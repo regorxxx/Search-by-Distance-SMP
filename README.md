@@ -1,6 +1,8 @@
 # Search-by-Distance-SMP
 An implementation of [Music-Graph](https://github.com/regorxxx/Music-Graph) for [foobar200](https://www.foobar2000.org) using [Spider Monkey Panel](https://theqwertiest.github.io/foo_spider_monkey_panel), which creates intelligent "spotify-like" playlist using high-level data from tracks and computing their similarity using genres/styles.
 
+![Animation11](https://user-images.githubusercontent.com/83307074/116761198-80a8bd80-aa06-11eb-904c-b3d50905f6bd.gif)
+
 # Features
 Creates playlists using high-level data from tracks similar to the currently selected one according to genre, style, key, etc. When their score is over 'scoreFilter', then they are included in the final pool. After all tracks have been evaluated and the final pool is complete, some of them are chosen to populate the playlist. You can choose whether this final selection is done according to score, randomly chosen, etc. All settings are configurable on the properties panel (or set in the files when called using buttons, etc.)
 
