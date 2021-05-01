@@ -67,6 +67,9 @@ There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
   *  Scattering instrumentals: Intercalate instrumental tracks breaking clusters if possible.
 * Recursive playlist creation (where output tracks are used as new references, and so on).
 * Influences and anti-influences playlists.
+* There are some custom buttons which may be set according to user preferences, even its own name:  'buttons_search_bydistance_customizable.js'.
+
+![Animation12](https://user-images.githubusercontent.com/83307074/116776801-073aba80-aa5a-11eb-8f3f-82e02ccf265e.gif)
 	
 ## Note about genre/styles: 
 GRAPH method doesn't care whether "Rock" is a genre or a style but the scoring part does! Both values are considered points without any distinction. Genre weight is related to genres, style weight is related to styles.... But there is a workaround, let's say you only use genre tags (and put all values
