@@ -24,7 +24,7 @@ function calcStarPoints(centerX, centerY, innerCirclePoints, innerRadius, outerR
 	const totalPoints = innerCirclePoints * 2; // 10 in a 5-points star 
 	let points = '';
 	for (let i = 0; i < totalPoints; i++) {
-		let isEvenIndex = i % 2 == 0;
+		let isEvenIndex = i % 2 === 0;
 		let r = isEvenIndex ? outerRadius : innerRadius;
 		let currX = centerX + Math.cos(i * angle + angleOffsetToCenterStar ) * r;
 		let currY = centerY + Math.sin(i * angle + angleOffsetToCenterStar) * r;
