@@ -1,9 +1,13 @@
 # Search-by-Distance-SMP
+[![version][version_badge]][changelog]
+[![CodeFactor][codefactor_badge]](https://www.codefactor.io/repository/github/regorxxx/Search-by-Distance-SMP/overview/main)
+[![Codacy Badge][codacy_badge]](https://www.codacy.com/gh/regorxxx/Search-by-Distance-SMP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=regorxxx/Search-by-Distance-SMP&amp;utm_campaign=Badge_Grade)
+![GitHub](https://img.shields.io/github/license/regorxxx/Search-by-Distance-SMP)  
 An implementation of [Music-Graph](https://github.com/regorxxx/Music-Graph) for [foobar200](https://www.foobar2000.org) using [Spider Monkey Panel](https://theqwertiest.github.io/foo_spider_monkey_panel), which creates intelligent "spotify-like" playlist using high-level data from tracks and computing their similarity using genres/styles.
 
 ![Animation11](https://user-images.githubusercontent.com/83307074/116761198-80a8bd80-aa06-11eb-904c-b3d50905f6bd.gif)
 
-# Features
+## Features
 Creates playlists using high-level data from tracks similar to the currently selected one according to genre, style, key, etc. When their score is over 'scoreFilter', then they are included in the final pool. After all tracks have been evaluated and the final pool is complete, some of them are chosen to populate the playlist. You can choose whether this final selection is done according to score, randomly chosen, etc. All settings are configurable on the properties panel (or set in the files when called using buttons, etc.)
 
 Take a look at the descriptions of the properties panel to check how the variables work. These are the weight/tags pairs checked by default:
@@ -54,7 +58,7 @@ There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
 	Uses a simplification of the GRAPH method. Let's say we assign a number to every "big" cluster of points on the music graph, then we can simply	put any genre/style point into any of those clusters and give them a value. So 'Rock' is linked to 3, the same than 'Roots Rock' or 'Rock & Roll'.It's a more complex method than WEIGHT, but less than GRAPH, which allows cross-linking between different genres breaking from string matching.  
 	For a complete description of how it works check: 'helpers/dyngenre_map_xxx.js'
 
-## Other features 
+### Other features 
 * The pool can be filtered with a flobal forced query (for example to always exclude live tracks).
 * The final selection can be choosen from the pool following 4 methods.
   * By score.
@@ -99,8 +103,14 @@ Both the html and foobar scripts will use any setting on the user file (as if it
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
 # Installation:
-Copy all files from the zip into YOUR_FOOBAR_PROFILE_PATH\scripts\SMP\xxx-scripts
-Any other path WILL NOT work without editing the scripts.
-For ex: mine is c:\Users\xxx\AppData\Roaming\foobar2000\scripts\SMP\xxx-scripts...
-For portable installations: .\foobar2000\profile\scripts\SMP\xxx-scripts...
-Then load any button script into a SMP panel within foobar.
+Copy all files from the zip into YOUR_FOOBAR_PROFILE_PATH\scripts\SMP\xxx-scripts  
+Any other path WILL NOT work without editing the scripts.  
+For ex: mine is c:\Users\xxx\AppData\Roaming\foobar2000\scripts\SMP\xxx-scripts...  
+For portable installations: .\foobar2000\profile\scripts\SMP\xxx-scripts...  
+Then load any button script into a SMP panel within foobar.  
+
+
+[changelog]: CHANGELOG.md
+[version_badge]: https://img.shields.io/github/release/regorxxx/Search-by-Distance-SMP.svg
+[codacy_badge]: https://api.codacy.com/project/badge/Grade/1677d2b0dee54548bf44614fcf808529
+[codefactor_badge]: https://www.codefactor.io/repository/github/regorxxx/Search-by-Distance-SMP/badge/main
