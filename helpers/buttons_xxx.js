@@ -155,7 +155,7 @@ function chooseButton(x, y) {
 }
 
 function on_paint(gr) {
-	if (bToolbar !== null){ // When not merged with panels
+	if (bToolbar){ // When not merged with panels
 		if (oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, toolbarColor);} // Toolbar color fix
 		else {gr.FillSolidRect(0, 0, window.Width, window.Height, utils.GetSysColour(15));} // Default
 	}

@@ -20,7 +20,7 @@ buttonCoordinates.w += 0; // Only works for 'y' orientation
 buttonCoordinates.h += 0; //For 'x' orientation
 
 // Global toolbar color
-bToolbar = false; // Change this on buttons bars files to set the background color
+bToolbar = true; // Change this on buttons bars files to set the background color
 toolbarColor = RGB(211,218,237);
 
 
