@@ -116,14 +116,14 @@ const zeroOrGreaterThan = (value, limit) => {return (value === 0) ? 0 : ((value 
 // repeatedFunction(arguments);
 const repeatFn = (func, ms) => {
 	return (...args) => {setInterval(func.bind(this, ...args), ms);};
-}
+};
 
 // Delay execution according to interval (ms). Ex:
 // const delayedFunction = delayFn(function, ms);
 // delayedFunction(arguments);
 const delayFn = (func, ms) => {
 	return (...args) => {return setTimeout(func.bind(this, ...args), ms);};
-}
+};
 
 // Halt execution if trigger rate is greater than delay (ms), so it fires only once after successive calls. Ex:
 // const debouncedFunction = debounce(function, delay[, immediate]);
@@ -138,7 +138,7 @@ const debounce = (func, delay, immediate) => {
 		}
 		const calleeFunc = immediate ? () => {timerId = null;} : boundFunc;
 		timerId = setTimeout(calleeFunc, delay);
-	}
+	};
 };
 
 // Limit the rate at which a function can fire to delay (ms).
@@ -160,7 +160,7 @@ const throttle = (func, delay, immediate) => {
 			}
 			timerId = null; 
 		}, delay);
-	}
+	};
 };
 
 // Fire functions only once
@@ -171,8 +171,8 @@ const doOnce = (task, fn) => {
 			doOnceCache.push(task);
 			return fn(...args);
 		}
-	}
-}
+	};
+};
 
 function _isFunction(obj) {
   return !!(obj && obj.constructor && obj.call && obj.apply);
@@ -709,7 +709,7 @@ function addHandleToPlaylist(handleList, playlistPath) {
 				let trackTextLength = trackText.length;
 				for (let i = 0; i < trackTextLength; i++) { // It appears 3 times...
 					trackText[i] = trackText[i].replace('#placeholder#', i + 1).replace('#placeholder#', i + 1).replace('#placeholder#', i + 1);
-					trackText[i] += '\r\n' // EoL after every track info group... just for readability
+					trackText[i] += '\r\n'; // EoL after every track info group... just for readability
 				}
 			} else { //  Else empty handle
 				return false;
@@ -912,7 +912,7 @@ function query_combinations(tagsArray, queryKey, tagsArrayLogic, subtagsArrayLog
 			console.log("query_combinations(): tagsArray [" + tagsArray + "] was null, empty or not an array");
 			return; //Array was null or not an array
 		}
-		if (queryKey === undefined || queryKey === null || !queryKey) {
+		if (typeof queryKey === 'undefined' || queryKey === null || !queryKey) {
 			console.log("query_combinations(): queryKey not set");
 			return;
 		}
@@ -1024,7 +1024,7 @@ function getTagsValuesV3(handle, tagsArray, bMerged = false) {
 	outputArray = tfo.EvalWithMetadbs(handle);
 	if (bMerged) { // Just an array of values per track: n x 1
 		for (let i = 0; i < outputArray_length; i++) {
-			outputArray[i] = outputArray[i].split(', ')
+			outputArray[i] = outputArray[i].split(', ');
 			}
 	} else { // Array of values tag and per track; n x tagNumber
 		let tfo = fb.TitleFormat(tagString); 

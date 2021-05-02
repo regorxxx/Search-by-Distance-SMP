@@ -7,7 +7,7 @@ try { //May be loaded along other buttons
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
 	var buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation == 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation == 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Search by Distance Buttons loaded.');
 }
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
@@ -21,18 +21,18 @@ newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 
 // we change the default coordinates here to accommodate text
-if (buttonOrientation == 'x') {buttonCoordinates.w -= 5;}
+if (buttonOrientation === 'x') {buttonCoordinates.w -= 5;}
 
 /*	
 	Some button examples for "search_bydistance.js". Look at that file to see what they do.
 */
 
 var newButtons = {
-    SimilarUserSet: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation == 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation == 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, getProperties(newButtonsProperties, prefix)['customName'], function () {
+    SimilarUserSet: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, getProperties(newButtonsProperties, prefix)['customName'], function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const properties = getPropertiesPairs(this.buttonsProperties, this.prefix);
-		if (properties['customName'][1] == 'Customize!') {
+		if (properties['customName'][1] === 'Customize!') {
 			const new_name = utils.InputBox(window.ID, 'Enter button name. Then configure properties according to your liking (look for "' + this.prefix + '...").', window.Name + ': Search by Distance Customizable Button');
             if (!new_name.length) {
                 return;
@@ -43,7 +43,7 @@ var newButtons = {
 				window.Reload(); // Forces redraw with new name
 			}
 		} else {
-			do_searchby_distance({properties: properties}); // All set according to properties panel!
+			do_searchby_distance({properties}); // All set according to properties panel!
 		}
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance " + getProperties(this.buttonsProperties, this.prefix)['customName'] + " took " + (t1 - t0) + " milliseconds.");

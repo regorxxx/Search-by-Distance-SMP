@@ -195,7 +195,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		const style_weak_substitutions = descriptor.style_weak_substitutions;
 		// const style_substitutions =  descriptor.style_substitutions; // Not used on drawing
 		// Weights
- 		const primary_origin = descriptor.primary_origin;
+		const primary_origin = descriptor.primary_origin;
 		const secondary_origin = descriptor.secondary_origin;
 		const weak_substitutions = descriptor.weak_substitutions;
 		const cluster = descriptor.cluster;

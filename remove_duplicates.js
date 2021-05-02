@@ -35,14 +35,14 @@ function do_remove_duplicates(handleList = null, sortouput = null, checkfirst = 
 	items = handleList.Clone();
 	
 	let sortInput; // Sorting
-	if (checkfirst) {sortInput = checkfirst.replace("%",) == checkfirst ? "%" + checkfirst + "%" : checkfirst;} // Using tags set
-	if (checksecond) {sortInput += checksecond.replace("%",) == checksecond ? " - %" + checksecond + "%" :  " - " + checksecond;}
-	if (checkthird) {sortInput += checkthird.replace("%",) == checkthird ? " - %" + checkthird + "%" : " - " + checkthird;}
+	if (checkfirst) {sortInput = checkfirst.replace("%",) === checkfirst ? "%" + checkfirst + "%" : checkfirst;} // Using tags set
+	if (checksecond) {sortInput += checksecond.replace("%",) === checksecond ? " - %" + checksecond + "%" :  " - " + checksecond;}
+	if (checkthird) {sortInput += checkthird.replace("%",) === checkthird ? " - %" + checkthird + "%" : " - " + checkthird;}
 	let tfo = fb.TitleFormat(sortInput);
 	let strArray = tfo.EvalWithMetadbs(items); // We get all tf values at once
 	let i = 0;
 	let j = 0;
- 	let set = new Set();
+	let set = new Set();
 	let itemsCount = items.Count;
 	while (i < itemsCount) {
 		// var str = tfo.EvalWithMetadb(items[i]);
@@ -58,7 +58,7 @@ function do_remove_duplicates(handleList = null, sortouput = null, checkfirst = 
 	}
 	
 	if (sortouput !== null) { // Output Sorting?
-		if (sortouput != "" && sortouput != sortInput) {tfo = fb.TitleFormat(sortouput);}
+		if (sortouput.length && sortouput !== sortInput) {tfo = fb.TitleFormat(sortouput);}
 		else {tfo = fb.TitleFormat("$rand()");}
 		items.OrderByFormat(tfo, 1);
 	}
@@ -80,7 +80,7 @@ function do_remove_duplicates(handleList = null, sortouput = null, checkfirst = 
 // V2: Equal to V1 but can check an arbitrary number of tags
 function do_remove_duplicatesV2(handleList = null, sortouput = null, checkKeys = ["title","artist","date"]) {
 	// Check input
-	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length == 0) {
+	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log("do_remove_duplicatesV2: checkKeys [" + checkKeys + "] was null, empty or not an array");
 		return; //Array was null or not an array
 	} else {
@@ -106,8 +106,8 @@ function do_remove_duplicatesV2(handleList = null, sortouput = null, checkKeys =
     let i = 0;
 	while (i < checklength) {
 		let check_i = checkKeys[i];
-		if (i == 0) {sortInput = (check_i.replace("%",) == check_i) ? "%" + check_i + "%" : check_i;}
-		else {sortInput += (check_i.replace("%",) == check_i) ? " - %" + check_i + "%" :  " - " + check_i;}
+		if (i === 0) {sortInput = (check_i.replace("%",) === check_i) ? "%" + check_i + "%" : check_i;}
+		else {sortInput += (check_i.replace("%",) === check_i) ? " - %" + check_i + "%" :  " - " + check_i;}
 		i++;
 	}
 	let tfo = fb.TitleFormat(sortInput);
@@ -125,7 +125,7 @@ function do_remove_duplicatesV2(handleList = null, sortouput = null, checkKeys =
 	}
 	
 	if (sortouput !== null) { // Output Sorting?
-		if (sortouput != "" && sortouput != sortInput) {tfo = fb.TitleFormat(sortouput);}
+		if (sortouput.length && sortouput !== sortInput) {tfo = fb.TitleFormat(sortouput);}
 		else {tfo = fb.TitleFormat("$rand()");}
 		items.OrderByFormat(tfo, 1);
 	}
@@ -149,7 +149,7 @@ function do_remove_duplicatesV2(handleList = null, sortouput = null, checkKeys =
 // "nAllowed = 0" match behaviour of V2.
 function do_remove_duplicatesV3(handleList = null, sortouput = null, checkKeys = ["title","artist","date"], nAllowed = 0) {
 	// Check input
-	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length == 0) {
+	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log("do_remove_duplicatesV2: checkKeys [" + checkKeys + "] was null, empty or not an array");
 		return; //Array was null or not an array
 	} else {
@@ -175,8 +175,8 @@ function do_remove_duplicatesV3(handleList = null, sortouput = null, checkKeys =
     let i = 0;
 	while (i < checklength) {
 		let check_i = checkKeys[i];
-		if (i == 0) {sortInput = (check_i.replace("%",) == check_i) ? "%" + check_i + "%" : check_i;}
-		else {sortInput += (check_i.replace("%",) == check_i) ? " - %" + check_i + "%" :  " - " + check_i;}
+		if (i === 0) {sortInput = (check_i.replace("%",) === check_i) ? "%" + check_i + "%" : check_i;}
+		else {sortInput += (check_i.replace("%",) === check_i) ? " - %" + check_i + "%" :  " - " + check_i;}
 		i++;
 	}
 	let tfo = fb.TitleFormat(sortInput);
@@ -201,7 +201,7 @@ function do_remove_duplicatesV3(handleList = null, sortouput = null, checkKeys =
 	}
 	
 	if (sortouput !== null) { // Output Sorting?
-		if (sortouput != "" && sortouput != sortInput) {tfo = fb.TitleFormat(sortouput);}
+		if (sortouput.length && sortouput !== sortInput) {tfo = fb.TitleFormat(sortouput);}
 		else {tfo = fb.TitleFormat("$rand()");}
 		items.OrderByFormat(tfo, 1);
 	}

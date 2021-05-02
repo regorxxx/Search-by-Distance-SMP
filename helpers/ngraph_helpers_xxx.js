@@ -156,7 +156,7 @@ if (typeof calcMeanDistance === 'undefined') {
 			}
 		}
 		return map_distance;
-	}
+	};
 	
 	// Same than V1 but also checks for exclusions and arrays
 	var calcMeanDistanceV2 = function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
@@ -169,7 +169,7 @@ if (typeof calcMeanDistance === 'undefined') {
 		style_genre_new = style_genre_new.difference(map_distance_exclusions);
 		// And calc
 		return calcMeanDistance(mygraph, style_genre_reference, style_genre_new);
-	}
+	};
 }
 
 /*

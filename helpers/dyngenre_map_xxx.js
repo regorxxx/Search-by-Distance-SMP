@@ -100,7 +100,7 @@ function dyn_genre_range(reference, offset, bReturnLimits = false) {
 		}
 		if (lowRange > highRange) {[lowRange, highRange] = [highRange, lowRange];} // Invert values
 	}
-	if (!bFound) {[lowRange, highRange, lowerLimit, upperLimit] = [-1, -1, -1, -1]} // Safety check
+	if (!bFound) {[lowRange, highRange, lowerLimit, upperLimit] = [-1, -1, -1, -1];} // Safety check
 	if (bReturnLimits) {return [lowRange, highRange, lowerLimit, upperLimit];}
 	return [lowRange, highRange];
 }

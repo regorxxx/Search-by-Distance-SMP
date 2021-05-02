@@ -11,7 +11,7 @@ try { //May be loaded along other buttons
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
 	var buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation == 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation == 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Merged SBD Custom Buttons bar loaded.');
 }
 

@@ -45,10 +45,10 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 	// This requires on_size_buttn() within on_size callback. Is equivalent to calculate the coordinates directly with inlined functions... but maintained here for compatibility purporse
 	const isFunc = (_isFunction(buttonCoordinates.x) || _isFunction(buttonCoordinates.y) || _isFunction(buttonCoordinates.w) || _isFunction(buttonCoordinates.h));
 	if (buttonOrientation === 'x') {
-		newCoordinates = {x: (_isFunction(buttonCoordinates.x) ? () => {return oldButtonCoordinates.x + buttonCoordinates.x()} : oldButtonCoordinates.x + buttonCoordinates.x) , y: (_isFunction(buttonCoordinates.y) ? () => {return buttonCoordinates.y()} : buttonCoordinates.y), w: (_isFunction(buttonCoordinates.w) ? () => {return buttonCoordinates.w()} : buttonCoordinates.w), h: (_isFunction(buttonCoordinates.h) ? () => {return buttonCoordinates.h()} : buttonCoordinates.h)};
+		newCoordinates = {x: (_isFunction(buttonCoordinates.x) ? () => {return oldButtonCoordinates.x + buttonCoordinates.x();} : oldButtonCoordinates.x + buttonCoordinates.x) , y: (_isFunction(buttonCoordinates.y) ? () => {return buttonCoordinates.y();} : buttonCoordinates.y), w: (_isFunction(buttonCoordinates.w) ? () => {return buttonCoordinates.w();} : buttonCoordinates.w), h: (_isFunction(buttonCoordinates.h) ? () => {return buttonCoordinates.h();} : buttonCoordinates.h)};
 		if (recalc) {oldButtonCoordinates.x += (_isFunction(buttonCoordinates.x) ? buttonCoordinates.x() : buttonCoordinates.x) + (_isFunction(buttonCoordinates.w) ? buttonCoordinates.w() : buttonCoordinates.w);}
 	} else if (buttonOrientation === 'y') {
-		newCoordinates = {x: (_isFunction(buttonCoordinates.x) ? () => {return buttonCoordinates.x()} : buttonCoordinates.x), y: (_isFunction(buttonCoordinates.y) ? () => {return oldButtonCoordinates.y + buttonCoordinates.y()} : oldButtonCoordinates.y + buttonCoordinates.y), w: (_isFunction(buttonCoordinates.w) ? () => {return buttonCoordinates.w()} : buttonCoordinates.w), h: (_isFunction(buttonCoordinates.h) ? () => {return buttonCoordinates.h()} : buttonCoordinates.h)};
+		newCoordinates = {x: (_isFunction(buttonCoordinates.x) ? () => {return buttonCoordinates.x();} : buttonCoordinates.x), y: (_isFunction(buttonCoordinates.y) ? () => {return oldButtonCoordinates.y + buttonCoordinates.y();} : oldButtonCoordinates.y + buttonCoordinates.y), w: (_isFunction(buttonCoordinates.w) ? () => {return buttonCoordinates.w();} : buttonCoordinates.w), h: (_isFunction(buttonCoordinates.h) ? () => {return buttonCoordinates.h();} : buttonCoordinates.h)};
 		if (recalc) {oldButtonCoordinates.y += (_isFunction(buttonCoordinates.y) ? buttonCoordinates.y() : buttonCoordinates.y)  + (_isFunction(buttonCoordinates.h) ? buttonCoordinates.h() : buttonCoordinates.h);}
 	}
 	return newCoordinates;
@@ -71,7 +71,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = _isFunction(this.description) ? () => {return this.prefix ? this.prefix.replace("_","") + ': ' + this.description() : this.description()}: (this.prefix ? this.prefix.replace("_","") + ': ' + this.description : this.description); // Adds prefix to description, whether it's a func or a string
+	this.descriptionWithID = _isFunction(this.description) ? () => {return this.prefix ? this.prefix.replace("_","") + ': ' + this.description() : this.description();} : (this.prefix ? this.prefix.replace("_","") + ': ' + this.description : this.description); // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 
 	this.containXY = function (x, y) {
@@ -136,18 +136,21 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 }
 
 function drawAllButtons(gr) {
-	for (let i in buttons) {
-		buttons[i].draw(gr);
+	for (let key in buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+			buttons[key].draw(gr);
+		}
 	}
 }
 
 function chooseButton(x, y) {
-	for (let i in buttons) {
-		if (buttons[i].containXY(x, y) && buttons[i].state !== ButtonStates.hide) {
-			return buttons[i];
+	for (let key in buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+			if (buttons[key].containXY(x, y) && buttons[key].state !== ButtonStates.hide) {
+				return buttons[key];
+			}
 		}
 	}
-
 	return null;
 }
 
