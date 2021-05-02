@@ -1,0 +1,15 @@
+﻿Removes tracks with same tags (also real duplicated files) from playlists.
+Note you can use these functions to filter lists! i.e. if you only check 
+by artist/date, then any track with same artist/date is considered duplicated.
+That means this could be used both to find duplicates or for custom 
+post-playlist creation filtering (1 track per artist, 1 track per date, etc.)
+
+If 'sortouput = ""', then final order will be randomized. It follows 'plman.SortByFormat' conventions.
+Any 'sort...' variable follows titleformat conventions
+	i.e. "%title%|%artist%|%date%"
+Any 'check...' variable can follow both tag name or titleformat conventions (functions too) 
+	i.e. "title" or "%title%"
+You can add multiple entries to the same variable but then it must follow titleformat conventions.
+	i.e. "checkfirst = %title% - %artist%"
+The multiple 'check...' variables are joined using " - " before execution.
+
