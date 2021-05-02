@@ -75,18 +75,18 @@ There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
 
 ![Animation12](https://user-images.githubusercontent.com/83307074/116776801-073aba80-aa5a-11eb-8f3f-82e02ccf265e.gif)
 	
-## Note about genre/styles: 
+## Note about genre/styles
 GRAPH method doesn't care whether "Rock" is a genre or a style but the scoring part does! Both values are considered points without any distinction. Genre weight is related to genres, style weight is related to styles.... But there is a workaround, let's say you only use genre tags (and put all values
 together there). Then set style weight to zero. It will just check genre tags and the graph part will work the same anyway.
 
-## Note about GRAPH/DYNGENRE exclusions: 
+## Note about GRAPH/DYNGENRE exclusions
 Apart from the global filter (which applies to genre/style string matching for scoring purpose), there is another filtering done when mapping genres/styles to the graph or their associated static values. See 'map_distance_exclusions' at 'helpers/music_graph_descriptors_xxx.js'.  
 
 It includes those genre/style tags which are not related to an specific musical genre. For ex. "Acoustic" which could be applied to any genre. They are filtered because they have no representation on the graph, not being a real genre/style but a musical characteristic of any musical composition. Therefore, they are useful for similarity scoring purposes but not for the graph. That's why we don't use the global filter for them.  
 
 This second filtering stage is not really needed, but it greatly speedups the calculations if you have tons of files with these tags! In other words, any tag not included in 'helpers/music_graph_descriptors_xxx.js' as part of the graph will be omitted for distance calcs, but you save time if you add it manually to the exclusions (otherwise the entire graph will be visited trying to find a match).
 
-## Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file:
+## Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file
 Instead of editing the main file, you can add any edit to an user set file named 'helpers/music_graph_descriptors_xxx_user.js'. Check sample for more info. It's irrelevant whether you add your changes to the original file or the user's one but note on future script updates the main file may be updated too. That means you will need to manually merge the changes from the update with your own ones, if you want them. That's the only "problem" editing the main one.  
 
 Both the html and foobar scripts will use any setting on the user file (as if it were in the main file), so there is no other difference.  Anything at this doc which points to 'helpers/music_graph_descriptors_xxx.js' applies the same to 'helpers/music_graph_descriptors_xxx_user.js'.
@@ -102,13 +102,12 @@ Both the html and foobar scripts will use any setting on the user file (as if it
 
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
-# Installation:
+## Installation
 Copy all files from the zip into YOUR_FOOBAR_PROFILE_PATH\scripts\SMP\xxx-scripts  
 Any other path WILL NOT work without editing the scripts.  
 For ex: mine is c:\Users\xxx\AppData\Roaming\foobar2000\scripts\SMP\xxx-scripts...  
 For portable installations: .\foobar2000\profile\scripts\SMP\xxx-scripts...  
 Then load any button script into a SMP panel within foobar.  
-
 
 [changelog]: CHANGELOG.md
 [version_badge]: https://img.shields.io/github/release/regorxxx/Search-by-Distance-SMP.svg

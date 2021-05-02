@@ -52,7 +52,7 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 		if (recalc) {oldButtonCoordinates.y += (_isFunction(buttonCoordinates.y) ? buttonCoordinates.y() : buttonCoordinates.y)  + (_isFunction(buttonCoordinates.h) ? buttonCoordinates.h() : buttonCoordinates.h);}
 	}
 	return newCoordinates;
-};
+}
 
 function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = "", buttonsProperties = {}, icon = null, g_font_icon = _gdiFont("FontAwesome", 12)) {
     this.state = state ? state : ButtonStates.normal;
@@ -152,7 +152,6 @@ function chooseButton(x, y) {
 }
 
 function on_paint(gr) {
-	if (bToolbar === null){} // When merged with panels
     else if (bToolbar && oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, toolbarColor);} // Toolbar color fix
 	else {gr.FillSolidRect(0, 0, window.Width, window.Height, utils.GetSysColour(15));} // Default
 	drawAllButtons(gr);
