@@ -1,3 +1,8 @@
+REQUISITES:
+-------------
+Spider Monkey Panel:
+https://theqwertiest.github.io/foo_spider_monkey_panel/
+
 INSTALLATION: 
 -------------
 Copy all files from the zip into YOUR_FOOBAR_PROFILE_PATH\scripts\SMP\xxx-scripts

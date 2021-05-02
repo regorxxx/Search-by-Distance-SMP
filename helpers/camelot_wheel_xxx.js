@@ -195,7 +195,7 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 	perfectMatch(x) {return x;},
 	energyBoost(x) {x.hour = cyclicOffset(x.hour, 1, [1,12]); return x;},
 	energyDrop(x) {x.hour = cyclicOffset(x.hour, -1, [1,12]); return x;},
-	energySwitch(x) {x.letter = (x.letter == 'A') ? 'B' : 'A'; return x;},
+	energySwitch(x) {x.letter = (x.letter === 'A') ? 'B' : 'A'; return x;},
 	moodBoost(x) {x.hour = cyclicOffset(x.hour, 3, [1,12]); return x;},
 	moodDrop(x) {x.hour = cyclicOffset(x.hour, -3, [1,12]); return x;},	
 	domKey(x) {this.energyBoost(x); this.energySwitch(x); return x;},
@@ -213,5 +213,5 @@ if (typeof cyclicOffset === 'undefined') {
 			if (reference > limits[1]) {reference -= limits[1];}
 		}
 		return reference;
-	}
+	};
 }

@@ -21,7 +21,7 @@ function get_distanche_from_path(graph, path) {
 		let distanceGraph = Infinity;
 		let path_length = path.length;
 		let i ;
-		if (path.length == 1) {
+		if (path.length === 1) {
 			throw new Error('Invalid path');
 		} else {
 			for (i = 0; i < path_length - 1;i++) {
@@ -35,7 +35,7 @@ function get_distanche_from_path(graph, path) {
 
 // Finds distance between two nodes, Path is calculated on the fly.
 function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
-		const method = "NBA" // Minimal speed differences found for our weighted graph...
+		const method = "NBA"; // Minimal speed differences found for our weighted graph...
 		
 		let distanceGraph = Infinity;
 		let influenceDistanceGraph = 0;
@@ -51,19 +51,19 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
 			return [distanceGraph , influenceDistanceGraph];
 		}
 		
-		if (nodeOne == nodeTwo) { //Same node, skip calc.
+		if (nodeOne === nodeTwo) { //Same node, skip calc.
 			distanceGraph = 0;
 			return [distanceGraph , influenceDistanceGraph];
 		}
 		
 		let pathFinder;
-		if (method == "A*greedy") {
+		if (method === "A*greedy") {
 			pathFinder = aStarBi(mygraph, {
 				distance(fromNode, toNode, link) {
 				return link.data.weight;
 				}
 		});
-		} else if (method == "A*") {
+		} else if (method === "A*") {
 			pathFinder = aStarPathSearch(mygraph, {
 				distance(fromNode, toNode, link) {
 				return link.data.weight;
@@ -78,13 +78,11 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
 		}
 		
 		let path = [];
-		let idpath = "";
-
 		path = pathFinder.find(key_one, key_two);
 		distanceGraph = get_distanche_from_path(mygraph, path);
 		
 		if (bUseInfluence) {
-			let links = []
+			let links = [];
 			mygraph.forEachLinkedNode(key_one, function(linkedNode, link){
 				if (link.fromId === key_one && link.toId === key_two || link.fromId === key_two && link.toId === key_one) {
 					links.push(link);
@@ -112,13 +110,12 @@ if (typeof calcMeanDistance === 'undefined') {
 	var calcMeanDistance = function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
 		let map_distance = Infinity;
 		const difference = style_genre_reference.difference(style_genre_new);
-		if (style_genre_reference.size == 0 || style_genre_new.size == 0) { // When no tags are available, sets are empty & tracks are not connected
+		if (style_genre_reference.size === 0 || style_genre_new.size === 0) { // When no tags are available, sets are empty & tracks are not connected
 			map_distance = Infinity;
 		} else { // With non-empty sets
 			if (!difference.size) { // If style_genre_new is superset of style_genre_reference.
 				map_distance = 0;
 			} else {
-				let map_distance_set = new Set();
 				let influenceDistance = 0;
 				for (let style_genre of difference) { // No need to check for those already matched. We are making an assumption here... i.e. that A genre has zero distance to only one value: A. But not to multiple ones: A, B, etc. That possibility is given by zero weight substitutions, but in that case 'calc_map_distance' will output a zero distance too.
 					let setMin = Infinity;
@@ -139,7 +136,7 @@ if (typeof calcMeanDistance === 'undefined') {
 							cacheLink.set([style_genre, style_genreNew].sort().join('-'), {distance: jh_distance , influenceDistance: jh_influenceDistance}); // Sorting removes the need to check A-B and B-A later...
 						}
 						if (jh_distance < setMin) {setMin = jh_distance;}
-						if (jh_influenceDistance != 0) {influenceDistance += jh_influenceDistance;}
+						if (jh_influenceDistance !== 0) {influenceDistance += jh_influenceDistance;}
 					}
 					if (setMin < Infinity) { //Get the minimum distance of the entire set
 						if (map_distance === Infinity) { // If points were not linked before
@@ -194,7 +191,7 @@ function calcCacheLinkAll(mygraph, limit = -1) {
 			let j = i + 1;
 			while (j < node_list_length){
 				let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, node_list[i], node_list[j], true);
-				if (limit == -1 || ij_distance <= limit) {
+				if (limit === -1 || ij_distance <= limit) {
 					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 				}
 				j++;
@@ -217,7 +214,7 @@ function calcCacheLinkSG(mygraph, limit = -1) {
 			let j = i + 1;
 			while (j < node_list_length){
 				let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, node_list[i], node_list[j], true);
-				if (limit == -1 || ij_distance <= limit) {
+				if (limit === -1 || ij_distance <= limit) {
 					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 				}
 				j++;

@@ -66,7 +66,7 @@ if (Object.keys(music_graph_descriptors_user).length) {
 						// [ [A,[values]], ..., [[X,[values]], ... ] index of X within main array? Using flat() length gets doubled.
 						const doubleIndex = music_graph_descriptors[key].flat().indexOf(nodeArray[0]);
 						const index =  !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
-						if (index != -1) { // If present on both files, replace with new value
+						if (index !== -1) { // If present on both files, replace with new value
 							music_graph_descriptors[key][index] = music_graph_descriptors_user[key][i]; // Note replacing [A,[B,C]] with [A,[]] is the same than deleting the line, since no link will be created. And only links are added to the graph (not individual nodes).
 						} else { // Concat
 							music_graph_descriptors[key].push(music_graph_descriptors_user[key][i]);

@@ -32,7 +32,7 @@ function music_graph(descriptor = music_graph_descriptors) {
 		const style_weak_substitutions = descriptor.style_weak_substitutions;
 		const style_substitutions =  descriptor.style_substitutions;
 		// Weights
- 		const primary_origin = descriptor.primary_origin;
+		const primary_origin = descriptor.primary_origin;
 		const secondary_origin = descriptor.secondary_origin;
 		const weak_substitutions = descriptor.weak_substitutions;
 		const cluster = descriptor.cluster;
@@ -193,7 +193,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		const style_primary_origin = descriptor.style_primary_origin;
 		const style_secondary_origin = descriptor.style_secondary_origin;
 		const style_weak_substitutions = descriptor.style_weak_substitutions;
-		const style_substitutions =  descriptor.style_substitutions;
+		// const style_substitutions =  descriptor.style_substitutions; // Not used on drawing
 		// Weights
  		const primary_origin = descriptor.primary_origin;
 		const secondary_origin = descriptor.secondary_origin;
@@ -204,7 +204,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		const supergenre_supercluster = descriptor.supergenre_supercluster;
 		const inter_supergenre = descriptor.inter_supergenre;
 		const inter_supergenre_supercluster = descriptor.inter_supergenre_supercluster;
-		const substitutions = descriptor.substitutions;
+		// const substitutions = descriptor.substitutions; // Not used on drawing
 		// Drawing
 		const nodeSize = descriptor.nodeSize;
 		const nodeShape = descriptor.nodeShape;
