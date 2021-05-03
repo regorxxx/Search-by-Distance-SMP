@@ -82,32 +82,22 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['A'	, {hour: 11	, letter: 'B'}],
 		['E'	, {hour: 12	, letter: 'B'}],
 		['1A'	, {hour: 1	, letter: 'A'}], // Itself
-		['2A'	, {hour: 1	, letter: 'A'}],
 		['2A'	, {hour: 2	, letter: 'A'}],
-		['3A'	, {hour: 2	, letter: 'A'}],
 		['3A'	, {hour: 3	, letter: 'A'}],
-		['4A'	, {hour: 3	, letter: 'A'}],
 		['4A'	, {hour: 4	, letter: 'A'}],
 		['5A'	, {hour: 5	, letter: 'A'}],
-		['5A'	, {hour: 6	, letter: 'A'}],
-		['6A'	, {hour: 7	, letter: 'A'}],
-		['6A'	, {hour: 8	, letter: 'A'}],
-		['7A'	, {hour: 9	, letter: 'A'}],
-		['8A'	, {hour: 10	, letter: 'A'}],
-		['9A'	, {hour: 11	, letter: 'A'}],
-		['10A'	, {hour: 11	, letter: 'A'}],
-		['11A'	, {hour: 12	, letter: 'A'}],
+		['6A'	, {hour: 6	, letter: 'A'}],
+		['7A'	, {hour: 7	, letter: 'A'}],
+		['8A'	, {hour: 8	, letter: 'A'}],
+		['9A'	, {hour: 9	, letter: 'A'}],
+		['10A'	, {hour: 10	, letter: 'A'}],
+		['11A'	, {hour: 11	, letter: 'A'}],
 		['12A'	, {hour: 12	, letter: 'A'}],
 		['1B'	, {hour: 1	, letter: 'B'}],
 		['2B'	, {hour: 2	, letter: 'B'}],
-		['2B'	, {hour: 2	, letter: 'B'}],
-		['3B'	, {hour: 3	, letter: 'B'}],
 		['3B'	, {hour: 3	, letter: 'B'}],
 		['4B'	, {hour: 4	, letter: 'B'}],
-		['4B'	, {hour: 4	, letter: 'B'}],
 		['5B'	, {hour: 5	, letter: 'B'}],
-		['5B'	, {hour: 5	, letter: 'B'}],
-		['6B'	, {hour: 6	, letter: 'B'}],
 		['6B'	, {hour: 6	, letter: 'B'}],
 		['7B'	, {hour: 7	, letter: 'B'}],
 		['8B'	, {hour: 8	, letter: 'B'}],
@@ -153,14 +143,9 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['E'	, '12B'	],
 		['1A'	, '1A'	], // Itself
 		['2A'	, '2A'	],
-		['2A'	, '2A'	],
-		['3A'	, '3A'	],
 		['3A'	, '3A'	],
 		['4A'	, '4A'	],
-		['4A'	, '4A'	],
 		['5A'	, '5A'	],
-		['5A'	, '5A'	],
-		['6A'	, '6A'	],
 		['6A'	, '6A'	],
 		['7A'	, '7A'	],
 		['8A'	, '8A'	],
@@ -170,14 +155,9 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['12A'	, '12A'	],
 		['1B'	, '1B'	],
 		['2B'	, '2B'	],
-		['2B'	, '2B'	],
-		['3B'	, '3B'	],
 		['3B'	, '3B'	],
 		['4B'	, '4B'	],
-		['4B'	, '4B'	],
 		['5B'	, '5B'	],
-		['5B'	, '5B'	],
-		['6B'	, '6B'	],
 		['6B'	, '6B'	],
 		['7B'	, '7B'	],
 		['8B'	, '8B'	],
@@ -187,21 +167,65 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['12B'	, '12B'	]
 	]),
 	// Methods to retrieve Key Objects (x) from Key Strings (y)
-	hasKey(y) {return this.keyNotation.has(y);},
+	hasKey(xy) {return (typeof xy === 'object' ? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') ? this.keyNotation.has(xy.hour + xy.letter) : false): this.keyNotation.has(xy));},
 	getKeyNotationObject(y) {return (this.hasKey(y) ? {...this.keyNotationObject.get(y)} : null);},
-	getKeyNotationFlat(x) {return (this.hasKey(x.hour + x.letter) ? this.wheelNotationFlat.get(x.hour)[x.letter] : null);},
-	getKeyNotationSharp(x) {return (this.hasKey(x.hour + x.letter) ? this.wheelNotationSharp.get(x.hour)[x.letter] : null);},
+	getKeyNotationFlat(x) {return (this.hasKey(x) ? this.wheelNotationFlat.get(x.hour)[x.letter] : null);},
+	getKeyNotationSharp(x) {return (this.hasKey(x) ? this.wheelNotationSharp.get(x.hour)[x.letter] : null);},
 	// Methods to work with Key Objects (x)
+	// Beware to pass a copy of the object if you want a new key object, otherwise the original will be modified!
 	perfectMatch(x) {return x;},
 	energyBoost(x) {x.hour = cyclicOffset(x.hour, 1, [1,12]); return x;},
 	energyDrop(x) {x.hour = cyclicOffset(x.hour, -1, [1,12]); return x;},
 	energySwitch(x) {x.letter = (x.letter === 'A') ? 'B' : 'A'; return x;},
 	moodBoost(x) {x.hour = cyclicOffset(x.hour, 3, [1,12]); return x;},
-	moodDrop(x) {x.hour = cyclicOffset(x.hour, -3, [1,12]); return x;},	
-	domKey(x) {this.energyBoost(x); this.energySwitch(x); return x;},
-	subDomKey(x) {this.energyDrop(x); this.energySwitch(x); return x;},
+	moodDrop(x) {x.hour = cyclicOffset(x.hour, -3, [1,12]); return x;},
+	domKey(x) {this.energySwitch(x);this.energyBoost(x); return x;},
+	subDomKey(x) {this.energySwitch(x);this.energyDrop(x); return x;},
 	energyRaise(x) {x.hour = cyclicOffset(x.hour, 7, [1,12]); return x;},
+	// Methods to create and apply patterns
+	createHarmonicMixingPattern(length) {return createHarmonicMixingPattern(length);},
+	applyPattern(x, pattern) {return applyPattern(x, pattern);},
 };
+
+/*
+	Helpers
+*/
+
+function createHarmonicMixingPattern(playlistLength) {
+	// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
+	// TODO: randomize proportions a bit and use perfectMatch as default for the rest
+	const movements = {
+		perfectMatch: 	35	, // perfectMatch (=)
+		energyBoost	: 	10	, // energyBoost (+1)
+		energyDrop	:	10	, // energyDrop (-1)
+		energySwitch:	10	, // energySwitch (B/A)
+		moodBoost	:	5	, // moodBoost (+3)
+		moodDrop	:	5	, // moodDrop (-3)
+		energyRaise	:	5	, // energyRaise (+7)
+		domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
+		subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
+	}; // Sum must be 100%
+	let pattern = [];
+	Object.keys(movements).forEach((key) => {
+		pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
+	});
+	pattern.sort(() => Math.random() - 0.5);
+	if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+	return pattern;
+}
+
+function applyPattern(key, pattern, bReturnObj = true) {
+	let keyArr = [];
+	if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(key)) {
+		let firstKey;
+		if (typeof key === 'string') {keyArr.push(camelotWheel.getKeyNotationObject(key));}
+		else if (typeof key === 'object' && key.hasOwnProperty('hour') && key.hasOwnProperty('letter')) {keyArr.push(key);}
+		else {return keyArr;}
+		pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});
+		if (!bReturnObj) {keyArr = keyArr.map( (keyObj) => {return camelotWheel.getKeyNotationSharp(key);});} // Translate back
+	}
+	return keyArr;
+}
 
 if (typeof cyclicOffset === 'undefined') {
 	// Adds/subtracts 'offset' to 'reference' considering the values must follow cyclic logic within 'limits' range (both values included)

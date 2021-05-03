@@ -1828,88 +1828,79 @@ function do_searchby_distance({
 			bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
 			if (key.length) {
 				// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-				// TODO: randomize proportions a bit and use perfectMatch as default for the rest
-				const movements = {
-					perfectMatch: 	35	, // perfectMatch (=)
-					energyBoost	: 	10	, // energyBoost (+1)
-					energyDrop	:	10	, // energyDrop (-1)
-					energySwitch:	10	, // energySwitch (B/A)
-					moodBoost	:	5	, // moodBoost (+3)
-					moodDrop	:	5	, // moodDrop (-3)
-					energyRaise	:	5	, // energyRaise (+7)
-					domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
-					subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
-				}; // Sum must be 100%
-				var pattern = [];
-				Object.keys(movements).forEach((key) => {
-					// pattern = pattern.concat(Array(Math.ceil(finalPlaylistLength * movements[key] / 100)).fill(key));
-					pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
-				});
-				pattern.sort(() => Math.random() - 0.5);
-				if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+				const pattern = createHarmonicMixingPattern(poolLength < playlistLength ? poolLength : playlistLength);  // On camelot_wheel_xxx.js
 				if (bSearchDebug) {console.log(pattern)};
 				let nextKeyObj;
 				let keyCache = new Map();
 				let keyDebug = [];
-				selectedHandlesArray = [];
-				selectedHandlesData = [];
-				let alreadySelected = new Set([0]); // equal to the desired order
+				let keySharpDebug = [];
+				let patternDebug = [];
 				let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).sort(() => Math.random() - 0.5));
-				let nextIndex = scoreData[0].index; // Initial track, it will match most times the last reference track when using progressive playlists
-				selectedHandlesArray.push(handle_list[nextIndex]);
-				selectedHandlesData.push(scoreData[0]);
+				let nextIndexScore = 0;
+				let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
+				let camelotKeyCurrent, camelotKeyNew;
 				for (let i = 0, j = 0; i < playlistLength - 1; i++) {
-					// if (nextIndex >= poolLength) {break;} // May have used all handles before completing the playlist
+					// Search key
+					const indexScore = nextIndexScore;
 					const index = nextIndex;
-					var camelotKeyCurrent;
-					if (!keyCache.has(i)) {
+					if (!keyCache.has(index)) {
 						const keyCurrent = keyHandle[index][0];
-						if (bSearchDebug && i === 0) {keyDebug.push(keyCurrent);}
-						camelotKeyCurrent = keyCurrent.length ? {...camelotWheel.keyNotationObject.get(keyCurrent)} : null;
-						keyCache.set(i, camelotKeyCurrent);
-					} else {camelotKeyCurrent = keyCache.get(i);}
-					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]](camelotKeyCurrent) : null; // Applies movement to current key
+						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObject(keyCurrent) : null;
+						if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
+					} else {camelotKeyCurrent = keyCache.get(index);}
+					// Delete from check selection
+					toCheck.delete(indexScore);
+					if (!toCheck.size) {break;}
+					// Find next key
+					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({...camelotKeyCurrent}) : null; // Applies movement to copy of current key
 					if (nextKeyObj) { // Finds next track, but traverse pool with random indexes...
 						let bFound = false;
-						for (const toCheck_k of toCheck) {
-							if (!alreadySelected.has(toCheck_k)){
-								var camelotKeyNew;
-								const indexNew = scoreData[toCheck_k].index;
-								if (!keyCache.has(toCheck_k)) {
-									const keyNew = keyHandle[indexNew][0];
-									camelotKeyNew = (keyNew.length) ? {...camelotWheel.keyNotationObject.get(keyNew)} : null;
-									keyCache.set(toCheck_k, camelotKeyNew);
-								} else {camelotKeyNew = keyCache.get(toCheck_k);}
-								if (camelotKeyNew) {
-									if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
-										nextIndex = indexNew; // Which will be used for next movement
-										selectedHandlesArray.push(handle_list[indexNew]);
-										selectedHandlesData.push(scoreData[toCheck_k]);
-										alreadySelected.add(toCheck_k); // And not be selected again
-										toCheck.delete(toCheck_k);
-										bFound = true;
-										if (bSearchDebug && nextKeyObj) {keyDebug.push(camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter]);}
-										break;
-									}
+						for (const indexNewScore of toCheck) {
+							const indexNew = scoreData[indexNewScore].index;
+							if (!keyCache.has(indexNew)) {
+								const keyNew = keyHandle[indexNew][0];
+								camelotKeyNew = (keyNew.length) ? camelotWheel.getKeyNotationObject(keyNew) : null;
+								if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
+								else {toCheck.delete(indexNew);}
+							} else {camelotKeyNew = keyCache.get(indexNew);}
+							if (camelotKeyNew) {
+								if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
+									selectedHandlesArray.push(handle_list[index]);
+									selectedHandlesData.push(scoreData[indexScore]);
+									if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
+									nextIndex = indexNew; // Which will be used for next movement
+									nextIndexScore = indexNewScore; // Which will be used for next movement
+									bFound = true;
+									break;
 								}
 							}
 						}
 						if (!bFound) { // If nothing is found, then continue next movement with current track
-							nextIndex = index;
+							camelotKeyNew = camelotKeyCurrent; // For debug console on last item
 							if (j === 1) {j = 0; continue;}  // try once retrying this step with default movement
 							else {
 								pattern[i] = 'perfectMatch';
 								i--;
 								j++;
 							}
-						} else {j = 0;} // Reset retry counter if found
-					} else {
-						i--; 
-						toCheck.delete(index); // If there is no tag, it can be deleted
-						if (toCheck.size) {nextIndex = scoreData[[...toCheck][0]].index;} // If tag was not found, then use next handle
+						} else {j = 0;} // Reset retry counter if found 
+					} else { // No tag or bad tag
+						i--;
+						if (toCheck.size) {nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index;} // If tag was not found, then use next handle
 					}
 				}
-				if (bSearchDebug) {console.log(keyDebug)};
+				// Add tail
+				selectedHandlesArray.push(handle_list[nextIndex]); 
+				selectedHandlesData.push(scoreData[nextIndexScore]);
+				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
+				// Debug console
+				if (bSearchDebug) {
+					console.log('Keys from selection:');
+					console.log(keyDebug);
+					console.log(keySharpDebug);
+					console.log('Pattern applied:');
+					console.log(patternDebug); // Always has one item less thankey arrays
+				}
 			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
 		} else { // Standard methods
 			if (poolLength > playlistLength) {
