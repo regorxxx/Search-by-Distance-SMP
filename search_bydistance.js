@@ -1,7 +1,7 @@
 ﻿'use strict';
 
 /*	
-	Search by Distance v 1.0.0 02/05/21
+	Search by Distance 03/05/21
 	-----------------------------------
 	Creates a playlist with similar tracks to the currently selected one according to genre, style, key, etc.
 	Every track of the library is given a score according to those tags and/or a distance according to genre/style.
