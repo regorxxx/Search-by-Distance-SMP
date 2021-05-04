@@ -21,5 +21,5 @@
 
 ### Removed
 
-[Unreleased]: https://github.com/regorxxx/Music-Graph/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/regorxxx/Music-Graph/compare/6e0ae3f...v1.0.0
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/6e0ae3f...v1.0.0
