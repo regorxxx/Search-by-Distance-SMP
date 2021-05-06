@@ -691,7 +691,7 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 			if (!moodNumber && !styleNumber && !genreNumber) {
 				console.log('No query available for selected track. Probably missing tags!');
 				return;
-			} else {query[queryl] = ''} // Pre-Filter may not be relevant according to weights...
+			} else {query[queryl] = '';} // Pre-Filter may not be relevant according to weights...
 		}
 		const querylength = query.length;
 		if (method === 'WEIGHT' && dyngenreWeight === 0) { // Weight method. Pre-filtering is really simple...
@@ -717,7 +717,7 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 		// It was 500ms
 		handle_list = do_remove_duplicates(handle_list, '%title% - %artist% - %date%', '%title%', '%artist%', '%date%');
 		
-		const tracktotal = handle_list.Count
+		const tracktotal = handle_list.Count;
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');
 		
