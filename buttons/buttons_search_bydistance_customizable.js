@@ -38,7 +38,7 @@ var newButtons = {
                 return;
             } else {
 				this.buttonsProperties['customName'][1] = new_name;
-				setProperties(this.buttonsProperties, this.prefix, undefined, undefined, true); // Force overwriting
+				setProperties(this.buttonsProperties, this.prefix, void(0), void(0), true); // Force overwriting
 				window.ShowProperties(); // This also forces a reload if you press ok/apply, but pressing cancel doesn't! That would leave the button with the old name... even if the property is already set
 				window.Reload(); // Forces redraw with new name
 			}

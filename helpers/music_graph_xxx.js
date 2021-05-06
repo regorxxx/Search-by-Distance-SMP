@@ -270,7 +270,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 			let sub_lenght = style_cluster[i][1].length;
 			let color = 'white';
 			for (j = 0; j < sub_lenght; j++) {
-				if (mygraph.getNode(style_cluster[i][1][j]) !== undefined && mygraph.getNode(style_cluster[i][1][j]).data !== undefined && mygraph.getNode(style_cluster[i][1][j]).data.color !== undefined) {color = mygraph.getNode(style_cluster[i][1][j]).data.color;}
+				if (typeof mygraph.getNode(style_cluster[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data.color !== 'undefined') {color = mygraph.getNode(style_cluster[i][1][j]).data.color;}
 				mygraph.addLink(style_cluster[i][0], style_cluster[i][1][j], {weight: cluster, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', color]});
 			}
 			mygraph.addNode(style_cluster[i][0], {shape: style_clusterShape, size: style_clusterSize, imageLink: style_clusterImageLink, color: color});
@@ -281,7 +281,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 			let sub_lenght = style_weak_substitutions[i][1].length;
 			let color = 'white';
 			for (j = 0; j < sub_lenght; j++) {
-				if (mygraph.getNode(style_weak_substitutions[i][1][j]) !== undefined && mygraph.getNode(style_weak_substitutions[i][1][j]).data !== undefined && mygraph.getNode(style_weak_substitutions[i][1][j]).data.color !== undefined) {color = mygraph.getNode(style_weak_substitutions[i][1][j]).data.color;}
+				if (typeof mygraph.getNode(style_weak_substitutions[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_weak_substitutions[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_weak_substitutions[i][1][j]).data.color !== 'undefined') {color = mygraph.getNode(style_weak_substitutions[i][1][j]).data.color;}
 				mygraph.addLink(style_weak_substitutions[i][0], style_weak_substitutions[i][1][j], {weight: weak_substitutions, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', color]});
 			}
 		}
@@ -291,7 +291,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 			let sub_lenght = style_primary_origin[i][1].length;
 			let color = 'white';
 			for (j = 0; j < sub_lenght; j++) {
-				if (mygraph.getNode(style_primary_origin[i][1][j]) !== undefined && mygraph.getNode(style_primary_origin[i][1][j]).data !== undefined && mygraph.getNode(style_primary_origin[i][1][j]).data.color !== undefined) {color = mygraph.getNode(style_primary_origin[i][1][j]).data.color;}
+				if (typeof mygraph.getNode(style_primary_origin[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_primary_origin[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_primary_origin[i][1][j]).data.color !== 'undefined') {color = mygraph.getNode(style_primary_origin[i][1][j]).data.color;}
 				mygraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], {weight: primary_origin, absoluteWeight: 0, lineshape: ['stroke-dasharray', '3, 3'], linecolor: ['stroke', color]});
 			}
 		}
@@ -301,7 +301,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 			let sub_lenght = style_secondary_origin[i][1].length;
 			let color = 'white';
 			for (j = 0; j < sub_lenght; j++) {
-				if (mygraph.getNode(style_secondary_origin[i][1][j]) !== undefined && mygraph.getNode(style_secondary_origin[i][1][j]).data !== undefined && mygraph.getNode(style_secondary_origin[i][1][j]).data.color !== undefined) {color = mygraph.getNode(style_secondary_origin[i][1][j]).data.color;}
+				if (typeof mygraph.getNode(style_secondary_origin[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_secondary_origin[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_secondary_origin[i][1][j]).data.color !== 'undefined') {color = mygraph.getNode(style_secondary_origin[i][1][j]).data.color;}
 				mygraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], {weight: secondary_origin, absoluteWeight: 0, lineshape: ['stroke-dasharray', '4, 4'], linecolor: ['stroke', color]});
 			}
 		}
@@ -340,7 +340,7 @@ function GraphDebug(graph = music_graph()) {
 	let bWarning = false;
 	
 	graph.forEachNode(function(node){
-		if (node.links === null || node.links === undefined) {  // Check for not connected nodes
+		if (typeof node.links === 'undefined' || node.links === null) {  // Check for not connected nodes
 			console.log('music_graph_descriptors_xxx Warning: ' + node.id + ' is not connected to any other node');
 			bWarning = true;
 		}
