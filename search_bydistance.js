@@ -436,7 +436,7 @@ var cacheLinkSet = new Map();
 debounce(updateCache, 3000)(); // Delays update after startup
 window.NotifyOthers('SearchByDistance: requires cacheLink', true); // Ask others instances to share link cache on startup
 function updateCache(otherCache) {
-	if (cacheLink === undefined && !otherCache) { // only required if on_notify_data did not fire before
+	if (typeof cacheLink === 'undefined' && !otherCache) { // only required if on_notify_data did not fire before
 		cacheLink = getPropertyByKey((typeof buttons === 'undefined') ? SearchByDistance_properties : SearchByDistance_panelProperties, 'bCacheOnStartup', sbd_prefix) ? calcCacheLinkSGV2(all_music_graph) : new Map();
 		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink', cacheLink);
 		console.log('SearchByDistance: New Cache');
@@ -452,8 +452,8 @@ function updateCache(otherCache) {
 }
 
 function on_notify_data(name, info) {
-	if (name.indexOf('SearchByDistance: requires cacheLink') !== -1 && cacheLink !== undefined) { // When asked to share cache, delay 1 sec. to allow script loading
-		debounce(() => {if (cacheLink !== undefined) {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink', cacheLink);}}, 1000)();
+	if (name.indexOf('SearchByDistance: requires cacheLink') !== -1 && typeof cacheLink !== 'undefined') { // When asked to share cache, delay 1 sec. to allow script loading
+		debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink', cacheLink);}}, 1000)();
 		console.log('SearchByDistance: Requested Cache.');
 	} 
 	if (name.indexOf('SearchByDistance: cacheLink') !== -1 && info) {
