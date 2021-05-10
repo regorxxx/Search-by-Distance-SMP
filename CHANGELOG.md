@@ -7,11 +7,15 @@
 ## [Unreleased][]
 ### Added
 - Harmonic mixing: multiple debug additions.
-- Multiple additions to descriptors.
+- Cache: is now saved to a json file and reused between different sessions. Cuts loading time by 4 secs for 70K tracks on startup (!).
+- Cache: gets automatically refreshed whenever the descriptors crc change. i.e. it will be recalculated with any change by the user too.
+- Descriptors: Multiple new additions.
 ### Changed
 - Harmonic mixing: small changes and optimizations.
 - Harmonic mixing: code for pattern creation moved to camelot_wheel.js.
 - Harmonic mixing: code for sending to playlist moved to helpers and reused in multiple scripts.
+- Debug: Greatly expanded the debug functions to check possible errors or inconsistencies in the descriptors. It should be foolproof now.
+- Descriptors: Multiple fixes on descriptors found with the new debug code.
 ### Removed
 - Removed all lodash dependence and deleted helper.
 ## [1.0.0] - 2021-05-02

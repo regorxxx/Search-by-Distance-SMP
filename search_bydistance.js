@@ -390,13 +390,14 @@ SearchByDistance_properties['progressiveListCreationN'].push({range: [[2,99]], f
 
 const SearchByDistance_panelProperties = {
 	bCacheOnStartup 		:	['Calculates link cache on script startup (instead of on demand)', true],
-	bGraphDebug 			:	['Warnings about links/nodes set wrong', true],
+	bGraphDebug 			:	['Warnings about links/nodes set wrong', false],
 	bSearchDebug			:	['Enables debugging console logs', false],
 	bProfile 				:	['Enables profiling console logs', false],
 	bShowQuery 				:	['Enables query console logs', false],
 	bBasicLogging 			:	['Enables basic console logs', true],
 	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
 	firstPopup				:	['Search by distance: Fired once', false],
+	descriptorCRC			:	['Graph Descriptors CRC', crc32(JSON.stringify(music_graph_descriptors))],
 };
 
 var sbd_prefix = 'sbd_';
@@ -407,17 +408,16 @@ if (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') { /
 } else { // With buttons, set these properties only once per panel
 	setProperties(SearchByDistance_panelProperties, sbd_prefix);
 }
+const panelProperties = (typeof buttons === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 
-{ // Info Popup
-	let panelProperties = (typeof buttons === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
-	if (!panelProperties['firstPopup'][1]) {
-		panelProperties['firstPopup'][1] = true;
-		overwriteProperties(panelProperties); // Updates panel
-		const readmePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\readme\\search_bydistance.txt';
-		if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
-			const readme = utils.ReadTextFile(readmePath, 65001);
-			if (readme.length) {fb.ShowPopupMessage(readme, 'Search by Distance');}
-		}
+// Info Popup
+if (!panelProperties.firstPopup[1]) {
+	panelProperties.firstPopup[1] = true;
+	overwriteProperties(panelProperties); // Updates panel
+	const readmePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\readme\\search_bydistance.txt';
+	if (_isFile(readmePath)) {
+		const readme = utils.ReadTextFile(readmePath, 65001);
+		if (readme.length) {fb.ShowPopupMessage(readme, 'Search by Distance');}
 	}
 }
 
@@ -429,23 +429,42 @@ const [genre_map , style_map, genre_style_map] = dyngenre_map();
 const kMoodNumber = 6;  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library..
 
 /* 
-	Reuse cache on the same session and from other panels 
+	Reuse cache on the same session, from other panels and from json file
 */
+// Only use file cache related to current descriptors, otherwise delete it
+if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors));
+if (panelProperties.descriptorCRC[1] != descriptorCRC) {
+	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.')
+	_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
+	_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+	panelProperties.descriptorCRC[1] = descriptorCRC;
+	overwriteProperties(panelProperties); // Updates panel
+}
+if (panelProperties.bProfile[1]) {profiler.Print();}
+// Start cache
 var cacheLink;
 var cacheLinkSet = new Map();
+if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {cacheLink = loadCache(folders.data + 'searchByDistance_cacheLink.json');}
+if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {cacheLinkSet = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');}
 debounce(updateCache, 3000)(); // Delays update after startup
 window.NotifyOthers('SearchByDistance: requires cacheLink', true); // Ask others instances to share link cache on startup
 function updateCache(otherCache) {
 	if (typeof cacheLink === 'undefined' && !otherCache) { // only required if on_notify_data did not fire before
-		cacheLink = getPropertyByKey((typeof buttons === 'undefined') ? SearchByDistance_properties : SearchByDistance_panelProperties, 'bCacheOnStartup', sbd_prefix) ? calcCacheLinkSGV2(all_music_graph) : new Map();
+		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
+		cacheLink = panelProperties.bCacheOnStartup[1] ? calcCacheLinkSGV2(all_music_graph) : new Map();
+		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
+		if (panelProperties.bProfile[1]) {profiler.Print();}
 		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink', cacheLink);
 		console.log('SearchByDistance: New Cache');
 	} else if (otherCache) {
 		cacheLink = otherCache;
 		console.log('SearchByDistance: Used Cache from other panel.');
+	} else {
+		console.log('SearchByDistance: Used Cache from file.');
 	}
 	// Multiple Graph testing and logging of results using the existing cache
-	if (getPropertyByKey((typeof buttons === 'undefined') ? SearchByDistance_properties : SearchByDistance_panelProperties, 'bSearchDebug', sbd_prefix)) {
+	if (panelProperties.bSearchDebug[1]) {
 		doOnce('Test 1',testGraph)(all_music_graph);
 		doOnce('Test 2',testGraphV2)(all_music_graph);
 	}
@@ -461,15 +480,19 @@ function on_notify_data(name, info) {
 	}
 }
 
-function on_script_unload() { // Ask others instances to share link cache on reloading
-	window.NotifyOthers(window.Name + ' SearchByDistance: requires cacheLink', true); 
+function on_script_unload() {
+	window.NotifyOthers(window.Name + ' SearchByDistance: requires cacheLink', true); // Ask others instances to share link cache on reloading
+	saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
+	saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');
 }
 
 /* 
 	Warnings about links/nodes set wrong
 */
-if (getPropertyByKey((typeof buttons === 'undefined') ? SearchByDistance_properties : SearchByDistance_panelProperties, 'bGraphDebug', sbd_prefix)) {
-	GraphDebug(all_music_graph);
+if (panelProperties.bGraphDebug[1]) {
+	if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
+	graphDebug(all_music_graph);
+	if (panelProperties.bProfile[1]) {profiler.Print();}
 }
 
 // 1550 ms 24K tracks weight all default on i7 920 from 2008
@@ -1463,7 +1486,7 @@ function do_searchby_distance({
 			if (!originalScore) {
 				console.log('No query available for selected track. Probably missing tags!');
 				return;
-			} else {query[queryl] = ''} // Pre-Filter may not be relevant according to weights...
+			} else {query[queryl] = '';} // Pre-Filter may not be relevant according to weights...
 		}
 		const querylength = query.length;
 		if (method === 'WEIGHT' && dyngenreWeight === 0) { // Weight method. Pre-filtering is really simple...
@@ -1515,7 +1538,7 @@ function do_searchby_distance({
 		// It was 500ms
 		handle_list = do_remove_duplicates(handle_list, '%title% - %artist% - %date%', '%title%', '%artist%', '%date%');
 		
-		const tracktotal = handle_list.Count
+		const tracktotal = handle_list.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
 		if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
         // Compute similarity distance by Weight and/or Graph
@@ -2185,4 +2208,19 @@ function calcCacheLinkSGV2(mygraph, limit = -1) {
 		i++;
 	}
 	return cache;
+}
+
+// Save and load cache on json
+function saveCache(cacheMap, path) {
+	_save(path, JSON.stringify(Object.fromEntries(cacheMap)));
+}
+
+function loadCache(path) {
+	let cacheMap = new Map();
+	if (utils.IsFile(path)) {
+		let obj = Object.entries(_jsonParseFile(path));
+		obj.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+		cacheMap = new Map(obj);
+	}
+	return cacheMap;
 }

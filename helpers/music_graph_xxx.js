@@ -19,7 +19,9 @@ try { // On foobar
 	console.log('\'music_graph_xxx\' script is being used on browser. Omitting \'include\' clause.');
 }
 
-// Creates Music Map links for foobar
+/*
+	Creates Music Map links for foobar 
+*/
 function music_graph(descriptor = music_graph_descriptors) {
 		// Maps
 		const style_supergenre_supercluster = descriptor.style_supergenre_supercluster;
@@ -183,7 +185,9 @@ function music_graph(descriptor = music_graph_descriptors) {
 		return mygraph;
 }
 
-// This one skips absoluteWeight related links and substitutions! Used along VivaGraph on browsers
+/*
+	Creates Music Map. This one skips absoluteWeight related links and substitutions! Used along VivaGraph on browsers
+*/
 function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		// Maps
 		const style_supergenre_supercluster = descriptor.style_supergenre_supercluster;
@@ -334,8 +338,10 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		return mygraph;
 }
 
-// Basic graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, etc.
-function GraphDebug(graph = music_graph()) {
+/* 
+	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
+*/
+function graphDebug(graph = music_graph()) {
 	console.log('music_graph_descriptors_xxx: Basic debug enabled')
 	let bWarning = false;
 	
@@ -420,6 +426,134 @@ function GraphDebug(graph = music_graph()) {
 		+ '	' + 'Not true: ' + music_graph_descriptors['cluster'] + '<' + music_graph_descriptors['intra_supergenre'] + ' & ' + music_graph_descriptors['inter_supergenre'] + '<' + music_graph_descriptors['intra_supergenre'] + '<' + music_graph_descriptors['supergenre_supercluster'] + '<' + music_graph_descriptors['supergenre_cluster']);
 		bWarning = true;
 	}
+	// Check that all weak substitutions terms are also on any superGenre (otherwise we are creating another layer of nodes)
+	let bFound;
+	const superGenreNumbers = music_graph_descriptors.style_supergenre.length;
+	music_graph_descriptors.style_weak_substitutions.forEach( (nodePair) => {
+		{	
+			let node = nodePair[0];
+			bFound = false;
+			for (let i = superGenreNumbers; i--;) {
+				if (music_graph_descriptors.style_supergenre[i].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (bFound) {break;}
+			}
+			if (!bFound) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_weak_substitutions\' has nodes not found on \'style_supergenre\'. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		}
+		const nodeNumbers = nodePair[1].length;
+ 		for (let i = nodeNumbers; i--;) {
+			let node = nodePair[1][i];
+			bFound = false;
+			for (let j = superGenreNumbers; j--;) {
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (bFound) {break;}
+			}
+			if (!bFound) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_weak_substitutions\' has nodes not found on \'style_supergenre\'. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		}
+	});
+	// Check that all nodes on style clusters are also on any superGenre (otherwise we are creating another layer of nodes)
+	const styleClusterNumbers = music_graph_descriptors.style_cluster.length;
+	const superGenreClusterNumbers = music_graph_descriptors.style_supergenre_cluster.length;
+	const superGenreSuperClusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length;
+	music_graph_descriptors.style_cluster.forEach( (nodePair) => {
+		const nodeNumbers = nodePair[1].length;
+ 		for (let i = nodeNumbers; i--;) {
+			let node = nodePair[1][i];
+			bFound = false;
+			for (let j = superGenreNumbers; j--;) {
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (bFound) {break;}
+			}
+			if (!bFound) { // May be a cluster linked to another cluster
+				for (let i = styleClusterNumbers; i--;) {
+					if (music_graph_descriptors.style_cluster[i][0] == node) {bFound = true;}
+					if (bFound) {break;}
+				}
+			}
+			if (!bFound) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_cluster\' has nodes not found on \'style_supergenre\'. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		}
+	});
+	// Check that all nodes on influences are present in other descriptors
+	music_graph_descriptors.style_anti_influence.concat(music_graph_descriptors.style_secondary_origin, music_graph_descriptors.style_primary_origin).forEach( (nodePair) => {
+		const nodeNumbers = nodePair[1].length;
+ 		for (let i = nodeNumbers; i--;) {
+			let node = nodePair[1][i];
+			bFound = false;
+			for (let j = superGenreNumbers; j--;) {
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (bFound) {break;}
+			}
+			if (!bFound) { // May be a style cluster
+				for (let i = styleClusterNumbers; i--;) {
+					if (music_graph_descriptors.style_cluster[i][0] == node) {bFound = true;}
+					if (bFound) {break;}
+				}
+			}
+			if (!bFound) { // May be a superGenre
+				for (let i = superGenreNumbers; i--;) {
+					if (music_graph_descriptors.style_supergenre[i][0] == node) {bFound = true;}
+					if (bFound) {break;}
+				}
+			}
+			if (!bFound) { // May be a superGenre Cluster
+				for (let i = superGenreClusterNumbers; i--;) {
+					if (music_graph_descriptors.style_supergenre_cluster[i][0] == node) {bFound = true;}
+					if (bFound) {break;}
+				}
+			}
+			if (!bFound) { // May be a superGenre Cluster
+				for (let i = superGenreSuperClusterNumbers; i--;) {
+					if (music_graph_descriptors.style_supergenre_supercluster[i][0] == node) {bFound = true;}
+					if (bFound) {break;}
+				}
+			}
+			if (!bFound) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_anti_influence\' or \'style_secondary_origin\' or \'style_primary_origin\' has nodes not found on any other descriptor. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		}
+	});
+	// Check that all superGenres are present in other descriptors
+	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
+		let node = nodePair[0];
+		bFound = false;
+		for (let j = superGenreClusterNumbers; j--;) {
+			if (music_graph_descriptors.style_supergenre_cluster[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+			if (bFound) {break;}
+		}
+		if (!bFound) { // May be a superGenre super Cluster
+			for (let i = superGenreSuperClusterNumbers; i--;) {
+				if (music_graph_descriptors.style_supergenre_supercluster[i][0] == node) {bFound = true;}
+				if (bFound) {break;}
+			}
+		}
+		if (!bFound) {
+			console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not found on any other descriptor. Check \'Graph nodes and links\' section\n' + '	' +  node);
+			bWarning = true;
+		}
+	});
+	// Check that all superGenre Clusters are present in other descriptors
+	music_graph_descriptors.style_supergenre_cluster.forEach( (nodePair) => {
+		let node = nodePair[0];
+		if (node == 'SKIP') {return;}
+		bFound = false;
+		for (let j = superGenreSuperClusterNumbers; j--;) {
+			if (music_graph_descriptors.style_supergenre_supercluster[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+			if (bFound) {break;}
+		}
+		if (!bFound) {
+			console.log('music_graph_descriptors_xxx Warning: \'style_supergenre_cluster\' has nodes not found on any other descriptor. Check \'Graph nodes and links\' section\n' + '	' +  node);
+			bWarning = true;
+		}
+	});
 	// Test basic paths using the graph. 
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
 	var bGraphDeclared = true;
@@ -512,6 +646,5 @@ function GraphDebug(graph = music_graph()) {
 		const message = 'There are some errors on \'music_graph_descriptors_xxx.js\' or \'music_graph_descriptors_xxx_user.js\'';
 		try {fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_xxx');} // On foobar
 		catch (e) {alert('Check console \'Ctrl + Shift + K\'. ' + message);} // On browsers
-	}
-	
+	} else {console.log('music_graph_descriptors_xxx: All tests passed');}	
 }
