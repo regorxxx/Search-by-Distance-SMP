@@ -32,7 +32,7 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 70, sbd_max_graph_distance: 50, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 70, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre / 2, method: 'GRAPH', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix with only nearest tracks
 		do_searchby_distance(args); 
 		t1 = Date.now();
@@ -43,7 +43,7 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: 85, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.cluster, method: 'GRAPH', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix a bit varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();
@@ -54,7 +54,7 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: 150, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 3/2, method: 'GRAPH', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix even more varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();
@@ -65,7 +65,7 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 5, 
-					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: 400, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 4, method: 'GRAPH', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix with different genres but same mood from any date
 		do_searchby_distance(args);
 		t1 = Date.now();

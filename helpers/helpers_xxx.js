@@ -116,7 +116,7 @@ const zeroOrGreaterThan = (value, limit) => {return (value === 0) ? 0 : ((value 
 // const repeatedFunction = repeatFn(function, ms);
 // repeatedFunction(arguments);
 const repeatFn = (func, ms) => {
-	return (...args) => {setInterval(func.bind(this, ...args), ms);};
+	return (...args) => {return setInterval(func.bind(this, ...args), ms);};
 };
 
 // Delay execution according to interval (ms). Ex:
@@ -254,6 +254,8 @@ function _copyFile(oldFilePath, newFilePath) {
 }
 
 // Sends file to recycle bin, can be undone
+// Beware of calling this while pressing shift. File will be removed without sending to recycle bin!
+// Use utils.IsKeyPressed(VK_SHIFT) and debouncing as workaround
 function _recycleFile(file) {
 	if (_isFile(file)) {
 		try {
@@ -548,13 +550,16 @@ const nextIdIndicator = (function() { // Same structure to ease compatibility
 */
 
 // Select n tracks from playlist and remove the rest
-function removeNotSelectedTracks(playlistIndex, nTracks) {
+// Start is zero by default
+// When nTracks is negative, then the count is done 
+// reversed from start to zero
+// When nTracks is negative and start is zero or not provided,
+// then start is set to playlist length
+function removeNotSelectedTracks(playlistIndex, nTracks, start = 0) {
         plman.ClearPlaylistSelection(playlistIndex);
-        let selection = [];
-		let i = 0;
-        for (i; i < nTracks; ++i) {
-            selection[i] = i;
-        }
+		const sign = Math.sign(nTracks);
+		start = sign < 0 && !start ?  plman.PlaylistItemCount(playlistIndex) - 1 : start;
+		const selection = range(start, start + sign * (Math.abs(nTracks) - 1), sign);
         plman.SetPlaylistSelection(playlistIndex, selection, true);
         plman.RemovePlaylistSelection(playlistIndex, true);
 }
@@ -649,7 +654,7 @@ function sendToPlaylist(handleList, playlistName) {
 	return handleList;
 }
 
-function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlistName = '', useUUID = null, bLocked = false, category = '', tags = []) {
+function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlistName = '', useUUID = null, bLocked = false, category = '', tags = [], relPath = '') {
 	if (!writablePlaylistFormats.has(extension)){
 		console.log('savePlaylist(): Wrong extension set \'' + extension + '\', only allowed ' + Array.from(writablePlaylistFormats).join(', '));
 		return false;
@@ -674,9 +679,9 @@ function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlist
 			// Tracks text
 			if (playlistIndex !== -1) { // Tracks from playlist
 				let trackText = [];
-				// let tfo = fb.TitleFormat('%path%');
-				let tfo = fb.TitleFormat('#EXTINF:%_length_seconds%,%artist% - %title%$crlf()' + '%path%');
-				let items = plman.GetPlaylistItems(playlistIndex);
+				const repl = '.\\';
+				const tfo = fb.TitleFormat('#EXTINF:%_length_seconds%,%artist% - %title%$crlf()' + (relPath.length ? '$replace(%path%,\'' + relPath + '\',' + repl + ')' : '%path%'));
+				const items = plman.GetPlaylistItems(playlistIndex);
 				trackText = tfo.EvalWithMetadbs(items);
 				playlistText[7] += items.Count; // Add number of tracks to size
 				playlistText = playlistText.concat(trackText);
@@ -690,8 +695,9 @@ function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlist
 			// Tracks text
 			if (playlistIndex !== -1) { // Tracks from playlist
 				let trackText = [];
-				let tfo = fb.TitleFormat('File#placeholder#=%path%' + '$crlf()Title#placeholder#=%title%' + '$crlf()Length#placeholder#=%_length_seconds%');
-				let items = plman.GetPlaylistItems(playlistIndex);
+				const repl = '.\\';
+				const tfo = fb.TitleFormat('File#placeholder#=' + (relPath.length ? '$replace(%path%,\'' + relPath + '\',' + repl + ')' : '%path%')  + '$crlf()Title#placeholder#=%title%' + '$crlf()Length#placeholder#=%_length_seconds%');
+				const items = plman.GetPlaylistItems(playlistIndex);
 				trackText = tfo.EvalWithMetadbs(items);
 				//Fix file numbering since foobar doesn't output list index...
 				let trackTextLength = trackText.length;
@@ -720,53 +726,29 @@ function savePlaylist(playlistIndex, playlistPath, extension = '.m3u8', playlist
 	return false;
 }
 
-function addHandleToPlaylist(handleList, playlistPath) {
-	const extension = isCompatible('1.4.0') ? utils.SplitFilePath(file)[2] : utils.FileTest(file, 'split')[2]; //TODO: Deprecated
+function addHandleToPlaylist(handleList, playlistPath, relPath = '') {
+	const extension = isCompatible('1.4.0') ? utils.SplitFilePath(playlistPath)[2] : utils.FileTest(playlistPath, 'split')[2]; //TODO: Deprecated
 	if (!writablePlaylistFormats.has(extension)){
-		console.log('savePlaylist(): Wrong extension set \'' + extension + '\', only allowed ' + Array.from(writablePlaylistFormats).join(', '));
+		console.log('addHandleToPlaylist(): Wrong extension set \'' + extension + '\', only allowed ' + Array.from(writablePlaylistFormats).join(', '));
 		return false;
 	}
-	if (!_isFile(playlistPath)) {
-		let trackText = [];
-		let addSize = handleList.Count;
-		// -------------- m3u
-		if (extension === '.m3u8' || extension === '.m3u') {
-			// Tracks text
-			if (addSize !== 0) {
-				let tfo = fb.TitleFormat('#EXTINF:%_length_seconds%,%artist% - %title%$crlf()' + '%path%');
-				trackText = tfo.EvalWithMetadbs(handleList);
-			} else { //  Else empty handle
-				return false;
-			} 
-		// ---------------- PLS
-		} else if (extension === '.pls') { // The standard doesn't allow comments... so no UUID here.
-			if (addSize !== 0) { // Tracks from playlist
-				// Tracks text
-				let tfo = fb.TitleFormat('File#placeholder#=%path%' + '$crlf()Title#placeholder#=%title%' + '$crlf()Length#placeholder#=%_length_seconds%');
-				trackText = tfo.EvalWithMetadbs(handleList);
-				//Fix file numbering since foobar doesn't output list index...
-				let trackTextLength = trackText.length;
-				for (let i = 0; i < trackTextLength; i++) { // It appears 3 times...
-					trackText[i] = trackText[i].replace('#placeholder#', i + 1).replace('#placeholder#', i + 1).replace('#placeholder#', i + 1);
-					trackText[i] += '\r\n'; // EoL after every track info group... just for readability
-				}
-			} else { //  Else empty handle
-				return false;
-			} 
-		}
+	if (_isFile(playlistPath)) {
 		// Read original file
 		let originalText = utils.ReadTextFile(playlistPath).split('\r\n');
 		let bFound = false;
+		let addSize = handleList.Count;
+		let trackText = [];
+		let size;
 		if (typeof originalText !== 'undefined' && originalText.length) { // We don't check if it's a playlist by its content! Can break things if used wrong...
 			let lines = originalText.length;
 			if (extension === '.m3u8' || extension === '.m3u') {
+				bFound = true; // no check for m3u8 since it can be anything
 				let j = 0;
 				while (j < lines) { // Changes size Line
 					if (originalText[j].startsWith('#PLAYLISTSIZE:')) {
 						size = Number(originalText[j].split(':')[1]);
-						let newSize = size + addSize;
+						const newSize = size + addSize;
 						originalText[j] = '#PLAYLISTSIZE:' + newSize;
-						bFound = true;
 						break;
 					}
 					j++;
@@ -777,7 +759,7 @@ function addHandleToPlaylist(handleList, playlistPath) {
 					bFound = true;
 					// End of Footer
 					size = Number(originalText[lines - 2].split('=')[1]);
-					let newSize = size + addSize;
+					const newSize = size + addSize;
 					trackText.push('NumberOfEntries=' + newSize);
 					trackText.push('Version=2');
 					originalText.pop(); //Removes old NumberOfEntries=..
@@ -786,10 +768,38 @@ function addHandleToPlaylist(handleList, playlistPath) {
 			}
 		}
 		if (!bFound) {return false;} // Safety check
+		// New text
+		// -------------- m3u
+		if (extension === '.m3u8' || extension === '.m3u') {
+			// Tracks text
+			if (addSize !== 0) {
+				const repl = '.\\';
+				const tfo = fb.TitleFormat('#EXTINF:%_length_seconds%,%artist% - %title%$crlf()' + (relPath.length ? '$replace(%path%,\'' + relPath + '\',' + repl + ')' : '%path%'));
+				trackText = [...tfo.EvalWithMetadbs(handleList), ...trackText]
+			} else { //  Else empty handle
+				return false;
+			} 
+		// ---------------- PLS
+		} else if (extension === '.pls') { // The standard doesn't allow comments... so no UUID here.
+			if (addSize !== 0) { // Tracks from playlist
+				// Tracks text
+				const repl = '.\\';
+				const tfo = fb.TitleFormat('File#placeholder#=' + (relPath.length ? '$replace(%path%,\'' + relPath + '\',' + repl + ')' : '%path%')  + '$crlf()Title#placeholder#=%title%' + '$crlf()Length#placeholder#=%_length_seconds%');
+				trackText = [...tfo.EvalWithMetadbs(handleList), ...trackText];
+				//Fix file numbering since foobar doesn't output list index...
+				let trackTextLength = trackText.length;
+				for (let i = 0; i < trackTextLength - 2; i++) { // It appears 3 times per track...
+					trackText[i] = trackText[i].replace('#placeholder#', size + 1).replace('#placeholder#', size + 1).replace('#placeholder#', size + 1);
+					trackText[i] += '\r\n'; // EoL after every track info group... just for readability
+				}
+			} else { //  Else empty handle
+				return false;
+			} 
+		}
 		// Write to file
 		trackText = trackText.join('\r\n');
 		originalText = originalText.join('\r\n');
-		let playlistText = playlistText.concat(trackText);
+		let playlistText = originalText.concat('\r\n', trackText);
 		let bDone = utils.WriteTextFile(playlistPath, playlistText, true);
 		// Check
 		if (_isFile(playlistPath) && bDone) {
@@ -803,6 +813,10 @@ function addHandleToPlaylist(handleList, playlistPath) {
 
 function getFilePathsFromPlaylist(playlistPath) {
 	let paths = [];
+	if (!playlistPath || !playlistPath.length) {
+		console.log('getFilePathsFromPlaylist(): no playlist path was provided');
+		return paths;
+	}
 	const extension = isCompatible('1.4.0') ? utils.SplitFilePath(playlistPath)[2] : utils.FileTest(playlistPath, 'split')[2]; //TODO: Deprecated
 	if (!writablePlaylistFormats.has(extension)){
 		console.log('getFilePathsFromPlaylist(): Wrong extension set \'' + extension + '\', only allowed ' + Array.from(writablePlaylistFormats).join(', '));
@@ -831,22 +845,52 @@ function getFilePathsFromPlaylist(playlistPath) {
 	return paths;
 }
 
+// Cache paths
+var libItemsAbsPaths = [];
+var libItemsRelPaths = {};
+
+function precacheLibraryPaths() {
+	libItemsAbsPaths = fb.TitleFormat('%path%').EvalWithMetadbs(fb.GetLibraryItems());
+}
+
 // Loading m3u, m3u8 & pls playlist files is really slow when there are many files
 // Better to find matches on the library (by path) and use those! A query or addLocation approach is easily 100x times slower
-function loadTracksFromPlaylist(playlistPath, playlistIndex) {
-	let test = new FbProfiler('Group #1');
+function loadTracksFromPlaylist(playlistPath, playlistIndex, relPath = '') {
+	let test = new FbProfiler('loadTracksFromPlaylist');
 	let bDone = false;
 	const filePaths = getFilePathsFromPlaylist(playlistPath).map((path) => {return path.toLowerCase();});
+	if (!filePaths.some((path) => {return path.startsWith('.\\');})) {relPath = '';} // No need to check rel paths if they are all absolute
 	const playlistLength = filePaths.length;
 	let handlePlaylist = [...Array(playlistLength)];
-	let poolItems = fb.GetLibraryItems().Convert();
+	const poolItems = fb.GetLibraryItems();
+	const poolItemsCount = poolItems.Count;
+	const poolItemsAbsPaths = libItemsAbsPaths.length === poolItems.Count ? libItemsAbsPaths : fb.TitleFormat('%path%').EvalWithMetadbs(poolItems);
+	const poolItemsRelPaths = relPath.length ? (libItemsRelPaths.hasOwnProperty(relPath) && libItemsRelPaths[relPath].length === poolItems.Count ? libItemsRelPaths[relPath] : poolItemsAbsPaths.map((path) => {return path.replace(relPath, '.\\');})) : null; // Faster than tf again
 	let pathPool = new Map();
 	let filePool = new Set(filePaths);
-	poolItems.forEach( (handle, index) => {
-		if (filePool.has(handle.Path.toLowerCase())) {
-			pathPool.set(handle.Path.toLowerCase(), index);
+	let path;
+	if (relPath.length) {
+		for (let i = 0; i < poolItemsCount; i++) {
+			path = poolItemsAbsPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				pathPool.set(path, i);
+				continue;
+			}
+			path = poolItemsRelPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				pathPool.set(path, i);
+				continue;
+			}
 		}
-	});
+	} else {
+		for (let i = 0; i < poolItemsCount; i++) {
+			path = poolItemsAbsPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				pathPool.set(path, i);
+				continue;
+			}
+		}
+	}
 	let count = 0;
 	for (let i = 0; i < playlistLength; i++) {
 		if (pathPool.has(filePaths[i])) {
@@ -860,7 +904,52 @@ function loadTracksFromPlaylist(playlistPath, playlistIndex) {
 		bDone = true;
 	}
 	test.Print();
+	if (!libItemsAbsPaths.length) {libItemsAbsPaths = poolItemsAbsPaths;}
+	if (relPath.length && (!libItemsRelPaths.hasOwnProperty(relPath) || !libItemsRelPaths[relPath].length)) {libItemsRelPaths[relPath] = poolItemsRelPaths;}
 	return bDone;
+}
+
+// Loading m3u, m3u8 & pls playlist files is really slow when there are many files
+// Better to find matches on the library (by path) and use those! A query or addLocation approach is easily 100x times slower
+function arePathsInMediaLibrary(filePaths, relPath = '') {
+	let test = new FbProfiler('arePathsInMediaLibrary');
+	if (!filePaths.some((path) => {return path.startsWith('.\\');})) {relPath = '';} // No need to check rel paths if they are all absolute
+	const playlistLength = filePaths.length;
+	const poolItems = fb.GetLibraryItems();
+	const poolItemsCount = poolItems.Count;
+	const poolItemsAbsPaths = libItemsAbsPaths.length === poolItems.Count ? libItemsAbsPaths : fb.TitleFormat('%path%').EvalWithMetadbs(poolItems);
+	const poolItemsRelPaths = relPath.length ? (libItemsRelPaths.hasOwnProperty(relPath) && libItemsRelPaths[relPath].length === poolItems.Count ? libItemsRelPaths[relPath] : poolItemsAbsPaths.map((path) => {return path.replace(relPath, '.\\');})) : null; // Faster than tf again
+	let filePool = new Set(filePaths.map((path) => {return path.toLowerCase();}));
+	let path;
+	let count = 0;
+	if (relPath.length) {
+		for (let i = 0; i < poolItemsCount; i++) {
+			path = poolItemsAbsPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				count++;
+				continue;
+			}
+			path = poolItemsRelPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				count++;
+				continue;
+			}
+		}
+	} else {
+		for (let i = 0; i < poolItemsCount; i++) {
+			path = poolItemsAbsPaths[i].toLowerCase();
+			if (filePool.has(path)) {
+				count++;
+				continue;
+			}
+		}
+	}
+	test.Print();
+	if (libItemsAbsPaths.length !== poolItems.Count) {libItemsAbsPaths = poolItemsAbsPaths;}
+	if (relPath.length && (!libItemsRelPaths.hasOwnProperty(relPath) || !libItemsRelPaths[relPath].length)) {libItemsRelPaths[relPath] = poolItemsRelPaths;}
+	console.log(count);
+	console.log(playlistLength);
+	return (count === playlistLength);
 }
 
 function loadPlaylists(playlistArray) {
@@ -1161,6 +1250,10 @@ function isArrayNumbers(checkKeys) {
 	return true;
 }
 
+function isArrayEqual(arrayA, arrayB) {
+	return new Set(arrayA).isEqual(new Set(arrayB));
+}
+
 // Expects key,value,key,value,...
 // or key,value,value;key,value,...
 // Outputs {key: value, key: value, ...}
@@ -1228,6 +1321,12 @@ Array.prototype.rotate = (function() {
 		return this;
 	};
 })();
+
+function compareKeys(a, b) {
+	const aKeys = Object.keys(a).sort();
+	const bKeys = Object.keys(b).sort();
+	return JSON.stringify(aKeys) === JSON.stringify(bKeys);
+}
 
 /* 
 	Sets
@@ -1451,7 +1550,7 @@ function _tt(value, font = 'Segoe UI', fontsize = _scale(10), width = 1200) {
 function _scale(size) {
 	if (!scaleDPI[size]) {
 		let WshShell = new ActiveXObject('WScript.Shell');
-		const DPI = WshShell.RegRead('HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI');
+		const DPI = WshShell.RegRead('HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI'); // TODO Linux: const DPI = 96
 		scaleDPI[size] = Math.round(size * DPI / 72);
 	}
 	return scaleDPI[size];
@@ -1554,7 +1653,7 @@ function drawDottedLine(gr, x1, y1, x2, y2, line_width, colour, dot_sep) {
 			newY1 += dot_sep * 2;
 			newY2 += dot_sep * 2;
 		}
-	} else { // Any angle: Would work alone, but checking coordinates first is faster...
+	} else { // Any angle: Would work alone, but checking coordinates first is faster for vertical and horizontal...
 		const numberDots = Math.floor(((x2 - x1)**2 + (y2 - y1)**2)**(1/2) / dot_sep / 2);
 		const angle = (y2 !== y1) ? Math.atan((x2 - x1)/(y2 - y1)) : 0;
 		const xStep = dot_sep * Math.cos(angle);
@@ -1569,6 +1668,45 @@ function drawDottedLine(gr, x1, y1, x2, y2, line_width, colour, dot_sep) {
 			newX2 += xStep * 2;
 			newY1 += yStep * 2;
 			newY2 += yStep * 2;
+		}
+	}
+}
+
+function fillWithPattern(gr, x1, y1, x2, y2, colour, lineWidth, size, pattern) {
+	const dotSize = _scale(3);
+	if (x1 > x2) {[x1, x2] = [x2, x1];} 
+	if (y1 > y2) {[y1, y2] = [y2, y1];} 
+	const diffX = x2 - x1;
+	const diffY = y2 - y1;
+	let iX = x1, iY = y1;
+	switch (pattern){
+		case 'verticalDotted': {
+			size = getClosestDivisor(diffX, size);
+			const rep = diffX / size;
+			for (let i = 0; i <= rep; i++) {
+				drawDottedLine(gr, iX, y1, iX, y2 - dotSize, lineWidth, colour, dotSize)
+				iX += size;
+			}
+			break;
+		}
+		case 'horizontalDotted': {
+			size = getClosestDivisor(diffY, size);
+			const rep = diffY / size;
+			for (let i = 0; i <= rep; i++) {
+				drawDottedLine(gr, x1, iY, x2 - dotSize, iY, lineWidth, colour, dotSize)
+				iY += size;
+			}
+			break;
+		}
+		case 'squares': {
+			fillWithPattern(gr, x1, y1, x2, y2, colour, lineWidth, size, 'verticalDotted');
+			fillWithPattern(gr, x1, y1, x2, y2, colour, lineWidth, size, 'horizontalDotted');
+			break;
+		}
+		case 'mossaic': {
+			fillWithPattern(gr, x1, y1, x2, y2, colour, lineWidth, size * 2/3, 'verticalDotted');
+			fillWithPattern(gr, x1, y1, x2, y2, colour, lineWidth, size * 1/3, 'horizontalDotted');
+			break;
 		}
 	}
 }
@@ -1787,6 +1925,21 @@ function isFloat(n){
     return Number(n) === n && n % 1 !== 0;
 }
 
+function getClosestDivisor(n, toX){
+	if (!n % toX) {return toX;}
+    let res = [];
+	let i = 0;
+    while (i <= n) {
+        if (n % i === 0){
+			res.push(i);
+			if (i >= toX) {break;}
+		}
+        i++;
+	}
+	let b = res.pop();
+	let a = res.pop();
+    return 	(Math.abs(b - toX) < Math.abs(a - toX) ? b : a)
+}
 // Adds/subtracts 'offset' to 'reference' considering the values must follow cyclic logic within 'limits' range (both values included)
 // Ex: [1,8], x = 5 -> x + 4 = 1 <=> cyclicOffset(5, 4, [1,8])
 function cyclicOffset(reference, offset, limits) {
