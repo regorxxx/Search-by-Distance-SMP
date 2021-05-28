@@ -42,7 +42,7 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 		// newCoordinates = {x: buttonCoordinates.x, y: oldButtonCoordinates.y + buttonCoordinates.y, w: buttonCoordinates.w, h: buttonCoordinates.h};
 		// if (recalc) {oldButtonCoordinates.y += buttonCoordinates.y  + buttonCoordinates.h;}
 	// }
-	// This requires on_size_buttn() within on_size callback. Is equivalent to calculate the coordinates directly with inlined functions... but maintained here for compatibility purporse
+	// This requires on_size_buttn() within on_size callback. Is equivalent to calculate the coordinates directly with inlined functions... but maintained here for compatibility purpose
 	const isFunc = (_isFunction(buttonCoordinates.x) || _isFunction(buttonCoordinates.y) || _isFunction(buttonCoordinates.w) || _isFunction(buttonCoordinates.h));
 	if (buttonOrientation === 'x') {
 		newCoordinates = {x: (_isFunction(buttonCoordinates.x) ? () => {return oldButtonCoordinates.x + buttonCoordinates.x();} : oldButtonCoordinates.x + buttonCoordinates.x) , y: (_isFunction(buttonCoordinates.y) ? () => {return buttonCoordinates.y();} : buttonCoordinates.y), w: (_isFunction(buttonCoordinates.w) ? () => {return buttonCoordinates.w();} : buttonCoordinates.w), h: (_isFunction(buttonCoordinates.h) ? () => {return buttonCoordinates.h();} : buttonCoordinates.h)};
@@ -130,8 +130,8 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 		}
 	};
 
-	this.onClick = function () {
-		this.fonClick && this.fonClick();
+	this.onClick = function (mask) {
+		this.fonClick && this.fonClick(mask);
 	};
 }
 
@@ -208,11 +208,11 @@ function on_mouse_lbtn_down(x, y) {
 	}
 }
 
-function on_mouse_lbtn_up(x, y) {
+function on_mouse_lbtn_up(x, y, mask) {
 	g_down = false;
 
 	if (cur_btn) {
-		cur_btn.onClick();
+		cur_btn.onClick(mask);
 		if (cur_btn) { // Solves error if you create a new Whsell Popup (cur_btn becomes null) after pressing the button and firing cur_btn.onClick()
 			cur_btn.changeState(ButtonStates.hover);
 			window.Repaint();

@@ -8,6 +8,7 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Buttons framework: updated.
 ### Removed
 ### Fixed
 
