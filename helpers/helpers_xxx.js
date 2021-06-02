@@ -291,9 +291,9 @@ function _restoreFile(file) {
 	}
 }
 
-function _open(file) {
+function _open(file, codePage = 0) {
 	if (_isFile(file)) {
-		return utils.ReadTextFile(file);
+		return utils.ReadTextFile(file, codePage);
 	} else {
 		return '';
 	}
@@ -994,6 +994,8 @@ function queryReplaceWithCurrent(query, handle) {
 			else {break;}
 		}
 		let count = idx.length;
+		const startQuery = query[0] === '(' ? query.slice(0, query.split('').findIndex((s) => {return s !== '(';})) : '';
+		const endQuery = query.length > idx[count - 1] ? query.slice(idx[count - 1] + 1, query.length) : '';
 		if (count % 2 === 0) { // Must be on pairs of 2
 			let tempQuery = '';
 			let tfo = '', tfoVal = '';
@@ -1004,14 +1006,23 @@ function queryReplaceWithCurrent(query, handle) {
 				tfo = fb.TitleFormat(tfo);
 				tfoVal = tfo.EvalWithMetadb(handle);
 				if (tfoVal.indexOf('#') !== -1) { // Split multivalue tags if possible!
-					tempQuery = tfoVal.map((val) => {return tempQuery + query.slice((i > 0 ? idx[i - 1] + 1 : 0), idx[i]) + val;})
-					tempQuery = query_join(tempQuery, 'AND');
+					// tempQuery += query.slice((i > 0 ? idx[i - 1] + 1 : (startQuery.length ? startQuery.length : 0)), idx[i]);
+					const interText = query.slice((i > 0 ? idx[i - 1] + 1 : (startQuery.length ? startQuery.length : 0)), idx[i]);
+					const interQueryStart = interText[0] === ')' ? interText.slice(0, interText.split('').findIndex((s) => {return s !== ')';})) : '';
+					const breakPoint = interText.lastIndexOf(' (');
+					const interQueryEnd = breakPoint !== -1 ? interText.slice(interQueryStart.length, breakPoint + 2 + interText.slice(breakPoint + 2).split('').findIndex((s) => {return s !== '(';})) : '';
+					// const interQueryEnd = breakPoint !== -1 ? interText.slice(interQueryStart.length, breakPoint + 2) : '';
+					const interQuery = interQueryStart + interQueryEnd;
+					const multiQuery  = tfoVal.split('#').map((val) => {return query.slice((i > 0 ? idx[i - 1] + interQuery.length + 1 : (startQuery.length ? startQuery.length : 0)), idx[i]) + val;})
+					// tempQuery = tfoVal.split('#').map((val) => {return tempQuery + query.slice((i > 0 ? idx[i - 1] + 1 : (startQuery.length ? startQuery.length : 0)), idx[i]) + val;})
+					// tempQuery = query_join(tempQuery, 'AND');
+					tempQuery += interQuery + query_join(multiQuery, 'AND');
 				} else {
-					tempQuery = tempQuery + query.slice((i > 0 ? idx[i - 1] + 1 : 0), idx[i]) + tfoVal;
+					tempQuery += query.slice((i > 0 ? idx[i - 1] + 1 : (startQuery.length ? startQuery.length : 0)), idx[i]) + tfoVal;
 				}
 				// tempQuery = tempQuery + query.slice((i > 0 ? idx[i - 1] + 1 : 0), idx[i]) + tfoVal;
 			}
-			query = tempQuery;
+			query = startQuery + tempQuery + endQuery;
 		}
 	}
 	return query;

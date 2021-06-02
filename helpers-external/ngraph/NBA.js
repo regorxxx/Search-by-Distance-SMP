@@ -2,10 +2,10 @@
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\defaultSettings.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\heuristics.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\makeNBASearchStatePool.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\NodeHeap.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\defaultSettings.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\heuristics.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\makeNBASearchStatePool.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\NodeHeap.js');
 } catch (e) {}// On browsers
 
 var NO_PATH = defaultSettings.NO_PATH;

@@ -7,10 +7,18 @@
 
 ## [Unreleased][]
 ### Added
+- 4 sets of buttons, one for each method: GRAPH, WEIGHT, DYNGENRE + ONE CONFIGURABLE (method at properties). (This in addition to the fully customizable buttons)
 ### Changed
+- GRAPH: mean distance is now also divided by the numbef of genre/styles of the reference track. That should give more results for tracks with too many tags, while not changing so much for the rest. Distance filters have been updated accordingly in all buttons to reflect the change (and users should do the same in their customized buttons).
 - Buttons framework: updated.
+- Helpers: Moved all external libraries to 'helpers-external'.
+- Helpers: Split 'helpers_xxx.js' file into multiple ones for easier future maintenance.
+- Moved all SMP scripts without UI (those not meant to be loaded directly on panels) to 'main'.
+- All buttons now have not needed properties deleted, to not confuse users about things on properties not being reflected on the buttons.
 ### Removed
 ### Fixed
+- Default args: crashes when trying to access non present properties on the arguments (found while applying the previous changes).
+- Cache: crash when sharing cache between 2 panels due to a typo.
 
 ## [1.1.0] - 2021-05-26
 ### Added

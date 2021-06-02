@@ -10,7 +10,7 @@ try { //May be loaded along other buttons
 	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Search by Distance Buttons loaded.');
 }
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 var prefix = "sbd_";
 prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
 

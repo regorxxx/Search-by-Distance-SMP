@@ -2,10 +2,10 @@
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\ngraph.graph.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\a-star.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\a-greedy-star.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\NBA.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\ngraph.graph.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-star.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-greedy-star.js');
+	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\NBA.js');
 } catch (e) { // On browsers
 	// same files must be loaded on html
 	console.log('\'ngraph_helpers_xxx\' script is being used on browser. Omitting \'include\' clause.');

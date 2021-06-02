@@ -312,9 +312,9 @@
 			- Helpers used don't need foobar at all (except the 'getValues' for tags obviously)
 */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\a-star.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\a-greedy-star.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\NBA.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-star.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-greedy-star.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\NBA.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\ngraph_helpers_xxx.js');
 var bLoadTags = true; // This tells the helper to load tags descriptors extra files
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx.js');
@@ -323,7 +323,7 @@ include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\dyngenre_map_xxx.j
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_descriptors_xxx.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_xxx.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_test_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\remove_duplicates.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\remove_duplicates.js');
 
 /* 
 	Properties
@@ -2044,7 +2044,7 @@ function do_searchby_distance({
 		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
 		// May override previous sorting methods (only for instrumental tracks). 
 		// Finds instrumental track indexes, and move them to a random range without overlapping.
-		if (bScatterInstrumentals) { // Could reuse scatter_by_tags.js but since we already have the tags... done here
+		if (bScatterInstrumentals) { // Could reuse scatter_by_tags but since we already have the tags... done here
 			let newOrder = [];
 			for (let i = 0; i < finalPlaylistLength; i++) {
 				const index = selectedHandlesData[i].index;

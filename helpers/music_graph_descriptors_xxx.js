@@ -489,23 +489,23 @@ const music_graph_descriptors = {
 		// Attributtes for every node type
 		nodeSize: 10,
 		nodeShape: 'rect', //'circle','rect','star' or 'image'. 'Image' requires 'imageLink' data for every node on drawing function
-		nodeImageLink: 'ngraph/html/images/Starv2.png',
+		nodeImageLink: 'helpers-external/ngraph/html/images/Starv2.png',
 		
 		style_clusterSize: 20,
 		style_clusterShape: 'star',
-		style_clusterImageLink: 'ngraph/html/images/Star.png',
+		style_clusterImageLink: 'helpers-external/ngraph/html/images/Star.png',
 		
 		style_supergenreSize: 15,
 		style_supergenreShape: 'circle',
-		style_supergenreImageLink: 'ngraph/html/images/Star.png',
+		style_supergenreImageLink: 'helpers-external/ngraph/html/images/Star.png',
 		
 		style_supergenre_clusterSize: 18,
 		style_supergenre_clusterShape: 'circle',
-		style_supergenre_clusterImageLink: 'ngraph/html/images/Star.png',
+		style_supergenre_clusterImageLink: 'helpers-external/ngraph/html/images/Star.png',
 		
 		style_supergenre_superclusterSize: 22,
 		style_supergenre_superclusterShape: 'rect',
-		style_supergenre_superclusterImageLink: 'ngraph/html/images/Star_color.png',
+		style_supergenre_superclusterImageLink: 'helpers-external/ngraph/html/images/Star_color.png',
 		
 		// Other
 		bPreRender: true, // (false) Renders graph on the fly on browsers or (true) pre-rendering (it may take some time while loading entire graph)
