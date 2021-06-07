@@ -1170,11 +1170,11 @@ function do_searchby_distance({
 								customStrWeight 		= Number(properties['customStrWeight'][1]), // Only used if tag is set at properties
 								customNumWeight 		= Number(properties['customNumWeight'][1]), // Only used if tag is set at properties
 								// --->Ranges (for associated weighting)
-								dyngenreRange 			= properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
-								keyRange 				= Number(properties['keyRange'][1]),
-								dateRange				= Number(properties['dateRange'][1]),
-								bpmRange				= Number(properties['bpmRange'][1]),
-								customNumRange 			= Number(properties['customNumRange'][1]),
+								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
+								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties['keyRange'][1]) : 0,
+								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties['dateRange'][1]) : 0,
+								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties['bpmRange'][1]) : 0,
+								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties['customNumRange'][1]) : 0,
 								bNegativeWeighting		= properties['bNegativeWeighting'][1], // Assigns negative score for num. tags when they fall outside range
 								// --->Pre-Scoring Filters
 								// Query to filter library
@@ -1886,7 +1886,8 @@ function do_searchby_distance({
 			bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
 			if (key.length) {
 				// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-				const pattern = createHarmonicMixingPattern(poolLength < playlistLength ? poolLength : playlistLength);  // On camelot_wheel_xxx.js
+				const size = poolLength < playlistLength ? poolLength : playlistLength;
+				const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
 				if (bSearchDebug) {console.log(pattern)};
 				let nextKeyObj;
 				let keyCache = new Map();
@@ -1897,7 +1898,7 @@ function do_searchby_distance({
 				let nextIndexScore = 0;
 				let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
 				let camelotKeyCurrent, camelotKeyNew;
-				for (let i = 0, j = 0; i < playlistLength - 1; i++) {
+				for (let i = 0, j = 0; i < size - 1; i++) {
 					// Search key
 					const indexScore = nextIndexScore;
 					const index = nextIndex;

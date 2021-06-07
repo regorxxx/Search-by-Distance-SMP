@@ -26,6 +26,7 @@
 ### Fixed
 - Default args: crashes when trying to access non present properties on the arguments (found while applying the previous changes).
 - Cache: crash when sharing cache between 2 panels due to a typo.
+- In key mixing: crash when pool was smaller than set playlist length.
 - In key mixing: not really random due to using sort + random method. Using an array shuffle now instead.
 - Random picking: not really random due to using sort + random method. Using an array shuffle now instead.
 
