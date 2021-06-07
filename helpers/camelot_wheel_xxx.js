@@ -209,8 +209,24 @@ function createHarmonicMixingPattern(playlistLength) {
 	Object.keys(movements).forEach((key) => {
 		pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
 	});
-	pattern.sort(() => Math.random() - 0.5);
-	if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+	// Sort randomly
+	const result = [];
+	const len = pattern.length;
+	for (let i = len - 1; i >= 0; i--) {
+		const r = Math.floor(Math.random() * (i + 1));
+		for (let j = 0, k = 0; j <= len - 1; j++) {
+			if (typeof result[j] === 'undefined') {
+				if (k === r) {
+					result[j] = pattern[i];
+					break;
+				}
+				k++;
+			}
+		}
+	}
+	pattern = result;
+	// Cut to desired length and output
+	if (len > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
 	return pattern;
 }
 

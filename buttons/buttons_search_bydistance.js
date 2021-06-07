@@ -1,8 +1,10 @@
 ﻿'use strict';
 
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+
 try { //May be loaded along other buttons
 	window.DefinePanel('Search by Distance Buttons', {author:'xxx'});
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
 	var buttonOrientation = 'x';
@@ -11,6 +13,7 @@ try { //May be loaded along other buttons
 	console.log('Search by Distance Buttons loaded.');
 }
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
 var prefix = "sbd_";
 prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
 
@@ -18,6 +21,19 @@ var newButtonsProperties = { //You can simply add new properties here
 	customName: ['Name for the custom UI button', 'Customize!']
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
+delete newButtonsProperties.genreWeight;
+delete newButtonsProperties.styleWeight;
+delete newButtonsProperties.moodWeight;
+delete newButtonsProperties.keyWeight;
+delete newButtonsProperties.dateWeight;
+delete newButtonsProperties.bpmWeight;
+delete newButtonsProperties.dateRange;
+delete newButtonsProperties.bpmRange;
+delete newButtonsProperties.probPick;
+delete newButtonsProperties.scoreFilter;
+delete newButtonsProperties.sbd_max_graph_distance;
+delete newButtonsProperties.dyngenreWeight;
+delete newButtonsProperties.dyngenreRange;
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 
 // we change the default coordinates here to accommodate text
@@ -32,7 +48,8 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 70, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre / 2, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 70, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre / 2, 
+					dyngenreWeight: 25, dyngenreRange: 1,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix with only nearest tracks
 		do_searchby_distance(args); 
 		t1 = Date.now();
@@ -43,7 +60,8 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.cluster, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.cluster, 
+					dyngenreWeight: 10, dyngenreRange: 1,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix a bit varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();
@@ -54,7 +72,8 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 3/2, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 3/2, 
+					dyngenreWeight: 10, dyngenreRange: 2,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix even more varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();
@@ -65,7 +84,8 @@ var newButtons = {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 5, 
-					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 4, method: 'GRAPH', 
+					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 4, 
+					dyngenreWeight: 5, dyngenreRange: 4,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix with different genres but same mood from any date
 		do_searchby_distance(args);
 		t1 = Date.now();

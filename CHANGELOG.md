@@ -7,7 +7,7 @@
 
 ## [Unreleased][]
 ### Added
-- 4 sets of buttons, one for each method: GRAPH, WEIGHT, DYNGENRE + ONE CONFIGURABLE (method at properties). (This in addition to the fully customizable buttons)
+- Buttons: 4 sets of buttons, one for each method: GRAPH, WEIGHT, DYNGENRE + ONE CONFIGURABLE (method at properties). (This in addition to the fully customizable buttons)
 ### Changed
 - GRAPH: mean distance is now also divided by the numbef of genre/styles of the reference track. That should give more results for tracks with too many tags, while not changing so much for the rest. Distance filters have been updated accordingly in all buttons to reflect the change (and users should do the same in their customized buttons).
 - Buttons framework: updated.
@@ -19,6 +19,8 @@
 ### Fixed
 - Default args: crashes when trying to access non present properties on the arguments (found while applying the previous changes).
 - Cache: crash when sharing cache between 2 panels due to a typo.
+- In key mixing: not really random due to using sort + random method. Using an array shuffle now instead.
+- Random picking: not really random due to using sort + random method. Using an array shuffle now instead.
 
 ## [1.1.0] - 2021-05-26
 ### Added

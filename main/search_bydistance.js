@@ -318,6 +318,11 @@ include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\N
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\ngraph_helpers_xxx.js');
 var bLoadTags = true; // This tells the helper to load tags descriptors extra files
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_crc.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_prototypes.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_tags.js');
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_math.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\camelot_wheel_xxx.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\dyngenre_map_xxx.js');
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_descriptors_xxx.js');
@@ -408,7 +413,7 @@ if (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') { /
 } else { // With buttons, set these properties only once per panel
 	setProperties(SearchByDistance_panelProperties, sbd_prefix);
 }
-const panelProperties = (typeof buttons === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
+const panelProperties = (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 
 // Info Popup
 if (!panelProperties.firstPopup[1]) {
@@ -506,7 +511,7 @@ function on_notify_data(name, info) {
 	if (name.indexOf('SearchByDistance: cacheLinkSet map') !== -1 && info) {
 		console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
 		let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-		data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+		data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
 		updateCache({newCacheLinkSet: new Map(data)});
 	}
 }
@@ -1156,7 +1161,7 @@ function do_searchby_distance({
 								// --->Weights
 								genreWeight				= Number(properties['genreWeight'][1]), // Number() is used to avoid bugs with dates or other values...
 								styleWeight				= Number(properties['styleWeight'][1]),
-								dyngenreWeight			= Number(properties['dyngenreWeight'][1]),
+								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties['dyngenreWeight'][1]) : 0,
 								moodWeight				= Number(properties['moodWeight'][1]),
 								keyWeight				= Number(properties['keyWeight'][1]),
 								dateWeight				= Number(properties['dateWeight'][1]),
@@ -1165,7 +1170,7 @@ function do_searchby_distance({
 								customStrWeight 		= Number(properties['customStrWeight'][1]), // Only used if tag is set at properties
 								customNumWeight 		= Number(properties['customNumWeight'][1]), // Only used if tag is set at properties
 								// --->Ranges (for associated weighting)
-								dyngenreRange 			= Number(properties['dyngenreRange'][1]),
+								dyngenreRange 			= properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
 								keyRange 				= Number(properties['keyRange'][1]),
 								dateRange				= Number(properties['dateRange'][1]),
 								bpmRange				= Number(properties['bpmRange'][1]),
@@ -1180,7 +1185,7 @@ function do_searchby_distance({
                                 method					= properties['method'][1],
 								// --->Scoring filters
                                 scoreFilter				= Number(properties['scoreFilter'][1]),
-                                sbd_max_graph_distance	= Number(properties['sbd_max_graph_distance'][1]),
+                                sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 								poolFilteringTag 		= properties['poolFilteringTag'][1].split(',').filter(Boolean),
@@ -1888,7 +1893,7 @@ function do_searchby_distance({
 				let keyDebug = [];
 				let keySharpDebug = [];
 				let patternDebug = [];
-				let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).sort(() => Math.random() - 0.5));
+				let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).shuffle());
 				let nextIndexScore = 0;
 				let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
 				let camelotKeyCurrent, camelotKeyNew;
@@ -1958,8 +1963,7 @@ function do_searchby_distance({
 		} else { // Standard methods
 			if (poolLength > playlistLength) {
 				if (bRandomPick){	//Random from pool
-					const numbers = Array(poolLength).fill().map((_, index) => index);
-					numbers.sort(() => Math.random() - 0.5);
+					const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
 					const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
 					let i = 0;
 					while (i < playlistLength) {
@@ -2138,8 +2142,8 @@ function do_searchby_distance({
 			if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
 		// Share changes on cache
-		if (cacheLink.size) {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
-		if (cacheLinkSet.size) {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
+		if (cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
+		if (cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
 		// Output handle list (as array), the score data, current selection (reference track) and more distant track
 		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handle_list[scoreData[poolLength - 1].index] : -1)];
 }
@@ -2195,6 +2199,7 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
 			if (map_distance < Infinity) { // If they are linked
 				map_distance += influenceDistance; // Adds positive/negative influence distance ('negative' means nearer...)
 				map_distance /= style_genre_new.size;  // mean distance
+				map_distance /= style_genre_reference.size;  // mean distance //TODO:
 				map_distance = round(map_distance,1); // And rounds the final value
 				if (map_distance < 0) {map_distance = 0;} // Safety check, since influence may lower values below zero
 			}
