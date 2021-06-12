@@ -58,8 +58,8 @@ var newButtons = {
 	SimilarTracks: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Tracks", function () {
 		let t0 = Date.now();
 		let t1 = 0;
-		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, method: 'WEIGHT', 
+		const args = {genreWeight: 10, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
+					bpmRange: 25, probPick: 100, scoreFilter: 65, method: 'WEIGHT', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix a bit varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();
@@ -69,7 +69,7 @@ var newButtons = {
     SimilarGenres: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Genres", function () {
 		let t0 = Date.now();
 		let t1 = 0;
-		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
+		const args = {genreWeight: 5, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
 					bpmRange: 25, probPick: 100, scoreFilter: 60, method: 'WEIGHT', 
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix even more varied on styles/genres most from the same decade
 		do_searchby_distance(args);

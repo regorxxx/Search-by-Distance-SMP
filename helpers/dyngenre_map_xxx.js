@@ -25,6 +25,7 @@ function dyngenre_map() {
 		["Jazz Vocal"						,	[9						]],
 		["Reggae"							,	[10						]],
 		["Hip-Hop"							,	[11						]],
+		["Electronic"						,	[13, 14, 15, 16, 17		]],
 		["New Age"							,	[18						]], //break
 		["African"							,	[30						]], //break
 		["Nubian"							,	[31						]], //break

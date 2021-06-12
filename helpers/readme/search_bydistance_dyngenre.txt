@@ -1,0 +1,9 @@
+﻿Creates intelligent "spotify-like" playlists using high-level data from tracks similar
+to the currently selected one according to genre, style, key, etc.
+When their score is over 'scoreFilter', then they are included in the final pool.
+
+DYNGENRE presets work by grouping similar genre\style tags (Rock group: Rock, Hard Rock, Alt. Rock, ...).
+Instead of using tag matching (Rock != Hard Rock) or more complex linking.
+Tags must be included on '.\helpers\dyngenre_map_xxx.js' to work.,
+
+See main readme for more usage info.

@@ -8,7 +8,14 @@
 
 ## [Unreleased][]
 ### Added
+- Recipes: Recipes presets may be used to set variables of the function. Whenever the argument is set, it's used instead of related property. Custom button now allows to use a recipe file. Once set, button would always use the recipe as arguments instead of the properties variables. A recipe may force the use of a theme.
+- Recipes: custom button now allows to set the recipe file used by pressing Ctrl + L. Click. 'None' would use the current properties variables, which is the default behaviour.
+- Themes: themes presets may be used as reference instead of tracks. Whenever the argument is set, it's used instead of the selection. Custom button now allows to use a theme file. Once set, button would always use the theme as reference instead of the current selection.
+- Themes: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
 ### Changed
+- Console: shows on console the track or theme used as reference (name and path).
+- Buttons: custom button code cleanup and improvements on name changing.
+- Buttons: custom button tooltip shows the theme and recipe being used, along tips to change them..
 ### Removed
 ### Fixed
 
@@ -29,6 +36,7 @@
 - In key mixing: crash when pool was smaller than set playlist length.
 - In key mixing: not really random due to using sort + random method. Using an array shuffle now instead.
 - Random picking: not really random due to using sort + random method. Using an array shuffle now instead.
+- GRAPH: setting both genre and style weights to zero output nothing with GRAPH method instead of using the values for the graph and not for weighting.
 
 ## [1.1.0] - 2021-05-26
 ### Added

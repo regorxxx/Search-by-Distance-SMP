@@ -1,0 +1,14 @@
+{
+	"name": "Test",
+	"tags": [{
+		"genre": ["Rock"],
+		"style": ["Southern Rock"],
+		"mood": ["Not acoustic","Not aggressive","Electronic","Not happy","Not party","Relaxed","Sad","Mellow"],
+		"key": ["Am"],
+		"date": [1975],
+		"bpm": [100],
+		"composer": ["J.J. Cale"],
+		"customStr": [],
+		"customNum": []
+	}]
+}

@@ -58,8 +58,8 @@ var newButtons = {
 	SimilarTracks: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Tracks", function () {
 		let t0 = Date.now();
 		let t1 = 0;
-		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, method: 'DYNGENRE', dyngenreWeight: 10, dyngenreRange: 1,
+		const args = {genreWeight: 15, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
+					bpmRange: 25, probPick: 100, scoreFilter: 65, method: 'DYNGENRE', dyngenreWeight: 10, dyngenreRange: 1,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix)}; // Mix a bit varied on styles/genres most from the same decade
 		do_searchby_distance(args);
 		t1 = Date.now();

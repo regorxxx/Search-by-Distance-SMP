@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>All Music Graph</title>
+		<script type="text/javascript" src="helpers-external/ngraph/html/vivagraph.min.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/html/jquery.min.jsm.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/html/invert.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/html/starpoints.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/defaultSettings.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/heuristics.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/makeNBASearchStatePool.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/NodeHeap.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/a-star.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/a-greedy-star.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph/NBA.js"></script>
+		<script type="text/javascript" src="helpers/ngraph_helpers_xxx.js"></script>
+		<script type="text/javascript" src="helpers/music_graph_html_xxx.js"></script>
+		<script type="text/javascript" src="helpers/music_graph_xxx.js"></script>
+		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx.js"></script>
+		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_user.js"></script>
+		<script type="text/javascript">
+			function onLoad() {
+				
+				const idealLength = music_graph_descriptors.cluster; //Uses default cluster weighting
+				const bGraphDebug = true; // Change this to omit warnings about links/nodes set wrong
+				var nodeSize = 10; // Default fallbacks
+				var nodeColor = 'white';
+				var nodeShape = 'rect';
+				var nodeImageLink = '';
+				const lineShape = 'stroke'; 
+				const lineColor = '#c3c3c3';
+				const bPreRender = music_graph_descriptors.bPreRender;
+				const renderMethod = music_graph_descriptors.renderMethod;
+				const map_colors = new Map(music_graph_descriptors.map_colors);
+				const lengthMultiplier = 1;
+				
+				// Create the graph from foobar scripts:
+				var graph = music_graph_fordrawing();
+				if (bGraphDebug) {graphDebug(graph);}
+								
+				/* 
+					SVG Renderer
+				*/
+				var processingElement = document.getElementById('graphContainer');
+				var layout;
+				var renderer;
+				var graphics;
+				if (renderMethod == 'realDistance') { //Uses omly link's weight
+					layout = Viva.Graph.Layout.forceDirected(graph, {
+						// We are telling force directed layout, that we want to change length of each physical spring by overriding `springTransform` method:
+						springTransform: function (link, spring) {spring.length = link.data.weight * lengthMultiplier;}
+					});
+				} else if (renderMethod == 'graphWeighted') { //Uses link's weight along gravity and link centrality
+					layout = Viva.Graph.Layout.forceDirected(graph, {
+						springCoeff : 0.0008,
+						//dragCoeff : 0.0001,
+						gravity : -10,
+						springTransform: function (link, spring) {spring.length = link.data.weight * lengthMultiplier;}
+					});
+				} else if (renderMethod == 'graph') { //Gravity and link centrality
+					layout = Viva.Graph.Layout.forceDirected(graph, {
+						springLength : 1,
+						springCoeff : 0.0004,
+						dragCoeff : 0.10,
+						gravity : -1.2
+					});
+				}
+				if (bPreRender) {precompute(2000, renderGraph);}
+				else {renderGraph()}
+
+				// we need to compute layout, but we don't want to freeze the browser
+				function precompute(iterations, callback) {
+					// let's run 10 iterations per event loop cycle:
+					let i = 0;
+					while (iterations > 0 && i < 10) {
+						layout.step();
+						iterations--;
+						i++;
+					}
+					processingElement.innerHTML = '<span style="color:white; position: relative; left: 50%; top: 50%;">Layout precompute: ' + iterations + '</span>';
+					if (iterations > 0) {
+						setTimeout(function () {
+							precompute(iterations, callback);
+						}, 0); // keep going in next even cycle
+					} else {
+					// we are done!
+					processingElement.innerHTML = ""
+					callback();
+					}
+				}
+				
+				let oldnode = null;
+				function renderGraph() {
+					graphics = Viva.Graph.View.svgGraphics();
+					graphics.node(function(node) { //NODES
+						// Adds color data to nodes
+						if (node.data !== undefined) {
+							if (node.data.color !== undefined && node.data.color !== null) {
+								nodeColor = node.data.color;
+								}
+							if (node.data.size !== undefined && node.data.size !== null) {
+								nodeSize = node.data.size;
+							}
+							if (node.data.shape !== undefined && node.data.shape !== null) {
+								nodeShape = node.data.shape;
+								if (node.data.imageLink !== undefined && node.data.imageLink !== null) {
+									nodeImageLink = node.data.imageLink;
+								}
+							}
+						}
+						// Shape
+						let ui;
+						if (nodeShape === 'circle') { // Circles
+							nodeSize = nodeSize / 1.414 //Radious is 1/sqrt(2) of rectangle side
+							ui = Viva.Graph.svg('circle')
+								.attr('r', nodeSize)
+								.attr('fill', nodeColor)
+								.attr('shape', 'circle');
+						} else if (nodeShape === 'star') { // Stars
+							ui = Viva.Graph.svg('polygon')
+							.attr('points', getStarPoints(nodeSize))
+							.attr('fill', nodeColor)
+							.attr('shape', 'star')
+							.attr('size', nodeSize);
+						} else if (nodeShape === 'image') { // local or internet images
+							ui = Viva.Graph.svg('image')
+							.attr('width', nodeSize)
+							.attr('height', nodeSize)
+							.link(nodeImageLink)
+							.attr('shape', 'image');
+						} else { // Rectangles and fallback
+							if (nodeShape !== 'rect') {console.log('"' + nodeShape + '" is not a valid shape for node generation. Check "music_graph_descriptors_xxx.js"');} // Warning if shapes data is wrong
+							ui = Viva.Graph.svg('rect')
+							.attr('width', nodeSize)
+							.attr('height', nodeSize)
+							.attr('fill', nodeColor)
+							.attr('shape', 'rect');
+						}
+						// Highlight links on hover
+						$(ui).hover(function() { // mouse over
+							highlightRelatedNodes(node.id, true);
+							showNode(node.id, true); // Show info from current node
+							showLinks(node.id, true);
+						}, function() { // mouse out
+							highlightRelatedNodes(node.id, false);
+							if (oldnode === null) { // Show info from previously selected node if available
+								showNode(null, true);
+								showLinks(null, true);
+							} else {
+								showNode(oldnode.id);
+								showLinks(oldnode.id);
+							}
+						});
+						// Show node an link on click
+						$(ui).mousedown(function() {
+							showNode(node.id);
+							showLinks(node.id);
+							oldnode = node;
+						});
+						return ui;
+					}).placeNode(function(nodeUI, pos) {
+						let xNodePos = 'x'; // Default for rectangular shapes
+						let yNodePos = 'y';
+						let offset = nodeSize / 2;
+						if (nodeUI.getAttribute('shape') !== undefined) { // We need position according to shape and sizes. Note every node may have different size!
+							if (nodeUI.getAttribute('shape') === 'circle') {
+								xNodePos = 'cx';
+								yNodePos = 'cy';
+								nodeUI.attr(xNodePos, pos.x).attr(yNodePos, pos.y); //offset is zero for circles = center
+							} else if (nodeUI.getAttribute('shape') === 'star') {
+								nodeSize = nodeUI.getAttribute('size');
+								let offsetX = pos.x - nodeSize / 2;
+								let offsetY = pos.y - nodeSize / 2;
+								nodeUI.attr('points', getStarPointsOffset(nodeSize, offsetX, offsetY)); //Redraw at new position (offset X,Y)
+							} else {
+								nodeSize = nodeUI.getAttribute('width');
+								offset = nodeSize / 2; //Note this is new nodeSize
+								nodeUI.attr(xNodePos, pos.x - offset).attr(yNodePos, pos.y - offset);
+							}
+						}
+					});
+					
+					
+					graphics.link(function(link){ //LINKS
+						// adds color data to nodes
+						let newLineShape;
+						let newLineColor;
+						
+						if (link.data !== undefined) {
+							if (link.data.linecolor !== undefined && link.data.linecolor !== null) {
+								newLineColor = link.data.linecolor;
+							}						
+							if (link.data.lineshape !== undefined && link.data.lineshape !== null) {
+								newLineShape = link.data.lineshape;
+							}
+						}
+					
+						let ui = Viva.Graph.svg('path')
+								   .attr(newLineColor ? newLineColor[0] : lineShape, newLineColor ? newLineColor[1] : lineColor)
+								   .attr(newLineShape ? newLineShape[0] : null, newLineShape ? newLineShape[1] : null);
+						return ui;
+					}).placeLink(function(linkUI, fromPos, toPos) {
+						// linkUI - is the object returend from link() callback above.
+						let data = 'M' + fromPos.x + ',' + fromPos.y +
+								   'L' + toPos.x + ',' + toPos.y;
+
+						// 'Path data' (http://www.w3.org/TR/SVG/paths.html#DAttribute )
+						// is a common way of rendering paths in SVG:
+						linkUI.attr("d", data);
+					});
+					
+					renderer = Viva.Graph.View.renderer(graph, {
+						layout : layout,
+						graphics: graphics,
+						container: document.getElementById('graphContainer'),
+						prerender: bPreRender,
+						interactive: 'scroll drag'
+					});
+					renderer.run();
+					
+					// Final bit: most likely graph will take more space than available
+					// screen. Let's zoom out to fit it into the view:
+					let graphRect = layout.getGraphRect();
+					let graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
+					let screenSize = Math.min(document.body.clientWidth, document.body.clientHeight);
+
+					let desiredScale = screenSize / graphSize - screenSize / graphSize * 0.2; // A bit more to be sure
+					zoomOut(desiredScale, 1);
+				}
+				
+				/* 
+					HELPERS
+				*/
+				
+				function zoomOut(desiredScale, currentScale) {
+					// zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
+					// directly. Maybe it will be fixed in future, for now this is the best I could do:
+					if (desiredScale < currentScale) {
+					  currentScale = renderer.zoomOut();
+					  setTimeout(function () {
+						zoomOut(desiredScale, currentScale);
+						}, 16);
+					}
+				}
+			
+				// Reset renderer on space bar
+				document.body.addEventListener('keydown', function (e) {
+					if (e.which === 32) { // spacebar
+						renderer.reset();
+						// And zoom out
+						let graphRect = layout.getGraphRect();
+						let graphSize = Math.min(graphRect.x2 - graphRect.x1, graphRect.y2 - graphRect.y1);
+						let screenSize = Math.min(document.body.clientWidth, document.body.clientHeight);
+
+						let desiredScale = screenSize / graphSize - screenSize / graphSize * 0.2;
+						zoomOut(desiredScale, 1);
+					}
+				});
+				
+				// SuperGenre/Node Color label legend
+				let paragraph = document.getElementById('label');
+				let text = "SuperGenre Labels:<br>________________<br>";
+				function logMapElements(value, key, map) {
+					let aCheck = key.replace("_supergenre","");
+					if (aCheck != key) { // We only wants supergenre strings
+						let bCheck = aCheck.replace("Folk",""); 
+						entry = bCheck.replace("Classical",""); 
+						if (entry == aCheck) { // We treat Colks and Classical supergenres appart
+							text += '<span style="color:' + value + ';">' + entry + '</span>' + '<br>';
+							return;
+						} else if (entry == bCheck && text.replace("Folk","") == text) { //Folk
+							text += '<span style="color:' + value + ';">' + 'Folk Music' + '</span>' + '<br>';
+							return;
+						} else if (entry != bCheck && text.replace("Classical","") == text) { //Classical
+							text += '<span style="color:' + value + ';">' + 'Classical Music' + '</span>' + '<br>';
+							return;
+						}
+					}
+				}
+				map_colors.forEach(logMapElements);
+				paragraph.innerHTML = text;
+				
+				// Selected node label at top, and list of links
+				function showNode(nodeId, bHover = false) {
+					let bgcolor = '#fff';
+					let textColor = '#000';
+					let borderColor = '#9b9b9b';
+					if (graph.getNode(nodeId) !== undefined && graph.getNode(nodeId).data !== undefined && graph.getNode(nodeId).data.color !== undefined) {
+						bgcolor = graph.getNode(nodeId).data.color;
+						textColor = invertToBW(bgcolor,true);
+						borderColor = invertToBW(bgcolor,true);
+					}
+					let text  = ''
+					if (bHover) {
+						if (nodeId === null) {
+							text = 'Highlighted node: - ';
+						} else {
+							text = 'Highlighted node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + nodeId + '&nbsp;</span>';
+						}
+					} else {
+						text = 'Selected node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + (nodeId !== null ? nodeId : "") + '&nbsp;</span>';
+					}
+					let paragraph = document.getElementById('nodehighlight');
+					paragraph.innerHTML = text;
+				}
+				
+				function showLinks(nodeId) {
+					let bgcolor = '#fff';
+					let textColor = '#000';
+					let borderColor = '#9b9b9b';
+					let text = '';
+					let textSize = '1.2vmin';
+					let linkDistance = -1;
+					let count = 0;
+					graph.forEachLinkedNode(nodeId, function(node, link){ //List of links
+						if (count < 16) {
+							if (link.id !== undefined && link.id !== null) {
+								if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
+									bgcolor = link.data.linecolor[1];
+									textColor = invertToBW(bgcolor,true);
+									borderColor = invertToBW(bgcolor,true);
+								}
+								if (link.data.weight !== undefined && link.data.weight !== null) {
+									linkDistance = link.data.weight;
+								}
+								count++;
+								let showLink = link.fromId;
+								if (showLink == nodeId) {showLink = link.toId;}
+								if (count % 2 != 0) {text += '<br>';}
+								text += '&nbsp;<span style="font-size: ' + textSize + ';">#' + count + ':&nbsp;</span><span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + '; font-size: ' + textSize + ';">&nbsp;' + showLink  + '&nbsp;-&nbsp;' + linkDistance + '&nbsp;</span>';
+							}
+						} else if (count == 16){
+							count++;
+							text += '<br>&nbsp;<span style="font-size: ' + textSize + ';">...&nbsp;</span>'
+						}
+					});
+					let paragraph = document.getElementById('nodehighlight');
+					paragraph.innerHTML += text;
+				}
+				
+				var highlightRelatedNodes = function(nodeId, isOn) {
+				   // just enumerate all related nodes and update link color:
+                   graph.forEachLinkedNode(nodeId, function(node, link){
+						let linkUI = graphics.getLinkUI(link.id);
+						if (linkUI) {
+							let linkColorOn = 'red'; //Highlighted color
+							let linkColorOff = 'white';
+							if (link.data !== undefined) { //Default color
+								if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
+									linkColorOff = link.data.linecolor[1];
+								}
+							}
+                           // linkUI is a UI object created by graphics below
+							linkUI.attr('stroke', isOn ? linkColorOn : linkColorOff);
+                       }
+					});
+				};
+			}
+		</script>
+		<style type="text/css" media="screen">
+			html, body, svg  {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				overflow: hidden;
+				left: 0;
+				top: 0;
+			}
+			#graphContainer  {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				overflow: hidden;
+				left: 0;
+				top: 0;
+			}
+			#log {
+				color: deepskyblue;
+				font-size:32px;
+			}
+            .topleft {
+                position: fixed;
+                top: 10px;
+                color: white;
+                font-size: 2vmin;
+                left: 10px;
+                font-family: Verdana;
+			}
+			#nodehighlight {
+                font-size: 1.8vmin;
+			}
+            .topright {
+                position: fixed;
+                top: 0;
+                color: white;
+                font-size: 1.8vmin;
+                right: 50px;
+                font-family: Verdana;
+			}
+            .bottomleft {
+                position: fixed;
+                color: white;
+                font-size: 1.6vmin;
+                font-family: Verdana;
+				bottom: 0;
+				left: 10px;
+				background-color: #231b02;
+				border: 2px dashed #f00505;
+				padding: 10px;
+				padding-bottom: 0;
+				padding-top: 0;
+			}
+		</style>
+	</head>
+	<body onload='onLoad()' style="background-color: #08011b;">
+		<div id='graphContainer'></div>
+		<span class='topleft'>Zoom/pan the graph. Press spacebar to reset its position.
+			<p id='nodehighlight'>
+			Move the mouse over the nodes to see their IDs and links.
+			<br>
+			Click on any of them to pin up that info.
+			<br>
+			Check console (Ctrl + Shift + K).
+			</p>
+		</span>
+		<span class='bottomleft'>
+			<p id='label'>Labels...</p>
+		</span>
+		<span class='topright'>
+		</span>
+	</body>
+</html>

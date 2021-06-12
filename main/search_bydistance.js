@@ -1154,75 +1154,165 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
 function do_searchby_distance({
-								// --->Default args (aka properties from the panel)
+								// --->Default args (aka properties from the panel and input)
 								properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 								panelProperties			= (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 								sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
+								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
+								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
 								// --->Weights
-								genreWeight				= Number(properties['genreWeight'][1]), // Number() is used to avoid bugs with dates or other values...
-								styleWeight				= Number(properties['styleWeight'][1]),
+								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
+								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
 								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties['dyngenreWeight'][1]) : 0,
-								moodWeight				= Number(properties['moodWeight'][1]),
-								keyWeight				= Number(properties['keyWeight'][1]),
-								dateWeight				= Number(properties['dateWeight'][1]),
-								bpmWeight				= Number(properties['bpmWeight'][1]),
-								composerWeight 			= Number(properties['composerWeight'][1]),
-								customStrWeight 		= Number(properties['customStrWeight'][1]), // Only used if tag is set at properties
-								customNumWeight 		= Number(properties['customNumWeight'][1]), // Only used if tag is set at properties
+								moodWeight				= properties.hasOwnProperty('moodWeight') ? Number(properties['moodWeight'][1]) : 0,
+								keyWeight				= properties.hasOwnProperty('keyWeight') ? Number(properties['keyWeight'][1]) : 0,
+								dateWeight				= properties.hasOwnProperty('dateWeight') ? Number(properties['dateWeight'][1]) : 0,
+								bpmWeight				= properties.hasOwnProperty('bpmWeight') ? Number(properties['bpmWeight'][1]) : 0,
+								composerWeight 			= properties.hasOwnProperty('composerWeight') ? Number(properties['composerWeight'][1]) : 0,
+								customStrWeight 		= properties.hasOwnProperty('customStrWeight') ? Number(properties['customStrWeight'][1]) : 0, // Only used if tag is set at properties
+								customNumWeight 		= properties.hasOwnProperty('customNumWeight') ? Number(properties['customNumWeight'][1]) : 0, // Only used if tag is set at properties
 								// --->Ranges (for associated weighting)
 								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
 								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties['keyRange'][1]) : 0,
 								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties['dateRange'][1]) : 0,
 								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties['bpmRange'][1]) : 0,
 								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties['customNumRange'][1]) : 0,
-								bNegativeWeighting		= properties['bNegativeWeighting'][1], // Assigns negative score for num. tags when they fall outside range
+								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties['bNegativeWeighting'][1] : true, // Assigns negative score for num. tags when they fall outside range
 								// --->Pre-Scoring Filters
 								// Query to filter library
-								forcedQuery				= properties['forcedQuery'][1],
-								bUseAntiInfluencesFilter= properties['bUseAntiInfluencesFilter'][1], // Filter anti-influences by query, before any scoring/distance calc. 					
-								bUseInfluencesFilter	= properties['bUseInfluencesFilter'][1], // Allows only influences by query, before any scoring/distance calc. 
+								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : true,
+								bUseAntiInfluencesFilter= properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc. 					
+								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, // Allows only influences by query, before any scoring/distance calc. 
 								// --->Scoring Method
-                                method					= properties['method'][1],
+                                method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
 								// --->Scoring filters
-                                scoreFilter				= Number(properties['scoreFilter'][1]),
+                                scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
                                 sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
-								poolFilteringTag 		= properties['poolFilteringTag'][1].split(',').filter(Boolean),
-								poolFilteringN			= Number(properties['poolFilteringN'][1]),
+								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],
+								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties['poolFilteringN'][1]) : Infinity,
 								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
 								// --->Playlist selection
 								// How tracks are chosen from pool
-								bRandomPick				= properties['bRandomPick'][1], // Get randomly
-								probPick				= Number(properties['probPick'][1]), // Get by scoring order but with x probability of being chosen
-								playlistLength			= Number(properties['playlistLength'][1]), // Max playlist size
+								bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties['bRandomPick'][1] : false, // Get randomly
+								probPick				= properties.hasOwnProperty('probPick') ? Number(properties['probPick'][1]) : 100, // Get by scoring order but with x probability of being chosen
+								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties['playlistLength'][1]) : 50, // Max playlist size
 								// --->Playlist sorting
 								// How playlist is sorted (independently of playlist selection)
-                                bSortRandom				= properties['bSortRandom'][1], // Random sorting 
-								bProgressiveListOrder	= properties['bProgressiveListOrder'][1], // Sorting following progressive changes on tags (score)
-								bScatterInstrumentals	= properties['bScatterInstrumentals'][1], // Intercalate instrumental tracks breaking clusters if possible
+                                bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties['bSortRandom'][1] : false, // Random sorting 
+								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties['bProgressiveListOrder'][1] : false, // Sorting following progressive changes on tags (score)
+								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties['bScatterInstrumentals'][1] : false, // Intercalate instrumental tracks breaking clusters if possible
 								// --->Special Playlists
 								// Use previous playlist selection, but override playlist sorting, since they use their own logic
-								bInKeyMixingPlaylist	= properties['bInKeyMixingPlaylist'][1], // Key changes following harmonic mixing rules like a DJ
-								bProgressiveListCreation= properties['bProgressiveListCreation'][1], // Uses output tracks as new references, and so on...
-								progressiveListCreationN= Number(properties['progressiveListCreationN'][1]), // > 1 and < 100
+								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties['bInKeyMixingPlaylist'][1] : false, // Key changes following harmonic mixing rules like a DJ
+								bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties['bProgressiveListCreation'][1] : false, // Uses output tracks as new references, and so on...
+								progressiveListCreationN= bProgressiveListCreation ? Number(properties['progressiveListCreationN'][1]) : 1, // > 1 and < 100
 								// --->Console logging
 								// Uses panelProperties instead of properties, so it always points to the right properties... used along buttons or not.
 								// They are the same for all instances within the same panel
-								bProfile 				= panelProperties['bProfile'][1],
-								bShowQuery 				= panelProperties['bShowQuery'][1],
-								bShowFinalSelection 	= panelProperties['bShowFinalSelection'][1],
-								bBasicLogging			= panelProperties['bBasicLogging'][1],
-								bSearchDebug 			= panelProperties['bSearchDebug'][1],
+								bProfile 				= panelProperties.hasOwnProperty('bProfile') ? panelProperties['bProfile'][1] : false,
+								bShowQuery 				= panelProperties.hasOwnProperty('bShowQuery') ? panelProperties['bShowQuery'][1] : true,
+								bShowFinalSelection 	= panelProperties.hasOwnProperty('bShowFinalSelection') ? panelProperties['bShowFinalSelection'][1] : true,
+								bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties['bBasicLogging'][1] : false,
+								bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties['bSearchDebug'][1] : false,
 								// --->Output
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 								} = {}) {
-        if (!sel) {
-			console.log('No track selected for mix.');
-            return;
+		// Recipe check
+		const themePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes\\';
+		const recipePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\recipes\\';
+		const bUseRecipe = recipe && (recipe.length || Object.keys(recipe).length);
+		if (bUseRecipe) {
+			let path;
+			if (isString(recipe)) { // File path
+				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
+				console.log(path);
+				recipe = _jsonParseFile(path);
+				if (!recipe) {
+					console.log('Recipe file selected is missing or not valid: ' + path);
+					return;
+				}
+			}
+			const name = recipe.name || isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1];  //TODO: Deprecated
+			// Rewrite args or use destruct when passing args
+			// Sel is ommited since it's a function or a handle
+			// Note a theme may be set within a recipe too, overwriting any other them set
+			// Changes null to infinity and not found theme filenames into full paths
+			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
+			let bOverwriteTheme = false;
+			Object.keys(recipe).forEach((key) => {
+				const value = recipe[key] !== null ? recipe[key] : Infinity;
+				if (allowedKeys.has(key)) {
+					if (isStringWeak(value)) {
+						eval(key + ' = \'' + value + '\'');
+					} else if (isArrayStrings(value)) {
+						const newVal = '\'' + value.join('\',\'') + '\'';
+						eval(key + ' = [' + newVal + ']');
+					} else {eval(key + ' = ' + value);}
+					if (key === 'theme') {bOverwriteTheme = true;};
+				}
+			});
+			if (bBasicLogging) {
+				console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
+				if (bOverwriteTheme) {console.log('Recipe forces its own theme.')};
+			}
 		}
-		
-		if (bProfile) {var test = new FbProfiler('do_searchby_distanceV3');}
+		// Parse args
+		if (isString(sbd_max_graph_distance)) { // Safety check
+			if (sbd_max_graph_distance.length >= 50) {
+				console.log('Error parsing sbd_max_graph_distance (length >= 50): ' + sbd_max_graph_distance);
+				return;
+			}
+			if (sbd_max_graph_distance.indexOf('music_graph_descriptors') === -1 || sbd_max_graph_distance.indexOf('()') !== -1 || sbd_max_graph_distance.indexOf(',') !== -1) {
+				console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + sbd_max_graph_distance);
+				return;
+			}
+			const validVars = Object.keys(music_graph_descriptors).map((_) => {return 'music_graph_descriptors.' + _;});
+			if (sbd_max_graph_distance.indexOf('+') === -1 && sbd_max_graph_distance.indexOf('-') === -1 && sbd_max_graph_distance.indexOf('*') === -1 && sbd_max_graph_distance.indexOf('/') === -1 && validVars.indexOf(sbd_max_graph_distance) === -1) {
+				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
+				return;
+			}
+			sbd_max_graph_distance = eval(sbd_max_graph_distance);
+			console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);
+		}
+		// Theme check
+		const bUseTheme = theme && (theme.length || Object.keys(theme).length);
+		if (bUseTheme) {
+			let path;
+			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
+				path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
+				theme = _jsonParseFile(path);
+				if (!theme) {
+					console.log('Theme file selected is missing or not valid: ' + path);
+					return;
+				}
+			}
+			
+			// Array of objects
+			const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
+			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck)}) : 0;
+			const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
+			if (!bCheck) {
+				console.log('Theme selected for mix is missing some keys: ' + (theme.hasOwnProperty('name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
+				return;
+			}
+			if (bBasicLogging) {
+				console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : ''));
+				console.log(theme);
+			}
+		}
+		// Sel check
+		if (!bUseTheme) {
+			if (!sel) {
+				console.log('No track\\theme selected for mix.');
+				return;
+			}
+			if (bBasicLogging) {
+				console.log('Using selection as reference: ' + fb.TitleFormat('[%track% - ]%title%').EvalWithMetadb(sel) + ' (' + sel.RawPath + ')');
+			}
+		}
+		if (bProfile) {var test = new FbProfiler('do_searchby_distance');}
 		
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
@@ -1258,7 +1348,7 @@ function do_searchby_distance({
 		if (composerTag.length === 0) {composerWeight = 0;}
 		if (customStrTag.length === 0) {customStrWeight = 0;}
 		if (customNumTag.length === 0) {customNumWeight = 0;}
-				
+		
 		if (method === 'DYNGENRE') {  // Warn users if they try wrong settings
 			if (dyngenreWeight === 0) {
 				if (bBasicLogging) {console.log('Check \'' + properties['dyngenreWeight'][0] + '\' value (' + dyngenreWeight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
@@ -1273,7 +1363,7 @@ function do_searchby_distance({
 		
 		const totalWeight = genreWeight + styleWeight + dyngenreWeight +  moodWeight + keyWeight + dateWeight + bpmWeight + customStrWeight + customNumWeight + composerWeight; //100%
 		const countWeights = (genreWeight ? 1 : 0) + (styleWeight ? 1 : 0) + (dyngenreWeight ? 1 : 0) + (moodWeight ? 1 : 0) + (keyWeight ? 1 : 0) + (dateWeight ? 1 : 0) + (bpmWeight ? 1 : 0) + (customStrWeight ? 1 : 0) + (customNumWeight ? 1 : 0) + (composerWeight ? 1 : 0);
-    
+		
 		if (!playlistLength) {
 			if (bBasicLogging) {console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.');}
             return;
@@ -1285,6 +1375,7 @@ function do_searchby_distance({
 			}
 			return;
 		}
+		
 		try {fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery);} // Sanity check
 		catch (e) {fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return;}
 		// Query
@@ -1304,15 +1395,15 @@ function do_searchby_distance({
 		// We use flat since it's only 1 track: genre[0][i] === genre.flat()[i]
 		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length.
 		// Using only boolean filter it's 3x faster than filtering by set
-		const selHandleList = new FbMetadbHandleList(sel);
-		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bTagFilter ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean)): [];
-		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bTagFilter ? getTagsValuesV3(selHandleList, styleTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, styleTag, true).flat().filter(Boolean)) : [];
-		const mood = (moodWeight !== 0) ? getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean) : [];
-		const composer = (composerWeight !== 0) ? getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean) : [];
-		const customStr = (customStrWeight !== 0) ? getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean) : [];
+		const selHandleList = bUseTheme ? null : new FbMetadbHandleList(sel);
+		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].genre.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].genre.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean))): [];
+		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].style.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].style.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, styleTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, styleTag, true).flat().filter(Boolean))) : [];
+		const mood = (moodWeight !== 0) ? (bUseTheme ? theme.tags[0].mood.filter(Boolean) : getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean)) : [];
+		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer.filter(Boolean) : getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean)) : [];
+		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr.filter(Boolean) : getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean)) : [];
 		
 		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? 'key' : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? 'bpm' : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
-		const [keyArr, dateArr, bpmArr, customNumArr] = getTagsValuesV4(selHandleList, restTagNames).flat();
+		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
 		const key = (keyWeight !== 0 || bInKeyMixingPlaylist) ? keyArr[0] : '';
 		const date =(dateWeight !== 0) ? Number(dateArr[0]) : 0;
 		const bpm = (bpmWeight !== 0) ? Number(bpmArr[0]) : 0;
@@ -1608,8 +1699,8 @@ function do_searchby_distance({
 			let dyngenreNew = [];
 			
 			// Get the tags according to weight and filter ''. Also create sets for comparison
-			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? (bTagFilter ? genreHandle[i].filter(tag => !genreStyleFilter.has(tag)) : genreHandle[i].filter(Boolean)) : [];
-			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? (bTagFilter ? styleHandle[i].filter(tag => !genreStyleFilter.has(tag)) : styleHandle[i].filter(Boolean)) : [];
+			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? genreHandle[i].filter(tag => !genreStyleFilter.has(tag)) : genreHandle[i].filter(Boolean)) : [];
+			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? styleHandle[i].filter(tag => !genreStyleFilter.has(tag)) : styleHandle[i].filter(Boolean)) : [];
 			const moodNew = (moodWeight !== 0) ? moodHandle[i].filter(Boolean) : [];
 			const genreNewSet = new Set(genreNew);
 			const styleNewSet = new Set(styleNew);
@@ -2045,7 +2136,7 @@ function do_searchby_distance({
 				selectedHandlesData.sort(function (a, b) {return a.mapdistance - b.mapdistance;});
 				selectedHandlesArray.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); 
 			}
-		} else if (!bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.')}
+		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.')}
 		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
 		// May override previous sorting methods (only for instrumental tracks). 
 		// Finds instrumental track indexes, and move them to a random range without overlapping.
