@@ -11,9 +11,14 @@ function createRecipeMenu(parent) {
 	// Header
 	recipeMenu.newEntry({entryText: 'Set recipe file:', func: null, flags: MF_GRAYED});
 	recipeMenu.newEntry({entryText: 'sep'});
+	recipeMenu.newEntry({entryText: 'Open recipes folder', func: () => {
+		if (_isFile(properties.recipe[1])) {_explorer(properties.recipe[1]);} // Open current file
+		else {_explorer(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\recipes');} // or folder
+	}});
+	recipeMenu.newEntry({entryText: 'sep'});
 	recipeMenu.newEntry({entryText: 'None', func: () => {
 		properties.recipe[1] = '';
-		parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + data.theme + '\n(Ctrl + L. Click to set recipe)\t -> None';
+		parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + data.theme + '\n(Ctrl + L. Click to set recipe)\t -> None\n(Shift + Ctrl + L. Click to set other config)';
 		data.tooltip = parent.description;
 		data.recipe = 'None'
 		properties.data[1] = JSON.stringify(data);
@@ -23,8 +28,8 @@ function createRecipeMenu(parent) {
 	// List
 	const options = [];
 	files.forEach((file) => {
-		// List
-		options.push(file);
+		// List files, with full path or relative path (portable)
+		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file);
 	});
 	const menus = [];
 	options.forEach((file) => {
@@ -42,7 +47,7 @@ function createRecipeMenu(parent) {
 		menus.push(entryText);
 		recipeMenu.newEntry({entryText, func: () => {
 			properties.recipe[1] = file;
-			parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + themeName + '\n(Ctrl + L. Click to set recipe)\t -> ' + name;
+			parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + themeName + '\n(Ctrl + L. Click to set recipe)\t -> ' + name + '\n(Shift + Ctrl + L. Click to set other config)';
 			data.tooltip = parent.description;
 			data.recipe = name;
 			properties.data[1] = JSON.stringify(data);
@@ -53,9 +58,5 @@ function createRecipeMenu(parent) {
 		const idx = options.indexOf(properties.recipe[1]);
 		return idx !== -1 ? idx + 1 : 0;
 	});
-	// recipeMenu.newCheckMenu(recipeMenu.getMainMenuName(), 'None', options[options.length - 1], () => {
-		// const idx = options.indexOf((file) => {return file === properties.recipe[1];});
-		// return (idx !== -1 ? 1 + idx : 0);
-	// });
 	return recipeMenu;
 }

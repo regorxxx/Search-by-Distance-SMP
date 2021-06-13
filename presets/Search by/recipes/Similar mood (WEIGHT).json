@@ -13,18 +13,5 @@
 	"dateRange": 100, 
 	"bpmRange": 25,
 	"scoreFilter": 50,
-	"bNegativeWeighting": true,
-	"bUseAntiInfluencesFilter": false,
-	"bUseInfluencesFilter": false,
-	"poolFilteringTag": "",
-	"poolFilteringN": -1,
-	"bPoolFiltering": false,
-	"bRandomPick": true,
-	"probPick": 100,
-	"bSortRandom": true,
-	"bProgressiveListOrder": false,
-	"bScatterInstrumentals": true,
-	"bInKeyMixingPlaylist": false,
-	"bProgressiveListCreation": false,
 	"method": "WEIGHT"
 }

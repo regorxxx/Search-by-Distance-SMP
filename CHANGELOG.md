@@ -2,22 +2,33 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [1.3.0](#130---2021-06-13)
 - [1.2.0](#120---2021-06-07)
 - [1.1.0](#110---2021-05-26)
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
 ### Added
+### Changed
+### Removed
+### Fixed
+
+## [1.3.0] - 2021-06-13
+### Added
 - Recipes: Recipes presets may be used to set variables of the function. Whenever the argument is set, it's used instead of related property. Custom button now allows to use a recipe file. Once set, button would always use the recipe as arguments instead of the properties variables. A recipe may force the use of a theme.
 - Recipes: custom button now allows to set the recipe file used by pressing Ctrl + L. Click. 'None' would use the current properties variables, which is the default behaviour.
 - Themes: themes presets may be used as reference instead of tracks. Whenever the argument is set, it's used instead of the selection. Custom button now allows to use a theme file. Once set, button would always use the theme as reference instead of the current selection.
-- Themes: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
+- Buttons: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
+- Buttons: custom button now allows to create a theme file using the currently focused track's tags. See theme menu (Shift + L. Click).
+- Buttons: custom button now allows to set most configs using the configuration menu (Ctrl + Shift + L. Click): method, tags remapping, filters, etc. Whenever a config is overriden by a recipe, the related entry is greyed and a warning is shown.
 ### Changed
 - Console: shows on console the track or theme used as reference (name and path).
 - Buttons: custom button code cleanup and improvements on name changing.
 - Buttons: custom button tooltip shows the theme and recipe being used, along tips to change them..
+- Portable: when properties are set for the first time, now use relative paths on profile folder for portable installations (>= 1.6). When possible, any other stored path is also stored as relative paths (for example themes or recipes on buttons).
 ### Removed
 ### Fixed
+- Console: when playlist length is set to Infinite, warnings are no longer shown about number of tracks being less than it (which obviously always happened).
 
 ## [1.2.0] - 2021-06-07
 ### Added
@@ -62,7 +73,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/6e0ae3f...v1.0.0

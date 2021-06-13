@@ -1130,7 +1130,9 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 				SelectionArray.push(distance[i]);
 				i++;
 			}
-			console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check "' + SearchByDistance_properties.sbd_max_graph_distance[0] + '" parameter (= ' + scoreFilter + '%).');
+			if (isFinite(playlistLength)) {
+				console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check "' + SearchByDistance_properties.sbd_max_graph_distance[0] + '" parameter (= ' + scoreFilter + '%).');
+			}
 		}
 		if (bProfile) {test.Print('Task #5: Final Selection', false);}
 		if (bShowFinalSelection) {
@@ -1180,7 +1182,7 @@ function do_searchby_distance({
 								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties['bNegativeWeighting'][1] : true, // Assigns negative score for num. tags when they fall outside range
 								// --->Pre-Scoring Filters
 								// Query to filter library
-								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : true,
+								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
 								bUseAntiInfluencesFilter= properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc. 					
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, // Allows only influences by query, before any scoring/distance calc. 
 								// --->Scoring Method
@@ -1191,7 +1193,7 @@ function do_searchby_distance({
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],
-								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties['poolFilteringN'][1]) : Infinity,
+								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties['poolFilteringN'][1]) : -1,
 								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
 								// --->Playlist selection
 								// How tracks are chosen from pool
@@ -1234,7 +1236,7 @@ function do_searchby_distance({
 					return;
 				}
 			}
-			const name = recipe.name || isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1];  //TODO: Deprecated
+			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1] : '-no name-');  //TODO: Deprecated
 			// Rewrite args or use destruct when passing args
 			// Sel is ommited since it's a function or a handle
 			// Note a theme may be set within a recipe too, overwriting any other them set
@@ -2099,15 +2101,17 @@ function do_searchby_distance({
 					selectedHandlesData.push(scoreData[i]);
 					i++;
 				}
-				if (method === 'GRAPH') {
-					if (bBasicLogging) {
-						let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
-						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+				if (isFinite(playlistLength)) {
+					if (method === 'GRAPH') {
+						if (bBasicLogging) {
+							let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
+							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+						}
 					}
-				}
-				if (bBasicLogging) {
-					let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
-					console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
+					if (bBasicLogging) {
+						let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
+					}
 				}
 			}
 		}

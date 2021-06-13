@@ -15,6 +15,7 @@ try { //May be loaded along other buttons
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
+include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_sbd_menu_config.js'); // Button menu
 var prefix = "sbd_";
 prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
 
@@ -22,7 +23,7 @@ var newButtonsProperties = { //You can simply add new properties here
 	customName: ['Name for the custom UI button', 'Customize!'],
 	theme: 		['Path to theme file (instead of using selection)', ''],
 	recipe: 	['Path to recipe file (instead of using properties)', ''],
-	data: 		['Internal data', JSON.stringify({tooltip: 'Search according to variables set at properties.\n(Shift + L. Click to set theme)\t -> None\n(Ctrl + L. Click to set recipe)\t -> None', theme: 'None', recipe: 'None'})],
+	data: 		['Internal data', JSON.stringify({tooltip: 'Search according to variables set at properties.\n(Shift + L. Click to set theme)\t -> None\n(Ctrl + L. Click to set recipe)\t -> None\n(Shift + Ctrl + L. Click to set other config)', theme: 'None', recipe: 'None'})],
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
@@ -41,6 +42,8 @@ var newButtons = {
 			createThemeMenu(this).btn_up(this.x, this.y + this.h);
 		} else if (mask === MK_CONTROL) {
 			createRecipeMenu(this).btn_up(this.x, this.y + this.h);
+		} else if (mask === MK_CONTROL + MK_SHIFT) {
+			createConfigMenu(this).btn_up(this.x, this.y + this.h);
 		} else {
 			let t0 = Date.now();
 			let t1 = 0;
