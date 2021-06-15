@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [1.3.0](#130---2021-06-13)
+- [2.0.0](#200---2021-06-15)
 - [1.2.0](#120---2021-06-07)
 - [1.1.0](#110---2021-05-26)
 - [1.0.0](#100---2021-05-02)
@@ -13,7 +13,7 @@
 ### Removed
 ### Fixed
 
-## [1.3.0] - 2021-06-13
+## [2.0.0] - 2021-06-15
 ### Added
 - Recipes: Recipes presets may be used to set variables of the function. Whenever the argument is set, it's used instead of related property. Custom button now allows to use a recipe file. Once set, button would always use the recipe as arguments instead of the properties variables. A recipe may force the use of a theme.
 - Recipes: custom button now allows to set the recipe file used by pressing Ctrl + L. Click. 'None' would use the current properties variables, which is the default behaviour.
@@ -79,8 +79,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.3.0...HEAD
-[1.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...v1.3.0
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...HEAD
+[1.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/6e0ae3f...v1.0.0
