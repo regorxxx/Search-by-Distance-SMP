@@ -37,7 +37,7 @@ delete newButtonsProperties.dyngenreRange;
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 
 // we change the default coordinates here to accommodate text
-if (buttonOrientation === 'x') {buttonCoordinates.w -= 5;}
+if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 /*	
 	Some button examples for "search_bydistance.js". Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling do_searchby_distance() outside buttons, it would work with default arguments.
@@ -54,7 +54,7 @@ var newButtons = {
 		do_searchby_distance(args); 
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance NearestTracks took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties),
+	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
 	
 	SimilarTracks: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Tracks", function () {
 		let t0 = Date.now();
@@ -66,7 +66,7 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarTracks took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties),
+	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
 	
     SimilarGenres: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Genres", function () {
 		let t0 = Date.now();
@@ -78,7 +78,7 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarGenres took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties),
+	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
 	
 	SimilarMood: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Mood", function () {
 		let t0 = Date.now();
@@ -90,7 +90,7 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarMood took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties),
+	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
 };
 
 // Check if the button list already has the same button ID

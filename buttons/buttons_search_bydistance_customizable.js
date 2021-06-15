@@ -30,7 +30,7 @@ setProperties(newButtonsProperties, prefix); //This sets all the panel propertie
 newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix); // And retrieve
 
 // we change the default coordinates here to accommodate text
-if (buttonOrientation === 'x') {buttonCoordinates.w -= 5;}
+if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 /*	
 	Some button examples for "search_bydistance.js". Look at that file to see what they do.
@@ -66,7 +66,7 @@ var newButtons = {
 			t1 = Date.now();
 			console.log("Call to do_searchby_distance " + this.buttonsProperties.customName[1] + " took " + (t1 - t0) + " milliseconds.");
 		}
-	}, null, g_font, JSON.parse(newButtonsProperties.data[1]).tooltip, prefix, newButtonsProperties)
+	}, null, g_font, JSON.parse(newButtonsProperties.data[1]).tooltip, prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10))
 };
 // Check if the button list already has the same button ID
 for (var buttonName in newButtons) {

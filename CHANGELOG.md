@@ -21,11 +21,16 @@
 - Buttons: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
 - Buttons: custom button now allows to create a theme file using the currently focused track's tags. See theme menu (Shift + L. Click).
 - Buttons: custom button now allows to set most configs using the configuration menu (Ctrl + Shift + L. Click): method, tags remapping, filters, etc. Whenever a config is overriden by a recipe, the related entry is greyed and a warning is shown.
+- Buttons: new '_buttons_mergedV3.js' toolbar which can be customized without editing the js file. Allows to enable/disable buttons -even add multiple copies- on demand and customize toolbar background color (L. Click on the bar).
 ### Changed
 - Console: shows on console the track or theme used as reference (name and path).
 - Buttons: custom button code cleanup and improvements on name changing.
-- Buttons: custom button tooltip shows the theme and recipe being used, along tips to change them..
+- Buttons: custom button tooltip shows the theme and recipe being used, along tips to change them.
+- Buttons: icons to all buttons.
+- Buttons framework: skip icon drawing if font is not found.
+- Buttons framework: allow a menu when clicking on the panel (and not on buttons).
 - Portable: when properties are set for the first time, now use relative paths on profile folder for portable installations (>= 1.6). When possible, any other stored path is also stored as relative paths (for example themes or recipes on buttons).
+- Helpers: warn about missing font on console if trying to load a font and is not found.
 ### Removed
 ### Fixed
 - Console: when playlist length is set to Infinite, warnings are no longer shown about number of tracks being less than it (which obviously always happened).

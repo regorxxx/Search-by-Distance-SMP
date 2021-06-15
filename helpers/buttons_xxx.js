@@ -20,6 +20,7 @@ const ButtonStates = {
 	hide: 3
 };
 
+const buttonsBar = {};
 var buttons = {}; // Global list
 var propertiesPrefixes = new Set(); // Global properties names prefixes
 const oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
@@ -55,7 +56,7 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 	return newCoordinates;
 }
 
-function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = "", buttonsProperties = {}, icon = null, g_font_icon = _gdiFont("FontAwesome", 12)) {
+function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = "", buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
 	this.state = state ? state : ButtonStates.normal;
 	this.x = x;
 	this.y = y;
@@ -68,7 +69,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	this.description = description;
 	this.text = text;
 	this.textWidth  = _isFunction(this.text) ? () => {return _gr.CalcTextWidth(this.text(), g_font);} : _gr.CalcTextWidth(this.text, g_font);
-	this.icon = icon;
+	this.icon = this.g_font_icon.Name !== 'Microsoft Sans Serif' ? icon : null; // if using the default font, then it has probably failed to load the right one, skip icon
 	this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
@@ -123,7 +124,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 			let textWidthCalculated = _isFunction(this.text) ? this.textWidth() : this.textWidth;
 			let iconCalculated = _isFunction(this.icon) ? this.icon() : this.icon;
 			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
-			gr.GdiDrawText(iconCalculated, this.g_font_icon, RGB(0, 0, 0), x_calc - iconWidthCalculated / 2 - textWidthCalculated / 2, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
+			gr.GdiDrawText(iconCalculated, this.g_font_icon, RGB(0, 0, 0), x_calc - iconWidthCalculated / 5 - textWidthCalculated / 2, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
 			gr.GdiDrawText(textCalculated, this.g_font, RGB(0, 0, 0), x_calc + iconWidthCalculated, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		} else {
 			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
@@ -200,9 +201,8 @@ function on_mouse_leave() {
 	}
 }
 
-function on_mouse_lbtn_down(x, y) {
+function on_mouse_lbtn_down(x, y, mask) {
 	g_down = true;
-
 	if (cur_btn) {
 		cur_btn.changeState(ButtonStates.down);
 		window.Repaint();
@@ -218,6 +218,8 @@ function on_mouse_lbtn_up(x, y, mask) {
 			cur_btn.changeState(ButtonStates.hover);
 			window.Repaint();
 		}
+	} else {
+		if (buttonsBar.hasOwnProperty('menu')) {buttonsBar.menu().btn_up(x, this.y + this.h)}
 	}
 }
 
