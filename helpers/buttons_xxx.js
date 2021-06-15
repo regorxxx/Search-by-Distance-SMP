@@ -25,6 +25,7 @@ var buttons = {}; // Global list
 var propertiesPrefixes = new Set(); // Global properties names prefixes
 const oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
 const tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 1200);  // Global tooltip
+var toolbarTooltip = ''; // Shown on toolbar
 const bShowID = true; // Show Prefixes + ID on tooltips
 
 // Toolbar color fix
@@ -189,6 +190,10 @@ function on_mouse_move(x, y) {
 	}
 	old && old.changeState(ButtonStates.normal);
 	cur_btn && cur_btn.changeState(ButtonStates.hover);
+	// Toolbar Tooltip
+	if (!cur_btn && toolbarTooltip.length) {
+		tooltipButton.SetValue(toolbarTooltip , true);
+	}
 	window.Repaint();
 }
 

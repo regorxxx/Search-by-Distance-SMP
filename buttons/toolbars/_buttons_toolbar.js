@@ -61,6 +61,9 @@ buttonsBar.menu = () => {
 toolbarColor = barProperties.toolbarColor[1];
 bToolbar = toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
 
+// Tooltip at empty bar
+toolbarTooltip = 'L. Click to configure...'
+
 // Buttons
 let buttonsPath = [	 // Add here your buttons path
 					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_same_by.js',  //+15 w
