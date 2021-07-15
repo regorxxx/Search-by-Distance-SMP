@@ -1,29 +1,40 @@
-﻿include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\menu_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_file.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_tags.js');
+﻿include('menu_xxx.js');
+include('helpers_xxx.js');
+include('helpers_xxx_file.js');
+include('helpers_xxx_tags.js');
 
 const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes'])
+	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes'])
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	// Recipe forced theme?
 	let forcedTheme = null;
 	if (properties.recipe[1].length) {
-		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\recipes\\' + properties.recipe[1]);
+		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1]);
 		if (recipe && recipe.hasOwnProperty('theme')) {
 			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFile(recipe.theme);}
-			else if (_isFile(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFile(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes\\' + recipe.theme);}
+			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme);}
 		}
 	}
 	// Header
 	themeMenu.newEntry({entryText: 'Set theme file:', func: null, flags: MF_GRAYED});
 	themeMenu.newEntry({entryText: 'sep'});
+	{	// Readme
+		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
+		themeMenu.newEntry({entryText: 'Open readme...', func: () => {
+			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) { 
+				const readme = utils.ReadTextFile(readmePath, 65001); // Executed on script load
+				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
+				else {console.log('Readme not found: ' + value);}
+			}
+		}});
+	}
 	themeMenu.newEntry({entryText: 'Open themes folder', func: () => {
 		if (_isFile(properties.theme[1])) {_explorer(properties.theme[1]);} // Open current file
-		else {_explorer(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes');} // or folder
+		else {_explorer(folders.xxx + 'presets\\Search by\\themes');} // or folder
 	}});
 	// Create theme
 	themeMenu.newEntry({entryText: 'Create theme file with selected track', func: () => {
@@ -55,17 +66,14 @@ function createThemeMenu(parent) {
 		if (!input.length) {return;}
 		const theme = {name: input, tags: []};
 		theme.tags.push({genre, style, mood, key, date, bpm, composer, customStr, customNum});
-		const filePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes\\' + input + '.json';
+		const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
 		const bDone = _save(filePath, JSON.stringify(theme, null, '\t'));
 		if (!bDone) {fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); return;}
 	}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED});
 	themeMenu.newEntry({entryText: 'sep'});
 	themeMenu.newEntry({entryText: 'None', func: () => {
 		properties.theme[1] = '';
-		const themeName = forcedTheme ? forcedTheme.name + ' (forced by recipe)' : 'None'; // Recipe may overwrite theme
-		parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + themeName + '\n(Ctrl + L. Click to set recipe)\t -> ' + data.recipe + '\n(Shift + Ctrl + L. Click to set other config)';
-		data.tooltip = parent.description;
-		data.theme = 'None'; // Recipe may overwrite theme
+		data.theme = 'None';
 		properties.data[1] = JSON.stringify(data);
 		overwriteProperties(properties);
 	}});
@@ -96,8 +104,6 @@ function createThemeMenu(parent) {
 		menus.push(entryText);
 		themeMenu.newEntry({entryText, func: () => {
 			properties.theme[1] = file;
-			parent.description = 'Search according to variables at properties.\n(Shift + L. Click to set theme)\t -> ' + name + '\n(Ctrl + L. Click to set recipe)\t -> ' + data.recipe + '\n(Shift + Ctrl + L. Click to set other config)';
-			data.tooltip = parent.description;
 			data.theme = theme.name;
 			properties.data[1] = JSON.stringify(data);
 			overwriteProperties(properties);

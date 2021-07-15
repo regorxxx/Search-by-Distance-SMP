@@ -4,9 +4,10 @@
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
 */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_foobar.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_UI.js');
+include('..\\..\\helpers\\buttons_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_foobar.js');
+include('..\\..\\helpers\\helpers_xxx_UI.js');
 
 try { //May be loaded along other buttons
 	window.DefinePanel('Merged SBD Custom Buttons bar', {author:'xxx'});
@@ -29,12 +30,12 @@ toolbarColor = RGB(211,218,237);
 
 {	// Buttons
 	let buttonsPath = [	 // Add here your buttons path
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
 						];
 	
 	for (let i = 0; i < buttonsPath.length; i++) {
@@ -47,7 +48,7 @@ toolbarColor = RGB(211,218,237);
 	
 	/* 	
 		OR just add them manually:
-		include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_same_style.js', {always_evaluate: true});
+		include(folders.xxx + 'buttons\\buttons_search_same_style.js', {always_evaluate: true});
 		...
 	*/
 }

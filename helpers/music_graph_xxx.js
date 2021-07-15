@@ -2,9 +2,10 @@
 
  // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\ngraph\\ngraph.graph.js');
-	include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_descriptors_xxx.js');
-	let userDescriptor = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_descriptors_xxx_user.js';
+	include('..\\helpers-external\\ngraph\\ngraph.graph.js');
+	include('music_graph_descriptors_xxx.js');
+	include('helpers_xxx.js');
+	let userDescriptor = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
 	if (isCompatible('1.4.0') ? utils.IsFile(userDescriptor) : utils.FileTest(userDescriptor, 'e')) {
 		try {
 			console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);

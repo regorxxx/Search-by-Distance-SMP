@@ -1,15 +1,26 @@
 ﻿Removes tracks with same tags (also real duplicated files) from playlists.
+It's superior to foobar2000 functionality since it checks more things than just
+having the same exact file multiple times...
 Note you can use these functions to filter lists! i.e. if you only check 
 by artist/date, then any track with same artist/date is considered duplicated.
 That means this could be used both to find duplicates or for custom 
 post-playlist creation filtering (1 track per artist, 1 track per date, etc.)
 
-If 'sortouput = ""', then final order will be randomized. It follows 'plman.SortByFormat' conventions.
-Any 'sort...' variable follows titleformat conventions
-	i.e. "%title%|%artist%|%date%"
-Any 'check...' variable can follow both tag name or titleformat conventions (functions too) 
-	i.e. "title" or "%title%"
-You can add multiple entries to the same variable but then it must follow titleformat conventions.
-	i.e. "checkfirst = %title% - %artist%"
-The multiple 'check...' variables are joined using " - " before execution.
+Usage on playlist tools:
+	- Tags and n+1 var may be set via menus.
+	- See comments below (buttons) for usage. It applies the same.
 
+Usage on buttons:
+	- Tags or TF expressions may be set at the properties panel. There are
+	3 possible fields, but multiple tags may also be set in the same field.
+	('%ARTIST% - %TITLE% - %DATE%' is equivalent to setting them separately
+	on the 3 properties)
+	- When adding a tag on a field, '%' may be omitted. When adding multiple 
+	tags or TF expressions, you must add all TF symbols (% and $).
+	- Setting the n+1 duplicates allowed variable is used for the filtering button.
+	A value of 0 makes it work as the remove duplicates button (no duplicates 
+	allowed). A value of 1, would allow 2 (1+1) tracks with the same set tags...
+	- Since the tags are configurable, the concept of 'duplicate' is related to 
+	those tags... that's why this tool may also be used to filter playlists instead
+	of removing real duplicates too.
+	

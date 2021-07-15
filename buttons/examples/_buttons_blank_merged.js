@@ -4,9 +4,10 @@
 	-> EDIT
 */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_foobar.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_UI.js');
+include('..\\..\\helpers\\buttons_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_foobar.js');
+include('..\\..\\helpers\\helpers_xxx_UI.js');
 
 try { //May be loaded along other buttons
 	window.DefinePanel('EDIT', {author:'xxx'});
@@ -29,7 +30,7 @@ toolbarColor = RGB(211,218,237);
 
 {	// Buttons
 	let buttonsPath = [	 // Add here your buttons path
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\EDIT.js',  //+15 w
+						folders.xxx + 'buttons\\EDIT.js',  //+15 w
 						];
 
 	for (let i = 0; i < buttonsPath.length; i++) {

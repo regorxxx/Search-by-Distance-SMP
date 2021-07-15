@@ -16,7 +16,8 @@
  *
  */
 // var eventify = require('ngraph.events');
-// include(fb.ProfilePath + 'xxx-scripts\\ngraph\\ngraph.events.js');
+// include('..\\helpers\\helpers_xxx');
+// include(folders.xxx + 'helpers-external\\ngraph\\ngraph.events.js');
 
 
 /**

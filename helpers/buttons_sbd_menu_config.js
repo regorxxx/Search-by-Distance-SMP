@@ -1,5 +1,6 @@
-﻿include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\menu_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_file.js');
+﻿include('menu_xxx.js');
+include('helpers_xxx.js');
+include('helpers_xxx_file.js');
 
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
@@ -8,7 +9,7 @@ function createConfigMenu(parent) {
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\recipes\\' + properties.recipe[1]);
+		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1]);
 		if (!recipe) {recipe = {};}
 	}
 	// Header
@@ -28,7 +29,7 @@ function createConfigMenu(parent) {
 	}
 	{	// Menu to configure properties: tags
 		const menuName = menu.newMenu('Remap tags');
-		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'composerTag', 'customStrTag', 'customNumTag'];
+		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
 		options.forEach((tagName) => {
 			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag', func: () => {
 				let input = '';
@@ -99,6 +100,37 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 		});
+	}
+	menu.newEntry({entryText: 'sep'});
+	{	// Readmes
+		const subMenuName = menu.newMenu('Readmes...');
+		menu.newEntry({menuName: subMenuName, entryText: 'Open popup with readme:', func: null, flags: MF_GRAYED});
+		menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+		let iCount = 0;
+		const readmes = {
+			Full: folders.xxx + 'helpers\\readme\\search_bydistance.txt',
+			DYNGENRE: folders.xxx + 'helpers\\readme\\search_bydistance_dyngenre.txt',
+			GRAPH: folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
+			WEIGHT: folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
+			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt'
+		}
+		if (Object.keys(readmes).length) {
+			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
+				if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) { 
+					const readme = utils.ReadTextFile(value, 65001); // Executed on script load
+					if (readme.length) {
+						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
+							if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) {
+								const readme = utils.ReadTextFile(value, 65001);
+								if (readme.length) {fb.ShowPopupMessage(readme, key);}
+							} else {console.log('Readme not found: ' + value);}
+						}});
+						iCount++;
+					}
+				} else {console.log('Readme not found: ' + value);}
+			});
+		} 
+		if (!iCount) {menu.newEntry({menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED});}
 	}
 	return menu;
 }

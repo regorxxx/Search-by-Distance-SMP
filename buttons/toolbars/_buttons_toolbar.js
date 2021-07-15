@@ -23,13 +23,23 @@
 */
 
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_same_by.js and search_same_by.js
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_foobar.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_UI.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_file.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_merged_menu.js');
+try {
+	include('..\\..\\helpers\\buttons_xxx.js');
+	include('..\\..\\helpers\\helpers_xxx.js');
+	include('..\\..\\helpers\\helpers_xxx_foobar.js');
+	include('..\\..\\helpers\\helpers_xxx_properties.js');
+	include('..\\..\\helpers\\helpers_xxx_UI.js');
+	include('..\\..\\helpers\\helpers_xxx_file.js');
+	include('..\\..\\helpers\\buttons_merged_menu.js');
+} catch (e) {
+	include('helpers\\buttons_xxx.js');
+	include('helpers\\helpers_xxx.js');
+	include('helpers\\helpers_xxx_foobar.js');
+	include('helpers\\helpers_xxx_properties.js');
+	include('helpers\\helpers_xxx_UI.js');
+	include('helpers\\helpers_xxx_file.js');
+	include('helpers\\buttons_merged_menu.js');
+}
 
 try { //May be loaded along other buttons
 	window.DefinePanel('Merged Buttons bar', {author:'xxx'});
@@ -46,35 +56,55 @@ buttonCoordinates.w += 40; // Only works for 'y' orientation
 buttonCoordinates.h += 0; //For 'x' orientation
 
 let barProperties = { //You can simply add new properties here
-	name: ['Name og config json file', 'buttons_' + randomString(5)],
-	toolbarColor: ['Toolbar color', -1],
+	name:			['Name of config json file', 'buttons_' + randomString(5)],
+	toolbarColor: 	['Toolbar color', -1],
+	firstPopup:		['Toolbar: Fired once', false]
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(barProperties); //This sets all the panel properties at once
 barProperties = getPropertiesPairs(barProperties);
 
+// Toolbar menu
 buttonsBar.menu = () => {
 	return createButtonsMenu(barProperties.name[1]);
 };
+
+// First popup
+if (!barProperties.firstPopup[1]) {
+	const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
+	barProperties.firstPopup[1] = true;
+	overwriteProperties(barProperties); // Updates panel
+	if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
+		const readme = utils.ReadTextFile(readmePath, 65001);
+		if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
+	};
+}
 
 // Global toolbar color
 toolbarColor = barProperties.toolbarColor[1];
 bToolbar = toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
 
 // Tooltip at empty bar
-toolbarTooltip = 'L. Click to configure...'
+toolbarTooltip = 'Shift + L. Click to configure...'
 
 // Buttons
-let buttonsPath = [	 // Add here your buttons path
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_same_by.js',  //+15 w
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_remove_duplicates.js',  //+25 w
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance.js',
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_bydistance_customizable.js',
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_tags_automation.js',
-					fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_playlist_tools.js',
+const buttonsPathDef = [	 // Add here your buttons path
+					folders.xxx + 'buttons\\buttons_search_same_by.js',  //+15 w
+					folders.xxx + 'buttons\\buttons_remove_duplicates.js',  //+25 w
+					folders.xxx + 'buttons\\buttons_search_bydistance.js',
+					folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+					folders.xxx + 'buttons\\buttons_playlist_tools.js',
+					folders.xxx + 'buttons\\buttons_playlist_tools_macros.js',
+					folders.xxx + 'buttons\\buttons_playlist_tools_pool.js',
+					folders.xxx + 'buttons\\buttons_playlist_history.js',
 				];
+let buttonsPath = [...buttonsPathDef];
 
 loadButtons();
+if (!_isFile()) {
+	const names = buttonsPath.map((path) => {return path.split('\\').pop();});
+	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(names, null, 3));
+}
 
 for (let i = 0; i < buttonsPath.length; i++) {
 	if ((isCompatible('1.4.0') ? utils.IsFile(buttonsPath[i]) : utils.FileTest(buttonsPath[i], "e"))) {
@@ -85,6 +115,12 @@ for (let i = 0; i < buttonsPath.length; i++) {
 }
 
 function loadButtons() {
-	const data = _jsonParseFile(fb.ProfilePath + 'js_data\\' + barProperties.name[1] + '.json');
-	if (data) {buttonsPath = data;}
+	if (_isFolder(folders.data)) {
+		const data = _jsonParseFile(folders.data + barProperties.name[1] + '.json');
+		if (data) { // TODO: remove splitting after a few releases
+			const names = data.map((path) => {return path.split('\\').pop();});
+			_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(names, null, 3));
+			buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});
+		}
+	}
 }

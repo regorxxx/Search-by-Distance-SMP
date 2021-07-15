@@ -312,23 +312,23 @@
 			- Helpers used don't need foobar at all (except the 'getValues' for tags obviously)
 */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-star.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\a-greedy-star.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers-external\\ngraph\\NBA.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\ngraph_helpers_xxx.js');
+include('..\\helpers-external\\ngraph\\a-star.js');
+include('..\\helpers-external\\ngraph\\a-greedy-star.js');
+include('..\\helpers-external\\ngraph\\NBA.js');
+include('..\\helpers\\ngraph_helpers_xxx.js');
 var bLoadTags = true; // This tells the helper to load tags descriptors extra files
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_crc.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_prototypes.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_tags.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_math.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\camelot_wheel_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\dyngenre_map_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_descriptors_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\music_graph_test_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\remove_duplicates.js');
+include('..\\helpers\\helpers_xxx.js');
+include('..\\helpers\\helpers_xxx_crc.js');
+include('..\\helpers\\helpers_xxx_prototypes.js');
+include('..\\helpers\\helpers_xxx_properties.js');
+include('..\\helpers\\helpers_xxx_tags.js');
+include('..\\helpers\\helpers_xxx_math.js');
+include('..\\helpers\\camelot_wheel_xxx.js');
+include('..\\helpers\\dyngenre_map_xxx.js');
+include('..\\helpers\\music_graph_descriptors_xxx.js');
+include('..\\helpers\\music_graph_xxx.js');
+include('..\\helpers\\music_graph_test_xxx.js');
+include('remove_duplicates.js');
 
 /* 
 	Properties
@@ -353,6 +353,8 @@ const SearchByDistance_properties = {
 	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', 'style'],
 	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'mood'],
 	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%date%)'],
+	keyTag					:	['To remap key tag to other tag change this', 'key'],
+	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', 'bpm'],
 	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'composer'],
 	customStrTag			:	['To use a custom string tag(s) change this (sep.by comma)', ''],
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
@@ -419,7 +421,7 @@ const panelProperties = (typeof buttons === 'undefined' && typeof bNotProperties
 if (!panelProperties.firstPopup[1]) {
 	panelProperties.firstPopup[1] = true;
 	overwriteProperties(panelProperties); // Updates panel
-	const readmePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\readme\\search_bydistance.txt';
+	const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance.txt';
 	if (_isFile(readmePath)) {
 		const readme = utils.ReadTextFile(readmePath, 65001);
 		if (readme.length) {fb.ShowPopupMessage(readme, 'Search by Distance');}
@@ -493,34 +495,50 @@ function updateCache({newCacheLink, newCacheLinkSet} = {}) {
 	}
 }
 
-function on_notify_data(name, info) {
-	if (name.indexOf('SearchByDistance: requires cacheLink map') !== -1 && typeof cacheLink !== 'undefined' && cacheLink.size) { // When asked to share cache, delay 1 sec. to allow script loading
-		debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
-		console.log('SearchByDistance: Requested Cache - cacheLink.');
-	}
-	if (name.indexOf('SearchByDistance: requires cacheLinkSet map') !== -1 && typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) { // When asked to share cache, delay 1 sec. to allow script loading
-		debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
-		console.log('SearchByDistance: Requested Cache - cacheLinkSet.');
-	} 
-	if (name.indexOf('SearchByDistance: cacheLink map') !== -1 && info) {
-		console.log('SearchByDistance: Used Cache - cacheLink from other panel.');
-		let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-		data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-		updateCache({newCacheLink: new Map(data)});
-	}
-	if (name.indexOf('SearchByDistance: cacheLinkSet map') !== -1 && info) {
-		console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
-		let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-		data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-		updateCache({newCacheLinkSet: new Map(data)});
+function onNotifyData(name, info) {
+	if (name) {
+		if (name.indexOf('SearchByDistance: requires cacheLink map') !== -1 && typeof cacheLink !== 'undefined' && cacheLink.size) { // When asked to share cache, delay 1 sec. to allow script loading
+			debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
+			console.log('SearchByDistance: Requested Cache - cacheLink.');
+		}
+		if (name.indexOf('SearchByDistance: requires cacheLinkSet map') !== -1 && typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) { // When asked to share cache, delay 1 sec. to allow script loading
+			debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
+			console.log('SearchByDistance: Requested Cache - cacheLinkSet.');
+		} 
+		if (name.indexOf('SearchByDistance: cacheLink map') !== -1 && info) {
+			console.log('SearchByDistance: Used Cache - cacheLink from other panel.');
+			let data = JSON.parse(JSON.stringify([...info])); // Deep copy
+			data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+			updateCache({newCacheLink: new Map(data)});
+		}
+		if (name.indexOf('SearchByDistance: cacheLinkSet map') !== -1 && info) {
+			console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
+			let data = JSON.parse(JSON.stringify([...info])); // Deep copy
+			data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+			updateCache({newCacheLinkSet: new Map(data)});
+		}
 	}
 }
+if (typeof on_notify_data !== 'undefined') {
+	const oldFunc = on_notify_data;
+	on_notify_data = function(name, info) {
+		oldFunc(name, info);
+		onNotifyData(name, info);
+	}
+} else {var on_notify_data = onNotifyData;}
 
-function on_script_unload() {
+function onScriptUnload() {
 	console.log('SearchByDistance: Saving Cache.');
 	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
 	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
 }
+if (typeof on_script_unload !== 'undefined') {
+	const oldFunc = on_script_unload;
+	on_script_unload = function() {
+		oldFunc();
+		onScriptUnload();
+	}
+} else {var on_script_unload = onScriptUnload;}
 
 /* 
 	Warnings about links/nodes set wrong
@@ -1222,8 +1240,8 @@ function do_searchby_distance({
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 								} = {}) {
 		// Recipe check
-		const themePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\themes\\';
-		const recipePath = fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\presets\\Search by\\recipes\\';
+		const themePath = folders.xxx + 'presets\\Search by\\themes\\';
+		const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 		const bUseRecipe = recipe && (recipe.length || Object.keys(recipe).length);
 		if (bUseRecipe) {
 			let path;
@@ -1323,6 +1341,8 @@ function do_searchby_distance({
 		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? properties['styleTag'][1].split(',').filter(Boolean) : [];
 		const moodTag = (moodWeight !== 0) ? properties['moodTag'][1].split(',').filter(Boolean) : [];
 		const dateTag = (dateWeight !== 0) ? properties['dateTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? properties['keyTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const bpmTag = (bpmWeight !== 0) ? properties['bpmTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
 		const composerTag = (composerWeight !== 0) ? properties['composerTag'][1].split(',').filter(Boolean) : [];
 		const customStrTag = (customStrWeight !== 0) ? properties['customStrTag'][1].split(',').filter(Boolean) : [];
 		const customNumTag = (customNumWeight !== 0) ? properties['customNumTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
@@ -1347,6 +1367,8 @@ function do_searchby_distance({
 		if (styleTag.length === 0) {styleWeight = 0;}
 		if (moodTag.length === 0) {moodWeight = 0;}
 		if (dateTag.length === 0) {dateWeight = 0;}
+		if (keyTag.length === 0) {keyWeight = 0; bInKeyMixingPlaylist = false;}
+		if (bpmTag.length === 0) {bpmWeight = 0;}
 		if (composerTag.length === 0) {composerWeight = 0;}
 		if (customStrTag.length === 0) {customStrWeight = 0;}
 		if (customNumTag.length === 0) {customNumWeight = 0;}
@@ -1404,7 +1426,7 @@ function do_searchby_distance({
 		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer.filter(Boolean) : getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean)) : [];
 		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr.filter(Boolean) : getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean)) : [];
 		
-		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? 'key' : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? 'bpm' : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
+		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? keyTag[0] : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? bpmTag[0] : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
 		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
 		const key = (keyWeight !== 0 || bInKeyMixingPlaylist) ? keyArr[0] : '';
 		const date =(dateWeight !== 0) ? Number(dateArr[0]) : 0;

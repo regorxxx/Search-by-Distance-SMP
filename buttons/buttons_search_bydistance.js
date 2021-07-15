@@ -1,7 +1,7 @@
 ﻿'use strict';
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+include('..\\helpers\\buttons_xxx.js');
+include('..\\helpers\\helpers_xxx_properties.js');
 
 try { //May be loaded along other buttons
 	window.DefinePanel('Search by Distance Buttons', {author:'xxx'});
@@ -12,13 +12,12 @@ try { //May be loaded along other buttons
 	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Search by Distance Buttons loaded.');
 }
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\helpers\\helpers_xxx_properties.js');
 var prefix = "sbd_";
 prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
 
 var newButtonsProperties = { //You can simply add new properties here
-	customName: ['Name for the custom UI button', 'Customize!']
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 delete newButtonsProperties.genreWeight;
@@ -35,6 +34,7 @@ delete newButtonsProperties.sbd_max_graph_distance;
 delete newButtonsProperties.dyngenreWeight;
 delete newButtonsProperties.dyngenreRange;
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
+buttonsBar.list.push(getPropertiesPairs(newButtonsProperties, prefix));
 
 // we change the default coordinates here to accommodate text
 if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
@@ -54,7 +54,7 @@ var newButtons = {
 		do_searchby_distance(args); 
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance NearestTracks took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
+	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
 	
 	SimilarTracks: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Tracks", function () {
 		let t0 = Date.now();
@@ -66,7 +66,7 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarTracks took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
+	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
     SimilarGenres: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Genres", function () {
 		let t0 = Date.now();
@@ -78,7 +78,7 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarGenres took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
+	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
 	SimilarMood: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, "Similar Mood", function () {
 		let t0 = Date.now();
@@ -90,14 +90,14 @@ var newButtons = {
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log("Call to do_searchby_distance SimilarMood took " + (t1 - t0) + " milliseconds.");
-	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand, _gdiFont('FontAwesome', 10)),
+	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
 };
 
 // Check if the button list already has the same button ID
 for (var buttonName in newButtons) {
 	if (buttons.hasOwnProperty(buttonName)) {
 		// fb.ShowPopupMessage('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		console.log('Duplicated button ID (' + buttonName + ') on ' + window.Name);
+		// console.log('Duplicated button ID (' + buttonName + ') on ' + window.Name);
 		Object.defineProperty(newButtons, buttonName + Object.keys(buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
 		delete newButtons[buttonName];
 	}

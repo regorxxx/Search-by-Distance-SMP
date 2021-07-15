@@ -26,11 +26,11 @@
 	-(Other scripts inline) (*) (optional)
  */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+include('..\\..\\helpers\\buttons_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_properties.js');
   
 // YOUR SCRIPTS
-// include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\YOURSCRIPT.js');
+// include('YOURSCRIPT.js');
 var prefix = "YOUR PREFIX"; // -EDIT HERE PROPERTY PANEL PREFIX-
  
 // THIS IS STANDARD STRUCTURE FOR ALL BUTTONS

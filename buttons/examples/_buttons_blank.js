@@ -4,9 +4,9 @@
 	-> EDIT
  */
  
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
-// include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\EDIT.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_properties.js');
+include('..\\..\\helpers\\buttons_xxx.js');
+// include('EDIT.js');
+include('..\\..\\helpers\\helpers_xxx_properties.js');
 var prefix = "EDIT";
  
 try { //May be loaded along other buttons

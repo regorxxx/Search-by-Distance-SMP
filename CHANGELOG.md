@@ -9,9 +9,22 @@
 
 ## [Unreleased][]
 ### Added
+- Key tag can now be remapped to another tag (uses 'key' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
+- BPM tag can now be remapped to another tag (uses 'bpm' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
 ### Changed
+- Buttons framework: default icon size is now bigger.
+- Buttons: minor renaming for AutoPlaylist - Playlist filter.
+- Buttons: Added readmes to configurable button on menus: methods, full documentation and recipes & themes.
+- Buttons: loading buttons using the customizable toolbar will show their associated readme (if it exists).
+- Buttons: restoring defaults buttons on the toolbar will show the readme of all the restored buttons.
+- Buttons: replaced the readme entry on the toolbar menu with a submenu pointing to all readmes of every button.
+- Installation: Installation path may now be changed by editing 'folders.xxxName' variable at '.\helpers\helpers_xxx.js'. This is a workaround for some SMP limitations when working with relative paths and text files, images or dynamic file loading.
 ### Removed
 ### Fixed
+- Buttons: Fixed multiple button names while logging loading on console.
+- Multiple minor improvements and fixes on path handling for portable installations.
+- Multiple minor improvements and fixes when saving files on non existing folder.
+
 
 ## [2.0.0] - 2021-06-15
 ### Added
@@ -20,7 +33,7 @@
 - Themes: themes presets may be used as reference instead of tracks. Whenever the argument is set, it's used instead of the selection. Custom button now allows to use a theme file. Once set, button would always use the theme as reference instead of the current selection.
 - Buttons: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
 - Buttons: custom button now allows to create a theme file using the currently focused track's tags. See theme menu (Shift + L. Click).
-- Buttons: custom button now allows to set most configs using the configuration menu (Ctrl + Shift + L. Click): method, tags remapping, filters, etc. Whenever a config is overriden by a recipe, the related entry is greyed and a warning is shown.
+- Buttons: custom button now allows to set most variables using the configuration menu (Ctrl + Shift + L. Click): method, tags remapping, filters, etc. Whenever a config is overridden by a recipe, the related entry is greyed and a warning is shown.
 - Buttons: new '_buttons_toolbar.js' toolbar which can be customized without editing the js file. Allows to enable/disable buttons -even add multiple copies- on demand and customize toolbar background color (L. Click on the bar).
 ### Changed
 - Console: shows on console the track or theme used as reference (name and path).

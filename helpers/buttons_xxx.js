@@ -1,7 +1,7 @@
 ﻿'use strict';
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_prototypes.js');
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\helpers_xxx_UI.js');
+include('helpers_xxx_prototypes.js');
+include('helpers_xxx_UI.js');
 
 /* 
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
@@ -21,6 +21,7 @@ const ButtonStates = {
 };
 
 const buttonsBar = {};
+buttonsBar.list = [];
 var buttons = {}; // Global list
 var propertiesPrefixes = new Set(); // Global properties names prefixes
 const oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
@@ -74,7 +75,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = _isFunction(this.description) ? () => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description() : this.description());} : () => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description : this.description)}; // Adds prefix to description, whether it's a func or a string
+	this.descriptionWithID = _isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description : this.description)}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 
 	this.containXY = function (x, y) {
@@ -102,7 +103,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 				break;
 
 			case ButtonStates.hover:
-				tooltipButton.SetValue( (bShowID ? this.descriptionWithID() : (_isFunction(this.description) ? this.description() : this.description) ) , true); // ID or just description, according to string or func.
+				tooltipButton.SetValue( (bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
 				this.g_theme.SetPartAndStateID(1, 2);
 				break;
 
@@ -223,7 +224,7 @@ function on_mouse_lbtn_up(x, y, mask) {
 			cur_btn.changeState(ButtonStates.hover);
 			window.Repaint();
 		}
-	} else {
+	} else if (mask === MK_SHIFT) {
 		if (buttonsBar.hasOwnProperty('menu')) {buttonsBar.menu().btn_up(x, this.y + this.h)}
 	}
 }

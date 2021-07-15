@@ -22,7 +22,8 @@
 		skipped, instead of throwing and error! This is better than try/catch, since it doesn't omit coding errors while including them...
 */
 
-include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\helpers\\buttons_xxx.js');
+include('..\\..\\helpers\\buttons_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
 
 try { //May be loaded along other buttons
 	window.DefinePanel('Merged Buttons bar', {author:'xxx'});
@@ -45,8 +46,8 @@ toolbarColor = RGB(211,218,237);
 
 {	// Buttons
 	let buttonsPath = [	 // Add here your buttons path
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\_buttons_example.js',
-						fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\_buttons_example.js',
+						folders.xxx + 'buttons\\_buttons_example.js',
+						folders.xxx + 'buttons\\_buttons_example.js',
 						];
 
 	for (let i = 0; i < buttonsPath.length; i++) {
@@ -59,7 +60,7 @@ toolbarColor = RGB(211,218,237);
 
 	/* 	
 		OR just add them manually:
-		include(fb.ProfilePath + 'scripts\\SMP\\xxx-scripts\\buttons\\buttons_search_same_style.js', {always_evaluate: true});
+		include(folders.xxx + 'buttons\\buttons_search_same_style.js', {always_evaluate: true});
 		...
 	*/
 }
