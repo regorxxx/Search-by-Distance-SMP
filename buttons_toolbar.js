@@ -94,8 +94,6 @@ const buttonsPathDef = [	 // Add here your buttons path
 					folders.xxx + 'buttons\\buttons_search_bydistance.js',
 					folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
 					folders.xxx + 'buttons\\buttons_playlist_tools.js',
-					folders.xxx + 'buttons\\buttons_playlist_tools_macros.js',
-					folders.xxx + 'buttons\\buttons_playlist_tools_pool.js',
 					folders.xxx + 'buttons\\buttons_playlist_history.js',
 				];
 let buttonsPath = [...buttonsPathDef];

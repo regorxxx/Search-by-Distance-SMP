@@ -11,8 +11,13 @@
 ### Added
 - Key tag can now be remapped to another tag (uses 'key' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
 - BPM tag can now be remapped to another tag (uses 'bpm' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
+- Buttons: added a submenu to set variables' weight and range at custom button.
+- Recipes: added 'LikeADJ (MusicBee)' which replicates functionality of [MusicBee's plugin LikeADJ](https://getmusicbee.com/forum/index.php?topic=24631.0). Uses BPM, Key, Energy, Ratings, Genres and Harmonic Mixing. If only a subset of those things are desired, duplicate the recipe and configure it as needed or simply set a custom button using the recipe as reference with your own changes.
+- Harmonic Mixing: now works with Open Keys too (in addition to Camelo Keys and standard notation keys).
 ### Changed
+- Harmonic Mixing: greatly improved speed when the pool had thousands of tracks (improved shuffle method).
 - Buttons framework: default icon size is now bigger.
+- Buttons: custom button shows the current value on the menu entries (no need to click on them or open properties). It also shows the value if set -forced- by the recipe. 'sbd_max_graph_distance' value is evaluated before displaying (if not using a number).
 - Buttons: minor renaming for AutoPlaylist - Playlist filter.
 - Buttons: Added readmes to configurable button on menus: methods, full documentation and recipes & themes.
 - Buttons: loading buttons using the customizable toolbar will show their associated readme (if it exists).
@@ -24,7 +29,7 @@
 - Buttons: Fixed multiple button names while logging loading on console.
 - Multiple minor improvements and fixes on path handling for portable installations.
 - Multiple minor improvements and fixes when saving files on non existing folder.
-
+- Evaluation of 'sbd_max_graph_distance' at recipes on multiple places is now rounded (just for cleaner logging purpose).
 
 ## [2.0.0] - 2021-06-15
 ### Added
@@ -63,8 +68,8 @@
 ### Fixed
 - Default args: crashes when trying to access non present properties on the arguments (found while applying the previous changes).
 - Cache: crash when sharing cache between 2 panels due to a typo.
-- In key mixing: crash when pool was smaller than set playlist length.
-- In key mixing: not really random due to using sort + random method. Using an array shuffle now instead.
+- Harmonic Mixing: crash when pool was smaller than set playlist length.
+- Harmonic Mixing: not really random due to using sort + random method. Using an array shuffle now instead.
 - Random picking: not really random due to using sort + random method. Using an array shuffle now instead.
 - GRAPH: setting both genre and style weights to zero output nothing with GRAPH method instead of using the values for the graph and not for weighting.
 

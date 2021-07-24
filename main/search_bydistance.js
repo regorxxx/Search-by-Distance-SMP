@@ -1293,7 +1293,7 @@ function do_searchby_distance({
 				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
 				return;
 			}
-			sbd_max_graph_distance = eval(sbd_max_graph_distance);
+			sbd_max_graph_distance = Math.floor(eval(sbd_max_graph_distance));
 			console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);
 		}
 		// Theme check
@@ -1500,7 +1500,7 @@ function do_searchby_distance({
 				query[queryl] = '';
 				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
 				// Gets both, flat and sharp equivalences
-				const camelotKey = camelotWheel.keyNotationObject.has(key) ? {...camelotWheel.keyNotationObject.get(key)} : null;
+				const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
 				if (camelotKey) {
 					let nextKeyObj, nextKeyFlat, nextKeySharp;
 					let keyComb = [];
@@ -1770,8 +1770,8 @@ function do_searchby_distance({
 				if (key === keyNew) { // Not only fastest but also allows for arbitrary key notations (although only using simple matching)
 					weightValue += keyWeight;
 				} else if (keyRange !== 0){
-					const camelotKeyNew = camelotWheel.keyNotationObject.get(keyNew);
-					const camelotKey = camelotWheel.keyNotationObject.get(key);
+					const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(keyNew);
+					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
 					if (camelotKey && camelotKeyNew) {
 						const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
 						const hourDifference = keyRange - Math.abs(camelotKey.hour - camelotKeyNew.hour);
@@ -2019,7 +2019,7 @@ function do_searchby_distance({
 					const index = nextIndex;
 					if (!keyCache.has(index)) {
 						const keyCurrent = keyHandle[index][0];
-						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObject(keyCurrent) : null;
+						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
 						if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
 					} else {camelotKeyCurrent = keyCache.get(index);}
 					// Delete from check selection
@@ -2033,7 +2033,7 @@ function do_searchby_distance({
 							const indexNew = scoreData[indexNewScore].index;
 							if (!keyCache.has(indexNew)) {
 								const keyNew = keyHandle[indexNew][0];
-								camelotKeyNew = (keyNew.length) ? camelotWheel.getKeyNotationObject(keyNew) : null;
+								camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
 								if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
 								else {toCheck.delete(indexNew);}
 							} else {camelotKeyNew = keyCache.get(indexNew);}

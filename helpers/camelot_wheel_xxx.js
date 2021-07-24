@@ -17,34 +17,62 @@
 //	-Experimental Energy Changes:
 //		- Energy Boost ++ (nX -> n+2X): adding two 'hours' (+2), equivalent to going up a step.
 //		- Dramatic Energy Raise (nX -> n+7X): adding seven 'hours' (+7), equivalent to going up a half step.
-const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of the objects and not just a reference to the originals
+const camelotWheel = { // Use methods at bottom to get a copy of the objects and not just a reference to the originals
 	wheelNotationFlat: new Map([
-		[1	, {A: 'Abm'		, B: 'B'	}],
-		[2	, {A: 'Ebm'		, B: 'Gb'	}],
-		[3	, {A: 'Bbm'		, B: 'Db'	}],
-		[4	, {A: 'Fm'		, B: 'Ab'	}],
-		[5	, {A: 'Cm'		, B: 'Eb'	}],
-		[6	, {A: 'Gm'		, B: 'Bb'	}],
-		[7	, {A: 'Dm'		, B: 'F'	}],
-		[8	, {A: 'Am'		, B: 'C'	}],
-		[9	, {A: 'Em'		, B: 'G'	}],
-		[10	, {A: 'Bm'		, B: 'D'	}],
-		[11	, {A: 'Gbm'		, B: 'A'	}],
-		[12	, {A: 'Dbm'		, B: 'E'	}]
+		[1	, {A: 'Abm'		, B: 'B'	, m: 'Am'		, d: 'C'	}], // Camelot Key
+		[2	, {A: 'Ebm'		, B: 'Gb'	, m: 'Em'		, d: 'G'	}],
+		[3	, {A: 'Bbm'		, B: 'Db'	, m: 'Bm'		, d: 'D'	}],
+		[4	, {A: 'Fm'		, B: 'Ab'	, m: 'Gbm'		, d: 'A'	}],
+		[5	, {A: 'Cm'		, B: 'Eb'	, m: 'Dbm'		, d: 'E'	}],
+		[6	, {A: 'Gm'		, B: 'Bb'	, m: 'Abm'		, d: 'B'	}],
+		[7	, {A: 'Dm'		, B: 'F'	, m: 'Ebm'		, d: 'Gb'	}],
+		[8	, {A: 'Am'		, B: 'C'	, m: 'Bbm'		, d: 'Db'	}],
+		[9	, {A: 'Em'		, B: 'G'	, m: 'Fm'		, d: 'Ab'	}],
+		[10	, {A: 'Bm'		, B: 'D'	, m: 'Cm'		, d: 'Eb'	}],
+		[11	, {A: 'Gbm'		, B: 'A'	, m: 'Gm'		, d: 'Bb'	}],
+		[12	, {A: 'Dbm'		, B: 'E'	, m: 'Dm'		, d: 'F'	}]
 	]),
 	wheelNotationSharp: new Map([
-		[1	, {A: 'G#m'		, B: 'B'	}],
-		[2	, {A: 'D#m'		, B: 'F#'	}],
-		[3	, {A: 'A#m'		, B: 'C#'	}],
-		[4	, {A: 'Fm'		, B: 'G#'	}],
-		[5	, {A: 'Cm'		, B: 'D#'	}],
-		[6	, {A: 'Gm'		, B: 'A#'	}],
-		[7	, {A: 'Dm'		, B: 'F'	}],
-		[8	, {A: 'Am'		, B: 'C'	}],
-		[9	, {A: 'Em'		, B: 'G'	}],
-		[10	, {A: 'Bm'		, B: 'D'	}],
-		[11	, {A: 'F#m'		, B: 'A'	}],
-		[12	, {A: 'C#m'		, B: 'E'	}]
+		[1	, {A: 'G#m'		, B: 'B'	, m: 'Am'		, d: 'C'	}],
+		[2	, {A: 'D#m'		, B: 'F#'	, m: 'Em'		, d: 'G'	}],
+		[3	, {A: 'A#m'		, B: 'C#'	, m: 'Bm'		, d: 'D'	}],
+		[4	, {A: 'Fm'		, B: 'G#'	, m: 'F#m'		, d: 'A'	}],
+		[5	, {A: 'Cm'		, B: 'D#'	, m: 'C#m'		, d: 'E'	}],
+		[6	, {A: 'Gm'		, B: 'A#'	, m: 'G#m'		, d: 'B'	}],
+		[7	, {A: 'Dm'		, B: 'F'	, m: 'D#m'		, d: 'F#'	}],
+		[8	, {A: 'Am'		, B: 'C'	, m: 'A#m'		, d: 'C#'	}],
+		[9	, {A: 'Em'		, B: 'G'	, m: 'Fm'		, d: 'G#'	}],
+		[10	, {A: 'Bm'		, B: 'D'	, m: 'Cm'		, d: 'D#'	}],
+		[11	, {A: 'F#m'		, B: 'A'	, m: 'Gm'		, d: 'A#'	}],
+		[12	, {A: 'C#m'		, B: 'E'	, m: 'Dm'		, d: 'F'	}]
+	]),
+	wheelNotationOpen: new Map([
+		[1	, {A: '6m'		, B: '6d'	, m: '1m'		, d: '1d'	}],
+		[2	, {A: '7m'		, B: '7d'	, m: '2m'		, d: '2d'	}],
+		[3	, {A: '8m'		, B: '8d'	, m: '3m'		, d: '3d'	}],
+		[4	, {A: '9m'		, B: '9d'	, m: '4m'		, d: '4d'	}],
+		[5	, {A: '10m'		, B: '10d'	, m: '5m'		, d: '5d'	}],
+		[6	, {A: '11m'		, B: '11d'	, m: '6m'		, d: '6d'	}],
+		[7	, {A: '12m'		, B: '12d'	, m: '7m'		, d: '7d'	}],
+		[8	, {A: '1m'		, B: '1d'	, m: '8m'		, d: '8d'	}],
+		[9	, {A: '2m'		, B: '2d'	, m: '9m'		, d: '9d'	}],
+		[10	, {A: '3m'		, B: '3d'	, m: '10m'		, d: '10d'	}],
+		[11	, {A: '4m'		, B: '4d'	, m: '11m'		, d: '11d'	}],
+		[12	, {A: '5m'		, B: '5d'	, m: '12m'		, d: '12d'	}]
+	]),
+	wheelNotationCamelot: new Map([
+		[1	, {A: '1A'		, B: '1B'	, m: '8A'		, d: '8B'	}],
+		[2	, {A: '2A'		, B: '2B'	, m: '9A'		, d: '9B'	}],
+		[3	, {A: '3A'		, B: '3B'	, m: '10A'		, d: '10B'	}],
+		[4	, {A: '4A'		, B: '4B'	, m: '11A'		, d: '11B'	}],
+		[5	, {A: '5A'		, B: '5B'	, m: '12A'		, d: '12B'	}],
+		[6	, {A: '6A'		, B: '6B'	, m: '1A'		, d: '1B'	}],
+		[7	, {A: '7A'		, B: '7B'	, m: '2A'		, d: '2B'	}],
+		[8	, {A: '8A'		, B: '8B'	, m: '3A'		, d: '3B'	}],
+		[9	, {A: '9A'		, B: '9B'	, m: '4A'		, d: '4B'	}],
+		[10	, {A: '10A'		, B: '10B'	, m: '5A'		, d: '5B'	}],
+		[11	, {A: '11A'		, B: '11B'	, m: '6A'		, d: '6B'	}],
+		[12	, {A: '12A'		, B: '12B'	, m: '7A'		, d: '7B'	}]
 	]),
 	keyNotationObject:  new Map([ //Merged sharp and flat key notations when there are equivalences
 		['G#m'	, {hour: 1	, letter: 'A'}], // Minor
@@ -104,7 +132,31 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['9B'	, {hour: 9	, letter: 'B'}],
 		['10B'	, {hour: 10	, letter: 'B'}],
 		['11B'	, {hour: 11	, letter: 'B'}],
-		['12B'	, {hour: 12	, letter: 'B'}]
+		['12B'	, {hour: 12	, letter: 'B'}],
+		['6m'	, {hour: 1	, letter: 'A'}], // Open Key
+		['7m'	, {hour: 2	, letter: 'A'}],
+		['8m'	, {hour: 3	, letter: 'A'}],
+		['9m'	, {hour: 4	, letter: 'A'}],
+		['10m'	, {hour: 5	, letter: 'A'}],
+		['11m'	, {hour: 6	, letter: 'A'}],
+		['12m'	, {hour: 7	, letter: 'A'}],
+		['1m'	, {hour: 8	, letter: 'A'}],
+		['2m'	, {hour: 9	, letter: 'A'}],
+		['3m'	, {hour: 10	, letter: 'A'}],
+		['4m'	, {hour: 11	, letter: 'A'}],
+		['5m'	, {hour: 12	, letter: 'A'}],
+		['6d'	, {hour: 1	, letter: 'B'}],
+		['7d'	, {hour: 2	, letter: 'B'}],
+		['8d'	, {hour: 3	, letter: 'B'}],
+		['9d'	, {hour: 4	, letter: 'B'}],
+		['10d'	, {hour: 5	, letter: 'B'}],
+		['11d'	, {hour: 6	, letter: 'B'}],
+		['12d'	, {hour: 7	, letter: 'B'}],
+		['1d'	, {hour: 8	, letter: 'B'}],
+		['2d'	, {hour: 9	, letter: 'B'}],
+		['3d'	, {hour: 10	, letter: 'B'}],
+		['4d'	, {hour: 11	, letter: 'B'}],
+		['5d'	, {hour: 12	, letter: 'B'}]
 	]),
 	keyNotation:  new Map([ //Merged sharp and flat key notations when there are equivalences
 		['G#m'	, '1A' 	], // Minor
@@ -164,23 +216,56 @@ const camelotWheel = { // Use {...camelotWheel.[map].get(x)} to get a copy of th
 		['9B'	, '9B'	],
 		['10B'	, '10B'	],
 		['11B'	, '11B'	],
-		['12B'	, '12B'	]
+		['12B'	, '12B'	],
+		['6m'	, '1A'	], // Open Key
+		['7m'	, '2A'	],
+		['8m'	, '3A'	],
+		['9m'	, '4A'	],
+		['10m'	, '5A'	],
+		['11m'	, '6A'	],
+		['12m'	, '7A'	],
+		['1m'	, '8A'	],
+		['2m'	, '9A'	],
+		['3m'	, '10A'	],
+		['4m'	, '11A'	],
+		['5m'	, '12A'	],
+		['6d'	, '1B'	],
+		['7d'	, '2B'	],
+		['8d'	, '3B'	],
+		['9d'	, '4B'	],
+		['10d'	, '5B'	],
+		['11d'	, '6B'	],
+		['12d'	, '7B'	],
+		['1d'	, '8B'	],
+		['2d'	, '9B'	],
+		['3d'	, '10B'	],
+		['4d'	, '11B'	],
+		['5d'	, '12B'	]
 	]),
 	// Methods to retrieve Key Objects (x) from Key Strings (y)
+	// x: Camelot Key or Open Key -> {hour, letter}
+	// y: Standard Notation Key (flat and sharp), Camelot Key or Open Key -> string
 	hasKey(xy) {return (typeof xy === 'object' ? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') ? this.keyNotation.has(xy.hour + xy.letter) : false): this.keyNotation.has(xy));},
-	getKeyNotationObject(y) {return (this.hasKey(y) ? {...this.keyNotationObject.get(y)} : null);},
+	getKeyNotationObjectCamelot(y) {return (this.hasKey(y) ? {...this.keyNotationObject.get(y)} : null);}, // Retrieves camelot object
+	getKeyNotationObjectOpen(y) {const x = this.getKeyNotationObjectCamelot(y); if (x) {this.translateObjectCamelotToOpen(x);} return x;}, // Retrieves open key object
+	translateObjectCamelotToOpen(x) {if (x.hour >= 8) {x.hour -= 7;} else {x.hour += 5;}; x.letter = (x.letter === 'A' ? 'm' : 'd'); return x;}, // {Camelot} -> {Open Key}
+	translateObjectOpenToCamelot(x) {if (x.hour <= 5) {x.hour += 7;} else {x.hour -= 5;}; x.letter = (x.letter === 'm' ? 'A' : 'B'); return x;}, // {Open Key} -> {Camelot}
+	// Methods to retrieve Key Strings (y) from Key Objects (x)
 	getKeyNotationFlat(x) {return (this.hasKey(x) ? this.wheelNotationFlat.get(x.hour)[x.letter] : null);},
 	getKeyNotationSharp(x) {return (this.hasKey(x) ? this.wheelNotationSharp.get(x.hour)[x.letter] : null);},
+	getKeyNotationOpen(x) {return (this.hasKey(x) ? this.wheelNotationOpen.get(x.hour)[x.letter] : null);},
+	getKeyNotationCamelot(x) {return (this.hasKey(x) ? this.wheelNotationCamelot.get(x.hour)[x.letter] : null);},
 	// Methods to work with Key Objects (x)
 	// Beware to pass a copy of the object if you want a new key object, otherwise the original will be modified!
+	// Works for camelot or open key objects, no need to translate
 	perfectMatch(x) {return x;},
 	energyBoost(x) {x.hour = cyclicOffset(x.hour, 1, [1,12]); return x;},
 	energyDrop(x) {x.hour = cyclicOffset(x.hour, -1, [1,12]); return x;},
-	energySwitch(x) {x.letter = (x.letter === 'A') ? 'B' : 'A'; return x;},
+	energySwitch(x) {x.letter = (x.letter === 'A' || x.letter === 'B' ? (x.letter === 'A' ? 'B' : 'A') : (x.letter === 'm' ? 'd' : 'm')); return x;},
 	moodBoost(x) {x.hour = cyclicOffset(x.hour, 3, [1,12]); return x;},
 	moodDrop(x) {x.hour = cyclicOffset(x.hour, -3, [1,12]); return x;},
-	domKey(x) {this.energySwitch(x);this.energyBoost(x); return x;},
-	subDomKey(x) {this.energySwitch(x);this.energyDrop(x); return x;},
+	domKey(x) {this.energySwitch(x); this.energyBoost(x); return x;},
+	subDomKey(x) {this.energySwitch(x); this.energyDrop(x); return x;},
 	energyRaise(x) {x.hour = cyclicOffset(x.hour, 7, [1,12]); return x;},
 	// Methods to create and apply patterns
 	createHarmonicMixingPattern(length) {return createHarmonicMixingPattern(length);},
@@ -210,31 +295,24 @@ function createHarmonicMixingPattern(playlistLength) {
 		pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
 	});
 	// Sort randomly
-	const result = [];
-	const len = pattern.length;
-	for (let i = len - 1; i >= 0; i--) {
-		const r = Math.floor(Math.random() * (i + 1));
-		for (let j = 0, k = 0; j <= len - 1; j++) {
-			if (typeof result[j] === 'undefined') {
-				if (k === r) {
-					result[j] = pattern[i];
-					break;
-				}
-				k++;
-			}
-		}
+	let last = pattern.length;
+	let n;
+	while (last > 0) {
+		n = Math.floor(Math.random() * last);
+		--last;
+		[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
 	}
-	pattern = result;
+	
 	// Cut to desired length and output
-	if (len > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+	if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
 	return pattern;
 }
 
-function applyPattern(key, pattern, bReturnObj = true) {
+function applyPattern(key, pattern, bReturnObj = true) { // Works with both Camelot and Open Keys objects
 	let keyArr = [];
 	if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(key)) {
 		let firstKey;
-		if (typeof key === 'string') {keyArr.push(camelotWheel.getKeyNotationObject(key));}
+		if (typeof key === 'string') {keyArr.push(camelotWheel.getKeyNotationObjectCamelot(key));}
 		else if (typeof key === 'object' && key.hasOwnProperty('hour') && key.hasOwnProperty('letter')) {keyArr.push(key);}
 		else {return keyArr;}
 		pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});

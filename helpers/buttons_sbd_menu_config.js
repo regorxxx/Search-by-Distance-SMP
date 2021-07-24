@@ -31,7 +31,7 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu('Remap tags');
 		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
 		options.forEach((tagName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag', func: () => {
+			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (recipe.hasOwnProperty(tagName) ? '\t[' + recipe[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
 				let input = '';
 				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \',\')', 'Search by distance', properties[tagName][1], true);} 
 				catch(e) {return;}
@@ -39,7 +39,39 @@ function createConfigMenu(parent) {
 				if (input === properties[tagName][1]) {return;}
 				properties[tagName][1] = input;
 				overwriteProperties(properties);
-			}});
+			}, flags: recipe.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
+		});
+	}
+	{	// Menu to configure properties: weights
+		const menuName = menu.newMenu('Set weights');
+		const options = ['genreWeight', 'styleWeight', 'moodWeight', 'dateWeight', 'keyWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight'];
+		options.forEach((weightName) => {
+			menu.newEntry({menuName, entryText: 'Set ' + weightName.replace('Weight','') + ' weight' + (recipe.hasOwnProperty(weightName) ? '\t[' + recipe[weightName] + '] (forced by recipe)' : '\t[' + properties[weightName][1] + ']'), func: () => {
+				let input = '';
+				try {input = Number(utils.InputBox(window.ID, 'Input weight value:', 'Search by distance', properties[weightName][1], true));} 
+				catch(e) {return;}
+				if (!input.length) {return;}
+				if (isNaN(input)) {return;}
+				if (input === properties[weightName][1]) {return;}
+				properties[weightName][1] = input;
+				overwriteProperties(properties);
+			}, flags: recipe.hasOwnProperty(weightName) ? MF_GRAYED : MF_STRING});
+		});
+	}
+	{	// Menu to configure properties: ranges
+		const menuName = menu.newMenu('Set ranges');
+		const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
+		options.forEach((rangeName) => {
+			menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
+				let input = '';
+				try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
+				catch(e) {return;}
+				if (!input.length) {return;}
+				if (isNaN(input)) {return;}
+				if (input === properties[rangeName][1]) {return;}
+				properties[rangeName][1] = input;
+				overwriteProperties(properties);
+			}, flags: recipe.hasOwnProperty(rangeName) ? MF_GRAYED : MF_STRING});
 		});
 	}
 	{	// Menu to configure filters:
@@ -54,7 +86,7 @@ function createConfigMenu(parent) {
 				catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
 				properties['forcedQuery'][1] = input;
 				overwriteProperties(properties); // Updates panel
-			}});
+			}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 		}
 		{ // Menu to configure properties: tags filter
 			const options = ['genreStyleFilter', 'poolFilteringTag'];
@@ -85,12 +117,13 @@ function createConfigMenu(parent) {
 		});
 	}
 	{	// Menu to configure number properties:
+		const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : '';
 		const menuName = menu.newMenu('Set number config');
 		const options = ['scoreFilter', 'sbd_max_graph_distance', 'poolFilteringN', 'probPick', 'playlistLength', 'progressiveListCreationN'];
 		const lowerHundred = new Set(['scoreFilter', 'probPick', 'progressiveListCreationN']);
 		options.forEach((key) => {
 			const idxEnd = properties[key][0].indexOf('(');
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
 				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1]));}
@@ -133,4 +166,24 @@ function createConfigMenu(parent) {
 		if (!iCount) {menu.newEntry({menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED});}
 	}
 	return menu;
+}
+
+function parseGraphVal(val) {
+	if (isString(val)) { // Safety check
+		if (val.length >= 50) {
+			console.log('Error parsing sbd_max_graph_distance (length >= 50): ' + val);
+			return;
+		}
+		if (val.indexOf('music_graph_descriptors') === -1 || val.indexOf('()') !== -1 || val.indexOf(',') !== -1) {
+			console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + val);
+			return;
+		}
+		const validVars = Object.keys(music_graph_descriptors).map((_) => {return 'music_graph_descriptors.' + _;});
+		if (val.indexOf('+') === -1 && val.indexOf('-') === -1 && val.indexOf('*') === -1 && val.indexOf('/') === -1 && validVars.indexOf(val) === -1) {
+			console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + val);
+			return;
+		}
+		val = Math.floor(eval(val));
+	}
+	return val;
 }
