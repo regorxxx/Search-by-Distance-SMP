@@ -322,7 +322,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 		}
 		
 		for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
-			if (j == style_supergenre_cluster_break) {j = 0;} //Join supergenres clusters in circle: last one is next to first one
+			if (j === style_supergenre_cluster_break) {j = 0;} //Join supergenres clusters in circle: last one is next to first one
 			mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], {weight: inter_supergenre, absoluteWeight: 0, lineshape: ['stroke-dasharray', '5, 5'], linecolor: ['stroke', map_colors.get(style_supergenre_cluster[0][0])]});
 		}
 		
@@ -343,7 +343,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
 */
 function graphDebug(graph = music_graph()) {
-	console.log('music_graph_descriptors_xxx: Basic debug enabled')
+	console.log('music_graph_descriptors_xxx: Basic debug enabled');
 	let bWarning = false;
 	
 	graph.forEachNode(function(node){
@@ -363,7 +363,7 @@ function graphDebug(graph = music_graph()) {
 		if (link.data.absoluteWeight !== 0) { // Stores links with influence values
 			influenceLinks.add(link.fromId + '-' + link.toId);
 		}
-		if (link.data.weight == 0) { // Stores links with zero distance
+		if (link.data.weight === 0) { // Stores links with zero distance
 			zeroLinks.add(link.fromId + '-' + link.toId);
 		}
 	});
@@ -463,11 +463,11 @@ function graphDebug(graph = music_graph()) {
 	const superGenreSuperClusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length;
 	music_graph_descriptors.style_cluster.forEach( (nodePair) => {
 		const nodeNumbers = nodePair[1].length;
- 		for (let i = nodeNumbers; i--;) {
+		for (let i = nodeNumbers; i--;) {
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) { // May be a cluster linked to another cluster
@@ -485,7 +485,7 @@ function graphDebug(graph = music_graph()) {
 	// Check that all nodes on influences are present in other descriptors
 	music_graph_descriptors.style_anti_influence.concat(music_graph_descriptors.style_secondary_origin, music_graph_descriptors.style_primary_origin).forEach( (nodePair) => {
 		const nodeNumbers = nodePair[1].length;
- 		for (let i = nodeNumbers; i--;) {
+		for (let i = nodeNumbers; i--;) {
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
@@ -544,7 +544,7 @@ function graphDebug(graph = music_graph()) {
 	// Check that all superGenre Clusters are present in other descriptors
 	music_graph_descriptors.style_supergenre_cluster.forEach( (nodePair) => {
 		let node = nodePair[0];
-		if (node == 'SKIP') {return;}
+		if (node === 'SKIP') {return;}
 		bFound = false;
 		for (let j = superGenreSuperClusterNumbers; j--;) {
 			if (music_graph_descriptors.style_supergenre_supercluster[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
@@ -560,7 +560,7 @@ function graphDebug(graph = music_graph()) {
 	var bGraphDeclared = true;
 	try {all_music_graph;}
 	catch(e) {
-		if(e.name == "ReferenceError") {
+		if (e.name === "ReferenceError") {
 			bGraphDeclared = false;
 		}
 	}
@@ -572,7 +572,7 @@ function graphDebug(graph = music_graph()) {
 		}
 	}
 	if (bIncludesDeclared) {
-		console.log('music_graph_descriptors_xxx: Advanced debug enabled')
+		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
 		const mygraph = bGraphDeclared ? all_music_graph : music_graph(); // Foobar graph, or HTML graph or a new one
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
@@ -586,7 +586,7 @@ function graphDebug(graph = music_graph()) {
 		
 		const superGenreNumbers = music_graph_descriptors.style_supergenre.length; // SuperGenres
 		for (let i = 0; i < superGenreNumbers; i++, nextIndex++) {
-			if (i + 1 == superGenreNumbers) {nextIndex = 0;}
+			if (i + 1 === superGenreNumbers) {nextIndex = 0;}
 			key_one = music_graph_descriptors.style_supergenre[i][0];
 			key_two = music_graph_descriptors.style_supergenre[nextIndex][0];
 			distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);

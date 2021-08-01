@@ -225,7 +225,7 @@ function on_mouse_lbtn_up(x, y, mask) {
 			window.Repaint();
 		}
 	} else if (mask === MK_SHIFT) {
-		if (buttonsBar.hasOwnProperty('menu')) {buttonsBar.menu().btn_up(x, this.y + this.h)}
+		if (buttonsBar.hasOwnProperty('menu')) {buttonsBar.menu().btn_up(x, this.y + this.h);}
 	}
 }
 

@@ -107,16 +107,16 @@ function nk_combinations(n, k) {
 
 function getClosestDivisor(n, toX){
 	if (!n % toX) {return toX;}
-    let res = [];
+	let res = [];
 	let i = 0;
-    while (i <= n) {
-        if (n % i === 0){
+	while (i <= n) {
+		if (n % i === 0){
 			res.push(i);
 			if (i >= toX) {break;}
 		}
-        i++;
+		i++;
 	}
 	let b = res.pop();
 	let a = res.pop();
-    return 	(Math.abs(b - toX) < Math.abs(a - toX) ? b : a)
+	return (Math.abs(b - toX) < Math.abs(a - toX) ? b : a);
 }

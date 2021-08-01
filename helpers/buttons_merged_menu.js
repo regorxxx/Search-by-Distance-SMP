@@ -76,7 +76,7 @@ function createButtonsMenu(name) {
 					});
 				}
 				// Save and reload
-				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();})
+				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
 				window.Reload();
 			}});

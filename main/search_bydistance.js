@@ -536,7 +536,7 @@ if (typeof on_script_unload !== 'undefined') {
 	on_script_unload = function() {
 		oldFunc();
 		onScriptUnload();
-	}
+	};
 } else {var on_script_unload = onScriptUnload;}
 
 /* 
@@ -1061,7 +1061,7 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 						break;
 					}
 				}
-				i++
+				i++;
 			}
 			distance.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); // First sorted by graph distance, then by weight
 			poollength = distance.length;

@@ -240,7 +240,7 @@ function getAntiInfluences(genreStyle) {
 function getInfluences(genreStyle) {
 	const doubleIndex = music_graph_descriptors.style_primary_origin.flat().indexOf(genreStyle);
 	const index = !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
-	if (index != -1) {
+	if (index !== -1) {
 		return music_graph_descriptors.style_primary_origin[index][1];
 	}
 	return [];
@@ -265,10 +265,10 @@ function get_nodes_from_path(graph, path) {
 // To capitalize nodes if using standard descriptors
 function capitalize(s) {
   if (typeof s !== 'string') {return '';}
-  return s.charAt(0).toUpperCase() + s.slice(1)
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function capitalizeAll(s, sep = ' ') {
-  if (typeof s !== 'string') return '';
+  if (typeof s !== 'string') {return '';}
   return s.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1);}).join(sep); // Split, capitalize each subString and join
 }
