@@ -248,8 +248,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 	hasKey(xy) {return (typeof xy === 'object' ? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') ? this.keyNotation.has(xy.hour + xy.letter) : false): this.keyNotation.has(xy));},
 	getKeyNotationObjectCamelot(y) {return (this.hasKey(y) ? {...this.keyNotationObject.get(y)} : null);}, // Retrieves camelot object
 	getKeyNotationObjectOpen(y) {const x = this.getKeyNotationObjectCamelot(y); if (x) {this.translateObjectCamelotToOpen(x);} return x;}, // Retrieves open key object
-	translateObjectCamelotToOpen(x) {if (x.hour >= 8) {x.hour -= 7;} else {x.hour += 5;}; x.letter = (x.letter === 'A' ? 'm' : 'd'); return x;}, // {Camelot} -> {Open Key}
-	translateObjectOpenToCamelot(x) {if (x.hour <= 5) {x.hour += 7;} else {x.hour -= 5;}; x.letter = (x.letter === 'm' ? 'A' : 'B'); return x;}, // {Open Key} -> {Camelot}
+	translateObjectCamelotToOpen(x) {if (x.hour >= 8) {x.hour -= 7;} else {x.hour += 5;} x.letter = (x.letter === 'A' ? 'm' : 'd'); return x;}, // {Camelot} -> {Open Key}
+	translateObjectOpenToCamelot(x) {if (x.hour <= 5) {x.hour += 7;} else {x.hour -= 5;} x.letter = (x.letter === 'm' ? 'A' : 'B'); return x;}, // {Open Key} -> {Camelot}
 	// Methods to retrieve Key Strings (y) from Key Objects (x)
 	getKeyNotationFlat(x) {return (this.hasKey(x) ? this.wheelNotationFlat.get(x.hour)[x.letter] : null);},
 	getKeyNotationSharp(x) {return (this.hasKey(x) ? this.wheelNotationSharp.get(x.hour)[x.letter] : null);},

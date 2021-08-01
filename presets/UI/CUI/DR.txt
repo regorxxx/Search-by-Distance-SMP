@@ -2,9 +2,12 @@ Provides Dynamic Range values with color codes (CUI).
 
 ----------------------  At Playlist View\Columns\Display Script (CUI)) ----------------------
 
-$ifgreater(%DYNAMIC RANGE%,10,$rgb(97,204,51),
-$ifgreater(%DYNAMIC RANGE%,8,$rgb(224,192,65),
-$ifgreater(%DYNAMIC RANGE%,5,$rgb(251,82,0),
-$rgb(204,17,17))))
-
 %DYNAMIC RANGE%
+
+---------------------- At Playlist View\Columns\Style Script (CUI) ----------------------
+
+$ifgreater(%DYNAMIC RANGE%,10,$set_style(back,$rgb(97,204,51,97,204,51)),
+$ifgreater(%DYNAMIC RANGE%,8,$set_style(back,$rgb(224,192,65,224,192,65)),
+$ifgreater(%DYNAMIC RANGE%,5,$set_style(back,$rgb(251,82,0,251,82,0)),
+$ifgreater(%DYNAMIC RANGE%,0,$set_style(back,$rgb(204,17,17,204,17,17)),
+))))
