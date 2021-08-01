@@ -123,7 +123,7 @@ function music_graph(descriptor = music_graph_descriptors) {
 		}
 		
 		for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
-			if (j == style_supergenre_cluster_break) {j = 0;}  //Join supergenres clusters in circle: last one is next to first one
+			if (j === style_supergenre_cluster_break) {j = 0;}  //Join supergenres clusters in circle: last one is next to first one
 			mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], {weight: inter_supergenre, absoluteWeight: 0});
 		}
 		
@@ -278,7 +278,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 				if (typeof mygraph.getNode(style_cluster[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data.color !== 'undefined') {color = mygraph.getNode(style_cluster[i][1][j]).data.color;}
 				mygraph.addLink(style_cluster[i][0], style_cluster[i][1][j], {weight: cluster, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', color]});
 			}
-			mygraph.addNode(style_cluster[i][0], {shape: style_clusterShape, size: style_clusterSize, imageLink: style_clusterImageLink, color: color});
+			mygraph.addNode(style_cluster[i][0], {shape: style_clusterShape, size: style_clusterSize, imageLink: style_clusterImageLink, color});
 		}
 		
 		const style_weak_substitutions_length = style_weak_substitutions.length;
@@ -360,7 +360,7 @@ function graphDebug(graph = music_graph()) {
 			console.log('music_graph_descriptors_xxx Warning: ' + link.fromId + ' has a link to ' + link.fromId + ' with distance equal to ' + link.data.weight + ' and influence modifier equal to ' + link.data.absoluteWeight);
 			bWarning = true;
 		}
-		if (link.data.absoluteWeight != 0) { // Stores links with influence values
+		if (link.data.absoluteWeight !== 0) { // Stores links with influence values
 			influenceLinks.add(link.fromId + '-' + link.toId);
 		}
 		if (link.data.weight == 0) { // Stores links with zero distance
@@ -371,7 +371,7 @@ function graphDebug(graph = music_graph()) {
 	// Check for links with zero distance but non zero influence values
 	// Usually fires if you add A as substitution to B but also add A as primary/secondary origin to B. Or as anti-influence.
 	const wrongLinks = influenceLinks.intersection(zeroLinks); // This one requires music_graph_html_xxx.js when loaded within html!
-	if (wrongLinks.size != 0) {
+	if (wrongLinks.size !== 0) {
 		console.log('music_graph_descriptors_xxx Warning: there are some links with distance equal to 0 but a non zero influence distance modifier.\n' + '	' + Array.from(wrongLinks).join(', '));
 		bWarning = true;
 	}
@@ -398,7 +398,7 @@ function graphDebug(graph = music_graph()) {
 	// Special keys
 	const otherKeysToCheck = ['substitutions', 'anti_influence', 'primary_origin_influence', 'secondary_origin_influence'];
 	for (let key of otherKeysToCheck){
-		if (!music_graph_descriptors[key] && key != 'substitutions') { // Check for zero valued keys
+		if (!music_graph_descriptors[key] && key !== 'substitutions') { // Check for zero valued keys
 			console.log('music_graph_descriptors_xxx Warning: ' + key + ' has a value of zero. Check \'Weighting, for Foobar2000\' section');
 			bWarning = true;
 		} else if (!Number.isFinite(music_graph_descriptors[key])) { // Check for infinity valued keys
@@ -435,7 +435,7 @@ function graphDebug(graph = music_graph()) {
 			let node = nodePair[0];
 			bFound = false;
 			for (let i = superGenreNumbers; i--;) {
-				if (music_graph_descriptors.style_supergenre[i].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (music_graph_descriptors.style_supergenre[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) {
@@ -444,11 +444,11 @@ function graphDebug(graph = music_graph()) {
 			}
 		}
 		const nodeNumbers = nodePair[1].length;
- 		for (let i = nodeNumbers; i--;) {
+		for (let i = nodeNumbers; i--;) {
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) {
@@ -472,7 +472,7 @@ function graphDebug(graph = music_graph()) {
 			}
 			if (!bFound) { // May be a cluster linked to another cluster
 				for (let i = styleClusterNumbers; i--;) {
-					if (music_graph_descriptors.style_cluster[i][0] == node) {bFound = true;}
+					if (music_graph_descriptors.style_cluster[i][0] === node) {bFound = true;}
 					if (bFound) {break;}
 				}
 			}
@@ -494,25 +494,25 @@ function graphDebug(graph = music_graph()) {
 			}
 			if (!bFound) { // May be a style cluster
 				for (let i = styleClusterNumbers; i--;) {
-					if (music_graph_descriptors.style_cluster[i][0] == node) {bFound = true;}
+					if (music_graph_descriptors.style_cluster[i][0] === node) {bFound = true;}
 					if (bFound) {break;}
 				}
 			}
 			if (!bFound) { // May be a superGenre
 				for (let i = superGenreNumbers; i--;) {
-					if (music_graph_descriptors.style_supergenre[i][0] == node) {bFound = true;}
+					if (music_graph_descriptors.style_supergenre[i][0] === node) {bFound = true;}
 					if (bFound) {break;}
 				}
 			}
 			if (!bFound) { // May be a superGenre Cluster
 				for (let i = superGenreClusterNumbers; i--;) {
-					if (music_graph_descriptors.style_supergenre_cluster[i][0] == node) {bFound = true;}
+					if (music_graph_descriptors.style_supergenre_cluster[i][0] === node) {bFound = true;}
 					if (bFound) {break;}
 				}
 			}
 			if (!bFound) { // May be a superGenre Cluster
 				for (let i = superGenreSuperClusterNumbers; i--;) {
-					if (music_graph_descriptors.style_supergenre_supercluster[i][0] == node) {bFound = true;}
+					if (music_graph_descriptors.style_supergenre_supercluster[i][0] === node) {bFound = true;}
 					if (bFound) {break;}
 				}
 			}
@@ -527,12 +527,12 @@ function graphDebug(graph = music_graph()) {
 		let node = nodePair[0];
 		bFound = false;
 		for (let j = superGenreClusterNumbers; j--;) {
-			if (music_graph_descriptors.style_supergenre_cluster[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+			if (music_graph_descriptors.style_supergenre_cluster[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 			if (bFound) {break;}
 		}
 		if (!bFound) { // May be a superGenre super Cluster
 			for (let i = superGenreSuperClusterNumbers; i--;) {
-				if (music_graph_descriptors.style_supergenre_supercluster[i][0] == node) {bFound = true;}
+				if (music_graph_descriptors.style_supergenre_supercluster[i][0] === node) {bFound = true;}
 				if (bFound) {break;}
 			}
 		}
@@ -547,7 +547,7 @@ function graphDebug(graph = music_graph()) {
 		if (node == 'SKIP') {return;}
 		bFound = false;
 		for (let j = superGenreSuperClusterNumbers; j--;) {
-			if (music_graph_descriptors.style_supergenre_supercluster[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+			if (music_graph_descriptors.style_supergenre_supercluster[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 			if (bFound) {break;}
 		}
 		if (!bFound) {
@@ -605,7 +605,7 @@ function graphDebug(graph = music_graph()) {
 
 		const style_supergenre_clusterNumbers = music_graph_descriptors.style_supergenre_cluster.length; // style_supergenre_clusters
 		for (let i = 0; i < style_supergenre_clusterNumbers; i++, nextIndex++) {
-			if (i + 1 == style_supergenre_clusterNumbers) {nextIndex = 0;}
+			if (i + 1 === style_supergenre_clusterNumbers) {nextIndex = 0;}
 			if(music_graph_descriptors.style_supergenre_cluster[i][0] !== 'SKIP' && music_graph_descriptors.style_supergenre_cluster[nextIndex][0] !== 'SKIP' ) {
 				key_one = music_graph_descriptors.style_supergenre_cluster[i][0];
 				key_two = music_graph_descriptors.style_supergenre_cluster[nextIndex][0];
@@ -625,7 +625,7 @@ function graphDebug(graph = music_graph()) {
 		}	
 		const style_supergenre_superclusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length; // style_supergenre_superclusters
 		for (let i = 0; i < style_supergenre_superclusterNumbers; i++, nextIndex++) {
-			if (i + 1 == style_supergenre_superclusterNumbers) {nextIndex = 0;}
+			if (i + 1 === style_supergenre_superclusterNumbers) {nextIndex = 0;}
 			key_one = music_graph_descriptors.style_supergenre_supercluster[i][0];
 			key_two = music_graph_descriptors.style_supergenre_supercluster[nextIndex][0];
 			distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);

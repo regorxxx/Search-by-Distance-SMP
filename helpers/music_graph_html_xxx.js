@@ -12,7 +12,7 @@ Set.prototype.intersection = function(setB) {
         }
     }
     return intersection;
-}
+};
 
 Set.prototype.union = function(setB) {
     let union = new Set(this);
@@ -20,7 +20,7 @@ Set.prototype.union = function(setB) {
         union.add(elem);
     }
     return union;
-}
+};
 
 Set.prototype.difference = function(setB) {
     let difference = new Set(this);
@@ -28,4 +28,4 @@ Set.prototype.difference = function(setB) {
         difference.delete(elem);
     }
     return difference;
-}
+};

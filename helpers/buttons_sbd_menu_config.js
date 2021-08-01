@@ -146,7 +146,7 @@ function createConfigMenu(parent) {
 			GRAPH: folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
 			WEIGHT: folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
 			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt'
-		}
+		};
 		if (Object.keys(readmes).length) {
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
 				if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) { 

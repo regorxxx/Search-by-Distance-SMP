@@ -13,12 +13,12 @@ function k_combinations(aSet, k) {
 		let isArray = Object.prototype.toString.call(aSet) === '[object Array]' ? 1 : 0; //set
 		if (!isArray || typeof aSet === 'undefined' || aSet === null || aSetLength === null || aSetLength === 0) {
 			console.log('k_combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
-			return; //Array was null or not an array
+			return null; //Array was null or not an array
 		}
 		// Wrong K-size
 		if (!k || k > aSetLength) {
 			console.log('select_pairs: wrong combinatory number (' + k + ').');
-			return;
+			return null;
 		}
 		// K-sized set has only one K-sized subset.
 		if (k === aSetLength) {
@@ -58,7 +58,7 @@ function combinations(aSet) {
 		let isArray = Object.prototype.toString.call(aSet) === '[object Array]' ? 1 : 0; //set
 		if (!isArray || typeof aSet === 'undefined' || aSet === null || aSetLength === null || aSetLength === 0) {
 			console.log('combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
-			return; //Array was null or not an array
+			return null; //Array was null or not an array
 		}
 		// 1-sized set has only one subset.
 		if (aSetLength === 1) {

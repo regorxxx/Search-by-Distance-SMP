@@ -231,7 +231,7 @@ function calcCacheLinkSG(mygraph, limit = -1) {
 function getAntiInfluences(genreStyle) {
 	const doubleIndex = music_graph_descriptors.style_anti_influence.flat().indexOf(genreStyle);
 	const index = !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
-	if (index != -1) {
+	if (index !== -1) {
 		return music_graph_descriptors.style_anti_influence[index][1];
 	}
 	return [];
@@ -264,7 +264,7 @@ function get_nodes_from_path(graph, path) {
 
 // To capitalize nodes if using standard descriptors
 function capitalize(s) {
-  if (typeof s !== 'string') return '';
+  if (typeof s !== 'string') {return '';}
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 

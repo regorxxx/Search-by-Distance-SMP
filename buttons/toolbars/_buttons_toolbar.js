@@ -77,7 +77,7 @@ if (!barProperties.firstPopup[1]) {
 	if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
 		const readme = utils.ReadTextFile(readmePath, 65001);
 		if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
-	};
+	}
 }
 
 // Global toolbar color
@@ -85,7 +85,7 @@ toolbarColor = barProperties.toolbarColor[1];
 bToolbar = toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
 
 // Tooltip at empty bar
-toolbarTooltip = 'Shift + L. Click to configure...'
+toolbarTooltip = 'Shift + L. Click to configure...';
 
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons path

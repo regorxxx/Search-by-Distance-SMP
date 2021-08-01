@@ -6,7 +6,7 @@ const recipeMenu = new _menu();
 
 function createRecipeMenu(parent) {
 	recipeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes'])
+	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	// Header
@@ -29,8 +29,8 @@ function createRecipeMenu(parent) {
 	recipeMenu.newEntry({entryText: 'sep'});
 	recipeMenu.newEntry({entryText: 'None', func: () => {
 		properties.recipe[1] = '';
-		data.recipe = 'None'
-		data.forcedTheme = ''
+		data.recipe = 'None';
+		data.forcedTheme = '';
 		properties.data[1] = JSON.stringify(data);
 		overwriteProperties(properties);
 	}});

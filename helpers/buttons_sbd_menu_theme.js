@@ -7,7 +7,7 @@ const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes'])
+	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	// Recipe forced theme?
@@ -86,8 +86,8 @@ function createThemeMenu(parent) {
 		const theme = _jsonParseFile(file);
 		if (!theme) {console.log('Recipe file is not valid:' + file); return;}
 		// Check
-		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck)}) : 0;
-		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;;
+		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
+		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
 		if (!bCheck) {
 			console.log('File is not a valid theme: ' + (theme.hasOwnProperty('tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));
 			return;
