@@ -91,7 +91,7 @@ function createButtonsMenu(name) {
 				if (isNaN(input) || input > buttonsPath.length) {return;}
 				buttonsPath.splice(input - 1, 0, buttonsPath.splice(idx, 1)[0]);
 				buttonsBar.list.splice(input - 1, 0, buttonsBar.list.splice(idx, 1)[0]);
-				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();})
+				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
 				// Since properties have a prefix according to their loading order when there are multiple instances of the same
 				// script, moving a button when there other "clones" means the other buttons may get their properties names
@@ -114,6 +114,7 @@ function createButtonsMenu(name) {
 								const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
 								deleteProperties(oldProperties); // Delete it at panel
 								for (const key in backup) { // Update Id
+									if (!backup.hasOwnProperty(key)) {continue;}
 									backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 								}
 								setProperties(backup, '', 0, false, true); // And restore at new position

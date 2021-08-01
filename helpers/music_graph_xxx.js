@@ -489,7 +489,7 @@ function graphDebug(graph = music_graph()) {
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) != -1) {bFound = true;}
+				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) { // May be a style cluster
@@ -567,7 +567,7 @@ function graphDebug(graph = music_graph()) {
 	var bIncludesDeclared = true;
 	try {nba();}
 	catch(e) {
-		if(e.name == "ReferenceError") {
+		if(e.name === "ReferenceError") {
 			bIncludesDeclared = false;
 		}
 	}
