@@ -1,0 +1,76 @@
+<NotepadPlus>
+   <Documentation>
+      <Author name="Michael Piz, @Piz at musicbrainz.org" />
+      <Version number="0.0.0 (edit history at end of file)" />
+      <Copyright info="Copyright 2016 by Michael Pizolato. This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Your use of this work constitutes agreement to these terms. License details are available at http://creativecommons.org/licenses/by-nc-sa/4.0/" />
+   </Documentation>
+   <UserLang name="Picard Tagger Script" ext="pts" udlVersion="2.1">
+         <Settings>
+            <Global caseIgnored="no" allowFoldOfComments="yes" foldCompact="yes" forcePureLC="0" decimalSeparator="0" />
+            <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
+         </Settings>
+         <KeywordLists>
+            <Keywords name="Comments">00 01 02 03$noop( 04)</Keywords>
+            <Keywords name="Numbers, prefix1"></Keywords>
+            <Keywords name="Numbers, prefix2"></Keywords>
+            <Keywords name="Numbers, extras1"></Keywords>
+            <Keywords name="Numbers, extras2"></Keywords>
+            <Keywords name="Numbers, suffix1"></Keywords>
+            <Keywords name="Numbers, suffix2"></Keywords>
+            <Keywords name="Numbers, range"></Keywords>
+            <Keywords name="Operators1">% , \</Keywords>
+            <Keywords name="Operators2"></Keywords>
+            <Keywords name="Folders in code1, open">(</Keywords>
+            <Keywords name="Folders in code1, middle"></Keywords>
+            <Keywords name="Folders in code1, close">)</Keywords>
+            <Keywords name="Folders in code2, open"></Keywords>
+            <Keywords name="Folders in code2, middle"></Keywords>
+            <Keywords name="Folders in code2, close"></Keywords>
+            <Keywords name="Folders in comment, open">$noop(</Keywords>
+            <Keywords name="Folders in comment, middle"></Keywords>
+            <Keywords name="Folders in comment, close">)</Keywords>
+            <Keywords name="Keywords1">$add&#x000D;&#x000A;$and&#x000D;&#x000A;$copy&#x000D;&#x000A;$copymerge&#x000D;&#x000A;$delprefix&#x000D;&#x000A;$div&#x000D;&#x000A;$eq&#x000D;&#x000A;$firstalphachar&#x000D;&#x000A;$firstwords&#x000D;&#x000A;$get&#x000D;&#x000A;$gt&#x000D;&#x000A;$gte&#x000D;&#x000A;$if&#x000D;&#x000A;$if2&#x000D;&#x000A;$in&#x000D;&#x000A;$initials&#x000D;&#x000A;$inmulti&#x000D;&#x000A;$left&#x000D;&#x000A;$len&#x000D;&#x000A;$lower&#x000D;&#x000A;$lt&#x000D;&#x000A;$lte&#x000D;&#x000A;$matchedtracks&#x000D;&#x000A;$mod&#x000D;&#x000A;$mul&#x000D;&#x000A;$ne&#x000D;&#x000A;$noop&#x000D;&#x000A;$not&#x000D;&#x000A;$num&#x000D;&#x000A;$or&#x000D;&#x000A;$performer&#x000D;&#x000A;$replace&#x000D;&#x000A;$right&#x000D;&#x000A;$rreplace&#x000D;&#x000A;$rsearch&#x000D;&#x000A;$set&#x000D;&#x000A;$setmulti&#x000D;&#x000A;$setmulti&#x000D;&#x000A;$sub&#x000D;&#x000A;$swapprefix&#x000D;&#x000A;$trim&#x000D;&#x000A;$truncate&#x000D;&#x000A;$unset&#x000D;&#x000A;$upper</Keywords>
+            <Keywords name="Keywords2">_absolutetracknumber&#x000D;&#x000A;_bitrate&#x000D;&#x000A;_bits_per_sample&#x000D;&#x000A;_channels&#x000D;&#x000A;_dirname&#x000D;&#x000A;_extension&#x000D;&#x000A;_filename&#x000D;&#x000A;_format&#x000D;&#x000A;_length&#x000D;&#x000A;_multiartist&#x000D;&#x000A;_primaryreleasetype&#x000D;&#x000A;_rating&#x000D;&#x000A;_recordingcomment&#x000D;&#x000A;_recordingtitle&#x000D;&#x000A;_releasecomment&#x000D;&#x000A;_releasegroup&#x000D;&#x000A;_releasegroupcomment&#x000D;&#x000A;_releaselanguage&#x000D;&#x000A;_sample_rate&#x000D;&#x000A;_secondaryreleasetype&#x000D;&#x000A;_totalalbumtracks&#x000D;&#x000A;album&#x000D;&#x000A;albumartist&#x000D;&#x000A;albumartistsort&#x000D;&#x000A;artist&#x000D;&#x000A;artists&#x000D;&#x000A;artistsort&#x000D;&#x000A;asin&#x000D;&#x000A;barcode&#x000D;&#x000A;catalognumber&#x000D;&#x000A;compilation&#x000D;&#x000A;composer&#x000D;&#x000A;conductor&#x000D;&#x000A;date&#x000D;&#x000A;discnumber&#x000D;&#x000A;discsubtitle&#x000D;&#x000A;djmixer&#x000D;&#x000A;engineer&#x000D;&#x000A;genre&#x000D;&#x000A;instrumentator&#x000D;&#x000A;isrc&#x000D;&#x000A;label&#x000D;&#x000A;language&#x000D;&#x000A;license&#x000D;&#x000A;lyricist&#x000D;&#x000A;media&#x000D;&#x000A;mixer&#x000D;&#x000A;musicbrainz_albumartistid&#x000D;&#x000A;musicbrainz_albumid&#x000D;&#x000A;musicbrainz_artistid&#x000D;&#x000A;musicbrainz_discid&#x000D;&#x000A;musicbrainz_releasetrackid&#x000D;&#x000A;musicbrainz_trackid&#x000D;&#x000A;orchestra&#x000D;&#x000A;originaldate&#x000D;&#x000A;performer&#x000D;&#x000A;producer&#x000D;&#x000A;releasecountry&#x000D;&#x000A;releasestatus&#x000D;&#x000A;releasetype&#x000D;&#x000A;remixer&#x000D;&#x000A;script&#x000D;&#x000A;title&#x000D;&#x000A;totaldiscs&#x000D;&#x000A;totaltracks&#x000D;&#x000A;tracknumber&#x000D;&#x000A;work&#x000D;&#x000A;writer</Keywords>
+            <Keywords name="Keywords3">audiobook&#x000D;&#x000A;broadcast&#x000D;&#x000A;compilation&#x000D;&#x000A;dj-mix&#x000D;&#x000A;ep&#x000D;&#x000A;interview&#x000D;&#x000A;live&#x000D;&#x000A;mixtape/street&#x000D;&#x000A;other&#x000D;&#x000A;remix&#x000D;&#x000A;single&#x000D;&#x000A;soundtrack&#x000D;&#x000A;spokenword</Keywords>
+            <Keywords name="Keywords4">_album&#x000D;&#x000A;_albumArtist&#x000D;&#x000A;_albumArtistFolder&#x000D;&#x000A;_albumArtistTrack&#x000D;&#x000A;_albumFolder&#x000D;&#x000A;_albumNotes&#x000D;&#x000A;_albumTrack&#x000D;&#x000A;_artist&#x000D;&#x000A;_artistFolder&#x000D;&#x000A;_artistTrack&#x000D;&#x000A;_differentAlbumArtist&#x000D;&#x000A;_discNum&#x000D;&#x000A;_isSingle&#x000D;&#x000A;_isUnknownAlbum&#x000D;&#x000A;_isUnknownArtist&#x000D;&#x000A;_isVariousArtists&#x000D;&#x000A;_pattern&#x000D;&#x000A;_relType&#x000D;&#x000A;_title&#x000D;&#x000A;_totaldiscs&#x000D;&#x000A;_trackFile&#x000D;&#x000A;_trackNotes&#x000D;&#x000A;_trackNum</Keywords>
+            <Keywords name="Keywords5">_kA&#x000D;&#x000A;_kAlbum&#x000D;&#x000A;_kAmpersand&#x000D;&#x000A;_kAn&#x000D;&#x000A;_kAudiobook&#x000D;&#x000A;_kBroadcast&#x000D;&#x000A;_kComma&#x000D;&#x000A;_kCompilation&#x000D;&#x000A;_kDJMix&#x000D;&#x000A;_kDefaultMedia&#x000D;&#x000A;_kEP&#x000D;&#x000A;_kEllipsis&#x000D;&#x000A;_kFolderSep&#x000D;&#x000A;_kInterview&#x000D;&#x000A;_kLive&#x000D;&#x000A;_kMixtape&#x000D;&#x000A;_kMultiSpace&#x000D;&#x000A;_kNoTitle&#x000D;&#x000A;_kNonAlbumTracks&#x000D;&#x000A;_kNoteBracketLeft&#x000D;&#x000A;_kNoteBracketRight&#x000D;&#x000A;_kNull&#x000D;&#x000A;_kOther&#x000D;&#x000A;_kPeriod&#x000D;&#x000A;_kRe3Dots&#x000D;&#x000A;_kReAnd&#x000D;&#x000A;_kReArticles&#x000D;&#x000A;_kReCaseInsensitive&#x000D;&#x000A;_kReCloseBrackets&#x000D;&#x000A;_kReEndPeriod&#x000D;&#x000A;_kReFeat&#x000D;&#x000A;_kReIllegalFileChars&#x000D;&#x000A;_kReOpenBrackets&#x000D;&#x000A;_kReQuestionMarks&#x000D;&#x000A;_kReQuoteMarks&#x000D;&#x000A;_kRemix&#x000D;&#x000A;_kSingle&#x000D;&#x000A;_kSingleQuote&#x000D;&#x000A;_kSoundtrack&#x000D;&#x000A;_kSpace&#x000D;&#x000A;_kSpokenword&#x000D;&#x000A;_kThe&#x000D;&#x000A;_kTrackSep1&#x000D;&#x000A;_kTrackSep2&#x000D;&#x000A;_kTrackSep3&#x000D;&#x000A;_kTrackTxt&#x000D;&#x000A;_kUnknownAlbum&#x000D;&#x000A;_kUnknownArtist&#x000D;&#x000A;_kVariousArtists&#x000D;&#x000A;</Keywords>
+            <Keywords name="Keywords6"></Keywords>
+            <Keywords name="Keywords7"></Keywords>
+            <Keywords name="Keywords8"></Keywords>
+            <Keywords name="Delimiters">00$noop( 01 02) 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
+         </KeywordLists>
+         <Styles>
+            <WordsStyle name="DEFAULT" fgColor="000000" bgColor="FFFFFF" fontName="Courier New" fontStyle="0" fontSize="8" nesting="0" />
+            <WordsStyle name="COMMENTS" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="2" nesting="1" />
+            <WordsStyle name="LINE COMMENTS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="3" nesting="1" />
+            <WordsStyle name="NUMBERS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS1" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS2" fgColor="006000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS3" fgColor="006000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS4" fgColor="C04000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS5" fgColor="804000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS6" fgColor="E06000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS7" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="OPERATORS" fgColor="0080FF" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE1" fgColor="8080FF" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE2" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="FOLDER IN COMMENT" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="2" nesting="0" />
+            <WordsStyle name="DELIMITERS1" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="2" nesting="256" />
+            <WordsStyle name="DELIMITERS2" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="1026" />
+            <WordsStyle name="DELIMITERS3" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS4" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS5" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS7" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+         </Styles>
+   </UserLang>
+	<EditHistory>
+		<Version
+			date="2016-11-02"
+			number="0.0.0"
+			notes="1. Initial version."
+		/>
+	</EditHistory>
+</NotepadPlus>
