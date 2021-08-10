@@ -27,8 +27,8 @@ var newButtonsProperties = { //You can simply add new properties here
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
-buttonsBar.list.push(getPropertiesPairs(newButtonsProperties, prefix));
 newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix); // And retrieve
+buttonsBar.list.push(newButtonsProperties);
 
 // we change the default coordinates here to accommodate text
 if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}

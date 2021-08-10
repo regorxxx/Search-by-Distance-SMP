@@ -1,6 +1,6 @@
 REQUISITES:
 -------------
-Spider Monkey Panel:
+Spider Monkey Panel 1.5.2 or greater:
 https://theqwertiest.github.io/foo_spider_monkey_panel/
 
 WINE USERS: 

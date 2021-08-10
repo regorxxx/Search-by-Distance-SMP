@@ -548,333 +548,627 @@ if (panelProperties.bGraphDebug[1]) {
 	if (panelProperties.bProfile[1]) {profiler.Print();}
 }
 
-// 1550 ms 24K tracks weight all default on i7 920 from 2008
-// 1500 ms 24K tracks GRAPH all default on i7 920 from 2008
-// 3500 ms 46K tracks DYNGENRE all default on i7 920 from 2008
-function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['genreWeight'				]),
-                                styleWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['styleWeight'				]),
-                                dyngenreWeight			= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['dyngenreWeight'			]),
-                                moodWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['moodWeight'				]),
-                                keyWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['keyWeight'				]),
-                                dateWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['dateWeight'				]),
-                                dateRange				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['dateRange'				]),
-                                bpmWeight				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['bpmWeight'				]),
-                                bpmRange				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['bpmRange'					]),
-                                playlistLength			= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['playlistLength'			]),
-                                probPick				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['probPick'					]),
-                                scoreFilter				= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['scoreFilter'				]),
-                                sbd_max_graph_distance	= Number(getProperties(SearchByDistance_properties, sbd_prefix)	['sbd_max_graph_distance'	]),
-                                bRandomPick				= getProperties(SearchByDistance_properties, sbd_prefix)		['bRandomPick'				],
-                                method					= getProperties(SearchByDistance_properties, sbd_prefix)		['method'					],
-                                forcedQuery				= getProperties(SearchByDistance_properties, sbd_prefix)		['forcedQuery'				],
-                                bSortRandom				= getProperties(SearchByDistance_properties, sbd_prefix)		['bSortRandom'				],
-								prefix = sbd_prefix, 
-								newProperties = SearchByDistance_properties
-							) { // Number() is used to avoid bugs with dates or other values...
-								// getPropertyByKey would be faster or calling getProperties once.
+// 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
+// 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
+function do_searchby_distance({
+								// --->Default args (aka properties from the panel and input)
+								properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
+								panelProperties			= (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
+								sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
+								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
+								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+								// --->Weights
+								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
+								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
+								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties['dyngenreWeight'][1]) : 0,
+								moodWeight				= properties.hasOwnProperty('moodWeight') ? Number(properties['moodWeight'][1]) : 0,
+								keyWeight				= properties.hasOwnProperty('keyWeight') ? Number(properties['keyWeight'][1]) : 0,
+								dateWeight				= properties.hasOwnProperty('dateWeight') ? Number(properties['dateWeight'][1]) : 0,
+								bpmWeight				= properties.hasOwnProperty('bpmWeight') ? Number(properties['bpmWeight'][1]) : 0,
+								composerWeight 			= properties.hasOwnProperty('composerWeight') ? Number(properties['composerWeight'][1]) : 0,
+								customStrWeight 		= properties.hasOwnProperty('customStrWeight') ? Number(properties['customStrWeight'][1]) : 0, // Only used if tag is set at properties
+								customNumWeight 		= properties.hasOwnProperty('customNumWeight') ? Number(properties['customNumWeight'][1]) : 0, // Only used if tag is set at properties
+								// --->Ranges (for associated weighting)
+								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
+								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties['keyRange'][1]) : 0,
+								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties['dateRange'][1]) : 0,
+								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties['bpmRange'][1]) : 0,
+								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties['customNumRange'][1]) : 0,
+								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties['bNegativeWeighting'][1] : true, // Assigns negative score for num. tags when they fall outside range
+								// --->Pre-Scoring Filters
+								// Query to filter library
+								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
+								bUseAntiInfluencesFilter= properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc. 					
+								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, // Allows only influences by query, before any scoring/distance calc. 
+								// --->Scoring Method
+                                method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
+								// --->Scoring filters
+                                scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
+                                sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
+								// --->Post-Scoring Filters
+								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
+								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],
+								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties['poolFilteringN'][1]) : -1,
+								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
+								// --->Playlist selection
+								// How tracks are chosen from pool
+								bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties['bRandomPick'][1] : false, // Get randomly
+								probPick				= properties.hasOwnProperty('probPick') ? Number(properties['probPick'][1]) : 100, // Get by scoring order but with x probability of being chosen
+								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties['playlistLength'][1]) : 50, // Max playlist size
+								// --->Playlist sorting
+								// How playlist is sorted (independently of playlist selection)
+                                bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties['bSortRandom'][1] : false, // Random sorting 
+								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties['bProgressiveListOrder'][1] : false, // Sorting following progressive changes on tags (score)
+								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties['bScatterInstrumentals'][1] : false, // Intercalate instrumental tracks breaking clusters if possible
+								// --->Special Playlists
+								// Use previous playlist selection, but override playlist sorting, since they use their own logic
+								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties['bInKeyMixingPlaylist'][1] : false, // Key changes following harmonic mixing rules like a DJ
+								bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties['bProgressiveListCreation'][1] : false, // Uses output tracks as new references, and so on...
+								progressiveListCreationN= bProgressiveListCreation ? Number(properties['progressiveListCreationN'][1]) : 1, // > 1 and < 100
+								// --->Console logging
+								// Uses panelProperties instead of properties, so it always points to the right properties... used along buttons or not.
+								// They are the same for all instances within the same panel
+								bProfile 				= panelProperties.hasOwnProperty('bProfile') ? panelProperties['bProfile'][1] : false,
+								bShowQuery 				= panelProperties.hasOwnProperty('bShowQuery') ? panelProperties['bShowQuery'][1] : true,
+								bShowFinalSelection 	= panelProperties.hasOwnProperty('bShowFinalSelection') ? panelProperties['bShowFinalSelection'][1] : true,
+								bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties['bBasicLogging'][1] : false,
+								bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties['bSearchDebug'][1] : false,
+								// --->Output
+								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
+								} = {}) {
+		// Recipe check
+		const themePath = folders.xxx + 'presets\\Search by\\themes\\';
+		const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
+		const bUseRecipe = recipe && (recipe.length || Object.keys(recipe).length);
+		if (bUseRecipe) {
+			let path;
+			if (isString(recipe)) { // File path
+				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
+				console.log(path);
+				recipe = _jsonParseFile(path);
+				if (!recipe) {
+					console.log('Recipe file selected is missing or not valid: ' + path);
+					return;
+				}
+			}
+			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1] : '-no name-');  //TODO: Deprecated
+			// Rewrite args or use destruct when passing args
+			// Sel is ommited since it's a function or a handle
+			// Note a theme may be set within a recipe too, overwriting any other them set
+			// Changes null to infinity and not found theme filenames into full paths
+			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
+			let bOverwriteTheme = false;
+			Object.keys(recipe).forEach((key) => {
+				const value = recipe[key] !== null ? recipe[key] : Infinity;
+				if (allowedKeys.has(key)) {
+					if (isStringWeak(value)) {
+						eval(key + ' = \'' + value + '\'');
+					} else if (isArrayStrings(value)) {
+						const newVal = '\'' + value.join('\',\'') + '\'';
+						eval(key + ' = [' + newVal + ']');
+					} else {eval(key + ' = ' + value);}
+					if (key === 'theme') {bOverwriteTheme = true;};
+				}
+			});
+			if (bBasicLogging) {
+				console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
+				if (bOverwriteTheme) {console.log('Recipe forces its own theme.')};
+			}
+		}
+		// Parse args
+		if (isString(sbd_max_graph_distance)) { // Safety check
+			if (sbd_max_graph_distance.length >= 50) {
+				console.log('Error parsing sbd_max_graph_distance (length >= 50): ' + sbd_max_graph_distance);
+				return;
+			}
+			if (sbd_max_graph_distance.indexOf('music_graph_descriptors') === -1 || sbd_max_graph_distance.indexOf('()') !== -1 || sbd_max_graph_distance.indexOf(',') !== -1) {
+				console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + sbd_max_graph_distance);
+				return;
+			}
+			const validVars = Object.keys(music_graph_descriptors).map((_) => {return 'music_graph_descriptors.' + _;});
+			if (sbd_max_graph_distance.indexOf('+') === -1 && sbd_max_graph_distance.indexOf('-') === -1 && sbd_max_graph_distance.indexOf('*') === -1 && sbd_max_graph_distance.indexOf('/') === -1 && validVars.indexOf(sbd_max_graph_distance) === -1) {
+				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
+				return;
+			}
+			sbd_max_graph_distance = Math.floor(eval(sbd_max_graph_distance));
+			console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);
+		}
+		// Theme check
+		const bUseTheme = theme && (theme.length || Object.keys(theme).length);
+		if (bUseTheme) {
+			let path;
+			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
+				path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
+				theme = _jsonParseFile(path);
+				if (!theme) {
+					console.log('Theme file selected is missing or not valid: ' + path);
+					return;
+				}
+			}
+			
+			// Array of objects
+			const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
+			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck)}) : 0;
+			const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
+			if (!bCheck) {
+				console.log('Theme selected for mix is missing some keys: ' + (theme.hasOwnProperty('name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
+				return;
+			}
+			if (bBasicLogging) {
+				console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : ''));
+				console.log(theme);
+			}
+		}
+		// Sel check
+		if (!bUseTheme) {
+			if (!sel) {
+				console.log('No track\\theme selected for mix.');
+				return;
+			}
+			if (bBasicLogging) {
+				console.log('Using selection as reference: ' + fb.TitleFormat('[%track% - ]%title%').EvalWithMetadb(sel) + ' (' + sel.RawPath + ')');
+			}
+		}
+		if (bProfile) {var test = new FbProfiler('do_searchby_distance');}
+		
+		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
+		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
+		// We check if weights are zero first
+		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? properties['genreTag'][1].split(',').filter(Boolean) : [];
+		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? properties['styleTag'][1].split(',').filter(Boolean) : [];
+		const moodTag = (moodWeight !== 0) ? properties['moodTag'][1].split(',').filter(Boolean) : [];
+		const dateTag = (dateWeight !== 0) ? properties['dateTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? properties['keyTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const bpmTag = (bpmWeight !== 0) ? properties['bpmTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const composerTag = (composerWeight !== 0) ? properties['composerTag'][1].split(',').filter(Boolean) : [];
+		const customStrTag = (customStrWeight !== 0) ? properties['customStrTag'][1].split(',').filter(Boolean) : [];
+		const customNumTag = (customNumWeight !== 0) ? properties['customNumTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		
 		// Check input
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
 		probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 		scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 		const sbd_distanceFilter_dyngenre_below = 5;
 		const sbd_distanceFilter_graph_below = 10;
+		if (customNumTag.length > 1) { // Safety Check. Warn users if they try wrong settings
+			if (bBasicLogging) {console.log('Check \'' + properties['customNumTag'][0] + '\' value (' + properties['customNumTag'][1] + '). Must be only one tag name!.');}
+			return;
+		}
+		if (genreTag.length === 0 && styleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) { // Can not use those methods without genre/style tags at all
+			if (bBasicLogging) {console.log('Check \'' + properties['genreTag'][0] + '\' and \''  + properties['styleTag'][0] + '\'. Both can not be empty when using GRAPH or DYNGENRE methods.');}
+			return;
+		}
 		
-		// Configuration
-		const properties = getPropertiesPairs(newProperties, prefix); // Load once! [0] = descriptions, [1] = values set by user (not defaults!)
-		const genreTag = properties['genreTag'][1];
-		const styleTag = properties['styleTag'][1];
-		const moodTag = properties['moodTag'][1];
-		const poolFilteringArray = ['artist'];
-		// let bPoolFiltering = isArrayStrings(poolFilteringArray);
-		const bPoolFiltering = false;
-		const bProfile = false;
-		const bShowQuery = true;
-		const bShowFinalSelection = true;
-		if (bProfile) {var test = new FbProfiler('Group #1');}
-		// if (bProfile) {test.Print('\nTask #1:', false);}
-		
+		// Zero weights if there are no tag names to look for
+		if (genreTag.length === 0) {genreWeight = 0;}
+		if (styleTag.length === 0) {styleWeight = 0;}
+		if (moodTag.length === 0) {moodWeight = 0;}
+		if (dateTag.length === 0) {dateWeight = 0;}
+		if (keyTag.length === 0) {keyWeight = 0; bInKeyMixingPlaylist = false;}
+		if (bpmTag.length === 0) {bpmWeight = 0;}
+		if (composerTag.length === 0) {composerWeight = 0;}
+		if (customStrTag.length === 0) {customStrWeight = 0;}
+		if (customNumTag.length === 0) {customNumWeight = 0;}
 		
 		if (method === 'DYNGENRE') {  // Warn users if they try wrong settings
 			if (dyngenreWeight === 0) {
-				console.log('Check "' + properties['dyngenreWeight'][0] + '" value (' + dyngenreWeight + '). Must be greater than zero if you want to use DYNGENRE method!.');
+				if (bBasicLogging) {console.log('Check \'' + properties['dyngenreWeight'][0] + '\' value (' + dyngenreWeight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
 				return;
 			} else {method = 'WEIGHT';} // For calcs they are the same!
 		} else {dyngenreWeight = 0;}
 	
 		let minFilter;
-		if (method === 'GRAPH') {
-			dyngenreWeight = 0;
-			minFilter = scoreFilter - sbd_distanceFilter_graph_below;
-		} else {minFilter = scoreFilter - sbd_distanceFilter_dyngenre_below;}
+		if (method === 'GRAPH') {minFilter = scoreFilter - sbd_distanceFilter_graph_below;} 
+		else {minFilter = scoreFilter - sbd_distanceFilter_dyngenre_below;}
+		if (minFilter < 0) {minFilter = 0;}
 		
-		const totalweight = genreWeight + styleWeight + dyngenreWeight +  moodWeight + keyWeight + dateWeight + bpmWeight; //100%
-		const countweights = (genreWeight ? 1 : 0) + (styleWeight ? 1 : 0) + (dyngenreWeight ? 1 : 0) + (moodWeight ? 1 : 0) + (keyWeight ? 1 : 0) + (dateWeight ? 1 : 0) + (bpmWeight ? 1 : 0);
-		let originaldistance = 0;
-    
+		const totalWeight = genreWeight + styleWeight + dyngenreWeight +  moodWeight + keyWeight + dateWeight + bpmWeight + customStrWeight + customNumWeight + composerWeight; //100%
+		const countWeights = (genreWeight ? 1 : 0) + (styleWeight ? 1 : 0) + (dyngenreWeight ? 1 : 0) + (moodWeight ? 1 : 0) + (keyWeight ? 1 : 0) + (dateWeight ? 1 : 0) + (bpmWeight ? 1 : 0) + (customStrWeight ? 1 : 0) + (customNumWeight ? 1 : 0) + (composerWeight ? 1 : 0);
+		
 		if (!playlistLength) {
-			console.log('Check "Playlist Mix length" value (' + playlistLength + '). Must be greater than zero.');
+			if (bBasicLogging) {console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.');}
             return;
 		}
-		if (!totalweight && method !== 'GRAPH') {
-			console.log('Check weight values, all are set to zero');
-            return;
+		if (!totalWeight && method === 'WEIGHT') {
+			if (bBasicLogging) {
+				if (properties['dyngenreWeight'][1] !== 0) {console.log('Check weight values, all are set to zero and ' + properties['dyngenreWeight'][0] + ' is not used for WEIGHT method.');}
+				else {console.log('Check weight values, all are set to zero.');}
+			}
+			return;
 		}
-		const sel = fb.GetFocusItem();
-        if (!sel) {
-			console.log('No track selected for mix.');
-            return;
-		}
+		
 		try {fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery);} // Sanity check
 		catch (e) {fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return;}
+		// Query
+		let query = [];
+		let queryl = 0;
 		
-		// Look if target playlist already exists and clear it. Preferred to removing it, since then we could undo later...
-		const playlist_name = 'Search...';
-		let i = 0;
-		const plc = plman.PlaylistCount;
-        while (i < plc) {
-            if (plman.GetPlaylistName(i) === playlist_name) {
-				plman.ActivePlaylist = i;
-				plman.UndoBackup(plman.ActivePlaylist);
-				plman.ClearPlaylist(plman.ActivePlaylist);
-				break;
-            } else {
-                i++;
-			}
-        }
-		if (i === plc) { //if no playlist was found before
-			plman.CreatePlaylist(plc, playlist_name);
-			plman.ActivePlaylist = plc;
-		}
-        
-        // Query
-        let query = [];
-		let queryl = query.length;
-		
-		// These should be music characteristics not genre/styles. Like "electric blues" o "acoustic", which could be any blues style... those things are not connected by graph, but considered as weight variables instead.
+		// These should be music characteristics not genre/styles. Like 'electric blues' o 'acoustic', which could apply to any blues style... those things are not connected by graph, but considered only for weight scoring instead.
 		const map_distance_exclusions = music_graph_descriptors.map_distance_exclusions; // Set
 		
-		const [keyArr, dateArr, bpmArr] = getTagsValuesV4(new FbMetadbHandleList(sel), ['key','date','bpm']).flat(); 	//We use flat since it's only 1 track. i.e. genre[0][i] === genre.flat()[i]
-		const genre = getTagsValuesV3(new FbMetadbHandleList(sel), [genreTag], true).flat().filter(Boolean); 	//We use flat since it's only 1 track. i.e. genre[0][i] === genre.flat()[i]
-		const style = getTagsValuesV3(new FbMetadbHandleList(sel), [styleTag], true).flat().filter(Boolean); 	//We use flat since it's only 1 track. i.e. genre[0][i] === genre.flat()[i]
-		const mood = getTagsValuesV3(new FbMetadbHandleList(sel), [moodTag], true).flat().filter(Boolean); 	//We use flat since it's only 1 track. i.e. genre[0][i] === genre.flat()[i]
-		const key = keyArr[0];
-		const date = Number(dateArr[0]);
-		const bpm = Number(bpmArr[0]);
+		// Tag filtering: applied globally. Matched values omitted on both calcs, graph and scoring..
+		// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
+		// It's faster than applying array.filter(Boolean).filter(genreStyleFilter)
+		const genreStyleFilter = properties['genreStyleFilter'][1].length ? new Set(properties['genreStyleFilter'][1].split(',').concat('')) : null;
+		const bTagFilter = genreStyleFilter ? true : false; // Only use filter when required
+		
+		// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)
+		// We use flat since it's only 1 track: genre[0][i] === genre.flat()[i]
+		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length.
+		// Using only boolean filter it's 3x faster than filtering by set
+		const selHandleList = bUseTheme ? null : new FbMetadbHandleList(sel);
+		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].genre.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].genre.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean))): [];
+		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].style.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].style.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, styleTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, styleTag, true).flat().filter(Boolean))) : [];
+		const mood = (moodWeight !== 0) ? (bUseTheme ? theme.tags[0].mood.filter(Boolean) : getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean)) : [];
+		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer.filter(Boolean) : getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean)) : [];
+		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr.filter(Boolean) : getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean)) : [];
+		
+		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? keyTag[0] : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? bpmTag[0] : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
+		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
+		const key = (keyWeight !== 0 || bInKeyMixingPlaylist) ? keyArr[0] : '';
+		const date =(dateWeight !== 0) ? Number(dateArr[0]) : 0;
+		const bpm = (bpmWeight !== 0) ? Number(bpmArr[0]) : 0;
+		const customNum = (customNumWeight !== 0) ? Number(customNumArr[0]) : 0;
+		
+		// Sets for later comparison
 		const style_genreSet = new Set(genre.concat(style)).difference(map_distance_exclusions); // We remove exclusions
-		const style_genre = Array.from(style_genreSet);
+		const genreSet = new Set(genre);
+		const styleSet = new Set(style);
+		const moodSet = new Set(mood);
+		const customStrSet = new Set(customStr);
 		
-		
+		let originalWeightValue = 0;
 		// Genres
         const genreNumber = genre.length;
 		if (genreNumber !== 0) {
-			originaldistance += genreWeight;
-			if (genreWeight / totalweight >= totalweight / countweights / 100) {
+			originalWeightValue += genreWeight;
+			if ( genreWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				query[queryl] += query_combinations(genre, genreTag, 'OR');
+				if (genreTag.length > 1) {query[queryl] += query_join(query_combinations(genre, genreTag, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(genre, genreTag, 'OR');}
 			}
-		}
+		} else if (genreWeight !== 0 && bBasicLogging) {console.log('GenreWeight was not zero but selected track had no genre tags');}
         // Styles
 		const styleNumber = style.length;
 		if (styleNumber !== 0) {
-			originaldistance += styleWeight;
-			if ( styleWeight / totalweight >= totalweight / countweights / 100) {
+			originalWeightValue += styleWeight;
+			if ( styleWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				query[queryl] += query_combinations(style, styleTag, 'OR');
+				if (styleTag.length > 1) {query[queryl] += query_join(query_combinations(style, styleTag, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(style, styleTag, 'OR');}
 			}
-		}
+		} else if (styleWeight !== 0 && bBasicLogging) {console.log('styleWeight was not zero but selected track had no style tags');}
 		// Dyngenre
-		const style_genre_length = style_genre.length;
+		const style_genre_length = style_genreSet.size;
 		if (dyngenreWeight !== 0 && style_genre_length !== 0) {
+			// This virtual tag is calculated with previous values
 			var dyngenreNumber = 0;
 			var dyngenre = [];
-			let i = 0;
-			while (i < style_genre_length) {
-				let dyngenre_i = genre_style_map.get(style_genre[i]);
-				if (dyngenre_i) {
-					let k;
-					let dyngenre_i_length = dyngenre_i.length;
-					for (k = 0; k < dyngenre_i_length; k++) {
-						dyngenre.push(dyngenre_i[k]);
-					}
-				}
-				i++;
+			for (const style_genre_i of style_genreSet) {
+				const dyngenre_i = genre_style_map.get(style_genre_i);
+				if (dyngenre_i) {dyngenre = dyngenre.concat(dyngenre_i);}
 			}
 			dyngenreNumber = dyngenre.length;
 			if (dyngenreNumber !== 0) {
-				originaldistance += dyngenreWeight;
+				originalWeightValue += dyngenreWeight;
 			}
-		}
+		} else if (dyngenreWeight !== 0 && bBasicLogging) {console.log('dyngenreWeight was not zero but selected track had no style nor genre tags');}
         // Moods
 		const moodNumber = mood.length;
 		if (moodNumber !== 0) {
-			originaldistance += moodWeight;
-			if (moodWeight / totalweight / moodNumber * kMoodNumber >= totalweight / countweights / 100) {
+			originalWeightValue += moodWeight;
+			if ( moodWeight / totalWeight / moodNumber * kMoodNumber >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				let k = moodNumber >= kMoodNumber ? kMoodNumber : moodNumber; //on combinations of 4
-				const moodcomb = k_combinations(mood, k);
-				query[queryl] += query_combinations(moodcomb, moodTag, 'OR', 'AND');
+				const k = moodNumber >= kMoodNumber ? kMoodNumber : moodNumber; //on combinations of 6
+				const moodComb = k_combinations(mood, k);
+				
+				if (moodTag.length > 1) {query[queryl] += query_join(query_combinations(moodComb, moodTag, 'OR', 'AND'), 'OR');}
+				else {query[queryl] += query_combinations(moodComb, moodTag, 'OR', 'AND');}
 			}
-		}
+		} else if (moodWeight !== 0 && bBasicLogging) {console.log('moodWeight was not zero but selected track had no mood tags');}
         // Key
-		if (key) {
-			originaldistance += keyWeight;
-			if (keyWeight / totalweight >= totalweight / countweights / 100) {
+		if (key.length) {
+			originalWeightValue += keyWeight;
+			if ( keyWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				query[queryl] += 'key IS ' + key;
+				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
+				// Gets both, flat and sharp equivalences
+				const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
+				if (camelotKey) {
+					let nextKeyObj, nextKeyFlat, nextKeySharp;
+					let keyComb = [];
+					// Mayor axis with same letter
+					nextKeyObj = {...camelotKey};
+					for (let i = 0; i < keyRange; i++) {
+						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
+						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+						else {keyComb.push('key IS ' + nextKeySharp);}
+					}
+					nextKeyObj = {...camelotKey};
+					for (let i = 0; i <  keyRange; i++) {
+						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
+						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+						else {keyComb.push('key IS ' + nextKeySharp);}
+					}
+					// Minor axis after changing letter
+					nextKeyObj = {...camelotKey};
+					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
+					for (let i = 0; i <  keyRange - 1; i++) {
+						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
+						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+						else {keyComb.push('key IS ' + nextKeySharp);}
+					}
+					nextKeyObj = {...camelotKey};
+					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
+					for (let i = 0; i < keyRange - 1; i++) {
+						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
+						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+						else {keyComb.push('key IS ' + nextKeySharp);}
+						i++;
+					}
+					// Different letter and same number
+					nextKeyObj = {...camelotKey};
+					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
+					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+					if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+					else {keyComb.push('key IS ' + nextKeySharp);}
+					// Same letter and number
+					nextKeyObj = {...camelotKey};
+					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
+					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
+					if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
+					else {keyComb.push('key IS ' + nextKeySharp);}
+					// And combinate queries
+					if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
+				} else {query[queryl] = 'key IS ' + key;} // For non-standard notations just use simple matching
 			}
-		}
+		} else if (keyWeight !== 0 && bBasicLogging) {console.log('keyWeight was not zero but selected track had no key tags');}
 		// Date
 		if (date) {
-			originaldistance += dateWeight;
-			if (dateWeight / totalweight >= totalweight / countweights / 100) {
+			originalWeightValue += dateWeight;
+			if (dateWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				let dateUpper = date + dateRange;
-				let dateLower = date - dateRange;
-				if (dateUpper !== dateLower) {query[queryl] += 'date GREATER ' + dateLower + ' AND date LESS ' + dateUpper;} 
-				else {query[queryl] += 'date EQUAL ' + date;}
+				const dateUpper = date + dateRange;
+				const dateLower = date - dateRange;
+				const tagNameTF = ((dateTag[0].indexOf('$') === -1) ? dateTag[0] : '"' + dateTag[0] + '"') // May be a tag or a function...
+				if (dateUpper !== dateLower) {query[queryl] += tagNameTF + ' GREATER ' + dateLower + ' AND ' + tagNameTF + ' LESS ' + dateUpper;} 
+				else {query[queryl] += tagNameTF + ' EQUAL ' + date;}
 			}
-		}
+		} else if (dateWeight !== 0 && bBasicLogging) {console.log('dateWeight was not zero but selected track had no date tags');}
 		// BPM
 		if (bpm) {
-			originaldistance += bpmWeight;
-			if (bpmWeight / totalweight >= totalweight / countweights / 100) {
+			originalWeightValue += bpmWeight;
+			if (bpmWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				let bmpUpper = round(bpm * (100 + bpmRange) / 100, 0);
-				let bmpLower = round(bpm * (100 - bpmRange) / 100, 0);
+				const bmpUpper = round(bpm * (100 + bpmRange) / 100, 0);
+				const bmpLower = round(bpm * (100 - bpmRange) / 100, 0);
 				if (bmpUpper !== bmpLower) {query[queryl] += 'bpm GREATER ' + bmpLower + ' AND bpm LESS ' + bmpUpper;}
 				else {query[queryl] += 'bpm EQUAL ' + bpm;}
 			}
-		}
-
+		} else if (bpmWeight !== 0 && bBasicLogging) {console.log('bpmWeight was not zero but selected track had no bpm tags');}
+		// Composer
+		const composerNumber = composer.length;
+		if (composerNumber !== 0) {
+			originalWeightValue += composerWeight;
+			if ( composerWeight / totalWeight >= totalWeight / countWeights / 100) {
+				queryl = query.length;
+				query[queryl] = '';
+				if (composerTag.length > 1) {query[queryl] += query_join(query_combinations(composer, composerTag, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(style, composerTag, 'OR');}
+			}
+		} else if (composerWeight !== 0 && bBasicLogging) {console.log('composerWeight was not zero but selected track had no composer tags');}
+        // customStringTag
+		const customStrNumber = customStr.length;
+		if (customStrNumber !== 0) {
+			originalWeightValue += customStrWeight;
+			if ( customStrWeight / totalWeight >= totalWeight / countWeights / 100) {
+				queryl = query.length;
+				query[queryl] = '';
+				if (customStrTag.length > 1) {query[queryl] += query_join(query_combinations(customStr, customStrTag, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(style, customStrTag, 'OR');}
+			}
+		} else if (customStrWeight !== 0 && bBasicLogging) {console.log('customStrWeight was not zero but selected track had no custom string tags');}
+		// customNumTag
+		if (customNum) {
+			originalWeightValue += customNumWeight;
+			if (customNumWeight / totalWeight >= totalWeight / countWeights / 100) {
+				queryl = query.length;
+				query[queryl] = '';
+				const customNumUpper = customNum + customNumRange;
+				const customNumLower = customNum - customNumRange;
+				// If it worked like bpm in %...
+				// let customNumUpper = round(customNum * (100 + customNumRange) / 100, 0);
+				// let customNumLower = round(customNum * (100 - customNumRange) / 100, 0);
+				const tagNameTF = ((customNumTag[0].indexOf('$') === -1) ? customNumTag[0] : '"' + customNumTag[0] + '"') // May be a tag or a function...
+				if (customNumUpper !== customNumLower) {query[queryl] += tagNameTF + ' GREATER ' + customNumLower + ' AND ' + tagNameTF + ' LESS ' + customNumUpper;}
+				else {query[queryl] += tagNameTF + ' EQUAL ' + customNum;}
+			}
+		} else if (customNumWeight !== 0 && bBasicLogging) {console.log('customNumWeight was not zero but selected track had no custom number tags');}
 		// Total score
-		originaldistance = (originaldistance * 100) / totalweight; // always 100% but this is done as a check...
-		if (bProfile) {test.Print('\nTask #1: Reference track', false);}
+		const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
+		if (bProfile) {test.Print('Task #1: Reference track', false);}
 		
         // Create final query
 		// Pre filtering by query greatly speeds up the next part (weight and graph distance calcs), but it requires variable queries according to the weights.
 		// i.e. if genreWeight is set too high, then only same genre tracks would pass the later score/distance filter... 
 		// But having the same values for other tags could make the track pass to the final pool too, specially for Graph method. 
-		// So a variable pre-filter would be needed, calculated according to the input weight values and later score filter.
-		// Also an input track missing some tags would break the pre-filter logic if not adjusted.
+		// So a variable pre-filter would be needed, calculated according to the input weight values and -estimated- later filters scoring.
+		// Also an input track missing some tags could break the pre-filter logic if not adjusted.
         queryl = query.length;
 		if (queryl === 0) {
-			if (!moodNumber && !styleNumber && !genreNumber) {
+			if (!originalScore) {
 				console.log('No query available for selected track. Probably missing tags!');
 				return;
 			} else {query[queryl] = '';} // Pre-Filter may not be relevant according to weights...
 		}
 		const querylength = query.length;
 		if (method === 'WEIGHT' && dyngenreWeight === 0) { // Weight method. Pre-filtering is really simple...
-			if (querylength === 1 && query[0] === '') {query[querylength] = '';}
+			if (querylength === 1 && !query[0].length) {query[querylength] = '';}
 			else {query[querylength] = query_join(query, 'OR');} //join previous query's
 		} else if (method === 'WEIGHT' && dyngenreWeight !== 0) { //Dyngenre method.
-			query[querylength] = '';
+			query[querylength] = ''; // TODO: Add weight query, now is dynamically set
 		} else { // Graph Method
-			query[querylength] = '';
+			let influencesQuery = [];
+			if (bUseAntiInfluencesFilter) { // Removes anti-influences using queries
+					let influences = [];
+				style_genreSet.forEach(styleGenre => {influences.push(...getAntiInfluences(styleGenre));})
+				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
+				if (influences.length) {
+					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
+					temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
+					influencesQuery.push(temp);
+				}
+			}
+			if (bUseInfluencesFilter) { // Outputs only influences using queries
+				let influences = [];
+				style_genreSet.forEach(styleGenre => {influences.push(...getInfluences(styleGenre));})
+				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
+				if (influences.length) {
+					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
+					temp = '(' + query_join(temp, 'OR') + ')'; // flattens the array. Here changes the 'not' part
+					influencesQuery.push(temp);
+					sbd_max_graph_distance = Infinity;
+					scoreFilter = 40;
+					minFilter = 30;
+				}
+			}
+			
+			query[querylength] = influencesQuery.length ? query_join(influencesQuery, 'AND') : ''; // TODO: Add weight query, now is dynamically set
 		}
-		if (forcedQuery) { //Add user input query to the previous one
+		if (forcedQuery.length) { //Add user input query to the previous one
 			if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND ' + forcedQuery;}
 			else {query[querylength] += forcedQuery;}
 		}
+		if (!query[querylength].length) {query[querylength] = 'ALL'}
 		
 		// Load query
+		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		let handle_list;
 		try {handle_list = fb.GetQueryItems(fb.GetLibraryItems(), query[querylength]);} // Sanity check
-		catch (e) {fb.ShowPopupMessage('Query not valid:\n' + query[querylength]); return;}
-		if (bProfile) {test.Print('\nTask #2: Query', false);}
-		
+		catch (e) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
+		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~900 ms for 55k tracks
 		// It was 500ms
 		handle_list = do_remove_duplicates(handle_list, '%title% - %artist% - %date%', '%title%', '%artist%', '%date%');
 		
 		const tracktotal = handle_list.Count;
-		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
-		console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');
-		
-        //Compute similarity distance by Weight and/or Graph	
-		//Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
-        let distance = [];
-		let cacheLink = [];
+		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
+		if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
+        // Compute similarity distance by Weight and/or Graph
+		// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
+        let scoreData = [];
+		// let cacheLink = new Map();
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
-			let tfo = fb.TitleFormat('%genre%|%style%');
+			let tfo = fb.TitleFormat(genreTag.concat(styleTag).join('|'));
 			handle_list.OrderByFormat(tfo, 1);
 		}
-		if (bProfile) {test.Print('\nTask #3: Remove Duplicates and sorting', false);}
+		if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
 		
 		// const handle_list_array = handle_list.Convert();
-		const [genreHandle, styleHandle, moodHandle, keyHandle, dateHandle, bpmHandle] = getTagsValuesV4(handle_list, [genreTag, styleTag, moodTag,'key','date','bpm']);
-		const genreSet = new Set(genre);
-		const styleSet = new Set(style);
-		const moodSet = new Set(mood);
-		i = 0;
-        while (i < tracktotal) {
-            let genreDistance = 0;
-			let styleDistance = 0;
-            let dyngenreDistance = 0;    
-            let moodDistance = 0;
-            let keyDistance = 0;
-            let dateDistance = 0;
-			let bpmDistance = 0;
-			let map_distance = -1;
-			
+		// Get the tag values for all the handle list. Skip those with weight 0.
+		// Now flat is not needed, we have 1 array of tags per track [i][j]
+		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length, but it's done per track.
+		// Using only boolean filter it's 3x faster than filtering by set, here bTagFilter becomes useful since we may skip +40K evaluations 
+		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handle_list, genreTag, true) : null;
+		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handle_list, styleTag, true) : null;
+		const moodHandle = (moodWeight !== 0) ? getTagsValuesV3(handle_list, moodTag, true) : null;
+		const composerHandle = (composerWeight !== 0) ? getTagsValuesV3(handle_list, composerTag, true) : null;
+		const customStrHandle = (customStrWeight !== 0) ? getTagsValuesV3(handle_list, customStrTag, true) : null;
+		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = getTagsValuesV4(handle_list, restTagNames);
+		const titleHandle = getTagsValuesV3(handle_list, ['title'], true);
+		let i = 0;
+		while (i < tracktotal) {
+            let weightValue = 0;
+			let map_distance = Infinity; // We consider points are not linked by default
 			let dyngenreNumberNew = 0;
 			let dyngenreNew = [];
-			const genreNew = genreHandle[i];
-			const styleNew = styleHandle[i];
-			const moodNew = moodHandle[i];
+			
+			// Get the tags according to weight and filter ''. Also create sets for comparison
+			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? genreHandle[i].filter(tag => !genreStyleFilter.has(tag)) : genreHandle[i].filter(Boolean)) : [];
+			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? styleHandle[i].filter(tag => !genreStyleFilter.has(tag)) : styleHandle[i].filter(Boolean)) : [];
+			const moodNew = (moodWeight !== 0) ? moodHandle[i].filter(Boolean) : [];
 			const genreNewSet = new Set(genreNew);
 			const styleNewSet = new Set(styleNew);
 			const moodNewSet = new Set(moodNew);
-			const keyNew = keyHandle[i][0];
-			const dateNew = Number(dateHandle[i][0]);
-			const bpmNew = Number(bpmHandle[i][0]);
-			const style_genreSetNew = new Set(genreNew.concat(styleNew)).difference(map_distance_exclusions); // We remove exclusions
-			const style_genre_new = Array.from(style_genreSetNew);
-			const style_genre_new_length = style_genre_new.length;
 			
-			// O(i)*O(j*k) time
+			const keyNew = (keyWeight !== 0) ? keyHandle[i][0] : '';
+			const dateNew = (dateWeight !== 0) ? Number(dateHandle[i][0]) : 0;
+			const bpmNew =(bpmWeight !== 0) ? Number(bpmHandle[i][0]) : 0;
+			
+			const composerNew = (composerWeight !== 0) ? composerHandle[i].filter(Boolean) : [];
+			const customStrNew = (customStrWeight !== 0) ? customStrHandle[i].filter(Boolean) : [];
+			const customNumNew = (customNumWeight !== 0) ? Number(customNumHandle[i][0]) : 0;
+			const composerNewSet = new Set(composerNew);
+			const customStrNewSet = new Set(customStrNew);
+			
+			const style_genreSetNew = new Set(genreNew.concat(styleNew)).difference(map_distance_exclusions); // Remove exclusions
+			const style_genre_new_length = style_genreSetNew.size;
+			
+			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
-			if (genreWeight !== 0 && genreNumber !== 0) {
-				let common = genreSet.intersection(genreNewSet).size;
+			if (genreWeight !== 0 && genreNumber !== 0 && genreNew.length) {
+				let common = genreSet.intersectionSize(genreNewSet);
 				if (common) {
-					genreDistance += genreWeight / genreNumber * common;
+					weightValue += genreWeight / genreNumber * common;
 				}
 			}
 			
-			if (styleWeight !== 0 && styleNumber !== 0) {
-				let common = styleSet.intersection(styleNewSet).size;
+			if (styleWeight !== 0 && styleNumber !== 0 && styleNew.length) {
+				let common = styleSet.intersectionSize(styleNewSet);
 				if (common) {
-					styleDistance += styleWeight / styleNumber * common;
+					weightValue += styleWeight / styleNumber * common;
 				}
 			}
 			
-			if (moodWeight !== 0 && moodNumber !== 0) {
-				let common = moodSet.intersection(moodNewSet).size;
+			if (moodWeight !== 0 && moodNumber !== 0 && moodNew.length) {
+				let common = moodSet.intersectionSize(moodNewSet);
 				if (common) {
-					moodDistance += moodWeight / moodNumber * common;
+					weightValue += moodWeight / moodNumber * common;
 				}
 			}
 			
-			if (keyWeight !== 0 && key.length) {
-				if (key === keyNew) {
-					keyDistance += keyWeight;
+			if (keyWeight !== 0 && key.length !== 0 && keyNew.length) {
+				if (key === keyNew) { // Not only fastest but also allows for arbitrary key notations (although only using simple matching)
+					weightValue += keyWeight;
+				} else if (keyRange !== 0){
+					const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(keyNew);
+					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
+					if (camelotKey && camelotKeyNew) {
+						const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
+						const hourDifference = keyRange - Math.abs(camelotKey.hour - camelotKeyNew.hour);
+						// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
+						if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
+							weightValue += (bLetterEqual) ? ((hourDifference + 1)/ (keyRange + 1)) * keyWeight : (hourDifference / keyRange) * keyWeight;  //becomes negative outside the allowed range!
+						}
+					}
 				}
 			}
 			
 			if (dateWeight !== 0 && date !== 0) {
 				if (dateNew !== 0) {
 					if (date === dateNew){
-						dateDistance += dateWeight;
-					} else 	if (dateRange !== 0) {
-						const datedifference = dateRange - Math.abs(date -  dateNew);
-						dateDistance += (datedifference / dateRange) * dateWeight;  //becomes negative outside the allowed range!
+						weightValue += dateWeight;
+					} else if (dateRange !== 0) {
+						const dateDifference = dateRange - Math.abs(date -  dateNew);
+						if ((dateDifference < 0 && bNegativeWeighting) || dateDifference > 0) {
+							weightValue += (dateDifference / dateRange) * dateWeight;  //becomes negative outside the allowed range!
+						}
 					}
 				}
 			}
@@ -882,28 +1176,53 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 			if (bpmWeight !== 0 && bpm !== 0) {
 				if (bpmNew !== 0) {
 					if (bpm === bpmNew){
-						bpmDistance += bpmWeight;
+						weightValue += bpmWeight;
 					} else if (bpmRange !== 0) {
-						const irange = bpm * bpmRange / 100;
-						const bpmdifference = irange - Math.abs(bpm -  bpmNew);
-						bpmDistance += (bpmdifference / bpmRange / bpm * 100 ) * bpmWeight;
+						const iRange = bpm * bpmRange / 100;
+						const bpmdifference = iRange - Math.abs(bpm -  bpmNew);
+						if ((bpmdifference < 0 && bNegativeWeighting) || bpmdifference > 0) {
+							weightValue += (bpmdifference / bpmRange / bpm * 100 ) * bpmWeight; //becomes negative outside the allowed range!
+						}
+					}
+				}
+			}
+			
+			if (composerWeight !== 0 && composerNumber !== 0 && composerNew.length) {
+				let common = composerSet.intersectionSize(composerNewSet);
+				if (common) {
+					weightValue += composerWeight / composerNumber * common;
+				}
+			}
+			
+			if (customStrWeight !== 0 && customStrNumber !== 0 && customStrNew.length) {
+				let common = customStrSet.intersectionSize(customStrNewSet);
+				if (common) {
+					weightValue += customStrWeight / customStrNumber * common;
+				}
+			}
+			
+			if (customNumWeight !== 0 && customNum !== 0) {
+				if (customNumNew !== 0) {
+					if (customNum === customNumNew){
+						weightValue += customNumWeight;
+					} else if (customNumRange !== 0) {
+						const customNumdifference = customNumRange - Math.abs(customNum - customNumNew);
+						if ((customNumdifference < 0 && bNegativeWeighting) || customNumdifference > 0) {
+							weightValue += (customNumdifference / customNumRange) * customNumWeight;  //becomes negative outside the allowed range!
+						}
+						// If it worked like bpm in %...
+						// const iRange = customNum * customNumRange / 100;
+						// const customNumdifference = iRange - Math.abs(customNum -  customNumNew);
+						// weightValue += (customNumDifference / customNumRange / customNum* 100 ) * customNumWeight;
 					}
 				}
 			}
 			
 			if (dyngenreWeight !== 0 && dyngenreNumber !== 0) {
 				if (style_genre_new_length !== 0) {
-					let i = 0;
-					while (i < style_genre_new_length) {
-						let dyngenre_i = genre_style_map.get(style_genre_new[i]);
-						if (dyngenre_i) {
-							let k;
-							let dyngenre_i_length = dyngenre_i.length;
-							for (k = 0; k < dyngenre_i_length; k++) {
-								dyngenreNew.push(dyngenre_i[k]);
-							}
-						}
-						i++;
+					for (let style_genreNew_i of style_genreSetNew) {
+						const dyngenre_i = genre_style_map.get(style_genreNew_i);
+						if (dyngenre_i) {dyngenreNew = dyngenreNew.concat(dyngenre_i);}
 					}
 				}
 				dyngenreNumberNew = dyngenreNew.length;
@@ -912,262 +1231,418 @@ function do_searchby_distanceV2(genreWeight				= Number(getProperties(SearchByDi
 					while (j < dyngenreNumber) {
 						let h = 0;
 							while (h < dyngenreNumberNew) {
-							const [lowrange , highrange] = dyn_genre_range(dyngenre[j], 1); //On +-1 range
-							if (lowrange <= dyngenreNew[h] && dyngenreNew[h] <= highrange) {
-								dyngenreDistance += dyngenreWeight / dyngenreNumber;
-								break;
-							}
+								if (dyngenreNew[h] === dyngenre[j]) {
+									weightValue += dyngenreWeight / dyngenreNumber;
+									break;
+								} else if (dyngenreRange !== 0) {
+									const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](dyngenre[j], dyngenreRange, true);
+									if (valueLower !== -1) { //All or none are -1
+										if (valueLower > dyngenre[j]) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
+											if (lowerLimit <= dyngenreNew[h] && dyngenreNew[h] <= valueLower) {  // (lowerLimit , x)
+												weightValue += dyngenreWeight / dyngenreNumber;
+												break;
+											}
+											else if (valueLower <= dyngenreNew[h] && dyngenreNew[h] <= dyngenre[j]) {  // (x, x + y)
+												weightValue += dyngenreWeight / dyngenreNumber;
+												break;
+											}
+											else if (valueUpper <= dyngenreNew[h] && dyngenreNew[h] <= upperLimit) { // (x - y, upperLimit)
+												weightValue += dyngenreWeight / dyngenreNumber;
+												break;
+											}
+										} else if (valueLower <= dyngenreNew[h] && dyngenreNew[h] <= valueUpper) {
+											weightValue += dyngenreWeight / dyngenreNumber;
+											break;
+										}
+									}
+								}
 							h++;
 						}
 						j++;
 					}
 				}
 			}
-			
-			const weightValue = round(((genreDistance + styleDistance + dyngenreDistance + moodDistance + keyDistance + dateDistance + bpmDistance) * 100) / originaldistance / totalweight, 3);
-			const score = round(weightValue * 100, 1);
+			const score = round(weightValue * 10000 / originalScore / totalWeight, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 			
 			if (method === 'GRAPH') {
 				// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
-				if (score < minFilter) {
-					map_distance = -1;
-				} else {
-					// PUT THIS IN ITS OWN FUNCTION
+				if (score >= minFilter) {
 					// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j): 
-					// O(i)*O(j*k)*O(lg n) time
+					// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
 					// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
 					// Pre-filtering number of tracks is the best approach to reduce calc time (!)
-					let map_distance_setA = new Set();
-					let map_distance_setB = new Set();
-
-					let j = 0;
-					let i_influenceDistance = 0;
-					while (j < style_genre_length) {
-						let h = 0;
-						while (h < style_genre_new_length) {
-							if (style_genre[j] === style_genre_new[h]) {  // Same style/genre, no need to continue
-									map_distance_setB.add(0);
-									break;
-							} else {
-								let jh_distance = -1;
-								let jh_influenceDistance = 0;
-								let bfoundcache = 0;
-								let k = cacheLink.length;
-								while (k--){  //Look first at cache. Having the list already sorted by genre/style it gets even faster...
-									if (cacheLink[k].styleB === style_genre_new[h] && cacheLink[k].styleA === style_genre[j]) { //style_genre_new changes more, so first one...
-										jh_distance = cacheLink[k].distance;
-										jh_influenceDistance = cacheLink[k].influenceDistance;
-										bfoundcache = 1;
-										break;
-									} else if (cacheLink[k].styleA === style_genre_new[h] && cacheLink[k].styleB === style_genre[j]) { //idem, but reversed
-										jh_distance = cacheLink[k].distance;
-										jh_influenceDistance = cacheLink[k].influenceDistance;
-										bfoundcache = 1;
-										break;
-									}
-								}
-								if (!bfoundcache) { // Calc distances if not found at cache. This is the heaviest part of the calc.
-									[jh_distance, jh_influenceDistance] = calc_map_distance(all_music_graph, style_genre[j], style_genre_new[h], true); 
-									//Graph is initialized at startup
-									cacheLink.push({ styleA: style_genre[j], styleB: style_genre_new[h], distance: jh_distance , influenceDistance: jh_influenceDistance});
-								}
-								if (jh_distance !== -1) {
-									map_distance_setB.add(jh_distance);
-								}
-								if (jh_influenceDistance !== 0) {i_influenceDistance += jh_influenceDistance;} // Added to the total distance, not per link.
-							}
-							h++;
-						}
-						if (map_distance_setB.size) { //Get the minimum distance of the entire set
-							if (map_distance === -1) {
-								if (map_distance_setB.has(0)) {
-									map_distance = 0;
-								} else {
-									let setMinB = Math.min(...Array.from(map_distance_setB));
-									map_distance = setMinB;
-								}
-							} else {
-								let setMinB = Math.min(...Array.from(map_distance_setB));
-								map_distance += setMinB;
-							}
-							map_distance_setB.clear();
-						}
-						j++;
-					}
-					if (map_distance !== -1) {
-						map_distance += i_influenceDistance; // Adds negative influence. Note it's added to the total distance, not per link.
-						map_distance /= style_genre_new_length;  // And calcs mean distance!
-						map_distance = round(map_distance,1);
+					// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
+					let mapKey = [[...style_genreSet].sort(),[...style_genreSetNew].sort()].join(' -> ');
+					if (cacheLinkSet.has(mapKey)) { // Mean distance from entire set (A,B,C) to (X,Y,Z)
+						map_distance = cacheLinkSet.get(mapKey);
+					} else { // Calculate it if not found
+						map_distance = calcMeanDistance(all_music_graph, style_genreSet, style_genreSetNew);
+						cacheLinkSet.set(mapKey, map_distance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
 					}
 				}
 			} // Distance / style_genre_new_length < sbd_max_graph_distance / style_genre_length ?
 			if (method === 'GRAPH') {
-				if (map_distance !== -1 && map_distance <= sbd_max_graph_distance) { //	We are checking that the  mean distance of every genre/style
-					// Save computed distance and index									from new track is below graph distance
-					const newtrack = handle_list[i];
-					const newtrack_info = newtrack.GetFileInfo();
-					const titleIdx = newtrack_info.MetaFind('title');
-					const title = (titleIdx !== -1) ? newtrack_info.MetaValue(titleIdx,0) : '';
-					distance.push({ index: i, name: title, value: score, mapdistance: map_distance });
+				if (map_distance <= sbd_max_graph_distance) {
+					scoreData.push({ index: i, name: titleHandle[i][0], score: score, mapdistance: map_distance });
 				}
 			}
 			if (method === 'WEIGHT') {
-				if (weightValue !== -1 && score > minFilter) {
-					// Save computed distance and index
-					const newtrack = handle_list[i];
-					const newtrack_info = newtrack.GetFileInfo();
-					const titleIdx = newtrack_info.MetaFind('title');
-					const title = (titleIdx !== -1) ? newtrack_info.MetaValue(titleIdx,0) : '';
-					distance.push({ index: i, name: title, value: score });
+				if (score > minFilter) {
+					scoreData.push({ index: i, name: titleHandle[i][0], score: score });
 				}
 			}
             i++;
         }
-		if (bProfile) {test.Print('\nTask #4: Score and Distance', false);}
-		// console.log(distance);
-		let poollength = distance.length;
+		if (bProfile) {test.Print('Task #4: Score and Distance', false);}
+		let poolLength = scoreData.length;
 		if (method === 'WEIGHT') {
-			distance.sort(function (a, b) {return b.value - a.value;});
+			scoreData.sort(function (a, b) {return b.score - a.score;});
 			let i = 0;
-			while (i < poollength) {
-				const i_score = distance[i].value;
+			while (i < poolLength) {
+				const i_score = scoreData[i].score;
 				if (i_score < scoreFilter) { //If below minimum score
 					if (i >= playlistLength) { //Break when reaching required playlist length
-						distance.length = i;
+						scoreData.length = i;
 						break;
-					} else if (sbd_distanceFilter_dyngenre_below && i_score < minFilter) {	//Or after min value - 10% range
-						distance.length = i;
+					} else if (sbd_distanceFilter_dyngenre_below && i_score < minFilter) { //Or after min score - 10% range
+						scoreData.length = i;
 						break;
 					}
 				}
 				i++;
 			}
-			poollength = distance.length;
-			console.log('Pool of tracks with similarity greater than ' + scoreFilter + '%: ' + poollength + ' tracks');
+			poolLength = scoreData.length;
+			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + scoreFilter + '%: ' + poolLength + ' tracks');}
 		} 
-		else {	// GRAPH
-				// Done on 3 steps. Weight filtering (done before!) -> Graph distance filtering -> Graph distance sort
-			// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE VALUE?
-			distance.sort(function (a, b) {return b.value - a.value;});
+		else { // GRAPH
+			// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
+			// Now we check if all tracks are needed (over 'minFilter') or only those over 'scoreFilter'.
+			// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
+			scoreData.sort(function (a, b) {return b.score - a.score;});
 			let i = 0;
-			while (i < poollength) {
-				const i_score = distance[i].value;
+			while (i < poolLength) {
+				const i_score = scoreData[i].score;
 				if (i_score < scoreFilter) {	//If below minimum score
 					if (i >= playlistLength) {	//Break when reaching required playlist length
-						distance.length = i;
+						scoreData.length = i;
 						break;
-					} else if (sbd_distanceFilter_graph_below && i_score < minFilter) {	//Or after min value - 10% range
-						distance.length = i;
+					} else if (sbd_distanceFilter_graph_below && i_score < minFilter) {	//Or after min score - 10% range
+						scoreData.length = i;
 						break;
 					}
 				}
-				i++;
+				i++
 			}
-			distance.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); // First sorted by graph distance, then by weight
-			poollength = distance.length;
-			console.log('Pool of tracks with similarity greater than ' + (scoreFilter - sbd_distanceFilter_graph_below) + '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poollength + ' tracks');
+			scoreData.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); // First sorted by graph distance, then by weight
+			poolLength = scoreData.length;
+			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + minFilter + '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
 		}
 		
-		// Pre Filter (note there are no real duplicates at this point)
+		// Post Filter (note there are no real duplicates at this point)
 		if (bPoolFiltering) {
 			let handlePoolArray = [];
-			let i = poollength;
-			while (i--) {handlePoolArray.push(handle_list_array[distance[i].index]);}
+			let i = poolLength;
+			while (i--) {handlePoolArray.push(handle_list[scoreData[i].index]);}
 			let handlePool = new FbMetadbHandleList(handlePoolArray);
-			handlePool = do_remove_duplicatesV3(handlePool, null, poolFilteringArray, 2); // n + 1 = 3 tracks set of tags
-			let distanceCopy = [];
+			handlePool = do_remove_duplicatesV3(handlePool, null, poolFilteringTag, poolFilteringN); // n + 1
+			const [titleHandlePool] = getTagsValuesV4(handlePool, ['title']);
+			let filteredScoreData = [];
 			i = 0;
 			while (i < handlePool.Count) {
-				let newtrack = handlePool[i];
-				let newtrack_info = newtrack.GetFileInfo();
-				let titleIdx = newtrack_info.MetaFind('title');
-				let title = (titleIdx !== -1) ? newtrack_info.MetaValue(titleIdx,0) : '';
 				let j = 0;
-				while (j < poollength) { 
-					if (distance[j].name === title) {
-						distanceCopy[i] = distance[j]; //It's an object! only copy references
+				while (j < poolLength) { 
+					if (titleHandlePool[i][0] === scoreData[j].name) {
+						filteredScoreData[i] = scoreData[j]; // Copies references
 					}
 					j++;
 				}
 				i++;
 			}
-			distance = distanceCopy; //We don't care about storing only the selected references...
-			poollength = distance.length;
-			console.log('Pool of tracks after filtering by : ' + distance.length + ' tracks');
-		}
+			scoreData = filteredScoreData; // Maintains only selected references...
+			poolLength = scoreData.length;
+			if (bBasicLogging) {console.log('Pool of tracks after post-filtering, ' + ++poolFilteringN + ' tracks per ' + poolFilteringTag.join(', ') + ': ' + poolLength + ' tracks');}
+		}	
 		
 		// Final selection
-		let handleSelectionArray = [];
-		let SelectionArray = []; //For console
-		if (poollength > playlistLength) {
-			if (bRandomPick){	//Random from pool
-				const numbers = Array(poollength).fill().map((_, index) => index);
-				numbers.sort(() => Math.random() - 0.5);
-				const randomSeed = numbers.slice(0, playlistLength); //random numbers from 0 to playlistLength - 1
-				let i = 0;
-				while (i < playlistLength) {
-					const i_random = randomSeed[i];
-					handleSelectionArray.push(handle_list[distance[i_random].index]);
-					SelectionArray.push(distance[i_random]);
-					i++;
-				}
-			} else { 
-				if (probPick < 100) {	//Random but starting from high score picked tracks
-					let randomSeed = 0;
-					let indexSelectionArray = []; //Save index and handles in parallel. Faster than comparing handles.
-					let i = 0;
-					while (indexSelectionArray.length < playlistLength) {
-						randomSeed = Math.floor((Math.random() * 100) + 1);
-						if (randomSeed < probPick) {
-							if (indexSelectionArray.indexOf(distance[i].index) === -1) { //No duplicate selection
-								indexSelectionArray.push(distance[i].index);
-								handleSelectionArray.push(handle_list[distance[i].index]);
-								SelectionArray.push(distance[i]);
+		// In Key Mixing or standard methods.
+		let selectedHandlesArray = []; // Final playlist output
+		let selectedHandlesData = []; // For console
+		if (bInKeyMixingPlaylist) {
+			// DJ-like playlist creation with key changes following harmonic mixing rules... Uses 9 movements described at 'camelotWheel' on camelot_wheel_xxx.js
+			// The entire pool is considered, instead of using the standard playlist selection. Since the pattern is random, it makes no sense
+			// to use any specific order of pre-selection or override the playlist with later sorting.
+			// Also note the movements creates a 'path' along the track keys, so even changing or skipping one movement changes drastically the path;
+			// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements. 
+			// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
+			// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
+			bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
+			if (key.length) {
+				// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
+				const size = poolLength < playlistLength ? poolLength : playlistLength;
+				const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
+				if (bSearchDebug) {console.log(pattern)};
+				let nextKeyObj;
+				let keyCache = new Map();
+				let keyDebug = [];
+				let keySharpDebug = [];
+				let patternDebug = [];
+				let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).shuffle());
+				let nextIndexScore = 0;
+				let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
+				let camelotKeyCurrent, camelotKeyNew;
+				for (let i = 0, j = 0; i < size - 1; i++) {
+					// Search key
+					const indexScore = nextIndexScore;
+					const index = nextIndex;
+					if (!keyCache.has(index)) {
+						const keyCurrent = keyHandle[index][0];
+						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
+						if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
+					} else {camelotKeyCurrent = keyCache.get(index);}
+					// Delete from check selection
+					toCheck.delete(indexScore);
+					if (!toCheck.size) {break;}
+					// Find next key
+					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({...camelotKeyCurrent}) : null; // Applies movement to copy of current key
+					if (nextKeyObj) { // Finds next track, but traverse pool with random indexes...
+						let bFound = false;
+						for (const indexNewScore of toCheck) {
+							const indexNew = scoreData[indexNewScore].index;
+							if (!keyCache.has(indexNew)) {
+								const keyNew = keyHandle[indexNew][0];
+								camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
+								if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
+								else {toCheck.delete(indexNew);}
+							} else {camelotKeyNew = keyCache.get(indexNew);}
+							if (camelotKeyNew) {
+								if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
+									selectedHandlesArray.push(handle_list[index]);
+									selectedHandlesData.push(scoreData[indexScore]);
+									if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
+									nextIndex = indexNew; // Which will be used for next movement
+									nextIndexScore = indexNewScore; // Which will be used for next movement
+									bFound = true;
+									break;
+								}
 							}
 						}
-						i++;
-						if (i >= poollength) { //Start selection from the beginning of pool
-							i = 0;
-						}
+						if (!bFound) { // If nothing is found, then continue next movement with current track
+							camelotKeyNew = camelotKeyCurrent; // For debug console on last item
+							if (j === 1) {j = 0; continue;}  // try once retrying this step with default movement
+							else {
+								pattern[i] = 'perfectMatch';
+								i--;
+								j++;
+							}
+						} else {j = 0;} // Reset retry counter if found 
+					} else { // No tag or bad tag
+						i--;
+						if (toCheck.size) {nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index;} // If tag was not found, then use next handle
 					}
-				} else {	//In order starting from high score picked tracks
-					distance.length = playlistLength;
+				}
+				// Add tail
+				selectedHandlesArray.push(handle_list[nextIndex]); 
+				selectedHandlesData.push(scoreData[nextIndexScore]);
+				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
+				// Debug console
+				if (bSearchDebug) {
+					console.log('Keys from selection:');
+					console.log(keyDebug);
+					console.log(keySharpDebug);
+					console.log('Pattern applied:');
+					console.log(patternDebug); // Always has one item less thankey arrays
+				}
+			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
+		} else { // Standard methods
+			if (poolLength > playlistLength) {
+				if (bRandomPick){	//Random from pool
+					const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
+					const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
 					let i = 0;
 					while (i < playlistLength) {
-						handleSelectionArray.push(handle_list[distance[i].index]);
-						SelectionArray.push(distance[i]);
+						const i_random = randomseed[i];
+						selectedHandlesArray.push(handle_list[scoreData[i_random].index]);
+						selectedHandlesData.push(scoreData[i_random]);
 						i++;
+					}
+				} else { 
+					if (probPick < 100) {	//Random but starting from high score picked tracks
+						let randomseed = 0;
+						let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
+						let i = 0;
+						while (indexSelectionArray.length < playlistLength) {
+							randomseed = Math.floor((Math.random() * 100) + 1);
+							if (randomseed < probPick) {
+								if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
+									indexSelected.add(scoreData[i].index);
+									selectedHandlesArray.push(handle_list[scoreData[i].index]);
+									selectedHandlesData.push(scoreData[i]);
+								}
+							}
+							i++;
+							if (i >= poolLength) { //Start selection from the beginning of pool
+								i = 0;
+							}
+						}
+					} else {	//In order starting from high score picked tracks
+						let i = 0;
+						while (i < playlistLength) {
+							selectedHandlesArray.push(handle_list[scoreData[i].index]);
+							selectedHandlesData.push(scoreData[i]);
+							i++;
+						}
+					}
+				}
+			} else {	//Entire pool
+				let i = 0;
+				while (i < poolLength) {
+					selectedHandlesArray[i] = handle_list[scoreData[i].index];
+					selectedHandlesData.push(scoreData[i]);
+					i++;
+				}
+				if (isFinite(playlistLength)) {
+					if (method === 'GRAPH') {
+						if (bBasicLogging) {
+							let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
+							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+						}
+					}
+					if (bBasicLogging) {
+						let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 					}
 				}
 			}
-		} else {	//Entire pool
+		}
+
+		// Final sorting
+		// This are final sorting-only steps, which may override previous one(s). But always outputs the same set of tracks.
+		// Sorting is disabled when using bInKeyMixingPlaylist for harmonic mixed playlists, since they have its own order.
+		// bProgressiveListCreation also changes sorting, since it has its own order after playlist creation/sorting!
+		const finalPlaylistLength = selectedHandlesArray.length;
+		// Note that bRandomPick makes playlist randomly sorted too (but using different sets of tracks on every call)!
+		if (bSortRandom) {
+			if (bProgressiveListOrder) {console.log('Warning: bSortRandom and bProgressiveListOrder are both set to true, but last one overrides random order.');}
+			for (let i = finalPlaylistLength - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[selectedHandlesArray[i], selectedHandlesArray[j]] = [selectedHandlesArray[j], selectedHandlesArray[i]];
+				[selectedHandlesData[i], selectedHandlesData[j]] = [selectedHandlesData[j], selectedHandlesData[i]];
+			}
+		}
+		// Forces progressive changes on tracks, independently of the previous sorting/picking methods
+		// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
+		if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
+			if (bSortRandom) {console.log('Warning: bProgressiveListOrder is overriding random sorting when used along bSortRandom.');}
+			selectedHandlesData.sort(function (a, b) {return b.score - a.score;});
+			selectedHandlesArray.sort(function (a, b) {return b.score - a.score;});
+			if (method === 'GRAPH') { // First sorted by graph distance, then by score
+				selectedHandlesData.sort(function (a, b) {return a.mapdistance - b.mapdistance;});
+				selectedHandlesArray.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); 
+			}
+		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.')}
+		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
+		// May override previous sorting methods (only for instrumental tracks). 
+		// Finds instrumental track indexes, and move them to a random range without overlapping.
+		if (bScatterInstrumentals) { // Could reuse scatter_by_tags but since we already have the tags... done here
+			let newOrder = [];
+			for (let i = 0; i < finalPlaylistLength; i++) {
+				const index = selectedHandlesData[i].index;
+				const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
+				const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
+				const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
+				if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
+					newOrder.push(i);
+				}
+			}
+			// Reorder
+			const toMoveTracks = newOrder.length;
+			if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
+			const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
+			if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
+				let removed = [], removedData = [];
+				[...newOrder].reverse().forEach((index) => {
+					removed.push(...selectedHandlesArray.splice(index, 1));
+					removedData.push(...selectedHandlesData.splice(index, 1));
+				});
+				removed.reverse();
+				removedData.reverse();
+				removed.forEach((handle, index) => {
+					const i_scatterInterval = index * scatterInterval;
+					let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
+					if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
+					if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j)};
+					selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
+					selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
+				});
+			} else if (toMoveTracks) {console.log('Warning: Could not scatter instrumentals. Interval is too low. (' + toMoveTracks + ' < 2)')}
+		}
+		
+		// Progressive list creation, uses output tracks as new references, and so on...
+		// Note it can be combined with 'bInKeyMixingPlaylist', creating progressive playlists with harmonic mixing for every sub-group of tracks
+		if (bProgressiveListCreation) {
+			if (progressiveListCreationN > 1 && progressiveListCreationN < 100) { // Safety limit
+				const newPlaylistLength = Math.floor(playlistLength / (progressiveListCreationN + 1)); // First call also included N + 1!
+				const firstPlaylistLength = newPlaylistLength + playlistLength % (progressiveListCreationN + 1); // Get most tracks from 1st call
+				if (newPlaylistLength > 2) { // Makes no sense to create a list with groups of 1 or 2 tracks...
+					if (finalPlaylistLength >= firstPlaylistLength) { // Don't continue if 1st playlist doesn't have required num of tracks
+						selectedHandlesArray.length = firstPlaylistLength;
+						// Use the track with less score from pool as new reference or the last track of the playlist when using 'In key mixing'
+						let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handle_list[scoreData[poolLength - 1].index];
+						// Reuse arguments for successive calls and disable debug/logs and playlist creation
+						let newArgs = {};
+						for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
+						newArgs = {...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false ,bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false};
+						// Get #n tracks per call and reuse lower scoring track as new selection
+						let newSelectedHandlesArray, newSelectedHandlesData;
+						for (let i = 0; i < progressiveListCreationN; i++) {
+							const prevtLength = selectedHandlesArray.length;
+							if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
+							[newSelectedHandlesArray, newSelectedHandlesData, , newArgs['sel']] = do_searchby_distance(newArgs);
+							// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
+							selectedHandlesArray = do_remove_duplicates(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, '%title%', '%artist%', '%date%').Convert();
+							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
+						}
+					} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.')}
+				} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.')}
+			} else {console.log('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).')}
+		}
+		
+		if (bProfile) {test.Print('Task #5: Final Selection', false);}
+		if (bShowFinalSelection && !bProgressiveListCreation) {
+			let i = finalPlaylistLength;
+			while (i--) {console.log(selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : ''));}
+		}
+			
+		// Insert to playlist
+		if (bCreatePlaylist) {
+			// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
+			const playlist_name = 'Search...';
 			let i = 0;
-			while (i < poollength) {
-				handleSelectionArray[i] = handle_list[distance[i].index];
-				SelectionArray.push(distance[i]);
+			const plc = plman.PlaylistCount;
+			while (i < plc) {
+				if (plman.GetPlaylistName(i) === playlist_name) {
+					plman.ActivePlaylist = i;
+					plman.UndoBackup(i);
+					plman.ClearPlaylist(i);
+					break;
+				}
 				i++;
 			}
-			if (isFinite(playlistLength)) {
-				console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check "' + SearchByDistance_properties.sbd_max_graph_distance[0] + '" parameter (= ' + scoreFilter + '%).');
+			if (i === plc) { //if no playlist was found before
+				plman.CreatePlaylist(plc, playlist_name);
+				plman.ActivePlaylist = plc;
 			}
+			const outputHandleList = new FbMetadbHandleList(selectedHandlesArray);
+			plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
+			if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
-		if (bProfile) {test.Print('Task #5: Final Selection', false);}
-		if (bShowFinalSelection) {
-			let i = SelectionArray.length;
-			while (i--) {console.log(SelectionArray[i].name + ' - ' + SelectionArray[i].value + (typeof SelectionArray[i].mapdistance !== 'undefined' ? ' - ' + SelectionArray[i].mapdistance : ''));}
-		}
-	
-		// Create final handle and sort random
-		let final_handle_list = new FbMetadbHandleList(handleSelectionArray);
-		
-		if (bSortRandom) { // Note that bRandomPick makes playlist randomly sorted too!
-			const tfo = fb.TitleFormat('$rand()');
-			final_handle_list.OrderByFormat(tfo, 1);
-		}
-		// Insert to playlist
-		plman.InsertPlaylistItems(plman.ActivePlaylist, 0, final_handle_list);
-		console.log('Final Playlist selection length: ' + final_handle_list.Count + ' tracks.');
+		// Share changes on cache
+		if (cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
+		if (cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
+		// Output handle list (as array), the score data, current selection (reference track) and more distant track
+		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handle_list[scoreData[poolLength - 1].index] : -1)];
 }
+
 
 /* 
 	Helpers

@@ -11,13 +11,13 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	if (!_isFolder(folders.data)) {_createFolder(folders.data);}
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_tags_automation.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_save_tags.js', 'buttons_tags_automation.js']);
+	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
+	const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
 	function isAllowed(fileName) {return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName);}
 	function isAllowedV2(fileName) {return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js');}
 	{
 		const subMenu = menu.newMenu('Add buttons');
-		const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_tags_automation.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_save_tags.js', 'buttons_tags_automation.js']);
-		const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js']);
-		const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
 		files.forEach((path, idx) => {
 			const fileName = path.split('\\').pop();
 			const entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)') ;

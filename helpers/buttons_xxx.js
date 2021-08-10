@@ -25,7 +25,7 @@ buttonsBar.list = [];
 var buttons = {}; // Global list
 var propertiesPrefixes = new Set(); // Global properties names prefixes
 const oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
-const tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 1200);  // Global tooltip
+const tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
 var toolbarTooltip = ''; // Shown on toolbar
 const bShowID = true; // Show Prefixes + ID on tooltips
 
