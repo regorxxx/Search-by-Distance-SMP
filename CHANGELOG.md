@@ -15,6 +15,7 @@
 - Buttons: added a submenu to set variables' weight and range at custom button.
 - Recipes: added 'LikeADJ (MusicBee)' which replicates functionality of [MusicBee's plugin LikeADJ](https://getmusicbee.com/forum/index.php?topic=24631.0). Uses BPM, Key, Energy, Ratings, Genres and Harmonic Mixing. If only a subset of those things are desired, duplicate the recipe and configure it as needed or simply set a custom button using the recipe as reference with your own changes.
 - Harmonic Mixing: now works with Open Keys too (in addition to Camelo Keys and standard notation keys).
+- Descriptors: Added multiple genre and styles to punk, rock, pop, folk and metal super-genres, along their style clusters, substitutions and influence relations.
 ### Changed
 - Harmonic Mixing: greatly improved speed when the pool had thousands of tracks (improved shuffle method).
 - Buttons framework: default icon size is now bigger.
@@ -24,6 +25,7 @@
 - Buttons: loading buttons using the customizable toolbar will show their associated readme (if it exists).
 - Buttons: restoring defaults buttons on the toolbar will show the readme of all the restored buttons.
 - Buttons: replaced the readme entry on the toolbar menu with a submenu pointing to all readmes of every button.
+- Debug: new config to show popup even after test passing (meant to be used along Playlist Tools). Default behavior remains the same, popup only appears if errors are found.
 - Installation: Installation path may now be changed by editing 'folders.xxxName' variable at '.\helpers\helpers_xxx.js'. This is a workaround for some SMP limitations when working with relative paths and text files, images or dynamic file loading.
 - Helpers: updated. Whenever a folder needs to be created to save a new file, the entire tree is now created if needed. Previously it would fail as soon as any folder did not exist. This greatly speeds up setting panels since now the final folder does not need to exists at all to work, since it will be created on the fly.
 ### Removed

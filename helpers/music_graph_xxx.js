@@ -342,7 +342,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 /* 
 	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
 */
-function graphDebug(graph = music_graph()) {
+function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	console.log('music_graph_descriptors_xxx: Basic debug enabled');
 	let bWarning = false;
 	
@@ -647,5 +647,12 @@ function graphDebug(graph = music_graph()) {
 		const message = 'There are some errors on \'music_graph_descriptors_xxx.js\' or \'music_graph_descriptors_xxx_user.js\'';
 		try {fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_xxx');} // On foobar
 		catch (e) {alert('Check console \'Ctrl + Shift + K\'. ' + message);} // On browsers
-	} else {console.log('music_graph_descriptors_xxx: All tests passed');}	
+	} else {
+		if (bShowPopupOnPass) {
+			const message = 'All tests passed.\nChecked \'music_graph_descriptors_xxx.js\' and \'music_graph_descriptors_xxx_user.js\'';
+			try {fb.ShowPopupMessage(message, 'music_graph_descriptors_xxx');} // On foobar
+			catch (e) {alert(message);} // On browsers
+		}
+		console.log('music_graph_descriptors_xxx: All tests passed');
+	}	
 }
