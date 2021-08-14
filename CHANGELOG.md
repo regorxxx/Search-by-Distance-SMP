@@ -15,8 +15,8 @@
 - Buttons: added a submenu to set variables' weight and range at custom button.
 - Recipes: added 'LikeADJ (MusicBee)' which replicates functionality of [MusicBee's plugin LikeADJ](https://getmusicbee.com/forum/index.php?topic=24631.0). Uses BPM, Key, Energy, Ratings, Genres and Harmonic Mixing. If only a subset of those things are desired, duplicate the recipe and configure it as needed or simply set a custom button using the recipe as reference with your own changes.
 - Harmonic Mixing: now works with Open Keys too (in addition to Camelo Keys and standard notation keys).
-- Descriptors: Added multiple genre and styles to punk, rock, pop, folk and metal super-genres, along their style clusters, substitutions and influence relations.
 ### Changed
+- Descriptors: Updated descriptors. Added multiple genre and styles to punk, rock, pop, folk, industrial, downtempo and metal super-genres, along their style clusters, substitutions and influence relations.
 - Harmonic Mixing: greatly improved speed when the pool had thousands of tracks (improved shuffle method).
 - Buttons framework: default icon size is now bigger.
 - Buttons: custom button shows the current value on the menu entries (no need to click on them or open properties). It also shows the value if set -forced- by the recipe. 'sbd_max_graph_distance' value is evaluated before displaying (if not using a number).

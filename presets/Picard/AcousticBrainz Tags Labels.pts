@@ -34,5 +34,5 @@ $if(%_temp%,
 $noop(Chords tags: chords_key -label-)
 $set(_temp,%ab:lo:tonal:chords_key%)
 $if(%_temp%,
-	$set(danceability,%_temp%)
+	$set(chords_key,%_temp%)
 )
