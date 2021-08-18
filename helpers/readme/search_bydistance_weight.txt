@@ -5,4 +5,4 @@ When their score is over 'scoreFilter', then they are included in the final pool
 WEIGHT presets work by matching genre\style tags (Rock != Hard Rock), without using complex logics.
 Therefore they work with arbitrary tag values.
 
-See main readme for more usage info.
+See main readme (ALL) for more usage info.

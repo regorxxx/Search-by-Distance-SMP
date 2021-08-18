@@ -6,4 +6,4 @@ DYNGENRE presets work by grouping similar genre\style tags (Rock group: Rock, Ha
 Instead of using tag matching (Rock != Hard Rock) or more complex linking.
 Tags must be included on '.\helpers\dyngenre_map_xxx.js' to work.,
 
-See main readme for more usage info.
+See main readme (ALL) for more usage info.

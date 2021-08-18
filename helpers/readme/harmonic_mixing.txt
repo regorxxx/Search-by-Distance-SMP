@@ -1,4 +1,4 @@
-﻿DJ-like playlist creation with key changes following harmonic mixing rules... contiguous tracks in the mix are most often either in the same key, or their keys are relative or in a subdominant or dominant relationship with one another. The primary goal is to create a smooth transition between songs, creating an harmonious and consonant mashup with any music genre. 
+﻿DJ-like playlist creation with key changes following harmonic mixing rules... contiguous tracks in the mix are most often either in the same key, or their keys are relative or in a subdominant or dominant relationship with one another. The primary goal is to create a smooth transition between songs, creating an harmonious and consonant mash-up with any music genre. 
 
 Uses 9 movements described at 'camelotWheel' on camelot_wheel_xxx.js
 The movements creates a 'path' along the track keys, so even changing or skipping one movement changes drastically the path;

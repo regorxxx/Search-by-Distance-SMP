@@ -6,4 +6,4 @@ GRAPH presets work by linking similar genre\style tags on a graph (Rock -> South
 Instead of using tag matching (Rock != Hard Rock) or simple grouping (Rock group: Rock, Hard Rock, Alt. Rock, ...).
 Tags must be included on '.\helpers\music_graph_descriptors_xxx.js' to work.
 
-See main readme for more usage info.
+See main readme (ALL) for more usage info.
