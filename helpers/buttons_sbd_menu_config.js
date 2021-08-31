@@ -79,7 +79,7 @@ function createConfigMenu(parent) {
 		{	// Menu to configure properties: forcedQuery
 			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: () => {
 				let input = '';
-				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', properties['forcedQuery'][1]);}
+				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', properties['forcedQuery'][1], true);}
 				catch(e) {return;}
 				if (properties['forcedQuery'][1] === input) {return;}
 				try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
@@ -90,13 +90,20 @@ function createConfigMenu(parent) {
 		}
 		{ // Menu to configure properties: additional filters
 			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
-			const options = [
-				{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
-				{title: 'Instrumentals', query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
-				{title: 'Acoustic tracks', query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'}
-			];
+			let options = [];
+			if (_isFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json')) {
+				options = _jsonParseFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json');
+			} else {
+				options = [
+					{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
+					{title: 'Instrumentals', query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
+					{title: 'Acoustic tracks', query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'}
+				];
+			}
 			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
 			options.forEach((obj) => {
+				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
 				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
 				let input = properties['forcedQuery'][1].length ? ') AND (' + obj.query + ')' : obj.query;
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
@@ -119,7 +126,7 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
 					let input = '';
-					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1]);}
+					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1], true);}
 					catch(e) {return;}
 					if (properties[key][1] === input) {return;}
 					properties[key][1] = input;
@@ -150,13 +157,27 @@ function createConfigMenu(parent) {
 			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
-				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1]));}
+				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 				catch(e) {return;}
 				if (isNaN(input)) {return;}
 				if (lowerHundred.has(key) && input > 100) {return;}
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 		});
+	}
+	menu.newEntry({entryText: 'sep'});
+	{
+		menu.newEntry({entryText: 'Rename button...', func: () => {
+			let input = '';
+			try {input =  utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for "' + parent.prefix + '...").', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true);}
+			catch(e) {return;}
+			if (!input.length) {return;}
+			if (properties.customName[1] !== input) {
+				properties.customName[1] = input;
+				overwriteProperties(properties); // Force overwriting
+				parent.text = input;
+			}
+		}});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Readmes

@@ -4,3 +4,5 @@ Recipes are 'variables containers' which emulate the input of 'search_bydistance
 Recipes may also contain a forced theme, either the entire object or a link to a theme file (path or filename).
 
 Both may be used in buttons, tools or with Playlist Tools's Pools (pools' themes and recipes arguments may link to these files).
+
+Filters are pre-defined queries meant to be used as forced queries to filter the library, independently of the recipe, theme or other config set. Currently used on the customizable 'search_bydistance' button.

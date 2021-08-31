@@ -1,0 +1,29 @@
+﻿[
+	{
+		"title": "Female vocals",
+		"query": "STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female"
+	}, 
+	{
+		"title": "Instrumentals",
+		"query": "STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0"
+	},
+	{
+		"title": "Acoustic tracks", 
+		"query": "STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75"
+	},
+	{
+		"title": "sep"
+	},
+	{
+		"title": "No Female vocals",
+		"query": "NOT (STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female)"
+	}, 
+	{
+		"title": "No Instrumentals",
+		"query": "NOT (STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0)"
+	},
+	{
+		"title": "No Acoustic tracks", 
+		"query": "NOT (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)"
+	}
+]

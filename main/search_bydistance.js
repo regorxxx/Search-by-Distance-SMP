@@ -1753,12 +1753,15 @@ function saveCache(cacheMap, path) {
 function loadCache(path) {
 	let cacheMap = new Map();
 	if (utils.IsFile(path)) {
-		let obj = Object.entries(_jsonParseFile(path));
-		obj.forEach((pair) => {
-			if (pair[1] === null) {pair[1] = Infinity;} // TODO: Only 1 cache structure for both files
-			if (pair[1].distance === null) {pair[1].distance = Infinity;}
-		}); // stringify converts Infinity to null, this reverts the change
-		cacheMap = new Map(obj);
+		let obj = _jsonParseFile(path);
+		if (obj) { 
+			obj = Object.entries(obj);
+			obj.forEach((pair) => {
+				if (pair[1] === null) {pair[1] = Infinity;} // TODO: Only 1 cache structure for both files
+				if (pair[1].distance === null) {pair[1].distance = Infinity;}
+			}); // stringify converts Infinity to null, this reverts the change
+			cacheMap = new Map(obj);
+		}
 	}
 	return cacheMap;
 }

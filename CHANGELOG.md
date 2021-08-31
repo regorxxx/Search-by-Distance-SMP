@@ -13,7 +13,7 @@
 - Key tag can now be remapped to another tag (uses 'key' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
 - BPM tag can now be remapped to another tag (uses 'bpm' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
 - Buttons: added a submenu to set variables' weight and range at custom button.
-- Buttons: added a submenu to set additional query filters (along the forced query): Acoustic, Instrumental and Female Vocal tracks. They can work in conjunction with any recipe as long as the recipe does not force a query too.
+- Buttons: added a submenu to set additional query filters (along the forced query): Acoustic, Instrumental and Female Vocal tracks. They can work in conjunction with any recipe as long as the recipe does not force a query too. Filters may be added or edited on 'xxx-scripts\presets\Search by\filters\custom_button_filters.json'.
 - Recipes: added 'LikeADJ (MusicBee)' which replicates functionality of [MusicBee's plugin LikeADJ](https://getmusicbee.com/forum/index.php?topic=24631.0). Uses BPM, Key, Energy, Ratings, Genres and Harmonic Mixing. If only a subset of those things are desired, duplicate the recipe and configure it as needed or simply set a custom button using the recipe as reference with your own changes.
 - Recipes: added Acoustic, Instrumental and Female Vocal versions for 'Similar tracks (G)' recipe which forces only acoustic, instrumental or female vocal tracks as output. Style, genre and Picard tags (acousticness, speechiness, gender) -see below- are taken into consideration.
 - Harmonic Mixing: now works with Open Keys too (in addition to Camelo Keys and standard notation keys).
@@ -22,6 +22,7 @@
 - Descriptors: Updated descriptors. Added multiple genre and styles to punk, rock, pop, folk, industrial, downtempo and metal super-genres, along their style clusters, substitutions and influence relations.
 - Harmonic Mixing: greatly improved speed when the pool had thousands of tracks (improved shuffle method).
 - Buttons framework: default icon size is now bigger.
+- Buttons: custom button now has a menu entry to rename it after the first time (instead of using the properties panel).
 - Buttons: custom button shows the current value on the menu entries (no need to click on them or open properties). It also shows the value if set -forced- by the recipe. 'sbd_max_graph_distance' value is evaluated before displaying (if not using a number).
 - Buttons: minor renaming for AutoPlaylist - Playlist filter.
 - Buttons: Added readmes to configurable button on menus: methods, full documentation and recipes & themes.
@@ -34,6 +35,7 @@
 ### Removed
 ### Fixed
 - Buttons: Fixed multiple button names while logging loading on console.
+- Cache: Fixed crash while trying to parse the cache file if it's being edited at the same time or corrupt.
 - Multiple minor improvements and fixes on path handling for portable installations.
 - Multiple minor improvements and fixes when saving files on non existing folder.
 - Evaluation of 'sbd_max_graph_distance' at recipes on multiple places is now rounded (just for cleaner logging purpose).

@@ -29,6 +29,7 @@ newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix); // And retrieve
 buttonsBar.list.push(newButtonsProperties);
+buttonCoordinates.w = _gr.CalcTextWidth(newButtonsProperties.customName[1], g_font) + 50;
 
 // we change the default coordinates here to accommodate text
 if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
@@ -47,13 +48,14 @@ var newButtons = {
 			createConfigMenu(this).btn_up(this.x, this.y + this.h);
 		} else {
 			if (this.buttonsProperties['customName'][1] === 'Customize!') {
-				const newName = utils.InputBox(window.ID, 'Enter button name. Then configure properties according to your liking (look for "' + this.prefix + '...").', window.Name + ': Search by Distance Customizable Button');
-				if (!newName.length) {
-					return;
-				} else {
-					this.buttonsProperties.customName[1] = newName;
+				let input = '';
+				try {input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for "' + this.prefix + '...").', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true);}
+				catch(e) {return;}
+				if (!input.length) {return;}
+				if (this.buttonsProperties.customName[1] !== input) {
+					this.buttonsProperties.customName[1] = input;
 					overwriteProperties(this.buttonsProperties); // Force overwriting
-					this.text = newName;
+					this.text = input;
 					const data = JSON.parse(this.buttonsProperties.data[1]);
 					if (data.recipe === 'none') {
 						window.ShowProperties();
