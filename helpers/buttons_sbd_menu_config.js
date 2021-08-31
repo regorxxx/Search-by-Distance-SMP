@@ -88,6 +88,30 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 		}
+		{ // Menu to configure properties: additional filters
+			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
+			const options = [
+				{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
+				{title: 'Instrumentals', query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
+				{title: 'Acoustic tracks', query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'}
+			];
+			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});
+			options.forEach((obj) => {
+				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
+				let input = properties['forcedQuery'][1].length ? ') AND (' + obj.query + ')' : obj.query;
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					if (properties['forcedQuery'][1].indexOf(input) !== -1) {
+						input = properties['forcedQuery'][1].slice(1).replace(input, '');
+					} else {
+						input = properties['forcedQuery'][1].length ? '(' + properties['forcedQuery'][1] + input : input;
+					}
+					try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
+					catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
+					properties['forcedQuery'][1] = input;
+				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(input) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(input) !== -1);});
+			});
+		}
 		{ // Menu to configure properties: tags filter
 			const options = ['genreStyleFilter', 'poolFilteringTag'];
 			options.forEach((key) => {

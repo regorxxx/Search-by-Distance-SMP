@@ -1,0 +1,19 @@
+{
+	"name": "Similar tracks - Female vocal (G)",
+	"genreWeight": 10,
+	"styleWeight": 5,
+	"moodWeight": 5,
+	"keyWeight": 5,
+	"dateWeight": 25,
+	"bpmWeight": 5,
+	"composerWeight": 0,
+	"customStrWeight": 0,
+	"customNumWeight": 0,
+	"keyRange": 1, 
+	"dateRange": 15, 
+	"bpmRange": 25,
+	"scoreFilter": 65,
+	"method": "GRAPH",
+	"sbd_max_graph_distance": "music_graph_descriptors.cluster",
+	"forcedQuery": "(NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad) AND (STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female)"
+}

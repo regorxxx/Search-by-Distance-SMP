@@ -311,7 +311,8 @@ const music_graph_descriptors = {
 		['Death Metal'						,	['Contemporary Christian Music','Christian Rock','Pop_supergenre']],
 		['Thrash Metal'						,	['Glam Metal','Hair Metal','Pop Metal']],
 		['Sadcore'							,	['Dream Pop','Traditional Pop','Mainstream Pop','Traditional Pop','Vocal Pop','Britpop','Beat Music','Glam Rock']],
-		['Nature Music'						,	['Ambient Industrial','Loungetronica','Easy Listening','Lounge XL','Ambient Dance']]
+		['Nature Music'						,	['Ambient Industrial','Loungetronica','Easy Listening','Lounge XL','Ambient Dance']],
+		['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']]
 		],
 		
 		// Genres or styles that are pretty similar but not exactly the same. Combinations must be added as multiple entries.
