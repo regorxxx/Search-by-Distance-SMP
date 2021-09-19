@@ -9,8 +9,8 @@ function createConfigMenu(parent) {
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1]);
-		if (!recipe) {recipe = {};}
+		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1], convertCharsetToCodepage('UTF-8')) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], convertCharsetToCodepage('UTF-8'));
+		if (!recipe) {recipe = {}; console.log('Recipe file is not valid or not found:' + properties.recipe[1]);}
 	}
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});

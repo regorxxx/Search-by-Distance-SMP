@@ -32,6 +32,8 @@
 - Debug: new config to show popup even after test passing (meant to be used along Playlist Tools). Default behavior remains the same, popup only appears if errors are found.
 - Installation: Installation path may now be changed by editing 'folders.xxxName' variable at '.\helpers\helpers_xxx.js'. This is a workaround for some SMP limitations when working with relative paths and text files, images or dynamic file loading.
 - Helpers: updated. Whenever a folder needs to be created to save a new file, the entire tree is now created if needed. Previously it would fail as soon as any folder did not exist. This greatly speeds up setting panels since now the final folder does not need to exists at all to work, since it will be created on the fly.
+- All json files are now saved as UTF-8 without BOM. All json files are now read as UTF-8 (forced).
+- Link cache is now saved in an human readable structure.
 ### Removed
 ### Fixed
 - Buttons: Fixed multiple button names while logging loading on console.

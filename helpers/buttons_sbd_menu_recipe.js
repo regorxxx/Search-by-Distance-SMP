@@ -39,17 +39,20 @@ function createRecipeMenu(parent) {
 	const options = [];
 	files.forEach((file) => {
 		// List files, with full path or relative path (portable)
-		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file);
+		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file.replace(fb.ProfilePath,'.\\')): file);
 	});
 	const menus = [];
 	options.forEach((file) => {
-		const recipe = _jsonParseFile(file);
+		const recipe = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
 		if (!recipe) {console.log('Recipe file is not valid:' + file); return;}
 		const name = recipe.hasOwnProperty('name') ? recipe.name : isCompatible('1.4.0') ? utils.SplitFilePath(file)[1] : utils.FileTest(file, 'split')[1];  //TODO: Deprecated
 		let theme = null;
 		if (recipe.hasOwnProperty('theme')) {
-			if (_isFile(recipe.theme)) {theme = _jsonParseFile(recipe.theme);}
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme);}
+			let bDone = false;
+			if (_isFile(recipe.theme)) {theme = _jsonParseFile(recipe.theme, convertCharsetToCodepage('UTF-8')); bDone = true;}
+			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, convertCharsetToCodepage('UTF-8')); bDone = true;}
+			if (bDone && !theme) {console.log('Theme file is not valid:' + recipe.theme);}
+			else if (!bDone) {console.log('Theme file not found:' + recipe.theme);}
 		}
 		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
 		let i = 1;

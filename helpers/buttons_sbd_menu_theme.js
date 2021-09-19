@@ -14,9 +14,13 @@ function createThemeMenu(parent) {
 	let forcedTheme = null;
 	if (properties.recipe[1].length) {
 		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1]) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1]);
-		if (recipe && recipe.hasOwnProperty('theme')) {
-			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFile(recipe.theme);}
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme);}
+		if (!recipe) {console.log('Recipe file is not valid or not found:' + properties.recipe[1]);}
+		else if (recipe.hasOwnProperty('theme')) {
+			let bDone = false;
+			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFile(recipe.theme); bDone = true;}
+			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme); bDone = true;}
+			if (bDone && !forcedTheme) {console.log('Theme file is not valid:' + recipe.theme);}
+			else if (!bDone) {console.log('Theme file not found:' + recipe.theme);}
 		}
 	}
 	// Header
@@ -84,7 +88,7 @@ function createThemeMenu(parent) {
 	const options = [];
 	files.forEach((file) => {
 		const theme = _jsonParseFile(file);
-		if (!theme) {console.log('Recipe file is not valid:' + file); return;}
+		if (!theme) {console.log('Theme file is not valid:' + file); return;}
 		// Check
 		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
 		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
@@ -93,11 +97,12 @@ function createThemeMenu(parent) {
 			return;
 		}
 		// List files, with full path or relative path (portable)
-		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file);
+		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file.replace(fb.ProfilePath,'.\\')): file);
 	});
 	const menus = [];
 	options.forEach((file) => {
 		const theme = _jsonParseFile(file);
+		if (!theme) {console.log('Theme file is not valid:' + file); return;}
 		const name = forcedTheme ? forcedTheme.name + ' (forced by recipe)' : theme.name; // Recipe may overwrite theme
 		let i = 1;
 		const entryText = menus.indexOf(theme.name) === -1 ? theme.name : theme.name + ' (' + ++i + ')';

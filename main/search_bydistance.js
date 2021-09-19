@@ -625,7 +625,7 @@ function do_searchby_distance({
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
 				console.log(path);
-				recipe = _jsonParseFile(path);
+				recipe = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
 				if (!recipe) {
 					console.log('Recipe file selected is missing or not valid: ' + path);
 					return;
@@ -679,7 +679,7 @@ function do_searchby_distance({
 			let path;
 			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
 				path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
-				theme = _jsonParseFile(path);
+				theme = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
 				if (!theme) {
 					console.log('Theme file selected is missing or not valid: ' + path);
 					return;
@@ -1747,13 +1747,13 @@ function calcCacheLinkSGV2(mygraph, limit = -1) {
 
 // Save and load cache on json
 function saveCache(cacheMap, path) {
-	_save(path, JSON.stringify(Object.fromEntries(cacheMap)));
+	_save(path, JSON.stringify(Object.fromEntries(cacheMap), null, '\t'));
 }
 
 function loadCache(path) {
 	let cacheMap = new Map();
 	if (utils.IsFile(path)) {
-		let obj = _jsonParseFile(path);
+		let obj = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
 		if (obj) { 
 			obj = Object.entries(obj);
 			obj.forEach((pair) => {
