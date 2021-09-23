@@ -469,10 +469,10 @@ if (typeof cacheLink === 'undefined') {
 if (typeof cacheLinkSet === 'undefined') {
 	window.NotifyOthers('SearchByDistance: requires cacheLinkSet map', true);
 }
-function updateCache({newCacheLink, newCacheLinkSet} = {}) {
+async function updateCache({newCacheLink, newCacheLinkSet, bForce = false} = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
 		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
-		cacheLink = panelProperties.bCacheOnStartup[1] ? calcCacheLinkSGV2(all_music_graph) : new Map();
+		cacheLink = panelProperties.bCacheOnStartup[1] || bForce ? await calcCacheLinkSGV2(all_music_graph) : new Map();
 		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
 		if (panelProperties.bProfile[1]) {profiler.Print();}
 		console.log('SearchByDistance: New Cache - cacheLink');
@@ -1718,7 +1718,7 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
 }
 
 // Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSGV2(mygraph, limit = -1) {
+/* function calcCacheLinkSGV2(mygraph, limit = -1) {
 	let cache = new Map();
 	let nodeList = [];
 	
@@ -1743,6 +1743,41 @@ function calcCacheLinkSGV2(mygraph, limit = -1) {
 		i++;
 	}
 	return cache;
+} */
+
+// Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
+function calcCacheLinkSGV2(mygraph, limit = -1) {
+	let nodeList = [];
+	// Filter SGs with those on library
+	nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity))); // all values without duplicates
+	let tfo = fb.TitleFormat('%genre%|%style%'); // TODO: Use properties!
+	const styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split('|')); // All styles/genres from library without duplicates
+	nodeList = [...nodeList.intersection(styleGenres)];
+	return new Promise(resolve => {
+		let cache = new Map();
+		const promises = [];
+		const total = nodeList.length - 1;
+		let prevProgress = 0;
+		for (let i = 0; i < total; i++) {
+			for (let j = i + 1; j <= total; j++) {
+				promises.push(new Promise(resolve => {
+					setTimeout(() => {
+						let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true);
+						if (limit === -1 || ij_distance <= limit) {
+							// Sorting removes the need to check A-B and B-A later...
+							cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
+						}
+						const progress = Math.round(i * j / (total * total) * 4) * 25;
+						if (progress % 25 === 0 && progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + Math.round(progress) + '%.');}
+						resolve('done');
+					}, iDelaySBDCache * j);
+				}));
+			}
+		}
+		Promise.all(promises).then((done) => {
+			resolve(cache);
+		});
+	});
 }
 
 // Save and load cache on json
@@ -1753,6 +1788,7 @@ function saveCache(cacheMap, path) {
 function loadCache(path) {
 	let cacheMap = new Map();
 	if (utils.IsFile(path)) {
+		if (utils.GetFileSize(path) > 400000000) {console.log('SearchByDistance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
 		let obj = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
 		if (obj) { 
 			obj = Object.entries(obj);

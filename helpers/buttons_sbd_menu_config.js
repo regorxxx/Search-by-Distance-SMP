@@ -6,10 +6,11 @@ function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
+	const utf8 = convertCharsetToCodepage('UTF-8');
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1], convertCharsetToCodepage('UTF-8')) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], convertCharsetToCodepage('UTF-8'));
+		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1], utf8) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], utf8);
 		if (!recipe) {recipe = {}; console.log('Recipe file is not valid or not found:' + properties.recipe[1]);}
 	}
 	// Header
@@ -92,7 +93,7 @@ function createConfigMenu(parent) {
 			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
 			let options = [];
 			if (_isFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json')) {
-				options = _jsonParseFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json');
+				options = _jsonParseFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json', utf8);
 			} else {
 				options = [
 					{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
@@ -178,6 +179,77 @@ function createConfigMenu(parent) {
 				parent.text = input;
 			}
 		}});
+	}
+	menu.newEntry({entryText: 'sep'});
+	{
+		const submenu = menu.newMenu('Other tools');
+		{ 	// Find genre/styles not on graph
+			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
+				// Skipped values at pre-filter
+				const tagValuesExcluded = new Set(properties['genreStyleFilter'][1].split(',').filter(Boolean)); // Filter holes and remove duplicates
+				// Get all tags and their frequency
+				const tagsToCheck = [...new Set(properties['genreTag'][1].concat(',', properties['styleTag'][1]).split(',').filter(Boolean))]; // Merge and filter
+				if (!tagsToCheck.length) {
+					fb.ShowPopupMessage('There are no tags to check set at properties panel:\n' + properties['genreTag'][0], 'Search by distance');
+					return;
+				}
+				// Get tags
+				const tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
+				// Get node list (+ weak substitutions + substitutions + style cluster)
+				const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
+				// Compare (- user exclusions - graph exclusions)
+				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
+				// Report
+				const userFile = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
+				const UserFileFound = (isCompatible('1.4.0') ? utils.IsFile(userFile) : utils.FileTest(userFile, 'e')) ? '' : ' (not found)';
+				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
+				const report = 'Graph descriptors:\n' +
+								'.\helpers\music_graph_descriptors_xxx.js\n' +
+								'.\helpers\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
+								'List of tags not present on the graph descriptors:\n' +
+								[...missing].sort().join(', ');
+				fb.ShowPopupMessage(report, 'Search by distance');
+			}});
+			// Graph debug
+			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
+				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
+				graphDebug(all_music_graph, true); // Show popup on pass
+				if (panelProperties.bProfile[1]) {profiler.Print();}
+			}});
+			// Graph test
+			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
+				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
+				testGraph(all_music_graph);
+				testGraphV2(all_music_graph);
+				if (panelProperties.bProfile[1]) {profiler.Print();}
+			}});
+			// Graph cache reset Async
+			menu.newEntry({menuName: submenu, entryText: 'Reset link cache', func: () => {
+				_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
+				_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+				cacheLink = void(0);
+				cacheLinkSet = void(0);
+				updateCache({bForce: true}); // Creates new one and also notifies other panels to discard their cache
+			}});
+		}
+		menu.newEntry({menuName: submenu, entryText: 'sep'});
+		{ // Open descriptors
+			menu.newEntry({menuName: submenu, entryText: 'Open main descriptor', func: () => {
+				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx.js';
+				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run('notepad.exe', file);}
+			}});
+			menu.newEntry({menuName: submenu, entryText: 'Open user descriptor', func: () => {
+				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
+				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run('notepad.exe', file);}
+			}});
+		}
+		menu.newEntry({menuName: submenu, entryText: 'sep'});
+		{ // Open graph html file
+			menu.newEntry({menuName: submenu, entryText: 'Show Music Graph on Browser', func: () => {
+				const file = folders.xxx + 'Draw Graph.html';
+				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run(file);}
+			}});
+		}
 	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Readmes

@@ -23,22 +23,27 @@
 */
 
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_same_by.js and search_same_by.js
-try {
-	include('..\\..\\helpers\\buttons_xxx.js');
-	include('..\\..\\helpers\\helpers_xxx.js');
-	include('..\\..\\helpers\\helpers_xxx_foobar.js');
-	include('..\\..\\helpers\\helpers_xxx_properties.js');
-	include('..\\..\\helpers\\helpers_xxx_UI.js');
-	include('..\\..\\helpers\\helpers_xxx_file.js');
-	include('..\\..\\helpers\\buttons_merged_menu.js');
-} catch (e) {
-	include('helpers\\buttons_xxx.js');
-	include('helpers\\helpers_xxx.js');
-	include('helpers\\helpers_xxx_foobar.js');
-	include('helpers\\helpers_xxx_properties.js');
-	include('helpers\\helpers_xxx_UI.js');
-	include('helpers\\helpers_xxx_file.js');
-	include('helpers\\buttons_merged_menu.js');
+
+{
+	let bIncludeRel = true;
+	try {include('..\\..\\helpers\\helpers_xxx_dummy.js');} catch(e) {bIncludeRel = false;}
+	if (bIncludeRel) {
+		include('..\\..\\helpers\\buttons_xxx.js');
+		include('..\\..\\helpers\\helpers_xxx.js');
+		include('..\\..\\helpers\\helpers_xxx_foobar.js');
+		include('..\\..\\helpers\\helpers_xxx_properties.js');
+		include('..\\..\\helpers\\helpers_xxx_UI.js');
+		include('..\\..\\helpers\\helpers_xxx_file.js');
+		include('..\\..\\helpers\\buttons_merged_menu.js');
+	} else {
+		include('helpers\\buttons_xxx.js');
+		include('helpers\\helpers_xxx.js');
+		include('helpers\\helpers_xxx_foobar.js');
+		include('helpers\\helpers_xxx_properties.js');
+		include('helpers\\helpers_xxx_UI.js');
+		include('helpers\\helpers_xxx_file.js');
+		include('helpers\\buttons_merged_menu.js');
+	}
 }
 
 try { //May be loaded along other buttons

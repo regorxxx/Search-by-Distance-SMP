@@ -9,6 +9,7 @@ function createRecipeMenu(parent) {
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
+	const utf8 = convertCharsetToCodepage('UTF-8');
 	// Header
 	recipeMenu.newEntry({entryText: 'Set recipe file:', func: null, flags: MF_GRAYED});
 	recipeMenu.newEntry({entryText: 'sep'});
@@ -43,14 +44,14 @@ function createRecipeMenu(parent) {
 	});
 	const menus = [];
 	options.forEach((file) => {
-		const recipe = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+		const recipe = _jsonParseFile(file, utf8);
 		if (!recipe) {console.log('Recipe file is not valid:' + file); return;}
 		const name = recipe.hasOwnProperty('name') ? recipe.name : isCompatible('1.4.0') ? utils.SplitFilePath(file)[1] : utils.FileTest(file, 'split')[1];  //TODO: Deprecated
 		let theme = null;
 		if (recipe.hasOwnProperty('theme')) {
 			let bDone = false;
-			if (_isFile(recipe.theme)) {theme = _jsonParseFile(recipe.theme, convertCharsetToCodepage('UTF-8')); bDone = true;}
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, convertCharsetToCodepage('UTF-8')); bDone = true;}
+			if (_isFile(recipe.theme)) {theme = _jsonParseFile(recipe.theme, utf8); bDone = true;}
+			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, utf8); bDone = true;}
 			if (bDone && !theme) {console.log('Theme file is not valid:' + recipe.theme);}
 			else if (!bDone) {console.log('Theme file not found:' + recipe.theme);}
 		}
