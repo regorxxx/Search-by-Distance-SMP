@@ -31,7 +31,7 @@ function createThemeMenu(parent) {
 		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
 		themeMenu.newEntry({entryText: 'Open readme...', func: () => {
 			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) { 
-				const readme = utils.ReadTextFile(readmePath, 65001); // Executed on script load
+				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
 				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 				else {console.log('Readme not found: ' + value);}
 			}

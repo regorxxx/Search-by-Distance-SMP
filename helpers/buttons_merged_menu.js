@@ -28,7 +28,7 @@ function createButtonsMenu(name) {
 				if (readmeList) {
 					const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, 65001), readmeFile);
+						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 					}
 				}
 				window.Reload();
@@ -140,31 +140,45 @@ function createButtonsMenu(name) {
 			fileNames.forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-					fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, 65001), readmeFile);
+					fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 				}
 			});
 		}
 		window.Reload();
 	}});
 	menu.newEntry({entryText: 'sep'});
-	const menuName = menu.newMenu('Colors...');
-	menu.newEntry({menuName, entryText: 'Set custom color...', func: () => {
-		barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
-		overwriteProperties(barProperties);
-		window.Reload();
-	}});
-	menu.newEntry({menuName, entryText: 'Reset...', func: () => {
-		barProperties.toolbarColor[1] = -1;
-		overwriteProperties(barProperties);
-		window.Reload();
-	}});
+	{
+		const menuName = menu.newMenu('Colors...');
+		menu.newEntry({menuName, entryText: 'Set custom bar color...', func: () => {
+			barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
+			overwriteProperties(barProperties);
+			bToolbar = true; // buttons_xxx.js
+			toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'Set custom text color...', func: () => {
+			barProperties.textColor[1] = utils.ColourPicker(window.ID, barProperties.textColor[1]);
+			overwriteProperties(barProperties);
+			textColor = barProperties.textColor[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
+			barProperties.toolbarColor[1] = -1;
+			barProperties.textColor[1] = RGB(0,0,0);
+			overwriteProperties(barProperties);
+			bToolbar = false; // buttons_xxx.js
+			textColor = barProperties.textColor[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+	}
 	menu.newEntry({entryText: 'sep'});
 	{
 		const subMenu = menu.newMenu('Readmes...');
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
-				const readme = utils.ReadTextFile(readmePath, 65001);
+				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
 				if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 			}
 		}});
@@ -174,7 +188,7 @@ function createButtonsMenu(name) {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				menu.newEntry({menuName: subMenu, entryText: fileName, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, 65001), readmeFile);
+						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 					}
 				}});
 			});

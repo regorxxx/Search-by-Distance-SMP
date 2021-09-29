@@ -63,6 +63,7 @@ buttonCoordinates.h += 0; //For 'x' orientation
 let barProperties = { //You can simply add new properties here
 	name:			['Name of config json file', 'buttons_' + randomString(5)],
 	toolbarColor: 	['Toolbar color', -1],
+	textColor:	 	['Buttons\' text color', textColor],
 	firstPopup:		['Toolbar: Fired once', false]
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
@@ -80,17 +81,18 @@ if (!barProperties.firstPopup[1]) {
 	barProperties.firstPopup[1] = true;
 	overwriteProperties(barProperties); // Updates panel
 	if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
-		const readme = utils.ReadTextFile(readmePath, 65001);
+		const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
 		if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 	}
 }
 
 // Global toolbar color
-toolbarColor = barProperties.toolbarColor[1];
+toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
+textColor = barProperties.textColor[1]; // buttons_xxx.js
 bToolbar = toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
 
 // Tooltip at empty bar
-toolbarTooltip = 'Shift + L. Click to configure...';
+toolbarTooltip = 'R. Click to configure...';
 
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons path

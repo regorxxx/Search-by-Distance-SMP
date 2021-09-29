@@ -423,7 +423,7 @@ if (!panelProperties.firstPopup[1]) {
 	overwriteProperties(panelProperties); // Updates panel
 	const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance.txt';
 	if (_isFile(readmePath)) {
-		const readme = utils.ReadTextFile(readmePath, 65001);
+		const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
 		if (readme.length) {fb.ShowPopupMessage(readme, 'Search by Distance');}
 	}
 }
@@ -1061,10 +1061,10 @@ function do_searchby_distance({
 		let handle_list;
 		try {handle_list = fb.GetQueryItems(fb.GetLibraryItems(), query[querylength]);} // Sanity check
 		catch (e) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
+		if (bBasicLogging) {console.log('Items retrieved by query: ' + handle_list.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
-		// Find and remove duplicates ~900 ms for 55k tracks
-		// It was 500ms
-		handle_list = do_remove_duplicates(handle_list, '%title% - %artist% - %date%', '%title%', '%artist%', '%date%');
+		// Find and remove duplicates ~600 ms for 50k tracks
+		handle_list = do_remove_duplicatesV2(handle_list, '%title% - %artist% - %date%', ['%title%', '%artist%', '%date%']);
 		
 		const tracktotal = handle_list.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
@@ -1344,8 +1344,8 @@ function do_searchby_distance({
 			let i = poolLength;
 			while (i--) {handlePoolArray.push(handle_list[scoreData[i].index]);}
 			let handlePool = new FbMetadbHandleList(handlePoolArray);
-			handlePool = do_remove_duplicatesV3(handlePool, null, poolFilteringTag, poolFilteringN); // n + 1
-			const [titleHandlePool] = getTagsValuesV4(handlePool, ['title']);
+			handlePool = do_remove_duplicates(handlePool, null, poolFilteringTag, poolFilteringN); // n + 1
+			const [titleHandlePool] = getTagsValuesV4(handlePool, ['title'], void(0), void(0), null);
 			let filteredScoreData = [];
 			i = 0;
 			while (i < handlePool.Count) {
@@ -1599,7 +1599,7 @@ function do_searchby_distance({
 							if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
 							[newSelectedHandlesArray, newSelectedHandlesData, , newArgs['sel']] = do_searchby_distance(newArgs);
 							// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
-							selectedHandlesArray = do_remove_duplicates(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, '%title%', '%artist%', '%date%').Convert();
+							selectedHandlesArray = do_remove_duplicatesV2(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, ['%title%', '%artist%', '%date%']).Convert();
 							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
 						}
 					} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.')}

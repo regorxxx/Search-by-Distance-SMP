@@ -267,11 +267,11 @@ function createConfigMenu(parent) {
 		if (Object.keys(readmes).length) {
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
 				if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) { 
-					const readme = utils.ReadTextFile(value, 65001); // Executed on script load
+					const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8')); // Executed on script load
 					if (readme.length) {
 						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
 							if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) {
-								const readme = utils.ReadTextFile(value, 65001);
+								const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8'));
 								if (readme.length) {fb.ShowPopupMessage(readme, key);}
 							} else {console.log('Readme not found: ' + value);}
 						}});
