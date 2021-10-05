@@ -7,7 +7,7 @@
 include('..\\..\\helpers\\buttons_xxx.js');
 // include('EDIT.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
-var prefix = "EDIT";
+var prefix = 'EDIT';
  
 try { //May be loaded along other buttons
 	window.DefinePanel('EDIT', {author:'xxx'});
@@ -18,10 +18,10 @@ try { //May be loaded along other buttons
 	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Remove EDIT loaded.');
 }
-prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
+prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here
-	EDIT: ["EDIT", 0],
+	EDIT: ['EDIT', 0],
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
@@ -37,7 +37,7 @@ var newButtons = {
 		let [EDIT] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
 		// EDIT();
 		t1 = Date.now();
-		console.log("Call to EDIT took " + (t1 - t0) + " milliseconds.");
+		console.log('Call to EDIT took ' + (t1 - t0) + ' milliseconds.');
 	}, null, g_font,'EDIT', prefix, newButtonsProperties),
 };
 // Check if the button list already has the same button ID

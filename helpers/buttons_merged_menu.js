@@ -43,7 +43,7 @@ function createButtonsMenu(name) {
 				buttonsPath.splice(idx, 1);
 				// Remove properties
 				// Since properties have a prefix according to their loading order when there are multiple instances of the same
-				// script, removing a button when there a other "clones" means the other buttons will get their properties names
+				// script, removing a button when there a other 'clones' means the other buttons will get their properties names
 				// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
 				const properties = buttonsBar.list[idx];
 				if (properties) {deleteProperties(properties);} // Delete current position
@@ -94,7 +94,7 @@ function createButtonsMenu(name) {
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
 				// Since properties have a prefix according to their loading order when there are multiple instances of the same
-				// script, moving a button when there other "clones" means the other buttons may get their properties names
+				// script, moving a button when there other 'clones' means the other buttons may get their properties names
 				// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
 				const properties = buttonsBar.list[input - 1];
 				const keys = properties ? Object.keys(properties) : [];

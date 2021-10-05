@@ -7,9 +7,9 @@
 	The music structure goes like this: Superclusters -> Clusters -> Supergenres -> Style clusters -> Styles (smallest nodes)
 	Obviously, the left terms are groups of the right terms.
 	
-	That means every user can set its "own map" according to their tags. Note your files MUST be tagged according to the descriptors,
+	That means every user can set its 'own map' according to their tags. Note your files MUST be tagged according to the descriptors,
 	but you can add substitutions at style_substitutions.... that's the thing most users will have to configure according to their tag usage.
-	Note the graph functions don't care whether the tag is a genre a style or whatever tag name you use. "Rock is rock", wherever it is. 
+	Note the graph functions don't care whether the tag is a genre a style or whatever tag name you use. 'Rock is rock', wherever it is. 
 	But that genre/style must be on music_graph_descriptors to be recognized.
 	
 	If you have new genres/styles not present on the graph then you probably need to add them to: 
@@ -20,12 +20,12 @@
 			- style_secondary_origin: connects styles which are secondary derivatives or origins. Farther than previous one.
 			- style_anti_influence: greatly distances two genres. It would be the opposite to bein in the same style cluster.
 	
-	Now, let's say you have a group of related styles not present on the graph. For ex. Grunge Rock, Classic Grunge, etc. They are all "grunge",
+	Now, let's say you have a group of related styles not present on the graph. For ex. Grunge Rock, Classic Grunge, etc. They are all 'grunge',
 	so you should not put them into style_supergenre matrix, where grunge already exists. We would want to add even smaller nodes than that
 	main genre. For that we use style_weak_substitutions, where we would put Grunge at the left, and connect it to Grunge Rock, Classic Grunge, etc.
-	Other approach would be to use style_cluster. Use whatever you prefer according to the link "distance" you want to add. Values at bottom.
+	Other approach would be to use style_cluster. Use whatever you prefer according to the link 'distance' you want to add. Values at bottom.
 		
-	"map_distance_exclusions" have those genre/style tags which are not related to an specific musical style. 
+	'map_distance_exclusions' have those genre/style tags which are not related to an specific musical style. 
 	i.e. Acoustic could be heavy metal, rock or whatever... so we skip it (for other calcs).
 	They are filtered because they have no representation on the graph, not being a real genre/style but a musical characteristic.
 	So they are useful for similarity scoring purposes but not for the graph. 
@@ -33,14 +33,14 @@
 	This means than any tag not included in the graph will be omitted for calcs, but you save time if you add it manually to the exclusions (otherwise the entire graph will be visited to try to find a match).
 
 	Then we got: Primary origins, secondary origins, weak substitutions, (direct) substitutions and anti-influences.
-	The first 3 are links between styles related "in some way". (Direct) substitutions are equivalent  nodes (A = B), with 0 distance.
+	The first 3 are links between styles related 'in some way'. (Direct) substitutions are equivalent  nodes (A = B), with 0 distance.
 	Finally, anti-influence accounts for styles which are considered too different, even being of the same group (style cluster or supergenres).
 	
-	The function "music_graph()" creates the graph, and the same for the HTML counterpart (it adds colors and all that to the main graph).
-	Execute "Draw Graph.html" on your browser and it should load the graph set on this file. So whatever you edit here, it gets shown on the rendered version. 
+	The function 'music_graph()' creates the graph, and the same for the HTML counterpart (it adds colors and all that to the main graph).
+	Execute 'Draw Graph.html' on your browser and it should load the graph set on this file. So whatever you edit here, it gets shown on the rendered version. 
 	That's an easy way to see if you added nodes at a wrong place, things not linked, etc. Much easier than checking matrices and lists of strings!
 	
-	Finally, the function "do_searchby_distance()" does all the calculations for similarity between tracks.
+	Finally, the function 'do_searchby_distance()' does all the calculations for similarity between tracks.
 */
 const music_graph_descriptors = {
 		
@@ -344,7 +344,7 @@ const music_graph_descriptors = {
 		['Glam Metal'						,	['Hair Metal'						]]
 		],
 		
-		// Some big groups or clusters are equal to genres or styles "in the classic sense", so these are direct connections for them:
+		// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 		// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
 		// Example: we tag files as 'Golden Age Rock' and/or '60s Rock' instead of 'Classic Rock' (the value at the graph), then
 		// We would add this line:
@@ -476,8 +476,8 @@ const music_graph_descriptors = {
 		*/
 		
 		// Assigns colors to labels and nodes
-		// Anything named "..._supergenre" will be added to the html color label legend automatically.
-		// If more than one "...Folk..._supergenre" or "...Classical..._supergenre" is found, then it will be skipped.
+		// Anything named '..._supergenre' will be added to the html color label legend automatically.
+		// If more than one '...Folk..._supergenre' or '...Classical..._supergenre' is found, then it will be skipped.
 		// i.e. It will list Folk and Classical only once, even if there are multiple (sub)SuperGenres.
 		map_colors: [
 		// Supergenres
@@ -524,7 +524,7 @@ const music_graph_descriptors = {
 		['Indian Classical_supergenre'			,'#adadad'],
 		// Supergenre Clusters
 		['Industrial_cluster'					,'#e04103'], // From here to the bottom, will not be added to the color label legend,
-		['Metal_cluster'						,'#D88417'], // because the names don't have "..._supergenre"
+		['Metal_cluster'						,'#D88417'], // because the names don't have '..._supergenre'
 		['Rock_cluster'							,'#F3C605'],
 		['Pop_cluster'							,'#F9FF03'],
 		['Country_cluster'						,'#8FA800'],

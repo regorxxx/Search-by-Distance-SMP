@@ -560,14 +560,14 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	var bGraphDeclared = true;
 	try {all_music_graph;}
 	catch(e) {
-		if (e.name === "ReferenceError") {
+		if (e.name === 'ReferenceError') {
 			bGraphDeclared = false;
 		}
 	}
 	var bIncludesDeclared = true;
 	try {nba();}
 	catch(e) {
-		if(e.name === "ReferenceError") {
+		if(e.name === 'ReferenceError') {
 			bIncludesDeclared = false;
 		}
 	}
@@ -580,8 +580,8 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 			}
 		});
 		let distanceGraph = Infinity;
-		let key_one = "";
-		let key_two = "";
+		let key_one = '';
+		let key_two = '';
 		let nextIndex = 1;
 		
 		const superGenreNumbers = music_graph_descriptors.style_supergenre.length; // SuperGenres

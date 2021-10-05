@@ -4,7 +4,7 @@
 	Button example. Just configure the -things commented-.
 	Look other js buttons files to add things like tooltips/button names changing according to panel properties
 	or more complex settings.
-	Look at "_buttons_merged.js" to merge different buttons at once with 0 coding.
+	Look at '_buttons_merged.js' to merge different buttons at once with 0 coding.
 	
 	Note: Within the same file ALL BUTTONS ID's MUST BE DIFFERENT TO WORK:
 		var newButtons = {
@@ -31,7 +31,7 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
   
 // YOUR SCRIPTS
 // include('YOURSCRIPT.js');
-var prefix = "YOUR PREFIX"; // -EDIT HERE PROPERTY PANEL PREFIX-
+var prefix = 'YOUR PREFIX'; // -EDIT HERE PROPERTY PANEL PREFIX-
  
 // THIS IS STANDARD STRUCTURE FOR ALL BUTTONS
 try { //May be loaded along other buttons
@@ -43,12 +43,12 @@ try { //May be loaded along other buttons
 	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Remove Duplicates Button loaded.');
 }
-prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
+prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
 
 // YOU ADD THIS PART TO ANY NEW BUTTON IF YOU WANT TO SET VARIABLES AT PROPERTIES PANEL
 var newButtonsProperties = { //You can simply add new properties here
-	propertyA: ["This is property A", "A value"],
-	propertyB: ["This is property B", "Hello world"],
+	propertyA: ['This is property A', 'A value'],
+	propertyB: ['This is property B', 'Hello world'],
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties (if needed) at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
@@ -65,7 +65,7 @@ var newButtons = { // -EDIT You can add here as many buttons as you want-
 																						// Note there would be more if we merged it with defaultProperties
         yourFunctionHereOne(textA); // And uses that as variable for your function
 		t1 = Date.now();
-		console.log("Call to yourFunctionHere took " + (t1 - t0) + " milliseconds.");  // -EDIT HERE CONSOLE OUTPUT-
+		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
 	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 	
 	TwoButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation,false).y, buttonCoordinates.w, buttonCoordinates.h, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
@@ -75,7 +75,7 @@ var newButtons = { // -EDIT You can add here as many buttons as you want-
 																						// Note there would be more if we merged it with defaultProperties
         yourFunctionHereTwo(textB); // And uses that as variable for your function
 		t1 = Date.now();
-		console.log("Call to yourFunctionHere took " + (t1 - t0) + " milliseconds.");  // -EDIT HERE CONSOLE OUTPUT-
+		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
 	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 };
 // Check if the button list already has the same button ID
@@ -91,7 +91,7 @@ for (var buttonName in newButtons) {
 buttons = {...buttons, ...newButtons};
 
 // AND HERE YOU PUT YOUR SCRIPT...
-// OR YOU COULD SIMPLY "INCLUDE IT" AT THE TOP
+// OR YOU COULD SIMPLY 'INCLUDE IT' AT THE TOP
 function yourFunctionHereOne(text) { // -EDIT HERE WHATEVER YOU WANT TO DO WITH THE BUTTON 1-
 	fb.ShowPopupMessage(text,'Button 1 popup');
 }

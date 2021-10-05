@@ -12,10 +12,10 @@ function testGraph(mygraph) {
 		});
 		
 		let path = [];
-		let idpath = "";
+		let idpath = '';
 		let distanceGraph = Infinity;
-		let key_one = "";
-		let key_two = "";
+		let key_one = '';
+		let key_two = '';
 		
 		key_one = 'Baroque'; // here both keys...
 		key_two = 'Modernist';

@@ -364,7 +364,7 @@ const SearchByDistance_properties = {
 	bUseInfluencesFilter:		['Allows only influences on the pool, before any scoring/distance calc', false],
 	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music'],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75],
-	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', music_graph_descriptors.intra_supergenre],
+	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT'],
 	bNegativeWeighting		:	['Assigns negative score for numeric tags when they fall outside their range', true],
 	poolFilteringTag		:	['Allows only N + 1 tracks on the pool per tag set', 'artist'],
@@ -389,11 +389,17 @@ Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
 		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
 	} else if (key.toLowerCase().endsWith('query')) {
 		SearchByDistance_properties[key].push({func: (query) => {return checkQuery(query, true);}}, SearchByDistance_properties[key][1]);
+	} else if (key.toLowerCase().endsWith('tag')) {
+		SearchByDistance_properties[key].push({func: isStringWeak}, SearchByDistance_properties[key][1]);
 	}
 });
-SearchByDistance_properties['scoreFilter'].push({range: [[0,100]], func: Number.isSafeInteger}, SearchByDistance_properties['scoreFilter'][1]);
-SearchByDistance_properties['probPick'].push({range: [[1,100]], func: Number.isSafeInteger}, SearchByDistance_properties['probPick'][1]);
-SearchByDistance_properties['progressiveListCreationN'].push({range: [[2,99]], func: Number.isSafeInteger}, SearchByDistance_properties['progressiveListCreationN'][1]);
+SearchByDistance_properties['genreStyleFilter'].push({func: isStringWeak}, SearchByDistance_properties['genreStyleFilter'][1]);
+SearchByDistance_properties['method'].push({func: isStringWeak}, SearchByDistance_properties['method'][1]);
+SearchByDistance_properties['sbd_max_graph_distance'].push({func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, SearchByDistance_properties['sbd_max_graph_distance'][1]);
+SearchByDistance_properties['playlistLength'].push({greater: 0, func: isInt}, SearchByDistance_properties['playlistLength'][1]);
+SearchByDistance_properties['scoreFilter'].push({range: [[0,100]], func: isInt}, SearchByDistance_properties['scoreFilter'][1]);
+SearchByDistance_properties['probPick'].push({range: [[1,100]], func: isInt}, SearchByDistance_properties['probPick'][1]);
+SearchByDistance_properties['progressiveListCreationN'].push({range: [[2,99]], func: isInt}, SearchByDistance_properties['progressiveListCreationN'][1]);
 
 const SearchByDistance_panelProperties = {
 	bCacheOnStartup 		:	['Calculates link cache on script startup (instead of on demand)', true],

@@ -16,8 +16,8 @@ include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so prope
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_config.js'); // Button menu
-var prefix = "sbd_";
-prefix = getUniquePrefix(prefix, "_"); // Puts new ID before "_"
+var prefix = 'sbd_';
+prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here
 	customName: ['Name for the custom UI button', 'Customize!'],
@@ -35,7 +35,7 @@ buttonCoordinates.w = _gr.CalcTextWidth(newButtonsProperties.customName[1], g_fo
 if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 /*	
-	Some button examples for "search_bydistance.js". Look at that file to see what they do.
+	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
 */
 
 var newButtons = {
@@ -49,7 +49,7 @@ var newButtons = {
 		} else {
 			if (this.buttonsProperties['customName'][1] === 'Customize!') {
 				let input = '';
-				try {input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for "' + this.prefix + '...").', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true);}
+				try {input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true);}
 				catch(e) {return;}
 				if (!input.length) {return;}
 				if (this.buttonsProperties.customName[1] !== input) {

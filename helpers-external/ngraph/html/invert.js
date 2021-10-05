@@ -27,7 +27,7 @@ function invertToBW(hex, bw) {
     g = (255 - g).toString(16);
     b = (255 - b).toString(16);
     // pad each with zeros and return
-    return "#" + padZero(r) + padZero(g) + padZero(b);
+    return '#' + padZero(r) + padZero(g) + padZero(b);
 }
 
 function invertColor(hex) {

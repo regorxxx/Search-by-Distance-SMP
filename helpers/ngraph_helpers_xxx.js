@@ -35,7 +35,7 @@ function get_distanche_from_path(graph, path) {
 
 // Finds distance between two nodes, Path is calculated on the fly.
 function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
-		const method = "NBA"; // Minimal speed differences found for our weighted graph...
+		const method = 'NBA'; // Minimal speed differences found for our weighted graph...
 		
 		let distanceGraph = Infinity;
 		let influenceDistanceGraph = 0;
@@ -57,13 +57,13 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
 		}
 		
 		let pathFinder;
-		if (method === "A*greedy") {
+		if (method === 'A*greedy') {
 			pathFinder = aStarBi(mygraph, {
 				distance(fromNode, toNode, link) {
 				return link.data.weight;
 				}
 		});
-		} else if (method === "A*") {
+		} else if (method === 'A*') {
 			pathFinder = aStarPathSearch(mygraph, {
 				distance(fromNode, toNode, link) {
 				return link.data.weight;
@@ -93,7 +93,7 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
 				let ilink = links[i];
 				if (ilink.data.absoluteWeight) {
 					influenceDistanceGraph += ilink.data.absoluteWeight; // Called absolute because it's added to the total distance!
-					// console.log(key_one +" -> " + key_two + " - " + influenceDistanceGraph);
+					// console.log(key_one +' -> ' + key_two + ' - ' + influenceDistanceGraph);
 				}
 			}
 		}
@@ -148,7 +148,7 @@ if (typeof calcMeanDistance === 'undefined') {
 					}
 				}
 				if (map_distance < Infinity) { // If they are linked
-					map_distance += influenceDistance; // Adds positive/negative influence distance ("negative" means nearer...)
+					map_distance += influenceDistance; // Adds positive/negative influence distance ('negative' means nearer...)
 					map_distance /= style_genre_new.size;  // mean distance
 					map_distance = round(map_distance,1); // And rounds the final value
 					if (map_distance < 0) {map_distance = 0;} // Safety check, since influence may lower values below zero
@@ -253,7 +253,7 @@ function get_nodes_from_path(graph, path) {
 		let path_length = path.length;
 		let i;
 		for (i = 1; i < path_length;i++) {
-			idpath += " <- " + path[i].id;
+			idpath += ' <- ' + path[i].id;
 		}
 		return idpath;
 }

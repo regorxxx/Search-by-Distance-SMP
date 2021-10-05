@@ -6,11 +6,11 @@ include('helpers_xxx_UI.js');
 /* 
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
 	as new buttons instances on the same toolbar. Coordinates get updated when loading multiple buttons, removing the need to manually set them.
-	Check "_buttons_blank.js" to see the universal buttons structure. It loads on foobar but does nothing, it's just empty.
-	Check "_buttons_blank_merged.js" to see the universal structure for merging butons, creating an entire bar
-	Check "_buttons_example.js" for a working example of buttons within foobar.
-	Check "_buttons_example_merged.js" for a working example of a buttons bar within foobar.
-	Check "_buttons_example_merged_double.js" for a working example of merging multiple buttons and bars within foobar.
+	Check '_buttons_blank.js' to see the universal buttons structure. It loads on foobar but does nothing, it's just empty.
+	Check '_buttons_blank_merged.js' to see the universal structure for merging butons, creating an entire bar
+	Check '_buttons_example.js' for a working example of buttons within foobar.
+	Check '_buttons_example_merged.js' for a working example of a buttons bar within foobar.
+	Check '_buttons_example_merged_double.js' for a working example of merging multiple buttons and bars within foobar.
 */
 
 const ButtonStates = {
@@ -59,7 +59,7 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 	return newCoordinates;
 }
 
-function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = "", buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
+function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
 	this.state = state ? state : ButtonStates.normal;
 	this.x = x;
 	this.y = y;
@@ -76,7 +76,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = _isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace("_","") + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
+	this.descriptionWithID = _isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 
 	this.containXY = function (x, y) {
@@ -244,12 +244,12 @@ function on_size() {
 }
 
 
-function getUniquePrefix(string, sep = "_"){
-	if (string === null || string === "") {return "";}
-	let newPrefix = string.replace(sep,"") + 0;  // First ID
+function getUniquePrefix(string, sep = '_'){
+	if (string === null || !string.length) {return '';}
+	let newPrefix = string.replace(sep,'') + 0;  // First ID
 	let i = 1;
 	while (propertiesPrefixes.has(newPrefix)) { // The rest
-		newPrefix = string.replace(sep,"") + i;
+		newPrefix = string.replace(sep,'') + i;
 		i++;
 	}
 	propertiesPrefixes.add(newPrefix);

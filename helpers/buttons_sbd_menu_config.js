@@ -149,13 +149,13 @@ function createConfigMenu(parent) {
 		});
 	}
 	{	// Menu to configure number properties:
-		const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : '';
+		const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
 		const menuName = menu.newMenu('Set number config');
 		const options = ['scoreFilter', 'sbd_max_graph_distance', 'poolFilteringN', 'probPick', 'playlistLength', 'progressiveListCreationN'];
 		const lowerHundred = new Set(['scoreFilter', 'probPick', 'progressiveListCreationN']);
 		options.forEach((key) => {
 			const idxEnd = properties[key][0].indexOf('(');
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
 			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
 				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
@@ -170,7 +170,7 @@ function createConfigMenu(parent) {
 	{
 		menu.newEntry({entryText: 'Rename button...', func: () => {
 			let input = '';
-			try {input =  utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for "' + parent.prefix + '...").', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true);}
+			try {input =  utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true);}
 			catch(e) {return;}
 			if (!input.length) {return;}
 			if (properties.customName[1] !== input) {
