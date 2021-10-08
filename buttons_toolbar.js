@@ -47,7 +47,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 }
 
 try { //May be loaded along other buttons
-	window.DefinePanel('Merged Buttons bar', {author:'xxx', version: '3.0.0'});
+	window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
 	var buttonOrientation = 'x';

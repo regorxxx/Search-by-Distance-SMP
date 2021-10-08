@@ -1,4 +1,5 @@
 ﻿'use strict';
+//08/10/21
 
 // FOR TESTING: compares genre/style A to Band computes distance (similar to the main function for individual links)
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
@@ -87,6 +88,16 @@ function testGraph(mygraph) {
 		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
 		console.log(distanceGraph);
 		
+		key_one = 'Blues';
+		key_two = 'Hip-Hop';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
 		key_one = 'Trance';
 		key_two = 'House';
 		path = pathFinder.find(key_one, key_two);
@@ -119,6 +130,86 @@ function testGraph(mygraph) {
 		
 		key_one = 'Shoegaze';
 		key_two = 'Indie';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues Rock';
+		key_two = 'Gangsta';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues Rock';
+		key_two = 'Hip-Hop';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues Rock';
+		key_two = 'Blues';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues';
+		key_two = 'Blues';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues';
+		key_two = 'Heavy Metal';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues';
+		key_two = 'Glam Metal';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues';
+		key_two = 'Pop Metal';
+		path = pathFinder.find(key_one, key_two);
+		distanceGraph = get_distanche_from_path(mygraph, path);
+		idpath = get_nodes_from_path(mygraph, path);
+		console.log(key_one + ' - ' + key_two + ': ' + distanceGraph);
+		console.log(idpath);
+		distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+		console.log(distanceGraph);
+		
+		key_one = 'Blues Rock';
+		key_two = 'Pop Metal';
 		path = pathFinder.find(key_one, key_two);
 		distanceGraph = get_distanche_from_path(mygraph, path);
 		idpath = get_nodes_from_path(mygraph, path);
@@ -232,6 +323,16 @@ function testGraphV2(mygraph) {
 		
 		array_one = [ 'Rock', 'Surf Rock' ];
 		array_two = [ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ];
+		distanceGraph = calcMeanDistanceV2(mygraph, array_one, array_two);
+		console.log(array_one + ' <- ' + array_two + ' = ' + distanceGraph);
+
+		array_one = [ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ];
+		array_two = [ 'Hip-Hop', 'Gangsta', 'West Coast' ];
+		distanceGraph = calcMeanDistanceV2(mygraph, array_one, array_two);
+		console.log(array_one + ' <- ' + array_two + ' = ' + distanceGraph);
+
+		array_one = [ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ];
+		array_two = [ 'Hard Rock', 'Heavy Metal', 'Glam Metal', 'Pop Metal' ];
 		distanceGraph = calcMeanDistanceV2(mygraph, array_one, array_two);
 		console.log(array_one + ' <- ' + array_two + ' = ' + distanceGraph);
 }

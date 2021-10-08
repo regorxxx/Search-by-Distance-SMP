@@ -1,7 +1,9 @@
 ﻿'use strict';
+//07/10/21
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
+include('helpers_xxx_flags.js');
 
 /* 
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
@@ -12,13 +14,6 @@ include('helpers_xxx_UI.js');
 	Check '_buttons_example_merged.js' for a working example of a buttons bar within foobar.
 	Check '_buttons_example_merged_double.js' for a working example of merging multiple buttons and bars within foobar.
 */
-
-const ButtonStates = {
-	normal: 0,
-	hover: 1,
-	down: 2,
-	hide: 3
-};
 
 const buttonsBar = {};
 buttonsBar.list = [];

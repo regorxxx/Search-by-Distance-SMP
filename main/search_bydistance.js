@@ -410,7 +410,7 @@ const SearchByDistance_panelProperties = {
 	bBasicLogging 			:	['Enables basic console logs', true],
 	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
 	firstPopup				:	['Search by distance: Fired once', false],
-	descriptorCRC			:	['Graph Descriptors CRC', crc32(JSON.stringify(music_graph_descriptors))],
+	descriptorCRC			:	['Graph Descriptors CRC', -1], // Calculated later on first time
 };
 
 var sbd_prefix = 'sbd_';
@@ -440,13 +440,14 @@ if (!panelProperties.firstPopup[1]) {
 const all_music_graph = music_graph();
 const [genre_map , style_map, genre_style_map] = dyngenre_map();
 const kMoodNumber = 6;  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library..
+const influenceMethod = 'adjacentNodes'; // direct, zeroNodes, adjacentNodes, fullPath
 
 /* 
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
 if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
-const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors));
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod);
 if (panelProperties.descriptorCRC[1] !== descriptorCRC) {
 	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
 	_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
@@ -1680,9 +1681,9 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
 						jh_distance = jh_link.distance;
 						jh_influenceDistance = jh_link.influenceDistance;
 						bfoundcache = true;
-					} 
+					}
 					if (!bfoundcache) { // Calc distances not found at cache. This is the heaviest part of the calc.
-						[jh_distance, jh_influenceDistance] = calc_map_distance(mygraph, style_genre, style_genreNew, true); 
+						[jh_distance, jh_influenceDistance] = calc_map_distance(mygraph, style_genre, style_genreNew, true, influenceMethod); 
 						//Graph is initialized at startup
 						cacheLink.set([style_genre, style_genreNew].sort().join('-'), {distance: jh_distance , influenceDistance: jh_influenceDistance}); // Sorting removes the need to check A-B and B-A later...
 					}
@@ -1724,34 +1725,6 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
 }
 
 // Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-/* function calcCacheLinkSGV2(mygraph, limit = -1) {
-	let cache = new Map();
-	let nodeList = [];
-	
-	// Filter SGs with those on library
-	nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity))); // all values without duplicates
-	let tfo = fb.TitleFormat('%genre%|%style%'); // TODO: Use properties!
-	const styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split('|')); // All styles/genres from library without duplicates
-	nodeList = [...nodeList.intersection(styleGenres)];
-	
-	let nodeListLength = nodeList.length;
-	let i = 0;
-	while (i < nodeListLength){
-		let j = i + 1;
-		while (j < nodeListLength){
-			let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true);
-			if (limit === -1 || ij_distance <= limit) {
-				// Sorting removes the need to check A-B and B-A later...
-				cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
-			}
-			j++;
-		}
-		i++;
-	}
-	return cache;
-} */
-
-// Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
 function calcCacheLinkSGV2(mygraph, limit = -1) {
 	let nodeList = [];
 	// Filter SGs with those on library
@@ -1763,12 +1736,12 @@ function calcCacheLinkSGV2(mygraph, limit = -1) {
 		let cache = new Map();
 		const promises = [];
 		const total = nodeList.length - 1;
-		let prevProgress = 0;
+		let prevProgress = -1;
 		for (let i = 0; i < total; i++) {
 			for (let j = i + 1; j <= total; j++) {
 				promises.push(new Promise(resolve => {
 					setTimeout(() => {
-						let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true);
+						let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
 						if (limit === -1 || ij_distance <= limit) {
 							// Sorting removes the need to check A-B and B-A later...
 							cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});

@@ -1,4 +1,5 @@
 ﻿'use strict';
+//08/10/21
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
@@ -25,7 +26,7 @@ function get_distanche_from_path(graph, path) {
 			throw new Error('Invalid path');
 		} else {
 			for (i = 0; i < path_length - 1;i++) {
-				let link = graph.getLink(path[i].id, path[i+1].id) !== null ? graph.getLink(path[i].id, path[i+1].id) : graph.getLink(path[i+1].id, path[i].id);
+				let link = graph.getLink(path[i].id, path[i+1].id) || graph.getLink(path[i+1].id, path[i].id);
 				if (distanceGraph !== Infinity) {distanceGraph += link.data.weight;}
 				else {distanceGraph = link.data.weight;}
 			}
@@ -34,7 +35,7 @@ function get_distanche_from_path(graph, path) {
 }
 
 // Finds distance between two nodes, Path is calculated on the fly.
-function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
+function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false, influenceMethod = 'adjacentNodes' /* direct, zeroNodes, adjacentNodes, fullPath */) {
 		const method = 'NBA'; // Minimal speed differences found for our weighted graph...
 		
 		let distanceGraph = Infinity;
@@ -81,20 +82,67 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false) {
 		path = pathFinder.find(key_one, key_two);
 		distanceGraph = get_distanche_from_path(mygraph, path);
 		
-		if (bUseInfluence) {
-			let links = [];
-			mygraph.forEachLinkedNode(key_one, function(linkedNode, link){
-				if (link.fromId === key_one && link.toId === key_two || link.fromId === key_two && link.toId === key_one) {
-					links.push(link);
+		if (bUseInfluence) { 
+			// Checks links between pairs of nodes to find if they are (anti)influences
+			// For ex: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues
+			// Where {Hip-Hop <- Rap_supergenre} and {Blues_supergenre <- Blues} are zero distance links
+			let last = path.length - 1; // Is always >= 1
+			let bDirect = false;
+			switch (influenceMethod) {
+				case 'fullPath': { // Considering every consecutive link on the path {Hip-Hop <- Rap_supergenre}, {Rap_supergenre <- Rap_cluster}, ...
+					if (last !== 1) { // Otherwise we are repeating first->last multiple times, considered below
+						for (let i = 0; i < last; i++) { // size (<=n) (a)->{b}, (b)->{c}, (c)->{d}, ...
+							const link = mygraph.getLink(path[i].id, path[i + 1].id) || mygraph.getLink(path[i + 1].id, path[i].id);
+							if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
+						}
+					}
 				}
-			});
-			let i = links.length;
-			while (i--){
-				let ilink = links[i];
-				if (ilink.data.absoluteWeight) {
-					influenceDistanceGraph += ilink.data.absoluteWeight; // Called absolute because it's added to the total distance!
-					// console.log(key_one +' -> ' + key_two + ' - ' + influenceDistanceGraph);
+				case 'adjacentNodes': { // Considering the adjacent nodes no matter their distance, so compare node set {Hip-Hop, Rap_supergenre} to {Blues_supergenre, Blues}
+					if (last !== 1) { // Otherwise we are repeating first->last multiple times
+						let adjLinkNodeFrom = new Set();
+						let adjLinkNodeTo = new Set();
+						adjLinkNodeFrom.add(path[0].id).add(path[1].id);
+						adjLinkNodeTo.add(path[last].id).add(path[last - 1].id);
+						adjLinkNodeFrom.forEach((nodeFrom) => { // size (<=4) (a)->{z}, (a)->{y}, (b)->{z}, (b)->{y}
+							adjLinkNodeTo.forEach((nodeTo) => {
+								const link = mygraph.getLink(nodeFrom, nodeTo) || mygraph.getLink(nodeTo, nodeFrom);
+								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
+							});
+						});
+					} else {bDirect = true;}
+					break;
 				}
+				case 'zeroNodes': { // Considering only the adjacent nodes at zero distance, equivalent to prev. method but only when links are substitutions
+					if (last !== 1) { // Otherwise we are repeating first->last multiple times
+						let zeroLinkNodeFrom = new Set();
+						let zeroLinkNodeTo = new Set();
+						const linkFrom = mygraph.getLink(path[0].id, path[1].id) || mygraph.getLink(path[1].id, path[0].id);
+						const linkTo = mygraph.getLink(path[last].id, path[last - 1].id) || mygraph.getLink(path[last - 1].id, path[last].id);
+						if (linkFrom && linkFrom.data.weight === 0) {zeroLinkNodeFrom.add(linkFrom.fromId).add(linkFrom.toId);}
+						if (linkTo && linkTo.data.weight === 0) {zeroLinkNodeTo.add(linkTo.fromId).add(linkTo.toId);}
+						let bDone = false;
+						zeroLinkNodeFrom.forEach((nodeFrom) => { // size (<=1) Note substitutions require their influence links to be added to the generic item, so there is only (A=a)->(Z=z)
+							if (bDone) {return;}
+							zeroLinkNodeTo.forEach((nodeTo) => {
+								if (bDone) {return;}
+								const link = mygraph.getLink(nodeFrom, nodeTo) || mygraph.getLink(nodeTo, nodeFrom);
+								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight; bDone = true;}
+							});
+						});
+					}
+				}
+				case 'direct': { // zero nodes method also includes any direct link between the last and first node even when the distance is not zero. Built-in in adjacent nodes
+					bDirect = true;
+					break;
+				}
+				default: {
+					console.log('calc_map_distance: influence method not recognized \'' + influenceMethod + '\'.')
+					break;
+				}
+			}
+			if (bDirect) { // Always applies when there is only 2 nodes no matter the method or using direct
+				const link = mygraph.getLink(path[0].id, path[last].id) || mygraph.getLink(path[last].id, path[0].id); // Size (<=1) (a)->{z}
+				if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
 			}
 		}
 		return [distanceGraph, influenceDistanceGraph];
@@ -251,8 +299,7 @@ function get_nodes_from_path(graph, path) {
 		if (!path.length) {return 'No Path';}
 		let idpath = path[0].id;
 		let path_length = path.length;
-		let i;
-		for (i = 1; i < path_length;i++) {
+		for (let i = 1; i < path_length;i++) {
 			idpath += ' <- ' + path[i].id;
 		}
 		return idpath;

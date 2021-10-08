@@ -1,4 +1,7 @@
-﻿include('menu_xxx.js');
+﻿'use strict'
+//07/10/21
+
+include('menu_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
 
@@ -155,7 +158,7 @@ function createConfigMenu(parent) {
 		const lowerHundred = new Set(['scoreFilter', 'probPick', 'progressiveListCreationN']);
 		options.forEach((key) => {
 			const idxEnd = properties[key][0].indexOf('(');
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
+			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
 			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
 				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}

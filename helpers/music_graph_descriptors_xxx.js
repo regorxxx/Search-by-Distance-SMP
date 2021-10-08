@@ -1,4 +1,5 @@
 ﻿'use strict';
+//08/10/21
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -300,11 +301,12 @@ const music_graph_descriptors = {
 		['Folk Baroque'						,	['Americana','Country_supergenre','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
 		['Grunge'							,	['Indie','Britpop','Funk Metal','Beat Music','Roots Rock','Glam Rock','Pop Metal','Glam Metal','Hair Metal']],
 		['Post-Britpop'						,	['Garage Rock Revival','Post-Punk Revival','Garage Punk']],
-		['Garage Rock Revival'				,	['Dream Pop','Shoegaze']],
+		['Garage Rock Revival'				,	['Dream Pop','Shoegaze']],		
 		['Freak Folk'						,	['Electropop','Psychedelic Rock','Acid Rock']],
 		['Chill-Out Downtempo'				,	['Progressive Trance','New Age','New Age XL','Neo-Classical New Age','Healing Music','New Acoustic']],
 		['Future Jazz'						,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
-		['Jazz_supergenre'						,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
+		['Jazz_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
+		['Blues_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Rap_supergenre','Hardcore Punk_supergenre','Electronic Music_supercluster','Classic Metal XL','Heavy Prog','Dream Pop','Indie']],
 		['Traditional Pop'					,	['Electropop','Electronic Music_supercluster','Electro','Psychedelic Rock','Psychedelic Folk','Progressive Rock']],
 		['Electronic Music_supercluster'	,	['Metal_supergenre','Classic Rock XL','Punk Rock_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre']],
 		['Stoner Rock'						,	['Pop Rock','Pop_supergenre']],
@@ -364,7 +366,7 @@ const music_graph_descriptors = {
 		['Country_supergenre'				,	['Country'							]],
 		['Blues_supergenre'					,	['Blues'							]],
 		['Jazz_supergenre'					,	['Jazz','Jazz Vocal'				]],
-		['Rap_cluster'						,	['Hip-Hop'							]],
+		['Rap_supergenre'					,	['Hip-Hop'							]],
 		['Hardcore Rap'						,	['Hardcore'							]],
 		['Electronic Music_supercluster'	,	['Electronic'						]],
 		['Techno_supergenre'				,	['Techno'							]],
