@@ -1,5 +1,5 @@
 ﻿'use strict'
-//07/10/21
+//13/10/21
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -9,7 +9,7 @@ function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => {return !path.split('\\').pop().startsWith('_');});
-	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFile(folders.xxx + 'helpers\\readme\\buttons_list.json', convertCharsetToCodepage('UTF-8')) : null;
+	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name,convertCharsetToCodepage('UTF-8')) : null;
 	// Header
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});

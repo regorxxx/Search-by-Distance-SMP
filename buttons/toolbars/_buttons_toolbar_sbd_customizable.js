@@ -1,4 +1,5 @@
 ﻿'use strict';
+//13/10/21
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.

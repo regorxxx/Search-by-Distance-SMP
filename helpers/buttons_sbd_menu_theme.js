@@ -1,5 +1,5 @@
 ﻿'use strict'
-//07/10/21
+//13/10/21
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -17,14 +17,12 @@ function createThemeMenu(parent) {
 	// Recipe forced theme?
 	let forcedTheme = null;
 	if (properties.recipe[1].length) {
-		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1], utf8) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], utf8);
-		if (!recipe) {console.log('Recipe file is not valid or not found:' + properties.recipe[1]);}
-		else if (recipe.hasOwnProperty('theme')) {
+		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) : _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], 'Recipe json', 'Search by distance', utf8);
+		if (recipe && recipe.hasOwnProperty('theme')) {
 			let bDone = false;
-			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFile(recipe.theme, utf8); bDone = true;}
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, utf8); bDone = true;}
-			if (bDone && !forcedTheme) {console.log('Theme file is not valid:' + recipe.theme);}
-			else if (!bDone) {console.log('Theme file not found:' + recipe.theme);}
+			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8);}
+			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {forcedTheme = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, 'Theme json', 'Search by distance', utf8);}
+			else {console.log('Theme file not found:' + recipe.theme);}
 		}
 	}
 	// Header
@@ -91,8 +89,8 @@ function createThemeMenu(parent) {
 	// List
 	const options = [];
 	files.forEach((file) => {
-		const theme = _jsonParseFile(file, utf8);
-		if (!theme) {console.log('Theme file is not valid:' + file); return;}
+		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
+		if (!theme) {return;}
 		// Check
 		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
 		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
@@ -105,8 +103,8 @@ function createThemeMenu(parent) {
 	});
 	const menus = [];
 	options.forEach((file) => {
-		const theme = _jsonParseFile(file, utf8);
-		if (!theme) {console.log('Theme file is not valid:' + file); return;}
+		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
+		if (!theme) {return;}
 		const name = forcedTheme ? forcedTheme.name + ' (forced by recipe)' : theme.name; // Recipe may overwrite theme
 		let i = 1;
 		const entryText = menus.indexOf(theme.name) === -1 ? theme.name : theme.name + ' (' + ++i + ')';

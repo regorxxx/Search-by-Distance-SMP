@@ -1,7 +1,8 @@
 ﻿'use strict';
+//13/10/21
 
 /*	
-	Search by Distance 03/05/21
+	Search by Distance
 	-----------------------------------
 	Creates a playlist with similar tracks to the currently selected one according to genre, style, key, etc.
 	Every track of the library is given a score according to those tags and/or a distance according to genre/style.
@@ -632,11 +633,8 @@ function do_searchby_distance({
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
 				console.log(path);
-				recipe = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
-				if (!recipe) {
-					console.log('Recipe file selected is missing or not valid: ' + path);
-					return;
-				}
+				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+				if (!recipe) {return;}
 			}
 			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1] : '-no name-');  //TODO: Deprecated
 			// Rewrite args or use destruct when passing args
@@ -686,11 +684,8 @@ function do_searchby_distance({
 			let path;
 			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
 				path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
-				theme = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
-				if (!theme) {
-					console.log('Theme file selected is missing or not valid: ' + path);
-					return;
-				}
+				theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+				if (!theme) {return;}
 			}
 			
 			// Array of objects
@@ -1768,7 +1763,7 @@ function loadCache(path) {
 	let cacheMap = new Map();
 	if (utils.IsFile(path)) {
 		if (utils.GetFileSize(path) > 400000000) {console.log('SearchByDistance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
-		let obj = _jsonParseFile(path, convertCharsetToCodepage('UTF-8'));
+		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  convertCharsetToCodepage('UTF-8'));
 		if (obj) { 
 			obj = Object.entries(obj);
 			obj.forEach((pair) => {

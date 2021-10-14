@@ -1,5 +1,5 @@
 ﻿'use strict'
-//07/10/21
+//13/10/21
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -13,8 +13,7 @@ function createConfigMenu(parent) {
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFile(properties.recipe[1], utf8) : _jsonParseFile(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], utf8);
-		if (!recipe) {recipe = {}; console.log('Recipe file is not valid or not found:' + properties.recipe[1]);}
+		recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}: _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
 	}
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});
@@ -96,7 +95,7 @@ function createConfigMenu(parent) {
 			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
 			let options = [];
 			if (_isFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json')) {
-				options = _jsonParseFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json', utf8);
+				options = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json', 'Query filters json', 'Search by distance', utf8) || [];
 			} else {
 				options = [
 					{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 

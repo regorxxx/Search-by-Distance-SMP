@@ -1,4 +1,5 @@
 ﻿'use strict';
+//13/10/21
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -121,7 +122,7 @@ for (let i = 0; i < buttonsPath.length; i++) {
 
 function loadButtons() {
 	if (_isFolder(folders.data)) {
-		const data = _jsonParseFile(folders.data + barProperties.name[1] + '.json', convertCharsetToCodepage('UTF-8'));
+		const data = _jsonParseFileCheck(folders.data + barProperties.name[1] + '.json', 'Buttons bar', window.Name, convertCharsetToCodepage('UTF-8'));
 		if (data) { // TODO: remove splitting after a few releases
 			const names = data.map((path) => {return path.split('\\').pop();});
 			_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(names, null, 3));
