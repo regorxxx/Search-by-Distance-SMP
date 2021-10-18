@@ -1074,7 +1074,6 @@ function do_searchby_distance({
         // Compute similarity distance by Weight and/or Graph
 		// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
         let scoreData = [];
-		// let cacheLink = new Map();
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
 			let tfo = fb.TitleFormat(genreTag.concat(styleTag).join('|'));
@@ -1267,6 +1266,9 @@ function do_searchby_distance({
 			const score = round(weightValue * 10000 / originalScore / totalWeight, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 			
 			if (method === 'GRAPH') {
+				// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
+				if (!cacheLink) {cacheLink = new Map();}
+				if (!cacheLinkSet) {cacheLinkSet = new Map();}
 				// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
 				if (score >= minFilter) {
 					// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j): 
@@ -1322,6 +1324,7 @@ function do_searchby_distance({
 			// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
 			scoreData.sort(function (a, b) {return b.score - a.score;});
 			let i = 0;
+			let bMin = false;
 			while (i < poolLength) {
 				const i_score = scoreData[i].score;
 				if (i_score < scoreFilter) {	//If below minimum score
@@ -1330,6 +1333,7 @@ function do_searchby_distance({
 						break;
 					} else if (sbd_distanceFilter_graph_below && i_score < minFilter) {	//Or after min score - 10% range
 						scoreData.length = i;
+						bMin = true;
 						break;
 					}
 				}
@@ -1337,7 +1341,7 @@ function do_searchby_distance({
 			}
 			scoreData.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); // First sorted by graph distance, then by weight
 			poolLength = scoreData.length;
-			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + minFilter + '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
+			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minFilter : scoreFilter)+ '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
 		}
 		
 		// Post Filter (note there are no real duplicates at this point)
@@ -1655,6 +1659,7 @@ function do_searchby_distance({
 // where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
 // Pre-filtering number of tracks is the best approach to reduce calc time (!)
 function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
+	if (!cacheLink) {cacheLink = new Map();}
 	let map_distance = Infinity;
 	const difference = style_genre_reference.difference(style_genre_new);
 	if (style_genre_reference.size === 0 || style_genre_new.size === 0) { // When no tags are available, sets are empty & tracks are not connected

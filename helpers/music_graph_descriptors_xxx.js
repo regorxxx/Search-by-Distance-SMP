@@ -306,7 +306,7 @@ const music_graph_descriptors = {
 		['Chill-Out Downtempo'				,	['Progressive Trance','New Age','New Age XL','Neo-Classical New Age','Healing Music','New Acoustic']],
 		['Future Jazz'						,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
 		['Jazz_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
-		['Blues_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Rap_supergenre','Hardcore Punk_supergenre','Electronic Music_supercluster','Classic Metal XL','Heavy Prog','Dream Pop','Indie']],
+		['Blues_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Rap_supergenre','Hardcore Punk_supergenre','Electronic Music_supercluster','Classic Metal XL','Heavy Prog','Dream Pop','Indie','Progressive Rock XL']],
 		['Traditional Pop'					,	['Electropop','Electronic Music_supercluster','Electro','Psychedelic Rock','Psychedelic Folk','Progressive Rock']],
 		['Electronic Music_supercluster'	,	['Metal_supergenre','Classic Rock XL','Punk Rock_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre']],
 		['Stoner Rock'						,	['Pop Rock','Pop_supergenre']],
@@ -314,6 +314,9 @@ const music_graph_descriptors = {
 		['Thrash Metal'						,	['Glam Metal','Hair Metal','Pop Metal']],
 		['Sadcore'							,	['Dream Pop','Traditional Pop','Mainstream Pop','Traditional Pop','Vocal Pop','Britpop','Beat Music','Glam Rock']],
 		['Nature Music'						,	['Ambient Industrial','Loungetronica','Easy Listening','Lounge XL','Ambient Dance']],
+		['Tulsa Sound'						,	['Heavy Prog','Stoner Rock','Progressive Rock XL']],
+		['Progressive Rock XL'				,	['Metal_supergenre','Grunge','Americana','Detroit Blues','Garage Rock Revival','Southern Rock','Heartland Rock']],
+		['Heavy Prog'						,	['Fusion', 'Jazz-Rock','Symphonic Prog','Crossover Prog','Southern Rock','Heartland Rock','Soft Rock']],
 		['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']]
 		],
 		
