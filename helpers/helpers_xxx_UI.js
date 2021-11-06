@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/10/21
+//05/11/21
 
 include(fb.ComponentPath + 'docs\\Flags.js');
 include('helpers_xxx_UI_chars.js');
@@ -73,6 +73,19 @@ function nextId(method, bNext = true, bCharsForced = true) {
 			return nextIdLetters(bNext, bCharsForced);
 		case method === 'indicator':
 			return nextIdIndicator(bNext);
+		default:
+			return null;
+	}
+}
+
+function getIdRegEx(method, bNext = true, bCharsForced = true) {
+	switch (true) {
+		case method === 'invisible':
+			return / \(\*[\u200b\u200c\u200d\u200e]{5}\)$/g;
+		case method === 'letters':
+			return / \([abcdf]{5}\)$/g;
+		case method === 'indicator':
+			return / \(\*\)$/g;
 		default:
 			return null;
 	}
@@ -155,6 +168,14 @@ const nextIdIndicator = (function() { // Same structure to ease compatibility
 			return ' (*)';
 		};
 }());
+
+function removeIdFromStr(nameId) {
+	let name = nameId;
+	['invisible','letters','indicator'].forEach((method) => {
+		name = name.replace(getIdRegEx(method), '');
+	});
+	return name;
+}
 
 /* 
 	Tooltip
@@ -257,17 +278,29 @@ function tintColor(color, percent) {
 	const red = getRed(color);
 	const green = getGreen(color);
 	const blue = getBlue(color);
-
 	return RGBA(lightenColorVal(red, percent), lightenColorVal(green, percent), lightenColorVal(blue, percent), getAlpha(color));
 }
+
 function darkenColorVal(color, percent) {
 	const shift = Math.max(color * percent / 100, percent / 2);
 	const val = Math.round(color - shift);
 	return Math.max(val, 0);
 }
+
 function lightenColorVal(color, percent) {
 	const val = Math.round(color + ((255-color) * (percent / 100)));
 	return Math.min(val, 255);
+}
+
+function tintColor(color, percent) {
+	const red = getRed(color);
+	const green = getGreen(color);
+	const blue = getBlue(color);
+	return RGBA(lightenColorVal(red, percent), lightenColorVal(green, percent), lightenColorVal(blue, percent), getAlpha(color));
+}
+
+function opaqueColor(color, percent) {
+	return RGBA(...toRGB(color), Math.min(255, 255 * (percent / 100)));
 }
 
 /* 

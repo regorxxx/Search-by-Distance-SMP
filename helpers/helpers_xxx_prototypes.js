@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/10/21
+//06/11/21
 
 /* 
 	Objects
@@ -245,3 +245,10 @@ function round(floatnum, decimals){
 function isBoolean(obj) {
    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
 }
+
+
+/* 
+	Maps
+*/
+// Allows forward and backward iteration
+try {include('..\\helpers-external\\reverse-iterable-map-5.0.0\\reverse-iterable-map.js');} catch (e) {}

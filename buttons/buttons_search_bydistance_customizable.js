@@ -50,7 +50,7 @@ var newButtons = {
 		} else {
 			if (this.buttonsProperties['customName'][1] === 'Customize!') {
 				let input = '';
-				try {input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true);}
+				try {input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true);}
 				catch(e) {return;}
 				if (!input.length) {return;}
 				if (this.buttonsProperties.customName[1] !== input) {
