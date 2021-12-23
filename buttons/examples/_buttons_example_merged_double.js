@@ -38,7 +38,7 @@ toolbarColor = RGB(211,218,237);
 						];
 
 	for (let i = 0; i < buttonsPath.length; i++) {
-		if ((isCompatible('1.4.0') ? utils.IsFile(buttonsPath[i]) : utils.FileTest(buttonsPath[i], "e"))) {
+		if ((isCompatible('1.4.0') ? utils.IsFile(buttonsPath[i]) : utils.FileTest(buttonsPath[i], 'e'))) {
 			include(buttonsPath[i], {always_evaluate: true});
 		} else {
 			console.log(buttonsPath[i] +' not loaded');

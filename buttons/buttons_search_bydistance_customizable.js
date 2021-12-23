@@ -82,5 +82,5 @@ buttons = {...buttons, ...newButtons};
 // Helper
 function buttonTooltip(parent) {
 	const data = JSON.parse(parent.buttonsProperties.data[1]);
-	return ('Search according to variables set at properties.\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme) + '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe + '\n(Shift + Ctrl + L. Click to set other config)');
+	return ('Search according to variables set at properties.\n-----------------------------------------------------\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme) + '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe + '\n(Shift + Ctrl + L. Click to set other config)');
 }

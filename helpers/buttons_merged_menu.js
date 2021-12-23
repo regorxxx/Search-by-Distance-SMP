@@ -1,5 +1,5 @@
 ﻿'use strict'
-//13/10/21
+//02/12/21
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -9,22 +9,30 @@ function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => {return !path.split('\\').pop().startsWith('_');});
-	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name,convertCharsetToCodepage('UTF-8')) : null;
+	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, convertCharsetToCodepage('UTF-8')) : null;
 	// Header
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	if (!_isFolder(folders.data)) {_createFolder(folders.data);}
-	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_tags_automation.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_save_tags.js', 'buttons_tags_automation.js']);
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_tags_automation.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_automation.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js','buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js','buttons_fingerprint_tools.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
+	const subCategories = ['_fingerprint_', '_search_', '_tags_', '_playlist_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
 	function isAllowed(fileName) {return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName);}
 	function isAllowedV2(fileName) {return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js');}
 	{
 		const subMenu = menu.newMenu('Add buttons');
+		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		files.forEach((path, idx) => {
 			const fileName = path.split('\\').pop();
-			const entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)') ;
-			menu.newEntry({menuName: subMenu, entryText, func: () => {
+			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
+			let subMenuFolder = subCategories.find((folder) => {return entryText.indexOf(folder) !== -1;});
+			if (subMenuFolder && subMenuFolder.length) {
+				 subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,'')) + invId;
+				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
+			}
+			entryText = entryText.replace('buttons_', '');
+			menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
 				buttonsPath.push(path);
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
@@ -178,6 +186,7 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'sep'});
 	{
 		const subMenu = menu.newMenu('Readmes...');
+		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
@@ -189,7 +198,13 @@ function createButtonsMenu(name) {
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
 			Object.keys(readmeList).forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-				menu.newEntry({menuName: subMenu, entryText: fileName, func: () => {
+				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;});
+				if (subMenuFolder && subMenuFolder.length) {
+					 subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,'')) + invId;
+					if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
+				}
+				const entryText = fileName.replace('buttons_', '');
+				menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
 						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 					}

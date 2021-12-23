@@ -15,7 +15,7 @@ try { //May be loaded along other buttons
 }
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\helpers_xxx_properties.js');
-var prefix = "sbd_";
+var prefix = 'sbd_';
 prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here

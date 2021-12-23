@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/10/21
+//13/12/21
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -162,7 +162,7 @@ function on_paint(gr) {
 	drawAllButtons(gr);
 }
 
-function on_mouse_move(x, y) {
+function on_mouse_move(x, y, mask) {
 	let old = cur_btn;
 	cur_btn = chooseButton(x, y);
 
@@ -228,6 +228,28 @@ function on_mouse_lbtn_up(x, y, mask) {
 		}
 	} else if (mask === MK_SHIFT) {
 		if (buttonsBar.hasOwnProperty('shiftMenu')) {buttonsBar.shiftMenu().btn_up(x, this.y + this.h);}
+	}
+}
+
+function on_key_down(k) { // Update tooltip with key mask if required
+	for (let key in buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+			if (buttons[key].state === ButtonStates.hover) {
+				const that = buttons[key];
+				tooltipButton.SetValue( (bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+			}
+		}
+	}
+}
+
+function on_key_up(k) {
+	for (let key in buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+			if (buttons[key].state === ButtonStates.hover) {
+				const that = buttons[key];
+				tooltipButton.SetValue( (bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+			}
+		}
 	}
 }
 

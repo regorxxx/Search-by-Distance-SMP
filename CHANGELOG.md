@@ -2,13 +2,19 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [2.0.1](#201---2021-06-15)
+- [2.0.1](#201---2021-12-23)
 - [2.0.0](#200---2021-06-15)
 - [1.2.0](#120---2021-06-07)
 - [1.1.0](#110---2021-05-26)
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [2.0.1] - 2021-12-23
 ### Added
 - Helpers: added full script console logging to file at foobar profile folder ('console.log'). File is reset when reaching 5 MB. Logging is also sent to foobar2000's console (along other components logging).
 - Cache: Checks graph links cache size on startup and warns when file size > 40 Mb. This is done to avoid memory leaks, since the file is fully loaded on memory and a corrupted file may increase the map size indefinitely until crashing the panel.
@@ -35,15 +41,18 @@
 - Buttons framework: default icon size is now bigger.
 - Buttons: custom button now has a menu entry to rename it after the first time (instead of using the properties panel).
 - Buttons: custom button shows the current value on the menu entries (no need to click on them or open properties). It also shows the value if set -forced- by the recipe. 'sbd_max_graph_distance' value is evaluated before displaying (if not using a number).
+- Buttons: custom button, reworked a bit the first input popup when setting the name to explain general functionality.
 - Buttons: minor renaming for AutoPlaylist - Playlist filter.
 - Buttons: Added readmes to configurable button on menus: methods, full documentation and recipes & themes.
 - Buttons: loading buttons using the customizable toolbar will show their associated readme (if it exists).
 - Buttons: restoring defaults buttons on the toolbar will show the readme of all the restored buttons.
 - Buttons: replaced the readme entry on the toolbar menu with a submenu pointing to all readmes of every button.
 - Buttons: colors are changed without reloading the panel.
+- Buttons: the list of buttons when adding a new one is now split by categories to easily found them according to their functionality. Same with their readme popup.
 - Debug: new config to show popup even after test passing (meant to be used along Playlist Tools). Default behavior remains the same, popup only appears if errors are found.
 - Installation: Installation path may now be changed by editing 'folders.xxxName' variable at '.\helpers\helpers_xxx.js'. This is a workaround for some SMP limitations when working with relative paths and text files, images or dynamic file loading.
 - Helpers: updated. Whenever a folder needs to be created to save a new file, the entire tree is now created if needed. Previously it would fail as soon as any folder did not exist. This greatly speeds up setting panels since now the final folder does not need to exists at all to work, since it will be created on the fly.
+- Helpers: additional checks at json loading on all scripts. Warnings via popup when a corrupted file is found.
 - All json files are now saved as UTF-8 without BOM. All json files are now read as UTF-8 (forced).
 - Link cache is now saved in an human readable structure.
 ### Removed
@@ -51,6 +60,8 @@
 - Influences: were not being correctly parsed when the original or the final node was a substitution (zero weight). Now adjacent nodes which may be substitutions are also checked at both sides, for ex for this path: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues. Where Hip-Hop is a substitution for Rap_supergenre,  Rap_supergenre is checked against Blues_supergenre and/or Blues for (anti)influences. Note it doesn't check for links at Hip-Hop since the influences link are always added to the generic items by design (in this case Rap_supergenre_supergenre), so there is max. 1 possible link. (note this may be overridden by the default behavior listed at top)
 - Buttons: Fixed multiple button names while logging loading on console.
 - Cache: Fixed crash while trying to parse the cache file if it's being edited at the same time or corrupt.
+- Cache: crash when using the tools and link cache has not been built (on the 10 first secs on first startup or after cache resetting).
+- Logging: minor fixes at console logging.
 - Multiple minor improvements and fixes on path handling for portable installations.
 - Multiple minor improvements and fixes when saving files on non existing folder.
 - Evaluation of 'sbd_max_graph_distance' at recipes on multiple places is now rounded (just for cleaner logging purpose).
