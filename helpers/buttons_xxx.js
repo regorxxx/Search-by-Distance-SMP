@@ -55,7 +55,7 @@ function calcNextButtonCoordinates(buttonCoordinates,  buttonOrientation = 'x' ,
 }
 
 function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
-	this.state = state ? state : ButtonStates.normal;
+	this.state = state ? state : buttonStates.normal;
 	this.x = x;
 	this.y = y;
 	this.w = w;
@@ -89,25 +89,25 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	};
 
 	this.draw = function (gr) {
-		if (this.state === ButtonStates.hide) {
+		if (this.state === buttonStates.hide) {
 			return;
 		}
 
 		switch (this.state) {
-			case ButtonStates.normal:
+			case buttonStates.normal:
 				this.g_theme.SetPartAndStateID(1, 1);
 				break;
 
-			case ButtonStates.hover:
+			case buttonStates.hover:
 				tooltipButton.SetValue( (bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
 				this.g_theme.SetPartAndStateID(1, 2);
 				break;
 
-			case ButtonStates.down:
+			case buttonStates.down:
 				this.g_theme.SetPartAndStateID(1, 3);
 				break;
 
-			case ButtonStates.hide:
+			case buttonStates.hide:
 				return;
 		}
 		
@@ -146,7 +146,7 @@ function drawAllButtons(gr) {
 function chooseButton(x, y) {
 	for (let key in buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].containXY(x, y) && buttons[key].state !== ButtonStates.hide) {
+			if (buttons[key].containXY(x, y) && buttons[key].state !== buttonStates.hide) {
 				return buttons[key];
 			}
 		}
@@ -170,8 +170,8 @@ function on_mouse_move(x, y, mask) {
 		if (g_down) {
 			return;
 		}
-	} else if (g_down && cur_btn && cur_btn.state !== ButtonStates.down) {
-		cur_btn.changeState(ButtonStates.down);
+	} else if (g_down && cur_btn && cur_btn.state !== buttonStates.down) {
+		cur_btn.changeState(buttonStates.down);
 		window.Repaint();
 		return;
 	} 
@@ -185,8 +185,8 @@ function on_mouse_move(x, y, mask) {
 			tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
 		} else {tooltipButton.SetDelayTime(3, tooltipButton.oldDelay);} 
 	}
-	old && old.changeState(ButtonStates.normal);
-	cur_btn && cur_btn.changeState(ButtonStates.hover);
+	old && old.changeState(buttonStates.normal);
+	cur_btn && cur_btn.changeState(buttonStates.hover);
 	// Toolbar Tooltip
 	if (!cur_btn && toolbarTooltip.length) {
 		tooltipButton.SetValue(toolbarTooltip , true);
@@ -198,7 +198,7 @@ function on_mouse_leave() {
 	g_down = false;
 
 	if (cur_btn) {
-		cur_btn.changeState(ButtonStates.normal);
+		cur_btn.changeState(buttonStates.normal);
 		window.Repaint();
 	}
 }
@@ -206,7 +206,7 @@ function on_mouse_leave() {
 function on_mouse_lbtn_down(x, y, mask) {
 	g_down = true;
 	if (cur_btn) {
-		cur_btn.changeState(ButtonStates.down);
+		cur_btn.changeState(buttonStates.down);
 		window.Repaint();
 	}
 }
@@ -223,7 +223,7 @@ function on_mouse_lbtn_up(x, y, mask) {
 	if (cur_btn) {
 		cur_btn.onClick(mask);
 		if (cur_btn) { // Solves error if you create a new Whsell Popup (cur_btn becomes null) after pressing the button and firing cur_btn.onClick()
-			cur_btn.changeState(ButtonStates.hover);
+			cur_btn.changeState(buttonStates.hover);
 			window.Repaint();
 		}
 	} else if (mask === MK_SHIFT) {
@@ -234,7 +234,7 @@ function on_mouse_lbtn_up(x, y, mask) {
 function on_key_down(k) { // Update tooltip with key mask if required
 	for (let key in buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].state === ButtonStates.hover) {
+			if (buttons[key].state === buttonStates.hover) {
 				const that = buttons[key];
 				tooltipButton.SetValue( (bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
@@ -245,7 +245,7 @@ function on_key_down(k) { // Update tooltip with key mask if required
 function on_key_up(k) {
 	for (let key in buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].state === ButtonStates.hover) {
+			if (buttons[key].state === buttonStates.hover) {
 				const that = buttons[key];
 				tooltipButton.SetValue( (bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
