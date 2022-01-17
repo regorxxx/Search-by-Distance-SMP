@@ -13,6 +13,7 @@
 ### Changed
 ### Removed
 ### Fixed
+- Buttons bar: menu entry to change buttons position was not working properly.
 
 ## [2.0.1] - 2021-12-23
 ### Added

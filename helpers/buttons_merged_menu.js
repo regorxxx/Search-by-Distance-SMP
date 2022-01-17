@@ -1,5 +1,5 @@
 ﻿'use strict'
-//02/12/21
+//02/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -97,6 +97,7 @@ function createButtonsMenu(name) {
 		const subMenu = menu.newMenu('Change buttons position');
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
+				let input;
 				try {input = Number(utils.InputBox(window.ID, 'Enter new position.\n(1 - ' + buttonsPath.length +')', 'Buttons bar', idx + 1));}
 				catch (e) {return;}
 				if (isNaN(input) || input > buttonsPath.length) {return;}
@@ -114,14 +115,12 @@ function createButtonsMenu(name) {
 					const currentId = prefix.slice(0, prefix.length - 1);
 					let currentIdNumber = 0;
 					// Just rewrite all Ids with same prefix
-					console.log(prefix);
 					buttonsBar.list.forEach((oldProperties, newIdx) => {
 						const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
 						if (oldKeys.length) {
 							const oldPrefix = oldProperties[oldKeys[0]][0].split('_')[0];
 							const oldId = oldPrefix.slice(0, oldPrefix.length - 1);
 							if (oldId === currentId) {
-								console.log(oldProperties);
 								const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
 								deleteProperties(oldProperties); // Delete it at panel
 								for (const key in backup) { // Update Id
