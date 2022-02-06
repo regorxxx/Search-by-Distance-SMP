@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/10/21
+//04/02/22
 
 /*	
 	Search by Distance
@@ -326,7 +326,6 @@ include('..\\helpers\\helpers_xxx_tags.js');
 include('..\\helpers\\helpers_xxx_math.js');
 include('..\\helpers\\camelot_wheel_xxx.js');
 include('..\\helpers\\dyngenre_map_xxx.js');
-include('..\\helpers\\music_graph_descriptors_xxx.js');
 include('..\\helpers\\music_graph_xxx.js');
 include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
@@ -338,14 +337,14 @@ const SearchByDistance_properties = {
 	genreWeight				: 	['Genre Weight for final scoring', 15],
 	styleWeight				:	['Style Weight for final scoring', 15],
 	dyngenreWeight			:	['Dynamic Genre Weight for final scoring (only with DYNGENRE method)', 40],
-	dyngenreRange			:	['1.Dynamic Genre Range (only tracks within range will score)', 1],
+	dyngenreRange			:	['Dynamic Genre Range (only tracks within range will score)', 1],
 	moodWeight				:	['Mood Weight for final scoring', 10],
 	keyWeight				:	['Key Weight for final scoring', 5],
-	keyRange				:	['1.Key Range (uses Camelot Wheel \'12 hours\' scale)', 1],
+	keyRange				:	['Key Range (uses Camelot Wheel \'12 hours\' scale)', 1],
 	dateWeight				:	['Date Weight for final scoring', 10],
-	dateRange				:	['1.Date Range (only tracks within range will score positively)', 15],
+	dateRange				:	['Date Range (only tracks within range will score positively)', 15],
 	bpmWeight				:	['BPM Weight for final scoring', 5],
-	bpmRange				:	['1.BPM Range in % (for considering BPM Weight)', 25],
+	bpmRange				:	['BPM Range in % (for considering BPM Weight)', 25],
 	composerWeight			:	['Composer Weight for final scoring', 0],
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
@@ -362,12 +361,13 @@ const SearchByDistance_properties = {
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', 
 								'NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad AND TITLE PRESENT AND ARTIST PRESENT AND DATE PRESENT'],
 	bUseAntiInfluencesFilter:	['Filter anti-influences by query, before any scoring/distance calc', false],
+	bConditionAntiInfluences:	['Conditional anti-influences filtering for specific genres', false],
 	bUseInfluencesFilter:		['Allows only influences on the pool, before any scoring/distance calc', false],
 	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music'],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT'],
-	bNegativeWeighting		:	['Assigns negative score for numeric tags when they fall outside their range', true],
+	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	poolFilteringTag		:	['Allows only N + 1 tracks on the pool per tag set', 'artist'],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1],
 	bRandomPick				:	['Take randomly from pool? (thus not sorted by weighting)', true],
@@ -448,7 +448,7 @@ const influenceMethod = 'adjacentNodes'; // direct, zeroNodes, adjacentNodes, fu
 */
 // Only use file cache related to current descriptors, otherwise delete it
 if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
-const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod);
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod + 'v1.0.0');
 if (panelProperties.descriptorCRC[1] !== descriptorCRC) {
 	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
 	_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
@@ -468,8 +468,8 @@ if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
 	if (data.size) {cacheLinkSet = data; console.log('SearchByDistance: Used Cache - cacheLinkSet from file.');}
 }
-// Delays update after startup
-debounce(updateCache, 3000)();
+// Delays cache update after startup (must be called by the button file if it's not done here)
+if (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: panelProperties});}
 // Ask others instances to share cache on startup
 if (typeof cacheLink === 'undefined') {
 	window.NotifyOthers('SearchByDistance: requires cacheLink map', true);
@@ -477,10 +477,20 @@ if (typeof cacheLink === 'undefined') {
 if (typeof cacheLinkSet === 'undefined') {
 	window.NotifyOthers('SearchByDistance: requires cacheLinkSet map', true);
 }
-async function updateCache({newCacheLink, newCacheLinkSet, bForce = false} = {}) {
+async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, properties = null} = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
 		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
-		cacheLink = panelProperties.bCacheOnStartup[1] || bForce ? await calcCacheLinkSGV2(all_music_graph) : new Map();
+		if (panelProperties.bCacheOnStartup[1] || bForce) {
+			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
+			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%style%';
+			const tags = [genreTag, styleTag].filter(Boolean).join('|')
+			console.log('SearchByDistance: tags used for cache - ' + tags);
+			const tfo = fb.TitleFormat(tags);
+			const styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
+			cacheLink = await calcCacheLinkSGV2(all_music_graph, styleGenres);
+		} else {
+			cacheLink = new Map();
+		}
 		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
 		if (panelProperties.bProfile[1]) {profiler.Print();}
 		console.log('SearchByDistance: New Cache - cacheLink');
@@ -491,7 +501,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false} = {})
 	if (typeof cacheLinkSet === 'undefined' && !newCacheLinkSet) { // only required if on_notify_data did not fire before
 		cacheLinkSet = new Map();
 		console.log('SearchByDistance: New Cache - cacheLinkSet');
-		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLink);
+		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);
 	} else if (newCacheLinkSet) {
 		cacheLinkSet = newCacheLinkSet;
 	}
@@ -586,7 +596,8 @@ function do_searchby_distance({
 								// --->Pre-Scoring Filters
 								// Query to filter library
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
-								bUseAntiInfluencesFilter= properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc. 					
+								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Applies anti-influences filter only for specific style/genres (for ex. to further separate jazz to other genres) 
+								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc.
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, // Allows only influences by query, before any scoring/distance calc. 
 								// --->Scoring Method
                                 method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
@@ -624,6 +635,9 @@ function do_searchby_distance({
 								// --->Output
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 								} = {}) {
+		const descr = music_graph_descriptors;
+		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
+		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Recipe check
 		const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 		const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -636,12 +650,12 @@ function do_searchby_distance({
 				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
 				if (!recipe) {return;}
 			}
-			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? isCompatible('1.4.0') ? utils.SplitFilePath(path)[1] : utils.FileTest(path, 'split')[1] : '-no name-');  //TODO: Deprecated
+			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
 			// Rewrite args or use destruct when passing args
 			// Sel is ommited since it's a function or a handle
 			// Note a theme may be set within a recipe too, overwriting any other them set
 			// Changes null to infinity and not found theme filenames into full paths
-			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
+			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
 			let bOverwriteTheme = false;
 			Object.keys(recipe).forEach((key) => {
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
@@ -670,13 +684,13 @@ function do_searchby_distance({
 				console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + sbd_max_graph_distance);
 				return;
 			}
-			const validVars = Object.keys(music_graph_descriptors).map((_) => {return 'music_graph_descriptors.' + _;});
+			const validVars = Object.keys(descr).map((_) => {return 'music_graph_descriptors.' + _;});
 			if (sbd_max_graph_distance.indexOf('+') === -1 && sbd_max_graph_distance.indexOf('-') === -1 && sbd_max_graph_distance.indexOf('*') === -1 && sbd_max_graph_distance.indexOf('/') === -1 && validVars.indexOf(sbd_max_graph_distance) === -1) {
 				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
 				return;
 			}
 			sbd_max_graph_distance = Math.floor(eval(sbd_max_graph_distance));
-			console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);
+			if (bBasicLogging) {console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);}
 		}
 		// Theme check
 		const bUseTheme = theme && (theme.length || Object.keys(theme).length);
@@ -786,7 +800,7 @@ function do_searchby_distance({
 		let queryl = 0;
 		
 		// These should be music characteristics not genre/styles. Like 'electric blues' o 'acoustic', which could apply to any blues style... those things are not connected by graph, but considered only for weight scoring instead.
-		const map_distance_exclusions = music_graph_descriptors.map_distance_exclusions; // Set
+		const map_distance_exclusions = descr.map_distance_exclusions; // Set
 		
 		// Tag filtering: applied globally. Matched values omitted on both calcs, graph and scoring..
 		// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
@@ -1026,21 +1040,29 @@ function do_searchby_distance({
 			query[querylength] = ''; // TODO: Add weight query, now is dynamically set
 		} else { // Graph Method
 			let influencesQuery = [];
-			if (bUseAntiInfluencesFilter) { // Removes anti-influences using queries
-					let influences = [];
-				style_genreSet.forEach(styleGenre => {influences.push(...getAntiInfluences(styleGenre));})
+			if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
+				let influences = [];
+				style_genreSet.forEach((styleGenre) => {
+					let anti = bConditionAntiInfluences ? descr.getConditionalAntiInfluences(styleGenre) : descr.getAntiInfluences(styleGenre);
+					if (anti.length) {influences.push(...descr.replaceWithSubstitutionsReverse(anti));}
+				});
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
+					influences = [...new Set(influences)];
 					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
 					temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
 					influencesQuery.push(temp);
 				}
 			}
-			if (bUseInfluencesFilter) { // Outputs only influences using queries
+			if (bUseInfluencesFilter) { // Outputs only influences using queries (and changes ohter settings!)
 				let influences = [];
-				style_genreSet.forEach(styleGenre => {influences.push(...getInfluences(styleGenre));})
+				style_genreSet.forEach((styleGenre) => {
+					let infl = descr.getInfluences(styleGenre);
+					if (infl.length) {influences.push(...descr.replaceWithSubstitutionsReverse(infl));}
+				});
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
+					influences = [...new Set(influences)];
 					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
 					temp = '(' + query_join(temp, 'OR') + ')'; // flattens the array. Here changes the 'not' part
 					influencesQuery.push(temp);
@@ -1093,6 +1115,7 @@ function do_searchby_distance({
 		const customStrHandle = (customStrWeight !== 0) ? getTagsValuesV3(handle_list, customStrTag, true) : null;
 		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = getTagsValuesV4(handle_list, restTagNames);
 		const titleHandle = getTagsValuesV3(handle_list, ['title'], true);
+		if (bProfile) {test.Print('Task #4: Library tags', false);}
 		let i = 0;
 		while (i < tracktotal) {
             let weightValue = 0;
@@ -1297,7 +1320,7 @@ function do_searchby_distance({
 			}
             i++;
         }
-		if (bProfile) {test.Print('Task #4: Score and Distance', false);}
+		if (bProfile) {test.Print('Task #5: Score and Distance', false);}
 		let poolLength = scoreData.length;
 		if (method === 'WEIGHT') {
 			scoreData.sort(function (a, b) {return b.score - a.score;});
@@ -1613,7 +1636,7 @@ function do_searchby_distance({
 			} else {console.log('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).')}
 		}
 		
-		if (bProfile) {test.Print('Task #5: Final Selection', false);}
+		if (bProfile) {test.Print('Task #6: Final Selection', false);}
 		if (bShowFinalSelection && !bProgressiveListCreation) {
 			let i = finalPlaylistLength;
 			while (i--) {console.log(selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : ''));}
@@ -1643,8 +1666,8 @@ function do_searchby_distance({
 			if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
 		// Share changes on cache
-		if (cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
-		if (cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
+		if (oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
+		if (oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
 		// Output handle list (as array), the score data, current selection (reference track) and more distant track
 		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handle_list[scoreData[poolLength - 1].index] : -1)];
 }
@@ -1725,21 +1748,20 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
 }
 
 // Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSGV2(mygraph, limit = -1) {
+function calcCacheLinkSGV2(mygraph, styleGenres, limit = -1) {
 	let nodeList = [];
 	// Filter SGs with those on library
-	nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity))); // all values without duplicates
-	let tfo = fb.TitleFormat('%genre%|%style%'); // TODO: Use properties!
-	const styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split('|')); // All styles/genres from library without duplicates
+	const descr = music_graph_descriptors;
+	nodeList = new Set([...descr.style_supergenre, ...descr.style_weak_substitutions, ...descr.style_substitutions, ...descr.style_cluster].flat(Infinity)); 
 	nodeList = [...nodeList.intersection(styleGenres)];
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		let cache = new Map();
 		const promises = [];
 		const total = nodeList.length - 1;
 		let prevProgress = -1;
 		for (let i = 0; i < total; i++) {
 			for (let j = i + 1; j <= total; j++) {
-				promises.push(new Promise(resolve => {
+				promises.push(new Promise((resolve) => {
 					setTimeout(() => {
 						let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
 						if (limit === -1 || ij_distance <= limit) {
@@ -1766,7 +1788,7 @@ function saveCache(cacheMap, path) {
 
 function loadCache(path) {
 	let cacheMap = new Map();
-	if (utils.IsFile(path)) {
+	if (_isFile(path)) {
 		if (utils.GetFileSize(path) > 400000000) {console.log('SearchByDistance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
 		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  convertCharsetToCodepage('UTF-8'));
 		if (obj) { 

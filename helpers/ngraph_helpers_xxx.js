@@ -255,7 +255,7 @@ function calcCacheLinkSG(mygraph, limit = -1) {
 		let node_list = [];
 		
 		node_list = [...new Set(music_graph_descriptors.style_supergenre.flat(2))]; // all values without duplicates
-
+		
 		let node_list_length = node_list.length;
 		let i = 0;
 		while (i < node_list_length){

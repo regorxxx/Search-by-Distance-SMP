@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/10/21
+//03/02/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -30,9 +30,9 @@ try { //May be loaded along other buttons
 	window.DefinePanel('Merged Buttons bar', {author:'xxx'});
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-	var buttonOrientation = 'x';
+	buttonsBar.config.buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Merged Buttons loaded.');
 }
 
@@ -41,18 +41,17 @@ buttonCoordinates.w += 40; // Only works for 'y' orientation
 buttonCoordinates.h += 0; //For 'x' orientation
 
 // Global toolbar color
-bToolbar = true; // Change this on buttons bars files to set the background color
-toolbarColor = RGB(211,218,237);
+buttonsBar.config.bToolbar = true; // Change this on buttons bars files to set the background color
+buttonsBar.config.toolbarColor = RGB(211,218,237);
 
 
 {	// Buttons
 	let buttonsPath = [	 // Add here your buttons path
-						folders.xxx + 'buttons\\_buttons_example.js',
-						folders.xxx + 'buttons\\_buttons_example.js',
-						];
-
+						folders.xxx + 'buttons\\examples\\_buttons_example.js',
+						folders.xxx + 'buttons\\examples\\_buttons_example.js',
+	];
 	for (let i = 0; i < buttonsPath.length; i++) {
-		if ((isCompatible('1.4.0') ? utils.IsFile(buttonsPath[i]) : utils.FileTest(buttonsPath[i], 'e'))) {
+		if (utils.IsFile(buttonsPath[i])) {
 			include(buttonsPath[i], {always_evaluate: true});
 		} else {
 			console.log(buttonsPath[i] +' not loaded');

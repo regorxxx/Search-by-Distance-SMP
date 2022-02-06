@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/10/21
+//03/02/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -26,34 +26,26 @@
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_same_by.js and search_same_by.js
 
 {
+	const dependencies = [
+		'helpers\\buttons_xxx.js',
+		'helpers\\helpers_xxx.js',
+		'helpers\\helpers_xxx_foobar.js',
+		'helpers\\helpers_xxx_properties.js',
+		'helpers\\helpers_xxx_UI.js',
+		'helpers\\helpers_xxx_file.js',
+		'helpers\\buttons_merged_menu.js'];
 	let bIncludeRel = true;
 	try {include('..\\..\\helpers\\helpers_xxx_dummy.js');} catch(e) {bIncludeRel = false;}
-	if (bIncludeRel) {
-		include('..\\..\\helpers\\buttons_xxx.js');
-		include('..\\..\\helpers\\helpers_xxx.js');
-		include('..\\..\\helpers\\helpers_xxx_foobar.js');
-		include('..\\..\\helpers\\helpers_xxx_properties.js');
-		include('..\\..\\helpers\\helpers_xxx_UI.js');
-		include('..\\..\\helpers\\helpers_xxx_file.js');
-		include('..\\..\\helpers\\buttons_merged_menu.js');
-	} else {
-		include('helpers\\buttons_xxx.js');
-		include('helpers\\helpers_xxx.js');
-		include('helpers\\helpers_xxx_foobar.js');
-		include('helpers\\helpers_xxx_properties.js');
-		include('helpers\\helpers_xxx_UI.js');
-		include('helpers\\helpers_xxx_file.js');
-		include('helpers\\buttons_merged_menu.js');
-	}
+	if (bIncludeRel) {dependencies.forEach((file) => {include('..\\..\\' + file);});}
+	else {dependencies.forEach((file) => {include(file);});}
 }
 
 try { //May be loaded along other buttons
 	window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-	var buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Merged Buttons loaded.');
 }
 
@@ -62,10 +54,14 @@ buttonCoordinates.w += 40; // Only works for 'y' orientation
 buttonCoordinates.h += 0; //For 'x' orientation
 
 let barProperties = { //You can simply add new properties here
-	name:			['Name of config json file', 'buttons_' + randomString(5)],
-	toolbarColor: 	['Toolbar color', -1],
-	textColor:	 	['Buttons\' text color', textColor],
-	firstPopup:		['Toolbar: Fired once', false]
+	name:				['Name of config json file', 'buttons_' + randomString(5)],
+	toolbarColor: 		['Toolbar color', -1],
+	textColor:	 		['Buttons\' text color', buttonsBar.config.textColor],
+	firstPopup:			['Toolbar: Fired once', false],
+	bShowId:			['Show Ids on tooltip', false],
+	bBgButtons:			['Buttons with background', true],
+	buttonOrientation:	['Toolbar orientation', 'x'],
+	bReflow:			['Reflow according to width / height', false]
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(barProperties); //This sets all the panel properties at once
@@ -81,52 +77,67 @@ if (!barProperties.firstPopup[1]) {
 	const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 	barProperties.firstPopup[1] = true;
 	overwriteProperties(barProperties); // Updates panel
-	if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
+	if (_isFile(readmePath)) {
 		const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
 		if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 	}
 }
 
+// Config at buttons_xxx.js
 // Global toolbar color
-toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
-textColor = barProperties.textColor[1]; // buttons_xxx.js
-bToolbar = toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
-
+buttonsBar.config.toolbarColor = barProperties.toolbarColor[1];
+buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
+buttonsBar.config.textColor = barProperties.textColor[1];
+// Show Id on tooltips
+buttonsBar.config.bShowID = barProperties.bShowId[1]; // Change this on buttons bars files to set the background color
+// Orientation
+buttonsBar.config.buttonOrientation = barProperties.buttonOrientation[1];
+// Reflow
+buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Tooltip at empty bar
-toolbarTooltip = 'R. Click to configure...';
+buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons';
 
 // Buttons
-const buttonsPathDef = [	 // Add here your buttons path
-					folders.xxx + 'buttons\\buttons_search_same_by.js',  //+15 w
-					folders.xxx + 'buttons\\buttons_remove_duplicates.js',  //+25 w
-					folders.xxx + 'buttons\\buttons_search_bydistance.js',
-					folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-					folders.xxx + 'buttons\\buttons_playlist_tools.js',
-					folders.xxx + 'buttons\\buttons_playlist_history.js',
-				];
+const buttonsPathDef = [	 // Add here your buttons names
+					'buttons_search_same_by.js',  //+15 w
+					'buttons_remove_duplicates.js',  //+25 w
+					'buttons_search_bydistance.js',
+					'buttons_search_bydistance_customizable.js',
+					'buttons_playlist_tools.js',
+					'buttons_playlist_history.js',
+				].map((name) => {return folders.xxx + 'buttons\\' + name;});
 let buttonsPath = [...buttonsPathDef];
 
-loadButtons();
-if (!_isFile()) {
-	const names = buttonsPath.map((path) => {return path.split('\\').pop();});
-	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(names, null, 3));
-}
-
-for (let i = 0; i < buttonsPath.length; i++) {
-	if ((isCompatible('1.4.0') ? utils.IsFile(buttonsPath[i]) : utils.FileTest(buttonsPath[i], "e"))) {
-		include(buttonsPath[i], {always_evaluate: true});
-	} else {
-		console.log(buttonsPath[i] +' not loaded');
-	}
-}
-
-function loadButtons() {
-	if (_isFolder(folders.data)) {
-		const data = _jsonParseFileCheck(folders.data + barProperties.name[1] + '.json', 'Buttons bar', window.Name, convertCharsetToCodepage('UTF-8'));
-		if (data) { // TODO: remove splitting after a few releases
-			const names = data.map((path) => {return path.split('\\').pop();});
-			_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(names, null, 3));
-			buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});
+loadButtonsFile();
+{
+	const bProcessed = new Set();
+	for (let i = 0; i < buttonsPath.length; i++) {
+		if (_isFile(buttonsPath[i])) {
+			include(buttonsPath[i], {always_evaluate: true});
+			const newKeys = [];
+			Object.keys(buttons).forEach((key) => {
+				if (!bProcessed.has(key)) {
+					bProcessed.add(key);
+					newKeys.push(key);
+				}
+			});
+			buttonsBar.listKeys.push(newKeys);
+		} else {
+			console.log(buttonsPath[i] +' not loaded');
 		}
 	}
+}
+
+function loadButtonsFile() {
+	let names = [];
+	const file = folders.data + barProperties.name[1] + '.json';
+	if (!_isFile(file)) {
+		names = buttonsPath.map((path) => {return path.split('\\').pop();});
+		_save(file, JSON.stringify(names, null, '\t'));
+	} else {
+		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, convertCharsetToCodepage('UTF-8'));
+		if (data) {names = data.map((path) => {return path.split('\\').pop();});}
+		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths
+	}
+	buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});
 }

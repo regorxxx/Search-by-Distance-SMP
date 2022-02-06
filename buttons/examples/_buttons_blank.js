@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/10/21
+//03/02/22
 
 /* 
 	-> EDIT
@@ -14,9 +14,9 @@ try { //May be loaded along other buttons
 	window.DefinePanel('EDIT', {author:'xxx'});
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-	var buttonOrientation = 'x';
+	buttonsBar.config.buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Remove EDIT loaded.');
 }
 prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
@@ -28,11 +28,11 @@ var newButtonsProperties = { //You can simply add new properties here
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 
 // we change the default coordinates here to accommodate text for x orientation. Apply this on vertical as global!
-// if (buttonOrientation === 'x') {buttonCoordinates.w += 0;}
-// if (buttonOrientation === 'y') {buttonCoordinates.h += 0;}
+// if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 0;}
+// if (buttonsBar.config.buttonOrientation === 'y') {buttonCoordinates.h += 0;}
 
 var newButtons = {
-	OneButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation,false).y, buttonCoordinates.w, buttonCoordinates.h, 'EDIT', function () {
+	OneButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, false).y, buttonCoordinates.w, buttonCoordinates.h, 'EDIT', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		let [EDIT] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once

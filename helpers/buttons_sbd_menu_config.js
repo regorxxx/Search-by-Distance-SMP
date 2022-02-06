@@ -1,5 +1,5 @@
 ﻿'use strict'
-//13/10/21
+//04/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -20,30 +20,35 @@ function createConfigMenu(parent) {
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure methods:
 		const menuName = menu.newMenu('Set method');
-		const options = ['WEIGHT', 'GRAPH', 'DYNGENRE'];
-		options.forEach((key) => {
-			const entryText = key + (recipe.hasOwnProperty('method') && recipe.method  === key ? '\t(forced by recipe)' : '');
-			menu.newEntry({menuName, entryText, func: () => {
-				properties.method[1] = key;
-				overwriteProperties(properties); // Updates panel
-			}, flags: recipe.hasOwnProperty('method') ? MF_GRAYED : MF_STRING});
-			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty('method') ? recipe.method === key : properties.method[1] === key);});
-		});
-	}
-	{	// Menu to configure properties: tags
-		const menuName = menu.newMenu('Remap tags');
-		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
-		options.forEach((tagName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (recipe.hasOwnProperty(tagName) ? '\t[' + recipe[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
-				let input = '';
-				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \',\')', 'Search by distance', properties[tagName][1], true);} 
-				catch(e) {return;}
-				if (!input.length) {return;}
-				if (input === properties[tagName][1]) {return;}
-				properties[tagName][1] = input;
-				overwriteProperties(properties);
-			}, flags: recipe.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
-		});
+		{
+			const options = ['WEIGHT', 'GRAPH', 'DYNGENRE'];
+			options.forEach((key) => {
+				const entryText = key + (recipe.hasOwnProperty('method') && recipe.method  === key ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties.method[1] = key;
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty('method') ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty('method') ? recipe.method === key : properties.method[1] === key);});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
+			const options = ['scoreFilter', 'sbd_max_graph_distance'];
+			const lowerHundred = new Set(['scoreFilter']);
+			options.forEach((key) => {
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					catch(e) {return;}
+					if (isNaN(input)) {return;}
+					if (lowerHundred.has(key) && input > 100) {return;}
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
 	}
 	{	// Menu to configure properties: weights
 		const menuName = menu.newMenu('Set weights');
@@ -63,19 +68,33 @@ function createConfigMenu(parent) {
 	}
 	{	// Menu to configure properties: ranges
 		const menuName = menu.newMenu('Set ranges');
-		const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
-		options.forEach((rangeName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
-				let input = '';
-				try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
-				catch(e) {return;}
-				if (!input.length) {return;}
-				if (isNaN(input)) {return;}
-				if (input === properties[rangeName][1]) {return;}
-				properties[rangeName][1] = input;
-				overwriteProperties(properties);
-			}, flags: recipe.hasOwnProperty(rangeName) ? MF_GRAYED : MF_STRING});
-		});
+		{
+			const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
+			options.forEach((rangeName) => {
+				menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
+					catch(e) {return;}
+					if (!input.length) {return;}
+					if (isNaN(input)) {return;}
+					if (input === properties[rangeName][1]) {return;}
+					properties[rangeName][1] = input;
+					overwriteProperties(properties);
+				}, flags: recipe.hasOwnProperty(rangeName) ? MF_GRAYED : MF_STRING});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const options = ['bNegativeWeighting'];
+			options.forEach((key) => {
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
 	}
 	{	// Menu to configure filters:
 		const menuName = menu.newMenu('Set filters');
@@ -123,8 +142,9 @@ function createConfigMenu(parent) {
 			});
 		}
 		{ // Menu to configure properties: tags filter
-			const options = ['genreStyleFilter', 'poolFilteringTag'];
+			const options = ['genreStyleFilter', 'sep', 'poolFilteringTag'];
 			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
@@ -137,10 +157,71 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
+		{
+			const options = ['poolFilteringN'];
+			const lowerHundred = new Set(['probPick']);
+			options.forEach((key) => {
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					catch(e) {return;}
+					if (isNaN(input)) {return;}
+					if (lowerHundred.has(key) && input > 100) {return;}
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{ // Menu to configure properties: influences filter
+			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
+			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
+			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					if (key === 'bConditionAntiInfluences') {fb.ShowPopupMessage('This option overrides the global anti-influences filter option, so it will be disabled at the configuration menu.\n\nThe filter will be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).join(', '), 'Search by distance');}
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences ? MF_GRAYED : (recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING))});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
 	}
-	{	// Menu to configure boolean properties:
-		const menuName = menu.newMenu('Set boolean config');
-		const options = ['bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bNegativeWeighting', 'bRandomPick', 'bSortRandom', 'bScatterInstrumentals', 'bProgressiveListOrder', 'bInKeyMixingPlaylist', 'bProgressiveListCreation'];
+	{	// Menu to configure pool picking:
+		const menuName = menu.newMenu('Set pool picking');
+		{
+			const options = ['bRandomPick', 'bProgressiveListOrder'];
+			options.forEach((key) => {
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
+		{
+			const options = ['probPick'];
+			const lowerHundred = new Set(['probPick']);
+			options.forEach((key) => {
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					catch(e) {return;}
+					if (isNaN(input)) {return;}
+					if (lowerHundred.has(key) && input > 100) {return;}
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
+	}
+	{	// Menu to configure final sorting:
+		const menuName = menu.newMenu('Set final sorting');
+		const options = ['bSortRandom', 'bScatterInstrumentals', 'bProgressiveListOrder'];
 		options.forEach((key) => {
 			const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 			menu.newEntry({menuName, entryText, func: () => {
@@ -150,22 +231,51 @@ function createConfigMenu(parent) {
 			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 		});
 	}
-	{	// Menu to configure number properties:
-		const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
-		const menuName = menu.newMenu('Set number config');
-		const options = ['scoreFilter', 'sbd_max_graph_distance', 'poolFilteringN', 'probPick', 'playlistLength', 'progressiveListCreationN'];
-		const lowerHundred = new Set(['scoreFilter', 'probPick', 'progressiveListCreationN']);
-		options.forEach((key) => {
-			const idxEnd = properties[key][0].indexOf('(');
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
-			menu.newEntry({menuName, entryText, func: () => {
+	{	// Menu to configure final sorting:
+		const menuName = menu.newMenu('Other playlist attributes');
+		{
+			const options = ['bProgressiveListCreation', 'bInKeyMixingPlaylist'];
+			options.forEach((key) => {
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const options = ['progressiveListCreationN', 'playlistLength'];
+			const lowerHundred = new Set(['progressiveListCreationN']);
+			options.forEach((key) => {
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					catch(e) {return;}
+					if (isNaN(input)) {return;}
+					if (lowerHundred.has(key) && input > 100) {return;}
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
+	}
+	menu.newEntry({entryText: 'sep'});
+	{	// Menu to configure properties: tags
+		const menuName = menu.newMenu('Remap tags');
+		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
+		options.forEach((tagName) => {
+			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (recipe.hasOwnProperty(tagName) ? '\t[' + recipe[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
 				let input = '';
-				try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \',\')', 'Search by distance', properties[tagName][1], true);} 
 				catch(e) {return;}
-				if (isNaN(input)) {return;}
-				if (lowerHundred.has(key) && input > 100) {return;}
-				overwriteProperties(properties); // Updates panel
-			}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				if (!input.length) {return;}
+				if (input === properties[tagName][1]) {return;}
+				properties[tagName][1] = input;
+				overwriteProperties(properties);
+			}, flags: recipe.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
 		});
 	}
 	menu.newEntry({entryText: 'sep'});
@@ -203,7 +313,7 @@ function createConfigMenu(parent) {
 				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
 				// Report
 				const userFile = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
-				const UserFileFound = (isCompatible('1.4.0') ? utils.IsFile(userFile) : utils.FileTest(userFile, 'e')) ? '' : ' (not found)';
+				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
 				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
 				const report = 'Graph descriptors:\n' +
 								'.\helpers\music_graph_descriptors_xxx.js\n' +
@@ -231,25 +341,98 @@ function createConfigMenu(parent) {
 				_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
 				cacheLink = void(0);
 				cacheLinkSet = void(0);
-				updateCache({bForce: true}); // Creates new one and also notifies other panels to discard their cache
+				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
+			}});
+		}
+		menu.newEntry({menuName: submenu, entryText: 'sep'});
+		{
+			const file = folders.data + 'searchByDistance_artists.json';
+			const iNum = 10;
+			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
+			include('..\\main\\search_bydistance_extra.js');
+			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: () => {
+				const items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist);
+				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <=' + Math.round(items.Count * 30 * fb.GetLibraryItems().Count / 70000) + ' secs', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				let profiler = new FbProfiler('Calculate similar artists');
+				const handleList = do_remove_duplicatesV2(items, '%artist%', ['%artist%']);
+				const newData = [];
+				handleList.Convert().forEach((selHandle) => {
+					const output = calculateSimilarArtists({properties, selHandle});
+					if (output.val.length) {newData.push(output);}
+				})
+				if (!newData.length) {return;}
+				if (!_isFile(file)) {
+					newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});
+					_save(file, JSON.stringify(newData, null, '\t'));
+				} else {
+					const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+					if (data) {
+						const idxMap = new Map();
+						data.forEach((obj, idx) => {idxMap.set(obj.artist, idx);});
+						newData.forEach((obj) => {
+							const idx = idxMap.get(obj.artist);
+							if (idx >= 0) {data[idx] = obj;}
+							else {data.push(obj);}
+							console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));
+						});
+					}
+					_deleteFile(file);
+					_save(file, JSON.stringify(data || newData, null, '\t'));
+				}
+				profiler.Print();
+			}});
+			menu.newEntry({menuName: submenu, entryText: 'Write similar artists tags', func: () => {
+				if (WshShell.Popup('Write similar artist tag from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				if (!_isFile(file)) {return;}
+				else {
+					const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+					if (data) {
+						data.forEach((obj) => {
+							const artist = obj.artist.split(', ');
+							const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
+							if (!similarArtists.length) {return;}
+							const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
+							const count = artistTracks.Count;
+							if (count) {
+								let arr = [];
+								for (let i = 0; i < count; ++i) {
+									arr.push({
+										[tagName] : similarArtists
+									});
+								}
+								artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
+								console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
+							}
+						});
+					}
+				}
+			}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED});
+		}
+		menu.newEntry({menuName: submenu, entryText: 'sep'});
+		{
+			menu.newEntry({menuName: submenu, entryText: 'Calculate same zone artists', func: () => {
+				getArtistsSameZone({properties});
+			}});
+			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
+				graphStatistics({properties});
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{ // Open descriptors
 			menu.newEntry({menuName: submenu, entryText: 'Open main descriptor', func: () => {
 				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx.js';
-				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run('notepad.exe', file);}
+				if (_isFile(file)){_run('notepad.exe', file);}
 			}});
 			menu.newEntry({menuName: submenu, entryText: 'Open user descriptor', func: () => {
 				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
-				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run('notepad.exe', file);}
+				if (_isFile(file)){_run('notepad.exe', file);}
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{ // Open graph html file
 			menu.newEntry({menuName: submenu, entryText: 'Show Music Graph on Browser', func: () => {
 				const file = folders.xxx + 'Draw Graph.html';
-				if (isCompatible('1.4.0') ? utils.IsFile(file) : utils.FileTest(file, 'e')){_run(file);}
+				if (_isFile(file)){_run(file);}
 			}});
 		}
 	}
@@ -268,11 +451,11 @@ function createConfigMenu(parent) {
 		};
 		if (Object.keys(readmes).length) {
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
-				if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) { 
+				if (_isFile(value)) { 
 					const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8')); // Executed on script load
 					if (readme.length) {
 						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
-							if ((isCompatible('1.4.0') ? utils.IsFile(value) : utils.FileTest(value, 'e'))) {
+							if (_isFile(value)) {
 								const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8'));
 								if (readme.length) {fb.ShowPopupMessage(readme, key);}
 							} else {console.log('Readme not found: ' + value);}

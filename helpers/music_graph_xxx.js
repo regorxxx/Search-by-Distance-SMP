@@ -1,25 +1,28 @@
 ﻿'use strict';
-//07/10/21
+//04/02/22
 
- // Required since this script is loaded on browsers for drawing too!
-try { // On foobar
+// Required since this script is loaded on browsers for drawing too!
+
+if (typeof include !== 'undefined') { // On foobar
 	include('..\\helpers-external\\ngraph\\ngraph.graph.js');
 	include('music_graph_descriptors_xxx.js');
+	include('music_graph_descriptors_xxx_helper.js');
 	include('helpers_xxx.js');
 	let userDescriptor = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
-	if (isCompatible('1.4.0') ? utils.IsFile(userDescriptor) : utils.FileTest(userDescriptor, 'e')) {
+	if (utils.IsFile(userDescriptor)) {
 		try {
 			console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);
 			include(userDescriptor);
 		} catch (e) { 
 			console.log('Error loading user\'s music_graph_descriptors. Using default file instead.');
-		}	
+		}
 	}
-} catch (e) { // On browsers
+} else { // On browsers
 	// vivagraph.min.js must be loaded within HTML
 	// music_graph_descriptors_xxx (and the user set file) too!
 	console.log('\'music_graph_xxx\' script is being used on browser. Omitting \'include\' clause.');
 }
+
 
 /*
 	Creates Music Map links for foobar 
@@ -656,4 +659,89 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 		}
 		console.log('music_graph_descriptors_xxx: All tests passed');
 	}	
+}
+
+/* 
+	Statistics for the graph
+*/
+async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null} = {}) {
+	const graph = music_graph(descriptor);
+	let styleGenres;
+	if (bFoobar) { // using tags from the current library
+		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
+		const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%style%';
+		const tags = [genreTag, styleTag].filter(Boolean).join('|')
+		const tfo = fb.TitleFormat(tags);
+		styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
+	} else { // or the entire graph
+		styleGenres = new Set([...descriptor.style_supergenre, ...descriptor.style_weak_substitutions, ...descriptor.style_substitutions, ...descriptor.style_cluster].flat(Infinity));
+	}
+	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres);
+	// Calc basic statistics
+	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1};
+	const distances = [];
+	const total = cacheLink.size;
+	cacheLink.forEach((value, key) => {
+		const distance = value.distance + value.influenceDistance;
+		distances.push(distance);
+		if (distance > statistics.maxDistance) {statistics.maxDistance = distance;}
+		else if (distance && distance < statistics.minNonZeroDistance) {statistics.minNonZeroDistance = distance;}
+		else if (distance < statistics.minDistance) {statistics.minDistance = distance;}
+		statistics.mean += distance;
+	});
+	if (statistics.minDistance > statistics.minNonZeroDistance) {statistics.minDistance = statistics.minNonZeroDistance;}
+	statistics.totalSize = statistics.maxDistance - statistics.minDistance;
+	statistics.mean = Math.round(statistics.mean / total);
+	distances.forEach((val) => {
+		if (val === statistics.maxDistance) {statistics.maxCount++}
+		else if (val === statistics.minDistance) {statistics.minCount++}
+		else if (val === statistics.minNonZeroDistance) {statistics.minNonZeroCount++}
+		statistics.sigma += (val - statistics.mean) ** 2
+	});
+	statistics.sigma = Math.round((statistics.sigma / total) ** (1/2));
+	// Histogram, median, mode
+	const hist = {};
+	const binSize = statistics.minNonZeroDistance * 2;
+	histogram(distances, binSize).forEach((val, i) => {hist[(i * binSize).toString()] = val});
+	const masxFreq = Math.max(...Object.values(hist));
+	const histEntries = Object.entries(hist);
+	statistics.mode = histEntries.find((pair, i) => {return pair[1] === masxFreq;});
+	let i = 0, acumFreq = total / 2;
+	while (true) {
+		acumFreq -= histEntries[i][1];
+		if (acumFreq <= 0) {break;} else {i++;}
+	}
+	statistics.median = i > 0 ? (Number(histEntries[i - 1][0]) + Number(histEntries[i][0])) / 2 : Number(histEntries[i][0]);
+	// Report
+	console.log('Histogram:');
+	console.log(hist);
+	console.log('General statistics:');
+	Object.entries(statistics).forEach((pair) => {console.log(pair[0], '		', pair[1]);});
+	['weak_substitutions', 'cluster', 'intra_supergenre'].forEach((key) => {console.log(key, '		', descriptor[key]);});
+	// Usually follows a normal distribution, so that may give us some key parameters for graph filtering 'sbd_max_graph_distance'
+	// In real world usage it is not A -> B but {A,B,C} -> {C,D} or similar... i.e. sets of styles/genres
+	// Anyway since the total distance is divided by the num of tags, the results are still applicable
+	console.log('Suggested distance ranges:');
+	console.log('To retrieve <0.05% nodes:	', 1/4 * statistics.sigma);
+	console.log('To retrieve <0.8% nodes:	', 1/2 * statistics.sigma);
+	console.log('To retrieve <1% nodes:	', 3/4 * statistics.sigma);
+	console.log('To retrieve 2% nodes:		', statistics.sigma);
+	console.log('To retrieve 6% nodes:		', 3/2 * statistics.sigma);
+	console.log('To retrieve 14% nodes:	', 2 * statistics.sigma);
+	console.log('To retrieve 44% nodes:	', 3 * statistics.sigma);
+}
+
+function histogram(data, size) {
+	let min = Infinity;
+	let max = -Infinity;
+	for (const item of data) {
+		if (item < min) min = item;
+		else if (item > max) max = item;
+	}
+	const bins = Math.ceil((max - min + 1) / size);
+	const histogram = new Array(bins).fill(0);
+	for (const item of data) {
+		histogram[Math.floor((item - min) / size)]++;
+	}
+	return histogram;
 }

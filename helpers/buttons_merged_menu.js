@@ -1,5 +1,5 @@
 ﻿'use strict'
-//02/02/22
+//04/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -35,7 +35,7 @@ function createButtonsMenu(name) {
 			menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
 				buttonsPath.push(path);
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
+				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				if (readmeList) {
 					const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
@@ -88,7 +88,7 @@ function createButtonsMenu(name) {
 				}
 				// Save and reload
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
+				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				window.Reload();
 			}});
 		});
@@ -104,7 +104,7 @@ function createButtonsMenu(name) {
 				buttonsPath.splice(input - 1, 0, buttonsPath.splice(idx, 1)[0]);
 				buttonsBar.list.splice(input - 1, 0, buttonsBar.list.splice(idx, 1)[0]);
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
+				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				// Since properties have a prefix according to their loading order when there are multiple instances of the same
 				// script, moving a button when there other 'clones' means the other buttons may get their properties names
 				// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
@@ -128,7 +128,7 @@ function createButtonsMenu(name) {
 									backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 								}
 								setProperties(backup, '', 0, false, true); // And restore at new position
-								currentIdNumber++;
+								if (oldPrefix !== prefix) {currentIdNumber++;}
 							}
 						}
 					});
@@ -145,7 +145,7 @@ function createButtonsMenu(name) {
 		buttonsBar.list.forEach((properties) => {deleteProperties(properties);});
 		// Save and reload
 		const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-		_save(folders.data + name + '.json', JSON.stringify(fileNames, null, 3));
+		_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 		if (readmeList) {
 			fileNames.forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
@@ -162,25 +162,56 @@ function createButtonsMenu(name) {
 		menu.newEntry({menuName, entryText: 'Set custom bar color...', func: () => {
 			barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
 			overwriteProperties(barProperties);
-			bToolbar = true; // buttons_xxx.js
-			toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
+			buttonsBar.config.bToolbar = true; // buttons_xxx.js
+			buttonsBar.config.toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
 		menu.newEntry({menuName, entryText: 'Set custom text color...', func: () => {
 			barProperties.textColor[1] = utils.ColourPicker(window.ID, barProperties.textColor[1]);
 			overwriteProperties(barProperties);
-			textColor = barProperties.textColor[1]; // buttons_xxx.js
+			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'No background buttons', func: () => {
+			barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6; // buttons_xxx.js
+		}});
+		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
 			barProperties.toolbarColor[1] = -1;
 			barProperties.textColor[1] = RGB(0,0,0);
 			overwriteProperties(barProperties);
-			bToolbar = false; // buttons_xxx.js
-			textColor = barProperties.textColor[1]; // buttons_xxx.js
+			buttonsBar.config.bToolbar = false; // buttons_xxx.js
+			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
+	}
+	{
+		const menuName = menu.newMenu('Other configuration...');
+		menu.newEntry({menuName, entryText: 'Show properties IDs on tooltip', func: () => {
+			barProperties.bShowId[1] = !barProperties.bShowId[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bShowID = barProperties.bShowId[1]; // buttons_xxx.js
+		}});
+		menu.newCheckMenu(menuName, 'Show properties IDs on tooltip', void(0), () => {return barProperties.bShowId[1];});
+		menu.newEntry({menuName, entryText: 'sep'});
+		const orientation = barProperties.buttonOrientation[1].toLowerCase();
+		menu.newEntry({menuName, entryText: 'Toolbar orientation \t[' + orientation + ']', func: () => {
+			barProperties.buttonOrientation[1] = orientation === 'x' ? 'y' : 'x';
+			overwriteProperties(barProperties);
+			buttonsBar.config.buttonOrientation = barProperties.buttonOrientation[1]; // buttons_xxx.js
+			window.Reload();
+		}});
+		// menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
+			// barProperties.bReflow[1] = !barProperties.bReflow[1];
+			// overwriteProperties(barProperties);
+			// buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
+			// window.Reload();
+		// }});
+		// menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{
@@ -188,7 +219,7 @@ function createButtonsMenu(name) {
 		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
-			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) {
+			if (_isFile(readmePath)) {
 				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
 				if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 			}

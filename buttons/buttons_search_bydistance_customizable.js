@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/10/21
+//03/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -8,17 +8,16 @@ try { //May be loaded along other buttons
 	window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-	var buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Search by Distance (CUSTOM) Buttons loaded.');
 }
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_config.js'); // Button menu
-var prefix = 'sbd_';
-prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
+var prefix = 'sbd';
+prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here
 	customName: ['Name for the custom UI button', 'Customize!'],
@@ -27,20 +26,22 @@ var newButtonsProperties = { //You can simply add new properties here
 	data: 		['Internal data', JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'})],
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
-setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
-newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix); // And retrieve
+setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
+newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // And retrieve
 buttonsBar.list.push(newButtonsProperties);
-buttonCoordinates.w = _gr.CalcTextWidth(newButtonsProperties.customName[1], g_font) + 50;
+// Update cache with user set tags
+doOnce('Update SBD cache', debounce(updateCache, 3000))({properties: newButtonsProperties});
+if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w = _gr.CalcTextWidth(newButtonsProperties.customName[1], g_font) + 50;}
 
 // we change the default coordinates here to accommodate text
-if (buttonOrientation === 'x') {buttonCoordinates.w += 5;}
+if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 /*	
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
 */
 
 var newButtons = {
-    SimilarUserSet: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonOrientation, buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, newButtonsProperties.customName[1], function (mask) {
+    SimilarUserSet: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, buttonsBar.config.buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, buttonsBar.config.buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.x, this.y + this.h);
 		} else if (mask === MK_CONTROL) {
@@ -82,5 +83,5 @@ buttons = {...buttons, ...newButtons};
 // Helper
 function buttonTooltip(parent) {
 	const data = JSON.parse(parent.buttonsProperties.data[1]);
-	return ('Search according to variables set at properties.\n-----------------------------------------------------\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme) + '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe + '\n(Shift + Ctrl + L. Click to set other config)');
+	return ('Search similar tracks according to configuration\n-----------------------------------------------------\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme) + '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe + '\n(Shift + Ctrl + L. Click for other config and tools)');
 }

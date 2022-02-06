@@ -1,5 +1,5 @@
 ﻿'use strict'
-//13/10/21
+//04/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -19,7 +19,7 @@ function createRecipeMenu(parent) {
 	{	// Readme
 		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
 		recipeMenu.newEntry({entryText: 'Open readme...', func: () => {
-			if ((isCompatible('1.4.0') ? utils.IsFile(readmePath) : utils.FileTest(readmePath, 'e'))) { 
+			if (_isFile(readmePath)) { 
 				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
 				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 				else {console.log('Readme not found: ' + value);}
@@ -49,7 +49,7 @@ function createRecipeMenu(parent) {
 	options.forEach((file) => {
 		const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
 		if (!recipe) {return;}
-		const name = recipe.hasOwnProperty('name') ? recipe.name : isCompatible('1.4.0') ? utils.SplitFilePath(file)[1] : utils.FileTest(file, 'split')[1];  //TODO: Deprecated
+		const name = recipe.hasOwnProperty('name') ? recipe.name : utils.SplitFilePath(file)[1];
 		let theme = null;
 		if (recipe.hasOwnProperty('theme')) {
 			if (_isFile(recipe.theme)) {theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8);}
