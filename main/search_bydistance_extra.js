@@ -135,6 +135,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = music_graph
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
 	const panelProperties = (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
+	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
 	include('..\\helpers\\world_map_tables.js');
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist

@@ -1,5 +1,5 @@
 'use strict';
-//07/10/21
+//07/02/22
 
 /* 
 	World Map
@@ -104,12 +104,17 @@ const nameReplacersRev = new Map([...nameReplacers].map((_) => {return _.reverse
 if (typeof music_graph_descriptors_countries !== 'undefined' && typeof music_graph_descriptors_culture !== 'undefined') {
 	const parent = music_graph_descriptors_countries;
 	// Check all region names match
-	include('helpers_xxx_prototypes.js');
-	if (!(new Set(music_graph_descriptors_culture.getRegionNames()).isEqual(new Set(parent.getRegionNames())))) {
-		console.log('music_graph_descriptors_xxx_culture: Regions don\'t match');
+	let bMatch = true;
+	if (typeof include !== 'undefined') {
+		include('helpers_xxx_prototypes.js');
+		if (!(new Set(music_graph_descriptors_culture.getRegionNames()).isEqual(new Set(parent.getRegionNames())))) {bMatch = false;}
+	} else {
+		const isSuperset = (parent, subset) => {for (let elem of subset) {if (!parent.has(elem)) {return false;}}; return true;};
+		const isEqual = (parent, subset) => {return (parent.size === subset.size && isSuperset(parent, subset));};
+		if (!(isEqual(new Set(music_graph_descriptors_culture.getRegionNames()), new Set(parent.getRegionNames())))) {bMatch = false;}
 	}
+	if (!bMatch) {console.log('music_graph_descriptors_xxx_culture: Regions don\'t match');}
 	// Check all countries are present in both places
-	include('world_map_tables.js');
 	[...isoMap.values()].forEach((isoCode) => {if (!Object.keys(parent.getNodeRegion(isoCode)).length) {console.log('music_graph_descriptors_xxx_culture: ' + isoCode + ' is missing')}});
 	parent.getMainRegions().forEach((region) => {
 		parent.getSubRegions(region).forEach((subRegion) => {
