@@ -281,18 +281,15 @@
 		- Bugfix: harmonic mixing.
 		- Bugfix: scatter instrumentals.
 	TODO:
-		- Key tag using TF.
 		- Allow multiple tracks as reference
 			- Save references as json to create 'mood' file which can be exported.
 			- Save references as playlist to create 'mood' playlist file which can be edited anytime.
 			- Integrate within playlist manager (?) for automatic saving purpose
-		- Clean unused things
 		- Fingerprint comparison for scoring?
 			- Output just similar tracks by fingerprint
 			- Give more weighting to similar tracks
 		- Fine-tune Pre-filtering:
 			- Fine-tune queries
-		- Different date formats or just TF? YYYY-MM-DD; YYYY-MM
 		- Get data using MusicBrainz Ids for all tracks on library, save to json files and use them when no tags present
 		- Support for more high-level data (https://acousticbrainz.org/data#sample-data):
 			- danceability
@@ -360,25 +357,27 @@ const SearchByDistance_properties = {
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', 
 								'NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad AND TITLE PRESENT AND ARTIST PRESENT AND DATE PRESENT'],
-	bUseAntiInfluencesFilter:	['Filter anti-influences by query, before any scoring/distance calc', false],
-	bConditionAntiInfluences:	['Conditional anti-influences filtering for specific genres', false],
-	bUseInfluencesFilter:		['Allows only influences on the pool, before any scoring/distance calc', false],
+	bUseAntiInfluencesFilter:	['Filter anti-influences by query', false],
+	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
+	bUseInfluencesFilter	:	['Allow only influences by query', false],
+	bSimilArtistsFilter		:	['Allow only similar artists', false],
 	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music'],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
-	poolFilteringTag		:	['Allows only N + 1 tracks on the pool per tag set', 'artist'],
+	poolFilteringTag		:	['Filter pool by tag', 'artist'],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1],
-	bRandomPick				:	['Take randomly from pool? (thus not sorted by weighting)', true],
-	probPick				:	['Probability of track being choosen -after weighting- for final mix (makes playlist a bit random!)', 100],
+	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
+	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100],
 	playlistLength			:	['Max Playlist Mix length', 50],
-	bSortRandom				:	['Randomize sorting of final playlist? (not while picking from pool)', true],
-	bScatterInstrumentals	:	['Intercalate instrumental tracks breaking clusters if possible', true],
-	bProgressiveListOrder	:	['Sorting by score of final playlist? (not while picking from pool)', false],
-	bInKeyMixingPlaylist	:	['DJ-like playlist creation with key changes following harmonic mixing rules', false],
-	bProgressiveListCreation:	['Recursive playlist creation, uses output tracks as new references, ...', false],
+	bSortRandom				:	['Sort final playlist randomly', true],
+	bProgressiveListOrder	:	['Sort final playlist by score', false],
+	bScatterInstrumentals	:	['Intercalate instrumental tracks', true],
+	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
+	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
 	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4],
+	playlistName			:	['Playlist name (TF allowed)', 'Search...']
 };
 
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -596,9 +595,13 @@ function do_searchby_distance({
 								// --->Pre-Scoring Filters
 								// Query to filter library
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
-								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Applies anti-influences filter only for specific style/genres (for ex. to further separate jazz to other genres) 
-								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false, // Filter anti-influences by query, before any scoring/distance calc.
-								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, // Allows only influences by query, before any scoring/distance calc. 
+								// Similar artists
+								bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties['bSimilArtistsFilter'][1] : false, 
+								// Filter anti-influences by query, before any scoring/distance calc.
+								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Only for specific style/genres (for ex. Jazz) 
+								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false,
+								// Allows only influences by query, before any scoring/distance calc.
+								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, 
 								// --->Scoring Method
                                 method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
 								// --->Scoring filters
@@ -633,6 +636,7 @@ function do_searchby_distance({
 								bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties['bBasicLogging'][1] : false,
 								bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties['bSearchDebug'][1] : false,
 								// --->Output
+								playlistName			= properties.hasOwnProperty('playlistName') ? properties['playlistName'][1] : 'Search...',
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 								} = {}) {
 		const descr = music_graph_descriptors;
@@ -655,7 +659,7 @@ function do_searchby_distance({
 			// Sel is ommited since it's a function or a handle
 			// Note a theme may be set within a recipe too, overwriting any other them set
 			// Changes null to infinity and not found theme filenames into full paths
-			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
+			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
 			let bOverwriteTheme = false;
 			Object.keys(recipe).forEach((key) => {
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
@@ -1073,6 +1077,29 @@ function do_searchby_distance({
 			}
 			
 			query[querylength] = influencesQuery.length ? query_join(influencesQuery, 'AND') : ''; // TODO: Add weight query, now is dynamically set
+		}
+		if (bSimilArtistsFilter && !bUseTheme) {
+			const file = folders.data + 'searchByDistance_artists.json';
+			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
+			let similTags = fb.TitleFormat('[%' + tagName + '%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
+			let querySimil = '';
+			if (!similTags.length && _isFile(file)) {
+				const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+				const artist = fb.TitleFormat('%artist%').EvalWithMetadb(sel);
+				if (data) {
+					const dataArtist = data.find((obj) => {return obj.artist === artist;});
+					if (dataArtist) {dataArtist.val.forEach((artistObj) => {similTags.push(artistObj.artist);});}
+				}
+				similTags.push(artist); // Always add the original artist as a valid value
+			}
+			if (similTags.length) {
+				querySimil = similTags.map((artist) => {return 'ARTIST IS ' + artist;});
+				querySimil = query_join(querySimil, 'OR');
+			}
+			if (querySimil.length) {
+				if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND (' + querySimil + ')';}
+				else {query[querylength] += querySimil;}
+			}
 		}
 		if (forcedQuery.length) { //Add user input query to the previous one
 			if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND ' + forcedQuery;}
@@ -1645,11 +1672,22 @@ function do_searchby_distance({
 		// Insert to playlist
 		if (bCreatePlaylist) {
 			// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
-			const playlist_name = 'Search...';
+			let playlistNameEval;
+			const bIsTF =  /(%.*%)|(\$.*\(.*\))/g.test(playlistName);
+			if (bUseTheme) {
+				const themeRegexp = /%sbd_theme%/gi;
+				if (bIsTF && themeRegexp.test(playlistName)) {
+					playlistNameEval = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + theme.name +')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
+				} else {
+					playlistNameEval = playlistName;
+				}
+			} else {
+				playlistNameEval = bIsTF ? fb.TitleFormat(playlistName).EvalWithMetadb(sel) : playlistName;
+			}
 			let i = 0;
 			const plc = plman.PlaylistCount;
 			while (i < plc) {
-				if (plman.GetPlaylistName(i) === playlist_name) {
+				if (plman.GetPlaylistName(i) === playlistNameEval) {
 					plman.ActivePlaylist = i;
 					plman.UndoBackup(i);
 					plman.ClearPlaylist(i);
@@ -1658,16 +1696,16 @@ function do_searchby_distance({
 				i++;
 			}
 			if (i === plc) { //if no playlist was found before
-				plman.CreatePlaylist(plc, playlist_name);
+				plman.CreatePlaylist(plc, playlistNameEval);
 				plman.ActivePlaylist = plc;
 			}
 			const outputHandleList = new FbMetadbHandleList(selectedHandlesArray);
 			plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
 			if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
-		// Share changes on cache
-		if (oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
-		if (oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
+		// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
+		if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
+		if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
 		// Output handle list (as array), the score data, current selection (reference track) and more distant track
 		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handle_list[scoreData[poolLength - 1].index] : -1)];
 }

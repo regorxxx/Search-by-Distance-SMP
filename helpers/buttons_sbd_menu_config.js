@@ -38,13 +38,15 @@ function createConfigMenu(parent) {
 			const lowerHundred = new Set(['scoreFilter']);
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' ? properties[key][1].toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : properties[key][1]) + ']');
+				const val = properties[key][1];
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? val.toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : val) + ']');
 				menu.newEntry({menuName, entryText, func: () => {
 					let input = '';
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, val, true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
 					if (lowerHundred.has(key) && input > 100) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
@@ -58,7 +60,6 @@ function createConfigMenu(parent) {
 				let input = '';
 				try {input = Number(utils.InputBox(window.ID, 'Input weight value:', 'Search by distance', properties[weightName][1], true));} 
 				catch(e) {return;}
-				if (!input.length) {return;}
 				if (isNaN(input)) {return;}
 				if (input === properties[weightName][1]) {return;}
 				properties[weightName][1] = input;
@@ -75,7 +76,6 @@ function createConfigMenu(parent) {
 					let input = '';
 					try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
 					catch(e) {return;}
-					if (!input.length) {return;}
 					if (isNaN(input)) {return;}
 					if (input === properties[rangeName][1]) {return;}
 					properties[rangeName][1] = input;
@@ -97,7 +97,7 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Menu to configure filters:
-		const menuName = menu.newMenu('Set filters');
+		const menuName = menu.newMenu('Set pre-scoring filters');
 		{	// Menu to configure properties: forcedQuery
 			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: () => {
 				let input = '';
@@ -141,12 +141,30 @@ function createConfigMenu(parent) {
 				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(input) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(input) !== -1);});
 			});
 		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{ // Menu to configure properties: influences filter
+			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter'];
+			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
+			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					if (key === 'bConditionAntiInfluences') {fb.ShowPopupMessage('This option overrides the global anti-influences filter option, so it will be disabled at the configuration menu.\n\nThe filter will be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).join(', '), 'Search by distance');}
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences ? MF_GRAYED : (recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING))});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
+	}
+{	// Menu to configure filters:
+		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Menu to configure properties: tags filter
-			const options = ['genreStyleFilter', 'sep', 'poolFilteringTag'];
+			const options = ['poolFilteringTag'];
 			options.forEach((key) => {
 				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
 					let input = '';
 					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1], true);}
@@ -173,26 +191,11 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
-		menu.newEntry({menuName, entryText: 'sep'});
-		{ // Menu to configure properties: influences filter
-			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
-			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
-			options.forEach((key) => {
-				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					if (key === 'bConditionAntiInfluences') {fb.ShowPopupMessage('This option overrides the global anti-influences filter option, so it will be disabled at the configuration menu.\n\nThe filter will be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).join(', '), 'Search by distance');}
-					properties[key][1] = !properties[key][1];
-					overwriteProperties(properties); // Updates panel
-				}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences ? MF_GRAYED : (recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING))});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-			});
-		}
 	}
 	{	// Menu to configure pool picking:
 		const menuName = menu.newMenu('Set pool picking');
 		{
-			const options = ['bRandomPick', 'bProgressiveListOrder'];
+			const options = ['bRandomPick'];
 			options.forEach((key) => {
 				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
@@ -221,20 +224,23 @@ function createConfigMenu(parent) {
 	}
 	{	// Menu to configure final sorting:
 		const menuName = menu.newMenu('Set final sorting');
-		const options = ['bSortRandom', 'bScatterInstrumentals', 'bProgressiveListOrder'];
+		const options = ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals'];
 		options.forEach((key) => {
+			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 			const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 			menu.newEntry({menuName, entryText, func: () => {
 				properties[key][1] = !properties[key][1];
+				if (key === 'bSortRandom' && properties.bProgressiveListOrder[1]) {properties.bProgressiveListOrder[1] = !properties.bProgressiveListOrder[1];}
+				else if (key === 'bProgressiveListOrder' && properties.bSortRandom[1]) {properties.bSortRandom[1] = !properties.bSortRandom[1];}
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 		});
 	}
-	{	// Menu to configure final sorting:
-		const menuName = menu.newMenu('Other playlist attributes');
+{	// Menu to configure Special playlists:
+		const menuName = menu.newMenu('Special playlist rules');
 		{
-			const options = ['bProgressiveListCreation', 'bInKeyMixingPlaylist'];
+			const options = ['bProgressiveListCreation'];
 			options.forEach((key) => {
 				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
@@ -244,9 +250,57 @@ function createConfigMenu(parent) {
 				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 			});
 		}
+		{
+			const options = ['progressiveListCreationN'];
+			const lowerHundred = new Set(['progressiveListCreationN']);
+			options.forEach((key) => {
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
+					catch(e) {return;}
+					if (isNaN(input)) {return;}
+					if (lowerHundred.has(key) && input > 100) {return;}
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
-			const options = ['progressiveListCreationN', 'playlistLength'];
+			const options = ['bInKeyMixingPlaylist'];
+			options.forEach((key) => {
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
+	}
+	{	// Menu to configure other playlist attributes:
+		const menuName = menu.newMenu('Other playlist attributes');
+		{
+			const options = ['playlistName'];
+			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = utils.InputBox(window.ID, 'Enter TF expression:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %artist%\'\'s Mix   ->   ACDC\'s Mix\n\n%sbd_theme% is available when using themes to avoid showing the raw TF expression (since there is no track to evaluate it with). When a theme is not being used, it\'s evaluated as a tag.\nFor ex: $if2(%sbd_theme%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', properties[key][1], true);}
+					catch(e) {return;}
+					if (!input.length) {return;}
+					if (properties[key][1] === input) {return;}
+					properties[key][1] = input;
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const options = ['playlistLength'];
 			const lowerHundred = new Set(['progressiveListCreationN']);
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
@@ -277,6 +331,23 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties);
 			}, flags: recipe.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
 		});
+		menu.newEntry({menuName, entryText: 'sep'});
+		{ // Menu to configure properties: tags filter
+			const options = ['genreStyleFilter'];
+			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					let input = '';
+					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1], true);}
+					catch(e) {return;}
+					if (properties[key][1] === input) {return;}
+					properties[key][1] = input;
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+		}
 	}
 	menu.newEntry({entryText: 'sep'});
 	{
@@ -360,7 +431,7 @@ function createConfigMenu(parent) {
 					const output = calculateSimilarArtists({properties, selHandle});
 					if (output.val.length) {newData.push(output);}
 				})
-				if (!newData.length) {return;}
+				if (!newData.length) {console.log('Nothing found.'); return;}
 				if (!_isFile(file)) {
 					newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});
 					_save(file, JSON.stringify(newData, null, '\t'));

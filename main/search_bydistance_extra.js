@@ -23,7 +23,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	// Add all possible exclusions to make it faster (even if it less precise)
 	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(','))))].join(',');
 	if (panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
-	randomSelTracks.slice(0, size).forEach((sel) => {
+	randomSelTracks.forEach((sel) => {
 		// Further filter the tracks using a date range
 		const dateTag = newConfig.dateTag[1], dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
 		const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
