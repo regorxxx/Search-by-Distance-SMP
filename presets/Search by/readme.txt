@@ -5,4 +5,6 @@ Recipes may also contain a forced theme, either the entire object or a link to a
 
 Both may be used in buttons, tools or with Playlist Tools's Pools (pools' themes and recipes arguments may link to these files).
 
+Recipes and filter files may be set to 'Hidden' (file attribute) to not show them on Foobar scripts.
+
 Filters are pre-defined queries meant to be used as forced queries to filter the library, independently of the recipe, theme or other config set. Currently used on the customizable 'search_bydistance' button.

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/02/22
+//08/02/22
 
 /*	
 	Search by Distance
@@ -357,7 +357,8 @@ const SearchByDistance_properties = {
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', 
 								'NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad AND TITLE PRESENT AND ARTIST PRESENT AND DATE PRESENT'],
-	bUseAntiInfluencesFilter:	['Filter anti-influences by query', false],
+	bSameArtistFilter		:	['Exclude tracks by same artist', false],
+	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
@@ -448,7 +449,8 @@ const influenceMethod = 'adjacentNodes'; // direct, zeroNodes, adjacentNodes, fu
 // Only use file cache related to current descriptors, otherwise delete it
 if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod + 'v1.0.0');
-if (panelProperties.descriptorCRC[1] !== descriptorCRC) {
+const bMissmatchCRC = panelProperties.descriptorCRC[1] !== descriptorCRC;
+if (bMissmatchCRC) {
 	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
 	_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
 	_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
@@ -565,6 +567,27 @@ if (panelProperties.bGraphDebug[1]) {
 	if (panelProperties.bProfile[1]) {profiler.Print();}
 }
 
+/* 
+	Variables allowed at recipe files and automatic documentation update
+*/
+const recipeAllowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMissmatchCRC) {
+	const data = [...recipeAllowedKeys].map((key) => {
+		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
+		let descr = propDescr ? propDescr[0] : '';
+		if (!descr.length) {
+			if (key.toLowerCase().indexOf('properties') !== -1) {descr = 'Object properties for the panel or single button';}
+			if (key === 'theme') {descr = 'Load additional theme by file name or path';}
+			if (key === 'recipe') {descr = 'Load additional recipe by file name or path';}
+			if (key === 'bPoolFiltering') {descr = 'Global enable/disable switch. Equivalent to setting poolFilteringN to >0 or -1';}
+			if (key === 'bCreatePlaylist') {descr = 'Output results to a playlist or only for internal use';}
+		}
+		return [key, descr];
+	});
+	console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt');
+	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t'));
+}
+
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
 function do_searchby_distance({
@@ -595,7 +618,9 @@ function do_searchby_distance({
 								// --->Pre-Scoring Filters
 								// Query to filter library
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
-								// Similar artists
+								// Exclude same artist
+								bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties['bSameArtistFilter'][1] : false,
+ 								// Similar artists
 								bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties['bSimilArtistsFilter'][1] : false, 
 								// Filter anti-influences by query, before any scoring/distance calc.
 								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Only for specific style/genres (for ex. Jazz) 
@@ -659,11 +684,10 @@ function do_searchby_distance({
 			// Sel is ommited since it's a function or a handle
 			// Note a theme may be set within a recipe too, overwriting any other them set
 			// Changes null to infinity and not found theme filenames into full paths
-			const allowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist'])
 			let bOverwriteTheme = false;
 			Object.keys(recipe).forEach((key) => {
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
-				if (allowedKeys.has(key)) {
+				if (recipeAllowedKeys.has(key)) {
 					if (isStringWeak(value)) {
 						eval(key + ' = \'' + value + '\'');
 					} else if (isArrayStrings(value)) {
@@ -748,6 +772,7 @@ function do_searchby_distance({
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
 		probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 		scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
+		bPoolFiltering = (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
 		const sbd_distanceFilter_dyngenre_below = 5;
 		const sbd_distanceFilter_graph_below = 10;
 		if (customNumTag.length > 1) { // Safety Check. Warn users if they try wrong settings
@@ -1078,6 +1103,18 @@ function do_searchby_distance({
 			
 			query[querylength] = influencesQuery.length ? query_join(influencesQuery, 'AND') : ''; // TODO: Add weight query, now is dynamically set
 		}
+		if (bSameArtistFilter && !bUseTheme) {
+			let tags = fb.TitleFormat('[%artist%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
+			let queryArtist = '';
+			if (tags.length) {
+				queryArtist = tags.map((artist) => {return 'ARTIST IS ' + artist;});
+				queryArtist = 'NOT (' + query_join(queryArtist, 'OR') + ')';
+			}
+			if (queryArtist.length) {
+				if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND (' + queryArtist + ')';}
+				else {query[querylength] += queryArtist;}
+			}
+		}
 		if (bSimilArtistsFilter && !bUseTheme) {
 			const file = folders.data + 'searchByDistance_artists.json';
 			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
@@ -1090,7 +1127,7 @@ function do_searchby_distance({
 					const dataArtist = data.find((obj) => {return obj.artist === artist;});
 					if (dataArtist) {dataArtist.val.forEach((artistObj) => {similTags.push(artistObj.artist);});}
 				}
-				similTags.push(artist); // Always add the original artist as a valid value
+				if (!bSameArtistFilter) {similTags.push(artist);} // Always add the original artist as a valid value
 			}
 			if (similTags.length) {
 				querySimil = similTags.map((artist) => {return 'ARTIST IS ' + artist;});

@@ -1,5 +1,5 @@
 ﻿'use strict'
-//04/02/22
+//08/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -73,8 +73,10 @@ function createThemeMenu(parent) {
 		const theme = {name: input, tags: []};
 		theme.tags.push({genre, style, mood, key, date, bpm, composer, customStr, customNum});
 		const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
+		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
 		const bDone = _save(filePath, JSON.stringify(theme, null, '\t'));
 		if (!bDone) {fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); return;}
+		else {_explorer(filePath);}
 	}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED});
 	themeMenu.newEntry({entryText: 'sep'});
 	themeMenu.newEntry({entryText: 'None', func: () => {
@@ -89,6 +91,9 @@ function createThemeMenu(parent) {
 	// List
 	const options = [];
 	files.forEach((file) => {
+		// Omit hidden files
+		const attr = _parseAttrFile(file);
+		if (attr && attr.Hidden) {return;}
 		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
 		if (!theme) {return;}
 		// Check

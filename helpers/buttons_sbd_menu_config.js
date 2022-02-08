@@ -1,5 +1,5 @@
 ﻿'use strict'
-//04/02/22
+//08/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -54,9 +54,15 @@ function createConfigMenu(parent) {
 	}
 	{	// Menu to configure properties: weights
 		const menuName = menu.newMenu('Set weights');
-		const options = ['genreWeight', 'styleWeight', 'moodWeight', 'dateWeight', 'keyWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight'];
+		const options = ['genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'dateWeight', 'keyWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight'];
+		const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
+		const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
 		options.forEach((weightName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + weightName.replace('Weight','') + ' weight' + (recipe.hasOwnProperty(weightName) ? '\t[' + recipe[weightName] + '] (forced by recipe)' : '\t[' + properties[weightName][1] + ']'), func: () => {
+			const bIsDyngenreRecipe = weightName === 'dyngenreWeight' && bIsDyngenreMethodRecipe;
+			const bIsDyngenreProp = weightName === 'dyngenreWeight' && bIsDyngenreMethodProp;
+			const bPresent = recipe.hasOwnProperty(weightName);
+			const entryText = 'Set ' + weightName.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[weightName]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[weightName][1]) + ']');
+			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
 				try {input = Number(utils.InputBox(window.ID, 'Input weight value:', 'Search by distance', properties[weightName][1], true));} 
 				catch(e) {return;}
@@ -64,7 +70,7 @@ function createConfigMenu(parent) {
 				if (input === properties[weightName][1]) {return;}
 				properties[weightName][1] = input;
 				overwriteProperties(properties);
-			}, flags: recipe.hasOwnProperty(weightName) ? MF_GRAYED : MF_STRING});
+			}, flags: bPresent || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
 		});
 	}
 	{	// Menu to configure properties: ranges
@@ -143,13 +149,14 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{ // Menu to configure properties: influences filter
-			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter'];
+			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
 			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
 			options.forEach((key) => {
 				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
 					if (key === 'bConditionAntiInfluences') {fb.ShowPopupMessage('This option overrides the global anti-influences filter option, so it will be disabled at the configuration menu.\n\nThe filter will be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).join(', '), 'Search by distance');}
+					if (key === 'bSameArtistFilter') {fb.ShowPopupMessage('This option may overrride some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance');}
 					properties[key][1] = !properties[key][1];
 					overwriteProperties(properties); // Updates panel
 				}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences ? MF_GRAYED : (recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING))});
@@ -484,6 +491,9 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: submenu, entryText: 'Calculate same zone artists', func: () => {
 				getArtistsSameZone({properties});
 			}});
+		}
+		menu.newEntry({menuName: submenu, entryText: 'sep'});
+		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
 				graphStatistics({properties});
 			}});

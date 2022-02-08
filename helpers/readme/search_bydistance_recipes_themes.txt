@@ -20,3 +20,7 @@ Theme files may be created using the examples files, buttons or Playlist tools.
 	i.e. you can remap genre to use 'genre' and 'All Music Genre', etc.
 	- When using custom buttons just use the theme menu (Shift + Left Click).
 	Same comments apply.
+	
+Both type of files may be set to 'Hidden' (file attribute) to not show them
+on the menus, instead of deleting them. Some files meant for internal use only
+may be hidden by default.

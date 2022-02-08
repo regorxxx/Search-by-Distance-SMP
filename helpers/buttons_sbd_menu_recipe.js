@@ -1,5 +1,5 @@
 ﻿'use strict'
-//04/02/22
+//08/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -30,6 +30,23 @@ function createRecipeMenu(parent) {
 		if (_isFile(properties.recipe[1])) {_explorer(properties.recipe[1]);} // Open current file
 		else {_explorer(folders.xxx + 'presets\\Search by\\recipes');} // or folder
 	}});
+	recipeMenu.newEntry({entryText: 'Create recipe file with current config', func: () => {
+		const recipe = {name: ''};
+		// Retrieve allowed keys
+		const excludedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'bPoolFiltering', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+		recipeAllowedKeys.forEach((key) => {if (!excludedKeys.has(key)) {recipe[key] = properties[key][1];}});
+		// Recipe obj
+		let input = '';
+		try {input = utils.InputBox(window.ID, 'Enter Recipe name', 'Search by distance', 'my recipe', true).toString();}
+		catch (e) {return;}
+		if (!input.length) {return;}
+		recipe.name = input;
+		const filePath = folders.xxx + 'presets\\Search by\\recipes\\' + input + '.json';
+		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t'));
+		if (!bDone) {fb.ShowPopupMessage('Error saving recipe file:' + filePath, 'Search by distance'); return;}
+		else {_explorer(filePath);}
+	}});
 	recipeMenu.newEntry({entryText: 'sep'});
 	recipeMenu.newEntry({entryText: 'None', func: () => {
 		properties.recipe[1] = '';
@@ -42,6 +59,9 @@ function createRecipeMenu(parent) {
 	// List
 	const options = [];
 	files.forEach((file) => {
+		// Omit hidden files
+		const attr = _parseAttrFile(file);
+		if (attr && attr.Hidden) {return;}
 		// List files, with full path or relative path (portable)
 		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file.replace(fb.ProfilePath,'.\\')): file);
 	});

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/02/22
+//08/02/22
 
 include('search_bydistance.js');
 
@@ -38,7 +38,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 			dyngenreRange: 0, keyRange: 1, dateRange: dateRange * 2, bpmRange: 0, customNumRange: 0, bNegativeWeighting: true,
 			// --->Pre-Scoring Filters
 			forcedQuery: dateQuery ? forcedQuery + ' AND ' + dateQuery : forcedQuery,
-			bUseAntiInfluencesFilter: true, bUseInfluencesFilter: false, 
+			bUseAntiInfluencesFilter: true, bUseInfluencesFilter: false, bSimilArtistsFilter: false, bSameArtistFilter: false,
 			// --->Scoring Method
 			method: 'GRAPH', scoreFilter: 75, sbd_max_graph_distance: "music_graph_descriptors.intra_supergenre / 2",
 			// --->Post-Scoring Filters
@@ -51,7 +51,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 			bInKeyMixingPlaylist: false, bProgressiveListCreation: false, progressiveListCreationN: 1,
 			// --->Console logging
 			bProfile: false,
-			bShowQuery : false, bShowFinalSelection: false, bBasicLogging: false, bSearchDebug: false,
+			bShowQuery: false, bShowFinalSelection: false, bBasicLogging: false, bSearchDebug: false,
 			// --->Output
 			bCreatePlaylist: false // output handle list
 		});
