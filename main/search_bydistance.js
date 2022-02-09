@@ -675,7 +675,6 @@ function do_searchby_distance({
 			let path;
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
-				console.log(path);
 				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
 				if (!recipe) {return;}
 			}
@@ -1739,6 +1738,8 @@ function do_searchby_distance({
 			const outputHandleList = new FbMetadbHandleList(selectedHandlesArray);
 			plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
 			if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
+		} else {
+			if (bBasicLogging) {console.log('Final selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
 		// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
 		if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}

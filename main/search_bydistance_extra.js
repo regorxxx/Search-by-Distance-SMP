@@ -3,7 +3,7 @@
 
 include('search_bydistance.js');
 
-function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = null, dateRange = 10} = {}) {
+function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'Similar artists calculation (GRAPH).json', dateRange = 10} = {}) {
 	const panelProperties = (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Find which genre/styles are nearest as pre-filter
@@ -28,33 +28,15 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		const dateTag = newConfig.dateTag[1], dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
 		const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
 		const dateQuery = date && date.length ? '(' + dateQueryTag + ' GREATER ' + (Number(date)- Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2)) + ')' : null;
-		// Compare by genre/style and date using graph method. Exclude anti-influences (faster)
-		const [selectedHandlesArray, selectedHandlesData, ] = do_searchby_distance({
+		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
+ 		const data = do_searchby_distance({
 			properties: newConfig,
 			panelProperties,
 			sel, theme, recipe,
-			// --->Weights
-			genreWeight: 30, styleWeight: 30, dyngenreWeight: 0, moodWeight: 10, keyWeight: 5, dateWeight: 25, bpmWeight: 0, composerWeight: 0, customStrWeight: 0, customNumWeight: 0,
-			dyngenreRange: 0, keyRange: 1, dateRange: dateRange * 2, bpmRange: 0, customNumRange: 0, bNegativeWeighting: true,
 			// --->Pre-Scoring Filters
-			forcedQuery: dateQuery ? forcedQuery + ' AND ' + dateQuery : forcedQuery,
-			bUseAntiInfluencesFilter: true, bUseInfluencesFilter: false, bSimilArtistsFilter: false, bSameArtistFilter: false,
-			// --->Scoring Method
-			method: 'GRAPH', scoreFilter: 75, sbd_max_graph_distance: "music_graph_descriptors.intra_supergenre / 2",
-			// --->Post-Scoring Filters
-			poolFilteringTag: [], poolFilteringN: -1, bPoolFiltering: false,
-			// --->Playlist selection
-			bRandomPick: false, probPick: 100, playlistLength: 200, 
-			// --->Playlist sorting
-			bSortRandom	: false, bProgressiveListOrder: false, bScatterInstrumentals: false,
-			// --->Special Playlists
-			bInKeyMixingPlaylist: false, bProgressiveListCreation: false, progressiveListCreationN: 1,
-			// --->Console logging
-			bProfile: false,
-			bShowQuery: false, bShowFinalSelection: false, bBasicLogging: false, bSearchDebug: false,
-			// --->Output
-			bCreatePlaylist: false // output handle list
+			forcedQuery: dateQuery ? forcedQuery + ' AND ' + dateQuery : forcedQuery
 		});
+		const [selectedHandlesArray, selectedHandlesData, ] = data ? data : [[], []];
 		// Group tracks per artist and sum their score
 		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), ['artist'], true);
 		const similArtistData = new Map();
