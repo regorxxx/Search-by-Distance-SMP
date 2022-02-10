@@ -9,7 +9,7 @@ try { //May be loaded along other buttons
 	var g_font = _gdiFont('Segoe UI', 12);
 	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
 } catch (e) {
-	buttonCoordinates = {x: () => 0, y: 0, w: () => buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w, h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
+	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w, h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Search by Distance Buttons loaded.');
 }
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once

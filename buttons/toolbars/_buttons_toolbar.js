@@ -100,7 +100,7 @@ buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to m
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons names
 					'buttons_search_same_by.js',  //+15 w
-					'buttons_remove_duplicates.js',  //+25 w
+					'buttons_playlist_remove_duplicates.js',  //+25 w
 					'buttons_search_bydistance.js',
 					'buttons_search_bydistance_customizable.js',
 					'buttons_playlist_tools.js',
