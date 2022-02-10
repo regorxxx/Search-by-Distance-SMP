@@ -1,5 +1,5 @@
 ﻿'use strict'
-//04/02/22
+//10/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -205,13 +205,13 @@ function createButtonsMenu(name) {
 			buttonsBar.config.buttonOrientation = barProperties.buttonOrientation[1]; // buttons_xxx.js
 			window.Reload();
 		}});
-		// menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
-			// barProperties.bReflow[1] = !barProperties.bReflow[1];
-			// overwriteProperties(barProperties);
-			// buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
-			// window.Reload();
-		// }});
-		// menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
+		menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
+			barProperties.bReflow[1] = !barProperties.bReflow[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

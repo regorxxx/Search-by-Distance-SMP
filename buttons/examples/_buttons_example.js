@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/02/22
+//10/02/22
 
 /* 
 	Button example. Just configure the -things commented-.
@@ -59,7 +59,7 @@ if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 // THIS IS ALSO THE SAME STRUCTURE FOR ALL BUTTONS FILES, YOU JUST CHANGE THE NAMES...
 var newButtons = { // -EDIT You can add here as many buttons as you want-
-	OneButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, false).y, buttonCoordinates.w, buttonCoordinates.h, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
+	OneButton: new SimpleButton(buttonCoordinates, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
@@ -69,7 +69,7 @@ var newButtons = { // -EDIT You can add here as many buttons as you want-
 		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
 	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 	
-	TwoButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, false).y, buttonCoordinates.w, buttonCoordinates.h, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
+	TwoButton: new SimpleButton(buttonCoordinates, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/02/22
+//10/02/22
 
 /* 
 	-> EDIT
@@ -32,7 +32,7 @@ setProperties(newButtonsProperties, prefix); //This sets all the panel propertie
 // if (buttonsBar.config.buttonOrientation === 'y') {buttonCoordinates.h += 0;}
 
 var newButtons = {
-	OneButton: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation).x, calcNextButtonCoordinates(buttonCoordinates, buttonsBar.config.buttonOrientation, false).y, buttonCoordinates.w, buttonCoordinates.h, 'EDIT', function () {
+	OneButton: new SimpleButton(buttonCoordinates, 'EDIT', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		let [EDIT] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once

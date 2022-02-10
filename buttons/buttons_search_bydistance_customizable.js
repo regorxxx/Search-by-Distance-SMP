@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/02/22
+//10/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -41,7 +41,7 @@ if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 */
 
 var newButtons = {
-    SimilarUserSet: new SimpleButton(calcNextButtonCoordinates(buttonCoordinates, void(0), buttonsBar.config.buttonOrientation === 'x' ? true : false).x, calcNextButtonCoordinates(buttonCoordinates, void(0), buttonsBar.config.buttonOrientation === 'x' ? false : true).y, buttonCoordinates.w, buttonCoordinates.h, newButtonsProperties.customName[1], function (mask) {
+    SimilarUserSet: new SimpleButton(buttonCoordinates, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.x, this.y + this.h);
 		} else if (mask === MK_CONTROL) {

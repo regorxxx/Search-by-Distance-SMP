@@ -35,35 +35,26 @@ buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at buttons obj)
 buttonsBar.propertiesPrefixes = new Set(); // Global properties names prefixes
 var buttons = {}; // Global list
-
-const oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
-const tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
-
-let g_down = false;
-let curBtn = null;
+// Others (internal use)
+buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
+buttonsBar.tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
+buttonsBar.g_down = false;
+buttonsBar.curBtn = null;
 
 function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.buttonOrientation, recalc = true) {
 	let newCoordinates;
 	const orientation = buttonOrientation.toLowerCase();
-	const old = oldButtonCoordinates;
-	// This requires a panel reload after resizing
-	// if (buttonOrientation === 'x') {
-		// newCoordinates = {x: old.x + coord.x , y: coord.y, w: coord.w, h: coord.h};
-		// if (recalc) {old.x += coord.x + coord.w;}
-	// } else if (buttonOrientation === 'y') {
-		// newCoordinates = {x: coord.x, y: old.y + coord.y, w: coord.w, h: coord.h};
-		// if (recalc) {old.y += coord.y  + coord.h;}
-	// }
-	// This requires on_size_buttn() within on_size callback. Is equivalent to calculate the coordinates directly with inlined functions... but maintained here for compatibility purpose
+	const old = buttonsBar.oldButtonCoordinates;
+	const bFirstButton = !old[orientation] ? true : false;
 	const keys = ['x','y','w','h'];
 	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, _isFunction(coord[c])];}));
 	const iCoord = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? coord[c]() : coord[c]];}));
-	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]()} : old[c] + iCoord[c]];}));
+	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]()} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
 	if (recalc) {
 		if (orientation === 'x') {old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h);}
 		else if (orientation === 'y') {old.y += iCoord.y + iCoord.h; old.w = Math.max(old.w, iCoord.w);}
 	}
-	if (buttonsBar.config.bReflow) {
+	if (buttonsBar.config.bReflow && !bFirstButton) {
 		if (orientation === 'x' && old.x  > window.Width) {
 			newCoordinates.x = coord.x;
 			newCoordinates.y = old.y + old.h;
@@ -79,12 +70,12 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
+function SimpleButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
 	this.state = state ? state : buttonStates.normal;
-	this.x = x;
-	this.y = y;
-	this.w = w;
-	this.h = h;
+	this.x = this.currX = coordinates.x;
+	this.y = this.currY = coordinates.y;
+	this.w = this.currW = coordinates.w;
+	this.h = this.currH = coordinates.h;
 	this.moveX = null;
 	this.moveY = null;
 	this.originalWindowWidth = window.Width;
@@ -102,11 +93,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 
 	this.containXY = function (x, y) {
-		const x_calc = _isFunction(this.x) ? this.x() : this.x;
-		const y_calc = _isFunction(this.y) ? this.y() : this.y;
-		const w_calc = _isFunction(this.w) ? this.w() : this.w;
-		const h_calc = _isFunction(this.h) ? this.h() : this.h;
-		return (x_calc <= x) && (x <= x_calc + w_calc) && (y_calc <= y) && (y <= y_calc + h_calc );
+		return (this.currX <= x) && (x <= this.currX + this.currW) && (this.currY <= y) && (y <= this.currY + this.currH);
 	};
 
 	this.changeState = function (state) {
@@ -115,7 +102,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 		return old;
 	};
 
-	this.draw = function (gr, x = this.moveX || this.x, y = this.moveY || this.y) {
+	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		if (this.state === buttonStates.hide) {
 			return;
 		}
@@ -126,7 +113,7 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 				break;
 
 			case buttonStates.hover:
-				tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
 				this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 				break;
 
@@ -137,23 +124,23 @@ function SimpleButton(x, y, w, h, text, fonClick, state, g_font = _gdiFont('Sego
 			case buttonStates.hide:
 				return;
 		}
-		
-		const x_calc = _isFunction(x) ? x() : x;
-		const y_calc = _isFunction(y) ? y() : y;
-		const w_calc = _isFunction(this.w) ? this.w() : this.w;
-		const h_calc = _isFunction(this.h) ? this.h() : this.h;
-		
-		this.g_theme.DrawThemeBackground(gr, x_calc, y_calc, w_calc, h_calc);
+		// New coordinates must be calculated and stored to interact with UI
+		let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w, h});
+		this.currX = xCalc; this.currY = yCalc; this.currW = wCalc; this.currH = hCalc;
+		// When moving buttons, the button may be drawn at another position though
+		if (this.moveX) {xCalc = this.moveX;}
+		if (this.moveY) {yCalc = this.moveY;}
+		this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);
 		if (this.icon !== null) {
 			let iconWidthCalculated = _isFunction(this.icon) ? this.iconWidth() : this.iconWidth;
 			let textWidthCalculated = _isFunction(this.text) ? this.textWidth() : this.textWidth;
 			let iconCalculated = _isFunction(this.icon) ? this.icon() : this.icon;
 			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
-			gr.GdiDrawText(iconCalculated, this.g_font_icon, buttonsBar.config.textColor, x_calc - iconWidthCalculated / 5 - textWidthCalculated / 2, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
-			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, x_calc + iconWidthCalculated, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
+			gr.GdiDrawText(iconCalculated, this.g_font_icon, buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
+			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		} else {
 			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
-			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, x_calc, y_calc, w_calc, h_calc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
+			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		}
 	};
 
@@ -186,48 +173,55 @@ function chooseButton(x, y) {
 function on_paint(gr) {
 	// Toolbar
 	if (buttonsBar.config.bToolbar){
-		if (oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);} // Toolbar color fix
+		if (buttonsBar.oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);} // Toolbar color fix
 		else {gr.FillSolidRect(0, 0, window.Width, window.Height, utils.GetSysColour(15));} // Default
 	}
 	// Buttons
+	for (let key in buttonsBar.oldButtonCoordinates) {buttonsBar.oldButtonCoordinates[key] = 0;}
 	drawAllButtons(gr);
 	// Drag n drop buttons
-	if (buttonsBar.move.bIsMoving) {gr.DrawRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, 2, invert(buttonsBar.config.toolbarColor))}
+	if (buttonsBar.move.bIsMoving) {
+		gr.FillSolidRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
+		gr.DrawRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, 1, invert(buttonsBar.config.toolbarColor));
+	}
 }
 
 function on_mouse_move(x, y, mask) {
-	let old = curBtn;
+	let old = buttonsBar.curBtn;
 	let curBtnKey = '';
 	let curBtnIdx = -1;
-	[curBtn, curBtnKey, curBtnIdx] = chooseButton(x, y);
-
-	if (old === curBtn) {
-		if (g_down) {
+	[buttonsBar.curBtn, curBtnKey, curBtnIdx] = chooseButton(x, y);
+	
+	if (old === buttonsBar.curBtn) {
+		if (buttonsBar.g_down) {
 			return;
 		}
-	} else if (g_down && curBtn && curBtn.state !== buttonStates.down) {
-		curBtn.changeState(buttonStates.down);
+	} else if (buttonsBar.g_down && buttonsBar.curBtn && buttonsBar.curBtn.state !== buttonStates.down) {
+		buttonsBar.curBtn.changeState(buttonStates.down);
 		window.Repaint();
 		return;
-	} 
+	}
 	
 	//Tooltip fix
 	if (old !== null) {
-		if (curBtn === null) {tooltipButton.Deactivate();} // Needed because tooltip is only activated/deactivated on redrawing... 
+		if (buttonsBar.curBtn === null) {buttonsBar.tooltipButton.Deactivate();} // Needed because tooltip is only activated/deactivated on redrawing... 
 															// otherwise it shows on empty spaces after leaving a button.
-		else if (old !== curBtn && old.description === curBtn.description) { 	// This forces redraw even if buttons have the same text!
-			tooltipButton.Deactivate();											// Updates position but tooltip becomes slower since it sets delay time to initial... 
-			tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
-		} else {tooltipButton.SetDelayTime(3, tooltipButton.oldDelay);} 
+		else if (old !== buttonsBar.curBtn && old.description === buttonsBar.curBtn.description) { 	// This forces redraw even if buttons have the same text!
+			buttonsBar.tooltipButton.Deactivate();											// Updates position but tooltip becomes slower since it sets delay time to initial... 
+			buttonsBar.tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
+		} else {buttonsBar.tooltipButton.SetDelayTime(3, buttonsBar.tooltipButton.oldDelay);} 
 	}
+	// Change button states when not moving them
 	old && old.changeState(buttonStates.normal);
-	curBtn && curBtn.changeState(buttonStates.hover);
+	if (!buttonsBar.move.bIsMoving) {
+		buttonsBar.curBtn && buttonsBar.curBtn.changeState(buttonStates.hover);
+	}
 	// Toolbar Tooltip
-	if (!curBtn && buttonsBar.config.toolbarTooltip.length) {
-		tooltipButton.SetValue(buttonsBar.config.toolbarTooltip , true);
+	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length) {
+		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip , true);
 	}
 	// Move buttons
-	if (curBtn) {
+	if (buttonsBar.curBtn) {
 		if (mask === MK_RBUTTON) {
 			if (buttonsBar.move.bIsMoving) {
 				buttonsBar.move.toKey = curBtnKey;
@@ -238,13 +232,13 @@ function on_mouse_move(x, y, mask) {
 				const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1});
 				const fKey = toBtn[0];
 				const lKey = toBtn[toBtn.length - 1];
-				buttonsBar.move.rec.x = buttons[fKey].x;
-				buttonsBar.move.rec.y = buttons[fKey].y;
-				buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].x + buttons[lKey].w - buttonsBar.move.rec.x : buttons[fKey].w;
-				buttonsBar.move.rec.h = buttons[fKey].h;
+				buttonsBar.move.rec.x = buttons[fKey].currX;
+				buttonsBar.move.rec.y = buttons[fKey].currY;
+				buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].currX + buttons[lKey].currW - buttonsBar.move.rec.x : buttons[fKey].currW;
+				buttonsBar.move.rec.h = buttons[fKey].currH;
 			} else {
 				buttonsBar.move.bIsMoving = true;
-				buttonsBar.move.btn = curBtn;
+				buttonsBar.move.btn = buttonsBar.curBtn;
 				buttonsBar.move.fromKey = curBtnKey;
 				buttonsBar.move.toKey = curBtnKey;
 			}
@@ -258,31 +252,29 @@ function on_mouse_move(x, y, mask) {
 			}
 			buttonsBar.move.fromKey = null;
 			buttonsBar.move.toKey = null;
-			buttonsBar.move.rec.x = null;
-			buttonsBar.move.rec.y = null;
-			buttonsBar.move.rec.w = null;
-			buttonsBar.move.rec.h = null;
+			for (let key in buttonsBar.move.rec) {buttonsBar.move.rec[key] = null;}
 		}
 		for (let key in buttons) {if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}}
 	} else {
 		for (let key in buttons) {buttons[key].moveX = null; buttons[key].moveY = null;}
+		for (let key in buttonsBar.move.rec) {buttonsBar.move.rec[key] = null;}
 	}
 	window.Repaint();
 }
 
 function on_mouse_leave() {
-	g_down = false;
+	buttonsBar.g_down = false;
 
-	if (curBtn) {
-		curBtn.changeState(buttonStates.normal);
+	if (buttonsBar.curBtn) {
+		buttonsBar.curBtn.changeState(buttonStates.normal);
 		window.Repaint();
 	}
 }
 
 function on_mouse_lbtn_down(x, y, mask) {
-	g_down = true;
-	if (curBtn) {
-		curBtn.changeState(buttonStates.down);
+	buttonsBar.g_down = true;
+	if (buttonsBar.curBtn) {
+		buttonsBar.curBtn.changeState(buttonStates.down);
 		window.Repaint();
 	}
 }
@@ -309,11 +301,11 @@ function on_mouse_rbtn_up(x, y, mask) {
 }
 
 function on_mouse_lbtn_up(x, y, mask) {
-	g_down = false;
-	if (curBtn) {
-		curBtn.onClick(mask);
-		if (curBtn) { // Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
-			curBtn.changeState(buttonStates.hover);
+	buttonsBar.g_down = false;
+	if (buttonsBar.curBtn) {
+		buttonsBar.curBtn.onClick(mask);
+		if (buttonsBar.curBtn) { // Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
+			buttonsBar.curBtn.changeState(buttonStates.hover);
 			window.Repaint();
 		}
 	} else if (mask === MK_SHIFT) {
@@ -326,7 +318,7 @@ function on_key_down(k) { // Update tooltip with key mask if required
 		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
 			if (buttons[key].state === buttonStates.hover) {
 				const that = buttons[key];
-				tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
 	}
@@ -337,18 +329,11 @@ function on_key_up(k) {
 		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
 			if (buttons[key].state === buttonStates.hover) {
 				const that = buttons[key];
-				tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
 	}
 }
-
-function on_size() {
-	const orientation = buttonsBar.config.buttonOrientation.toLowerCase();
-	if (orientation === 'x') {oldButtonCoordinates.x = 0;}
-	else if (orientation === 'y') {oldButtonCoordinates.y = 0;}
-}
-
 
 function getUniquePrefix(string, sep = '_'){
 	if (string === null || !string.length) {return '';}
