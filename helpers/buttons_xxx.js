@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/02/22
+//10/02/22
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -372,8 +372,8 @@ function moveButton(fromKey, toKey) {
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
 	const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
 	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t'));
-	// Since properties have a prefix according to their loading order when there are multiple instances of the same
-	// script, moving a button when there other 'clones' means the other buttons may get their properties names
+	// Since properties have a prefix according to their loading order, when there are multiple instances of the same
+	// script, moving a button when there are other 'clones' means the other buttons may get their properties names
 	// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
 	const properties = buttonsBar.list[toPos];
 	const keys = properties ? Object.keys(properties) : [];
@@ -381,6 +381,8 @@ function moveButton(fromKey, toKey) {
 		const prefix = properties[Object.keys(properties)[0]][0].split('_')[0];
 		const currentId = prefix.slice(0, prefix.length - 1);
 		let currentIdNumber = 0;
+		// Backup all properties
+		const propertiesBack = buttonsBar.list.map((oldProperties) => {return getPropertiesPairs(oldProperties, '', 0, false);});
 		// Just rewrite all Ids with same prefix
 		buttonsBar.list.forEach((oldProperties, newIdx) => {
 			const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
@@ -388,17 +390,16 @@ function moveButton(fromKey, toKey) {
 				const oldPrefix = oldProperties[oldKeys[0]][0].split('_')[0];
 				const oldId = oldPrefix.slice(0, oldPrefix.length - 1);
 				if (oldId === currentId) {
-					const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
-					deleteProperties(oldProperties); // Delete it at panel
+					const backup = propertiesBack[newIdx];
 					for (const key in backup) { // Update Id
 						if (!backup.hasOwnProperty(key)) {continue;}
 						backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 					}
-					setProperties(backup, '', 0, false, true); // And restore at new position
-					if (oldPrefix !== prefix) {currentIdNumber++;}
+					overwriteProperties(backup); // And restore at new position
+					currentIdNumber++;
 				}
 			}
 		});
 	}
-	window.Reload();
+	window.Reload(); // Instead of doing the same with the button objects to update the UI, just reload with new paths... moving buttons is done once anyway
 }
