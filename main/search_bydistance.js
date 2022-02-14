@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/22
+//11/02/22
 
 /*	
 	Search by Distance
@@ -771,7 +771,8 @@ function do_searchby_distance({
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
 		probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 		scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
-		bPoolFiltering = (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
+		bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
+		if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {fb.ShowPopupMessage('Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag); return;}
 		const sbd_distanceFilter_dyngenre_below = 5;
 		const sbd_distanceFilter_graph_below = 10;
 		if (customNumTag.length > 1) { // Safety Check. Warn users if they try wrong settings

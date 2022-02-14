@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/22
+//14/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -20,10 +20,11 @@ var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here
-	customName: ['Name for the custom UI button', 'Customize!'],
-	theme: 		['Path to theme file (instead of using selection)', ''],
-	recipe: 	['Path to recipe file (instead of using properties)', ''],
-	data: 		['Internal data', JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'})],
+	customName:		['Name for the custom UI button', 'Customize!'],
+	theme: 			['Path to theme file (instead of using selection)', ''],
+	recipe: 		['Path to recipe file (instead of using properties)', ''],
+	data: 			['Internal data', JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'})],
+	bTooltipInfo:	['Show shortcuts on tooltip', true]
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
@@ -43,11 +44,11 @@ if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 var newButtons = {
     SimilarUserSet: new SimpleButton(buttonCoordinates, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
-			createThemeMenu(this).btn_up(this.x, this.y + this.h);
+			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
-			createRecipeMenu(this).btn_up(this.x, this.y + this.h);
+			createRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL + MK_SHIFT) {
-			createConfigMenu(this).btn_up(this.x, this.y + this.h);
+			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			if (this.buttonsProperties['customName'][1] === 'Customize!') {
 				let input = '';
@@ -83,5 +84,15 @@ buttons = {...buttons, ...newButtons};
 // Helper
 function buttonTooltip(parent) {
 	const data = JSON.parse(parent.buttonsProperties.data[1]);
-	return ('Search similar tracks according to configuration\n-----------------------------------------------------\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme) + '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe + '\n(Shift + Ctrl + L. Click for other config and tools)');
+	const bTooltipInfo = parent.buttonsProperties.bTooltipInfo[1];
+	let info = 'Search similar tracks according to configuration' + '\n-----------------------------------------------------';
+	// Modifiers
+	const bShift = utils.IsKeyPressed(VK_SHIFT);
+	const bControl = utils.IsKeyPressed(VK_CONTROL);
+	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
+	else {info += '\nTheme ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
+	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe;} 
+	else {info += '\nRecipe  ' + data.recipe;}
+	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click for other config and tools)';}
+	return info;
 }

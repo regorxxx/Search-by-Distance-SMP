@@ -1,5 +1,5 @@
 ﻿'use strict'
-//08/02/22
+//14/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -358,20 +358,6 @@ function createConfigMenu(parent) {
 	}
 	menu.newEntry({entryText: 'sep'});
 	{
-		menu.newEntry({entryText: 'Rename button...', func: () => {
-			let input = '';
-			try {input =  utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true);}
-			catch(e) {return;}
-			if (!input.length) {return;}
-			if (properties.customName[1] !== input) {
-				properties.customName[1] = input;
-				overwriteProperties(properties); // Force overwriting
-				parent.text = input;
-			}
-		}});
-	}
-	menu.newEntry({entryText: 'sep'});
-	{
 		const submenu = menu.newMenu('Other tools');
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
@@ -516,6 +502,26 @@ function createConfigMenu(parent) {
 				if (_isFile(file)){_run(file);}
 			}});
 		}
+	}
+	menu.newEntry({entryText: 'sep'});
+	{
+		const subMenuName = menu.newMenu('Button config...');
+		menu.newEntry({menuName: subMenuName, entryText: 'Rename button...', func: () => {
+			let input = '';
+			try {input =  utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true);}
+			catch(e) {return;}
+			if (!input.length) {return;}
+			if (properties.customName[1] !== input) {
+				properties.customName[1] = input;
+				overwriteProperties(properties); // Force overwriting
+				parent.text = input;
+			}
+		}});
+		menu.newEntry({menuName: subMenuName, entryText: 'Show shortcuts on tooltip', func: () => {
+			properties.bTooltipInfo[1] = !properties.bTooltipInfo[1];
+			overwriteProperties(properties); // Force overwriting
+		}});
+		menu.newCheckMenu(subMenuName, 'Show shortcuts on tooltip', void(0), () => {return properties.bTooltipInfo[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Readmes
