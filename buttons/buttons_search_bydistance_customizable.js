@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/02/22
+//15/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -41,8 +41,8 @@ if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
 */
 
-var newButtons = {
-    SimilarUserSet: new SimpleButton(buttonCoordinates, newButtonsProperties.customName[1], function (mask) {
+addButton({
+	SimilarUserSet: new themedButton(buttonCoordinates, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
@@ -68,18 +68,8 @@ var newButtons = {
 				do_searchby_distance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
 			}
 		}
-}, null, g_font, buttonTooltip, prefix, newButtonsProperties, chars.wand)
-};
-// Check if the button list already has the same button ID
-for (var buttonName in newButtons) {
-	if (buttons.hasOwnProperty(buttonName)) {
-		// fb.ShowPopupMessage('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		// console.log('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		Object.defineProperty(newButtons, buttonName + Object.keys(buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
-		delete newButtons[buttonName];
-	}
-}
-buttons = {...buttons, ...newButtons};
+	}, null, g_font, buttonTooltip, prefix, newButtonsProperties, chars.wand)
+});
 
 // Helper
 function buttonTooltip(parent) {

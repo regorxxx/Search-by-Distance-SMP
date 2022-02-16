@@ -1,10 +1,10 @@
 ﻿'use strict';
-//08/02/22
+//15/02/22
 
 include('search_bydistance.js');
 
 function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'Similar artists calculation (GRAPH).json', dateRange = 10} = {}) {
-	const panelProperties = (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
+	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Find which genre/styles are nearest as pre-filter
 	const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['genre', 'style'], true).flat().filter(Boolean);
@@ -115,7 +115,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = music_graph
 }
 
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
-	const panelProperties = (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
+	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
 	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
 	include('..\\helpers\\world_map_tables.js');

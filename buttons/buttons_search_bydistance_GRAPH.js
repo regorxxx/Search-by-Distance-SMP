@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/22
+//15/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -49,8 +49,8 @@ if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling do_searchby_distance() outside buttons, it would work with default arguments.
 */
 
-var newButtons = {
-    NearestTracks: new SimpleButton(buttonCoordinates, 'Nearest Tracks', function () {
+addButton({
+    NearestTracks: new themedButton(buttonCoordinates, 'Nearest Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -61,7 +61,7 @@ var newButtons = {
 		console.log('Call to do_searchby_distance NearestTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
 	
-	SimilarTracks: new SimpleButton(buttonCoordinates, 'Similar Tracks', function () {
+	SimilarTracks: new themedButton(buttonCoordinates, 'Similar Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -72,7 +72,7 @@ var newButtons = {
 		console.log('Call to do_searchby_distance SimilarTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
-    SimilarGenres: new SimpleButton(buttonCoordinates, 'Similar Genres', function () {
+    SimilarGenres: new themedButton(buttonCoordinates, 'Similar Genres', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -83,7 +83,7 @@ var newButtons = {
 		console.log('Call to do_searchby_distance SimilarGenres took ' + (t1 - t0) + ' milliseconds.');
 	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
-	SimilarMood: new SimpleButton(buttonCoordinates, 'Similar Mood', function () {
+	SimilarMood: new themedButton(buttonCoordinates, 'Similar Mood', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 5, dateRange: 100,
@@ -93,15 +93,4 @@ var newButtons = {
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarMood took ' + (t1 - t0) + ' milliseconds.');
 	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
-};
-
-// Check if the button list already has the same button ID
-for (var buttonName in newButtons) {
-	if (buttons.hasOwnProperty(buttonName)) {
-		// fb.ShowPopupMessage('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		// console.log('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		Object.defineProperty(newButtons, buttonName + Object.keys(buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
-		delete newButtons[buttonName];
-	}
-}
-buttons = {...buttons, ...newButtons};
+});

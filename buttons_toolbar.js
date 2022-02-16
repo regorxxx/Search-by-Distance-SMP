@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/02/22
+//15/02/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -115,7 +115,7 @@ loadButtonsFile();
 		if (_isFile(buttonsPath[i])) {
 			include(buttonsPath[i], {always_evaluate: true});
 			const newKeys = [];
-			Object.keys(buttons).forEach((key) => {
+			Object.keys(buttonsBar.buttons).forEach((key) => {
 				if (!bProcessed.has(key)) {
 					bProcessed.add(key);
 					newKeys.push(key);

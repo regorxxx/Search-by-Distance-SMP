@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/02/22
+//15/02/22
 
 /*	
 	Search by Distance
@@ -415,14 +415,14 @@ const SearchByDistance_panelProperties = {
 };
 
 var sbd_prefix = 'sbd_';
-if (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') { // Merge all properties when not loaded along buttons
+if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { // Merge all properties when not loaded along buttons
 	// With const var creating new properties is needed, instead of reassigning using A = {...A,...B}
 	Object.entries(SearchByDistance_panelProperties).forEach(([key, value]) => {SearchByDistance_properties[key] = value;});
 	setProperties(SearchByDistance_properties, sbd_prefix);
 } else { // With buttons, set these properties only once per panel
 	setProperties(SearchByDistance_panelProperties, sbd_prefix);
 }
-const panelProperties = (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
+const panelProperties = (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 
 // Info Popup
 if (!panelProperties.firstPopup[1]) {
@@ -470,7 +470,7 @@ if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	if (data.size) {cacheLinkSet = data; console.log('SearchByDistance: Used Cache - cacheLinkSet from file.');}
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
-if (typeof buttons === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: panelProperties});}
+if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: panelProperties});}
 // Ask others instances to share cache on startup
 if (typeof cacheLink === 'undefined') {
 	window.NotifyOthers('SearchByDistance: requires cacheLink map', true);
@@ -593,7 +593,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 function do_searchby_distance({
 								// --->Default args (aka properties from the panel and input)
 								properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
-								panelProperties			= (typeof buttons === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
+								panelProperties			= (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 								sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
 								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
 								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}

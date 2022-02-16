@@ -58,8 +58,8 @@ setProperties(newButtonsProperties, prefix); //This sets all the panel propertie
 if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
 
 // THIS IS ALSO THE SAME STRUCTURE FOR ALL BUTTONS FILES, YOU JUST CHANGE THE NAMES...
-var newButtons = { // -EDIT You can add here as many buttons as you want-
-	OneButton: new SimpleButton(buttonCoordinates, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
+addButton({ // -EDIT You can add here as many buttons as you want-
+	OneButton: new themedButton(buttonCoordinates, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
@@ -69,7 +69,7 @@ var newButtons = { // -EDIT You can add here as many buttons as you want-
 		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
 	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 	
-	TwoButton: new SimpleButton(buttonCoordinates, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
+	TwoButton: new themedButton(buttonCoordinates, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
@@ -78,18 +78,7 @@ var newButtons = { // -EDIT You can add here as many buttons as you want-
 		t1 = Date.now();
 		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
 	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
-};
-// Check if the button list already has the same button ID
-for (var buttonName in newButtons) {
-	if (buttons.hasOwnProperty(buttonName)) {
-		// fb.ShowPopupMessage('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		console.log('Duplicated button ID (' + buttonName + ') on ' + window.Name);
-		Object.defineProperty(newButtons, buttonName + Object.keys(buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
-		delete newButtons[buttonName];
-	}
-}
-// Adds to current buttons
-buttons = {...buttons, ...newButtons};
+});
 
 // AND HERE YOU PUT YOUR SCRIPT...
 // OR YOU COULD SIMPLY 'INCLUDE IT' AT THE TOP

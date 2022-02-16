@@ -1,5 +1,5 @@
 ﻿'use strict'
-//14/02/22
+//16/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -164,7 +164,7 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-{	// Menu to configure filters:
+	{	// Menu to configure filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Menu to configure properties: tags filter
 			const options = ['poolFilteringTag'];
@@ -244,7 +244,7 @@ function createConfigMenu(parent) {
 			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 		});
 	}
-{	// Menu to configure Special playlists:
+	{	// Menu to configure Special playlists:
 		const menuName = menu.newMenu('Special playlist rules');
 		{
 			const options = ['bProgressiveListCreation'];
@@ -357,58 +357,8 @@ function createConfigMenu(parent) {
 		}
 	}
 	menu.newEntry({entryText: 'sep'});
-	{
+	{	// Other tools
 		const submenu = menu.newMenu('Other tools');
-		{ 	// Find genre/styles not on graph
-			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
-				// Skipped values at pre-filter
-				const tagValuesExcluded = new Set(properties['genreStyleFilter'][1].split(',').filter(Boolean)); // Filter holes and remove duplicates
-				// Get all tags and their frequency
-				const tagsToCheck = [...new Set(properties['genreTag'][1].concat(',', properties['styleTag'][1]).split(',').filter(Boolean))]; // Merge and filter
-				if (!tagsToCheck.length) {
-					fb.ShowPopupMessage('There are no tags to check set at properties panel:\n' + properties['genreTag'][0], 'Search by distance');
-					return;
-				}
-				// Get tags
-				const tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
-				// Get node list (+ weak substitutions + substitutions + style cluster)
-				const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
-				// Compare (- user exclusions - graph exclusions)
-				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
-				// Report
-				const userFile = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
-				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
-				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
-				const report = 'Graph descriptors:\n' +
-								'.\helpers\music_graph_descriptors_xxx.js\n' +
-								'.\helpers\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
-								'List of tags not present on the graph descriptors:\n' +
-								[...missing].sort().join(', ');
-				fb.ShowPopupMessage(report, 'Search by distance');
-			}});
-			// Graph debug
-			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
-				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
-				graphDebug(all_music_graph, true); // Show popup on pass
-				if (panelProperties.bProfile[1]) {profiler.Print();}
-			}});
-			// Graph test
-			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
-				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
-				testGraph(all_music_graph);
-				testGraphV2(all_music_graph);
-				if (panelProperties.bProfile[1]) {profiler.Print();}
-			}});
-			// Graph cache reset Async
-			menu.newEntry({menuName: submenu, entryText: 'Reset link cache', func: () => {
-				_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
-				_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
-				cacheLink = void(0);
-				cacheLinkSet = void(0);
-				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
-			}});
-		}
-		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			const file = folders.data + 'searchByDistance_artists.json';
 			const iNum = 10;
@@ -476,6 +426,58 @@ function createConfigMenu(parent) {
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Calculate same zone artists', func: () => {
 				getArtistsSameZone({properties});
+			}});
+		}
+	}
+	{	// Debug
+		const submenu = menu.newMenu('Debug and testing');
+		{ 	// Find genre/styles not on graph
+			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
+				// Skipped values at pre-filter
+				const tagValuesExcluded = new Set(properties['genreStyleFilter'][1].split(',').filter(Boolean)); // Filter holes and remove duplicates
+				// Get all tags and their frequency
+				const tagsToCheck = [...new Set(properties['genreTag'][1].concat(',', properties['styleTag'][1]).split(',').filter(Boolean))]; // Merge and filter
+				if (!tagsToCheck.length) {
+					fb.ShowPopupMessage('There are no tags to check set at properties panel:\n' + properties['genreTag'][0], 'Search by distance');
+					return;
+				}
+				// Get tags
+				const tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
+				// Get node list (+ weak substitutions + substitutions + style cluster)
+				const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
+				// Compare (- user exclusions - graph exclusions)
+				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
+				// Report
+				const userFile = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
+				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
+				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
+				const report = 'Graph descriptors:\n' +
+								'.\helpers\music_graph_descriptors_xxx.js\n' +
+								'.\helpers\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
+								'List of tags not present on the graph descriptors:\n' +
+								[...missing].sort().join(', ');
+				fb.ShowPopupMessage(report, 'Search by distance');
+			}});
+			// Graph debug
+			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
+				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
+				graphDebug(all_music_graph, true); // Show popup on pass
+				if (panelProperties.bProfile[1]) {profiler.Print();}
+			}});
+			// Graph test
+			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
+				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
+				testGraph(all_music_graph);
+				testGraphV2(all_music_graph);
+				if (panelProperties.bProfile[1]) {profiler.Print();}
+			}});
+			// Graph cache reset Async
+			menu.newEntry({menuName: submenu, entryText: 'Reset link cache', func: () => {
+				_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
+				_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+				cacheLink = void(0);
+				cacheLinkSet = void(0);
+				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});

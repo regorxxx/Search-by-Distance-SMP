@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/22
+//15/02/22
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -34,7 +34,7 @@ buttonsBar.move.rec = {x: null, y: null, w: null, h: null};
 buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at buttons obj)
 buttonsBar.propertiesPrefixes = new Set(); // Global properties names prefixes
-var buttons = {}; // Global list
+buttonsBar.buttons = {}; // Global list
 // Others (internal use)
 buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
 buttonsBar.tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
@@ -70,7 +70,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function SimpleButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
+function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
 	this.state = state ? state : buttonStates.normal;
 	this.x = this.currX = coordinates.x;
 	this.y = this.currY = coordinates.y;
@@ -150,19 +150,19 @@ function SimpleButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 }
 
 function drawAllButtons(gr) {
-	for (let key in buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			buttons[key].draw(gr);
+	for (let key in buttonsBar.buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+			buttonsBar.buttons[key].draw(gr);
 		}
 	}
 }
 
 function chooseButton(x, y) {
 	let i = 0;
-	for (let key in buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].containXY(x, y) && buttons[key].state !== buttonStates.hide) {
-				return [buttons[key], key, i];
+	for (let key in buttonsBar.buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+			if (buttonsBar.buttons[key].containXY(x, y) && buttonsBar.buttons[key].state !== buttonStates.hide) {
+				return [buttonsBar.buttons[key], key, i];
 			}
 		}
 		i++;
@@ -188,6 +188,7 @@ function on_paint(gr) {
 
 function on_mouse_move(x, y, mask) {
 	let old = buttonsBar.curBtn;
+	const buttons = buttonsBar.buttons;
 	let curBtnKey = '';
 	let curBtnIdx = -1;
 	[buttonsBar.curBtn, curBtnKey, curBtnIdx] = chooseButton(x, y);
@@ -314,10 +315,10 @@ function on_mouse_lbtn_up(x, y, mask) {
 }
 
 function on_key_down(k) { // Update tooltip with key mask if required
-	for (let key in buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].state === buttonStates.hover) {
-				const that = buttons[key];
+	for (let key in buttonsBar.buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+			if (buttonsBar.buttons[key].state === buttonStates.hover) {
+				const that = buttonsBar.buttons[key];
 				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
@@ -325,10 +326,10 @@ function on_key_down(k) { // Update tooltip with key mask if required
 }
 
 function on_key_up(k) {
-	for (let key in buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-			if (buttons[key].state === buttonStates.hover) {
-				const that = buttons[key];
+	for (let key in buttonsBar.buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+			if (buttonsBar.buttons[key].state === buttonStates.hover) {
+				const that = buttonsBar.buttons[key];
 				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
@@ -387,4 +388,15 @@ function moveButton(fromKey, toKey) {
 		});
 	}
 	window.Reload(); // Instead of doing the same with the button objects to update the UI, just reload with new paths... moving buttons is done once anyway
+}
+
+function addButton(newButtons) {
+	// Check if the button list already has the same button ID
+	for (let buttonName in newButtons) {
+		if (buttonsBar.buttons.hasOwnProperty(buttonName)) {
+			Object.defineProperty(newButtons, buttonName + Object.keys(buttonsBar.buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
+			delete newButtons[buttonName];
+		}
+	}
+	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
 }
