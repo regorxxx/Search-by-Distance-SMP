@@ -198,11 +198,11 @@ function createButtonsMenu(name) {
 		}});
 		menu.newCheckMenu(menuName, 'Show properties IDs on tooltip', void(0), () => {return barProperties.bShowId[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
-		const orientation = barProperties.buttonOrientation[1].toLowerCase();
+		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({menuName, entryText: 'Toolbar orientation \t[' + orientation + ']', func: () => {
-			barProperties.buttonOrientation[1] = orientation === 'x' ? 'y' : 'x';
+			barProperties.orientation[1] = orientation === 'x' ? 'y' : 'x';
 			overwriteProperties(barProperties);
-			buttonsBar.config.buttonOrientation = barProperties.buttonOrientation[1]; // buttons_xxx.js
+			buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
 			window.Reload();
 		}});
 		menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
@@ -212,6 +212,13 @@ function createButtonsMenu(name) {
 			window.Repaint();
 		}});
 		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
+		menu.newEntry({menuName, entryText: 'Align buttons according to size', func: () => {
+			barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newCheckMenu(menuName, 'Align buttons according to size', void(0), () => {return barProperties.bAlignSize[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

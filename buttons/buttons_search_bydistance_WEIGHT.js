@@ -1,17 +1,11 @@
 ﻿'use strict';
-//15/02/22
+//17/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
-try { //May be loaded along other buttons
-	window.DefinePanel('Search by Distance Buttons', {author:'xxx'});
-	var g_font = _gdiFont('Segoe UI', 12);
-	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-} catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
-	console.log('Search by Distance (WEIGHT) Buttons loaded.');
-}
+try {window.DefinePanel('Search by Distance Buttons', {author:'xxx'});} catch (e) {console.log('Search by Distance (WEIGHT) Buttons loaded.');} //May be loaded along other buttons
+
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\helpers_xxx_properties.js');
 var prefix = 'sbd';
@@ -42,15 +36,12 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 	doOnce('Update SBD cache', debounce(updateCache, 3000))({properties});
 }
 
-// we change the default coordinates here to accommodate text
-if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
-
 /*	
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling do_searchby_distance() outside buttons, it would work with default arguments.
 */
 
 addButton({
-	NearestTracks: new themedButton(buttonCoordinates, 'Nearest Tracks', function () {
+	NearestTracks: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Nearest Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -59,9 +50,9 @@ addButton({
 		do_searchby_distance(args); 
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance NearestTracks took ' + (t1 - t0) + ' milliseconds.');
-	}, null, g_font,'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0),'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
 	
-	SimilarTracks: new themedButton(buttonCoordinates, 'Similar Tracks', function () {
+	SimilarTracks: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 10, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -70,9 +61,9 @@ addButton({
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarTracks took ' + (t1 - t0) + ' milliseconds.');
-	}, null, g_font,'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0),'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
-    SimilarGenres: new themedButton(buttonCoordinates, 'Similar Genres', function () {
+    SimilarGenres: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 5, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -81,9 +72,9 @@ addButton({
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarGenres took ' + (t1 - t0) + ' milliseconds.');
-	}, null, g_font,'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0),'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	
-	SimilarMood: new themedButton(buttonCoordinates, 'Similar Mood', function () {
+	SimilarMood: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Mood', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 5, dateRange: 100, 
@@ -92,5 +83,5 @@ addButton({
 		do_searchby_distance(args);
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarMood took ' + (t1 - t0) + ' milliseconds.');
-	}, null, g_font,'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0),'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
 });

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/02/22
+//17/02/22
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -23,8 +23,9 @@ buttonsBar.config = {
 	toolbarColor: RGB(211,218,237), // Toolbar color
 	bToolbar: false, // Change this on buttons bars files to set the background color
 	textColor: RGB(0,0,0),
-	buttonOrientation: 'x',
+	orientation: 'x',
 	bReflow: false,
+	bAlignSize: true,
 	partAndStateID: 1 // 1 standard button, 6  bg/border button (+hover)
 }; 
 // Drag n drop (internal use)
@@ -41,7 +42,7 @@ buttonsBar.tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Globa
 buttonsBar.g_down = false;
 buttonsBar.curBtn = null;
 
-function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.buttonOrientation, recalc = true) {
+function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.orientation, recalc = true) {
 	let newCoordinates;
 	const orientation = buttonOrientation.toLowerCase();
 	const old = buttonsBar.oldButtonCoordinates;
@@ -150,9 +151,22 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 }
 
 function drawAllButtons(gr) {
+	const orientation = buttonsBar.config.orientation.toLowerCase();
+	const bAlignSize = buttonsBar.config.bAlignSize;
+	// First calculate the max width or height so all buttons get aligned
+	let maxSize = -1;
+	if (bAlignSize) {
+		for (let key in buttonsBar.buttons) {
+			const button = buttonsBar.buttons[key];
+			maxSize = orientation === 'x' ? Math.max(button.currH, maxSize) : Math.max(button.currW, maxSize);
+		}
+	}
+	// Then draw
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
-			buttonsBar.buttons[key].draw(gr);
+			const button = buttonsBar.buttons[key];
+			if (bAlignSize) {button.draw(gr, void(0), void(0), orientation === 'x' ? void(0) : maxSize, orientation === 'x' ? maxSize : void(0));}
+			else {button.draw(gr);}
 		}
 	}
 }
@@ -298,7 +312,7 @@ function on_mouse_rbtn_up(x, y, mask) {
 	console.log('release');
 	// Must return true, if you want to suppress the default context menu.
 	// Note: left shift + left windows key will bypass this callback and will open default context menu.
-	return buttonsBar.hasOwnProperty('menu') ? buttonsBar.menu().btn_up(x, this.y + this.h) : false;
+	return buttonsBar.hasOwnProperty('menu') ? buttonsBar.menu().btn_up(x, y) : false;
 }
 
 function on_mouse_lbtn_up(x, y, mask) {

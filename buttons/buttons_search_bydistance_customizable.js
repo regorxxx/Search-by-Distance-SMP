@@ -1,17 +1,11 @@
 ﻿'use strict';
-//15/02/22
+//17/02/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
-try { //May be loaded along other buttons
-	window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});
-	var g_font = _gdiFont('Segoe UI', 12);
-	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-} catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w, h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
-	console.log('Search by Distance (CUSTOM) Buttons loaded.');
-}
+try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {console.log('Search by Distance (CUSTOM) Buttons loaded.');} //May be loaded along other buttons
+
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
@@ -32,17 +26,13 @@ newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // A
 buttonsBar.list.push(newButtonsProperties);
 // Update cache with user set tags
 doOnce('Update SBD cache', debounce(updateCache, 3000))({properties: newButtonsProperties});
-if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w = _gr.CalcTextWidth(newButtonsProperties.customName[1], g_font) + 50;}
 
-// we change the default coordinates here to accommodate text
-if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
-
-/*	
+/*
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
 */
 
 addButton({
-	SimilarUserSet: new themedButton(buttonCoordinates, newButtonsProperties.customName[1], function (mask) {
+	SimilarUserSet: new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12)) + 50, h: 22}, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
@@ -68,7 +58,7 @@ addButton({
 				do_searchby_distance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
 			}
 		}
-	}, null, g_font, buttonTooltip, prefix, newButtonsProperties, chars.wand)
+	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand)
 });
 
 // Helper

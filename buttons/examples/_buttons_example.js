@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/22
+//17/02/22
 
 /* 
 	Button example. Just configure the -things commented-.
@@ -35,13 +35,9 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 var prefix = 'YOUR PREFIX'; // -EDIT HERE PROPERTY PANEL PREFIX-
  
 // THIS IS STANDARD STRUCTURE FOR ALL BUTTONS
-try { //May be loaded along other buttons
+try {
 	window.DefinePanel('BUTTON NAME', {author:'xxx'}); // -EDIT HERE BUTTON NAME-
-	var g_font = _gdiFont('Segoe UI', 12);
-	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-	buttonsBar.config.buttonOrientation = 'x';
 } catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
 	console.log('Remove Duplicates Button loaded.');
 }
 prefix = getUniquePrefix(prefix, '_'); // Puts new ID before '_'
@@ -54,12 +50,9 @@ var newButtonsProperties = { //You can simply add new properties here
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties (if needed) at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix); //This sets all the panel properties at once
 
-// we change the default coordinates here to accommodate text for x orientation. Apply this on vertical as global!
-if (buttonsBar.config.buttonOrientation === 'x') {buttonCoordinates.w += 5;}
-
 // THIS IS ALSO THE SAME STRUCTURE FOR ALL BUTTONS FILES, YOU JUST CHANGE THE NAMES...
 addButton({ // -EDIT You can add here as many buttons as you want-
-	OneButton: new themedButton(buttonCoordinates, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
+	OneButton: new themedButton({x: 0, y: 0, w: 98, h: 22}, 'BUTTON NAME 1', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
@@ -67,9 +60,9 @@ addButton({ // -EDIT You can add here as many buttons as you want-
         yourFunctionHereOne(textA); // And uses that as variable for your function
 		t1 = Date.now();
 		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
-	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
+	}, null, _gdiFont('Segoe UI', 12), 'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 	
-	TwoButton: new themedButton(buttonCoordinates, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
+	TwoButton: new themedButton({x: 0, y: 0, w: 98, h: 22}, 'BUTTON NAME 2', function () {  // -EDIT HERE BUTTON NAME-
 		let t0 = Date.now();
 		let t1 = 0;
 		let [textA , textB] = getPropertiesValues(this.buttonsProperties, this.prefix); // This gets all the panel properties at once
@@ -77,7 +70,7 @@ addButton({ // -EDIT You can add here as many buttons as you want-
         yourFunctionHereTwo(textB); // And uses that as variable for your function
 		t1 = Date.now();
 		console.log('Call to yourFunctionHere took ' + (t1 - t0) + ' milliseconds.');  // -EDIT HERE CONSOLE OUTPUT-
-	}, null, g_font,'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
+	}, null, _gdiFont('Segoe UI', 12), 'TOOLTIP TEXT', prefix, newButtonsProperties),  // -EDIT TOOLTIP TEXT-
 });
 
 // AND HERE YOU PUT YOUR SCRIPT...

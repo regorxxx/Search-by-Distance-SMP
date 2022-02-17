@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/02/22
+//17/02/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -40,18 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include(file);});}
 }
 
-try { //May be loaded along other buttons
-	window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});
-	var g_font = _gdiFont('Segoe UI', 12);
-	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-} catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
-	console.log('Merged Buttons loaded.');
-}
-
-// Global width - Height overrides
-buttonCoordinates.w += 40; // Only works for 'y' orientation
-buttonCoordinates.h += 0; //For 'x' orientation
+try {	window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});} catch (e) {console.log('Merged Buttons loaded.');} //May be loaded along other buttons
 
 let barProperties = { //You can simply add new properties here
 	name:				['Name of config json file', 'buttons_' + randomString(5)],
@@ -60,8 +49,9 @@ let barProperties = { //You can simply add new properties here
 	firstPopup:			['Toolbar: Fired once', false],
 	bShowId:			['Show Ids on tooltip', false],
 	bBgButtons:			['Buttons with background', true],
-	buttonOrientation:	['Toolbar orientation', 'x'],
-	bReflow:			['Reflow according to width / height', false]
+	orientation:		['Toolbar orientation', 'x'],
+	bReflow:			['Reflow according to width / height', false],
+	bAlignSize:			['Align buttons according to size', true],
 };
 // newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(barProperties); //This sets all the panel properties at once
@@ -91,16 +81,18 @@ buttonsBar.config.textColor = barProperties.textColor[1];
 // Show Id on tooltips
 buttonsBar.config.bShowID = barProperties.bShowId[1]; // Change this on buttons bars files to set the background color
 // Orientation
-buttonsBar.config.buttonOrientation = barProperties.buttonOrientation[1];
+buttonsBar.config.orientation = barProperties.orientation[1];
 // Reflow
 buttonsBar.config.bReflow = barProperties.bReflow[1];
+// Align all widths and heights according to orientation
+buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
 buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons';
 
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons names
-					'buttons_search_same_by.js',  //+15 w
-					'buttons_playlist_remove_duplicates.js',  //+25 w
+					'buttons_search_same_by.js',
+					'buttons_playlist_remove_duplicates.js',
 					'buttons_search_bydistance.js',
 					'buttons_search_bydistance_customizable.js',
 					'buttons_playlist_tools.js',

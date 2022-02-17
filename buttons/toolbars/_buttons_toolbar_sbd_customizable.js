@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/02/22
+//17/02/22
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
@@ -10,18 +10,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_foobar.js');
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 
-try { //May be loaded along other buttons
-	window.DefinePanel('Merged SBD Custom Buttons bar', {author:'xxx'});
-	var g_font = _gdiFont('Segoe UI', 12);
-	var buttonCoordinates = {x: 0, y: 0, w: 98, h: 22};
-} catch (e) {
-	buttonCoordinates = {x: 0, y: 0, w: buttonsBar.config.buttonOrientation === 'x' ? 98 : buttonCoordinates.w , h: buttonsBar.config.buttonOrientation === 'y' ? 22 : buttonCoordinates.h}; // Reset 
-	console.log('Merged SBD Custom Buttons bar loaded.');
-}
-
-// Global width - Height overrides
-buttonCoordinates.w += 0; // Only works for 'y' orientation
-buttonCoordinates.h += 0; //For 'x' orientation
+try {window.DefinePanel('Merged SBD Custom Buttons bar', {author:'xxx'});} catch (e) {console.log('Merged SBD Custom Buttons bar loaded.');}  //May be loaded along other buttons
 
 // Global toolbar color
 buttonsBar.config.bToolbar = true; // Change this on buttons bars files to set the background color

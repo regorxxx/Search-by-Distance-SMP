@@ -1,0 +1,5 @@
+Provides Dynamic Range in Loudness Units from tags (DUI). Values may be calculated with MusicBee's plugin mb_loudness_analyzer.
+
+---------------------- At Playlist View\Custom Columns (DUI) ----------------------
+
+$replace(%LRA%, LU,)
