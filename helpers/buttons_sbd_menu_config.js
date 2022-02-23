@@ -308,7 +308,6 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const options = ['playlistLength'];
-			const lowerHundred = new Set(['progressiveListCreationN']);
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
@@ -317,7 +316,7 @@ function createConfigMenu(parent) {
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
-					if (lowerHundred.has(key) && input > 100) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
