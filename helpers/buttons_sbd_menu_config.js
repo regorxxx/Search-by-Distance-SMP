@@ -194,6 +194,7 @@ function createConfigMenu(parent) {
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
 					if (lowerHundred.has(key) && input > 100) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
@@ -224,6 +225,7 @@ function createConfigMenu(parent) {
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
 					if (lowerHundred.has(key) && input > 100) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
@@ -269,6 +271,7 @@ function createConfigMenu(parent) {
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
 					if (lowerHundred.has(key) && input > 100) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
