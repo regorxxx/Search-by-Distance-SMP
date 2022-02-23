@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/22
+//22/02/22
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -26,7 +26,8 @@ buttonsBar.config = {
 	orientation: 'x',
 	bReflow: false,
 	bAlignSize: true,
-	partAndStateID: 1 // 1 standard button, 6  bg/border button (+hover)
+	partAndStateID: 1, // 1 standard button, 6  bg/border button (+hover)
+	scale: _scale(0.7, false)
 }; 
 // Drag n drop (internal use)
 buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null};
@@ -71,12 +72,12 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12)) {
+function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
 	this.state = state ? state : buttonStates.normal;
-	this.x = this.currX = coordinates.x;
-	this.y = this.currY = coordinates.y;
-	this.w = this.currW = coordinates.w;
-	this.h = this.currH = coordinates.h;
+	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
+	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
+	this.w = this.currW = coordinates.w * buttonsBar.config.scale;
+	this.h = this.currH = coordinates.h * buttonsBar.config.scale;
 	this.moveX = null;
 	this.moveY = null;
 	this.originalWindowWidth = window.Width;
@@ -148,19 +149,27 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 	this.onClick = function (mask) {
 		this.fonClick && this.fonClick(mask);
 	};
+
+	this.changeScale = function (scale) {
+		const newScale = scale / buttonsBar.config.scale;
+		this.w *= newScale;
+		this.h *= newScale;
+		this.currH *= newScale;
+		this.currW *= newScale;
+		this.g_font = _gdiFont(this.g_font.Name, 12 * scale);
+		this.g_font_icon = _gdiFont(this.g_font_icon.Name, 12 * scale);
+		this.textWidth  = _isFunction(this.text) ? () => {return _gr.CalcTextWidth(this.text(), this.g_font);} : _gr.CalcTextWidth(this.text, this.g_font);
+		this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
+	};
 }
 
 function drawAllButtons(gr) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
 	const bAlignSize = buttonsBar.config.bAlignSize;
 	// First calculate the max width or height so all buttons get aligned
-	let maxSize = -1;
-	if (bAlignSize) {
-		for (let key in buttonsBar.buttons) {
-			const button = buttonsBar.buttons[key];
-			maxSize = orientation === 'x' ? Math.max(button.currH, maxSize) : Math.max(button.currW, maxSize);
-		}
-	}
+	let maxSize = bAlignSize ? getButtonsMaxSize() : -1;
+	// Size check
+	doOnce('Buttons Size Check', buttonSizeCheck)();
 	// Then draw
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
@@ -413,4 +422,24 @@ function addButton(newButtons) {
 		}
 	}
 	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
+}
+
+function buttonSizeCheck () {
+	const orientation = buttonsBar.config.orientation;
+	const maxSize = getButtonsMaxSize();
+	if (buttonsBar.config.scale > 1 && maxSize > -1) {
+		if (orientation === 'x' && maxSize > window.Height || orientation === 'y' && maxSize > window.Width) {
+			fb.ShowPopupMessage('Buttons ' + (orientation === 'x' ? 'height' : 'width') + ' is greater than current panel size, probably due to a wrong DPI or scale setting.\nIt\'s recommended to reconfigure the buttons scale via menus.', 'Buttons');
+		}
+	}
+}
+
+function getButtonsMaxSize() {
+	const orientation = buttonsBar.config.orientation;
+	let maxSize = -1;
+	for (let key in buttonsBar.buttons) {
+		const button = buttonsBar.buttons[key];
+		maxSize = (orientation === 'x' ? Math.max(button.currH, maxSize) : Math.max(button.currW, maxSize));
+	}
+	return maxSize;
 }

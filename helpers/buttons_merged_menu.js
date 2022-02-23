@@ -1,5 +1,5 @@
 ﻿'use strict'
-//10/02/22
+//22/02/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -95,6 +95,8 @@ function createButtonsMenu(name) {
 	}
 	{
 		const subMenu = menu.newMenu('Change buttons position');
+		menu.newEntry({menuName: subMenu, entryText: 'Buttons can also be moved on UI while pressing R. Click:', flags: MF_GRAYED});
+		menu.newEntry({menuName: subMenu, entryText: 'sep'});
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
 				let input;
@@ -190,7 +192,40 @@ function createButtonsMenu(name) {
 		}});
 	}
 	{
-		const menuName = menu.newMenu('Other configuration...');
+		const menuName = menu.newMenu('Size and placement...');
+		const orientation = barProperties.orientation[1].toLowerCase();
+		menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
+			barProperties.bReflow[1] = !barProperties.bReflow[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
+		menu.newEntry({menuName, entryText: 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), func: () => {
+			barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newCheckMenu(menuName, 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), void(0), () => {return barProperties.bAlignSize[1];});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
+			let input = buttonsBar.config.scale;
+			try {input = Number(utils.InputBox(window.ID, 'Enter number:', 'Buttons bar', input, true));}
+			catch(e) {return;}
+			if (isNaN(input)) {return;}
+			if (buttonsBar.config.scale === input) {return;}
+			for (let key in buttonsBar.buttons) {buttonsBar.buttons[key].changeScale(input);}
+			buttonsBar.config.scale = input; // buttons_xxx.js
+			barProperties.scale[1] = buttonsBar.config.scale;
+			overwriteProperties(barProperties);
+			window.Repaint();
+			buttonSizeCheck();
+		}});
+		menu.newCheckMenu(menuName, 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), void(0), () => {return barProperties.bAlignSize[1];});
+	}
+	{
+		const menuName = menu.newMenu('Other UI configuration...');
 		menu.newEntry({menuName, entryText: 'Show properties IDs on tooltip', func: () => {
 			barProperties.bShowId[1] = !barProperties.bShowId[1];
 			overwriteProperties(barProperties);
@@ -205,20 +240,6 @@ function createButtonsMenu(name) {
 			buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
 			window.Reload();
 		}});
-		menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
-			barProperties.bReflow[1] = !barProperties.bReflow[1];
-			overwriteProperties(barProperties);
-			buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
-			window.Repaint();
-		}});
-		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
-		menu.newEntry({menuName, entryText: 'Align buttons according to size', func: () => {
-			barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
-			overwriteProperties(barProperties);
-			buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
-			window.Repaint();
-		}});
-		menu.newCheckMenu(menuName, 'Align buttons according to size', void(0), () => {return barProperties.bAlignSize[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

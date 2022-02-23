@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/22
+//22/02/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -52,8 +52,8 @@ let barProperties = { //You can simply add new properties here
 	orientation:		['Toolbar orientation', 'x'],
 	bReflow:			['Reflow according to width / height', false],
 	bAlignSize:			['Align buttons according to size', true],
+	scale:				['UI scale', _scale(0.7, false)],
 };
-// newButtonsProperties = {...defaultProperties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(barProperties); //This sets all the panel properties at once
 barProperties = getPropertiesPairs(barProperties);
 
@@ -88,6 +88,8 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
 buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons';
+// Assign size
+buttonsBar.config.scale =  barProperties.scale[1];
 
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons names
@@ -129,7 +131,7 @@ function loadButtonsFile() {
 	} else {
 		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, convertCharsetToCodepage('UTF-8'));
 		if (data) {names = data.map((path) => {return path.split('\\').pop();});}
-		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths
+		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths TODO
 	}
 	buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});
 }
