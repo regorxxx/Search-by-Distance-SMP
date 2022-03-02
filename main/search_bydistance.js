@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/02/22
+//02/03/22
 
 /*	
 	Search by Distance
@@ -364,6 +364,7 @@ const SearchByDistance_properties = {
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
 	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music'],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75],
+	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
@@ -376,6 +377,7 @@ const SearchByDistance_properties = {
 	bProgressiveListOrder	:	['Sort final playlist by score', false],
 	bScatterInstrumentals	:	['Intercalate instrumental tracks', true],
 	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
+	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
 	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4],
 	playlistName			:	['Playlist name (TF allowed)', 'Search...']
@@ -448,7 +450,7 @@ const influenceMethod = 'adjacentNodes'; // direct, zeroNodes, adjacentNodes, fu
 */
 // Only use file cache related to current descriptors, otherwise delete it
 if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
-const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod + 'v1.0.0');
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + music_graph.toString() + calc_map_distance.toString() + calcMeanDistance.toString() + influenceMethod + 'v1.0.1');
 const bMissmatchCRC = panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
 	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
@@ -570,15 +572,22 @@ if (panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['properties', 'panelProperties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+const recipeAllowedKeys = new Set(['properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag']);
+const themePath = folders.xxx + 'presets\\Search by\\themes\\';
+const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMissmatchCRC) {
 	const data = [...recipeAllowedKeys].map((key) => {
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
 		if (!descr.length) {
-			if (key.toLowerCase().indexOf('properties') !== -1) {descr = 'Object properties for the panel or single button';}
+			if (key.toLowerCase().indexOf('properties') !== -1) {
+				descr = {'Object properties to pass other arguments': 
+					Object.fromEntries([...recipePropertiesAllowedKeys].map((key) => {return [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]];}))
+				};
+			}
 			if (key === 'theme') {descr = 'Load additional theme by file name or path';}
-			if (key === 'recipe') {descr = 'Load additional recipe by file name or path';}
+			if (key === 'recipe') {descr = 'Load additional recipe(s) by file name or path. Nesting and multiple values (array) allowed';}
 			if (key === 'bPoolFiltering') {descr = 'Global enable/disable switch. Equivalent to setting poolFilteringN to >0 or -1';}
 			if (key === 'bCreatePlaylist') {descr = 'Output results to a playlist or only for internal use';}
 		}
@@ -631,6 +640,7 @@ function do_searchby_distance({
                                 method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
 								// --->Scoring filters
                                 scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
+                                minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties['minScoreFilter'][1]) :  scoreFilter - 10,
                                 sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
@@ -650,6 +660,7 @@ function do_searchby_distance({
 								// --->Special Playlists
 								// Use previous playlist selection, but override playlist sorting, since they use their own logic
 								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties['bInKeyMixingPlaylist'][1] : false, // Key changes following harmonic mixing rules like a DJ
+								bHarmonicMixDoublePass	= properties.hasOwnProperty('bHarmonicMixDoublePass') ? properties['bHarmonicMixDoublePass'][1] : false, // Usually outputs more tracks in harmonic mixing
 								bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties['bProgressiveListCreation'][1] : false, // Uses output tracks as new references, and so on...
 								progressiveListCreationN= bProgressiveListCreation ? Number(properties['progressiveListCreationN'][1]) : 1, // > 1 and < 100
 								// --->Console logging
@@ -668,33 +679,49 @@ function do_searchby_distance({
 		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Recipe check
-		const themePath = folders.xxx + 'presets\\Search by\\themes\\';
-		const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 		const bUseRecipe = recipe && (recipe.length || Object.keys(recipe).length);
+		const recipeProperties = {};
 		if (bUseRecipe) {
 			let path;
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
 				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
-				if (!recipe) {return;}
+				if (!recipe) {console.log('Recipe not found: ' + path); return;}
 			}
 			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
 			// Rewrite args or use destruct when passing args
-			// Sel is ommited since it's a function or a handle
-			// Note a theme may be set within a recipe too, overwriting any other them set
+			// Sel is omitted since it's a function or a handle
+			// Note a theme may be set within a recipe too, overwriting any other theme set
 			// Changes null to infinity and not found theme filenames into full paths
 			let bOverwriteTheme = false;
-			Object.keys(recipe).forEach((key) => {
+			if (recipe.hasOwnProperty('recipe')) { // Process nested recipes
+				let toAdd = processRecipe(recipe.recipe);
+				delete toAdd.recipe;
+				Object.keys(toAdd).forEach((key) => {if (!recipe.hasOwnProperty(key)) {recipe[key] = toAdd[key];}});
+			}
+			Object.keys(recipe).forEach((key) => { // Process current recipe
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
 				if (recipeAllowedKeys.has(key)) {
-					if (isStringWeak(value)) {
-						eval(key + ' = \'' + value + '\'');
-					} else if (isArrayStrings(value)) {
-						const newVal = '\'' + value.join('\',\'') + '\'';
-						eval(key + ' = [' + newVal + ']');
-					} else {eval(key + ' = ' + value);}
-					if (key === 'theme') {bOverwriteTheme = true;};
-				}
+					if (key === 'properties') { // Overrule current ones (but don't touch original object!)
+						const newProperties = recipe[key];
+						if (newProperties) {
+							Object.keys(newProperties).forEach((rKey) => {
+								if (!properties.hasOwnProperty(rKey)) {console.log('Recipe has a property key not recognized: ' + rKey); return;}
+								recipeProperties[rKey] = newProperties[rKey];
+							});
+						}
+					} else if (key === 'recipe') {
+						return; // Skip, already processed
+					} else {
+						if (isStringWeak(value)) {
+							eval(key + ' = \'' + value + '\'');
+						} else if (isArrayStrings(value)) {
+							const newVal = '\'' + value.join('\',\'') + '\'';
+							eval(key + ' = [' + newVal + ']');
+						} else {eval(key + ' = ' + value);}
+						if (key === 'theme') {bOverwriteTheme = true;};
+					}
+				} else {console.log('Recipe has a variable not recognized: ' + key);}
 			});
 			if (bBasicLogging) {
 				console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
@@ -757,24 +784,23 @@ function do_searchby_distance({
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? properties['genreTag'][1].split(',').filter(Boolean) : [];
-		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? properties['styleTag'][1].split(',').filter(Boolean) : [];
-		const moodTag = (moodWeight !== 0) ? properties['moodTag'][1].split(',').filter(Boolean) : [];
-		const dateTag = (dateWeight !== 0) ? properties['dateTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? properties['keyTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const bpmTag = (bpmWeight !== 0) ? properties['bpmTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const composerTag = (composerWeight !== 0) ? properties['composerTag'][1].split(',').filter(Boolean) : [];
-		const customStrTag = (customStrWeight !== 0) ? properties['customStrTag'][1].split(',').filter(Boolean) : [];
-		const customNumTag = (customNumWeight !== 0) ? properties['customNumTag'][1].split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.genreTag || properties.genreTag[1]).split(',').filter(Boolean) : [];
+		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.styleTag || properties.styleTag[1]).split(',').filter(Boolean) : [];
+		const moodTag = (moodWeight !== 0) ?(recipeProperties.moodTag || properties.moodTag[1]).split(',').filter(Boolean) : [];
+		const dateTag = (dateWeight !== 0) ?(recipeProperties.dateTag || properties.dateTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? (recipeProperties.keyTag || properties.keyTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const bpmTag = (bpmWeight !== 0) ? (recipeProperties.bpmTag || properties.bpmTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const composerTag = (composerWeight !== 0) ? (recipeProperties.composerTag || properties.composerTag[1]).split(',').filter(Boolean) : [];
+		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(',').filter(Boolean) : [];
+		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
 		
 		// Check input
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
 		probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 		scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
+		minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
 		bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
 		if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {fb.ShowPopupMessage('Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag); return;}
-		const sbd_distanceFilter_dyngenre_below = 5;
-		const sbd_distanceFilter_graph_below = 10;
 		if (customNumTag.length > 1) { // Safety Check. Warn users if they try wrong settings
 			if (bBasicLogging) {console.log('Check \'' + properties['customNumTag'][0] + '\' value (' + properties['customNumTag'][1] + '). Must be only one tag name!.');}
 			return;
@@ -802,11 +828,6 @@ function do_searchby_distance({
 			} else {method = 'WEIGHT';} // For calcs they are the same!
 		} else {dyngenreWeight = 0;}
 	
-		let minFilter;
-		if (method === 'GRAPH') {minFilter = scoreFilter - sbd_distanceFilter_graph_below;} 
-		else {minFilter = scoreFilter - sbd_distanceFilter_dyngenre_below;}
-		if (minFilter < 0) {minFilter = 0;}
-		
 		const totalWeight = genreWeight + styleWeight + dyngenreWeight +  moodWeight + keyWeight + dateWeight + bpmWeight + customStrWeight + customNumWeight + composerWeight; //100%
 		const countWeights = (genreWeight ? 1 : 0) + (styleWeight ? 1 : 0) + (dyngenreWeight ? 1 : 0) + (moodWeight ? 1 : 0) + (keyWeight ? 1 : 0) + (dateWeight ? 1 : 0) + (bpmWeight ? 1 : 0) + (customStrWeight ? 1 : 0) + (customNumWeight ? 1 : 0) + (composerWeight ? 1 : 0);
 		
@@ -1083,7 +1104,7 @@ function do_searchby_distance({
 					influencesQuery.push(temp);
 				}
 			}
-			if (bUseInfluencesFilter) { // Outputs only influences using queries (and changes ohter settings!)
+			if (bUseInfluencesFilter) { // Outputs only influences using queries (and changes other settings!)
 				let influences = [];
 				style_genreSet.forEach((styleGenre) => {
 					let infl = descr.getInfluences(styleGenre);
@@ -1097,7 +1118,7 @@ function do_searchby_distance({
 					influencesQuery.push(temp);
 					sbd_max_graph_distance = Infinity;
 					scoreFilter = 40;
-					minFilter = 30;
+					minScoreFilter = 30;
 				}
 			}
 			
@@ -1357,7 +1378,7 @@ function do_searchby_distance({
 				if (!cacheLink) {cacheLink = new Map();}
 				if (!cacheLinkSet) {cacheLinkSet = new Map();}
 				// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
-				if (score >= minFilter) {
+				if (score >= minScoreFilter) {
 					// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j): 
 					// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
 					// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
@@ -1378,7 +1399,7 @@ function do_searchby_distance({
 				}
 			}
 			if (method === 'WEIGHT') {
-				if (score > minFilter) {
+				if (score > minScoreFilter) {
 					scoreData.push({ index: i, name: titleHandle[i][0], score: score });
 				}
 			}
@@ -1389,25 +1410,30 @@ function do_searchby_distance({
 		if (method === 'WEIGHT') {
 			scoreData.sort(function (a, b) {return b.score - a.score;});
 			let i = 0;
+			let bMin = false;
 			while (i < poolLength) {
 				const i_score = scoreData[i].score;
 				if (i_score < scoreFilter) { //If below minimum score
 					if (i >= playlistLength) { //Break when reaching required playlist length
 						scoreData.length = i;
 						break;
-					} else if (sbd_distanceFilter_dyngenre_below && i_score < minFilter) { //Or after min score - 10% range
+					} else if (i_score < minScoreFilter) { //Or after min score
 						scoreData.length = i;
+						bMin = true;
 						break;
 					}
 				}
 				i++;
 			}
 			poolLength = scoreData.length;
-			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + scoreFilter + '%: ' + poolLength + ' tracks');}
+			if (bBasicLogging) {
+				if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' +  scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
+				console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks');
+			}
 		} 
 		else { // GRAPH
 			// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
-			// Now we check if all tracks are needed (over 'minFilter') or only those over 'scoreFilter'.
+			// Now we check if all tracks are needed (over 'minScoreFilter') or only those over 'scoreFilter'.
 			// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
 			scoreData.sort(function (a, b) {return b.score - a.score;});
 			let i = 0;
@@ -1418,7 +1444,7 @@ function do_searchby_distance({
 					if (i >= playlistLength) {	//Break when reaching required playlist length
 						scoreData.length = i;
 						break;
-					} else if (sbd_distanceFilter_graph_below && i_score < minFilter) {	//Or after min score - 10% range
+					} else if (i_score < minScoreFilter) { //Or after min score
 						scoreData.length = i;
 						bMin = true;
 						break;
@@ -1428,7 +1454,8 @@ function do_searchby_distance({
 			}
 			scoreData.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); // First sorted by graph distance, then by weight
 			poolLength = scoreData.length;
-			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minFilter : scoreFilter)+ '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
+			if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' +  scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
+			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
 		}
 		
 		// Post Filter (note there are no real duplicates at this point)
@@ -1537,13 +1564,46 @@ function do_searchby_distance({
 				selectedHandlesArray.push(handle_list[nextIndex]); 
 				selectedHandlesData.push(scoreData[nextIndexScore]);
 				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
-				// Debug console
+				// Double pass
+				if (bDoublePass) {
+					const toAdd = {};
+					const keyMap = new Map();
+					// Find positions where the remainder tracks could be placed as long as they have the same key than other track
+					const selectedHandles = new FbMetadbHandleList(selectedHandlesArray);
+					for (let i = 0;  i < poolLength; i++) {
+						const currTrack = selItems[i];
+						if (selectedHandles.Find(currTrack) === -1) {
+							const matchIdx = selectedHandlesArray.findIndex((selTrack, j) => {
+								let idx = -1;
+								if (keyMap.has(j)) {idx = keyMap.get(j);}
+								else {idx = selItems.Find(selTrack); keyMap.set(j, idx);}
+								const selKey = keyHandle[idx];
+								return selKey[0] === keyHandle[i][0];
+							});
+							if (matchIdx !== -1) {
+								if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack);}
+								else {toAdd[matchIdx] = [currTrack];}
+							}
+						}
+					}
+					// Add items in reverse order to not recalculate new idx
+					const indexes = Object.keys(toAdd).sort().reverse();
+					if (indexes.length) {
+						let count = 0;
+						for (let idx of indexes) {
+							selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
+							count += toAdd[idx].length;
+						}
+						if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
+					}
+				}
+				// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
 				if (bSearchDebug) {
 					console.log('Keys from selection:');
 					console.log(keyDebug);
 					console.log(keySharpDebug);
 					console.log('Pattern applied:');
-					console.log(patternDebug); // Always has one item less thankey arrays
+					console.log(patternDebug); // Always has one item less than key arrays
 				}
 			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
 		} else { // Standard methods
@@ -1878,4 +1938,35 @@ function loadCache(path) {
 		}
 	}
 	return cacheMap;
+}
+
+// Process nested recipes
+function processRecipe(initialRecipe) {
+	let toAdd = {};
+	const processRecipeFile = (newRecipe) => {
+		const newPath = !_isFile(newRecipe) && _isFile(recipePath + newRecipe) ? recipePath + newRecipe : newRecipe;
+		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+		if (!newRecipeObj) {console.log('Recipe not found: ' + newPath);}
+		else {toAdd = {...newRecipeObj, ...toAdd};}
+		return newRecipeObj;
+	};
+	let newRecipe = initialRecipe;
+	while (newRecipe.length) {
+		if (isString(newRecipe)) {
+			const newRecipeObj = processRecipeFile(newRecipe);
+			if (!newRecipeObj) {break;}
+			newRecipe = newRecipeObj.recipe || '';
+		} else if (isArrayStrings(newRecipe)) {
+			for (const subRecipe of newRecipe) {
+				const newRecipeObj = processRecipeFile(subRecipe);
+				if (!newRecipeObj) {newRecipe = ''; break;}
+				newRecipe = newRecipeObj.recipe || '';
+				if (newRecipe.length) {toAdd = {...processRecipe(newRecipe), ...toAdd};}
+			};
+		} else {
+			console.log('Recipe not found: ' + newRecipe);
+			break;
+		}
+	}
+	return toAdd;
 }

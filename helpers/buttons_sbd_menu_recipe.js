@@ -43,6 +43,13 @@ function createRecipeMenu(parent) {
 		recipe.name = input;
 		const filePath = folders.xxx + 'presets\\Search by\\recipes\\' + input + '.json';
 		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+		if (WshShell.Popup('Also add additional variables from properties?\n' + [...recipePropertiesAllowedKeys].join(', '), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+			recipe.properties = {};
+			Object.keys(properties).forEach((rKey) => {
+				if (!recipePropertiesAllowedKeys.has(rKey)) {return;}
+				recipe.properties[rKey] = properties[rKey][1];
+			});
+		}
 		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t'));
 		if (!bDone) {fb.ShowPopupMessage('Error saving recipe file:' + filePath, 'Search by distance'); return;}
 		else {_explorer(filePath);}

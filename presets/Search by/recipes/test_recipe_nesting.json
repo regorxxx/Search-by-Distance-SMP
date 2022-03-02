@@ -1,0 +1,5 @@
+{
+	"name": "Test recipe nesting",
+	"recipe": ["test_recipe_nesting_02.json","test_recipe_nesting_03.json"],
+	"moodWeight": 100
+}

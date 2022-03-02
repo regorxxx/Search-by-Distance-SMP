@@ -1,5 +1,5 @@
 ﻿'use strict'
-//16/02/22
+//02/03/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -13,8 +13,16 @@ function createConfigMenu(parent) {
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}: _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
+		recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}: _jsonParseFileCheck(recipePath + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
 	}
+	// Process nested recipes
+	if (recipe.hasOwnProperty('recipe')) {
+		const toAdd = processRecipe(recipe.recipe);
+		delete toAdd.recipe;
+		Object.keys(toAdd).forEach((key) => {if (!recipe.hasOwnProperty(key)) {recipe[key] = toAdd[key];}});
+	}
+	// Recipe forced properties?
+	const bProperties = recipe.hasOwnProperty('properties');
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
@@ -34,9 +42,12 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
-			const options = ['scoreFilter', 'sbd_max_graph_distance'];
-			const lowerHundred = new Set(['scoreFilter']);
+			const options = ['scoreFilter', 'minScoreFilter', 'sep', 'sbd_max_graph_distance'];
+			const lowerHundred = new Set(['scoreFilter', 'minScoreFilter']);
+			const bIsGraph = recipe.hasOwnProperty('method') && recipe.method  === 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] === 'GRAPH';
 			options.forEach((key) => {
+				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED}); return;}
+				const flags = recipe.hasOwnProperty(key) ? MF_GRAYED : ((bIsGraph && key === 'sbd_max_graph_distance' || key !== 'sbd_max_graph_distance') ? MF_STRING : MF_GRAYED);
 				const idxEnd = properties[key][0].indexOf('(');
 				const val = properties[key][1];
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? val.toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : val) + ']');
@@ -48,7 +59,7 @@ function createConfigMenu(parent) {
 					if (lowerHundred.has(key) && input > 100) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				}, flags});
 			});
 		}
 	}
@@ -278,7 +289,7 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
-			const options = ['bInKeyMixingPlaylist'];
+			const options = ['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'];
 			options.forEach((key) => {
 				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
@@ -330,7 +341,7 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu('Remap tags');
 		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
 		options.forEach((tagName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (recipe.hasOwnProperty(tagName) ? '\t[' + recipe[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
+			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (bProperties && recipe.properties.hasOwnProperty(tagName) ? '\t[' + recipe.properties[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
 				let input = '';
 				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \',\')', 'Search by distance', properties[tagName][1], true);} 
 				catch(e) {return;}
@@ -338,7 +349,7 @@ function createConfigMenu(parent) {
 				if (input === properties[tagName][1]) {return;}
 				properties[tagName][1] = input;
 				overwriteProperties(properties);
-			}, flags: recipe.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
+			}, flags: bProperties && recipe.properties.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
 		});
 		menu.newEntry({menuName, entryText: 'sep'});
 		{ // Menu to configure properties: tags filter
