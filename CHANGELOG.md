@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.0](#210---2022-03-02)
 - [2.0.1](#201---2021-12-23)
 - [2.0.0](#200---2021-06-15)
 - [1.2.0](#120---2021-06-07)
@@ -14,6 +15,54 @@
 ### Removed
 ### Fixed
 - Buttons bar: menu entry to change buttons position was not working properly.
+
+## [2.1.0] - 2022-03-02
+### Added
+- Anti-influences filter: added new setting for conditional anti-influences filtering which only triggers for specific genres when enabled. i.e. using a Jazz track as reference will use it, but a Rock track will skip it. Rationale: some genres are more sensitive to style changes than others. For ex. it may be tolerable to get a grunge track on a rock playlist, but that situation should be absolutely avoided for Classical or Jazz playlists. Compatible with recipe files.
+- Similar artists: new option at 'Other tools', in customizable button, to compute the similar artists to those from the currently selected tracks (duplicates are filtered first). I.e. tries to compute something equivalent to 'Similar Artists Last.fm', which can be retrieved with Bio script (but requires internet). In this case the process is entirely offline and uses the already coded routines of Search by Distance to find which artists are usually the most similar to a random set of [50] tracks by every selected artist. It requires some time, since it's equivalent to perform the 'GRAPH' search x 50 times x selected artist. The advantage is that it does not requires internet and works with any artists, whether it's 'popular' or not, since it's not based on things like users' listening behaviors, eurocentric bias, etc. The results are output to console and saved to JSON, so they only need to be calculated once. Later changes to the graph descriptors may affect the results, in that case the same artists may be checked again to update the list if required.
+- Similar artists: new option at 'Other tools', in customizable button, to save the similar artists values from JSON to all tracks by the present artists. See previous change. I.e. instead of being saved on JSON, any track by the artist would have a tag named 'Similar Artists' which its own list (<= 10 artists). Once saved on tags, other tools like Playlist Tools may use them to easily create queries, pools, etc.
+- Similar artists: new filter option to only use tracks by similar artists as source for all Search by Distance methods. See previous change. It may use both the track's tags or the JSON library. When no data is found, it fallbacks to the selected artist (since is the only one known to be similar to itself). Use of this filter requires to precompute first all similar artist for the library to work properly. The advantage of using it is reduced processing time whenever looking for similar tracks (since most work was done when comparing artists).
+- Recipes: new option, in customizable button, to create a recipe file with the current config (does not inherit values from other recipes, only from the user-configured values on the menus). Also export additional variables from properties (see popup).
+- Recipes: full documentation of allowed variables to be used is automatically generated on the recipes folder (see 'allowedKeys.txt') whenever the script is updated. So it will be up to date if further changes are included on the future.
+- Recipes: now allow tag remapping to be set via properties. See 'test_tag_remap.json' for an example.
+- Recipes: recipe nesting is allowed. i.e. a recipe may load another recipe which adds new variables, and this one may also load another recipe which does the same, and so on.... Recipe's variables priority follow order of load if duplicated. A -> B -> C, where C variables may be overridden by B and A.
+- Recipes: recipe modularization is allowed. i.e. a recipe may load a set of recipes (instead of nesting), which add or override variables by order of load. A -> [B , C], where C variables may be overridden by B and A. Modularization and nesting may be mixed too. i.e. A -> [B -> D, C], where C variables may be overridden by D, B and A.
+- Exclude same artist: new option to exclude currently selected artist before calculating similarity score with queries. It may work in conjunction with the Similar Artists option. Use-case example: to create a playlist with tracks similar to one track by Jimi Hendrix but only considering tracks by other artists, so nothing by Jimi Hendrix is included.
+- Minimum score: exposed minimum score filter variable, used in case the pool doesn't have enough tracks with the required score. For ex. if similar tracks require to have a 70% similarity and the desired playlist length is 50 tracks, in case only 40 tracks are found, it tries to fill the playlist usin tracks with lower score (up to minimum score). It was done previously under the hood, but now it's configurable (and therefore can be disabled). Setting it to 100, to -1 or the same value than the score filter, disables it. Compatible with recipe files.
+- Harmonic mixing: new option to perform a double pass on harmonic mixing which increases the number of tracks selected for the final mix. Enabled by default.
+- Playlist Name: new option to configure the output playlist name. TF expressions are allowed along a placeholder tag for themes (which don't use a track to evaluate the TF expression with). Compatible with recipe files.
+- Buttons bar: menu entry to change buttons scale (for high resolution screens or non standard DPI settings).
+- Buttons bar: menu entry to enable/disable properties ID on buttons' tooltip.
+- Buttons bar: menu entry to change toolbar orientation: Horizontal / Vertical.
+- Buttons bar: menu entry to change how max button size is set according to the orientation.
+- Buttons bar: buttons can now be freely moved clicking and holding the right mouse button while moving them. This is equivalent to using the menu entry to change buttons position.
+- Buttons bar: menu entry to place buttons on new rows / columns if they fill the entire width or height of the panel. Does not require a reload of the panel.
+- UI: Added UI columns presets for LRA, for both Columns UI and Default UI. Found at presets folder.
+### Changed
+- Cache: now uses the genre and style remapped tags set by the user (first button config takes precedence). Actual tags used are output to console whenever the cache is rebuilt.
+- Influences filter: reworked influences and anti-influences filtering to also consider internal term substitutions, it should lead to more precise results now for some tags.
+- Buttons bar: buttons scale is now set by default according to system's DPI instead of using a fixed size. If the resulting button size is found to be greater than the panel size, a warning popup is shown.
+- Buttons: properties have been renamed to not use numbers before the description. Previous config will be lost on upgrade.
+- Buttons: reworked the entire configuration menu to better reflect what each option is related to.
+- Themes: when creating a new theme, if a file already exists with the same name, a popup asks now before overwriting the file.
+- Recipes: hidden files are now omitted on the menu list.
+- Themes: hidden files are now omitted on the menu list.
+- Tooltip: shortcuts info on customizable button is now configurable, i.e. can be hidden.
+- Helpers: updated helpers.
+- General cleanup of code and json file formatting.
+- Removed all code and compatibility checks for SMP <1.4.0. 
+### Removed
+### Fixed
+- Pool filtering: fixed crash on pool filtering when tags where not set. Warns with a popup when config is wrong.
+- Buttons bar: exposed missing Dyngenre weight configuration on customizable button. It's also greyed out whenever the method is not 'DYNGENRE' on the current recipe or config.
+- Buttons bar: menu entry to change buttons position was not working properly.
+- Buttons bar: fixed some instances where the buttons properties were not properly moved along the button when changing position.
+- Buttons: multiple instances where the input values were not being saved at the customizable button (weights, ranges, etc.).
+- Cache: crash when trying to execute a search before cache was calculated on the first seconds of script loading. It only happened on an already initialized foobar session when manually reloading the panel.
+- Cache: cache was always being shared between panels after executing a search. Fixed now, it only notifies other panels to share it when there is a change after searching. It's mostly a cosmetic change, to not pollute the console with unnecessary messages (since it did not affect performance or results at all).
+- Cache: 'searchByDistance_cacheLinkSet' values were messed up with other cache values due to a typo, now fixed. Did not affect results but it did for performance. Cache reset will be forced when installing the new update to also fix any old files present on previous installations.
+- Descriptors: fixed 'Symphonic Prog' error.
+- Helpers: file deletion failed when file was read-only.
 
 ## [2.0.1] - 2021-12-23
 ### Added
@@ -133,7 +182,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.1.0
 [2.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.1.0...v1.2.0
