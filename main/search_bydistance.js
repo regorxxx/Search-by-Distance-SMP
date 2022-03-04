@@ -431,10 +431,8 @@ if (!panelProperties.firstPopup[1]) {
 	panelProperties.firstPopup[1] = true;
 	overwriteProperties(panelProperties); // Updates panel
 	const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance.txt';
-	if (_isFile(readmePath)) {
-		const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
-		if (readme.length) {fb.ShowPopupMessage(readme, 'Search by Distance');}
-	}
+	const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
+	if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 }
 
 /* 

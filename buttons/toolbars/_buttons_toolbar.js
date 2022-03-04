@@ -67,10 +67,8 @@ if (!barProperties.firstPopup[1]) {
 	const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 	barProperties.firstPopup[1] = true;
 	overwriteProperties(barProperties); // Updates panel
-	if (_isFile(readmePath)) {
-		const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
-		if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
-	}
+	const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
+	if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 }
 
 // Config at buttons_xxx.js

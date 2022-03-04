@@ -113,7 +113,7 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Menu to configure filters:
+	{	// Menu to configure pre-scoring filters:
 		const menuName = menu.newMenu('Set pre-scoring filters');
 		{	// Menu to configure properties: forcedQuery
 			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: () => {
@@ -175,7 +175,7 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Menu to configure filters:
+	{	// Menu to configure post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Menu to configure properties: tags filter
 			const options = ['poolFilteringTag'];
@@ -553,12 +553,12 @@ function createConfigMenu(parent) {
 		};
 		if (Object.keys(readmes).length) {
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
-				if (_isFile(value)) { 
-					const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8')); // Executed on script load
+				if (_isFile(value)) {
+					const readme = _open(value, convertCharsetToCodepage('UTF-8')); // Executed on script load
 					if (readme.length) {
 						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
 							if (_isFile(value)) {
-								const readme = utils.ReadTextFile(value, convertCharsetToCodepage('UTF-8'));
+								const readme = _open(value, convertCharsetToCodepage('UTF-8'));
 								if (readme.length) {fb.ShowPopupMessage(readme, key);}
 							} else {console.log('Readme not found: ' + value);}
 						}});

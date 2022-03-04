@@ -11,10 +11,14 @@
 
 ## [Unreleased][]
 ### Added
+- HTML: SuperGenre legend is now dragable.
+- HTML: Selecting a node and pressing shift while hovering another node shows the distance (+ influences) between them.
+- HTML: Selecting a node and pressing shift while hovering another node highlights the shortest path between them.
+- HTML: Added favicon.
 ### Changed
 ### Removed
 ### Fixed
-- Buttons bar: menu entry to change buttons position was not working properly.
+- Helpers: avoid file reading crashing in any case (even if it's locked by another process).
 
 ## [2.1.0] - 2022-03-02
 ### Added

@@ -31,11 +31,9 @@ function createThemeMenu(parent) {
 	{	// Readme
 		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
 		themeMenu.newEntry({entryText: 'Open readme...', func: () => {
-			if (_isFile(readmePath)) { 
-				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
-				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
-				else {console.log('Readme not found: ' + value);}
-			}
+			const readme = _open(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
+			if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
+			else {console.log('Readme not found: ' + value);}
 		}});
 	}
 	themeMenu.newEntry({entryText: 'Open themes folder', func: () => {

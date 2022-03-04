@@ -38,9 +38,8 @@ function createButtonsMenu(name) {
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				if (readmeList) {
 					const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
-					}
+					const readme = _open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8'));
+					if (readme.length) {fb.ShowPopupMessage(readme, readmeFile);}
 				}
 				window.Reload();
 			}, flags: isAllowed(fileName) && isAllowedV2(fileName) ? MF_STRING : MF_GRAYED});
@@ -152,7 +151,7 @@ function createButtonsMenu(name) {
 			fileNames.forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-					fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
+					fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 				}
 			});
 		}
@@ -247,10 +246,8 @@ function createButtonsMenu(name) {
 		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
-			if (_isFile(readmePath)) {
-				const readme = utils.ReadTextFile(readmePath, convertCharsetToCodepage('UTF-8'));
-				if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
-			}
+			const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
+			if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 		}});
 		if (readmeList) {
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
@@ -264,7 +261,7 @@ function createButtonsMenu(name) {
 				const entryText = fileName.replace('buttons_', '');
 				menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-						fb.ShowPopupMessage(utils.ReadTextFile(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
+						fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 					}
 				}});
 			});
