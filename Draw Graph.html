@@ -2,7 +2,8 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>All Music Graph</title>
+		<title>Music Graph</title>
+		<link rel="icon" href="helpers-external/ngraph/html/images/icon.png">
 		<script type="text/javascript" src="helpers-external/ngraph/html/vivagraph.min.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/html/jquery.min.jsm.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/html/invert.js"></script>
@@ -42,6 +43,7 @@
 				
 				// Create the graph from foobar scripts:
 				var graph = music_graph_fordrawing();
+				const influenceMethod = 'adjacentNodes';
 				if (bGraphDebug) {graphDebug(graph);}
 								
 				/* 
@@ -143,10 +145,16 @@
 							.attr('shape', 'rect');
 						}
 						// Highlight links on hover
-						$(ui).hover(function() { // mouse over
-							highlightRelatedNodes(node.id, true);
-							showNode(node.id, true); // Show info from current node
-							showLinks(node.id, true);
+						$(ui).hover(function(e) { // mouse over
+							if (oldnode !== null && e.shiftKey) {
+								highlightPath(oldnode, node, true); // Show path
+								showNode(oldnode.id); // Show info from selected node
+								findLink(oldnode, node); // Show info from hovered node
+							} else {
+								highlightRelatedNodes(node.id, true);
+								showNode(node.id, true); // Show info from current node
+								showLinks(node.id, true);
+							}
 						}, function() { // mouse out
 							highlightRelatedNodes(node.id, false);
 							if (oldnode === null) { // Show info from previously selected node if available
@@ -155,6 +163,7 @@
 							} else {
 								showNode(oldnode.id);
 								showLinks(oldnode.id);
+								highlightPath(oldnode, node, false); // Hide path
 							}
 						});
 						// Show node an link on click
@@ -265,7 +274,7 @@
 				
 				// SuperGenre/Node Color label legend
 				let paragraph = document.getElementById('label');
-				let text = "SuperGenre Labels:<br>________________<br>";
+				let text = '<div id="labelHeader">SuperGenre Labels</div>';
 				function logMapElements(value, key, map) {
 					let aCheck = key.replace("_supergenre","");
 					if (aCheck != key) { // We only wants supergenre strings
@@ -285,6 +294,7 @@
 				}
 				map_colors.forEach(logMapElements);
 				paragraph.innerHTML = text;
+				dragElement(paragraph);
 				
 				// Selected node label at top, and list of links
 				function showNode(nodeId, bHover = false) {
@@ -315,7 +325,7 @@
 					let textColor = '#000';
 					let borderColor = '#9b9b9b';
 					let text = '';
-					let textSize = '1.2vmin';
+					let textSize = '1.6vmin';
 					let linkDistance = -1;
 					let count = 0;
 					graph.forEachLinkedNode(nodeId, function(node, link){ //List of links
@@ -327,7 +337,9 @@
 									borderColor = invertToBW(bgcolor,true);
 								}
 								if (link.data.weight !== undefined && link.data.weight !== null) {
-									linkDistance = link.data.weight;
+									<!-- linkDistance = link.data.weight; -->
+									const [distance, influence] = calc_map_distance(graph, link.fromId, link.toId, true, influenceMethod);
+									linkDistance = Math.round(distance - influence);
 								}
 								count++;
 								let showLink = link.fromId;
@@ -344,7 +356,47 @@
 					paragraph.innerHTML += text;
 				}
 				
-				var highlightRelatedNodes = function(nodeId, isOn) {
+				function findLink(fromNode, toNode) {
+					let bgcolor = '#fff';
+					let textColor = '#000';
+					let borderColor = '#9b9b9b';
+					let text = '';
+					let textSize = '1.6vmin';
+					const [distance, influence] = calc_map_distance(graph, fromNode.id, toNode.id, true, influenceMethod);
+					const linkDistance = Math.round(distance - influence);
+					text += '<br>Selected node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + toNode.id + '&nbsp;</span>';
+					text += '<br><span style="font-size: ' + textSize + ';">Distance: &nbsp;' +  linkDistance + '</span>'
+					let paragraph = document.getElementById('nodehighlight');
+					paragraph.innerHTML += text;
+				}
+				function highlightPath(fromNode, toNode, isOn) {
+				   // just enumerate all related nodes and update link color:
+					const pathFinder = nba(graph, {
+						distance(fromNode, toNode, link) {
+						return link.data.weight;
+						}
+					});
+					const path = pathFinder.find(fromNode.id, toNode.id);
+					let last = path.length - 1; // Is always >= 1
+					if (last !== 1) { // Otherwise we are repeating first->last multiple times, considered below
+						for (let i = 0; i < last; i++) { // size (<=n) (a)->{b}, (b)->{c}, (c)->{d}, ...
+							const link = graph.getLink(path[i].id, path[i + 1].id) || graph.getLink(path[i + 1].id, path[i].id);
+							let linkUI = graphics.getLinkUI(link.id);
+								if (linkUI) {
+								let linkColorOn = 'red'; //Highlighted color
+								let linkColorOff = 'white';
+								if (link.data !== undefined) { //Default color
+									if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
+										linkColorOff = link.data.linecolor[1];
+									}
+								}
+								// linkUI is a UI object created by graphics below
+								linkUI.attr('stroke', isOn ? linkColorOn : linkColorOff);
+						   }
+						}
+					}
+				}
+				function highlightRelatedNodes(nodeId, isOn) {
 				   // just enumerate all related nodes and update link color:
                    graph.forEachLinkedNode(nodeId, function(node, link){
 						let linkUI = graphics.getLinkUI(link.id);
@@ -360,7 +412,43 @@
 							linkUI.attr('stroke', isOn ? linkColorOn : linkColorOff);
                        }
 					});
-				};
+				}
+				function dragElement(elmnt) {
+					var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+					if (document.getElementById(elmnt.id + "Header")) {
+						document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
+					} else {
+						elmnt.onmousedown = dragMouseDown;
+					}
+
+					function dragMouseDown(e) {
+						e = e || window.event;
+						e.preventDefault();
+						pos3 = e.clientX;
+						pos4 = e.clientY;
+						document.onmouseup = closeDragElement;
+						document.onmousemove = elementDrag;
+						console.log('dragMouseDown')
+					}
+
+					function elementDrag(e) {
+						e = e || window.event;
+						e.preventDefault();
+						// calculate the new cursor position:
+						pos1 = pos3 - e.clientX;
+						pos2 = pos4 - e.clientY;
+						pos3 = e.clientX;
+						pos4 = e.clientY;
+						// set the element's new position:
+						elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+						elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+					}
+
+					function closeDragElement() {
+						document.onmouseup = null;
+						document.onmousemove = null;
+					}
+				}
 			}
 		</script>
 		<style type="text/css" media="screen">
@@ -410,11 +498,27 @@
                 font-family: Verdana;
 				bottom: 0;
 				left: 10px;
-				background-color: #231b02;
-				border: 2px dashed #f00505;
+			}
+			#label {
+                position: absolute;
+                color: white;
+                font-size: 1.6vmin;
+                font-family: Verdana;
+				top: 40%;
+				left: 10px;
+				background-color: #14001d99;
+				text-align: center;
+				border: 1px solid #4a0909b3;
+				z-index: 10;
+				overflow: hidden;
+			}
+			#labelHeader {
 				padding: 10px;
-				padding-bottom: 0;
-				padding-top: 0;
+				cursor: move;
+				z-index: 9;
+				background-color: #3C050C;
+				font-size: 1.8vmin;
+				color: #fff;
 			}
 		</style>
 	</head>
@@ -424,14 +528,20 @@
 			<p id='nodehighlight'>
 			Move the mouse over the nodes to see their IDs and links.
 			<br>
+			<br>
 			Click on any of them to pin up that info.
 			<br>
-			Check console (Ctrl + Shift + K).
+			Pressing shift while hovering other node will show the distance.
+			<br>
+			Shortest path between both nodes will be highlighted too.
+			<br>
+			<br>
+			Open console on Firefox (Ctrl+Shift+K) or Chrome (Ctrl+Shift+J).
 			</p>
 		</span>
 		<span class='bottomleft'>
-			<p id='label'>Labels...</p>
 		</span>
+		<div id='label'>Labels...</div>
 		<span class='topright'>
 		</span>
 	</body>
