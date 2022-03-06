@@ -1565,7 +1565,7 @@ function do_searchby_distance({
 				selectedHandlesData.push(scoreData[nextIndexScore]);
 				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
 				// Double pass
-				if (bDoublePass) {
+				if (bHarmonicMixDoublePass) {
 					const toAdd = {};
 					const keyMap = new Map();
 					// Find positions where the remainder tracks could be placed as long as they have the same key than other track
