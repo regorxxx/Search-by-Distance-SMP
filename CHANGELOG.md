@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.1](#211---2022-03-06)
 - [2.1.0](#210---2022-03-02)
 - [2.0.1](#201---2021-12-23)
 - [2.0.0](#200---2021-06-15)
@@ -19,6 +20,14 @@
 ### Removed
 ### Fixed
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
+
+## [2.1.1] - 2022-03-06
+### Added
+### Changed
+### Removed
+### Fixed
+- Crash when using harmonic mixing due to a typo on the code.
+
 
 ## [2.1.0] - 2022-03-02
 ### Added
@@ -187,7 +196,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.1.0
 [2.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v1.2.0...v2.0.0
