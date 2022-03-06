@@ -1563,45 +1563,52 @@ function do_searchby_distance({
 				selectedHandlesData.push(scoreData[nextIndexScore]);
 				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
 				// Double pass
-				if (bHarmonicMixDoublePass) {
-					const toAdd = {};
-					const keyMap = new Map();
-					// Find positions where the remainder tracks could be placed as long as they have the same key than other track
-					const selectedHandles = new FbMetadbHandleList(selectedHandlesArray);
-					for (let i = 0;  i < poolLength; i++) {
-						const currTrack = selItems[i];
-						if (selectedHandles.Find(currTrack) === -1) {
-							const matchIdx = selectedHandlesArray.findIndex((selTrack, j) => {
-								let idx = -1;
-								if (keyMap.has(j)) {idx = keyMap.get(j);}
-								else {idx = selItems.Find(selTrack); keyMap.set(j, idx);}
-								const selKey = keyHandle[idx];
-								return selKey[0] === keyHandle[i][0];
-							});
-							if (matchIdx !== -1) {
-								if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack);}
-								else {toAdd[matchIdx] = [currTrack];}
+				if (bHarmonicMixDoublePass && poolLength >= playlistLength) {
+					let tempPlaylistLength = selectedHandlesArray.length;
+					if (tempPlaylistLength < playlistLength) {
+						const toAdd = {};
+						const toAddData = {};
+						const keyMap = new Map();
+						// Find positions where the remainder tracks could be placed as long as they have the same key than other track
+						for (let i = 0;  i < poolLength; i++) {
+							const currTrackData = scoreData[i];
+							if (selectedHandlesData.indexOf(currTrackData) === -1) {
+								const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
+									let idx = -1;
+									if (keyMap.has(j)) {idx = keyMap.get(j);}
+									else {idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx);}
+									const selKey = keyHandle[idx];
+									return selKey[0] === keyHandle[i][0];
+								});
+								if (matchIdx !== -1) {
+									const currTrack = handle_list[currTrackData.index];
+									if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData);}
+									else {toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData];}
+									tempPlaylistLength++;
+								}
 							}
+							if (tempPlaylistLength >= playlistLength) {break;}
+						}
+						// Add items in reverse order to not recalculate new idx
+						const indexes = Object.keys(toAdd).sort().reverse();
+						if (indexes.length) {
+							let count = 0;
+							for (let idx of indexes) {
+								selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
+								selectedHandlesData.splice(idx, 0, ...toAddData[idx]);
+								count += toAdd[idx].length;
+							}
+							if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
 						}
 					}
-					// Add items in reverse order to not recalculate new idx
-					const indexes = Object.keys(toAdd).sort().reverse();
-					if (indexes.length) {
-						let count = 0;
-						for (let idx of indexes) {
-							selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
-							count += toAdd[idx].length;
-						}
-						if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
+					// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
+					if (bSearchDebug) {
+						console.log('Keys from selection:');
+						console.log(keyDebug);
+						console.log(keySharpDebug);
+						console.log('Pattern applied:');
+						console.log(patternDebug); // Always has one item less than key arrays
 					}
-				}
-				// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
-				if (bSearchDebug) {
-					console.log('Keys from selection:');
-					console.log(keyDebug);
-					console.log(keySharpDebug);
-					console.log('Pattern applied:');
-					console.log(patternDebug); // Always has one item less than key arrays
 				}
 			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
 		} else { // Standard methods
