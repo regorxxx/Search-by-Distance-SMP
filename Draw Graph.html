@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+		<!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="helpers-external/ngraph/a-greedy-star.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/NBA.js"></script>
 		<script type="text/javascript" src="helpers/ngraph_helpers_xxx.js"></script>
+		<script type="text/javascript" src="helpers/helpers_xxx_statistics.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_html_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx.js"></script>
@@ -27,7 +28,6 @@
 		<script type="text/javascript" src="helpers/world_map_tables.js"></script>
 		<script type="text/javascript">
 			function onLoad() {
-				
 				const idealLength = music_graph_descriptors.cluster; //Uses default cluster weighting
 				const bGraphDebug = true; // Change this to omit warnings about links/nodes set wrong
 				var nodeSize = 10; // Default fallbacks
@@ -92,7 +92,7 @@
 						}, 0); // keep going in next even cycle
 					} else {
 					// we are done!
-					processingElement.innerHTML = ""
+					processingElement.innerHTML = ''
 					callback();
 					}
 				}
@@ -221,7 +221,7 @@
 
 						// 'Path data' (http://www.w3.org/TR/SVG/paths.html#DAttribute )
 						// is a common way of rendering paths in SVG:
-						linkUI.attr("d", data);
+						linkUI.attr('d', data);
 					});
 					
 					renderer = Viva.Graph.View.renderer(graph, {
@@ -260,6 +260,7 @@
 			
 				// Reset renderer on space bar
 				document.body.addEventListener('keydown', function (e) {
+					if (typeof renderer === 'undefined') {return;} // ommit while loading page
 					if (e.which === 32) { // spacebar
 						renderer.reset();
 						// And zoom out
@@ -276,17 +277,17 @@
 				let paragraph = document.getElementById('label');
 				let text = '<div id="labelHeader">SuperGenre Labels</div>';
 				function logMapElements(value, key, map) {
-					let aCheck = key.replace("_supergenre","");
+					let aCheck = key.replace('_supergenre','');
 					if (aCheck != key) { // We only wants supergenre strings
-						let bCheck = aCheck.replace("Folk",""); 
-						entry = bCheck.replace("Classical",""); 
+						let bCheck = aCheck.replace('Folk',''); 
+						entry = bCheck.replace('Classical',''); 
 						if (entry == aCheck) { // We treat Colks and Classical supergenres appart
 							text += '<span style="color:' + value + ';">' + entry + '</span>' + '<br>';
 							return;
-						} else if (entry == bCheck && text.replace("Folk","") == text) { //Folk
+						} else if (entry == bCheck && text.replace('Folk','') == text) { //Folk
 							text += '<span style="color:' + value + ';">' + 'Folk Music' + '</span>' + '<br>';
 							return;
-						} else if (entry != bCheck && text.replace("Classical","") == text) { //Classical
+						} else if (entry != bCheck && text.replace('Classical','') == text) { //Classical
 							text += '<span style="color:' + value + ';">' + 'Classical Music' + '</span>' + '<br>';
 							return;
 						}
@@ -314,7 +315,7 @@
 							text = 'Highlighted node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + nodeId + '&nbsp;</span>';
 						}
 					} else {
-						text = 'Selected node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + (nodeId !== null ? nodeId : "") + '&nbsp;</span>';
+						text = 'Selected node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + (nodeId !== null ? nodeId : '') + '&nbsp;</span>';
 					}
 					let paragraph = document.getElementById('nodehighlight');
 					paragraph.innerHTML = text;
@@ -415,8 +416,8 @@
 				}
 				function dragElement(elmnt) {
 					var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-					if (document.getElementById(elmnt.id + "Header")) {
-						document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
+					if (document.getElementById(elmnt.id + 'Header')) {
+						document.getElementById(elmnt.id + 'Header').onmousedown = dragMouseDown;
 					} else {
 						elmnt.onmousedown = dragMouseDown;
 					}
@@ -428,7 +429,6 @@
 						pos4 = e.clientY;
 						document.onmouseup = closeDragElement;
 						document.onmousemove = elementDrag;
-						console.log('dragMouseDown')
 					}
 
 					function elementDrag(e) {
@@ -440,8 +440,8 @@
 						pos3 = e.clientX;
 						pos4 = e.clientY;
 						// set the element's new position:
-						elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-						elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+						elmnt.style.top = (elmnt.offsetTop - pos2) + 'px';
+						elmnt.style.left = (elmnt.offsetLeft - pos1) + 'px';
 					}
 
 					function closeDragElement() {
@@ -449,6 +449,50 @@
 						document.onmousemove = null;
 					}
 				}
+			}
+			// Popup
+			let data = null;
+			let bRunning = false;
+			function showStatistics() {
+				showPopup();
+				const popup = document.getElementById('popup');
+				const popupContent = document.getElementById('popupcontent');
+				const overlay = document.getElementById('overlay');
+				popupContent.innerHTML = '<br>Calculating... please wait.<br><br>Don\'t change to another tab nor minimize the window, otherwise script will be halted and sent to background (\'alt-tab\' is ok though).<br><br>Popup may be closed and reopened at any time while the calculation is being done, results are cached.';
+				if (!bRunning) {
+					if (!data) {
+						bRunning = true;
+						popup.style.cursor = overlay.style.cursor = 'wait';
+						setTimeout(() => {
+								graphStatistics().then((resolve) => {
+									data = resolve; 
+									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>'); 
+									popupContent.innerHTML = data.text;
+									popup.style.cursor = overlay.style.cursor = 'auto';
+									bRunning = false;
+									popupContent.style['overflow-x'] = 'scroll';
+									showPopup();
+									document.getElementById('statisticsButton').innerHTML = 'Show statistics';
+								});
+						}, 100);
+					} else {popupContent.innerHTML = data.text;}
+				}
+			}
+			function closePopup() {
+				const overlay = document.getElementById('overlay');
+				const popup = document.getElementById('popup');
+				overlay.style.display = 'none';
+				popup.style.display = 'none';
+			};
+			function showPopup() {
+				const overlay = document.getElementById('overlay');
+				const popup = document.getElementById('popup');
+				overlay.style.display = 'block';
+				popup.style.display = 'block';
+			}
+			
+			function resetView() {
+				document.body.dispatchEvent(new KeyboardEvent('keydown', {which: 32}));
 			}
 		</script>
 		<style type="text/css" media="screen">
@@ -485,10 +529,10 @@
 			}
             .topright {
                 position: fixed;
-                top: 0;
+                top: 10px;
                 color: white;
-                font-size: 1.8vmin;
-                right: 50px;
+                font-size: 2vmin;
+                right: 10px;
                 font-family: Verdana;
 			}
             .bottomleft {
@@ -520,29 +564,78 @@
 				font-size: 1.8vmin;
 				color: #fff;
 			}
+			#overlay {
+				display: none;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				background: #999;
+				width: 100%;
+				height: 100%;
+				opacity: 0.8;
+				z-index: 100;
+			}
+			#popup {
+				display: none;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				background: #fff;
+				width: 550px;
+				height: 550px;
+				margin-left: -275px; /*Half the value of width to center div*/
+				margin-top: -275px; /*Half the value of height to center div*/
+				z-index: 200;
+				overflow-y: hidden;
+			}
+			#popupclose {
+				float: right;
+				padding: 10px;
+				cursor: pointer;
+			}
+			.popupcontent {
+				padding: 10px;
+			}
+			#button {
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body onload='onLoad()' style="background-color: #08011b;">
+		<div id="overlay"></div>
+		<div id="popup">
+			<div class="popupcontrols">
+				<span id="popupclose" onclick="closePopup()">X</span>
+			</div>
+			<div id="popupcontent" class="popupcontent">
+				<h1>Some Popup Content.</h1>
+			</div>
+		</div>
 		<div id='graphContainer'></div>
 		<span class='topleft'>Zoom/pan the graph. Press spacebar to reset its position.
 			<p id='nodehighlight'>
-			Move the mouse over the nodes to see their IDs and links.
-			<br>
-			<br>
-			Click on any of them to pin up that info.
-			<br>
-			Pressing shift while hovering other node will show the distance.
-			<br>
-			Shortest path between both nodes will be highlighted too.
-			<br>
-			<br>
-			Open console on Firefox (Ctrl+Shift+K) or Chrome (Ctrl+Shift+J).
+				Move the mouse over the nodes to see their IDs and links.
+				<br>
+				<br>
+				Click on any of them to pin up that info.
+				<br>
+				Pressing shift while hovering other node will show the distance.
+				<br>
+				Shortest path between both nodes will be highlighted too.
+				<br>
+				<br>
+				Open console on Firefox (Ctrl+Shift+K) or Chrome (Ctrl+Shift+J).
 			</p>
 		</span>
 		<span class='bottomleft'>
 		</span>
-		<div id='label'>Labels...</div>
 		<span class='topright'>
+			<button id="statisticsButton" onclick="showStatistics()" style="width: 130px">Calculate statistics</button>
+			<br>
+			<button id="resetButton" onclick="resetView()" style="width: 130px">Reset view</button>
 		</span>
+		<div id='label'>
+			Labels...
+		</div>
 	</body>
 </html>
