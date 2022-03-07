@@ -496,7 +496,7 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
-				graphStatistics({properties});
+				graphStatistics({properties, graph: all_music_graph}).then((resolve) => {console.log(resolve.text);});
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});

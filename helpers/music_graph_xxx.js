@@ -8,6 +8,7 @@ if (typeof include !== 'undefined') { // On foobar
 	include('music_graph_descriptors_xxx.js');
 	include('music_graph_descriptors_xxx_helper.js');
 	include('helpers_xxx.js');
+	include('helpers_xxx_statistics.js');
 	let userDescriptor = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
 	if (utils.IsFile(userDescriptor)) {
 		try {
@@ -664,8 +665,7 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 /* 
 	Statistics for the graph
 */
-async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null} = {}) {
-	const graph = music_graph(descriptor);
+async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null, graph = music_graph(descriptor)} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
@@ -713,22 +713,40 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 	}
 	statistics.median = i > 0 ? (Number(histEntries[i - 1][0]) + Number(histEntries[i][0])) / 2 : Number(histEntries[i][0]);
 	// Report
-	console.log('Histogram:');
-	console.log(hist);
-	console.log('General statistics:');
-	Object.entries(statistics).forEach((pair) => {console.log(pair[0], '		', pair[1]);});
-	['weak_substitutions', 'cluster', 'intra_supergenre'].forEach((key) => {console.log(key, '		', descriptor[key]);});
 	// Usually follows a normal distribution, so that may give us some key parameters for graph filtering 'sbd_max_graph_distance'
 	// In real world usage it is not A -> B but {A,B,C} -> {C,D} or similar... i.e. sets of styles/genres
 	// Anyway since the total distance is divided by the num of tags, the results are still applicable
-	console.log('Suggested distance ranges:');
-	console.log('To retrieve <0.05% nodes:	', 1/4 * statistics.sigma);
-	console.log('To retrieve <0.8% nodes:	', 1/2 * statistics.sigma);
-	console.log('To retrieve <1% nodes:	', 3/4 * statistics.sigma);
-	console.log('To retrieve 2% nodes:		', statistics.sigma);
-	console.log('To retrieve 6% nodes:		', 3/2 * statistics.sigma);
-	console.log('To retrieve 14% nodes:	', 2 * statistics.sigma);
-	console.log('To retrieve 44% nodes:	', 3 * statistics.sigma);
+	const offset = poz(-3);
+	const ranges = [1/4, 1/2, 3/4, 1, 3/2, 2, 3].map((val) => {
+		const prob = poz(-3 + val) - offset;
+		const roundProb = poz > 0.01 ? Math.round(prob * 100) : Math.round(prob * 10000) / 100;
+		return 'To retrieve <' + roundProb + '% nodes: ' + val * statistics.sigma + ' (' + val.toString() + ' x Sigma)';
+	});
+	// Find sigma in terms of graph variables
+	const sigmaConv = ['cluster', 'intra_supergenre'].map((key) => {
+		let val;
+		let coeff = null;
+		for (let i = 1; i < 10; i++) {
+			val = descriptor[key] * i;
+			if (Math.abs(val - statistics.sigma) <= 10) {coeff = i; break;}
+			val = descriptor[key] / i;
+			if (Math.abs(val - statistics.sigma) <= 10) {coeff = 1 / i; break;}
+		}
+		return coeff ? coeff + ' x ' + key + ': ' + val : null;
+	}).filter(Boolean);
+	// Data text
+	let text = 'Histogram:\n' + JSON.stringify(hist);
+	text += '\nGeneral statistics:\n' + Object.entries(statistics).map((pair) => {return pair[0] + '\t' + pair[1];}).join('\n');
+	text += '\n------------------\n';
+	text += '\nSuggested distance ranges:\n' + ranges.join('\n');
+	text += '\n------------------\n';
+	if (sigmaConv.length) {
+		text += '\nSigma using graph variables:' + sigmaConv.join('\t');
+		text += '\n------------------\n';
+	}
+	text += '\nDescriptor variables:\n' + ['weak_substitutions', 'cluster', 'intra_supergenre'].map((key) => {return key + '\t' + descriptor[key];}).join('\n');
+	text += '\n------------------\n';
+	return {data: {histogram: hist, statistics}, text};
 }
 
 function histogram(data, size) {
