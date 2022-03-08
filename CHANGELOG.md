@@ -12,13 +12,14 @@
 
 ## [Unreleased][]
 ### Added
-- HTML: Added statistics calculation. To run it, use the associated button, results will be shown on a popup and cached for the current session.
+- HTML: Added statistics calculation. To run it, use the associated button, results will be shown on a popup and cached for the current session. Statistics button is now animated while processing
 - HTML: Added reset view button.
 - HTML: SuperGenre legend is now dragable.
 - HTML: Selecting a node and pressing shift while hovering another node shows the distance (+ influences) between them.
 - HTML: Selecting a node and pressing shift while hovering another node highlights the shortest path between them.
 - HTML: Added favicon.
 ### Changed
+- HTML: Changed CSS layout to adjust sizes according to window.
 ### Removed
 ### Fixed
 - Crash when using double pass on harmonic mixing.
