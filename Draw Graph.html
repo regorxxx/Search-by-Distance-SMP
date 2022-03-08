@@ -1,4 +1,4 @@
-		<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -463,19 +463,21 @@
 					if (!data) {
 						bRunning = true;
 						popup.style.cursor = overlay.style.cursor = 'wait';
+						document.getElementById('statisticsButton').innerHTML = 'Calculating...';
+						document.getElementById("statisticsButton").className = 'animation roy';
 						setTimeout(() => {
 								graphStatistics().then((resolve) => {
 									data = resolve; 
 									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>'); 
-									popupContent.innerHTML = data.text;
+									popupContent.innerHTML = '<br>' + data.text;
 									popup.style.cursor = overlay.style.cursor = 'auto';
 									bRunning = false;
-									popupContent.style['overflow-x'] = 'scroll';
 									showPopup();
 									document.getElementById('statisticsButton').innerHTML = 'Show statistics';
+									document.getElementById("statisticsButton").className = '';
 								});
 						}, 100);
-					} else {popupContent.innerHTML = data.text;}
+					} else {popupContent.innerHTML = '<br>' + data.text;}
 				}
 			}
 			function closePopup() {
@@ -497,107 +499,128 @@
 		</script>
 		<style type="text/css" media="screen">
 			html, body, svg  {
-				height: 100%;
-				width: 100%;
-				position: absolute;
-				overflow: hidden;
-				left: 0;
-				top: 0;
+			  height: 100%;
+			  width: 99.5%;
+			  overflow: hidden;
+			  left: 0;
+			  top: 0;
 			}
 			#graphContainer  {
-				height: 100%;
-				width: 100%;
-				position: absolute;
-				overflow: hidden;
-				left: 0;
-				top: 0;
+			  height: 100%;
+			  width: 100%;
+			  position: absolute;
+			  overflow: hidden;
+			  left: 0;
+			  top: 0;
 			}
 			#log {
-				color: deepskyblue;
-				font-size:32px;
+			  color: deepskyblue;
+			  font-size:2rem;
 			}
             .topleft {
-                position: fixed;
-                top: 10px;
-                color: white;
-                font-size: 2vmin;
-                left: 10px;
-                font-family: Verdana;
+              position: fixed;
+              top: 0.75rem;
+              color: white;
+              font-size: 2vmin;
+              left: 0.75rem;
+              font-family: Verdana;
 			}
 			#nodehighlight {
-                font-size: 1.8vmin;
+              font-size: 1.8vmin;
 			}
             .topright {
-                position: fixed;
-                top: 10px;
-                color: white;
-                font-size: 2vmin;
-                right: 10px;
-                font-family: Verdana;
+              position: fixed;
+              top: 0.75rem;
+              color: white;
+              font-size: 2vmin;
+              right: 0.75rem;
+              font-family: Verdana;
 			}
             .bottomleft {
-                position: fixed;
-                color: white;
-                font-size: 1.6vmin;
-                font-family: Verdana;
-				bottom: 0;
-				left: 10px;
+              position: fixed;
+              color: white;
+              font-size: 1.6vmin;
+              font-family: Verdana;
+			  bottom: 0;
+			  left: 0.75rem;
 			}
 			#label {
-                position: absolute;
-                color: white;
-                font-size: 1.6vmin;
-                font-family: Verdana;
-				top: 40%;
-				left: 10px;
-				background-color: #14001d99;
-				text-align: center;
-				border: 1px solid #4a0909b3;
-				z-index: 10;
-				overflow: hidden;
+              position: absolute;
+              color: white;
+              font-size: 1.6vmin;
+              font-family: Verdana;
+			  top: 40%;
+			  left: 0.75rem;
+			  background-color: #14001d99;
+			  text-align: center;
+			  border: 0.05rem solid #4a0909b3;
+			  z-index: 10;
+			  overflow: hidden;
 			}
 			#labelHeader {
-				padding: 10px;
-				cursor: move;
-				z-index: 9;
-				background-color: #3C050C;
-				font-size: 1.8vmin;
-				color: #fff;
+			  padding: 0.75rem;
+			  cursor: move;
+			  z-index: 9;
+			  background-color: #3C050C;
+			  font-size: 1.8vmin;
+			  color: #fff;
 			}
 			#overlay {
-				display: none;
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				background: #999;
-				width: 100%;
-				height: 100%;
-				opacity: 0.8;
-				z-index: 100;
+			  display: none;
+			  position: absolute;
+			  top: 0;
+			  bottom: 0;
+			  left: 0;
+			  background: #999;
+			  width: 100%;
+			  height: 100%;
+			  opacity: 0.8;
+			  z-index: 100;
 			}
 			#popup {
-				display: none;
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				background: #fff;
-				width: 550px;
-				height: 550px;
-				margin-left: -275px; /*Half the value of width to center div*/
-				margin-top: -275px; /*Half the value of height to center div*/
-				z-index: 200;
-				overflow-y: hidden;
+			  display: none;
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  background: #08011b;
+			  width: 80vmin;
+			  height: 70vmin;
+			  margin-left: -40vmin; /*Half the value of width to center div*/
+			  margin-top: -35vmin; /*Half the value of height to center div*/
+			  z-index: 200;
+			  overflow-y: auto;
+			  scrollbar-color: rebeccapurple #3C050C;
+			  scrollbar-width: thin;
 			}
 			#popupclose {
-				float: right;
-				padding: 10px;
-				cursor: pointer;
+			  float: right;
+			  padding: 0.75rem;
+			  cursor: pointer;
+			  color: white;
 			}
 			.popupcontent {
-				padding: 10px;
+			  padding: 1.5rem;
+			  overflow-wrap: anywhere;
+			  color: white;
 			}
 			#button {
-				cursor: pointer;
+			  cursor: pointer;
+			}
+			.animation {
+			  background-color: red;
+			  animation-duration: 4s;
+			  animation-iteration-count: infinite;
+			}
+			.roy {
+			   animation-name: roy;
+			}
+			@keyframes roy {
+			  0%   {background-color: Maroon;}
+			  20%  {background-color: red;}
+			  40%  {background-color: darkorange;}
+			  60%  {background-color: orange;}
+			  80%  {background-color: yellow;}
+			  100% {background-color: LemonChiffon;}
 			}
 		</style>
 	</head>
@@ -630,9 +653,9 @@
 		<span class='bottomleft'>
 		</span>
 		<span class='topright'>
-			<button id="statisticsButton" onclick="showStatistics()" style="width: 130px">Calculate statistics</button>
+			<button id="statisticsButton" onclick="showStatistics()" style="width: 8.2rem">Calculate statistics</button>
 			<br>
-			<button id="resetButton" onclick="resetView()" style="width: 130px">Reset view</button>
+			<button id="resetButton" onclick="resetView()" style="width: 8.2rem">Reset view</button>
 		</span>
 		<div id='label'>
 			Labels...
