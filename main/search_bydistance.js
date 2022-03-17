@@ -409,11 +409,13 @@ const SearchByDistance_panelProperties = {
 	bGraphDebug 			:	['Warnings about links/nodes set wrong', false],
 	bSearchDebug			:	['Enables debugging console logs', false],
 	bProfile 				:	['Enables profiling console logs', false],
-	bShowQuery 				:	['Enables query console logs', false],
+	bShowQuery 				:	['Enables query console logs', false],	
 	bBasicLogging 			:	['Enables basic console logs', true],
 	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
 	firstPopup				:	['Search by distance: Fired once', false],
 	descriptorCRC			:	['Graph Descriptors CRC', -1], // Calculated later on first time
+	bAllMusicDescriptors	:	['Load All Music descriptors?', false],
+	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
 };
 
 var sbd_prefix = 'sbd_';
@@ -434,6 +436,21 @@ if (!panelProperties.firstPopup[1]) {
 	const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
 	if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 }
+
+/* 
+	Load additional descriptors: All Music, Last.fm, ...
+*/
+[
+	{name: 'All Music', file: 'helpers\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors'},
+	{name: 'Last.fm', file: 'helpers\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors'}
+].forEach((descr) => {;
+	if (panelProperties[descr.prop][1]) {
+		if (_isFile(folders.xxx + descr.file)) {
+			console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);
+			include('..\\' + descr.file);
+		}
+	}
+});
 
 /* 
 	Initialize maps/graphs at start. Global variables
