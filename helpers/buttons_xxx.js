@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/02/22
+//16/03/22
 
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
@@ -86,9 +86,9 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 	this.g_font_icon = g_font_icon;
 	this.description = description;
 	this.text = text;
-	this.textWidth  = _isFunction(this.text) ? () => {return _gr.CalcTextWidth(this.text(), g_font);} : _gr.CalcTextWidth(this.text, g_font);
+	this.textWidth  = _isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), g_font);} : _gr.CalcTextWidth(this.text, g_font);
 	this.icon = this.g_font_icon.Name !== 'Microsoft Sans Serif' ? icon : null; // if using the default font, then it has probably failed to load the right one, skip icon
-	this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
+	this.iconWidth = _isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = _isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
@@ -134,14 +134,14 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		if (this.moveY) {yCalc = this.moveY;}
 		this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);
 		if (this.icon !== null) {
-			let iconWidthCalculated = _isFunction(this.icon) ? this.iconWidth() : this.iconWidth;
-			let textWidthCalculated = _isFunction(this.text) ? this.textWidth() : this.textWidth;
-			let iconCalculated = _isFunction(this.icon) ? this.icon() : this.icon;
-			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
+			let iconWidthCalculated = _isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
+			let textWidthCalculated = _isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			let iconCalculated = _isFunction(this.icon) ? this.icon(this) : this.icon;
+			let textCalculated = _isFunction(this.text) ? this.text(this) : this.text;
 			gr.GdiDrawText(iconCalculated, this.g_font_icon, buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
 			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		} else {
-			let textCalculated = _isFunction(this.text) ? this.text() : this.text;
+			let textCalculated = _isFunction(this.text) ? this.text(this) : this.text;
 			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		}
 	};
@@ -158,8 +158,8 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		this.currW *= newScale;
 		this.g_font = _gdiFont(this.g_font.Name, 12 * scale);
 		this.g_font_icon = _gdiFont(this.g_font_icon.Name, 12 * scale);
-		this.textWidth  = _isFunction(this.text) ? () => {return _gr.CalcTextWidth(this.text(), this.g_font);} : _gr.CalcTextWidth(this.text, this.g_font);
-		this.iconWidth = _isFunction(this.icon) ? () => {return _gr.CalcTextWidth(this.icon(), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
+		this.textWidth  = _isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.g_font);} : _gr.CalcTextWidth(this.text, this.g_font);
+		this.iconWidth = _isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
 	};
 }
 
@@ -387,8 +387,8 @@ function moveButton(fromKey, toKey) {
 	const properties = buttonsBar.list[toPos];
 	const keys = properties ? Object.keys(properties) : [];
 	if (keys.length) {
-		const prefix = properties[Object.keys(properties)[0]][0].split('_')[0];
-		const currentId = prefix.slice(0, prefix.length - 1);
+		const prefix = properties[Object.keys(properties)[0]][0].match(/([A-z]*[0-9]*)(_*[0-9]*\.)/)[1]; // plto3_01. or plt3. -> plto3
+		const currentId = prefix.match(/([A-z]*)(?:[0-9]*)/)[1]; // plto
 		let currentIdNumber = 0;
 		// Backup all properties
 		const propertiesBack = buttonsBar.list.map((oldProperties) => {return getPropertiesPairs(oldProperties, '', 0, false);});
@@ -396,8 +396,8 @@ function moveButton(fromKey, toKey) {
 		buttonsBar.list.forEach((oldProperties, newIdx) => {
 			const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
 			if (oldKeys.length) {
-				const oldPrefix = oldProperties[oldKeys[0]][0].split('_')[0];
-				const oldId = oldPrefix.slice(0, oldPrefix.length - 1);
+				const oldPrefix = oldProperties[oldKeys[0]][0].match(/([A-z]*[0-9]*)(_*[0-9]*\.)/)[1];
+				const oldId = oldPrefix.match(/([A-z]*)(?:[0-9]*)/)[1];
 				if (oldId === currentId) {
 					const backup = propertiesBack[newIdx];
 					for (const key in backup) { // Update Id
