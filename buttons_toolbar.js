@@ -40,7 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include(file);});}
 }
 
-try {	window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});} catch (e) {console.log('Merged Buttons loaded.');} //May be loaded along other buttons
+try {window.DefinePanel('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0', features: {drag_n_drop: false}});} catch (e) {console.log('Merged Buttons loaded.');} //May be loaded along other buttons
 
 let barProperties = { //You can simply add new properties here
 	name:				['Name of config json file', 'buttons_' + randomString(5)],
