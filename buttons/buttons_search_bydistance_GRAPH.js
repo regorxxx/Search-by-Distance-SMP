@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/22
+//16/03/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -41,7 +41,7 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 */
 
 addButton({
-    NearestTracks: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Nearest Tracks', function () {
+    NearestTracks: new themedButton({x: 0, y: 0, w: 106, h: 22}, 'Nearest Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 

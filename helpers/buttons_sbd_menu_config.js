@@ -1,5 +1,5 @@
 ﻿'use strict'
-//02/03/22
+//16/03/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -52,7 +52,7 @@ function createConfigMenu(parent) {
 				const val = properties[key][1];
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? val.toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : val) + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, val, true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -74,7 +74,7 @@ function createConfigMenu(parent) {
 			const bPresent = recipe.hasOwnProperty(weightName);
 			const entryText = 'Set ' + weightName.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[weightName]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[weightName][1]) + ']');
 			menu.newEntry({menuName, entryText, func: () => {
-				let input = '';
+				let input;
 				try {input = Number(utils.InputBox(window.ID, 'Input weight value:', 'Search by distance', properties[weightName][1], true));} 
 				catch(e) {return;}
 				if (isNaN(input)) {return;}
@@ -90,7 +90,7 @@ function createConfigMenu(parent) {
 			const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
 			options.forEach((rangeName) => {
 				menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
-					let input = '';
+					let input
 					try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -200,7 +200,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -231,7 +231,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -277,7 +277,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -326,7 +326,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
