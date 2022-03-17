@@ -12,6 +12,7 @@
 
 ## [Unreleased][]
 ### Added
+- Descriptors: added All Music and Last.fm support by linking all their genre/styles to the graph with substitutions.
 - HTML: Changed CSS layout to adjust sizes according to window.
 - HTML: Added statistics calculation. To run it, use the associated button, results will be shown on a popup and cached for the current session. Statistics button is now animated while processing
 - HTML: Added reset view button.
@@ -26,6 +27,7 @@
 ### Fixed
 - Crash when using double pass on harmonic mixing.
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
+- Properties were not being properly renumbered on some cases when moving buttons.
 
 ## [2.1.1] - 2022-03-06
 ### Added
