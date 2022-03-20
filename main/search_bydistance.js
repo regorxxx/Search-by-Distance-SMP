@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/03/22
+//20/03/22
 
 /*	
 	Search by Distance
@@ -1928,7 +1928,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres, limit = -1) {
 							cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 						}
 						const progress = Math.round(i * j / (total * total) * 4) * 25;
-						if (progress % 25 === 0 && progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + Math.round(progress) + '%.');}
+						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
 						resolve('done');
 					}, iDelaySBDCache * j);
 				}));
