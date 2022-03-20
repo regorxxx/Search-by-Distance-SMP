@@ -1,6 +1,7 @@
 ﻿'use strict';
 //16/03/22
 
+include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
 include('helpers_xxx_flags.js');
@@ -30,8 +31,7 @@ buttonsBar.config = {
 	scale: _scale(0.7, false)
 }; 
 // Drag n drop (internal use)
-buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null};
-buttonsBar.move.rec = {x: null, y: null, w: null, h: null};
+buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}};
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at buttons obj)
@@ -74,6 +74,9 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 
 function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
 	this.state = state ? state : buttonStates.normal;
+	this.bActive = false;
+	this.animStep = -1;
+	this.condition = null;
 	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
 	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
 	this.w = this.currW = coordinates.w * buttonsBar.config.scale;
@@ -103,28 +106,35 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		this.state = state;
 		return old;
 	};
+	
+	this.switchAnimation = function (bEnable, condition = null) {
+		this.bActive = bEnable;
+		this.condition = condition;
+		this.animStep = bEnable ? 0 : -1;
+	};
 
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		if (this.state === buttonStates.hide) {
 			return;
 		}
-
 		switch (this.state) {
-			case buttonStates.normal:
+			case buttonStates.normal: {
 				this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 1);
 				break;
-
-			case buttonStates.hover:
+			}
+			case buttonStates.hover: {
 				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
 				this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 				break;
-
-			case buttonStates.down:
+			}
+			case buttonStates.down: {
 				this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 3);
 				break;
-
-			case buttonStates.hide:
+			}
+			case buttonStates.hide: {
 				return;
+				break;
+			}
 		}
 		// New coordinates must be calculated and stored to interact with UI
 		let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w, h});
@@ -144,6 +154,15 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			let textCalculated = _isFunction(this.text) ? this.text(this) : this.text;
 			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
 		}
+		// Animation
+		if (this.bActive) {
+			if (this.condition && this.condition()) {this.switchAnimation(false);}
+			else {
+				gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, this.animStep * 90, RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30), 1);
+				this.animStep++;
+			}
+			throttledRepaint();
+		}
 	};
 
 	this.onClick = function (mask) {
@@ -162,6 +181,7 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		this.iconWidth = _isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
 	};
 }
+const throttledRepaint = throttle(() => window.Repaint(), 1000);
 
 function drawAllButtons(gr) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
