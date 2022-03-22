@@ -53,6 +53,7 @@ let barProperties = { //You can simply add new properties here
 	bReflow:			['Reflow according to width / height', false],
 	bAlignSize:			['Align buttons according to size', true],
 	scale:				['UI scale', _scale(0.7, false)],
+	activeColor:		['Buttons\' active icon color', buttonsBar.config.activeColor],
 };
 setProperties(barProperties); //This sets all the panel properties at once
 barProperties = getPropertiesPairs(barProperties);
@@ -76,6 +77,7 @@ if (!barProperties.firstPopup[1]) {
 buttonsBar.config.toolbarColor = barProperties.toolbarColor[1];
 buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
 buttonsBar.config.textColor = barProperties.textColor[1];
+buttonsBar.config.activeColor = barProperties.activeColor[1];
 // Show Id on tooltips
 buttonsBar.config.bShowID = barProperties.bShowId[1]; // Change this on buttons bars files to set the background color
 // Orientation

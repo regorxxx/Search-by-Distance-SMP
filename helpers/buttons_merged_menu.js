@@ -1,5 +1,5 @@
 ﻿'use strict'
-//17/03/22
+//22/03/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -173,6 +173,12 @@ function createButtonsMenu(name) {
 			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
+		menu.newEntry({menuName, entryText: 'Set active button color...', func: () => {
+			barProperties.activeColor[1] = utils.ColourPicker(window.ID, barProperties.activeColor[1]);
+			overwriteProperties(barProperties);
+			buttonsBar.config.activeColor = barProperties.activeColor[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'No background buttons', func: () => {
 			barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
@@ -184,9 +190,11 @@ function createButtonsMenu(name) {
 		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
 			barProperties.toolbarColor[1] = -1;
 			barProperties.textColor[1] = RGB(0,0,0);
+			barProperties.activeColor[1] = RGB(0, 163, 240);
 			overwriteProperties(barProperties);
 			buttonsBar.config.bToolbar = false; // buttons_xxx.js
 			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
+			buttonsBar.config.activeColor = barProperties.activeColor[1];
 			window.Repaint();
 		}});
 	}

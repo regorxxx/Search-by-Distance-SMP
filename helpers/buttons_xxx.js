@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/03/22
+//22/03/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -24,6 +24,7 @@ buttonsBar.config = {
 	toolbarColor: RGB(211,218,237), // Toolbar color
 	bToolbar: false, // Change this on buttons bars files to set the background color
 	textColor: RGB(0,0,0),
+	activeColor: RGB(0, 163, 240),
 	orientation: 'x',
 	bReflow: false,
 	bAlignSize: true,
@@ -49,7 +50,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	const old = buttonsBar.oldButtonCoordinates;
 	const bFirstButton = !old[orientation] ? true : false;
 	const keys = ['x','y','w','h'];
-	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, _isFunction(coord[c])];}));
+	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, isFunction(coord[c])];}));
 	const iCoord = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? coord[c]() : coord[c]];}));
 	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]()} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
 	if (recalc) {
@@ -74,9 +75,8 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 
 function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
 	this.state = state ? state : buttonStates.normal;
-	this.bActive = false;
-	this.animStep = -1;
-	this.condition = null;
+	this.animation = [];
+	this.active = false;
 	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
 	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
 	this.w = this.currW = coordinates.w * buttonsBar.config.scale;
@@ -89,12 +89,12 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 	this.g_font_icon = g_font_icon;
 	this.description = description;
 	this.text = text;
-	this.textWidth  = _isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), g_font);} : _gr.CalcTextWidth(this.text, g_font);
+	this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), g_font);} : _gr.CalcTextWidth(this.text, g_font);
 	this.icon = this.g_font_icon.Name !== 'Microsoft Sans Serif' ? icon : null; // if using the default font, then it has probably failed to load the right one, skip icon
-	this.iconWidth = _isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
+	this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), g_font_icon);} : _gr.CalcTextWidth(this.icon, g_font_icon);
 	this.fonClick = fonClick;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = _isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
+	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 
 	this.containXY = function (x, y) {
@@ -107,10 +107,28 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		return old;
 	};
 	
-	this.switchAnimation = function (bEnable, condition = null) {
-		this.bActive = bEnable;
-		this.condition = condition;
-		this.animStep = bEnable ? 0 : -1;
+	this.switchAnimation = function (name, bActive, condition = null) {
+		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
+		if (idx !== -1) { // Deactivated ones must be removed using this.cleanAnimation() afterwards
+			this.animation[idx].bActive = bActive;
+			this.animation[idx].condition = bActive ? condition : null;
+			this.animation[idx].animStep = bActive ? 0 : -1;
+		} else {
+			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1})
+		}
+	};
+	
+	this.cleanAnimation = function () {
+		if (this.animation.length) {this.animation = this.animation.filter((animation) => {return animation.bActive;});}
+	};
+	
+	this.isAnimationActive = function (name) {
+		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
+		return idx !== -1 && this.animation[idx].bActive;
+	};
+	
+	this.isAnyAnimationActive = function (name) {
+		return this.animation.some((obj) => {return obj.bActive;});
 	};
 
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
@@ -123,7 +141,7 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 				break;
 			}
 			case buttonStates.hover: {
-				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (_isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
 				this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 				break;
 			}
@@ -142,27 +160,47 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		// When moving buttons, the button may be drawn at another position though
 		if (this.moveX) {xCalc = this.moveX;}
 		if (this.moveY) {yCalc = this.moveY;}
+		const textCalculated = isFunction(this.text) ? this.text(this) : this.text;
+		// Draw button
 		this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);
+		// The rest...
 		if (this.icon !== null) {
-			let iconWidthCalculated = _isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
-			let textWidthCalculated = _isFunction(this.text) ? this.textWidth(this) : this.textWidth;
-			let iconCalculated = _isFunction(this.icon) ? this.icon(this) : this.icon;
-			let textCalculated = _isFunction(this.text) ? this.text(this) : this.text;
-			gr.GdiDrawText(iconCalculated, this.g_font_icon, buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Icon
-			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
-		} else {
-			let textCalculated = _isFunction(this.text) ? this.text(this) : this.text;
-			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX); // Text
-		}
-		// Animation
-		if (this.bActive) {
-			if (this.condition && this.condition()) {this.switchAnimation(false);}
-			else {
-				gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, this.animStep * 90, RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30), 1);
-				this.animStep++;
+			const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
+			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
+			if (this.active) { // Draw copy of icon in background blurred
+				const icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
+				const g = icon.GetGraphics();
+				g.SetTextRenderingHint(TextRenderingHint.AntiAlias);
+				g.DrawString(iconCalculated, this.g_font_icon, invert(buttonsBar.config.activeColor), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CALCRECT);
+				icon.StackBlur(30);
+				icon.ReleaseGraphics(g);
+				gr.SetTextRenderingHint(TextRenderingHint.ClearTypeGridFit);
+				// Image gets shifted in x and y axis.. don't know why
+				icon && gr.DrawImage(icon, xCalc + this.g_font_icon.Size * 5 / 8, yCalc + this.g_font_icon.Size * 3 / 8, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+				gr.SetTextRenderingHint(TextRenderingHint.SystemDefault);
 			}
-			throttledRepaint();
+			// Icon and text
+			gr.GdiDrawText(iconCalculated, this.g_font_icon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+		} else {
+			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 		}
+		// Process all animations but only paint once
+		let bDone = false;
+		this.animation.forEach((animation) => {
+			if (animation.bActive) {
+				if (animation.condition && Object.prototype.toString.call(animation.condition) === '[object Promise]') {animation.condition.then((bEnd) => {if (bEnd) {this.switchAnimation(animation.name, false);}});}
+				if (animation.condition && isFunction(animation.condition) && animation.condition()) {this.switchAnimation(animation.name, false);}
+				else if (!bDone) {
+					bDone = true;
+					gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, animation.animStep * 90, RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30), 1);
+					animation.animStep++;
+				}
+				throttledRepaint();
+			}
+		});
+		this.cleanAnimation(); // Remove finished ones
 	};
 
 	this.onClick = function (mask) {
@@ -177,8 +215,8 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		this.currW *= newScale;
 		this.g_font = _gdiFont(this.g_font.Name, 12 * scale);
 		this.g_font_icon = _gdiFont(this.g_font_icon.Name, 12 * scale);
-		this.textWidth  = _isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.g_font);} : _gr.CalcTextWidth(this.text, this.g_font);
-		this.iconWidth = _isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
+		this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.g_font);} : _gr.CalcTextWidth(this.text, this.g_font);
+		this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.g_font_icon);} : _gr.CalcTextWidth(this.icon, this.g_font_icon);
 	};
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
@@ -362,7 +400,7 @@ function on_key_down(k) { // Update tooltip with key mask if required
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
 				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
 	}
@@ -373,7 +411,7 @@ function on_key_up(k) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
 				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (_isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
 			}
 		}
 	}
