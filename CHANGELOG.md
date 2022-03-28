@@ -23,10 +23,13 @@
 - Debug: added 'graphStatistics' function which will perform basic statistical analysis over the entire graph, providing variables like: mean, median, standard deviation, distance histogram, etc. Given those values, it's reasonably easy to 'choose' the right values to retrieve nodes for a given similarity. Results are output as text and raw data (in object).
 ### Changed
 - HTML: Changed CSS layout to adjust sizes according to window.
+- Similar artists: Added new option to write similar artists tags only to previously non tagged files.
 ### Removed
 ### Fixed
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
 - Logging: Progress code in multiple tools have been fixed to display more accurately the percentage progress in the log.
+- Logging: non needed warning about 'name' variable not being recognized on recipes.
+- Recipes: 'name' was not being excluded when trying to save a recipe from current properties.
 - Properties were not being properly renumbered on some cases when moving buttons.
 - Crash when using double pass on harmonic mixing.
 
