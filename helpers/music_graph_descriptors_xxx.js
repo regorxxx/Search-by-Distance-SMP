@@ -91,7 +91,7 @@ const music_graph_descriptors = {
 	['Alternative_supergenre'			,	['Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Pop Punk','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
 	['Hardcore Punk_supergenre'			,	['Metalcore','Post-Hardcore','Math Rock','Grindcore','Crossover Thrash','Hardcore Punk','Anarcho-Punk','Stoner Rock','Stoner Sludge','Proto-Stoner Rock']],
 	['Contemporary_supergenre'			,	['Indie','Freak Folk','Neo-Prog','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Post-Britpop','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock']],
-	['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Electroclash','Post-Britpop','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
+	['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Electroclash','Post-Britpop','Emo Pop','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
 	['Modern Folk_supergenre'			,	['Folk-Rock','Folk Pop','Folk Baroque','Folk Metal','Psychedelic Folk','Contemporary Folk','Folktronica','Progressive Folk','Folk Punk','Hang Music','Ambient Folk']],
 	['European Pre-Modern Folk_supergenre',	['Medieval','Renaissance']],
 	['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango']],
@@ -283,7 +283,8 @@ const music_graph_descriptors = {
 	['Hypersoul'						,	['Urban Soul','Dance Pop']],
 	['Sadcore'							,	['Alt. Rock','Indie']],
 	['Desert Blues'						,	['Hill Country Blues','Blues Rock']],
-	['Ambient Industrial'				,	['Ambient']]
+	['Ambient Industrial'				,	['Ambient']],
+	['Emo Pop'							,	['Emo Rock']],
 	],
 	
 	style_secondary_origin: [
@@ -411,7 +412,8 @@ const music_graph_descriptors = {
 	['Geek Rock'						,	['Nerd Rock','Dork Rock'			]],
 	['Neo-Psychedelia'					,	['Neo Psychedelia'					]],
 	['Sadcore'							,	['Slowcore'							]],
-	['Synth-Pop'						,	['Techno-Pop'						]]
+	['Synth-Pop'						,	['Techno-Pop'						]],
+	['Emo Pop'							,	['Emo-Pop'							]]
 	],
 	
 	// For graph filtering
