@@ -2,4 +2,4 @@ Provides Peak to Loudness Ratio from replay gain values (DUI).
 
 ---------------------- At Playlist View\Custom Columns (DUI) ----------------------
 
-$puts(PLR,$if(%replaygain_track_peak_db%, $puts(PLR,$sub($mul($replace(%replaygain_track_peak_db%,.,),10),$sub($mul($replace(%replaygain_track_gain%,.,),-10),18000))) $puts(PLR_TEN,$left($right($get(PLR),3),2)) $puts(PLR_ROUND,$ifgreater($get(PLR_TEN),40,$add($get(PLR),100),$get(PLR)))$iflonger($get(PLR_ROUND),4,<$left($get(PLR_ROUND),2)<.$substr($get(PLR_ROUND),3,3),$left($get(PLR_ROUND),1)<.$substr($get(PLR_ROUND),2,2)),))$get(PLR)
+$puts(PLR,$if(%replaygain_track_peak_db%, $puts(PLR,$sub($mul($replace(%replaygain_track_peak_db%,.,),10),$sub($mul($replace(%replaygain_track_gain%,.,),-10),18000))) $puts(PLR_TEN,$left($right($get(PLR),3),2)) $puts(PLR_ROUND,$ifgreater($get(PLR_TEN),40,$add($get(PLR),100),$get(PLR)))$iflonger($get(PLR_ROUND),4,<$left($get(PLR_ROUND),2)<.$substr($get(PLR_ROUND),3,3),$left($get(PLR_ROUND),1)<.$substr($get(PLR_ROUND),2,2)),))$if2($get(PLR),?)

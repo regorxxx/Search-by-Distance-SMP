@@ -6,8 +6,11 @@ Provides Dynamic Range values with color codes (CUI).
 
 ---------------------- At Playlist View\Columns\Style Script (CUI) ----------------------
 
-$ifgreater(%DYNAMIC RANGE%,10,$set_style(back,$rgb(97,204,51,97,204,51)),
-$ifgreater(%DYNAMIC RANGE%,8,$set_style(back,$rgb(224,192,65,224,192,65)),
-$ifgreater(%DYNAMIC RANGE%,5,$set_style(back,$rgb(251,82,0,251,82,0)),
-$ifgreater(%DYNAMIC RANGE%,0,$set_style(back,$rgb(204,17,17,204,17,17)),
-))))
+$if(%DYNAMIC RANGE%,
+	$ifgreater(%DYNAMIC RANGE%,10,$set_style(back,$rgb(97,204,51,97,204,51)),
+	$ifgreater(%DYNAMIC RANGE%,8,$set_style(back,$rgb(224,192,65,224,192,65)),
+	$ifgreater(%DYNAMIC RANGE%,5,$set_style(back,$rgb(251,82,0,251,82,0)),
+	$ifgreater(%DYNAMIC RANGE%,0,$set_style(back,$rgb(204,17,17,204,17,17)),
+	$ifequal(%DYNAMIC RANGE%,0,$set_style(back,$rgb(104,17,17,104,17,17)),
+	)))))
+,)

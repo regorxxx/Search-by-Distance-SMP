@@ -10,7 +10,7 @@ $ifgreater($get(LUFS_TEN),40,$add($get(LUFS),100),
 $get(LUFS)))$iflonger($get(LUFS_ROUND),4,
 $left($get(LUFS_ROUND),2).$substr($get(LUFS_ROUND),3,3),$left($get(LUFS_ROUND),1).$substr($get(LUFS_ROUND),2,2)),))
 
-$get(LUFS)
+$if2($get(LUFS),?)
 
 ---------------------- At Playlist View\Columns\Style Script (CUI) ----------------------
 
@@ -22,8 +22,11 @@ $ifgreater($get(LUFS_TEN),40,$add($get(LUFS),100),
 $get(LUFS)))$iflonger($get(LUFS_ROUND),4,
 $left($get(LUFS_ROUND),2).$substr($get(LUFS_ROUND),3,3),$left($get(LUFS_ROUND),1).$substr($get(LUFS_ROUND),2,2)),))
 
-$ifgreater($get(LUFS),13,$set_style(back,$rgb(97,204,51,97,204,51)),
-$ifgreater($get(LUFS),9,$set_style(back,$rgb(224,192,65,224,192,65)),
-$ifgreater($get(LUFS),7,$set_style(back,$rgb(251,82,0,251,82,0)),
-$ifgreater($get(LUFS),0,$set_style(back,$rgb(204,17,17,204,17,17)),
-))))
+$if($get(PLR),
+	$ifgreater($get(LUFS),13,$set_style(back,$rgb(97,204,51,97,204,51)),
+	$ifgreater($get(LUFS),9,$set_style(back,$rgb(224,192,65,224,192,65)),
+	$ifgreater($get(LUFS),7,$set_style(back,$rgb(251,82,0,251,82,0)),
+	$ifgreater($get(LUFS),0,$set_style(back,$rgb(204,17,17,204,17,17)),
+	$ifequal($get(LUFS),0,$set_style(back,$rgb(104,17,17,104,17,17)),
+	)))))
+,)

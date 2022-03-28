@@ -6,10 +6,12 @@ $replace(%LRA%, LU,)
 
 ---------------------- At Playlist View\Columns\Style Script (CUI) ----------------------
 
-$puts(LRA,$if(%LRA%,$replace(%LRA%, LU,),))
-
-$ifgreater($get(LRA),12,$set_style(back,$rgb(97,204,51,97,204,51)),
-$ifgreater($get(LRA),6,$set_style(back,$rgb(224,192,65,224,192,65)),
-$ifgreater($get(LRA),4,$set_style(back,$rgb(251,82,0,251,82,0)),
-$ifgreater($get(LRA),0,$set_style(back,$rgb(204,17,17,204,17,17)),
-))))
+$if(%LRA%,
+	$puts(LRA,$replace(%LRA%, LU,))
+	$ifgreater($get(LRA),12,$set_style(back,$rgb(97,204,51,97,204,51)),
+	$ifgreater($get(LRA),6,$set_style(back,$rgb(224,192,65,224,192,65)),
+	$ifgreater($get(LRA),4,$set_style(back,$rgb(251,82,0,251,82,0)),
+	$ifgreater($get(LRA),0,$set_style(back,$rgb(204,17,17,204,17,17)),
+	$ifequal($get(LRA),0,$set_style(back,$rgb(104,17,17,104,17,17)),
+	)))))
+,)
