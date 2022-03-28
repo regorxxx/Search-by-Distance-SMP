@@ -587,7 +587,7 @@ if (panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
 const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -601,6 +601,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 					Object.fromEntries([...recipePropertiesAllowedKeys].map((key) => {return [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]];}))
 				};
 			}
+			if (key === 'name') {descr = 'Preset name (instead of filename)';}
 			if (key === 'theme') {descr = 'Load additional theme by file name or path';}
 			if (key === 'recipe') {descr = 'Load additional recipe(s) by file name or path. Nesting and multiple values (array) allowed';}
 			if (key === 'bPoolFiltering') {descr = 'Global enable/disable switch. Equivalent to setting poolFilteringN to >0 or -1';}
@@ -717,7 +718,11 @@ function do_searchby_distance({
 			Object.keys(recipe).forEach((key) => { // Process current recipe
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
 				if (recipeAllowedKeys.has(key)) {
-					if (key === 'properties') { // Overrule current ones (but don't touch original object!)
+					if (key === 'name') {
+						return;
+					} else if (key === 'recipe') {
+						return; // Skip, already processed
+					} else if (key === 'properties') { // Overrule current ones (but don't touch original object!)
 						const newProperties = recipe[key];
 						if (newProperties) {
 							Object.keys(newProperties).forEach((rKey) => {
@@ -725,8 +730,6 @@ function do_searchby_distance({
 								recipeProperties[rKey] = newProperties[rKey];
 							});
 						}
-					} else if (key === 'recipe') {
-						return; // Skip, already processed
 					} else {
 						if (isStringWeak(value)) {
 							eval(key + ' = \'' + value + '\'');
@@ -1129,7 +1132,7 @@ function do_searchby_distance({
 				if (influences.length) {
 					influences = [...new Set(influences)];
 					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
-					temp = '(' + query_join(temp, 'OR') + ')'; // flattens the array. Here changes the 'not' part
+					temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
 					influencesQuery.push(temp);
 					sbd_max_graph_distance = Infinity;
 					scoreFilter = 40;
@@ -1144,17 +1147,17 @@ function do_searchby_distance({
 			let queryArtist = '';
 			if (tags.length) {
 				queryArtist = tags.map((artist) => {return 'ARTIST IS ' + artist;});
-				queryArtist = 'NOT (' + query_join(queryArtist, 'OR') + ')';
+				queryArtist = 'NOT ' + _p(query_join(queryArtist, 'OR'));
 			}
 			if (queryArtist.length) {
-				if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND (' + queryArtist + ')';}
+				if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryArtist);}
 				else {query[querylength] += queryArtist;}
 			}
 		}
 		if (bSimilArtistsFilter && !bUseTheme) {
 			const file = folders.data + 'searchByDistance_artists.json';
 			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
-			let similTags = fb.TitleFormat('[%' + tagName + '%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
+			let similTags = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(sel).split(', ').filter(Boolean);
 			let querySimil = '';
 			if (!similTags.length && _isFile(file)) {
 				const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
@@ -1170,12 +1173,12 @@ function do_searchby_distance({
 				querySimil = query_join(querySimil, 'OR');
 			}
 			if (querySimil.length) {
-				if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND (' + querySimil + ')';}
+				if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(querySimil);}
 				else {query[querylength] += querySimil;}
 			}
 		}
 		if (forcedQuery.length) { //Add user input query to the previous one
-			if (query[querylength].length) {query[querylength] = '(' + query[querylength] + ') AND ' + forcedQuery;}
+			if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(forcedQuery);}
 			else {query[querylength] += forcedQuery;}
 		}
 		if (!query[querylength].length) {query[querylength] = 'ALL'}

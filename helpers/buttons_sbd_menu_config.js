@@ -4,6 +4,7 @@
 include('menu_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
+include('helpers_xxx_prototypes.js');
 
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
@@ -144,12 +145,13 @@ function createConfigMenu(parent) {
 			options.forEach((obj) => {
 				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
 				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
-				let input = properties['forcedQuery'][1].length ? ') AND (' + obj.query + ')' : obj.query;
+				let input = properties['forcedQuery'][1].length ? ' AND ' + _p(obj.query) : obj.query;
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
 					if (properties['forcedQuery'][1].indexOf(input) !== -1) {
-						input = properties['forcedQuery'][1].slice(1).replace(input, '');
+						input = properties['forcedQuery'][1].replace(input, ''); // Query
+						input = input.slice(1, -1); // Remove parentheses
 					} else {
-						input = properties['forcedQuery'][1].length ? '(' + properties['forcedQuery'][1] + input : input;
+						input = properties['forcedQuery'][1].length ? _p(properties['forcedQuery'][1]) + input : input;
 					}
 					try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
 					catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
@@ -407,18 +409,41 @@ function createConfigMenu(parent) {
 					_save(file, JSON.stringify(data || newData, null, '\t'));
 				}
 				profiler.Print();
+				if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				else {
+					newData.forEach((obj) => {
+						const artist = obj.artist.split(', ');
+						const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
+						if (!similarArtists.length) {return;}
+						const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
+						const count = artistTracks.Count;
+						if (count) {
+							let arr = [];
+							for (let i = 0; i < count; ++i) {
+								arr.push({
+									[tagName] : similarArtists
+								});
+							}
+							artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
+							console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
+						}
+					});
+				}
 			}});
 			menu.newEntry({menuName: submenu, entryText: 'Write similar artists tags', func: () => {
-				if (WshShell.Popup('Write similar artist tag from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
 				if (!_isFile(file)) {return;}
 				else {
 					const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
 					if (data) {
+						const bRewrite = WshShell.Popup('Rewrite previously added similar artist tags?', 0, window.Name, popup.question + popup.yes_no) === popup.yes;
+						const queryNoRw = ' AND ' + tagName + ' MISSING';
 						data.forEach((obj) => {
 							const artist = obj.artist.split(', ');
 							const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
 							if (!similarArtists.length) {return;}
-							const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
+							const queryArtists = artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ');
+							const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), (bRewrite ? queryArtists : _p(queryArtists) + queryNoRw));
 							const count = artistTracks.Count;
 							if (count) {
 								let arr = [];
