@@ -9,11 +9,11 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	// Find which genre/styles are nearest as pre-filter
 	const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['genre', 'style'], true).flat().filter(Boolean);
 	const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph)
-	const allowedGenresQuery = allowedGenres.map((tag) => {return '(GENRE IS ' + tag + ' OR STYLE IS ' + tag + ')'}).join(' OR ');
+	const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag)}).join(' OR ');
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['artist'], true).flat().filter(Boolean);
-	const forcedQuery = '(' + artist.map((tag) => {return '(NOT ARTIST IS ' + tag + ')'}).join(' AND ') + (allowedGenresQuery.length ? ') AND (' + allowedGenresQuery + ')' : ')');
-	const libQuery = artist.map((tag) => {return '(ARTIST IS ' + tag + ')'}).join(' AND ');
+	const forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag)}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
+	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag)}).join(' AND ');
 	const selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
 	// Use only X random tracks instead of all of them
 	const report = new Map();
@@ -27,7 +27,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		// Further filter the tracks using a date range
 		const dateTag = newConfig.dateTag[1], dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
 		const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
-		const dateQuery = date && date.length ? '(' + dateQueryTag + ' GREATER ' + (Number(date)- Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2)) + ')' : null;
+		const dateQuery = date && date.length ? _p(dateQueryTag + ' GREATER ' + (Number(date)- Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2))) : null;
 		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
  		const data = do_searchby_distance({
 			properties: newConfig,
@@ -122,7 +122,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist
 	const dataId = 'artist';
-	const selId = fb.TitleFormat('[%' + dataId+ '%]').EvalWithMetadb(selHandle);
+	const selId = fb.TitleFormat(_bt(dataId)).EvalWithMetadb(selHandle);
 	if (panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
 	// Retrieve world map data
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';

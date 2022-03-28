@@ -425,7 +425,7 @@ const music_graph_descriptors = {
 	'African','Indian','Nubian','Greek','Spanish Hip-Hop','German Rock','Israeli',
 	'Spoken Word','Israeli Rock','Uruguayan Rock','Mexican Rock','Italian Rock',
 	'Asian Folk','Torch Songs','Dummy','Rock Opera','Musical','Tuareg Music','Tex-Mex',
-	'Música Popular Brasileira','Jam Band','Spanish Jazz'
+	'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock'
 	]),
 	/*
 		-------------------------
