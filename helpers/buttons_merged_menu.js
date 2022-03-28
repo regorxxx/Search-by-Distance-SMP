@@ -173,11 +173,20 @@ function createButtonsMenu(name) {
 			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
+		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set active button color...', func: () => {
 			barProperties.activeColor[1] = utils.ColourPicker(window.ID, barProperties.activeColor[1]);
 			overwriteProperties(barProperties);
 			buttonsBar.config.activeColor = barProperties.activeColor[1]; // buttons_xxx.js
 			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'Set animation button colors...', func: () => {
+			let colors = JSON.parse(barProperties.animationColors[1]);
+			colors = [RGBA(...toRGB(utils.ColourPicker(window.ID, colors[0])), 50), RGBA(...toRGB(utils.ColourPicker(window.ID, colors[1])), 30)];
+			barProperties.animationColors[1] = JSON.stringify(colors);
+			overwriteProperties(barProperties);
+			buttonsBar.config.animationColors = colors; // buttons_xxx.js
+			window.Repaint(); // Note existing animations will use the previous colors, since the (default) colors are applied per animation once before firing
 		}});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'No background buttons', func: () => {

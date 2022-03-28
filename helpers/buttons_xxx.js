@@ -25,6 +25,7 @@ buttonsBar.config = {
 	bToolbar: false, // Change this on buttons bars files to set the background color
 	textColor: RGB(0,0,0),
 	activeColor: RGB(0, 163, 240),
+	animationColors: [RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30)],
 	orientation: 'x',
 	bReflow: false,
 	bAlignSize: true,
@@ -75,7 +76,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 
 function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, g_font_icon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
 	this.state = state ? state : buttonStates.normal;
-	this.animation = [];
+	this.animation = []; /* {bActive, condition, animStep} */
 	this.active = false;
 	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
 	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
@@ -107,15 +108,18 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		return old;
 	};
 	
-	this.switchAnimation = function (name, bActive, condition = null) {
+	this.switchAnimation = function (name, bActive, condition = null, animationColors = buttonsBar.config.animationColors) {
 		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
 		if (idx !== -1) { // Deactivated ones must be removed using this.cleanAnimation() afterwards
 			this.animation[idx].bActive = bActive;
 			this.animation[idx].condition = bActive ? condition : null;
 			this.animation[idx].animStep = bActive ? 0 : -1;
+			this.animation[idx].date = bActive ? Date.now() : -1;
+			this.animation[idx].colors = animationColors;
 		} else {
-			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1})
+			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors})
 		}
+		throttledRepaint();
 	};
 	
 	this.cleanAnimation = function () {
@@ -168,20 +172,23 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
 			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
-			if (this.active) { // Draw copy of icon in background blurred
-				const icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
-				const g = icon.GetGraphics();
-				g.SetTextRenderingHint(TextRenderingHint.AntiAlias);
-				g.DrawString(iconCalculated, this.g_font_icon, invert(buttonsBar.config.activeColor), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CALCRECT);
-				icon.StackBlur(30);
-				icon.ReleaseGraphics(g);
-				gr.SetTextRenderingHint(TextRenderingHint.ClearTypeGridFit);
-				// Image gets shifted in x and y axis.. don't know why
-				icon && gr.DrawImage(icon, xCalc + this.g_font_icon.Size * 5 / 8, yCalc + this.g_font_icon.Size * 3 / 8, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
-				gr.SetTextRenderingHint(TextRenderingHint.SystemDefault);
+			if (iconCalculated) { // Icon
+ 				if (this.active) { // Draw copy of icon in background blurred
+					const icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
+					const g = icon.GetGraphics();
+					g.SetTextRenderingHint(TextRenderingHint.AntiAlias);
+					g.DrawString(iconCalculated, this.g_font_icon, invert(buttonsBar.config.activeColor), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CALCRECT);
+					icon.StackBlur(15);
+					icon.ReleaseGraphics(g);
+					const orientation = buttonsBar.config.orientation.toLowerCase()
+					gr.SetTextRenderingHint(TextRenderingHint.ClearTypeGridFit);
+					// Image gets shifted in x and y axis... since it's not using text flags
+					gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 3/4 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+					gr.SetTextRenderingHint(TextRenderingHint.SystemDefault);
+				}
+				gr.GdiDrawText(iconCalculated, this.g_font_icon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 			}
-			// Icon and text
-			gr.GdiDrawText(iconCalculated, this.g_font_icon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			// Text
 			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 		} else {
 			gr.GdiDrawText(textCalculated, this.g_font, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
@@ -192,10 +199,17 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			if (animation.bActive) {
 				if (animation.condition && Object.prototype.toString.call(animation.condition) === '[object Promise]') {animation.condition.then((bEnd) => {if (bEnd) {this.switchAnimation(animation.name, false);}});}
 				if (animation.condition && isFunction(animation.condition) && animation.condition()) {this.switchAnimation(animation.name, false);}
-				else if (!bDone) {
-					bDone = true;
-					gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, animation.animStep * 90, RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30), 1);
-					animation.animStep++;
+				else {
+					if (!bDone) {
+						bDone = true;
+						gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, animation.animStep * 90, animation.colors[0], animation.colors[1], 1);
+						const now = Date.now();
+						if (now - animation.date > 2000) {
+							animation.animStep++;
+							animation.date = now;
+						}
+						
+					}
 				}
 				throttledRepaint();
 			}
@@ -280,6 +294,7 @@ function on_mouse_move(x, y, mask) {
 		}
 	} else if (buttonsBar.g_down && buttonsBar.curBtn && buttonsBar.curBtn.state !== buttonStates.down) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
+		old && old.changeState(buttonStates.normal);
 		window.Repaint();
 		return;
 	}
@@ -346,10 +361,10 @@ function on_mouse_move(x, y, mask) {
 
 function on_mouse_leave() {
 	buttonsBar.g_down = false;
-
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.normal);
 		window.Repaint();
+		buttonsBar.curBtn = null;
 	}
 }
 
@@ -386,7 +401,7 @@ function on_mouse_lbtn_up(x, y, mask) {
 	buttonsBar.g_down = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.onClick(mask);
-		if (buttonsBar.curBtn) { // Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
+		if (buttonsBar.curBtn && window.IsVisible) { // Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
 			buttonsBar.curBtn.changeState(buttonStates.hover);
 			window.Repaint();
 		}
