@@ -24,6 +24,7 @@
 ### Changed
 - HTML: Changed CSS layout to adjust sizes according to window.
 - Similar artists: Added new option to write similar artists tags only to previously non tagged files.
+- Helpers: improved sort and query expressions validity checks.
 ### Removed
 ### Fixed
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
