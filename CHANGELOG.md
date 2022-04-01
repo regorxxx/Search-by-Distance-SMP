@@ -29,6 +29,7 @@
 ### Fixed
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
 - Helpers: fixed query checking not working due to upper/lower case mixing in some cases, should now be pretty robust with RegEx.
+- Helpers: fixed UI slowdowns when required font is not found (due to excessive console logging). Now a warning popup is shown and logging is only done once per session.
 - Logging: Progress code in multiple tools have been fixed to display more accurately the percentage progress in the log.
 - Logging: non needed warning about 'name' variable not being recognized on recipes.
 - Recipes: 'name' was not being excluded when trying to save a recipe from current properties.

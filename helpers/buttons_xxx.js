@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/03/22
+//31/03/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -108,6 +108,11 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		return old;
 	};
 	
+	this.switchActive = function (bActive = null) {
+		this.active = bActive !== null ? bActive : !this.active;
+		window.Repaint();
+	};
+	
 	this.switchAnimation = function (name, bActive, condition = null, animationColors = buttonsBar.config.animationColors) {
 		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
 		if (idx !== -1) { // Deactivated ones must be removed using this.cleanAnimation() afterwards
@@ -174,17 +179,14 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
 			if (iconCalculated) { // Icon
  				if (this.active) { // Draw copy of icon in background blurred
-					const icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
+					let icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
 					const g = icon.GetGraphics();
-					g.SetTextRenderingHint(TextRenderingHint.AntiAlias);
-					g.DrawString(iconCalculated, this.g_font_icon, invert(buttonsBar.config.activeColor), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CALCRECT);
-					icon.StackBlur(15);
+					g.DrawString(iconCalculated, this.g_font_icon, tintColor(buttonsBar.config.activeColor, 50), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					icon = icon.Resize(this.g_font_icon.Size + 2, this.g_font_icon.Size + 2, 0);
 					icon.ReleaseGraphics(g);
 					const orientation = buttonsBar.config.orientation.toLowerCase()
-					gr.SetTextRenderingHint(TextRenderingHint.ClearTypeGridFit);
 					// Image gets shifted in x and y axis... since it's not using text flags
-					gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 3/4 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
-					gr.SetTextRenderingHint(TextRenderingHint.SystemDefault);
+					gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 9/10 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 				}
 				gr.GdiDrawText(iconCalculated, this.g_font_icon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 			}
