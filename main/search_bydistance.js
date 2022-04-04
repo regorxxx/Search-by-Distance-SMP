@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/03/22
+//04/04/22
 
 /*	
 	Search by Distance
@@ -622,6 +622,7 @@ function do_searchby_distance({
 								sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
 								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
 								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+								bAscii					= true, // Sanitize all tag values with ACII equivalent chars // TODO
 								// --->Weights
 								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
 								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
