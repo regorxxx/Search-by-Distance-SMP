@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/04/22
+//05/04/22
 
 /*	
 	Search by Distance
@@ -622,7 +622,9 @@ function do_searchby_distance({
 								sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
 								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
 								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+								// --->Args modifiers
 								bAscii					= true, // Sanitize all tag values with ACII equivalent chars // TODO
+								bCapitalize				= true, // Sanitize all genre/style tag values with proper letter case // TODO
 								// --->Weights
 								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
 								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
@@ -882,11 +884,11 @@ function do_searchby_distance({
 		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length.
 		// Using only boolean filter it's 3x faster than filtering by set
 		const selHandleList = bUseTheme ? null : new FbMetadbHandleList(sel);
-		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].genre.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].genre.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean))): [];
-		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? (bTagFilter ? theme.tags[0].style.filter(tag => !genreStyleFilter.has(tag)) : theme.tags[0].style.filter(Boolean)) : (bTagFilter ? getTagsValuesV3(selHandleList, styleTag, true).flat().filter(tag => !genreStyleFilter.has(tag)) : getTagsValuesV3(selHandleList, styleTag, true).flat().filter(Boolean))) : [];
-		const mood = (moodWeight !== 0) ? (bUseTheme ? theme.tags[0].mood.filter(Boolean) : getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean)) : [];
-		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer.filter(Boolean) : getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean)) : [];
-		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr.filter(Boolean) : getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean)) : [];
+		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? theme.tags[0].genre : getTagsValuesV3(selHandleList, genreTag, true).flat()).filter(bTagFilter ? tag => !genreStyleFilter.has(tag) : Boolean): [];
+		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? theme.tags[0].style : getTagsValuesV3(selHandleList, styleTag, true).flat()).filter(bTagFilter ? tag => !genreStyleFilter.has(tag) : Boolean): [];
+		const mood = (moodWeight !== 0) ? (bUseTheme ? theme.tags[0].mood : getTagsValuesV3(selHandleList, moodTag, true).flat()).filter(Boolean) : [];
+		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer : getTagsValuesV3(selHandleList, composerTag, true).flat()).filter(Boolean) : [];
+		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr : getTagsValuesV3(selHandleList, customStrTag, true).flat()).filter(Boolean) : [];
 		
 		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? keyTag[0] : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? bpmTag[0] : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
 		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
@@ -904,10 +906,10 @@ function do_searchby_distance({
 		
 		let originalWeightValue = 0;
 		// Genres
-        const genreNumber = genre.length;
+        const genreNumber = genreSet.size;
 		if (genreNumber !== 0) {
 			originalWeightValue += genreWeight;
-			if ( genreWeight / totalWeight >= totalWeight / countWeights / 100) {
+			if (genreWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				if (genreTag.length > 1) {query[queryl] += query_join(query_combinations(genre, genreTag, 'OR'), 'OR');}
@@ -915,10 +917,10 @@ function do_searchby_distance({
 			}
 		} else if (genreWeight !== 0 && bBasicLogging) {console.log('GenreWeight was not zero but selected track had no genre tags');}
         // Styles
-		const styleNumber = style.length;
+		const styleNumber = styleSet.size;
 		if (styleNumber !== 0) {
 			originalWeightValue += styleWeight;
-			if ( styleWeight / totalWeight >= totalWeight / countWeights / 100) {
+			if (styleWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				if (styleTag.length > 1) {query[queryl] += query_join(query_combinations(style, styleTag, 'OR'), 'OR');}
@@ -941,10 +943,10 @@ function do_searchby_distance({
 			}
 		} else if (dyngenreWeight !== 0 && bBasicLogging) {console.log('dyngenreWeight was not zero but selected track had no style nor genre tags');}
         // Moods
-		const moodNumber = mood.length;
+		const moodNumber = moodSet.size;
 		if (moodNumber !== 0) {
 			originalWeightValue += moodWeight;
-			if ( moodWeight / totalWeight / moodNumber * kMoodNumber >= totalWeight / countWeights / 100) {
+			if (moodWeight / totalWeight / moodNumber * kMoodNumber >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				const k = moodNumber >= kMoodNumber ? kMoodNumber : moodNumber; //on combinations of 6
@@ -955,9 +957,10 @@ function do_searchby_distance({
 			}
 		} else if (moodWeight !== 0 && bBasicLogging) {console.log('moodWeight was not zero but selected track had no mood tags');}
         // Key
-		if (key.length) {
+		const keyLength = key.length;
+		if (keyLength) {
 			originalWeightValue += keyWeight;
-			if ( keyWeight / totalWeight >= totalWeight / countWeights / 100) {
+			if (keyWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
@@ -1058,7 +1061,7 @@ function do_searchby_distance({
 			}
 		} else if (composerWeight !== 0 && bBasicLogging) {console.log('composerWeight was not zero but selected track had no composer tags');}
         // customStringTag
-		const customStrNumber = customStr.length;
+		const customStrNumber = customStrSet.size;
 		if (customStrNumber !== 0) {
 			originalWeightValue += customStrWeight;
 			if ( customStrWeight / totalWeight >= totalWeight / countWeights / 100) {
@@ -1228,8 +1231,8 @@ function do_searchby_distance({
 			let dyngenreNew = [];
 			
 			// Get the tags according to weight and filter ''. Also create sets for comparison
-			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? genreHandle[i].filter(tag => !genreStyleFilter.has(tag)) : genreHandle[i].filter(Boolean)) : [];
-			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (bTagFilter ? styleHandle[i].filter(tag => !genreStyleFilter.has(tag)) : styleHandle[i].filter(Boolean)) : [];
+			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? genreHandle[i].filter(bTagFilter ? tag => !genreStyleFilter.has(tag) : Boolean) : [];
+			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? styleHandle[i].filter(bTagFilter ? tag => !genreStyleFilter.has(tag) : Boolean) : [];
 			const moodNew = (moodWeight !== 0) ? moodHandle[i].filter(Boolean) : [];
 			const genreNewSet = new Set(genreNew);
 			const styleNewSet = new Set(styleNew);
@@ -1246,7 +1249,6 @@ function do_searchby_distance({
 			const customStrNewSet = new Set(customStrNew);
 			
 			const style_genreSetNew = new Set(genreNew.concat(styleNew)).difference(map_distance_exclusions); // Remove exclusions
-			const style_genre_new_length = style_genreSetNew.size;
 			
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
@@ -1271,7 +1273,7 @@ function do_searchby_distance({
 				}
 			}
 			
-			if (keyWeight !== 0 && key.length !== 0 && keyNew.length) {
+			if (keyWeight !== 0 && keyLength !== 0 && keyNew.length) {
 				if (key === keyNew) { // Not only fastest but also allows for arbitrary key notations (although only using simple matching)
 					weightValue += keyWeight;
 				} else if (keyRange !== 0){
@@ -1347,7 +1349,7 @@ function do_searchby_distance({
 			}
 			
 			if (dyngenreWeight !== 0 && dyngenreNumber !== 0) {
-				if (style_genre_new_length !== 0) {
+				if (style_genreSetNew.size !== 0) {
 					for (let style_genreNew_i of style_genreSetNew) {
 						const dyngenre_i = genre_style_map.get(style_genreNew_i);
 						if (dyngenre_i) {dyngenreNew = dyngenreNew.concat(dyngenre_i);}
@@ -1789,7 +1791,9 @@ function do_searchby_distance({
 		if (bProfile) {test.Print('Task #6: Final Selection', false);}
 		if (bShowFinalSelection && !bProgressiveListCreation) {
 			let i = finalPlaylistLength;
-			while (i--) {console.log(selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : ''));}
+			let conText = 'List of selected tracks:';
+			while (i--) {conText += '\n\                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : '');}
+			console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 		}
 			
 		// Insert to playlist

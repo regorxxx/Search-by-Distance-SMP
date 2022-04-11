@@ -21,12 +21,20 @@
 - HTML: Selecting a node and pressing shift while hovering another node highlights the shortest path between them.
 - HTML: Added favicon.
 - Debug: added 'graphStatistics' function which will perform basic statistical analysis over the entire graph, providing variables like: mean, median, standard deviation, distance histogram, etc. Given those values, it's reasonably easy to 'choose' the right values to retrieve nodes for a given similarity. Results are output as text and raw data (in object).
+- Debug: added multiple letter case checks at debug.
+- Debug: added accent checks (instead of single quotes) at debug.
+- Debug: added ASCII compatibility checks at debug.
 ### Changed
+- Logging: Greatly optimized console logging when sending selected tacks to console. It now outputs the entire list at once (instead of one entry per track). This reduces processing time by +2 secs for +50 tracks (the standard playlist size)... so total processing time has been reduced in most cases by half just with the logging optimization.
 - HTML: Changed CSS layout to adjust sizes according to window.
 - Similar artists: Added new option to write similar artists tags only to previously non tagged files.
 - Helpers: improved sort and query expressions validity checks.
+- Optimized a bit the comparison code along a general cleanup of code.
 ### Removed
 ### Fixed
+- Descriptors: fixed multiple letter case errors.
+- Descriptors: fixed accent usage instead of single quote.
+- Cultural Regions: improved capitalization logic.
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
 - Helpers: fixed query checking not working due to upper/lower case mixing in some cases, should now be pretty robust with RegEx.
 - Helpers: fixed UI slowdowns when required font is not found (due to excessive console logging). Now a warning popup is shown and logging is only done once per session.
