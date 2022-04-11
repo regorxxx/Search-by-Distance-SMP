@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/01/22
+//11/04/22
 
 function regionMap({nodeName = 'node', culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
@@ -31,7 +31,7 @@ function regionMap({nodeName = 'node', culturalRegion} = {}) {
 };
 
 regionMap.prototype.capitalize = function capitalize(string) {
-    return string[0].toUpperCase() + string.slice(1);
+	return string.split(' ').map((_) => {return _[0].toUpperCase() + _.slice(1).toLowerCase();}).join(' ');
 };
 
 regionMap.prototype.has = function has(region) {
