@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/02/22
+//05/02/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -346,6 +346,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 
 /* 
 	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
+	Unoptimized code on multiple loops since this should be run only on demand for testing once on a while...
 */
 function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	console.log('music_graph_descriptors_xxx: Basic debug enabled');
@@ -560,6 +561,44 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 			bWarning = true;
 		}
 	});
+	// Check letter case
+	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
+		const nodeList = nodePair[1];
+		const sep = /([ \-&])/g; // Added parentheses so they are also included on the split array
+		const otherRegEx = [[/\bXL\b/ig, 'XL'], [/\bEDM\b/ig, 'EDM'], [/\bNRG\b/ig, 'NRG'], [/\bUK\b/ig, 'UK'], [/\bIDM\b/ig, 'IDM'], [/\bar\b/ig, 'ar']];
+		nodeList.forEach( (node) => {
+			let capNode = node.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join('');
+			otherRegEx.forEach((rgex) => {capNode = capNode.replace(rgex[0], rgex[1]);});
+			if (capNode !== node) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not following standard letter case. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		});
+	});
+	// Check ASCII compatibility
+	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
+		const nodeList = nodePair[1];
+		const asciiRegEx = [[/[\u0300-\u036f]/g, ''], [/\u0142/g, 'l']];
+		nodeList.forEach( (node) => {
+			let asciiNode = node.normalize('NFD');
+			asciiRegEx.forEach((rgex) => {asciiNode = asciiNode.replace(rgex[0], rgex[1]);});
+			if (asciiNode !== node) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not compatible with ASCII. Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		});
+	});
+	// Check accents instead of single quotes
+	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
+		const nodeList = nodePair[1];
+		const regEx = /[`´]/g;
+		nodeList.forEach( (node) => {
+			if (node.search(regEx) !== -1) {
+				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not following single quote usage (\'). Check \'Graph nodes and links\' section\n' + '	' +  node);
+				bWarning = true;
+			}
+		});
+	});
 	// Test basic paths using the graph. 
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
 	var bGraphDeclared = true;
@@ -588,7 +627,6 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 		let key_one = '';
 		let key_two = '';
 		let nextIndex = 1;
-		
 		const superGenreNumbers = music_graph_descriptors.style_supergenre.length; // SuperGenres
 		for (let i = 0; i < superGenreNumbers; i++, nextIndex++) {
 			if (i + 1 === superGenreNumbers) {nextIndex = 0;}
@@ -607,7 +645,6 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 				bWarning = true;
 			}
 		}
-
 		const style_supergenre_clusterNumbers = music_graph_descriptors.style_supergenre_cluster.length; // style_supergenre_clusters
 		for (let i = 0; i < style_supergenre_clusterNumbers; i++, nextIndex++) {
 			if (i + 1 === style_supergenre_clusterNumbers) {nextIndex = 0;}
