@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/10/21
+//11/04/22
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
@@ -312,10 +312,10 @@ function get_nodes_from_path(graph, path) {
 // To capitalize nodes if using standard descriptors
 function capitalize(s) {
   if (typeof s !== 'string') {return '';}
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 
 function capitalizeAll(s, sep = ' ') {
   if (typeof s !== 'string') {return '';}
-  return s.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1);}).join(sep); // Split, capitalize each subString and join
+  return s.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join(sep); // Split, capitalize each subString and join
 }
