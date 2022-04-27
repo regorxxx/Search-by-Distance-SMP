@@ -28,7 +28,7 @@ function regionMap({nodeName = 'node', culturalRegion} = {}) {
 		this.regionList = {mainRegions, regions, regionsMap, regionsList};
 	};
 	this.updateRegionList();
-};
+}
 
 regionMap.prototype.capitalize = function capitalize(string) {
 	return string.split(' ').map((_) => {return _[0].toUpperCase() + _.slice(1).toLowerCase();}).join(' ');
@@ -108,7 +108,7 @@ regionMap.prototype.getFirstNodeRegion = function getFirstNodeRegion(node) {
 
 regionMap.prototype.isSameRegionNodes = function isSameRegionNodes(nodeA, nodeB, bMain = false) {
 	const regionA = Object.entries(this.getNodeRegion(nodeA));
-	return regionA.some((pair) => {return this.regionHasNode(bMain ? pair[0] : pair[1], nodeB);});;
+	return regionA.some((pair) => {return this.regionHasNode(bMain ? pair[0] : pair[1], nodeB);});
 };
 
 regionMap.prototype.getNodesFromRegion = function getNodesFromRegion(region) {
