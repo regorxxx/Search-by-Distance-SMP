@@ -16,6 +16,7 @@
 ### Changed
 ### Removed
 ### Fixed
+- Crash in some cases when pool of selected tracks was empty.
 
 ## [2.1.2] - 2022-04-13
 ### Added

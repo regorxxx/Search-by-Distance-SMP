@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/22
+//02/05/22
 
 /*	
 	Search by Distance
@@ -1508,294 +1508,307 @@ function do_searchby_distance({
 		// In Key Mixing or standard methods.
 		let selectedHandlesArray = []; // Final playlist output
 		let selectedHandlesData = []; // For console
-		if (bInKeyMixingPlaylist) {
-			// DJ-like playlist creation with key changes following harmonic mixing rules... Uses 9 movements described at 'camelotWheel' on camelot_wheel_xxx.js
-			// The entire pool is considered, instead of using the standard playlist selection. Since the pattern is random, it makes no sense
-			// to use any specific order of pre-selection or override the playlist with later sorting.
-			// Also note the movements creates a 'path' along the track keys, so even changing or skipping one movement changes drastically the path;
-			// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements. 
-			// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
-			// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
-			bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
-			if (key.length) {
-				// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-				const size = poolLength < playlistLength ? poolLength : playlistLength;
-				const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
-				if (bSearchDebug) {console.log(pattern)};
-				let nextKeyObj;
-				let keyCache = new Map();
-				let keyDebug = [];
-				let keySharpDebug = [];
-				let patternDebug = [];
-				let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).shuffle());
-				let nextIndexScore = 0;
-				let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
-				let camelotKeyCurrent, camelotKeyNew;
-				for (let i = 0, j = 0; i < size - 1; i++) {
-					// Search key
-					const indexScore = nextIndexScore;
-					const index = nextIndex;
-					if (!keyCache.has(index)) {
-						const keyCurrent = keyHandle[index][0];
-						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
-						if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
-					} else {camelotKeyCurrent = keyCache.get(index);}
-					// Delete from check selection
-					toCheck.delete(indexScore);
-					if (!toCheck.size) {break;}
-					// Find next key
-					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({...camelotKeyCurrent}) : null; // Applies movement to copy of current key
-					if (nextKeyObj) { // Finds next track, but traverse pool with random indexes...
-						let bFound = false;
-						for (const indexNewScore of toCheck) {
-							const indexNew = scoreData[indexNewScore].index;
-							if (!keyCache.has(indexNew)) {
-								const keyNew = keyHandle[indexNew][0];
-								camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
-								if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
-								else {toCheck.delete(indexNew);}
-							} else {camelotKeyNew = keyCache.get(indexNew);}
-							if (camelotKeyNew) {
-								if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
-									selectedHandlesArray.push(handle_list[index]);
-									selectedHandlesData.push(scoreData[indexScore]);
-									if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
-									nextIndex = indexNew; // Which will be used for next movement
-									nextIndexScore = indexNewScore; // Which will be used for next movement
-									bFound = true;
-									break;
+		let finalPlaylistLength = 0;
+		if (poolLength) {
+			if (bInKeyMixingPlaylist) {
+				// DJ-like playlist creation with key changes following harmonic mixing rules... Uses 9 movements described at 'camelotWheel' on camelot_wheel_xxx.js
+				// The entire pool is considered, instead of using the standard playlist selection. Since the pattern is random, it makes no sense
+				// to use any specific order of pre-selection or override the playlist with later sorting.
+				// Also note the movements creates a 'path' along the track keys, so even changing or skipping one movement changes drastically the path;
+				// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements. 
+				// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
+				// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
+				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
+				if (key.length) {
+					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
+					const size = poolLength < playlistLength ? poolLength : playlistLength;
+					const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
+					if (bSearchDebug) {console.log(pattern)};
+					let nextKeyObj;
+					let keyCache = new Map();
+					let keyDebug = [];
+					let keySharpDebug = [];
+					let patternDebug = [];
+					let toCheck = new Set(Array(poolLength).fill().map((_, index) => index).shuffle());
+					let nextIndexScore = 0;
+					let nextIndex = scoreData[nextIndexScore].index; // Initial track, it will match most times the last reference track when using progressive playlists
+					let camelotKeyCurrent, camelotKeyNew;
+					for (let i = 0, j = 0; i < size - 1; i++) {
+						// Search key
+						const indexScore = nextIndexScore;
+						const index = nextIndex;
+						if (!keyCache.has(index)) {
+							const keyCurrent = keyHandle[index][0];
+							camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
+							if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
+						} else {camelotKeyCurrent = keyCache.get(index);}
+						// Delete from check selection
+						toCheck.delete(indexScore);
+						if (!toCheck.size) {break;}
+						// Find next key
+						nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({...camelotKeyCurrent}) : null; // Applies movement to copy of current key
+						if (nextKeyObj) { // Finds next track, but traverse pool with random indexes...
+							let bFound = false;
+							for (const indexNewScore of toCheck) {
+								const indexNew = scoreData[indexNewScore].index;
+								if (!keyCache.has(indexNew)) {
+									const keyNew = keyHandle[indexNew][0];
+									camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
+									if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
+									else {toCheck.delete(indexNew);}
+								} else {camelotKeyNew = keyCache.get(indexNew);}
+								if (camelotKeyNew) {
+									if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
+										selectedHandlesArray.push(handle_list[index]);
+										selectedHandlesData.push(scoreData[indexScore]);
+										if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
+										nextIndex = indexNew; // Which will be used for next movement
+										nextIndexScore = indexNewScore; // Which will be used for next movement
+										bFound = true;
+										break;
+									}
 								}
 							}
-						}
-						if (!bFound) { // If nothing is found, then continue next movement with current track
-							camelotKeyNew = camelotKeyCurrent; // For debug console on last item
-							if (j === 1) {j = 0; continue;}  // try once retrying this step with default movement
-							else {
-								pattern[i] = 'perfectMatch';
-								i--;
-								j++;
-							}
-						} else {j = 0;} // Reset retry counter if found 
-					} else { // No tag or bad tag
-						i--;
-						if (toCheck.size) {nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index;} // If tag was not found, then use next handle
-					}
-				}
-				// Add tail
-				selectedHandlesArray.push(handle_list[nextIndex]); 
-				selectedHandlesData.push(scoreData[nextIndexScore]);
-				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
-				// Double pass
-				if (bHarmonicMixDoublePass && poolLength >= playlistLength) {
-					let tempPlaylistLength = selectedHandlesArray.length;
-					if (tempPlaylistLength < playlistLength) {
-						const toAdd = {};
-						const toAddData = {};
-						const keyMap = new Map();
-						// Find positions where the remainder tracks could be placed as long as they have the same key than other track
-						for (let i = 0;  i < poolLength; i++) {
-							const currTrackData = scoreData[i];
-							if (selectedHandlesData.indexOf(currTrackData) === -1) {
-								const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
-									let idx = -1;
-									if (keyMap.has(j)) {idx = keyMap.get(j);}
-									else {idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx);}
-									const selKey = keyHandle[idx];
-									return selKey[0] === keyHandle[i][0];
-								});
-								if (matchIdx !== -1) {
-									const currTrack = handle_list[currTrackData.index];
-									if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData);}
-									else {toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData];}
-									tempPlaylistLength++;
+							if (!bFound) { // If nothing is found, then continue next movement with current track
+								camelotKeyNew = camelotKeyCurrent; // For debug console on last item
+								if (j === 1) {j = 0; continue;}  // try once retrying this step with default movement
+								else {
+									pattern[i] = 'perfectMatch';
+									i--;
+									j++;
 								}
-							}
-							if (tempPlaylistLength >= playlistLength) {break;}
-						}
-						// Add items in reverse order to not recalculate new idx
-						const indexes = Object.keys(toAdd).sort().reverse();
-						if (indexes.length) {
-							let count = 0;
-							for (let idx of indexes) {
-								selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
-								selectedHandlesData.splice(idx, 0, ...toAddData[idx]);
-								count += toAdd[idx].length;
-							}
-							if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
+							} else {j = 0;} // Reset retry counter if found 
+						} else { // No tag or bad tag
+							i--;
+							if (toCheck.size) {nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index;} // If tag was not found, then use next handle
 						}
 					}
-					// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
-					if (bSearchDebug) {
-						console.log('Keys from selection:');
-						console.log(keyDebug);
-						console.log(keySharpDebug);
-						console.log('Pattern applied:');
-						console.log(patternDebug); // Always has one item less than key arrays
-					}
-				}
-			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
-		} else { // Standard methods
-			if (poolLength > playlistLength) {
-				if (bRandomPick){	//Random from pool
-					const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
-					const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
-					let i = 0;
-					while (i < playlistLength) {
-						const i_random = randomseed[i];
-						selectedHandlesArray.push(handle_list[scoreData[i_random].index]);
-						selectedHandlesData.push(scoreData[i_random]);
-						i++;
-					}
-				} else { 
-					if (probPick < 100) {	//Random but starting from high score picked tracks
-						let randomseed = 0;
-						let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
-						let i = 0;
-						while (indexSelectionArray.length < playlistLength) {
-							randomseed = Math.floor((Math.random() * 100) + 1);
-							if (randomseed < probPick) {
-								if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
-									indexSelected.add(scoreData[i].index);
-									selectedHandlesArray.push(handle_list[scoreData[i].index]);
-									selectedHandlesData.push(scoreData[i]);
+					// Add tail
+					selectedHandlesArray.push(handle_list[nextIndex]); 
+					selectedHandlesData.push(scoreData[nextIndexScore]);
+					if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
+					// Double pass
+					if (bHarmonicMixDoublePass && poolLength >= playlistLength) {
+						let tempPlaylistLength = selectedHandlesArray.length;
+						if (tempPlaylistLength < playlistLength) {
+							const toAdd = {};
+							const toAddData = {};
+							const keyMap = new Map();
+							// Find positions where the remainder tracks could be placed as long as they have the same key than other track
+							for (let i = 0;  i < poolLength; i++) {
+								const currTrackData = scoreData[i];
+								if (selectedHandlesData.indexOf(currTrackData) === -1) {
+									const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
+										let idx = -1;
+										if (keyMap.has(j)) {idx = keyMap.get(j);}
+										else {idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx);}
+										const selKey = keyHandle[idx];
+										return selKey[0] === keyHandle[i][0];
+									});
+									if (matchIdx !== -1) {
+										const currTrack = handle_list[currTrackData.index];
+										if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData);}
+										else {toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData];}
+										tempPlaylistLength++;
+									}
 								}
+								if (tempPlaylistLength >= playlistLength) {break;}
 							}
-							i++;
-							if (i >= poolLength) { //Start selection from the beginning of pool
-								i = 0;
+							// Add items in reverse order to not recalculate new idx
+							const indexes = Object.keys(toAdd).sort().reverse();
+							if (indexes.length) {
+								let count = 0;
+								for (let idx of indexes) {
+									selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
+									selectedHandlesData.splice(idx, 0, ...toAddData[idx]);
+									count += toAdd[idx].length;
+								}
+								if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
 							}
 						}
-					} else {	//In order starting from high score picked tracks
+						// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
+						if (bSearchDebug) {
+							console.log('Keys from selection:');
+							console.log(keyDebug);
+							console.log(keySharpDebug);
+							console.log('Pattern applied:');
+							console.log(patternDebug); // Always has one item less than key arrays
+						}
+					}
+				} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
+			} else { // Standard methods
+				if (poolLength > playlistLength) {
+					if (bRandomPick){	//Random from pool
+						const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
+						const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
 						let i = 0;
 						while (i < playlistLength) {
-							selectedHandlesArray.push(handle_list[scoreData[i].index]);
-							selectedHandlesData.push(scoreData[i]);
+							const i_random = randomseed[i];
+							selectedHandlesArray.push(handle_list[scoreData[i_random].index]);
+							selectedHandlesData.push(scoreData[i_random]);
 							i++;
 						}
+					} else { 
+						if (probPick < 100) {	//Random but starting from high score picked tracks
+							let randomseed = 0;
+							let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
+							let i = 0;
+							while (indexSelectionArray.length < playlistLength) {
+								randomseed = Math.floor((Math.random() * 100) + 1);
+								if (randomseed < probPick) {
+									if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
+										indexSelected.add(scoreData[i].index);
+										selectedHandlesArray.push(handle_list[scoreData[i].index]);
+										selectedHandlesData.push(scoreData[i]);
+									}
+								}
+								i++;
+								if (i >= poolLength) { //Start selection from the beginning of pool
+									i = 0;
+								}
+							}
+						} else {	//In order starting from high score picked tracks
+							let i = 0;
+							while (i < playlistLength) {
+								selectedHandlesArray.push(handle_list[scoreData[i].index]);
+								selectedHandlesData.push(scoreData[i]);
+								i++;
+							}
+						}
 					}
-				}
-			} else {	//Entire pool
-				let i = 0;
-				while (i < poolLength) {
-					selectedHandlesArray[i] = handle_list[scoreData[i].index];
-					selectedHandlesData.push(scoreData[i]);
-					i++;
-				}
-				if (isFinite(playlistLength)) {
-					if (method === 'GRAPH') {
+				} else {	//Entire pool
+					let i = 0;
+					while (i < poolLength) {
+						selectedHandlesArray[i] = handle_list[scoreData[i].index];
+						selectedHandlesData.push(scoreData[i]);
+						i++;
+					}
+					if (isFinite(playlistLength)) {
+						if (method === 'GRAPH') {
+							if (bBasicLogging) {
+								let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
+								console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+							}
+						}
 						if (bBasicLogging) {
-							let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
-							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+							let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 						}
-					}
-					if (bBasicLogging) {
-						let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
-						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 					}
 				}
 			}
-		}
-
-		// Final sorting
-		// This are final sorting-only steps, which may override previous one(s). But always outputs the same set of tracks.
-		// Sorting is disabled when using bInKeyMixingPlaylist for harmonic mixed playlists, since they have its own order.
-		// bProgressiveListCreation also changes sorting, since it has its own order after playlist creation/sorting!
-		const finalPlaylistLength = selectedHandlesArray.length;
-		// Note that bRandomPick makes playlist randomly sorted too (but using different sets of tracks on every call)!
-		if (bSortRandom) {
-			if (bProgressiveListOrder) {console.log('Warning: bSortRandom and bProgressiveListOrder are both set to true, but last one overrides random order.');}
-			for (let i = finalPlaylistLength - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				[selectedHandlesArray[i], selectedHandlesArray[j]] = [selectedHandlesArray[j], selectedHandlesArray[i]];
-				[selectedHandlesData[i], selectedHandlesData[j]] = [selectedHandlesData[j], selectedHandlesData[i]];
-			}
-		}
-		// Forces progressive changes on tracks, independently of the previous sorting/picking methods
-		// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
-		if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
-			if (bSortRandom) {console.log('Warning: bProgressiveListOrder is overriding random sorting when used along bSortRandom.');}
-			selectedHandlesData.sort(function (a, b) {return b.score - a.score;});
-			selectedHandlesArray.sort(function (a, b) {return b.score - a.score;});
-			if (method === 'GRAPH') { // First sorted by graph distance, then by score
-				selectedHandlesData.sort(function (a, b) {return a.mapdistance - b.mapdistance;});
-				selectedHandlesArray.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); 
-			}
-		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.')}
-		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
-		// May override previous sorting methods (only for instrumental tracks). 
-		// Finds instrumental track indexes, and move them to a random range without overlapping.
-		if (bScatterInstrumentals) { // Could reuse scatter_by_tags but since we already have the tags... done here
-			let newOrder = [];
-			for (let i = 0; i < finalPlaylistLength; i++) {
-				const index = selectedHandlesData[i].index;
-				const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
-				const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
-				const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
-				if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
-					newOrder.push(i);
-				}
-			}
-			// Reorder
-			const toMoveTracks = newOrder.length;
-			if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
-			const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
-			if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
-				let removed = [], removedData = [];
-				[...newOrder].reverse().forEach((index) => {
-					removed.push(...selectedHandlesArray.splice(index, 1));
-					removedData.push(...selectedHandlesData.splice(index, 1));
-				});
-				removed.reverse();
-				removedData.reverse();
-				removed.forEach((handle, index) => {
-					const i_scatterInterval = index * scatterInterval;
-					let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
-					if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
-					if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j)};
-					selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
-					selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
-				});
-			} else if (toMoveTracks) {console.log('Warning: Could not scatter instrumentals. Interval is too low. (' + toMoveTracks + ' < 2)')}
-		}
-		
-		// Progressive list creation, uses output tracks as new references, and so on...
-		// Note it can be combined with 'bInKeyMixingPlaylist', creating progressive playlists with harmonic mixing for every sub-group of tracks
-		if (bProgressiveListCreation) {
-			if (progressiveListCreationN > 1 && progressiveListCreationN < 100) { // Safety limit
-				const newPlaylistLength = Math.floor(playlistLength / (progressiveListCreationN + 1)); // First call also included N + 1!
-				const firstPlaylistLength = newPlaylistLength + playlistLength % (progressiveListCreationN + 1); // Get most tracks from 1st call
-				if (newPlaylistLength > 2) { // Makes no sense to create a list with groups of 1 or 2 tracks...
-					if (finalPlaylistLength >= firstPlaylistLength) { // Don't continue if 1st playlist doesn't have required num of tracks
-						selectedHandlesArray.length = firstPlaylistLength;
-						// Use the track with less score from pool as new reference or the last track of the playlist when using 'In key mixing'
-						let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handle_list[scoreData[poolLength - 1].index];
-						// Reuse arguments for successive calls and disable debug/logs and playlist creation
-						let newArgs = {};
-						for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
-						newArgs = {...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false ,bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false};
-						// Get #n tracks per call and reuse lower scoring track as new selection
-						let newSelectedHandlesArray, newSelectedHandlesData;
-						for (let i = 0; i < progressiveListCreationN; i++) {
-							const prevtLength = selectedHandlesArray.length;
-							if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
-							[newSelectedHandlesArray, newSelectedHandlesData, , newArgs['sel']] = do_searchby_distance(newArgs);
-							// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
-							selectedHandlesArray = do_remove_duplicatesV2(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, ['%title%', '%artist%', '%date%']).Convert();
-							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
-						}
-					} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.')}
-				} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.')}
-			} else {console.log('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).')}
-		}
-		
-		if (bProfile) {test.Print('Task #6: Final Selection', false);}
-		if (bShowFinalSelection && !bProgressiveListCreation) {
-			let i = finalPlaylistLength;
-			let conText = 'List of selected tracks:';
-			while (i--) {conText += '\n\                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : '');}
-			console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
-		}
 			
+			// Final sorting
+			// This are final sorting-only steps, which may override previous one(s). But always outputs the same set of tracks.
+			// Sorting is disabled when using bInKeyMixingPlaylist for harmonic mixed playlists, since they have its own order.
+			// bProgressiveListCreation also changes sorting, since it has its own order after playlist creation/sorting!
+			finalPlaylistLength = selectedHandlesArray.length;
+			// Note that bRandomPick makes playlist randomly sorted too (but using different sets of tracks on every call)!
+			if (bSortRandom) {
+				if (bProgressiveListOrder) {console.log('Warning: bSortRandom and bProgressiveListOrder are both set to true, but last one overrides random order.');}
+				for (let i = finalPlaylistLength - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[selectedHandlesArray[i], selectedHandlesArray[j]] = [selectedHandlesArray[j], selectedHandlesArray[i]];
+					[selectedHandlesData[i], selectedHandlesData[j]] = [selectedHandlesData[j], selectedHandlesData[i]];
+				}
+			}
+			// Forces progressive changes on tracks, independently of the previous sorting/picking methods
+			// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
+			if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
+				if (bSortRandom) {console.log('Warning: bProgressiveListOrder is overriding random sorting when used along bSortRandom.');}
+				selectedHandlesData.sort(function (a, b) {return b.score - a.score;});
+				selectedHandlesArray.sort(function (a, b) {return b.score - a.score;});
+				if (method === 'GRAPH') { // First sorted by graph distance, then by score
+					selectedHandlesData.sort(function (a, b) {return a.mapdistance - b.mapdistance;});
+					selectedHandlesArray.sort(function (a, b) {return a.mapdistance - b.mapdistance;}); 
+				}
+			} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.')}
+			// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
+			// May override previous sorting methods (only for instrumental tracks). 
+			// Finds instrumental track indexes, and move them to a random range without overlapping.
+			if (bScatterInstrumentals) { // Could reuse scatter_by_tags but since we already have the tags... done here
+				let newOrder = [];
+				for (let i = 0; i < finalPlaylistLength; i++) {
+					const index = selectedHandlesData[i].index;
+					const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
+					const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
+					const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
+					if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
+						newOrder.push(i);
+					}
+				}
+				// Reorder
+				const toMoveTracks = newOrder.length;
+				if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
+				const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
+				if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
+					let removed = [], removedData = [];
+					[...newOrder].reverse().forEach((index) => {
+						removed.push(...selectedHandlesArray.splice(index, 1));
+						removedData.push(...selectedHandlesData.splice(index, 1));
+					});
+					removed.reverse();
+					removedData.reverse();
+					removed.forEach((handle, index) => {
+						const i_scatterInterval = index * scatterInterval;
+						let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
+						if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
+						if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j)};
+						selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
+						selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
+					});
+				} else if (toMoveTracks) {console.log('Warning: Could not scatter instrumentals. Interval is too low. (' + toMoveTracks + ' < 2)')}
+			}
+			
+			// Progressive list creation, uses output tracks as new references, and so on...
+			// Note it can be combined with 'bInKeyMixingPlaylist', creating progressive playlists with harmonic mixing for every sub-group of tracks
+			if (bProgressiveListCreation) {
+				if (progressiveListCreationN > 1 && progressiveListCreationN < 100) { // Safety limit
+					const newPlaylistLength = Math.floor(playlistLength / (progressiveListCreationN + 1)); // First call also included N + 1!
+					const firstPlaylistLength = newPlaylistLength + playlistLength % (progressiveListCreationN + 1); // Get most tracks from 1st call
+					if (newPlaylistLength > 2) { // Makes no sense to create a list with groups of 1 or 2 tracks...
+						if (finalPlaylistLength >= firstPlaylistLength) { // Don't continue if 1st playlist doesn't have required num of tracks
+							selectedHandlesArray.length = firstPlaylistLength;
+							// Use the track with less score from pool as new reference or the last track of the playlist when using 'In key mixing'
+							let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handle_list[scoreData[poolLength - 1].index];
+							// Reuse arguments for successive calls and disable debug/logs and playlist creation
+							let newArgs = {};
+							for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
+							newArgs = {...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false ,bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false};
+							// Get #n tracks per call and reuse lower scoring track as new selection
+							let newSelectedHandlesArray, newSelectedHandlesData;
+							for (let i = 0; i < progressiveListCreationN; i++) {
+								const prevtLength = selectedHandlesArray.length;
+								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
+								[newSelectedHandlesArray, newSelectedHandlesData, , newArgs['sel']] = do_searchby_distance(newArgs);
+								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
+								selectedHandlesArray = do_remove_duplicatesV2(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, ['%title%', '%artist%', '%date%']).Convert();
+								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
+							}
+						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.')}
+					} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.')}
+				} else {console.log('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).')}
+			}
+			// Logging
+			if (bProfile) {test.Print('Task #6: Final Selection', false);}
+			if (bShowFinalSelection && !bProgressiveListCreation) {
+				let i = finalPlaylistLength;
+				let conText = 'List of selected tracks:';
+				while (i--) {conText += '\n\                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : '');}
+				console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
+			}
+		} else {
+			if (bProfile) {test.Print('Task #6: Final Selection', false);}
+			if (bBasicLogging) {
+				let propertyText = '';
+				if (method === 'GRAPH') {
+					propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
+					console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+				}
+				propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+				console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
+			}
+		}
 		// Insert to playlist
 		if (bCreatePlaylist) {
 			// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
