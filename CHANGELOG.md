@@ -21,10 +21,10 @@
 ## [2.1.3] - 2022-05-04
 ### Added
 ### Changed
-- Crash in some cases when pool of selected tracks was empty.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
+- Crash in some cases when pool of selected tracks was empty.
 
 ## [2.1.2] - 2022-04-13
 ### Added
