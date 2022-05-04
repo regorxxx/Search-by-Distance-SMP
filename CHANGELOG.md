@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.3](#213---2022-05-04)
 - [2.1.2](#212---2022-04-13)
 - [2.1.1](#211---2022-03-06)
 - [2.1.0](#210---2022-03-02)
@@ -16,7 +17,14 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.1.3] - 2022-05-04
+### Added
+### Changed
 - Crash in some cases when pool of selected tracks was empty.
+- Helpers: updated helpers.
+### Removed
+### Fixed
 
 ## [2.1.2] - 2022-04-13
 ### Added
@@ -226,8 +234,9 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...HEAD
-[2.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.1...v2.1.2
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...HEAD
+[2.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.1.0
 [2.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.0.0...v2.0.1
