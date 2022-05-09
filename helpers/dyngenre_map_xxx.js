@@ -4,7 +4,8 @@
 function dyngenre_map() {
 		// DYNGENRE Maps
 		const genre_array = [
-		["Industrial"						,	[0						]], //break
+		//break
+		["Industrial"						,	[0						]],
 		["Heavy Metal"						,	[1						]],
 		["Hard Rock"						,	[2						]],
 		["Punk"								,	[2						]],
@@ -27,13 +28,17 @@ function dyngenre_map() {
 		["Reggae"							,	[10						]],
 		["Hip-Hop"							,	[11						]],
 		["Electronic"						,	[13, 14, 15, 16, 17		]],
-		["New Age"							,	[18						]], //break
-		["African"							,	[30						]], //break
-		["Nubian"							,	[31						]], //break
-		["Indian Classical"					,	[59						]], //break
+		//break
+		["New Age"							,	[18						]],
+		//break
+		["African"							,	[30						]],
+		["Nubian"							,	[31						]],
+		//break
+		["Indian Classical"					,	[59						]],
 		["Japanese Classical"				,	[59						]],
+		//break
 		["Classical"						,	[60						]],
-		["Opera"							,	[61						]]  //break
+		["Opera"							,	[61						]] 
 		];
 		const genre_map = new Map(genre_array);
 		
