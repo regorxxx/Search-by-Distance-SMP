@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.4](#214---2022-05-09)
 - [2.1.3](#213---2022-05-04)
 - [2.1.2](#212---2022-04-13)
 - [2.1.1](#211---2022-03-06)
@@ -17,6 +18,13 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.1.4] - 2022-05-09
+### Added
+### Changed
+### Removed
+### Fixed
+- Crash due to a missing variable when trying to remove duplicates.
 
 ## [2.1.3] - 2022-05-04
 ### Added
@@ -234,7 +242,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.0...v2.1.1
