@@ -759,7 +759,7 @@ function do_searchby_distance({
 				console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + sbd_max_graph_distance);
 				return;
 			}
-			const validVars = Object.keys(descr).map((_) => {return 'music_graph_descriptors.' + _;});
+			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
 			if (sbd_max_graph_distance.indexOf('+') === -1 && sbd_max_graph_distance.indexOf('-') === -1 && sbd_max_graph_distance.indexOf('*') === -1 && sbd_max_graph_distance.indexOf('/') === -1 && validVars.indexOf(sbd_max_graph_distance) === -1) {
 				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
 				return;

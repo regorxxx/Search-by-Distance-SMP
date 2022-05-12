@@ -31,7 +31,7 @@ function regionMap({nodeName = 'node', culturalRegion} = {}) {
 }
 
 regionMap.prototype.capitalize = function capitalize(string) {
-	return string.split(' ').map((_) => {return _[0].toUpperCase() + _.slice(1).toLowerCase();}).join(' ');
+	return string.split(' ').map((ss) => {return ss[0].toUpperCase() + ss.slice(1).toLowerCase();}).join(' ');
 };
 
 regionMap.prototype.has = function has(region) {

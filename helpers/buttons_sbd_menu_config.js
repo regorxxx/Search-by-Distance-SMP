@@ -607,7 +607,7 @@ function parseGraphVal(val) {
 			console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + val);
 			return;
 		}
-		const validVars = Object.keys(music_graph_descriptors).map((_) => {return 'music_graph_descriptors.' + _;});
+		const validVars = Object.keys(music_graph_descriptors).map((key) => {return 'music_graph_descriptors.' + key;});
 		if (val.indexOf('+') === -1 && val.indexOf('-') === -1 && val.indexOf('*') === -1 && val.indexOf('/') === -1 && validVars.indexOf(val) === -1) {
 			console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + val);
 			return;

@@ -136,7 +136,7 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 		return idx !== -1 && this.animation[idx].bActive;
 	};
 	
-	this.isAnyAnimationActive = function (name) {
+	this.isAnyAnimationActive = function () {
 		return this.animation.some((obj) => {return obj.bActive;});
 	};
 
@@ -160,7 +160,6 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			}
 			case buttonStates.hide: {
 				return;
-				break;
 			}
 		}
 		// New coordinates must be calculated and stored to interact with UI
@@ -178,13 +177,12 @@ function themedButton(coordinates, text, fonClick, state, g_font = _gdiFont('Seg
 			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
 			if (iconCalculated) { // Icon
- 				if (this.active) { // Draw copy of icon in background blurred
+				if (this.active) { // Draw copy of icon in background blurred
 					let icon = gdi.CreateImage(this.g_font_icon.Size, this.g_font_icon.Size);
 					const g = icon.GetGraphics();
 					g.DrawString(iconCalculated, this.g_font_icon, tintColor(buttonsBar.config.activeColor, 50), 0, 0, this.g_font_icon.Size, this.g_font_icon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 					icon = icon.Resize(this.g_font_icon.Size + 2, this.g_font_icon.Size + 2, 0);
 					icon.ReleaseGraphics(g);
-					const orientation = buttonsBar.config.orientation.toLowerCase()
 					// Image gets shifted in x and y axis... since it's not using text flags
 					gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 9/10 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 				}
@@ -287,8 +285,7 @@ function on_mouse_move(x, y, mask) {
 	let old = buttonsBar.curBtn;
 	const buttons = buttonsBar.buttons;
 	let curBtnKey = '';
-	let curBtnIdx = -1;
-	[buttonsBar.curBtn, curBtnKey, curBtnIdx] = chooseButton(x, y);
+	[buttonsBar.curBtn, curBtnKey, ] = chooseButton(x, y);
 	
 	if (old === buttonsBar.curBtn) {
 		if (buttonsBar.g_down) {
