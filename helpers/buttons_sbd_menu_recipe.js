@@ -79,7 +79,7 @@ function createRecipeMenu(parent) {
 		if (recipe.hasOwnProperty('theme')) {
 			if (_isFile(recipe.theme)) {theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8);}
 			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, 'Recipe json', 'Search by distance', utf8);}
-			else {console.log('Theme file not found:' + recipe.theme);}
+			else {console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance');}
 		}
 		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
 		let i = 1;
