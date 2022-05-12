@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/02/22
+//12/05/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -702,12 +702,27 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 /* 
 	Statistics for the graph
 */
+function histogram(data, size) {
+	let min = Infinity;
+	let max = -Infinity;
+	for (const item of data) {
+		if (item < min) min = item;
+		else if (item > max) max = item;
+	}
+	const bins = Math.ceil((max - min + 1) / size);
+	const histogram = new Array(bins).fill(0);
+	for (const item of data) {
+		histogram[Math.floor((item - min) / size)]++;
+	}
+	return histogram;
+}
+
 async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null, graph = music_graph(descriptor)} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
 		const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%style%';
-		const tags = [genreTag, styleTag].filter(Boolean).join('|')
+		const tags = [genreTag, styleTag].filter(Boolean).join('|');
 		const tfo = fb.TitleFormat(tags);
 		styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
 	} else { // or the entire graph
@@ -733,7 +748,7 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 		if (val === statistics.maxDistance) {statistics.maxCount++}
 		else if (val === statistics.minDistance) {statistics.minCount++}
 		else if (val === statistics.minNonZeroDistance) {statistics.minNonZeroCount++}
-		statistics.sigma += (val - statistics.mean) ** 2
+		statistics.sigma += (val - statistics.mean) ** 2;
 	});
 	statistics.sigma = Math.round((statistics.sigma / total) ** (1/2));
 	// Histogram, median, mode
@@ -784,19 +799,4 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 	text += 'Descriptor variables:\n' + ['weak_substitutions', 'cluster', 'intra_supergenre'].map((key) => {return key + '\t' + descriptor[key];}).join('\n');
 	text += '\n------------------\n';
 	return {data: {histogram: hist, statistics}, text};
-}
-
-function histogram(data, size) {
-	let min = Infinity;
-	let max = -Infinity;
-	for (const item of data) {
-		if (item < min) min = item;
-		else if (item > max) max = item;
-	}
-	const bins = Math.ceil((max - min + 1) / size);
-	const histogram = new Array(bins).fill(0);
-	for (const item of data) {
-		histogram[Math.floor((item - min) / size)]++;
-	}
-	return histogram;
 }
