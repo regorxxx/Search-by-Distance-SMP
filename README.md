@@ -103,12 +103,8 @@ Both the html and foobar scripts will use any setting on the user file (as if it
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
 ## Installation
-Copy all files from the zip into YOUR_FOOBAR_PROFILE_PATH\scripts\SMP\xxx-scripts  
-Any other path WILL NOT work without editing the scripts. (see images\_Installation_*jpg)  
-For ex: mine is c:\Users\xxx\AppData\Roaming\foobar2000\scripts\SMP\xxx-scripts\...  
-For portable installations >= 1.6: .\foobar2000\profile\scripts\SMP\xxx-scripts\...  
-For portable installations <= 1.5: .\foobar2000\scripts\SMP\xxx-scripts\...  
-Then load 'buttons_toolbar.js' into a SMP panel within foobar. The toolbar can be configured within foobar to add pre-defined buttons with any of the 3 methods (GRAPH, WEIGHT and DYNGENRE) or to use a fully configurable button which is set using menus (you can add multiple instances of the same buttons). Also read file '_TIPS and INSTALLATION.txt for additional comments about foobar portable installations, not properly following the installation instructions will result in scripts not working as intended. Please don't report errors before checking this.
+See [_TIPS and INSTALLATION (txt)](https://github.com/regorxxx/Search-by-Distance-SM/blob/main/_TIPS%20and%20INSTALLATION.txt) and the [Wiki](https://github.com/regorxxx/Search-by-Distance-SM/wiki/Installation).
+Not properly following the installation instructions will result in scripts not working as intended. Please don't report errors before checking this.
 
 [changelog]: CHANGELOG.md
 [version_badge]: https://img.shields.io/github/release/regorxxx/Search-by-Distance-SMP.svg
