@@ -648,7 +648,7 @@ function do_searchby_distance({
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
 								// Exclude same artist
 								bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties['bSameArtistFilter'][1] : false,
- 								// Similar artists
+								// Similar artists
 								bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties['bSimilArtistsFilter'][1] : false, 
 								// Filter anti-influences by query, before any scoring/distance calc.
 								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Only for specific style/genres (for ex. Jazz) 
@@ -656,11 +656,11 @@ function do_searchby_distance({
 								// Allows only influences by query, before any scoring/distance calc.
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, 
 								// --->Scoring Method
-                                method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
+								method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
 								// --->Scoring filters
-                                scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
-                                minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties['minScoreFilter'][1]) :  scoreFilter - 10,
-                                sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
+								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
+								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties['minScoreFilter'][1]) :  scoreFilter - 10,
+								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],
@@ -673,7 +673,7 @@ function do_searchby_distance({
 								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties['playlistLength'][1]) : 50, // Max playlist size
 								// --->Playlist sorting
 								// How playlist is sorted (independently of playlist selection)
-                                bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties['bSortRandom'][1] : false, // Random sorting 
+								bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties['bSortRandom'][1] : false, // Random sorting 
 								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties['bProgressiveListOrder'][1] : false, // Sorting following progressive changes on tags (score)
 								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties['bScatterInstrumentals'][1] : false, // Intercalate instrumental tracks breaking clusters if possible
 								// --->Special Playlists
@@ -1955,7 +1955,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres, limit = -1) {
 				}));
 			}
 		}
-		Promise.all(promises).then((done) => {
+		Promise.all(promises).then(() => {
 			resolve(cache);
 		});
 	});

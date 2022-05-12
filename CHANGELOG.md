@@ -17,8 +17,10 @@
 ### Added
 ### Changed
 - Helpers: updated helpers.
+- Buttons: more warnings on customizable button when forced theme is not found, with popups instead of only logging to console.
 ### Removed
 ### Fixed
+- Buttons: configuration menu on customizable button was not showing forced theme applied by recipe and disabling the other entries.
 
 ## [2.1.4] - 2022-05-09
 ### Added

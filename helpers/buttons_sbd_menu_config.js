@@ -9,7 +9,6 @@ include('helpers_xxx_prototypes.js');
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
-	const data = JSON.parse(properties.data[1]);
 	const utf8 = convertCharsetToCodepage('UTF-8');
 	let recipe = {};
 	// Recipe forced theme?

@@ -23,12 +23,12 @@ function createButtonsMenu(name) {
 	{
 		const subMenu = menu.newMenu('Add buttons');
 		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
-		files.forEach((path, idx) => {
+		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
 			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
 			let subMenuFolder = subCategories.find((folder) => {return entryText.indexOf(folder) !== -1;});
 			if (subMenuFolder && subMenuFolder.length) {
-				 subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;
+				subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;
 				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 			}
 			entryText = entryText.replace('buttons_', '');
@@ -116,7 +116,7 @@ function createButtonsMenu(name) {
 					const currentId = prefix.slice(0, prefix.length - 1);
 					let currentIdNumber = 0;
 					// Just rewrite all Ids with same prefix
-					buttonsBar.list.forEach((oldProperties, newIdx) => {
+					buttonsBar.list.forEach((oldProperties) => {
 						const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
 						if (oldKeys.length) {
 							const oldPrefix = oldProperties[oldKeys[0]][0].split('_')[0];
@@ -272,7 +272,7 @@ function createButtonsMenu(name) {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;});
 				if (subMenuFolder && subMenuFolder.length) {
-					 subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,'')) + invId;
+					subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,'')) + invId;
 					if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 				}
 				const entryText = fileName.replace('buttons_', '');

@@ -40,7 +40,7 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 */
 
 addButton({
-    NearestTracks: new themedButton({x: 0, y: 0, w: 106, h: 22}, 'Nearest Tracks', function () {
+	NearestTracks: new themedButton({x: 0, y: 0, w: 106, h: 22}, 'Nearest Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -51,7 +51,6 @@ addButton({
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance NearestTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
-	
 	SimilarTracks: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Tracks', function () {
 		let t0 = Date.now();
 		let t1 = 0;
@@ -63,8 +62,7 @@ addButton({
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
-	
-    SimilarGenres: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function () {
+	SimilarGenres: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function () {
 		let t0 = Date.now();
 		let t1 = 0;
 		const args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
@@ -75,7 +73,6 @@ addButton({
 		t1 = Date.now();
 		console.log('Call to do_searchby_distance SimilarGenres took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
-	
 	SimilarMood: new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Mood', function () {
 		let t0 = Date.now();
 		let t1 = 0;
