@@ -489,8 +489,8 @@ function createConfigMenu(parent) {
 				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
 				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
 				const report = 'Graph descriptors:\n' +
-								'.\helpers\music_graph_descriptors_xxx.js\n' +
-								'.\helpers\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
+								'.\\helpers\\music_graph_descriptors_xxx.js\n' +
+								'.\\helpers\\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
 								'List of tags not present on the graph descriptors:\n' +
 								[...missing].sort().join(', ');
 				fb.ShowPopupMessage(report, 'Search by distance');

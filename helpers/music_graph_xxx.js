@@ -565,7 +565,7 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
 		const nodeList = nodePair[1];
 		const sep = /([ \-&])/g; // Added parentheses so they are also included on the split array
-		const otherRegEx = [[/\bXL\b/ig, 'XL'], [/\bEDM\b/ig, 'EDM'], [/\bNRG\b/ig, 'NRG'], [/\bUK\b/ig, 'UK'], [/\bIDM\b/ig, 'IDM'], [/\bar\b/ig, 'ar']];
+		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar']];
 		nodeList.forEach( (node) => {
 			let capNode = node.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join('');
 			otherRegEx.forEach((rgex) => {capNode = capNode.replace(rgex[0], rgex[1]);});
@@ -601,14 +601,14 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	});
 	// Test basic paths using the graph. 
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
-	var bGraphDeclared = true;
+	let bGraphDeclared = true;
 	try {all_music_graph;}
 	catch(e) {
 		if (e.name === 'ReferenceError') {
 			bGraphDeclared = false;
 		}
 	}
-	var bIncludesDeclared = true;
+	let bIncludesDeclared = true;
 	try {nba();}
 	catch(e) {
 		if(e.name === 'ReferenceError') {
@@ -733,7 +733,7 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1};
 	const distances = [];
 	const total = cacheLink.size;
-	cacheLink.forEach((value, key) => {
+	cacheLink.forEach((value) => {
 		const distance = value.distance + value.influenceDistance;
 		distances.push(distance);
 		if (distance > statistics.maxDistance) {statistics.maxDistance = distance;}
@@ -757,7 +757,7 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 	histogram(distances, binSize).forEach((val, i) => {hist[(i * binSize).toString()] = val});
 	const masxFreq = Math.max(...Object.values(hist));
 	const histEntries = Object.entries(hist);
-	statistics.mode = histEntries.find((pair, i) => {return pair[1] === masxFreq;});
+	statistics.mode = histEntries.find((pair) => {return pair[1] === masxFreq;});
 	let i = 0, acumFreq = total / 2;
 	while (true) {
 		acumFreq -= histEntries[i][1];

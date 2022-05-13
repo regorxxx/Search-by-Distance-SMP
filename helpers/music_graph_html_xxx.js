@@ -6,8 +6,8 @@
 */
 
 Set.prototype.intersection = function(setB) {
-    var intersection = new Set();
-    for (var elem of setB) {
+    let intersection = new Set();
+    for (let elem of setB) {
         if (this.has(elem)) {
             intersection.add(elem);
         }
@@ -61,7 +61,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres, limit = -1) {
 				}));
 			}
 		}
-		Promise.all(promises).then((done) => {
+		Promise.all(promises).then(() => {
 			resolve(cache);
 		});
 	});

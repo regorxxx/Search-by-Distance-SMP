@@ -61,7 +61,7 @@ console.checkSize = () => {
 		return true;
 	}
 	return false;
-}
+};
 
 // Send to popup and console
 console.popup = (arg, popupName) => {
@@ -69,7 +69,7 @@ console.popup = (arg, popupName) => {
 	arg.split('\n').forEach((line) => {
 		if (line && line.length) {console.log(line);}
 	});
-}
+};
 
 if (conLog && conLog.length && conLogMaxSize && console.log) {
 	console.logUI = console.log;

@@ -312,12 +312,11 @@ function createHarmonicMixingPattern(playlistLength) {
 function applyPattern(key, pattern, bReturnObj = true) { // Works with both Camelot and Open Keys objects
 	let keyArr = [];
 	if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(key)) {
-		let firstKey;
 		if (typeof key === 'string') {keyArr.push(camelotWheel.getKeyNotationObjectCamelot(key));}
 		else if (typeof key === 'object' && key.hasOwnProperty('hour') && key.hasOwnProperty('letter')) {keyArr.push(key);}
 		else {return keyArr;}
 		pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});
-		if (!bReturnObj) {keyArr = keyArr.map( (keyObj) => {return camelotWheel.getKeyNotationSharp(key);});} // Translate back
+		if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return camelotWheel.getKeyNotationSharp(keyObj);});} // Translate back
 	}
 	return keyArr;
 }

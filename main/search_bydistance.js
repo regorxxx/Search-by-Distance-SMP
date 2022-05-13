@@ -443,7 +443,7 @@ if (!panelProperties.firstPopup[1]) {
 [
 	{name: 'All Music', file: 'helpers\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors'},
 	{name: 'Last.fm', file: 'helpers\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors'}
-].forEach((descr) => {;
+].forEach((descr) => {
 	if (panelProperties[descr.prop][1]) {
 		if (_isFile(folders.xxx + descr.file)) {
 			console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);
@@ -740,13 +740,13 @@ function do_searchby_distance({
 							const newVal = '\'' + value.join('\',\'') + '\'';
 							eval(key + ' = [' + newVal + ']');
 						} else {eval(key + ' = ' + value);}
-						if (key === 'theme') {bOverwriteTheme = true;};
+						if (key === 'theme') {bOverwriteTheme = true;}
 					}
 				} else {console.log('Recipe has a variable not recognized: ' + key);}
 			});
 			if (bBasicLogging) {
 				console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
-				if (bOverwriteTheme) {console.log('Recipe forces its own theme.')};
+				if (bOverwriteTheme) {console.log('Recipe forces its own theme.')}
 			}
 		}
 		// Parse args
@@ -929,10 +929,9 @@ function do_searchby_distance({
 		} else if (styleWeight !== 0 && bBasicLogging) {console.log('styleWeight was not zero but selected track had no style tags');}
 		// Dyngenre
 		const style_genre_length = style_genreSet.size;
+		let dyngenreNumber = 0, dyngenre = [];
 		if (dyngenreWeight !== 0 && style_genre_length !== 0) {
 			// This virtual tag is calculated with previous values
-			var dyngenreNumber = 0;
-			var dyngenre = [];
 			for (const style_genre_i of style_genreSet) {
 				const dyngenre_i = genre_style_map.get(style_genre_i);
 				if (dyngenre_i) {dyngenre = dyngenre.concat(dyngenre_i);}
@@ -1523,7 +1522,7 @@ function do_searchby_distance({
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
 					const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
-					if (bSearchDebug) {console.log(pattern)};
+					if (bSearchDebug) {console.log(pattern);}
 					let nextKeyObj;
 					let keyCache = new Map();
 					let keyDebug = [];
@@ -1776,11 +1775,11 @@ function do_searchby_distance({
 							for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
 							newArgs = {...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false ,bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false};
 							// Get #n tracks per call and reuse lower scoring track as new selection
-							let newSelectedHandlesArray, newSelectedHandlesData;
+							let newSelectedHandlesArray;
 							for (let i = 0; i < progressiveListCreationN; i++) {
 								const prevtLength = selectedHandlesArray.length;
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
-								[newSelectedHandlesArray, newSelectedHandlesData, , newArgs['sel']] = do_searchby_distance(newArgs);
+								[newSelectedHandlesArray, , , newArgs['sel']] = do_searchby_distance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 								selectedHandlesArray = do_remove_duplicatesV2(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, ['%title%', '%artist%', '%date%']).Convert();
 								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
@@ -1794,7 +1793,7 @@ function do_searchby_distance({
 			if (bShowFinalSelection && !bProgressiveListCreation) {
 				let i = finalPlaylistLength;
 				let conText = 'List of selected tracks:';
-				while (i--) {conText += '\n\                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : '');}
+				while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapdistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapdistance : '');}
 				console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 			}
 		} else {
@@ -1813,7 +1812,7 @@ function do_searchby_distance({
 		if (bCreatePlaylist) {
 			// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
 			let playlistNameEval;
-			const bIsTF =  /(%.*%)|(\$.*\(.*\))/g.test(playlistName);
+			const bIsTF =  /(%.*%)|(\$.*\(.*\))/.test(playlistName);
 			if (bUseTheme) {
 				const themeRegexp = /%sbd_theme%/gi;
 				if (bIsTF && themeRegexp.test(playlistName)) {
@@ -2005,7 +2004,7 @@ function processRecipe(initialRecipe) {
 				if (!newRecipeObj) {newRecipe = ''; break;}
 				newRecipe = newRecipeObj.recipe || '';
 				if (newRecipe.length) {toAdd = {...processRecipe(newRecipe), ...toAdd};}
-			};
+			}
 		} else {
 			console.log('Recipe not found: ' + newRecipe);
 			break;

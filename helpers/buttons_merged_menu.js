@@ -197,13 +197,13 @@ function createButtonsMenu(name) {
 		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
-			barProperties.toolbarColor[1] = -1;
-			barProperties.textColor[1] = RGB(0,0,0);
-			barProperties.activeColor[1] = RGB(0, 163, 240);
+			barProperties.toolbarColor[1] = buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;;
+			barProperties.textColor[1] = buttonsBar.config.textColor = buttonsBar.config.default.textColor;
+			barProperties.activeColor[1] =  buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
+			barProperties.animationColors[1] = JSON.stringify(buttonsBar.config.default.animationColors);
+			buttonsBar.config.animationColors = buttonsBar.config.default.animationColors;
+			buttonsBar.config.bToolbar = buttonsBar.config.default.bToolbar;
 			overwriteProperties(barProperties);
-			buttonsBar.config.bToolbar = false; // buttons_xxx.js
-			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
-			buttonsBar.config.activeColor = barProperties.activeColor[1];
 			window.Repaint();
 		}});
 	}
