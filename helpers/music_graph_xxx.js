@@ -706,8 +706,8 @@ function histogram(data, size) {
 	let min = Infinity;
 	let max = -Infinity;
 	for (const item of data) {
-		if (item < min) min = item;
-		else if (item > max) max = item;
+		if (item < min) {min = item;}
+		else if (item > max) {max = item;}
 	}
 	const bins = Math.ceil((max - min + 1) / size);
 	const histogram = new Array(bins).fill(0);
@@ -745,16 +745,16 @@ async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = 
 	statistics.totalSize = statistics.maxDistance - statistics.minDistance;
 	statistics.mean = Math.round(statistics.mean / total);
 	distances.forEach((val) => {
-		if (val === statistics.maxDistance) {statistics.maxCount++}
-		else if (val === statistics.minDistance) {statistics.minCount++}
-		else if (val === statistics.minNonZeroDistance) {statistics.minNonZeroCount++}
+		if (val === statistics.maxDistance) {statistics.maxCount++;}
+		else if (val === statistics.minDistance) {statistics.minCount++;}
+		else if (val === statistics.minNonZeroDistance) {statistics.minNonZeroCount++;}
 		statistics.sigma += (val - statistics.mean) ** 2;
 	});
 	statistics.sigma = Math.round((statistics.sigma / total) ** (1/2));
 	// Histogram, median, mode
 	const hist = {};
 	const binSize = statistics.minNonZeroDistance * 2;
-	histogram(distances, binSize).forEach((val, i) => {hist[(i * binSize).toString()] = val});
+	histogram(distances, binSize).forEach((val, i) => {hist[(i * binSize).toString()] = val;});
 	const masxFreq = Math.max(...Object.values(hist));
 	const histEntries = Object.entries(hist);
 	statistics.mode = histEntries.find((pair) => {return pair[1] === masxFreq;});

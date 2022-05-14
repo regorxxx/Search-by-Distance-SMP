@@ -96,6 +96,7 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false, inf
 							if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
 						}
 					}
+					// falls through
 				}
 				case 'adjacentNodes': { // Considering the adjacent nodes no matter their distance, so compare node set {Hip-Hop, Rap_supergenre} to {Blues_supergenre, Blues}
 					if (last !== 1) { // Otherwise we are repeating first->last multiple times
@@ -130,13 +131,14 @@ function calc_map_distance(mygraph, key_one, key_two, bUseInfluence = false, inf
 							});
 						});
 					}
+					// falls through
 				}
 				case 'direct': { // zero nodes method also includes any direct link between the last and first node even when the distance is not zero. Built-in in adjacent nodes
 					bDirect = true;
 					break;
 				}
 				default: {
-					console.log('calc_map_distance: influence method not recognized \'' + influenceMethod + '\'.')
+					console.log('calc_map_distance: influence method not recognized \'' + influenceMethod + '\'.');
 					break;
 				}
 			}

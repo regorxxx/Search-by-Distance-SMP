@@ -54,7 +54,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	const keys = ['x','y','w','h'];
 	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, isFunction(coord[c])];}));
 	const iCoord = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? coord[c]() : coord[c]];}));
-	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]()} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
+	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]();} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
 	if (recalc) {
 		if (orientation === 'x') {old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h);}
 		else if (orientation === 'y') {old.y += iCoord.y + iCoord.h; old.w = Math.max(old.w, iCoord.w);}
@@ -75,7 +75,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(coordinates, text, fonClick, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
+function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
 	this.state = state ? state : buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */
 	this.active = false;
@@ -94,7 +94,7 @@ function themedButton(coordinates, text, fonClick, state, gFont = _gdiFont('Sego
 	this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), gFont);} : _gr.CalcTextWidth(this.text, gFont);
 	this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null; // if using the default font, then it has probably failed to load the right one, skip icon
 	this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), gFontIcon);} : _gr.CalcTextWidth(this.icon, gFontIcon);
-	this.fonClick = fonClick;
+	this.func = func;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
@@ -123,7 +123,7 @@ function themedButton(coordinates, text, fonClick, state, gFont = _gdiFont('Sego
 			this.animation[idx].date = bActive ? Date.now() : -1;
 			this.animation[idx].colors = animationColors;
 		} else {
-			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors})
+			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors});
 		}
 		throttledRepaint();
 	};
@@ -219,7 +219,7 @@ function themedButton(coordinates, text, fonClick, state, gFont = _gdiFont('Sego
 	};
 
 	this.onClick = function (mask) {
-		this.fonClick && this.fonClick(mask);
+		this.func && this.func(mask);
 	};
 
 	this.changeScale = function (scale) {
@@ -273,7 +273,10 @@ function on_paint(gr) {
 		else {gr.FillSolidRect(0, 0, window.Width, window.Height, utils.GetSysColour(15));} // Default
 	}
 	// Buttons
-	for (let key in buttonsBar.oldButtonCoordinates) {buttonsBar.oldButtonCoordinates[key] = 0;}
+	for (let key in buttonsBar.oldButtonCoordinates) {
+		if (!Object.prototype.hasOwnProperty.call(buttonsBar.oldButtonCoordinates, key)) {continue;}
+		buttonsBar.oldButtonCoordinates[key] = 0;
+	}
 	drawAllButtons(gr);
 	// Drag n drop buttons
 	if (buttonsBar.move.bIsMoving) {
@@ -301,10 +304,11 @@ function on_mouse_move(x, y, mask) {
 	
 	//Tooltip fix
 	if (old !== null) {
-		if (buttonsBar.curBtn === null) {buttonsBar.tooltipButton.Deactivate();} // Needed because tooltip is only activated/deactivated on redrawing... 
-															// otherwise it shows on empty spaces after leaving a button.
-		else if (old !== buttonsBar.curBtn && old.description === buttonsBar.curBtn.description) { 	// This forces redraw even if buttons have the same text!
-			buttonsBar.tooltipButton.Deactivate();											// Updates position but tooltip becomes slower since it sets delay time to initial... 
+		// Needed because tooltip is only activated/deactivated on redrawing... otherwise it shows on empty spaces after leaving a button.
+		if (buttonsBar.curBtn === null) {buttonsBar.tooltipButton.Deactivate();}
+		// This forces redraw even if buttons have the same text! Updates position but tooltip becomes slower since it sets delay time to initial...
+		else if (old !== buttonsBar.curBtn && old.description === buttonsBar.curBtn.description) {
+			buttonsBar.tooltipButton.Deactivate();
 			buttonsBar.tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
 		} else {buttonsBar.tooltipButton.SetDelayTime(3, buttonsBar.tooltipButton.oldDelay);} 
 	}
@@ -326,7 +330,7 @@ function on_mouse_move(x, y, mask) {
 					buttonsBar.move.btn.moveX = x;
 					buttonsBar.move.btn.moveY = y;
 				}
-				const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1});
+				const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
 				const fKey = toBtn[0];
 				const lKey = toBtn[toBtn.length - 1];
 				buttonsBar.move.rec.x = buttons[fKey].currX;
@@ -349,12 +353,15 @@ function on_mouse_move(x, y, mask) {
 			}
 			buttonsBar.move.fromKey = null;
 			buttonsBar.move.toKey = null;
-			for (let key in buttonsBar.move.rec) {buttonsBar.move.rec[key] = null;}
+			for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttonsBar.move.rec, key)) {buttonsBar.move.rec[key] = null;}}
 		}
-		for (let key in buttons) {if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}}
+		for (let key in buttons) {
+			if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+				if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}}
+			}
 	} else {
-		for (let key in buttons) {buttons[key].moveX = null; buttons[key].moveY = null;}
-		for (let key in buttonsBar.move.rec) {buttonsBar.move.rec[key] = null;}
+		for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
+		for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
 	}
 	window.Repaint();
 }
@@ -376,20 +383,6 @@ function on_mouse_lbtn_down(x, y, mask) {
 	}
 }
 
-// function on_mouse_rbtn_down(x, y, mask) {
-	// console.log('down');
-	// if (buttonsBar.move.bIsMoving) {moveButton(buttonsBar.move.fromIdx, buttonsBar.move.toIdx);}
-	// if (buttonsBar.move.btn) {
-		// buttonsBar.move.btn.moveX = null;
-		// buttonsBar.move.btn.moveY = null;
-		// buttonsBar.move.btn = null;
-	// }
-	// buttonsBar.move.btnKey = null;
-	// buttonsBar.move.fromIdx = null;
-	// buttonsBar.move.toIdx = null;
-	// buttonsBar.move.bIsMoving = false;
-// }
-
 function on_mouse_rbtn_up(x, y, mask) {
 	console.log('release');
 	// Must return true, if you want to suppress the default context menu.
@@ -401,7 +394,8 @@ function on_mouse_lbtn_up(x, y, mask) {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.onClick(mask);
-		if (buttonsBar.curBtn && window.IsVisible) { // Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
+		// Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
+		if (buttonsBar.curBtn && window.IsVisible) {
 			buttonsBar.curBtn.changeState(buttonStates.hover);
 			window.Repaint();
 		}
@@ -448,8 +442,8 @@ function getUniquePrefix(string, sep = '_'){
 function moveButton(fromKey, toKey) {
 	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined') {console.log('Buttons: Can not move buttons in current script.'); return;}
 	if (fromKey === toKey) {return;}
-	const fromPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(fromKey) !== -1});
-	const toPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(toKey) !== -1});
+	const fromPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(fromKey) !== -1;});
+	const toPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(toKey) !== -1;});
 	buttonsPath.splice(toPos, 0, buttonsPath.splice(fromPos, 1)[0]);
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
 	const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});

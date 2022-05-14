@@ -78,7 +78,7 @@ regionMap.prototype.regionHasNode = function regionHasNode(region, node) {
 		const key = this.get(region);
 		const subKey = this.capitalize(region) !== key ? this.capitalize(region) : null;
 		const nodeNorm = node.toUpperCase();
-		const findNode = (subKey) => {return this.culturalRegion[key][subKey].findIndex((nodeNormNew) => {return nodeNormNew.toUpperCase() === nodeNorm;})};
+		const findNode = (subKey) => {return this.culturalRegion[key][subKey].findIndex((nodeNormNew) => {return nodeNormNew.toUpperCase() === nodeNorm;});};
 		if (subKey) { // Look only at given subregion
 			bFound = findNode(subKey) !== -1;
 		} else { // Look within all subregions

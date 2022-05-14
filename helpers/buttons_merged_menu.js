@@ -75,7 +75,7 @@ function createButtonsMenu(name) {
 									const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
 									deleteProperties(oldProperties); // Delete it at panel
 									for (const key in backup) { // Update Id
-										if (!backup.hasOwnProperty(key)) {continue;}
+										if (!Object.prototype.hasOwnProperty.call(backup, key)) {continue;}
 										backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 									}
 									setProperties(backup, '', 0, false, true); // And restore at new position
@@ -125,7 +125,7 @@ function createButtonsMenu(name) {
 								const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
 								deleteProperties(oldProperties); // Delete it at panel
 								for (const key in backup) { // Update Id
-									if (!backup.hasOwnProperty(key)) {continue;}
+									if (!Object.prototype.hasOwnProperty.call(backup, key)) {continue;}
 									backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 								}
 								setProperties(backup, '', 0, false, true); // And restore at new position
@@ -197,7 +197,8 @@ function createButtonsMenu(name) {
 		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
-			barProperties.toolbarColor[1] = buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;;
+			barProperties.toolbarColor[1] = -1;
+			buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;
 			barProperties.textColor[1] = buttonsBar.config.textColor = buttonsBar.config.default.textColor;
 			barProperties.activeColor[1] =  buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
 			barProperties.animationColors[1] = JSON.stringify(buttonsBar.config.default.animationColors);
@@ -231,7 +232,10 @@ function createButtonsMenu(name) {
 			catch(e) {return;}
 			if (isNaN(input)) {return;}
 			if (buttonsBar.config.scale === input) {return;}
-			for (let key in buttonsBar.buttons) {buttonsBar.buttons[key].changeScale(input);}
+			for (let key in buttonsBar.buttons) {
+				if (!Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {continue;}
+				buttonsBar.buttons[key].changeScale(input);
+			}
 			buttonsBar.config.scale = input; // buttons_xxx.js
 			barProperties.scale[1] = buttonsBar.config.scale;
 			overwriteProperties(barProperties);

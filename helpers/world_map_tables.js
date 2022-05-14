@@ -109,7 +109,7 @@ if (typeof music_graph_descriptors_countries !== 'undefined' && typeof music_gra
 		include('helpers_xxx_prototypes.js');
 		if (!(new Set(music_graph_descriptors_culture.getRegionNames()).isEqual(new Set(parent.getRegionNames())))) {bMatch = false;}
 	} else {
-		const isSuperset = (parent, subset) => {for (let elem of subset) {if (!parent.has(elem)) {return false;}}; return true;};
+		const isSuperset = (parent, subset) => {for (let elem of subset) {if (!parent.has(elem)) {return false;}} return true;};
 		const isEqual = (parent, subset) => {return (parent.size === subset.size && isSuperset(parent, subset));};
 		if (!(isEqual(new Set(music_graph_descriptors_culture.getRegionNames()), new Set(parent.getRegionNames())))) {bMatch = false;}
 	}

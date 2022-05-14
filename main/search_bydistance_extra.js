@@ -8,12 +8,12 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Find which genre/styles are nearest as pre-filter
 	const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['genre', 'style'], true).flat().filter(Boolean);
-	const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph)
-	const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag)}).join(' OR ');
+	const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph);
+	const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['artist'], true).flat().filter(Boolean);
-	const forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag)}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
-	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag)}).join(' AND ');
+	const forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
+	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
 	const selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
 	// Use only X random tracks instead of all of them
 	const report = new Map();
@@ -29,7 +29,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
 		const dateQuery = date && date.length ? _p(dateQueryTag + ' GREATER ' + (Number(date)- Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2))) : null;
 		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
- 		const data = do_searchby_distance({
+		const data = do_searchby_distance({
 			properties: newConfig,
 			panelProperties,
 			sel, theme, recipe,

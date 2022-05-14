@@ -1,4 +1,4 @@
-﻿'use strict'
+﻿'use strict';
 //16/03/22
 
 include('menu_xxx.js');
@@ -90,7 +90,7 @@ function createConfigMenu(parent) {
 			const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
 			options.forEach((rangeName) => {
 				menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
-					let input
+					let input;
 					try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
 					catch(e) {return;}
 					if (isNaN(input)) {return;}
@@ -387,7 +387,7 @@ function createConfigMenu(parent) {
 				handleList.Convert().forEach((selHandle) => {
 					const output = calculateSimilarArtists({properties, selHandle});
 					if (output.val.length) {newData.push(output);}
-				})
+				});
 				if (!newData.length) {console.log('Nothing found.'); return;}
 				if (!_isFile(file)) {
 					newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});

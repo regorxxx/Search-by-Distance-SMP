@@ -142,7 +142,7 @@ music_graph_descriptors_culture.getStyleRegion = music_graph_descriptors_culture
 
 // Populate with substitutions
 {
-	const parent = music_graph_descriptors_culture
+	const parent = music_graph_descriptors_culture;
 	parent.getMainRegions().forEach((key) => {
 		const region = parent.culturalRegion[key];
 		const subRegions = parent.getSubRegions(key);
@@ -169,6 +169,6 @@ music_graph_descriptors_culture.getStyleRegion = music_graph_descriptors_culture
 			}
 		});
 		// And discard duplicates
-		subRegions.forEach((subKey) => {if (subKey === '_ALL_') {delete region._ALL_} else {region[subKey] = [...new Set(region[subKey])];}});
+		subRegions.forEach((subKey) => {if (subKey === '_ALL_') {delete region._ALL_;} else {region[subKey] = [...new Set(region[subKey])];}});
 	});
 }

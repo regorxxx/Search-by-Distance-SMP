@@ -1,4 +1,4 @@
-﻿'use strict'
+﻿'use strict';
 //08/02/22
 
 include('menu_xxx.js');
@@ -99,7 +99,7 @@ function createThemeMenu(parent) {
 		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
 		if (!theme) {return;}
 		// Check
-		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
+		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
 		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
 		if (!bCheck) {
 			console.log('File is not a valid theme: ' + (theme.hasOwnProperty('tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));

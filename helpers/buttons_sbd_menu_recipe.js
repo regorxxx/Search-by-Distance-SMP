@@ -1,4 +1,4 @@
-﻿'use strict'
+﻿'use strict';
 //08/02/22
 
 include('menu_xxx.js');
