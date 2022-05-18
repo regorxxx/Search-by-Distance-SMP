@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.5](#215---2022-05-19)
 - [2.1.4](#214---2022-05-09)
 - [2.1.3](#213---2022-05-04)
 - [2.1.2](#212---2022-04-13)
@@ -14,6 +15,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [2.1.4] - 2022-05-19
 ### Added
 ### Changed
 - Helpers: updated helpers.
@@ -245,7 +252,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...HEAD
+[2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.1...v2.1.2
