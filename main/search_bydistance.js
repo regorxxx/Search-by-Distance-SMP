@@ -327,6 +327,8 @@ include('..\\helpers\\music_graph_xxx.js');
 include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
 
+checkCompatible('1.6.1');
+
 /* 
 	Properties
 */

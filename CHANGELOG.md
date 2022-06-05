@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.1.6](#216---2022-06-05)
 - [2.1.5](#215---2022-05-23)
 - [2.1.4](#214---2022-05-09)
 - [2.1.3](#213---2022-05-04)
@@ -17,6 +18,14 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+### Removed
+### Fixed
+
+## [2.1.6] - 2022-06-05
+### Added
+### Changed
+- UI: enforced SMP version checking via popups.
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
 
@@ -252,7 +261,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.6...HEAD
+[2.1.6]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...v2.1.3
