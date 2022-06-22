@@ -18,8 +18,11 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- UI: themed buttons are replaced with manually drawn buttons when the first method fails (on Wine for ex.). Console will output: "window.CreateThemeManager('Button') failed, using experimental buttons" in such case.
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
+- UI: crash due to themed buttons not being available on wine.
 
 ## [2.1.6] - 2022-06-05
 ### Added
