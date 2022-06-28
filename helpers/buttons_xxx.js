@@ -146,14 +146,14 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
 		// Check SO allows button theme
-		if (buttonsBar.config.bUseThemeManager) {
-			if (!this.g_theme) { // may have been changed before drawing but initially not set
-				this.g_theme = window.CreateThemeManager('Button');
-				if (!this.g_theme) {
-					buttonsBar.config.bUseThemeManager = false; 
-					console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using experimental buttons');
-				}
+		if (buttonsBar.config.bUseThemeManager && !this.g_theme) { // may have been changed before drawing but initially not set
+			this.g_theme = window.CreateThemeManager('Button');
+			if (!this.g_theme) {
+				buttonsBar.config.bUseThemeManager = false; 
+				console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using experimental buttons');
 			}
+		}
+		if (buttonsBar.config.bUseThemeManager) {
 			// Themed Button states
 			switch (this.state) {
 				case buttonStates.normal: {
