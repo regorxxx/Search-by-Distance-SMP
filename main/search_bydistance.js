@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/05/22
+//29/06/22
 
 /*	
 	Search by Distance
@@ -1190,15 +1190,15 @@ function do_searchby_distance({
 		
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
-		let handle_list;
-		try {handle_list = fb.GetQueryItems(fb.GetLibraryItems(), query[querylength]);} // Sanity check
+		let handleList;
+		try {handleList = fb.GetQueryItems(fb.GetLibraryItems(), query[querylength]);} // Sanity check
 		catch (e) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
-		if (bBasicLogging) {console.log('Items retrieved by query: ' + handle_list.Count + ' tracks');}
+		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
-		handle_list = do_remove_duplicatesV2(handle_list, '%title% - %artist% - %date%', ['%title%', '%artist%', '%date%']);
+		handleList = removeDuplicatesV2({handleList, sortOutput: '%title% - %artist% - %date%', checkKeys: ['title', 'artist', 'date']});
 		
-		const tracktotal = handle_list.Count;
+		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
 		if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
         // Compute similarity distance by Weight and/or Graph
@@ -1207,22 +1207,21 @@ function do_searchby_distance({
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
 			let tfo = fb.TitleFormat(genreTag.concat(styleTag).join('|'));
-			handle_list.OrderByFormat(tfo, 1);
+			handleList.OrderByFormat(tfo, 1);
 		}
 		if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
 		
-		// const handle_list_array = handle_list.Convert();
 		// Get the tag values for all the handle list. Skip those with weight 0.
 		// Now flat is not needed, we have 1 array of tags per track [i][j]
 		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length, but it's done per track.
 		// Using only boolean filter it's 3x faster than filtering by set, here bTagFilter becomes useful since we may skip +40K evaluations 
-		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handle_list, genreTag, true) : null;
-		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handle_list, styleTag, true) : null;
-		const moodHandle = (moodWeight !== 0) ? getTagsValuesV3(handle_list, moodTag, true) : null;
-		const composerHandle = (composerWeight !== 0) ? getTagsValuesV3(handle_list, composerTag, true) : null;
-		const customStrHandle = (customStrWeight !== 0) ? getTagsValuesV3(handle_list, customStrTag, true) : null;
-		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = getTagsValuesV4(handle_list, restTagNames);
-		const titleHandle = getTagsValuesV3(handle_list, ['title'], true);
+		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handleList, genreTag, true) : null;
+		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handleList, styleTag, true) : null;
+		const moodHandle = (moodWeight !== 0) ? getTagsValuesV3(handleList, moodTag, true) : null;
+		const composerHandle = (composerWeight !== 0) ? getTagsValuesV3(handleList, composerTag, true) : null;
+		const customStrHandle = (customStrWeight !== 0) ? getTagsValuesV3(handleList, customStrTag, true) : null;
+		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = getTagsValuesV4(handleList, restTagNames);
+		const titleHandle = getTagsValuesV3(handleList, ['title'], true);
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
 		let i = 0;
 		while (i < tracktotal) {
@@ -1484,9 +1483,9 @@ function do_searchby_distance({
 		if (bPoolFiltering) {
 			let handlePoolArray = [];
 			let i = poolLength;
-			while (i--) {handlePoolArray.push(handle_list[scoreData[i].index]);}
+			while (i--) {handlePoolArray.push(handleList[scoreData[i].index]);}
 			let handlePool = new FbMetadbHandleList(handlePoolArray);
-			handlePool = do_remove_duplicates(handlePool, null, poolFilteringTag, poolFilteringN); // n + 1
+			handlePool = removeDuplicates({handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN}); // n + 1
 			const [titleHandlePool] = getTagsValuesV4(handlePool, ['title'], void(0), void(0), null);
 			let filteredScoreData = [];
 			i = 0;
@@ -1560,7 +1559,7 @@ function do_searchby_distance({
 								} else {camelotKeyNew = keyCache.get(indexNew);}
 								if (camelotKeyNew) {
 									if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
-										selectedHandlesArray.push(handle_list[index]);
+										selectedHandlesArray.push(handleList[index]);
 										selectedHandlesData.push(scoreData[indexScore]);
 										if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
 										nextIndex = indexNew; // Which will be used for next movement
@@ -1585,7 +1584,7 @@ function do_searchby_distance({
 						}
 					}
 					// Add tail
-					selectedHandlesArray.push(handle_list[nextIndex]); 
+					selectedHandlesArray.push(handleList[nextIndex]); 
 					selectedHandlesData.push(scoreData[nextIndexScore]);
 					if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
 					// Double pass
@@ -1607,7 +1606,7 @@ function do_searchby_distance({
 										return selKey[0] === keyHandle[i][0];
 									});
 									if (matchIdx !== -1) {
-										const currTrack = handle_list[currTrackData.index];
+										const currTrack = handleList[currTrackData.index];
 										if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData);}
 										else {toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData];}
 										tempPlaylistLength++;
@@ -1645,7 +1644,7 @@ function do_searchby_distance({
 						let i = 0;
 						while (i < playlistLength) {
 							const i_random = randomseed[i];
-							selectedHandlesArray.push(handle_list[scoreData[i_random].index]);
+							selectedHandlesArray.push(handleList[scoreData[i_random].index]);
 							selectedHandlesData.push(scoreData[i_random]);
 							i++;
 						}
@@ -1659,7 +1658,7 @@ function do_searchby_distance({
 								if (randomseed < probPick) {
 									if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
 										indexSelected.add(scoreData[i].index);
-										selectedHandlesArray.push(handle_list[scoreData[i].index]);
+										selectedHandlesArray.push(handleList[scoreData[i].index]);
 										selectedHandlesData.push(scoreData[i]);
 									}
 								}
@@ -1671,7 +1670,7 @@ function do_searchby_distance({
 						} else {	//In order starting from high score picked tracks
 							let i = 0;
 							while (i < playlistLength) {
-								selectedHandlesArray.push(handle_list[scoreData[i].index]);
+								selectedHandlesArray.push(handleList[scoreData[i].index]);
 								selectedHandlesData.push(scoreData[i]);
 								i++;
 							}
@@ -1680,7 +1679,7 @@ function do_searchby_distance({
 				} else {	//Entire pool
 					let i = 0;
 					while (i < poolLength) {
-						selectedHandlesArray[i] = handle_list[scoreData[i].index];
+						selectedHandlesArray[i] = handleList[scoreData[i].index];
 						selectedHandlesData.push(scoreData[i]);
 						i++;
 					}
@@ -1771,7 +1770,7 @@ function do_searchby_distance({
 						if (finalPlaylistLength >= firstPlaylistLength) { // Don't continue if 1st playlist doesn't have required num of tracks
 							selectedHandlesArray.length = firstPlaylistLength;
 							// Use the track with less score from pool as new reference or the last track of the playlist when using 'In key mixing'
-							let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handle_list[scoreData[poolLength - 1].index];
+							let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handleList[scoreData[poolLength - 1].index];
 							// Reuse arguments for successive calls and disable debug/logs and playlist creation
 							let newArgs = {};
 							for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
@@ -1783,7 +1782,7 @@ function do_searchby_distance({
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
 								[newSelectedHandlesArray, , , newArgs['sel']] = do_searchby_distance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
-								selectedHandlesArray = do_remove_duplicatesV2(new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), null, ['%title%', '%artist%', '%date%']).Convert();
+								selectedHandlesArray = removeDuplicatesV2({handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), checkKeys: ['title', 'artist', 'date']}).Convert();
 								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
 							}
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
@@ -1850,7 +1849,7 @@ function do_searchby_distance({
 		if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
 		if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
 		// Output handle list (as array), the score data, current selection (reference track) and more distant track
-		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handle_list[scoreData[poolLength - 1].index] : -1)];
+		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handleList[scoreData[poolLength - 1].index] : -1)];
 }
 
 
