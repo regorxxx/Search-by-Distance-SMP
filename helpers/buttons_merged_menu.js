@@ -38,7 +38,7 @@ function createButtonsMenu(name) {
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				if (readmeList) {
 					const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-					const readme = _open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8'));
+					const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')) : '';
 					if (readme.length) {fb.ShowPopupMessage(readme, readmeFile);}
 				}
 				window.Reload();
@@ -150,7 +150,7 @@ function createButtonsMenu(name) {
 		if (readmeList) {
 			fileNames.forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-				if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
+				if (readmeFile.length && _isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
 					fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
 				}
 			});
@@ -274,9 +274,10 @@ function createButtonsMenu(name) {
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
 			Object.keys(readmeList).forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
+				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {return;}
 				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;});
 				if (subMenuFolder && subMenuFolder.length) {
-					subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,'')) + invId;
+					subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;;
 					if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 				}
 				const entryText = fileName.replace('buttons_', '');
