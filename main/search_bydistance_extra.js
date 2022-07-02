@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/02/22
+//01/07/22
 
 include('search_bydistance.js');
 
@@ -128,7 +128,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
 	const worldMapData = [];
 	if (_isFile(path)) {
-		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, convertCharsetToCodepage('UTF-8'));
+		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) {data.forEach((item) => {worldMapData.push(item);});}
 	}
 	if (panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve world map data', false);}

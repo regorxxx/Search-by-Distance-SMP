@@ -1,5 +1,5 @@
 ﻿'use strict'
-//22/03/22
+//01/07/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -9,7 +9,7 @@ function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => {return !path.split('\\').pop().startsWith('_');});
-	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, convertCharsetToCodepage('UTF-8')) : null;
+	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
 	// Header
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
@@ -38,7 +38,7 @@ function createButtonsMenu(name) {
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 				if (readmeList) {
 					const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-					const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')) : '';
+					const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
 					if (readme.length) {fb.ShowPopupMessage(readme, readmeFile);}
 				}
 				window.Reload();
@@ -151,7 +151,7 @@ function createButtonsMenu(name) {
 			fileNames.forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (readmeFile.length && _isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-					fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
+					fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8), readmeFile);
 				}
 			});
 		}
@@ -267,7 +267,7 @@ function createButtonsMenu(name) {
 		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
-			const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
+			const readme = _open(readmePath, utf8);
 			if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 		}});
 		if (readmeList) {
@@ -283,7 +283,7 @@ function createButtonsMenu(name) {
 				const entryText = fileName.replace('buttons_', '');
 				menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-						fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, convertCharsetToCodepage('UTF-8')), readmeFile);
+						fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8), readmeFile);
 					}
 				}});
 			});

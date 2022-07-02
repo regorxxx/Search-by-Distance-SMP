@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/22
+//01/07/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -12,14 +12,13 @@ function createRecipeMenu(parent) {
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
-	const utf8 = convertCharsetToCodepage('UTF-8');
 	// Header
 	recipeMenu.newEntry({entryText: 'Set recipe file:', func: null, flags: MF_GRAYED});
 	recipeMenu.newEntry({entryText: 'sep'});
 	{	// Readme
 		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
 		recipeMenu.newEntry({entryText: 'Open readme...', func: () => {
-			const readme = _open(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
+			const readme = _open(readmePath, utf8); // Executed on script load
 			if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 			else {console.log('Readme not found: ' + value);}
 		}});

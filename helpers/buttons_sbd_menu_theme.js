@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/22
+//01/07/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -13,7 +13,6 @@ function createThemeMenu(parent) {
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
-	const utf8 = convertCharsetToCodepage('UTF-8');
 	// Recipe forced theme?
 	let bHasForcedTheme = false;
 	let forcedTheme = null;
@@ -35,7 +34,7 @@ function createThemeMenu(parent) {
 	{	// Readme
 		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
 		themeMenu.newEntry({entryText: 'Open readme...', func: () => {
-			const readme = _open(readmePath, convertCharsetToCodepage('UTF-8')); // Executed on script load
+			const readme = _open(readmePath, utf8); // Executed on script load
 			if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
 			else {console.log('Readme not found: ' + value);}
 		}});

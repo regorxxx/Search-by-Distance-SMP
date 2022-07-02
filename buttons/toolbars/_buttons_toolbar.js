@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/06/22
+//01/07/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -69,7 +69,7 @@ if (!barProperties.firstPopup[1]) {
 	const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 	barProperties.firstPopup[1] = true;
 	overwriteProperties(barProperties); // Updates panel
-	const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
+	const readme = _open(readmePath, utf8);
 	if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 }
 
@@ -131,7 +131,7 @@ function loadButtonsFile() {
 		names = buttonsPath.map((path) => {return path.split('\\').pop();});
 		_save(file, JSON.stringify(names, null, '\t'));
 	} else {
-		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, convertCharsetToCodepage('UTF-8'));
+		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, utf8);
 		if (data) {names = data.map((path) => {return path.split('\\').pop();});}
 		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths TODO
 	}
