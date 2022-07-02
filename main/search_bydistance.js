@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/06/22
+//01/07/22
 
 /*	
 	Search by Distance
@@ -434,9 +434,12 @@ const panelProperties = (typeof buttonsBar === 'undefined' && typeof bNotPropert
 if (!panelProperties.firstPopup[1]) {
 	panelProperties.firstPopup[1] = true;
 	overwriteProperties(panelProperties); // Updates panel
-	const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance.txt';
-	const readme = _open(readmePath, convertCharsetToCodepage('UTF-8'));
-	if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
+	const readmeKeys = [{name: 'search_bydistance', title: 'Search by Distance'}, {name: 'tags_structure', title: 'Tagging requisites'}]; // Must read files on first execution
+	readmeKeys.forEach((objRead) => {
+		const readmePath = folders.xxx + 'helpers\\readme\\' + objRead.name + '.txt';
+		const readme = _open(readmePath, utf8);
+		if (readme.length) {fb.ShowPopupMessage(readme, objRead.title);}
+	});
 }
 
 /* 
@@ -706,7 +709,7 @@ function do_searchby_distance({
 			let path;
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
-				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
 				if (!recipe) {console.log('Recipe not found: ' + path); return;}
 			}
 			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
@@ -775,7 +778,7 @@ function do_searchby_distance({
 			let path;
 			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
 				path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
-				theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+				theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', utf8);
 				if (!theme) {return;}
 			}
 			
@@ -1139,9 +1142,6 @@ function do_searchby_distance({
 					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
 					temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
 					influencesQuery.push(temp);
-					sbd_max_graph_distance = Infinity;
-					scoreFilter = 40;
-					minScoreFilter = 30;
 				}
 			}
 			
@@ -1165,7 +1165,7 @@ function do_searchby_distance({
 			let similTags = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(sel).split(', ').filter(Boolean);
 			let querySimil = '';
 			if (!similTags.length && _isFile(file)) {
-				const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+				const data = _jsonParseFile(file, utf8);
 				const artist = fb.TitleFormat('%artist%').EvalWithMetadb(sel);
 				if (data) {
 					const dataArtist = data.find((obj) => {return obj.artist === artist;});
@@ -1970,7 +1970,7 @@ function loadCache(path) {
 	let cacheMap = new Map();
 	if (_isFile(path)) {
 		if (utils.GetFileSize(path) > 400000000) {console.log('SearchByDistance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
-		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  convertCharsetToCodepage('UTF-8'));
+		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  utf8);
 		if (obj) { 
 			obj = Object.entries(obj);
 			obj.forEach((pair) => {
@@ -1988,7 +1988,7 @@ function processRecipe(initialRecipe) {
 	let toAdd = {};
 	const processRecipeFile = (newRecipe) => {
 		const newPath = !_isFile(newRecipe) && _isFile(recipePath + newRecipe) ? recipePath + newRecipe : newRecipe;
-		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', convertCharsetToCodepage('UTF-8'));
+		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8);
 		if (!newRecipeObj) {console.log('Recipe not found: ' + newPath);}
 		else {toAdd = {...newRecipeObj, ...toAdd};}
 		return newRecipeObj;
