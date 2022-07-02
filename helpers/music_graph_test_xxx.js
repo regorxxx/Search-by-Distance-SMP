@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/10/21
+//01/07/22
 
 // FOR TESTING: compares genre/style A to Band computes distance (similar to the main function for individual links)
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
@@ -333,6 +333,11 @@ function testGraphV2(mygraph) {
 
 		array_one = [ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ];
 		array_two = [ 'Hard Rock', 'Heavy Metal', 'Glam Metal', 'Pop Metal' ];
+		distanceGraph = calcMeanDistanceV2(mygraph, array_one, array_two);
+		console.log(array_one + ' <- ' + array_two + ' = ' + distanceGraph);
+
+		array_one = [ 'World', 'African', 'Blues', 'Malian Folk', 'Desert Blues', 'Hill Country Blues', 'Electric Blues' ];
+		array_two = [ 'Blues', 'Hill Country Blues', 'Electric Blues', 'Harmonica Blues' ];
 		distanceGraph = calcMeanDistanceV2(mygraph, array_one, array_two);
 		console.log(array_one + ' <- ' + array_two + ' = ' + distanceGraph);
 }

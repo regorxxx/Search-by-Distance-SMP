@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/22
+//01/07/22
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -250,7 +250,7 @@ const music_graph_descriptors = {
 	['Proto-Stoner Rock'				,	['Stoner Rock','Stoner Doom','Stoner Sludge']],
 	['Proto-Metal'						,	['Classic Metal']],
 	['Rockabilly'						,	['Rockabilly Revival']],
-	['Classic Rock XL'					,	['Retro Rock']],
+	['Retro Rock'						,	['Classic Rock XL']],
 	['Ska'								,	['Ska Revival']],
 	['Deep Funk Revival'				,	['Deep Funk','Classic Funk']],
 	['Tulsa Sound'						,	['Classic Rock XL','Classic Blues XL','Rock & Roll','Country Blues','Rockabilly','Country Rock','Folk-Rock']],
@@ -282,7 +282,7 @@ const music_graph_descriptors = {
 	['Classic Rock XL'					,	['Latin Rock XL','Latin Rock']],
 	['Hypersoul'						,	['Urban Soul','Dance Pop']],
 	['Sadcore'							,	['Alt. Rock','Indie']],
-	['Desert Blues'						,	['Hill Country Blues','Blues Rock']],
+	['Desert Blues'						,	['Hill Country Blues','Malian Folk','Tuareg Music']],
 	['Ambient Industrial'				,	['Ambient']],
 	['Emo Pop'							,	['Emo Rock']],
 	['Celtic Rock'						,	['Pub Rock','Celtic Folk','Celtic Punk']],
@@ -293,7 +293,8 @@ const music_graph_descriptors = {
 	['Future Bass'						,	['Chillwave','Trap','Ghetto House']],
 	['Celtic Folk XL'					,	['Celtic Punk']],
 	['Classical Music_supercluster'		,	['Neo-Classical Metal','Symphonic Metal']],
-	['Candombe Beat'					,	['Latin Rock']]
+	['Candombe Beat'					,	['Latin Rock']],
+	['Desert Blues'						,	['Tulsa Sound','Blues Rock']]
 	],
 	
 	style_anti_influence: [ //TODO: merge classical
@@ -320,7 +321,8 @@ const music_graph_descriptors = {
 	['Tulsa Sound'						,	['Heavy Prog','Stoner Rock','Progressive Rock XL']],
 	['Progressive Rock XL'				,	['Metal_supergenre','Grunge','Americana','Detroit Blues','Garage Rock Revival','Southern Rock','Heartland Rock']],
 	['Heavy Prog'						,	['Fusion', 'Jazz-Rock','Symphonic Rock','Crossover Prog','Southern Rock','Heartland Rock','Soft Rock']],
-	['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']]
+	['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']],
+	['Desert Blues'						,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock']],
 	],
 	
 	style_anti_influences_conditional: [
