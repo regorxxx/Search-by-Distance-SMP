@@ -10,6 +10,22 @@
 	{
 		"title": "Acoustic tracks", 
 		"query": "STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75"
+	},	
+	{
+		"title": "Rating > 2",
+		"query": "%RATING% GREATER 2"
+	},
+	{
+		"title": "Rating > 3",
+		"query": "%RATING% GREATER 2"
+	},
+	{
+		"title": "Length < 6 min",
+		"query": "%length_seconds% LESS 360"
+	},
+	{
+		"title": "Only Stereo",
+		"query": "%channels% LESS 3 AND NOT COMMENT HAS Quad"
 	},
 	{
 		"title": "sep"
@@ -25,5 +41,13 @@
 	{
 		"title": "No Acoustic tracks", 
 		"query": "NOT (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)"
+	},
+	{
+		"title": "Not Rated",
+		"query": "%RATING% MISSING"
+	},
+	{
+		"title": "Not Live (unless Hi-Fi)",
+		"query": "NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi)"
 	}
 ]

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/06/22
+//01/07/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -9,7 +9,6 @@ include('helpers_xxx_prototypes.js');
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
-	const utf8 = convertCharsetToCodepage('UTF-8');
 	let recipe = {};
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
@@ -130,13 +129,25 @@ function createConfigMenu(parent) {
 		{ // Menu to configure properties: additional filters
 			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
 			let options = [];
-			if (_isFile(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json')) {
-				options = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json', 'Query filters json', 'Search by distance', utf8) || [];
+			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
+			const bFile = _isFile(file);
+			if (bFile) {
+				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
 			} else {
 				options = [
-					{title: 'Female vocals', query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
-					{title: 'Instrumentals', query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
-					{title: 'Acoustic tracks', query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'}
+					{title: 'Female vocals',			query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
+					{title: 'Instrumentals',			query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
+					{title: 'Acoustic tracks',			query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'},
+					{title: 'Rating > 2',				query: '%RATING% GREATER 2'},
+					{title: 'Rating > 3',				query: '%RATING% GREATER 3'},
+					{title: 'Length < 6 min',			query: '%length_seconds% LESS 360'},
+					{title: 'Only Stereo',				query: '%channels% LESS 3 AND NOT COMMENT HAS Quad'},
+					{title: 'sep'},		
+					{title: 'No Female vocals',			query: 'NOT (STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female)'}, 
+					{title: 'No Instrumentals', 		query: 'NOT (STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0)'},
+					{title: 'No Acoustic tracks',		query: 'NOT (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)' },
+					{title: 'Not rated',				query: '%RATING% MISSING'},
+					{title: 'Not Live (unless Hi-Fi)',	query: 'NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi)'}
 				];
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});
@@ -158,6 +169,11 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(input) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(input) !== -1);});
 			});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
+			menu.newEntry({menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
+				if (!bFile) {_save(file, JSON.stringify(options, null, '\t'));}
+				_explorer(file);
+			}});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{ // Menu to configure properties: influences filter
@@ -393,7 +409,7 @@ function createConfigMenu(parent) {
 					newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});
 					_save(file, JSON.stringify(newData, null, '\t'));
 				} else {
-					const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+					const data = _jsonParseFile(file, utf8);
 					if (data) {
 						const idxMap = new Map();
 						data.forEach((obj, idx) => {idxMap.set(obj.artist, idx);});
@@ -433,7 +449,7 @@ function createConfigMenu(parent) {
 				if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
 				if (!_isFile(file)) {return;}
 				else {
-					const data = _jsonParseFile(file, convertCharsetToCodepage('UTF-8'));
+					const data = _jsonParseFile(file, utf8);
 					if (data) {
 						const bRewrite = WshShell.Popup('Rewrite previously added similar artist tags?', 0, window.Name, popup.question + popup.yes_no) === popup.yes;
 						const queryNoRw = ' AND ' + tagName + ' MISSING';
@@ -570,19 +586,27 @@ function createConfigMenu(parent) {
 		let iCount = 0;
 		const readmes = {
 			Full: folders.xxx + 'helpers\\readme\\search_bydistance.txt',
+			sep1: 'sep',
 			DYNGENRE: folders.xxx + 'helpers\\readme\\search_bydistance_dyngenre.txt',
 			GRAPH: folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
 			WEIGHT: folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
-			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt'
+			sep2: 'sep',
+			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
+			sep3: 'sep',
+			'Tagging requisites': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
+			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
+			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'
 		};
 		if (Object.keys(readmes).length) {
+			const rgex = /sep\b|separator\b/gi;
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
-				if (_isFile(value)) {
-					const readme = _open(value, convertCharsetToCodepage('UTF-8')); // Executed on script load
+				if (rgex.test(value)) {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
+				else if (_isFile(value)) {
+					const readme = _open(value, utf8); // Executed on script load
 					if (readme.length) {
 						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
 							if (_isFile(value)) {
-								const readme = _open(value, convertCharsetToCodepage('UTF-8'));
+								const readme = _open(value, utf8);
 								if (readme.length) {fb.ShowPopupMessage(readme, key);}
 							} else {console.log('Readme not found: ' + value);}
 						}});
