@@ -1,0 +1,29 @@
+﻿Some additional notes for tags apply:
+
++--------------------------------------------------------+
+|                 TAGS   TECHNICAL NOTES                 |
++------------+----------------------+--------------------+
+|  Tag name  |       INTERNALS      |   Notes / Allowed  |
++------------+----------------------+--------------------+
++------------+----------------------+--------------------+
+|            |                      |     Merged from    |
+| STYLEGENRE | [...STYLE; ...GENRE] |      standard tags |
++------------+----------------------+--------------------+
+|     KEY    |     Am | 8A | 1m     |   All are allowed  |
++------------+----------------------+--------------------+
+|            |                      |   Used by default  |
+|    DATE    |     $YEAR(%DATE%)    |       with this TF |
++------------+----------------------+--------------------+
+
+- STYLEGENRE: is a virtual tag used for internal use, retrieved from
+STYLE and GENRE standard tags. See "Tagging requisites" readme.
+
+- KEY: may use Camelot notation (8A), Open Key notation (1m) or 
+Standard notation (Am). Programs like Picard offer standard
+notation by default. There is no need to change the format in any
+of the tools, since all three are supported (ex. harmonic mixing).
+
+- DATE: as noted on "Tagging requisites" readme, year format is
+preferred. In any case, at most places the DATE tag is rewrapped
+to use the TF to retrieve only the year part. Usage of a different
+format is at your own risk (although it should work).

@@ -1,0 +1,89 @@
+﻿All the tools use this universal tag structure:
+
++------------------------------------------------------------------------+
+|                           TAGS   NOTATION                              |
++-------------+----------------+-----------------------+-----------------+
+| Description |    Tag name    | Tag values (examples) | Notes / Allowed |
++-------------+----------------+-----------------------+-----------------+
++-------------+----------------+-----------------------+-----------------+
+| Main genres |      GENRE     |       Alt. Rock       |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Sub-genres  |      STYLE     |   80s Rock; Pop Rock  |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Moods       |      MOOD      |  Not acoustic; Catchy |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Themes      |      THEME     |  Reflection; Summer   |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Key (any    |                |                       | Open, Camelot   |
+|   notation) |       KEY      |           Am          | or Standard key |
++-------------+----------------+-----------------------+-----------------+
+| Beats   per |                |                       |                 |
+|    Minute   |       BPM      |           95          |  Single value   |
++-------------+----------------+-----------------------+-----------------+
+| Composers   |    COMPOSER    |      Jimi Hendrix     |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+|             |                |                       |  Preferred in   |
+| Year        |      DATE      |          1964         |     year format |
++-------------+----------------+-----------------------+-----------------+
+| Artists     |     ARTIST     |   Lauryn Hill; Sade   |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Track title |      TITLE     |       Amber glow      |  Single value   |
++-------------+----------------+-----------------------+-----------------+
+| Featured    |                |                       |                 |
+|     artists | INVOLVEDPEOPLE |    Natalia M. King    |   Multivalue    |
++-------------+----------------+-----------------------+-----------------+
+| Rating      |     RATING     |           3           |  Plugin or Tag  |
++-------------+----------------+-----------------------+-----------------+
+
+Rationale: It's not feasible to support arbitrary tag names when there are
+a dozen of tools using their own. Also tag names should use standard names
+and not proprietary names. Proprietary tags like "GENRE LAST.FM" are only
+meant as intermediary tags which should be renamed, remapped or merged.
+
+If you use other tag names then you have these options:
+1. Rename your tags.
+2. Clone your tags and use names at top.
+3. Configure scripts to remap standard tags to your own tags.
+4. Configure your tagging tools to output proper tag names.
+
+--------------------------------------------------------------------------
+Example:
+--------------------------------------------------------------------------
+I have used the BIO panel to tag my files, and they are all tagged with 
+things like: "ALBUM GENRE ALLMUSIC", "ALBUM GENRE LAST.FM", 
+"ALBUM THEME ALLMUSIC", ...
+
+I also have my own genre tag named as "MY GENRE".
+
+Finally I have retrieved keys for my tracks using Traktor and the tag is
+written as "INITIAL KEY".
+
+- GENRE:
+(1) Is not possible for genres, since I intend to use all of them (3 tags).
+
+(2) Would be possible, Masstagger for ex. allows to merge different tags
+into one new field. I could simply retag all my tracks this way with a new
+tag name "GENRE" which contains the values of the other 3.
+
+(3) Probably the best option. For ex. Playlist Tools or Search by Distance
+already allow to remap any group of tags to GENRE, merging their values
+and removing duplicates, without touching the files. I will have to look
+for "Tag remapping" at the associated buttons in their config.
+
+(4) Picard allows to use scripting to set tag names before writing tags to
+files. This is obviously meant for these use-cases where you have different
+sources for a tag meant to be the same (genre on All Music, Last Fm, ...)
+and they should be merged or properly named. Same comment applies for other
+tools. BIO may be configured too, for ex. "ALBUM THEME ALLMUSIC"
+could be saved as just "THEME" if that's the only tag source used.
+
+- KEY:
+(1) "INITIALL KEY" may be renamed to "KEY" for all my files.
+
+(2) Idem. Trivial to clone single tag as "Key".
+
+(3) Idem. Remapping would allow to use the tag 'as is' without touching
+the original files or rewriting all tags.
+
+(4) It would be easier if from now on if I configure Traktor to write tag
+as "KEY".

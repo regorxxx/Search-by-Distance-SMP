@@ -1,26 +1,33 @@
 ﻿Themes are 'tag containers' which emulate track's tags, to be used with
-'search_bydistance' buttons and tools instead of evaluating with the selected track.
+'search_bydistance' buttons and tools instead of evaluating with the
+selected track.
 
-Recipes are 'variables containers' which emulate the args of 'search_bydistance'
-buttons snd tools instead of using hardcoded variables or properties.
-Note recipes may also contain a forced theme, either the entire object or a
-link to a theme file (using its path or filename).
+Recipes are 'variables containers' which emulate the args of 
+'search_bydistance' buttons snd tools instead of using hardcoded 
+variables or properties.
+Note recipes may also contain a forced theme, either the entire object or
+a link to a theme file (using its path or filename).
 
 Both may be used in buttons, tools or with Playlist Tools:
 	- Pools presets may link to these files in their arguments.
-	- Search by GRAPH\WEIGHT\DYNGENRE menu presets may link to these files in
-	their arguments to have menus which use the variables set on those files
-	instead of harcoded in the menu (working similar to custom buttons).
-	- Custom buttons may use recipes and themes to tweak their behavior (see tooltip).
+	- Search by GRAPH\WEIGHT\DYNGENRE menu presets may link to these
+	files in their arguments to have menus which use the variables
+	set on those files instead of harcoded in the menu (working similar
+	to custom buttons).
+	- Custom buttons may use recipes and themes to tweak their behavior
+	(see tooltip).
 
-Theme files may be created using the examples files, buttons or Playlist tools.
-	- When using Playlist Tools there is a menu entry (see Configuration\Search by Distance)
-	to use the selected track's tags as reference and save them to a json file directly.
-	In that case, the tags names put at the properties panel will be used.
-	i.e. you can remap genre to use 'genre' and 'All Music Genre', etc.
-	- When using custom buttons just use the theme menu (Shift + Left Click).
-	Same comments apply.
+Theme files may be created using the examples files, buttons or Playlist
+tools.
+	- When using Playlist Tools there is a menu entry (see
+	Configuration\Search by Distance) to use the selected track's tags
+	as reference and save them to a json file directly.
+	In that case, the tags names put at the properties panel will be 
+	used. i.e. you can remap genre to use 'GENRE' and 'ALL MUSIC
+	GENRE',	etc.
+	- When using custom buttons just use the theme menu 
+	(Shift + Left Click). Same comments apply.
 	
 Both type of files may be set to 'Hidden' (file attribute) to not show them
-on the menus, instead of deleting them. Some files meant for internal use only
-may be hidden by default.
+on the menus, instead of deleting them. Some files meant for internal use
+only may be hidden by default.

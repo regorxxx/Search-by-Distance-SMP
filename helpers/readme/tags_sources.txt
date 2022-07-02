@@ -1,0 +1,69 @@
+﻿Tags may be sourced from:
+
++--------------------------------------------------------------------+
+|                           TAGS   SOURCES                           |
++----------+---------------------------------------------------------+
++----------+---------------------------------------------------------+
+| Tag name |                 Software (UNIX/Windows)                 |
++----------+---------------------------------------------------------+
+|          | Foobar - Playlist Tools script   (**)                   |
+|          |      https://github.com/regorxxx/Playlist-Tools-SMP     |
+|          +---------------------------------------------------------+
+|    KEY   | Picard -   AcousticBrainz Tags plugin                   |
+|          |      https://picard.musicbrainz.org/plugins/            |
+|          +---------------------------------------------------------+
+|          | KeyFinder   (*)                                         |
+|          |      https://github.com/ibsh/is_KeyFinder               |
++----------+---------------------------------------------------------+
+|          | Foobar - Playlist Tools script   (**)                   |
+|          |      https://github.com/regorxxx/Playlist-Tools-SMP     |
+|          +---------------------------------------------------------+
+|          | Picard -   AcousticBrainz Tags plugin                   |
+|          |      https://picard.musicbrainz.org/plugins/            |
+|    BPM   +---------------------------------------------------------+
+|          | KeyFinder   (*)                                         |
+|          |      https://github.com/ibsh/is_KeyFinder               |
+|          +---------------------------------------------------------+
+|          | Foobar -   Foo_BPM Plugin                               |
+|          |      https://www.foobar2000.org/components/view/foo_bpm |
++----------+---------------------------------------------------------+
+|          | Picard - AcousticBrainz Tags   plugin                   |
+|          |      https://picard.musicbrainz.org/plugins/            |
+|   MOOD   +---------------------------------------------------------+
+|          | Foobar -   Biography script (*)                         |
+|          |      https://github.com/Wil-B/Biography                 |
++----------+---------------------------------------------------------+
+|          | Foobar - Biography script   (*)                         |
+|   THEME  |      https://github.com/Wil-B/Biography                 |
++----------+---------------------------------------------------------+
+|          | Picard                                                  |
+| COMPOSER |      https://picard.musicbrainz.org/downloads/          |
++----------+---------------------------------------------------------+
+
+(*) May require additional configuration or steps to either set a 
+compatible tag name or merge values. See 'Tagging requisites' readme.
+
+(*) Outputs same values than Picard / AcousticBrainz. i.e. fully 
+compatible (see warning below).
+
+NOTES AND WARNINGS:
+
+- Getting KEY tag from different sources:
+Different software use different algorithms to compute KEY, therefore it
+is not recommended to mix tagging from different sources. Stick with one
+for the entire library; that way even if the KEY is wrong (not the real
+key), the errors will be the same across the entire library (essential 
+for comparison purposes).
+
+- Getting KEY tag from different sources:
+
+- Mixx: https://mixxx.org
+Provides KEY tags, but will flatten all multivalue tags with spaces,
+making impossible to undone the tagging. Issue has been unresolved for
+years.
+
+- Essentia: https://essentia.upf.edu/download.html 
+See Precompiled extractor binaries (Linux, OSX, Win). Allow to extract
+KEY and BPM tags, but output to a txt file. Could be used with scripting
+for batch processing:
+streaming_extractor_music.exe file.flac out.txt

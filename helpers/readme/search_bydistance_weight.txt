@@ -1,8 +1,10 @@
-﻿Creates intelligent "spotify-like" playlists using high-level data from tracks similar
-to the currently selected one according to genre, style, key, etc.
-When their score is over 'scoreFilter', then they are included in the final pool.
+﻿Creates intelligent "spotify-like" playlists using high-level data from
+tracks similar to the currently selected one according to genre, style,
+key, etc. When their score is over 'scoreFilter', then they are included
+n the final pool.
 
-WEIGHT presets work by matching genre\style tags (Rock != Hard Rock), without using complex logics.
-Therefore they work with arbitrary tag values.
+WEIGHT presets work by matching genre\style tags (Rock != Hard Rock),
+without using complex logics. Therefore they work with arbitrary tag
+values.
 
 See main readme (ALL) for more usage info.
