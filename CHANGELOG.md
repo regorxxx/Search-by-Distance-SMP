@@ -25,6 +25,7 @@
 - UI: themed buttons are replaced with manually drawn buttons when the first method fails (on Wine for ex.). Console will output: "window.CreateThemeManager('Button') failed, using experimental buttons" in such case.
 - Descriptors: Updated descriptors.
 - Readmes: rewritten readmes to avoid line wrapping wen showing them within popup for a cleaner presentation.
+- Helpers: temp files are now written at 'js_data\temp' instead of 'js_data'.
 - Helpers: updated helpers.
 - Minor speed optimization on multiple tools/buttons using duplicates removal code.
 ### Removed
