@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//28/07/22
 
 /*	
 	Search by Distance
@@ -907,6 +907,7 @@ function do_searchby_distance({
 		const genreSet = new Set(genre);
 		const styleSet = new Set(style);
 		const moodSet = new Set(mood);
+		const composerSet = new Set(composer);
 		const customStrSet = new Set(customStr);
 		
 		let originalWeightValue = 0;
@@ -1054,7 +1055,7 @@ function do_searchby_distance({
 			}
 		} else if (bpmWeight !== 0 && bBasicLogging) {console.log('bpmWeight was not zero but selected track had no bpm tags');}
 		// Composer
-		const composerNumber = composer.length;
+		const composerNumber = composerSet.length;
 		if (composerNumber !== 0) {
 			originalWeightValue += composerWeight;
 			if ( composerWeight / totalWeight >= totalWeight / countWeights / 100) {
