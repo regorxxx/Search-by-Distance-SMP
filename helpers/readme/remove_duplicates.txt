@@ -15,7 +15,7 @@ Usage on playlist tools:
 	- See comments below (buttons) for usage. It applies the same.
 
 Usage on buttons:
-	- Tags or TF expressions may be set at the properties panel. There
+	- Tags or TF expressions may be set via menus. There
 	are	3 possible fields, but multiple tags may also be set in the 
 	same field. ('%ARTIST% - %TITLE% - %DATE%' is equivalent to setting
 	them separately on the 3 properties)

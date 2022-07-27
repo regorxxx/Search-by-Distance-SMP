@@ -32,6 +32,7 @@
 ### Fixed
 - UI: crash due to themed buttons not being available on wine.
 - Readmes: some minor fixes to names displayed and missing entries.
+- Crash when using composer tag for similarity.
 
 ## [2.1.6] - 2022-06-05
 ### Added
