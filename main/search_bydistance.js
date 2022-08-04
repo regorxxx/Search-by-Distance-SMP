@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/07/22
+//01/08/22
 
 /*	
 	Search by Distance
@@ -327,7 +327,7 @@ include('..\\helpers\\music_graph_xxx.js');
 include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
 
-checkCompatible('1.6.1');
+checkCompatible('1.6.1', 'smp');
 
 /* 
 	Properties
