@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [2.1.6](#216---2022-06-05)
+- [2.1.6](#216---2022-08-05)
 - [2.1.5](#215---2022-05-23)
 - [2.1.4](#214---2022-05-09)
 - [2.1.3](#213---2022-05-04)
@@ -17,12 +17,19 @@
 
 ## [Unreleased][]
 ### Added
+### Changed
+### Removed
+### Fixed
+
+## [2.1.6] - 2022-08-05
+### Added
 - Buttons: added new queries to pre-defined filters (queries).
 - Readmes: new readmes for 'Tagging requisites', 'Tags sources' and 'Other tag notes'. They should cover most frequently asked questions about tagging compatible with the tools or tag remapping.
 ### Changed
 - Influences filter: now doesn't overwrite score filter or graph distance filter. Although it was designed to do so (to output any influence without considering score), it did not work in a logical way since those filters can be manually tuned to achieve the same result while also allowing other options.
 - Buttons: added new entry to open the file to set pre-defined filters (queries). In case the file is deleted, clicking on the menu entry will recreate it.
 - UI: themed buttons are replaced with manually drawn buttons when the first method fails (on Wine for ex.). Console will output: "window.CreateThemeManager('Button') failed, using experimental buttons" in such case.
+- UI: enforced SMP version checking via popups.
 - Descriptors: Updated descriptors.
 - Readmes: rewritten readmes to avoid line wrapping wen showing them within popup for a cleaner presentation.
 - Helpers: temp files are now written at 'js_data\temp' instead of 'js_data'.
@@ -33,14 +40,6 @@
 - UI: crash due to themed buttons not being available on wine.
 - Readmes: some minor fixes to names displayed and missing entries.
 - Crash when using composer tag for similarity.
-
-## [2.1.6] - 2022-06-05
-### Added
-### Changed
-- UI: enforced SMP version checking via popups.
-- Helpers: updated helpers.
-### Removed
-### Fixed
 
 ## [2.1.5] - 2022-05-23
 ### Added
