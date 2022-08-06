@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.2.1](#221---2022-08-06)
 - [2.2.0](#220---2022-08-05)
 - [2.1.5](#215---2022-05-23)
 - [2.1.4](#214---2022-05-09)
@@ -20,6 +21,14 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.2.1] - 2022-08-06
+### Added
+### Changed
+- Logging: minor improvements to console logging when reporting track li
+### Removed
+### Fixed
+- Themes: fix to theme checking. Themes were being reported as non valid when they were fine
 
 ## [2.2.0] - 2022-08-05
 ### Added
@@ -273,7 +282,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.2.0
 [2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...v2.1.4
