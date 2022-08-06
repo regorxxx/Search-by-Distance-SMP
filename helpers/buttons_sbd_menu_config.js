@@ -152,22 +152,28 @@ function createConfigMenu(parent) {
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
+			const switchQuery = (input, query) => {
+				if (input.indexOf(query) !== -1) {
+					input = input.replace(query, ''); // Query
+					input = input.slice(1, -1); // Remove parentheses
+				} else {
+					input = input.length ? _p(input) + query : query;
+				}
+				return input;
+			};
 			options.forEach((obj) => {
 				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
 				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
-				let input = properties['forcedQuery'][1].length ? ' AND ' + _p(obj.query) : obj.query;
+				const query = properties['forcedQuery'][1].length ? ' AND ' + _p(obj.query) : obj.query;
+				let input = '';
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
-					if (properties['forcedQuery'][1].indexOf(input) !== -1) {
-						input = properties['forcedQuery'][1].replace(input, ''); // Query
-						input = input.slice(1, -1); // Remove parentheses
-					} else {
-						input = properties['forcedQuery'][1].length ? _p(properties['forcedQuery'][1]) + input : input;
-					}
+					input = switchQuery(properties['forcedQuery'][1], query);
 					try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
 					catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
 					properties['forcedQuery'][1] = input;
+					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(input) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(input) !== -1);});
+				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(query) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(query) !== -1);});
 			});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
 			menu.newEntry({menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {

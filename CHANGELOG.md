@@ -29,6 +29,7 @@
 ### Removed
 ### Fixed
 - Themes: fix to theme checking. Themes were being reported as non valid when they were fine
+- Buttons: forced query was not being properly saved when using pre-defined filters.
 
 ## [2.2.0] - 2022-08-05
 ### Added
