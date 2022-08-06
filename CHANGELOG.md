@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [2.1.6](#216---2022-08-05)
+- [2.2.0](#220---2022-08-05)
 - [2.1.5](#215---2022-05-23)
 - [2.1.4](#214---2022-05-09)
 - [2.1.3](#213---2022-05-04)
@@ -21,7 +21,7 @@
 ### Removed
 ### Fixed
 
-## [2.1.6] - 2022-08-05
+## [2.2.0] - 2022-08-05
 ### Added
 - Buttons: added new queries to pre-defined filters (queries).
 - Readmes: new readmes for 'Tagging requisites', 'Tags sources' and 'Other tag notes'. They should cover most frequently asked questions about tagging compatible with the tools or tag remapping.
@@ -273,8 +273,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.6...HEAD
-[2.1.6]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.1.6
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.2.0
 [2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
 [2.1.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.2...v2.1.3
