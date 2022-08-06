@@ -784,7 +784,7 @@ function do_searchby_distance({
 			
 			// Array of objects
 			const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
-			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
+			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
 			const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
 			if (!bCheck) {
 				console.log('Theme selected for mix is missing some keys: ' + (theme.hasOwnProperty('name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
@@ -1094,7 +1094,7 @@ function do_searchby_distance({
 		} else if (customNumWeight !== 0 && bBasicLogging) {console.log('customNumWeight was not zero but selected track had no custom number tags');}
 		// Total score
 		const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
-		if (bProfile) {test.Print('Task #1: Reference track', false);}
+		if (bProfile) {test.Print('Task #1: Reference track / theme', false);}
 		
         // Create final query
 		// Pre filtering by query greatly speeds up the next part (weight and graph distance calcs), but it requires variable queries according to the weights.
@@ -1795,7 +1795,7 @@ function do_searchby_distance({
 			if (bShowFinalSelection && !bProgressiveListCreation) {
 				let i = finalPlaylistLength;
 				let conText = 'List of selected tracks:';
-				while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance : '');}
+				while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance  + ' Graph' : '');}
 				console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 			}
 		} else {
