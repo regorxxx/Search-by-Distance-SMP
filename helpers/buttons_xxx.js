@@ -373,7 +373,7 @@ function on_mouse_move(x, y, mask) {
 		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip , true);
 	}
 	// Move buttons
-	if (buttonsBar.curBtn) {
+	if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
 		if (mask === MK_RBUTTON) {
 			if (buttonsBar.move.bIsMoving) {
 				buttonsBar.move.toKey = curBtnKey;

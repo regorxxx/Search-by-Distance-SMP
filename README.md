@@ -103,7 +103,7 @@ Both the html and foobar scripts will use any setting on the user file (as if it
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
 ## Installation
-See [_TIPS and INSTALLATION (txt)](https://github.com/regorxxx/Search-by-Distance-SM/blob/main/_TIPS%20and%20INSTALLATION.txt) and the [Wiki](https://github.com/regorxxx/Search-by-Distance-SM/wiki/Installation).
+See [_TIPS and INSTALLATION (txt)](https://github.com/regorxxx/Search-by-Distance-SMP/blob/main/_TIPS%20and%20INSTALLATION.txt) and the [Wiki](https://github.com/regorxxx/Search-by-Distance-SMP/wiki/Installation).
 Not properly following the installation instructions will result in scripts not working as intended. Please don't report errors before checking this.
 
 [changelog]: CHANGELOG.md

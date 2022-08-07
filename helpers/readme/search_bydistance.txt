@@ -297,7 +297,7 @@ https://picard.musicbrainz.org/
 
 Now, you DON'T need to change all your tags or your entire library. But 
 Picard offers 3 tags using the high-level open source data of 
-AcousticBraiz: mood, key and BPM. That means, you can use your manual set
+AcousticBrainz: mood, key and BPM. That means, you can use your manual set
 tags along those automatically set Picard's tags to fulfill both: your tag 
 convention and reproducibility along your entire library. Also you can 
 manually fix or change later any mood with your preferred editor or 

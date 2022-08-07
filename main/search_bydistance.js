@@ -665,7 +665,7 @@ function do_searchby_distance({
 								// --->Scoring filters
 								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
 								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties['minScoreFilter'][1]) :  scoreFilter - 10,
-								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? Number(properties['sbd_max_graph_distance'][1]) : Infinity,
+								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties['sbd_max_graph_distance'][1]) ? properties['sbd_max_graph_distance'][1] : Number(properties['sbd_max_graph_distance'][1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],

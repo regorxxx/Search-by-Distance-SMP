@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.2.2](#222---2022-08-07)
 - [2.2.1](#221---2022-08-06)
 - [2.2.0](#220---2022-08-05)
 - [2.1.5](#215---2022-05-23)
@@ -21,6 +22,14 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.2.2] - 2022-08-07
+### Added
+### Changed
+### Removed
+### Fixed
+- Buttons: graph variable 'Exclude any track with graph distance greater than (only GRAPH method' was not being parsed properly when set to a string.
+- Buttons: crash when trying to move a button when only a single button script was loaded on the panel.
 
 ## [2.2.1] - 2022-08-06
 ### Added
@@ -269,9 +278,9 @@
 - Harmonic mixing: small changes and optimizations.
 - Harmonic mixing: code for pattern creation moved to camelot_wheel.js.
 - Harmonic mixing: code for sending to playlist moved to helpers and reused in multiple scripts.
-- Debug: Greatly expanded the debug functions to check possible errors or inconsistencies in the descriptors. It should be foolproof now.
-- Descriptors: Multiple fixes on descriptors found with the new debug code.
-- Buttons: Variables are now set according to distance variables on descriptors. i.e. if they change at a latter point, they will be re-scaled.
+- Debug: greatly expanded the debug functions to check possible errors or inconsistencies in the descriptors. It should be foolproof now.
+- Descriptors: multiple fixes on descriptors found with the new debug code.
+- Buttons: variables are now set according to distance variables on descriptors. i.e. if they change at a latter point, they will be re-scaled.
 ### Removed
 - Removed all lodash dependence and deleted helper.
 ### Fixed
@@ -283,7 +292,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...HEAD
+[2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.2.0
 [2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
