@@ -29,5 +29,9 @@ tools.
 	(Shift + Left Click). Same comments apply.
 	
 Both type of files may be set to 'Hidden' (file attribute) to not show them
-on the menus, instead of deleting them. Some files meant for internal use
-only may be hidden by default.
+on the menus, instead of deleting them. Some files, meant for internal use
+only, may be hidden by default. 
+
+Although all recipes are shown by default in a clean installation, it's 
+recommended to hide those which will not be used on a daily basis to clean
+up the menu using the tip above.
