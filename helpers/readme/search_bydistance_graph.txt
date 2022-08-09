@@ -1,7 +1,7 @@
 ﻿Creates intelligent "spotify-like" playlists using high-level data from
 tracks similar to the currently selected one according to genre, style,
 key, etc. When their score is over 'scoreFilter', then they are included
-in the final pool.
+in the final pool. See '_images\search_by_distance_GRAPH_diagram.png'.
 
 GRAPH presets work by linking similar genre\style tags on a graph
 (Rock -> Southern Rock -> Country Rock -> Country).
