@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.2.3](#223---2022-08-09)
 - [2.2.2](#222---2022-08-07)
 - [2.2.1](#221---2022-08-06)
 - [2.2.0](#220---2022-08-05)
@@ -22,6 +23,17 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.2.3] - 2022-08-09
+### Added
+- Presets: new menu entry on customizable button to show all hidden presets (recipes or themes).
+- Presets: new option to hide selected preset (Shift + Click).
+### Changed
+- Presets: any recipe or theme file starting with 'test_' or 'int_' will be hidden everytime when opening the customizable button's menu.
+### Removed
+### Fixed
+- Presets: None preset was not being shown as current preset when there were no more presets on the list.
+- Presets: 'test_with_forcedThemePath.json' recipe is no longer available by default (see change above). Previously a warning popup was shown everytime the menus were called due to inline forced theme path being wrong.
 
 ## [2.2.2] - 2022-08-07
 ### Added
@@ -292,8 +304,9 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...HEAD
-[2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...HEAD
+[2.2.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.5...v2.2.0
 [2.1.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.1.4...v2.1.5
