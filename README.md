@@ -10,7 +10,7 @@ An implementation of [Music-Graph](https://github.com/regorxxx/Music-Graph) for 
 ## Features
 Creates playlists using high-level data from tracks similar to the currently selected one according to genre, style, key, etc. When their score is over a threshold, they are included in the final pool. After all tracks have been evaluated and the final pool is complete, some of those tracks are chosen to populate the playlist. You can choose whether this final selection is done according to score, randomly, using harmonic rules, etc. All settings are configurable via button's menus (on customizable button) or the properties panel (static buttons).
 
-Take a look at the descriptions of the properties panel to check how the variables work. These are the weight/tags pairs checked by default:
+To use this plugin at its best and to benefit the most from your library, you will want to make sure that your songs have the most possible information on genre, style, key, moods, etc. These are the weight/tags pairs checked by default:
 
 Weight|Tag|Weight|Tag
 -------------|----------------|--------------|-------------
