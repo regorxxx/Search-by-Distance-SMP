@@ -3,7 +3,7 @@
 
 include('search_bydistance.js');
 
-function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'Similar artists calculation (GRAPH).json', dateRange = 10} = {}) {
+function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10} = {}) {
 	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Find which genre/styles are nearest as pre-filter

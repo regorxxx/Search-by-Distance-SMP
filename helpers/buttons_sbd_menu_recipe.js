@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//09/08/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -12,21 +12,17 @@ function createRecipeMenu(parent) {
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
+	// Hide test files first
+	const testRegex = /test_.*|int_.*/i;
+	files.forEach((file) => {
+		if (testRegex.test(file.split('\\').pop())) {
+			const attr = _parseAttrFile(file);
+			if (attr && !attr.Hidden) {_runCmd('attrib +H ' + _q(file), true);}
+		}
+	});
 	// Header
-	recipeMenu.newEntry({entryText: 'Set recipe file:', func: null, flags: MF_GRAYED});
+	recipeMenu.newEntry({entryText: 'Set recipe file: (Shift + Click to hide)', func: null, flags: MF_GRAYED});
 	recipeMenu.newEntry({entryText: 'sep'});
-	{	// Readme
-		const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
-		recipeMenu.newEntry({entryText: 'Open readme...', func: () => {
-			const readme = _open(readmePath, utf8); // Executed on script load
-			if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
-			else {console.log('Readme not found: ' + value);}
-		}});
-	}
-	recipeMenu.newEntry({entryText: 'Open recipes folder', func: () => {
-		if (_isFile(properties.recipe[1])) {_explorer(properties.recipe[1]);} // Open current file
-		else {_explorer(folders.xxx + 'presets\\Search by\\recipes');} // or folder
-	}});
 	recipeMenu.newEntry({entryText: 'Create recipe file with current config', func: () => {
 		const recipe = {name: ''};
 		// Retrieve allowed keys
@@ -51,6 +47,35 @@ function createRecipeMenu(parent) {
 		if (!bDone) {fb.ShowPopupMessage('Error saving recipe file:' + filePath, 'Search by distance'); return;}
 		else {_explorer(filePath);}
 	}});
+	{	// Recipe tools
+		const menuName = recipeMenu.newMenu('More options...');
+		{	// Readme
+			const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
+			recipeMenu.newEntry({menuName, entryText: 'Open readme...', func: () => {
+				const readme = _open(readmePath, utf8); // Executed on script load
+				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
+				else {console.log('Readme not found: ' + value);}
+			}});
+		}
+		recipeMenu.newEntry({menuName, entryText: 'Open recipes folder', func: () => {
+			if (_isFile(properties.recipe[1])) {_explorer(properties.recipe[1]);} // Open current file
+			else {_explorer(folders.xxx + 'presets\\Search by\\recipes');} // or folder
+		}});
+		const hiddenFilesNum = files.reduce((total, file) => {
+			if (!testRegex.test(file.split('\\').pop())) {
+				const attr = _parseAttrFile(file);
+				return attr && attr.Hidden ? total + 1 : total;
+			} else {return total;}
+		}, 0);
+		recipeMenu.newEntry({menuName, entryText: 'Unhide all recipes\t' + _b(hiddenFilesNum + ' files'), func: () => {
+			const hiddenFiles = files.filter((file) => {const attr = _parseAttrFile(file); return attr && attr.Hidden;});
+			hiddenFiles.forEach((file) => {
+				if (!testRegex.test(file.split('\\').pop())) {
+					if (_runCmd('attrib -H ' + _q(file), false)) {console.log('Unhide: '+ file);}
+				}
+			});
+		}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED});
+	}
 	recipeMenu.newEntry({entryText: 'sep'});
 	recipeMenu.newEntry({entryText: 'None', func: () => {
 		properties.recipe[1] = '';
@@ -70,7 +95,7 @@ function createRecipeMenu(parent) {
 		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file.replace(fb.ProfilePath,'.\\')): file);
 	});
 	const menus = [];
-	options.forEach((file) => {
+	options.forEach((file, j) => {
 		const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
 		if (!recipe) {return;}
 		const name = recipe.hasOwnProperty('name') ? recipe.name : utils.SplitFilePath(file)[1];
@@ -85,14 +110,25 @@ function createRecipeMenu(parent) {
 		const entryText = menus.indexOf(name) === -1 ? name : name + ' (' + ++i + ')';
 		menus.push(entryText);
 		recipeMenu.newEntry({entryText, func: () => {
-			properties.recipe[1] = file;
-			data.recipe = name;
-			data.forcedTheme = themeName;
-			properties.data[1] = JSON.stringify(data);
-			overwriteProperties(properties);
+			if (utils.IsKeyPressed(VK_SHIFT)) {
+				_runCmd('attrib +H ' + _q(file), false);
+				if (properties.recipe[1] === file) { // Set to none when hiding current recipe
+					properties.recipe[1] = '';
+					data.recipe = 'None';
+					data.forcedTheme = '';
+					properties.data[1] = JSON.stringify(data);
+					overwriteProperties(properties);
+				}
+			} else {
+				properties.recipe[1] = file;
+				data.recipe = name;
+				data.forcedTheme = themeName;
+				properties.data[1] = JSON.stringify(data);
+				overwriteProperties(properties);
+			}
 		}});
 	});
-	recipeMenu.newCheckMenu(recipeMenu.getMainMenuName(), 'None', menus[menus.length - 1], () => {
+	recipeMenu.newCheckMenu(recipeMenu.getMainMenuName(), 'None', menus.length ? menus[menus.length - 1] : 'None', () => {
 		const idx = options.indexOf(properties.recipe[1]);
 		return idx !== -1 ? idx + 1 : 0;
 	});
