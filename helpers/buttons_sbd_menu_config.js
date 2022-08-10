@@ -359,6 +359,17 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
+	{	// Reset
+		menu.newEntry({entryText: 'Reset to default...', func: () => {
+			for (let key in SearchByDistance_properties) {
+				if (properties.hasOwnProperty(key)) {properties[key][1] = SearchByDistance_properties[key][1];}
+			}
+			properties.theme[1] = '';
+			properties.recipe[1] = '';
+			properties.data[1] = JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'});
+			overwriteProperties(properties); // Force overwriting
+		}});
+	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure properties: tags
 		const menuName = menu.newMenu('Remap tags');
