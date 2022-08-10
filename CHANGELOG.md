@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.2.4](#224---2022-08-10)
 - [2.2.3](#223---2022-08-09)
 - [2.2.2](#222---2022-08-07)
 - [2.2.1](#221---2022-08-06)
@@ -24,10 +25,22 @@
 ### Removed
 ### Fixed
 
+## [2.2.4] - 2022-08-10
+### Added
+- Buttons: new menu entry, on custom button, to reset entire button configuration to default values.
+### Changed
+- Diagram: minor update to diagram to clarify a few things ('_images\search_by_distance_GRAPH_diagram.png').
+### Removed
+### Fixed
+- Tags: composer tag was not being properly used on queries and scoring, leading to wrong results or query errors.
+- Tags: custom string tag was not being properly used on queries and scoring, leading to wrong results or query errors.
+- Tags: date, BPM and custom num tag was being skipped on calculations when equal to zero. While that may make sense for Date or BPM in real use-cases, the custom tag could be used to also store zero values. Now it will also compare the tags when set to zero, and only skip them when not found.
+
 ## [2.2.3] - 2022-08-09
 ### Added
 - Presets: new menu entry on customizable button to show all hidden presets (recipes or themes).
 - Presets: new option to hide selected preset (Shift + Click).
+- Diagram: diagram explaining the design logic of playlist creation and GRAPH method ('_images\search_by_distance_GRAPH_diagram.png').
 ### Changed
 - Presets: any recipe or theme file starting with 'test_' or 'int_' will be hidden everytime when opening the customizable button's menu.
 ### Removed
@@ -304,7 +317,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...HEAD
+[2.2.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.0...v2.2.1
