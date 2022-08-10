@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/08/22
+//10/08/22
 
 /*	
 	Search by Distance
@@ -898,10 +898,9 @@ function do_searchby_distance({
 		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? keyTag[0] : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? bpmTag[0] : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
 		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
 		const key = (keyWeight !== 0 || bInKeyMixingPlaylist) ? keyArr[0] : '';
-		const date =(dateWeight !== 0) ? Number(dateArr[0]) : 0;
-		const bpm = (bpmWeight !== 0) ? Number(bpmArr[0]) : 0;
-		const customNum = (customNumWeight !== 0) ? Number(customNumArr[0]) : 0;
-		
+		const date =(dateWeight !== 0 && dateArr[0] !== '') ? Number(dateArr[0]) : null;
+		const bpm = (bpmWeight !== 0 && bpmArr[0] !== '') ? Number(bpmArr[0]) : null;
+		const customNum = (customNumWeight !== 0 && customNumArr[0] !== '') ? Number(customNumArr[0]) : null;
 		// Sets for later comparison
 		const style_genreSet = new Set(genre.concat(style)).difference(map_distance_exclusions); // We remove exclusions
 		const genreSet = new Set(genre);
@@ -1030,7 +1029,7 @@ function do_searchby_distance({
 			}
 		} else if (keyWeight !== 0 && bBasicLogging) {console.log('keyWeight was not zero but selected track had no key tags');}
 		// Date
-		if (date) {
+		if (date !== null) {
 			originalWeightValue += dateWeight;
 			if (dateWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
@@ -1043,7 +1042,7 @@ function do_searchby_distance({
 			}
 		} else if (dateWeight !== 0 && bBasicLogging) {console.log('dateWeight was not zero but selected track had no date tags');}
 		// BPM
-		if (bpm) {
+		if (bpm !== null) {
 			originalWeightValue += bpmWeight;
 			if (bpmWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
@@ -1055,38 +1054,35 @@ function do_searchby_distance({
 			}
 		} else if (bpmWeight !== 0 && bBasicLogging) {console.log('bpmWeight was not zero but selected track had no bpm tags');}
 		// Composer
-		const composerNumber = composerSet.length;
+		const composerNumber = composerSet.size;
 		if (composerNumber !== 0) {
 			originalWeightValue += composerWeight;
-			if ( composerWeight / totalWeight >= totalWeight / countWeights / 100) {
+			if (composerWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				if (composerTag.length > 1) {query[queryl] += query_join(query_combinations(composer, composerTag, 'OR'), 'OR');}
-				else {query[queryl] += query_combinations(style, composerTag, 'OR');}
+				else {query[queryl] += query_combinations(composer, composerTag, 'OR');}
 			}
 		} else if (composerWeight !== 0 && bBasicLogging) {console.log('composerWeight was not zero but selected track had no composer tags');}
         // customStringTag
 		const customStrNumber = customStrSet.size;
 		if (customStrNumber !== 0) {
 			originalWeightValue += customStrWeight;
-			if ( customStrWeight / totalWeight >= totalWeight / countWeights / 100) {
+			if (customStrWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				if (customStrTag.length > 1) {query[queryl] += query_join(query_combinations(customStr, customStrTag, 'OR'), 'OR');}
-				else {query[queryl] += query_combinations(style, customStrTag, 'OR');}
+				else {query[queryl] += query_combinations(customStr, customStrTag, 'OR');}
 			}
 		} else if (customStrWeight !== 0 && bBasicLogging) {console.log('customStrWeight was not zero but selected track had no custom string tags');}
 		// customNumTag
-		if (customNum) {
+		if (customNum !== null) {
 			originalWeightValue += customNumWeight;
 			if (customNumWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
 				const customNumUpper = customNum + customNumRange;
 				const customNumLower = customNum - customNumRange;
-				// If it worked like bpm in %...
-				// let customNumUpper = round(customNum * (100 + customNumRange) / 100, 0);
-				// let customNumLower = round(customNum * (100 - customNumRange) / 100, 0);
 				const tagNameTF = ((customNumTag[0].indexOf('$') === -1) ? customNumTag[0] : '"' + customNumTag[0] + '"'); // May be a tag or a function...
 				if (customNumUpper !== customNumLower) {query[queryl] += tagNameTF + ' GREATER ' + customNumLower + ' AND ' + tagNameTF + ' LESS ' + customNumUpper;}
 				else {query[queryl] += tagNameTF + ' EQUAL ' + customNum;}
@@ -1240,12 +1236,12 @@ function do_searchby_distance({
 			const moodNewSet = new Set(moodNew);
 			
 			const keyNew = (keyWeight !== 0) ? keyHandle[i][0] : '';
-			const dateNew = (dateWeight !== 0) ? Number(dateHandle[i][0]) : 0;
-			const bpmNew =(bpmWeight !== 0) ? Number(bpmHandle[i][0]) : 0;
+			const dateNew = (dateWeight !== 0 && dateHandle[i][0] !== '') ? Number(dateHandle[i][0]) : null;
+			const bpmNew =(bpmWeight !== 0 && bpmHandle[i][0] !== '') ? Number(bpmHandle[i][0]) : null;
 			
 			const composerNew = (composerWeight !== 0) ? composerHandle[i].filter(Boolean) : [];
 			const customStrNew = (customStrWeight !== 0) ? customStrHandle[i].filter(Boolean) : [];
-			const customNumNew = (customNumWeight !== 0) ? Number(customNumHandle[i][0]) : 0;
+			const customNumNew = (customNumWeight !== 0 && customNumHandle[i][0] !== '') ? Number(customNumHandle[i][0]) : null;
 			const composerNewSet = new Set(composerNew);
 			const customStrNewSet = new Set(customStrNew);
 			
@@ -1291,8 +1287,8 @@ function do_searchby_distance({
 				}
 			}
 			
-			if (dateWeight !== 0 && date !== 0) {
-				if (dateNew !== 0) {
+			if (dateWeight !== 0 && date !== null) {
+				if (dateNew !== null) {
 					if (date === dateNew){
 						weightValue += dateWeight;
 					} else if (dateRange !== 0) {
@@ -1304,8 +1300,8 @@ function do_searchby_distance({
 				}
 			}
 			
-			if (bpmWeight !== 0 && bpm !== 0) {
-				if (bpmNew !== 0) {
+			if (bpmWeight !== 0 && bpm !== null) {
+				if (bpmNew !== null) {
 					if (bpm === bpmNew){
 						weightValue += bpmWeight;
 					} else if (bpmRange !== 0) {
@@ -1332,8 +1328,8 @@ function do_searchby_distance({
 				}
 			}
 			
-			if (customNumWeight !== 0 && customNum !== 0) {
-				if (customNumNew !== 0) {
+			if (customNumWeight !== 0 && customNum !== null) {
+				if (customNumNew !== null) {
 					if (customNum === customNumNew){
 						weightValue += customNumWeight;
 					} else if (customNumRange !== 0) {
@@ -1341,10 +1337,6 @@ function do_searchby_distance({
 						if ((customNumdifference < 0 && bNegativeWeighting) || customNumdifference > 0) {
 							weightValue += (customNumdifference / customNumRange) * customNumWeight;  //becomes negative outside the allowed range!
 						}
-						// If it worked like bpm in %...
-						// const iRange = customNum * customNumRange / 100;
-						// const customNumdifference = iRange - Math.abs(customNum -  customNumNew);
-						// weightValue += (customNumDifference / customNumRange / customNum* 100 ) * customNumWeight;
 					}
 				}
 			}
