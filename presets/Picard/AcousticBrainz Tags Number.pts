@@ -1,4 +1,6 @@
-﻿$noop(Sets -number- tags from AcousticBrainz high/low level data)
+﻿$noop(AcousticBrainz Tags: numbers [1.0.0])
+$noop(----------------------------------------------------------)
+$noop(Sets -number- tags from AcousticBrainz high/low level data)
 $noop(Recommended to removes all high/low level data afterwards)
 $noop(Requires: AcousticBrainz Tags plugin 2.2+)
 $noop(Requires: All high-level and subset of low-level tags enabled at plugin config)
@@ -6,35 +8,65 @@ $noop(Requires: All high-level and subset of low-level tags enabled at plugin co
 $noop(Timbre tags: brightness -number-)
 $set(_temp,%ab:hi:timbre:bright%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(brightness,%_temp%)
 )
 
 $noop(Danceability tags: danceness -number-)
 $set(_temp,%ab:hi:danceability:danceable%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(danceness,%_temp%)
 )
 
 $noop(Gender tags: femaleness -number-)
 $set(_temp,%ab:hi:gender:female%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(femaleness,%_temp%)
 )
 
 $noop(Voice/Instrumental tags: speechiness -number-)
 $set(_temp,%ab:hi:voice_instrumental:voice%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(speechiness,%_temp%)
 )
 
 $noop(Acousticness tags: acousticness -number-)
 $set(_temp,%ab:hi:mood_acoustic:acoustic%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(acousticness,%_temp%)
 )
 
@@ -43,21 +75,45 @@ $set(_tempA,%ab:hi:mood_happy:happy%)
 $set(_tempB,$get(ab:hi:mood_sad:not sad))
 $if(%_tempA%,
 $if(%_tempB%,
-	$if($eq($substr(%_tempA%,2,3),0),$set(_tempA,$substr(%_tempA%,3,4)),$set(_tempA,$substr(%_tempA%,2,4)))
-	$if($eq($substr(%_tempB%,2,3),0),$set(_tempB,$substr(%_tempB%,3,4)),$set(_tempB,$substr(%_tempB%,2,4)))
+	$if($in(%_tempA%,-),
+		$set(_tempA,0),
+		$if($eq($substr(%_tempA%,2,3),0),
+			$set(_tempA,$substr(%_tempA%,3,4)),
+			$set(_tempA,$substr(%_tempA%,2,4))
+		)
+	)
+	$if($in(%_tempB%,-),
+		$set(_tempB,0),
+		$if($eq($substr(%_tempB%,2,3),0),
+			$set(_tempB,$substr(%_tempB%,3,4)),
+			$set(_tempB,$substr(%_tempB%,2,4))
+		)
+	)
 	$set(valence,$div($add(%_tempA%,%_tempB%),2))
 ))
 
 $noop(Tonality tags: tonaleness -number-)
 $set(_temp,%ab:hi:tonal_atonal:tonal%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(tonaleness,%_temp%)
 )
 
 $noop(Chords tags: chords_rate -number-)
 $set(_temp,%ab:lo:tonal:chords_changes_rate%)
 $if(%_temp%,
-	$if($eq($substr(%_temp%,2,3),0),$set(_temp,$substr(%_temp%,3,4)),$set(_temp,$substr(%_temp%,2,4)))
+	$if($in(%_temp%,-),
+		$set(_temp,0),
+		$if($eq($substr(%_temp%,2,3),0),
+			$set(_temp,$substr(%_temp%,3,4)),
+			$set(_temp,$substr(%_temp%,2,4))
+		)
+	)
 	$set(chords_rate,%_temp%)
 )

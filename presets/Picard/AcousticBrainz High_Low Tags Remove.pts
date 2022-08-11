@@ -1,4 +1,6 @@
-﻿$noop(Removes all high/low level tags retrieved by AcousticBrainz Tags plugin)
+﻿$noop(AcousticBrainz Tags: remove [1.0.0])
+$noop(----------------------------------------------------------)
+$noop(Removes all high/low level tags retrieved by AcousticBrainz Tags plugin)
 $noop(Meant to be used along other scripts which uses this data first)
 $noop(Requires: AcousticBrainz Tags plugin 2.2+)
 

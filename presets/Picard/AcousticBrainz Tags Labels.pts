@@ -1,4 +1,6 @@
-﻿$noop(Sets -label- tags from AcousticBrainz high/low level data)
+﻿$noop(AcousticBrainz Tags: labels [1.0.0])
+$noop(----------------------------------------------------------)
+$noop(Sets -label- tags from AcousticBrainz high/low level data)
 $noop(Recommended to removes all high/low level data afterwards)
 $noop(Requires: AcousticBrainz Tags plugin 2.2+)
 $noop(Requires: All high-level and subset of low-level tags enabled at plugin config)
@@ -6,28 +8,40 @@ $noop(Requires: All high-level and subset of low-level tags enabled at plugin co
 $noop(Timbre tags: timbre -label-)
 $set(_temp,%ab:hi:timbre:bright%)
 $if(%_temp%,
-	$set(_temp,$if($gte($substr(%_temp%,2,3),5),Bright,Dark))
+	$if($in(%_temp%,-),
+		$set(_temp,Dark),
+		$set(_temp,$if($gte($substr(%_temp%,2,3),5),Bright,Dark))
+	)
 	$set(timbre,%_temp%)
 )
 
 $noop(Danceability tags: danceability -label-)
 $set(_temp,%ab:hi:danceability:danceable%)
 $if(%_temp%,
-	$set(_temp,$if($gte($substr(%_temp%,2,3),5),Danceable,Not danceable))
+	$if($in(%_temp%,-),
+		$set(_temp,Not danceable),
+		$set(_temp,$if($gte($substr(%_temp%,2,3),5),Danceable,Not danceable))
+	)
 	$set(danceability,%_temp%)
 )
 
 $noop(Gender tags: gender -label-)
 $set(_temp,%ab:hi:gender:female%)
 $if(%_temp%,
-	$set(_temp,$if($gte($substr(%_temp%,2,3),5),Female,Male))
+	$if($in(%_temp%,-),
+		$set(_temp,Male),
+		$set(_temp,$if($gte($substr(%_temp%,2,3),5),Female,Male))
+	)
 	$set(gender,%_temp%)
 )
 
 $noop(Tonality tags: tonality -label-)
 $set(_temp,%ab:hi:tonal_atonal:tonal%)
 $if(%_temp%,
-	$set(_temp,$if($gte($substr(%_temp%,2,3),5),Tonal,Atonal))
+	$if($in(%_temp%,-),
+		$set(_temp,Atonal),
+		$set(_temp,$if($gte($substr(%_temp%,2,3),5),Tonal,Atonal))
+	)
 	$set(tonality,%_temp%)
 )
 
