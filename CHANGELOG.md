@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [2.3.0](#230---2022-08-11)
 - [2.2.4](#224---2022-08-10)
 - [2.2.3](#223---2022-08-09)
 - [2.2.2](#222---2022-08-07)
@@ -24,6 +25,18 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [2.3.0] - 2022-08-11
+### Added
+- Diagram: diagrams explaining the design logic of similar artists calculation with 3 different methods ('_images\search_by_distance_SIMILAR_ARTISTS(R|V|W)_diagram.png').
+### Changed
+- Similar artists: library tracks are now filtered by nearest genre/styles to tracks by selected artist for every track, instead of using only the first track as reference. This should better reflect the works of an artist without depending on the reference track at all. Previously, output score would be heavily dependent on the reference track.
+- Similar artists: scores are now weighted with genre/style appearance on all artist's tracks. i.e. if 'Mdour Moctar' has 1 Reggae track on your library and 99 Rock tracks, then if the Reggae track is chosen for the calcs, it's score is weighted as 1% of the total score (instead of averaging all N scores).
+- Similar artists: current method uses the 2 above changes, named 'weighted'. Using only the filter change is 'variable'. Previous method based on reference track is named 'reference'. This is an internal change, but functionality -based on names- can be seen on the diagrams. 'Weighted' will be the default method from now on, not meant to be changed (unless the script 'search_bydistance_extra.js' is edited). In resume, this change is aimed to better reflect the entire work of an artist, instead of specific tracks or being tied to random variations.
+### Removed
+### Fixed
+- Similar artists: before choosing N random tracks, from selected artist, duplicates are now removed (to ensure no track is selected twice if it appears at different albums for ex.). Checks for Title + Artist + Date.
+- Presets: updated Picard AcousticBrainz presets with fixes to output when values used scientific notation and other weird situations.
 
 ## [2.2.4] - 2022-08-10
 ### Added
@@ -317,7 +330,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.5...HEAD
+[2.2.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...v2.2.5
 [2.2.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
