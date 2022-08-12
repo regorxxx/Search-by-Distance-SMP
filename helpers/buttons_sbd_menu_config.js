@@ -602,13 +602,14 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 		let iCount = 0;
 		const readmes = {
-			Full: folders.xxx + 'helpers\\readme\\search_bydistance.txt',
+			Main: folders.xxx + 'helpers\\readme\\search_bydistance.txt',
 			sep1: 'sep',
-			DYNGENRE: folders.xxx + 'helpers\\readme\\search_bydistance_dyngenre.txt',
-			GRAPH: folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
-			WEIGHT: folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
+			'Method: DYNGENRE': folders.xxx + 'helpers\\readme\\search_bydistance_dyngenre.txt',
+			'Method: GRAPH': folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
+			'Method: WEIGHT': folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
 			sep2: 'sep',
 			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
+			'Similar Artists': folders.xxx + 'helpers\\readme\\search_bydistance_similar_artists.txt',
 			sep3: 'sep',
 			'Tagging requisites': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',

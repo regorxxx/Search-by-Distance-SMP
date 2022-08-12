@@ -1,0 +1,30 @@
+﻿Search by Distance tools may be used to compute the similar artists to
+those from the currently selected tracks (duplicates are filtered first).
+This option may be found on the customizable button and Playlist Tools.
+
+It tries to compute something equivalent to 'Similar Artists Last.fm', 
+which can be retrieved with Bio script (but requires internet). In this
+case the process is entirely offline and uses the already coded routines
+of Search by Distance to find which artists are usually the most similar
+to a random set of [N=50] tracks by every selected artist. 
+ 
+It requires some time, since it's equivalent to perform the regular
+'GRAPH' search x N times x selected artist(s). The advantage is that it
+does not requires internet and works with any artists, whether it's 
+'popular' or not, since it's not based on things like users' listening
+behaviors, eurocentric bias, etc. Results are also limited to what the
+user has on library, instead of being based on an external list (static).
+
+The results are output to console and saved to JSON, so they only need
+to be calculated once. Later changes to the graph descriptors may affect
+the results, in that case the same artists may be checked again to update
+the list if required.
+
+Search by Distance offers multiple filtering options based on those 
+results, which may be used on the customizable button or via recipes.
+Script uses both the JSON file and tags (if present, take precedence).
+
+After scanning, results (from JSON) may also be saved to tags for all the
+tracks present on library by the analyzed artists. On tags, other tools
+like Playlist Tools may use them to easily create queries, pools, etc.
+Tag is named 'SIMILAR ARTISTS SEARCHBYDISTANCE'.
