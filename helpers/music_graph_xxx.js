@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/05/22
+//12/08/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -12,7 +12,7 @@ if (typeof include !== 'undefined') { // On foobar
 	let userDescriptor = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
 	if (utils.IsFile(userDescriptor)) {
 		try {
-			console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);
+			// console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);
 			include(userDescriptor);
 		} catch (e) { 
 			console.log('Error loading user\'s music_graph_descriptors. Using default file instead.');

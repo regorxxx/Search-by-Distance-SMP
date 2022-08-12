@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/22
+//12/08/22
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
@@ -34,10 +34,10 @@ buttonsBar.config.toolbarColor = RGB(211,218,237);
 			console.log(buttonsPath[i] +' not loaded');
 		}
 	}
-	
 	/* 	
 		OR just add them manually:
 		include(folders.xxx + 'buttons\\buttons_search_same_style.js', {always_evaluate: true});
 		...
 	*/
+	console.log('Buttons loaded: ' + buttonsBar.listKeys.flat(Infinity).join(', '));
 }

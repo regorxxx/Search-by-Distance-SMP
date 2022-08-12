@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/10/21
+//12/08/22
 
 /*
 	This is a sample file to show how to replace/add/delete properties at music_graph_descriptors without touching the original file.
@@ -82,4 +82,4 @@ if (Object.keys(music_graph_descriptors_user).length) {
 				music_graph_descriptors[key] = music_graph_descriptors_user[key];
 			}
 	});
-} else {console.log('User\'s music_graph_descriptors has been loaded but it contains no changes... using only default one.');}
+} else {/* console.log('User\'s music_graph_descriptors has been loaded but it contains no changes... using only default one.'); */}

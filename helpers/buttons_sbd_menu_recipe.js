@@ -26,7 +26,7 @@ function createRecipeMenu(parent) {
 	recipeMenu.newEntry({entryText: 'Create recipe file with current config', func: () => {
 		const recipe = {name: ''};
 		// Retrieve allowed keys
-		const excludedKeys = new Set(['name', 'properties', 'panelProperties', 'theme', 'recipe', 'bPoolFiltering', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist']);
+		const excludedKeys = new Set(['name', 'properties', 'panelProperties', 'theme', 'recipe', 'bPoolFiltering', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bStartLogging', 'bSearchDebug', 'bCreatePlaylist']);
 		recipeAllowedKeys.forEach((key) => {if (!excludedKeys.has(key)) {recipe[key] = properties[key][1];}});
 		// Recipe obj
 		let input = '';

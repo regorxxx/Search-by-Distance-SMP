@@ -418,6 +418,7 @@ const SearchByDistance_panelProperties = {
 	descriptorCRC			:	['Graph Descriptors CRC', -1], // Calculated later on first time
 	bAllMusicDescriptors	:	['Load All Music descriptors?', false],
 	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
+	bStartLogging 			:	['Startup logging', false]
 };
 
 var sbd_prefix = 'sbd_';
@@ -451,7 +452,7 @@ if (!panelProperties.firstPopup[1]) {
 ].forEach((descr) => {
 	if (panelProperties[descr.prop][1]) {
 		if (_isFile(folders.xxx + descr.file)) {
-			console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);
+			if (panelProperties.bStartLogging[1]) {console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);}
 			include('..\\' + descr.file);
 		}
 	}
@@ -485,11 +486,11 @@ var cacheLink;
 var cacheLinkSet;
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLink.json');
-	if (data.size) {cacheLink = data; console.log('SearchByDistance: Used Cache - cacheLink from file.');}
+	if (data.size) {cacheLink = data; if (panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Used Cache - cacheLink from file.');}}
 }
 if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
-	if (data.size) {cacheLinkSet = data; console.log('SearchByDistance: Used Cache - cacheLinkSet from file.');}
+	if (data.size) {cacheLinkSet = data; if (panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Used Cache - cacheLinkSet from file.');}}
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: panelProperties});}
@@ -614,7 +615,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 		}
 		return [key, descr];
 	});
-	console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt');
+	if (panelProperties.bStartLogging[1]) {console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt');}
 	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t'));
 }
 

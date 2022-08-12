@@ -1,10 +1,10 @@
 ﻿'use strict';
-//17/02/22
+//12/08/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
-try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {console.log('Search by Distance (CUSTOM) Buttons loaded.');} //May be loaded along other buttons
+try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */} //May be loaded along other buttons
 
 include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
@@ -32,7 +32,7 @@ doOnce('Update SBD cache', debounce(updateCache, 3000))({properties: newButtonsP
 */
 
 addButton({
-	SimilarUserSet: new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12)) + 50, h: 22}, newButtonsProperties.customName[1], function (mask) {
+	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12)) + 50, h: 22}, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
