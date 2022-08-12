@@ -1,314 +1,38 @@
 ﻿'use strict';
-//10/08/22
+//12/08/22
 
 /*	
 	Search by Distance
 	-----------------------------------
-	Creates a playlist with similar tracks to the currently selected one according to genre, style, key, etc.
-	Every track of the library is given a score according to those tags and/or a distance according to genre/style.
+	Creates a playlist with similar tracks to the currently selected one according
+	to genre, style, key, etc. Every library track is given a score using its tags
+	and/or a graph distance with their genre/style.
+	
 	When their score is over 'scoreFilter', then they are included in the final pool.
-	After all tracks have been evaluated and the final pool is complete, some of them are chosen to populate
-	the playlist. You can choose whether this final selection is done according to score, randomly chosen, etc.
-	All settings are configurable on the properties panel (or set in the files when called using buttons, etc.)
-	Check the descriptions of the properties panel to check how the variables work.
-	
-	These are the weight/tags pairs checked by default:
-		- genreWeight	 : genre					- styleWeight	 : style
-		- dyngenreWeight : virtual tag				- moodWeight	 : mood
-		- keyWeight		 : key						- dateWeight	 : $year(%date%)
-		- bpmWeight 	 : bpm						- composerWeight : composer (unused by default)
-	There are 2 custom tags which can be set by the user too:
-		- customStrWeight: (unused by default)		- customNumWeight: (unused by default)	
-		
-	Any Weight/tags pair can be remapped and/or merged (sep. by comma). 
-	For example, linking genreWeight to 2 different genre tags on your files:
-		- genreTag 		 : allmusic_genre,my_genre_tag
-		
-	Some weight/tags pairs can be linked to TitleFormat Expr. Use tag names instead of TF expressions when possible (+ performance). 
-	For example, see dateWeight: TF is used to have the same results for tracks with YYYY-MM tags or YYYY tags.
-		- dateTag		 : $year(%date%)			-customNumTag : (unused by default)
-		
-	Genre and Style tags (or their remapped values) can be globally filtered. See 'genreStyleFilter'. Case sensitive.
-	For example, when comparing genre values from track A to track B, 'Soundtrack' and 'Radio Program' values are omitted:
-		- genreStyleFilter: Soundtrack,Radio Program
-		
+	After all tracks have been evaluated and the final pool is complete, some of 
+	them are chosen to populate 	the playlist. You can choose whether this final
+	selection is done according to score, randomly chosen, etc. All settings are 
+	configurable on the properties panel (or set in the files when called using 
+	buttons, etc.)
+
 	There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
-		- WEIGHT: -> Score
-				Uses genreWeight, styleWeight, moodWeight, keyWeight, dateWeight, dateRange, bpmWeight, bpmRange, composerWeight, customStrWeight, customNumWeight + scoreFilter
-				Calculates similarity by scoring according to the tags. Similarity is calculated by simple string matching ('Rock' != 'Soul') and ranges for numeric tags. This means some coherence in tags is needed to make it work, and the script only works with high level data (tags) which should have
-				been added to files previously using manual or automatic methods (like MusicBrainz Picard, see note at bottom).
-		- GRAPH: -> Score + Distance
-				Same than WEIGHT + max_graph_distance
-				Apart from scoring, it compares the genre/styles tags set to the ones of the reference track using a graph and calculating their min. mean distance.
-				Minimum mean distance is done considering (A,B,D) set matches (A,B,C) at 2 points (0 distance). So we only need to find the nearest point 
-				from (A,B,D) to (C) which will be x. Then we calculate the mean distance dividing by the number of points of the reference track : (0 + 0 + x)/3
-				Imagine Google maps for genre/styles, and looking for the distance from Rock to Jazz for ex. 'max_graph_distance' sets the max distance allowed, so every track with genre/styles farther than that value will not be included in the final pool. Note this is totally different to simple string matching, so 'Acid Rock' may be similar to 'Psychedelic Rock' even if they are totally different tag values (or strings). 
-				This method is pretty computational intensive, we are drawing a map with all known genres/styles and calculating the shortest path between the reference track and all the tracks from the library (after some basic filtering). Somewhere between 2 and 5 secs for 40 K tracks.
-				For a complete description of how it works check: 'helpers/music_graph_descriptors_xxx.js'
-				And to see the map rendered in your browser like a map check: 'Draw Graph.html'
-		- DYNGENRE: -> Score
-				Same than WEIGHT + dyngenreWeight
-				Uses a simplification of the GRAPH method. Let's say we assign a number to every 'big' cluster of points on the music graph, then we can simply
-				put any genre/style point into any of those clusters and give them a value. So 'Rock' is linked to 3, the same than 'Roots Rock' or 'Rock & Roll'.
-				It's a more complex method than WEIGHT, but less than GRAPH, which allows cross-linking between different genres breaking from string matching.
-				For a complete description of how it works check: 'helpers/dyngenre_map_xxx.js'
 		
-	Any weight equal to zero or tag not set will be skipped for calcs. Therefore it's recommended to only use those really relevant, for speed improvements.
-	There are a 3 exceptions to this rule, where tags are used beyond tag comparisons for scoring purposes:
-		- dyngenreWeight > 0 & method = DYNGENRE:	genre and style tags will always be retrieved, even if their weight is set to 0. They will not be considered for
-													scoring... but are needed to calculate dynGenre virtual tags.
-		- method = GRAPH:							genre and style tags will always be retrieved, even if their weight is set to 0. They will not be considered for
-													scoring... but are needed to calculate the distance in the graph between different tracks.
-		- bInKeyMixingPlaylist = true:				key tags will always be retrieved, even if keyWeight is set to 0. This is done to create the special playlist
-													even if keys are totally ignored for similarity scoring.
-		
-	Arguments: 	As object, anything not set uses default values set at properties panel.
-		{	
-			// --->Default args (aka properties from the panel)
-			properties,
-			panelProperties,
-			sel, // Reference track, first item of active pls. if can't get focus item
-			// --->Weights          
-			genreWeight, styleWeight, dyngenreWeight, moodWeight, keyWeight, dateWeight, bpmWeight, composerWeight,	customStrWeight, customNumWeight,
-			// --->Ranges (for associated weighting)
-			dyngenreRange, dateRange, bpmRange, customNumRange,
-			bNegativeWeighting, // Assigns negative score for numeric tags when they fall outside their range
-			// --->Pre-Scoring Filters
-			forcedQuery, // Query to filter library
-			bUseAntiInfluencesFilter, // Filter anti-influences by query, before any scoring/distance calc. Stricter than distance checking.
-			bUseInfluencesFilter, // Allow only influences by query, before any scoring/distance calc.
-			// --->Scoring Method
-			method,	// GRAPH, WEIGHT, DYNGENRE
-			// --->Scoring filters
-			scoreFilter, sbd_max_graph_distance, // Minimum score & max distance to include track on pool
-			// --->Post-Scoring Filters
-			poolFilteringTag, poolFilteringN, bPoolFiltering, // Allows only N +1 tracks per tag set on pool... like only 2 tracks per artist
-			// --->Playlist selection
-			bRandomPick, // Get randomly from pool
-			probPick, // Get by scoring order but with x probability of being chosen from pool		
-			playlistLength,	// Max playlist size
-			// --->Playlist sorting
-			bSortRandom, // Random sorting (independently of picking method)
-			bProgressiveListOrder, // Following progressive changes on tags (score)
-			bScatterInstrumentals, // Intercalate instrumental tracks breaking clusters if possible
-			// --->Special Playlists
-			bInKeyMixingPlaylist, // Key changes following harmonic mixing rules like a DJ
-			bProgressiveListCreation, // Uses output tracks as new references, and so on...
-			progressiveListCreationN, // > 1 and < 100
-			// --->Console logging
-			bProfile, bShowQuery, bShowFinalSelection, bSearchDebug // Different logs on console
-			// --->Output
-			bCreatePlaylist, // false: only outputs handle list
-			
-		}
-			
-	Examples: Some usage examples, most of them can be combined in some way (like A with H, etc.)
-		A:  Random mix with only nearest tracks, most from the same decade
-			args = {genreWeight: 15, styleWeight: 10, moodWeight: 5, keyWeight: 10, dateWeight: 10, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: 150, bRandomPick: true, method: 'GRAPH'};
-			do_searchby_distance(args);
-		
-		B:	Random mix a bit varied on styles (but similar genres), most from the same decade. [like A with more diversity]
-			args = {genreWeight: 10, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: 250, bRandomPick: true, method: 'GRAPH'};
-			do_searchby_distance(args);
-		
-		C:	Random mix even more varied on styles/genres, most from the same decade.
-			args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: 300, bRandomPick: true, method: 'GRAPH'};
-			do_searchby_distance(args);
-			
-		D: 	Random mix with different genres but same mood from any date.
-			args = {genreWeight: 0, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 5, bpmRange: 25, 
-			probPick: 100, scoreFilter: 50, sbd_max_graph_distance: 600, bRandomPick: true, method: 'GRAPH'};
-			do_searchby_distance(args);
-			
-		E:  Uses the properties of the current panel to set all the arguments.
-			do_searchby_distance();
-			
-		F:  Uses a properties object to set all the arguments. [like E but overriding the properties used, usually for merged buttons]
-			args = {properties: yourPropertiesPairs}; // {key: [description, value], ...} see SearchByDistance_properties
-			do_searchby_distance(args);		
-			
-		G:  Outputs only influences from any date. [doesn't output similar genre/style tracks but influences! May be similar too, but not required]
-			args = {genreWeight: 5, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 10, bUseInfluencesFilter: true, 
-			probPick: 100, scoreFilter: 40, sbd_max_graph_distance: 500, bRandomPick: true, method: 'GRAPH'};
-			do_searchby_distance(args);
-			
-		H:  Uses the properties of the current panel, and allows only 2 tracks (n+1) per artist on the pool. [like E with pool filtering]
-			args = {poolFilteringTag: 'artist', poolFilteringN: 1} // bPoolFiltering evaluates to true whenever poolFilteringN != -1
-			do_searchby_distance(args);
-		
-		I:  Random mix even more varied on styles/genres, most from the same decade. [like C but WEIGHT method]
-			args = {genreWeight: 10, styleWeight: 5, moodWeight: 5, keyWeight: 5, dateWeight: 25, bpmWeight: 5,  dateRange: 15, 
-					bpmRange: 25, probPick: 100, scoreFilter: 60, bRandomPick: true, method: 'WEIGHT'};
-			do_searchby_distance(args);
-			
-		J:  Mix with similar genre/styles using DYNGENRE method. The rest of the args are set according to the properties of the current panel.
-			args = {dyngenreWeight: 20, dyngenreRange: 1, method: 'DYNGENRE'};
-			do_searchby_distance(args);
-			
-		K:  Progressive list (n = 5) created with influences from any date.. [like G with recursive calls]
-			args = {genreWeight: 5, styleWeight: 5, moodWeight: 15, keyWeight: 10, dateWeight: 0, bpmWeight: 10, bUseInfluencesFilter: true,
-			probPick: 100, scoreFilter: 40, sbd_max_graph_distance: 500, bRandomPick: true, method: 'GRAPH', bProgressiveListCreation: true,
-			progressiveListCreationN: 5};
-			do_searchby_distance(args);
-			
-		L:  Harmonic mix with similar genre/styles using DYNGENRE method. keyWeight is set to zero because we want all possible tracks with any key
-			within dyngenreRange on the pool. Harmonic mixing will choose which tracks/keys get to the playlist. [like J with harmonic mixing]
-			args = {dyngenreWeight: 20, dyngenreRange: 1, keyWeight: 0, method: 'DYNGENRE', bInKeyMixingPlaylist: true};
-			do_searchby_distance(args);
-			
-	Note about 'bProgressiveListCreation':
-	Creating progressive lists involves recursive calls to the main function using a track from the previous call as new reference. Therefore calc time is O(n),
-	where n is 'progressiveListCreationN'. Beware main function call involves O(i*j*k) time, where i is equal to num of tracks in library, j tags to check,
-	and k tag values... total calc time may easily be greater than a minute as soon as you set 'progressiveListCreationN' greater than 5 for big libraries (40K).
-			
-	Note about genre/styles: 
-	GRAPH method doesn't care whether 'Rock' is a genre or a style but the scoring part does! Both values are considered points without any distinction.
-	Genre weight is related to genres, style weight is related to styles.... But there is a workaround, let's say you only use genre tags (and put all values
-	together there). Then set style weight to zero. It will just check genre tags and the graph part will work the same anyway.
-	
-	Note about GRAPH/DYNGENRE exclusions: 
-	Apart from the global filter (which applies to genre/style string matching for scoring purpose), there is another filtering done when mapping
-	genres/styles to the graph or their associated static values. See 'map_distance_exclusions' at 'helpers/music_graph_descriptors_xxx.js'.
-	It includes those genre/style tags which are not related to an specific musical genre. For ex. 'Acoustic' which could be applied to any genre.
-	They are filtered because they have no representation on the graph, not being a real genre/style but a musical characteristic of any musical composition.
-	Therefore, they are useful for similarity scoring purposes but not for the graph. That's why we don't use the global filter for them.
-	This second filtering stage is not really needed, but it greatly speedups the calculations if you have tons of files with these tags! 
-	In other words, any tag not included in 'helpers/music_graph_descriptors_xxx.js' as part of the graph will be omitted for distance calcs, 
-	but you save time if you add it manually to the exclusions (otherwise the entire graph will be visited trying to find a match).
-	
-	Note about GRAPH substitutions: 
-	The graph created follows a genre/style convention found at 'helpers/music_graph_descriptors_xxx.js'. That means than only things written there, with exactly
-	the same name (including casing) will be found at the graph. As already noted, 'rock' will not be the same than 'Rock', neither 'Prog. Rock' and 'Progressive Rock'. This is a design decision, to force users to use a tag convention (whatever they want) and only one. See last note at bottom. As a workaround, since you
-	don't have to follow my convention, there is a section named 'style_substitutions' which lets you tell the scripts that 'Prog. Rock' is the same than 
-	'Progressive Rock' for example. So once you have all your library tagged as you please, you can either mass replace the different terms to follow the convention
-	of the graph OR add substitutions for all of them. It has other complex uses too, but that goes beyond this doc. Check 'helpers/music_graph_descriptors_xxx.js'.
-	
-	Note about console logs: 
-	The function assigns a score to every track and you can see the names - score (- graph distance) at console. The selected track will get a score = 100 and distance = 0. Then, the other tracks will get (lower or eq.) score and (greater or eq.) distance according to their similarity. You can toggle logging and profiling on/off setting the booleans within the function code (at their start).
-	
-	Note about graph configuration and error checking: 
-	By default 'bGraphDebug' is set to true. That means it checks the graph files whenever you load the script (usually once per session). You can disable it (faster loading). If you edit 'helpers/music_graph_descriptors_xxx.js' file, it's advised to enable it at least once so you can check there are no obvious
-	errors. The html rendering helps at that too (and also has debugging enabled by default).
-	
-	Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file:
-	Instead of editing the main file, you can add any edit to an user set file named 'helpers/music_graph_descriptors_xxx_user.js'. Check sample for more info.
-	It's irrelevant whether you add your changes to the original file or the user's one but note on future script updates the main file may be updated too. 
-	That means you will need to manually merge the changes from the update with your own ones, if you want them. That's the only 'problem' editing the main one. 
-	Both the html and foobar scripts will use any setting on the user file (as if it were in the main file), so there is no other difference. 
-	Anything at this doc which points to 'helpers/music_graph_descriptors_xxx.js' applies the same to 'helpers/music_graph_descriptors_xxx_user.js'.
-	
-	Note about buttons framework:
-	When used along buttons framework, you must pass all arguments, along the new prefix and merged properties! See 'buttons_search_bydistance_customizable.js'
-	
-	Note about High Level data, tag coherence, automatic tagging and MusicBrainz Picard:
-	Network players and servers like Spotify, Itunes Genius, YouTube, etc. offer similar services to these scripts. Whenever you play a track within their players,
-	similar tracks are offered on a regular basis. All the work is done on the servers, so it seems to be magic for the user. There are 2 important caveats for 
-	this approach: It only works because the tracks have been previously analyzed ('tagged') on their server. And all the data is closed source and network
-	dependent. i.e. you can always listen to Spotify and your great playlist, at least while you pay them, those tracks are not removed for your region and you
-	have a constant Internet connection.
-	
-	That music listening model has clear drawbacks, and while the purpose of this caveat is not talking about them, at least we have to note the closed source 
-	nature of that analysis data. Spotify's data is not the same than Youtube's data... and for sure, you can not make use of that data for your library in any way. 
-	Ironically, being at a point where machine learning and other methods of analysis are ubiquitous, they are mostly relegated behind a pay-wall. And every time
-	a company or a developer wants to create similar features, they must start from scratch and create their own data models.
-	
-	An offline similar program which does the same would be MusicIP ( https://spicefly.com/article.php?page=what-is-musicip ). It appeared as a viable alternative
-	to that model, offering both an Internet server and a complete ability to analyze files offline as fall-back. Nowadays, the company is gone, the software
-	is obsolete (although usable!) and documentation is missing for advanced features. The main problems? It was meant as a standalone solution, so there is no
-	easy way to	connect other programs to its local server to create playlists on demand. It can be done, but requires manually refreshing and maintaining 
-	the server database with new tag changes, data analysis, and translating ratings (from foobar for ex.) to the program. The other big problem is analysis time.
-	It may well take a minute per track when calculating all the data needed... and the data is also closed source (so it has no meaning outside the program).
-	The reason it takes so much time is simple, the program was created when machine learning was not a reality. MusicIP may well have been ahead of its time.
-	
-	Back to topic, both online and offline methods due to its closed source nature greatly difficult interoperability between different programs and use-cases.
-	These scripts offer a solution to both problems, relying only in offline data (your tags) and open source data (your tags again). But to make it work,
-	the data (your tags) need relevant info. Since every user fills their tags without following an universal convention (most times leaving some tags unfilled),
-	the only requirement for these scripts to work is tag coherence:
-		- Tags must point to high-level data, so analysis (whether computational or human) must be done previously. 'Acoustic' or 'Happy' moods are high level data,
-		'barkbands' with a list of values is low-level data (meant to be used to calculate high-level ones). See this for more info: https://acousticbrainz.org/data
-		- Tags not present are simply skipped. The script doesn't expect any specific tag to work, except the obvious ones (can not use GRAPH method without
-		genre/style tags). This is done to not enforce an specific set of tags, only the ones you need / use.
-		- Tags are not hard-linked to an specific tag-name convention. Genre may have as tag name 'genre', 'my_genre' or 'hjk'.
-		- Basic filtering features to solve some corner cases (for genre/styles).
-		- Casing must be the same along all tags. i.e. 'Rock' always spelled as 'Rock'. Yes, it could be omitted using .toLowerCase(), but is a design decision, since it forces users to check the casing of their entire set of tags (ensuring a bit more consistency in other fields).
-		- Reproducibility all along the library set. And this is the main point of tag coherence. 
-		
-	About Reproducibility: If two users tag a track with different genres or moods, then the results will be totally different. But that's not a problem as long as 
-	every user applies its own 'logic' to their entire library. i.e. if you have half of your library tagged right and the other half with missing tags, 
-	some wrongly set and others 'as is' when you got the files... then there is no coherence at all in your set of tracks nor your tags. Some follow a convention
-	and others follow another convention. To help with that here are 2 advises: tag your tracks properly (I don't care about specific use-cases to solve what ifs)
-	and take a look at MusicBrainz Picard (that's the open source part): https://picard.musicbrainz.org/
-	Now, you DON'T need to change all your tags or your entire library. But Picard offers 3 tags using the high-level open source data of AcousticBraiz:
-	mood, key and BPM. That means, you can use your manual set tags along those automatically set Picard's tags to fulfill both: your tag convention and reproducibility along your entire library. Also you can manually fix or change later any mood with your preferred editor or player. Picard also offers plugins
-	to fill other tags like genres, composers, etc. Filling only empty tags, or adding them to the existing ones, replacing them, ... whatever you want.
-	There are probably other solutions like fetching data from AllMusic (moods), lastFm (genres), Discogs (composers), etc. Use whatever you want as long as tag
-	coherence and reproducibility are ensured. 
-	
-	What happens if you don't want to (re)tag your files with moods, bpm, key, splitting genres/styles, ...? Then you will miss that part, that's all. But it works.
-	What about a library properly tagged but using 'rock' instead of 'Rock' or 'African Folk' instead of 'Nubian Folk' (although that's a bit racist you know ;)? Then use substitutions at 'helpers/music_graph_descriptors_xxx.js' (not touching your files) and/or use mass tagging utilities to replace values (touching them).
-	And what about having some tracks of my library properly tagged and not others? Then... garbage in, garbage out. Your mileage may vary.
+	Any weight equal to zero or tag not set will be skipped for calcs. Therefore it's 
+	recommended to only use those really relevant, for speed improvements. There are 3
+	exceptions to this rule:
+		- dyngenreWeight > 0 & method = DYNGENRE:	
+			genre and style tags will always be retrieved, even if their weight is set
+			to 0. They will not be considered for scoring... but are needed to calculate
+			dynGenre virtual tags.
+		- method = GRAPH:
+			genre and style tags will always be retrieved, even if their weight is set
+			to 0. They will not be considered for scoring... but are needed to calculate
+			the distance in the graph between different tracks.
+		- bInKeyMixingPlaylist = true:
+			key tags will always be retrieved, even if keyWeight is set to 0. This is 
+			done to create the special playlist even if keys are totally ignored for 
+			similarity scoring.
 */ 
-/*
- 	Last changes:
-		- Speed improvements replacing arrays with sets in multiple places.
-		- Speed improvements on tag filtering.
-		- User file to overwrite\add\delete properties from 'music_graph_descriptors'. On new updates, it would never get overwritten.
-		- Default arguments using object notation.
-		- Pre-scoring filters
-			- Anti-Influence filter: filter anti-influences by query for GRAPH Method.
-			- Influence filter: gets only influences by query for GRAPH Method.
-		- Post-scoring filters
-			- Allow only N+1 tracks per tag on the pool. Configurable.
-		- Link cache pre-calculated on startup with styles/genres present on library (instead of doing it on function evaluation later).
-		- Apart from individual link caching, cache entire distance from set (A,B,C) to (X,Y,Z)
-		- New Option: Scattering vocal & instrumental tracks, breaking clusters of instrumental tracks.
-		- New Option: Progressive list ordering, having more different tracks the more you advance within a playlist (using probPick < 100 && bProgressiveListOrder)
-		- New Option: Progressive playlist creation, uses one track as reference, and then uses the output tracks as new references, and so on...
-		- 'Camelot Wheel':
-			- Key matching is done using 'Camelot Wheel' logic, allowing similar keys by a range using a 'cross' (changing hour or letter, but both is penalized).
-			- Keys are supported using standard notation (Ab, Am, A#, etc.) and flat or sharp equivalences.
-			- For other key notations simple string matching will be used.
-		- New Option: Dj-like playlist creation following harmonic mixing rules.
-		- New Option: Negative scores for numeric tags when they fall outside range, configurable.
-		- Can delete properties (bSbdDeleteArgProperties) which are also used as arguments to not clobber the properties panel (but you must provide defaults when calling the function).
-		- Bugfix: crash when forcedQuery and calculated query were both empty. Query defaults to 'ALL' in those cases now.
-		- Bugfix: crash with empty genreTag or styleTag while using GRAPH method. Now tags retrieval is skipped in those cases too.
-		- Bugfix: distance was zero when joined genre/style set was empty using GRAPH method. calcMeanDistance: distance is Infinity in those cases now.
-		- Sanity check for queries when executing them. Warns with popup instead of crashing when error.
-		- Bugfix: harmonic mixing.
-		- Bugfix: scatter instrumentals.
-	TODO:
-		- Allow multiple tracks as reference
-			- Save references as json to create 'mood' file which can be exported.
-			- Save references as playlist to create 'mood' playlist file which can be edited anytime.
-			- Integrate within playlist manager (?) for automatic saving purpose
-		- Fingerprint comparison for scoring?
-			- Output just similar tracks by fingerprint
-			- Give more weighting to similar tracks
-		- Fine-tune Pre-filtering:
-			- Fine-tune queries
-		- Get data using MusicBrainz Ids for all tracks on library, save to json files and use them when no tags present
-		- Support for more high-level data (https://acousticbrainz.org/data#sample-data):
-			- danceability
-			- gender
-			- moods_mirex
-			- timbre
-			- tonal_atonal
-			- voice_instrumental
-			- Instruments
-		- Make it easy to port the code to other frameworks outside foobar:
-			- 'Include' replaced with 'import'
-			- Properties are just objects
-			- All graph calcs and descriptors are independent of foobar so they work 'as is'. That's the main feature and heaviest part.
-			- All tag 'getValues' would be done using external libraries or native player's methods
-			- Queries would be disabled (they are not intrinsic part of the code, just a speed optimization)
-			- Handle lists should be replaced with similar objects
-			- Console logs work as they are.
-			- Helpers used don't need foobar at all (except the 'getValues' for tags obviously)
-*/
 
 include('..\\helpers-external\\ngraph\\a-star.js');
 include('..\\helpers-external\\ngraph\\a-greedy-star.js');
@@ -326,6 +50,7 @@ include('..\\helpers\\dyngenre_map_xxx.js');
 include('..\\helpers\\music_graph_xxx.js');
 include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
+include('..\\helpers\\callbacks_xxx.js');
 
 checkCompatible('1.6.1', 'smp');
 
@@ -536,7 +261,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 	}
 }
 
-function onNotifyData(name, info) {
+addEventListener('on_notify_data', (name, info) => {
 	if (name) {
 		if (name.indexOf('SearchByDistance: requires cacheLink map') !== -1 && typeof cacheLink !== 'undefined' && cacheLink.size) { // When asked to share cache, delay 1 sec. to allow script loading
 			debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
@@ -559,27 +284,13 @@ function onNotifyData(name, info) {
 			updateCache({newCacheLinkSet: new Map(data)});
 		}
 	}
-}
-if (typeof on_notify_data !== 'undefined') {
-	const oldFunc = on_notify_data;
-	on_notify_data = function(name, info) {
-		oldFunc(name, info);
-		onNotifyData(name, info);
-	};
-} else {var on_notify_data = onNotifyData;}
+});
 
-function onScriptUnload() {
-	console.log('SearchByDistance: Saving Cache.');
+addEventListener('on_script_unload', () => {
+	if (panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Saving Cache.');}
 	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
 	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
-}
-if (typeof on_script_unload !== 'undefined') {
-	const oldFunc = on_script_unload;
-	on_script_unload = function() {
-		oldFunc();
-		onScriptUnload();
-	};
-} else {var on_script_unload = onScriptUnload;}
+});
 
 /* 
 	Warnings about links/nodes set wrong

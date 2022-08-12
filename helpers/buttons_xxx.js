@@ -5,6 +5,7 @@ include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_UI.js');
 include('helpers_xxx_flags.js');
+include('callbacks_xxx.js');
 
 /* 
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
@@ -317,7 +318,7 @@ function chooseButton(x, y) {
 	return [null, null, null];
 }
 
-function on_paint(gr) {
+addEventListener('on_paint', (gr) => {
 	// Toolbar
 	if (buttonsBar.config.bToolbar){
 		if (buttonsBar.oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);} // Toolbar color fix
@@ -334,9 +335,9 @@ function on_paint(gr) {
 		gr.FillSolidRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
 		gr.DrawRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, 1, invert(buttonsBar.config.toolbarColor));
 	}
-}
+});
 
-function on_mouse_move(x, y, mask) {
+addEventListener('on_mouse_move', (x, y, mask) => {
 	let old = buttonsBar.curBtn;
 	const buttons = buttonsBar.buttons;
 	let curBtnKey = '';
@@ -415,33 +416,32 @@ function on_mouse_move(x, y, mask) {
 		for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
 	}
 	window.Repaint();
-}
+});
 
-function on_mouse_leave() {
+addEventListener('on_mouse_leave', () => {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.normal);
 		window.Repaint();
 		buttonsBar.curBtn = null;
 	}
-}
+});
 
-function on_mouse_lbtn_down(x, y, mask) {
+addEventListener('on_mouse_lbtn_down', (x, y, mask) => {
 	buttonsBar.gDown = true;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
 		window.Repaint();
 	}
-}
+});
 
-function on_mouse_rbtn_up(x, y, mask) {
-	console.log('release');
+addEventListener('on_mouse_rbtn_up', (x, y, mask) => {
 	// Must return true, if you want to suppress the default context menu.
 	// Note: left shift + left windows key will bypass this callback and will open default context menu.
 	return buttonsBar.hasOwnProperty('menu') ? buttonsBar.menu().btn_up(x, y) : false;
-}
+});
 
-function on_mouse_lbtn_up(x, y, mask) {
+addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.onClick(mask);
@@ -453,9 +453,9 @@ function on_mouse_lbtn_up(x, y, mask) {
 	} else if (mask === MK_SHIFT) {
 		if (buttonsBar.hasOwnProperty('shiftMenu')) {buttonsBar.shiftMenu().btn_up(x, this.y + this.h);}
 	}
-}
+});
 
-function on_key_down(k) { // Update tooltip with key mask if required
+addEventListener('on_key_down', (k) => { // Update tooltip with key mask if required
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
@@ -464,9 +464,9 @@ function on_key_down(k) { // Update tooltip with key mask if required
 			}
 		}
 	}
-}
+});
 
-function on_key_up(k) {
+addEventListener('on_key_up', (k) => {
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
@@ -475,9 +475,9 @@ function on_key_up(k) {
 			}
 		}
 	}
-}
+});
 
-function getUniquePrefix(string, sep = '_'){
+function getUniquePrefix(string, sep = '_') {
 	if (string === null || !string.length) {return '';}
 	let newPrefix = string.replace(sep,'') + 0;  // First ID
 	let i = 1;
