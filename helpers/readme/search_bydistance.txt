@@ -188,23 +188,13 @@ omitted for distance calcs, but you save time if you add it manually
 to the exclusions (otherwise the entire graph will be visited trying 
 to find a match).
 
-Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file:
+Note about adding your own genre/styles to the graph:
 -------------------------------------------------------------------------
-Instead of editing the main file, you can add any edit to an user set 
-file named 'helpers/music_graph_descriptors_xxx_user.js'. Check sample 
-for more info.
+Instead of editing the main file, you can add any edit to an user 
+configurable file which should be placed at the profile folder on:
+'js_data/helpers/music_graph_descriptors_xxx_user.js'.
 
-It's irrelevant whether you add your changes to the original file or the 
-user's one but note on future script updates the main file may be 
-updated too. 
-
-That means you will need to manually merge the changes from the update 
-with your own ones, if you want them. That's the only "problem" editing 
-the main one. Both the html and foobar scripts will use any setting on 
-the user file (as if it were in the main file), so there is no other
-difference. Anything at this doc which points to 
-'helpers/music_graph_descriptors_xxx.js' applies the same to 
-'helpers/music_graph_descriptors_xxx_user.js'.
+See 'search_bydistance_user_descriptors' readme for more info.
 
 Note about High Level data, tag coherence, automatic tagging and Picard:
 ------------------------------------------------------------------------

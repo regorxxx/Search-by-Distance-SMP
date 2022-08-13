@@ -1,0 +1,22 @@
+﻿Custom genre/styles, substitutions or other variables may be added
+to the graph by the user using the existing framework.
+
+Instead of editing the main file, you can add any edit to an user 
+configurable file which should be placed at the profile folder on:
+'js_data/helpers/music_graph_descriptors_xxx_user.js'. This is done to
+ensure the file does not get overwritten when updating the scripts.
+
+Check sample at helpers folder for more info and copy it to that path.
+Alternatively the custom button has an entry to open the user descriptors
+which may be used to open it. If the file does not exist yet, a copy will
+be created and then opened.
+
+It's irrelevant whether you add your changes to the original file or the 
+user's one but note on future script updates the main file may be 
+updated too and therefore changes would be lost. 
+
+Both the html and foobar scripts will use any setting on the user file 
+(as if it were in the main file), so there is no other difference. 
+Anything at the docs which points to one of the file applies to the other
+[scripts folder] 'helpers/music_graph_descriptors_xxx.js'
+[profile folder] 'js_data/helpers/music_graph_descriptors_xxx_user.js'.
