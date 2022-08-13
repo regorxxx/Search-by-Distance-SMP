@@ -22,14 +22,18 @@
 
 ## [Unreleased][]
 ### Added
+- Readmes: added 'User descriptors' readme.
 ### Changed
+- Descriptors: user file has been moved to profile folder at 'js_data/helpers/music_graph_descriptors_xxx_user.js'. This will ensure it doesn't get overwritten on script updates. Using the menu entries to open the descriptor will automatically create a copy there and open it if it's not found. Users who have been adding changes and being careful to not overwrite the file at the current location only have to copy it manually or use the menu entry to apply the change (and future edits must be done on the data folder). This step is only required once.
 ### Removed
 ### Fixed
+- Descriptors: minor fix about 'Tuareg Music'.
 
 ## [2.3.0] - 2022-08-12
 ### Added
 - Diagram: diagrams explaining the design logic of similar artists calculation with 3 different methods ('_images\search_by_distance_SIMILAR_ARTISTS(R|V|W)_diagram.png').
 - Descriptors: added 'Dembow' and 'Renaissance Rock', along their influences.
+- Readmes: added 'Similar artists' readme.
 ### Changed
 - Similar artists: library tracks are now filtered by nearest genre/styles to tracks by selected artist for every track, instead of using only the first track as reference. This should better reflect the works of an artist without depending on the reference track at all. Previously, output score would be heavily dependent on the reference track.
 - Similar artists: scores are now weighted with genre/style appearance on all artist's tracks. i.e. if 'Mdour Moctar' has 1 Reggae track on your library and 99 Rock tracks, then if the Reggae track is chosen for the calcs, it's score is weighted as 1% of the total score (instead of averaging all N scores).
