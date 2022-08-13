@@ -282,7 +282,7 @@ const music_graph_descriptors = {
 	['Classic Rock XL'					,	['Latin Rock XL','Latin Rock']],
 	['Hypersoul'						,	['Urban Soul','Dance Pop']],
 	['Sadcore'							,	['Alt. Rock','Indie']],
-	['Desert Blues'						,	['Hill Country Blues','Malian Folk','Tuareg Music']],
+	['Desert Blues'						,	['Hill Country Blues','Malian Folk']],
 	['Ambient Industrial'				,	['Ambient']],
 	['Emo Pop'							,	['Emo Rock']],
 	['Celtic Rock'						,	['Pub Rock','Celtic Folk','Celtic Punk']],
