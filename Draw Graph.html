@@ -20,12 +20,13 @@
 		<script type="text/javascript" src="helpers/music_graph_html_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx.js"></script>
-		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_user.js"></script>
+		<script type="text/javascript" src="../../../js_data/helpers/music_graph_descriptors_xxx_user.js"></script>
 		<script type="text/javascript" src="helpers/region_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_countries.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_culture.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_helper.js"></script>
 		<script type="text/javascript" src="helpers/world_map_tables.js"></script>
+		<script type="text/javascript" src="helpers-external/xelection-js/xelection.js"></script>
 		<script type="text/javascript">
 			function onLoad() {
 				const idealLength = music_graph_descriptors.cluster; //Uses default cluster weighting
@@ -449,6 +450,24 @@
 						document.onmousemove = null;
 					}
 				}
+				
+				/* 
+					Selection popup
+				*/
+				const selection = new Selection();
+				selection.config({
+					facebook: false,
+					twitter: false,
+					search:true,
+					copy:false,
+					speak:true,
+					print:false,
+					image:false,
+					dictionary:false,
+					translate:false,
+					backgroundColor: '#dc143c',
+					iconColor: '#ffffff'
+				}).init();
 			}
 			// Popup
 			let data = null;
