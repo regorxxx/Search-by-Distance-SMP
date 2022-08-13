@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/22
+//13/08/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -9,7 +9,7 @@ if (typeof include !== 'undefined') { // On foobar
 	include('music_graph_descriptors_xxx_helper.js');
 	include('helpers_xxx.js');
 	include('helpers_xxx_statistics.js');
-	let userDescriptor = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
+	let userDescriptor = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 	if (utils.IsFile(userDescriptor)) {
 		try {
 			// console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);

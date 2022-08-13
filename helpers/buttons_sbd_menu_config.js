@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//13/08/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -518,12 +518,12 @@ function createConfigMenu(parent) {
 				// Compare (- user exclusions - graph exclusions)
 				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
 				// Report
-				const userFile = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
+				const userFile = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
 				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
 				const report = 'Graph descriptors:\n' +
-								'.\\helpers\\music_graph_descriptors_xxx.js\n' +
-								'.\\helpers\\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
+								'(scripts folder) .\\helpers\\music_graph_descriptors_xxx.js\n' +
+								'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
 								'List of tags not present on the graph descriptors:\n' +
 								[...missing].sort().join(', ');
 				fb.ShowPopupMessage(report, 'Search by distance');
@@ -560,11 +560,16 @@ function createConfigMenu(parent) {
 		{ // Open descriptors
 			menu.newEntry({menuName: submenu, entryText: 'Open main descriptor', func: () => {
 				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx.js';
-				if (_isFile(file)){_run('notepad.exe', file);}
+				if (_isFile(file)){_explorer(file); _run('notepad.exe', file);}
 			}});
 			menu.newEntry({menuName: submenu, entryText: 'Open user descriptor', func: () => {
-				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js';
-				if (_isFile(file)){_run('notepad.exe', file);}
+				const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
+				if (!_isFile(file)){
+					_copyFile(folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js', file);
+					const readme = _open(folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt', utf8);
+					if (readme.length) {fb.ShowPopupMessage(readme, 'User descriptors');}
+				}
+				if (_isFile(file)){_explorer(file); _run('notepad.exe', file);}
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
@@ -610,6 +615,7 @@ function createConfigMenu(parent) {
 			sep2: 'sep',
 			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
 			'Similar Artists': folders.xxx + 'helpers\\readme\\search_bydistance_similar_artists.txt',
+			'User descriptors': folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt',
 			sep3: 'sep',
 			'Tagging requisites': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
