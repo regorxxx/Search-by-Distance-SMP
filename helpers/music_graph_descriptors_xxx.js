@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//14/08/22
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -597,3 +597,36 @@ const music_graph_descriptors = {
 									// ('graphWeighted') uses the link's weight values at top to render similar distances to real ones, but also using link forces.
 									// ('realDistance') uses the link's weight values at top to render real distances. Beware it will look really weird!
 };
+
+{	// Clean non ASCII values
+	const asciiRegEx = [[/[\u0300-\u036f]/g, ''], [/\u0142/g, 'l']];
+	const asciify = (node) => {
+		let asciiNode = node.normalize('NFD');
+		asciiRegEx.forEach((rgex) => {asciiNode = asciiNode.replace(rgex[0], rgex[1]);});
+		return asciiNode;
+	};
+	['style_supergenre_supercluster', 'style_supergenre_cluster', 'style_supergenre', 'style_cluster', 'style_primary_origin', 'style_secondary_origin', 'style_weak_substitutions', 'style_substitutions'].forEach((key) => {
+		music_graph_descriptors[key].forEach((pair) => {
+			if (pair.length !== 2) {return;}
+			const parent = pair[0];
+			const asciiParent = asciify(parent);
+			if (asciiParent !== parent) {pair[0] = asciiParent;}
+			const nodeList = pair[1];
+			nodeList.forEach((node, j) => {
+				const asciiNode = asciify(node);
+				if (asciiNode !== node) {nodeList[j] = asciiNode;}
+			});
+		});
+	});
+
+	music_graph_descriptors.map_distance_exclusions.forEach((node, i, set) => {
+		const asciiNode = asciify(node);
+		if (asciiNode !== node) {set.add(asciiNode);}
+	});
+	
+	music_graph_descriptors.map_colors.forEach((pair) => {
+		const node = pair[0];
+		const asciiNode = asciify(node);
+		if (asciiNode !== node) {pair[0] = asciiNode;}
+	});
+}
