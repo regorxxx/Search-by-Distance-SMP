@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/22
+//14/08/22
 
 /*	
 	Search by Distance
@@ -73,8 +73,8 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', 'genre'],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', 'style'],
+	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', '$ascii(%genre%)'],
+	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', '$ascii(%style%)'],
 	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'mood'],
 	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%date%)'],
 	keyTag					:	['To remap key tag to other tag change this', 'key'],
@@ -230,8 +230,12 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
 		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
 		if (panelProperties.bCacheOnStartup[1] || bForce) {
-			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
-			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%style%';
+			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {
+				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
+			}).join('|') : '%genre%';
+			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {
+				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
+			}).join('|') : '%style%';
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
 			console.log('SearchByDistance: tags used for cache - ' + tags);
 			const tfo = fb.TitleFormat(tags);
