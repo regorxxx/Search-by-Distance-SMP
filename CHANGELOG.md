@@ -31,6 +31,7 @@
 - Tags: after tag remapping, a popup asks to rebuild the cache.
 ### Removed
 ### Fixed
+- Descriptors: minor fix about 'Tuareg Music'.
 - Descriptors: fixed warnings about non ASCII values on the descriptors.
 - Logging: fixed console logging to file (lines were not being split properly).
 
