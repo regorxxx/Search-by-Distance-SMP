@@ -20,7 +20,14 @@
 		<script type="text/javascript" src="helpers/music_graph_html_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx.js"></script>
-		<script type="text/javascript" src="../../../js_data/helpers/music_graph_descriptors_xxx_user.js"></script>
+		<!-- Try to load the user file at data otherwise the default one -->
+		<script type="text/javascript" src="../../../js_data/helpers/music_graph_descriptors_xxx_user.js" onerror="void(0)"></script>
+		<script>
+			if (typeof music_graph_descriptors_user === 'undefined') {
+				console.log('User descriptors file was not found at data folder, trying the helpers folder...');
+				document.write('<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_user.js"><\/script>');
+			}
+		</script>
 		<script type="text/javascript" src="helpers/region_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_countries.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_culture.js"></script>
