@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/22
+//14/08/22
 
 /*
 	This is a sample file to show how to replace/add/delete properties at music_graph_descriptors without touching the original file.
@@ -61,6 +61,9 @@ const music_graph_descriptors_user = {
 
 // Don't edit past this line...
 if (Object.keys(music_graph_descriptors_user).length) {
+	if (typeof include === 'undefined') { // On browser
+		console.log('User\'s music_graph_descriptors - File loaded: music_graph_descriptors_xxx_user.js');
+	}
 	Object.keys(music_graph_descriptors_user).forEach((key) => { // We have only: arrays, sets, strings, numbers and booleans properties
 			if (Array.isArray(music_graph_descriptors[key]) && Array.isArray(music_graph_descriptors_user[key])) { // Concatenate arrays and replace elements on both
 				music_graph_descriptors_user[key].forEach((nodeArray, i) => {
@@ -82,4 +85,8 @@ if (Object.keys(music_graph_descriptors_user).length) {
 				music_graph_descriptors[key] = music_graph_descriptors_user[key];
 			}
 	});
-} else {/* console.log('User\'s music_graph_descriptors has been loaded but it contains no changes... using only default one.'); */}
+} else {
+	if (typeof include === 'undefined') { // On browser
+		console.log('User\'s music_graph_descriptors has been loaded but it contains no changes... using only default one.');
+	}
+}
