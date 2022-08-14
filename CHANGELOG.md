@@ -25,9 +25,14 @@
 - Readmes: added 'User descriptors' readme.
 ### Changed
 - Descriptors: user file has been moved to profile folder at 'js_data/helpers/music_graph_descriptors_xxx_user.js'. This will ensure it doesn't get overwritten on script updates. Using the menu entries to open the descriptor will automatically create a copy there and open it if it's not found. Users who have been adding changes and being careful to not overwrite the file at the current location only have to copy it manually or use the menu entry to apply the change (and future edits must be done on the data folder). This step is only required once.
+- HTML: tries to load the user descriptors file from data folder first, then from helpers folder if not found. Will give a warning on console on the latter.
+- Descriptors: all style/genres on the graph use now ASCII only values, so it should be easier to match any value to them if required.
+- Tags: default genre and style tags use now '$ascii()' TF function. This will ensure a match when using accents, etc. See change above. On previous installations, change tags to (without quotes): '$ascii(%genre%)' & '$ascii(%style%)'
+- Tags: after tag remapping, a popup asks to rebuild the cache.
 ### Removed
 ### Fixed
-- Descriptors: minor fix about 'Tuareg Music'.
+- Descriptors: fixed warnings about non ASCII values on the descriptors.
+- Logging: fixed console logging to file (lines were not being split properly).
 
 ## [2.3.0] - 2022-08-12
 ### Added
