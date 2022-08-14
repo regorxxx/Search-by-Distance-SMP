@@ -313,12 +313,12 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const options = ['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'];
-			options.forEach((key) => {
+			options.forEach((key, i) => {
 				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName, entryText, func: () => {
 					properties[key][1] = !properties[key][1];
 					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				}, flags: recipe.hasOwnProperty(key) || (i !== 0 && !properties[options[0]][1]) ? MF_GRAYED : MF_STRING});
 				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 			});
 		}
@@ -383,6 +383,12 @@ function createConfigMenu(parent) {
 				if (input === properties[tagName][1]) {return;}
 				properties[tagName][1] = input;
 				overwriteProperties(properties);
+				if (tagName === 'genreTag' || tagName === 'styleTag') {
+					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+					if (answer === popup.yes) {
+						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+					}
+				}
 			}, flags: bProperties && recipe.properties.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
 		});
 		menu.newEntry({menuName, entryText: 'sep'});
@@ -519,11 +525,11 @@ function createConfigMenu(parent) {
 				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
 				// Report
 				const userFile = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
-				const UserFileFound = _isFile(userFile) ? '' : ' (not found)';
-				const UserFileEmpty = UserFileFound &&  Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
+				const userFileFound = _isFile(userFile) ? '' : ' (not found)';
+				const userFileEmpty = !userFileFound.length && Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
 				const report = 'Graph descriptors:\n' +
 								'(scripts folder) .\\helpers\\music_graph_descriptors_xxx.js\n' +
-								'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + UserFileFound + UserFileEmpty + '\n\n' +
+								'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + userFileFound + userFileEmpty + '\n\n' +
 								'List of tags not present on the graph descriptors:\n' +
 								[...missing].sort().join(', ');
 				fb.ShowPopupMessage(report, 'Search by distance');
