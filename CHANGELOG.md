@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [3.0.0](#300---2022-08-21)
 - [2.3.0](#230---2022-08-12)
 - [2.2.4](#224---2022-08-10)
 - [2.2.3](#223---2022-08-09)
@@ -21,6 +22,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [3.0.0] - 2022-08-21
 ### Added
 - Readmes: added 'User descriptors' readme.
 ### Changed
@@ -346,8 +353,9 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.5...HEAD
-[2.2.5]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...v2.2.5
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.3.0...v3.0.0
+[2.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...v2.3.0
 [2.2.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.1...v2.2.2
