@@ -64,25 +64,27 @@ if (Object.keys(music_graph_descriptors_user).length) {
 	if (typeof include === 'undefined') { // On browser
 		console.log('User\'s music_graph_descriptors - File loaded: music_graph_descriptors_xxx_user.js');
 	}
-	Object.keys(music_graph_descriptors_user).forEach((key) => { // We have only: arrays, sets, strings, numbers and booleans properties
-			if (Array.isArray(music_graph_descriptors[key]) && Array.isArray(music_graph_descriptors_user[key])) { // Concatenate arrays and replace elements on both
-				music_graph_descriptors_user[key].forEach((nodeArray, i) => {
+	const oldDesc = music_graph_descriptors;
+	const newDesc = music_graph_descriptors_user;
+	Object.keys(newDesc).forEach((key) => { // We have only: arrays, sets, strings, numbers and booleans properties
+			if (Array.isArray(oldDesc[key]) && Array.isArray(newDesc[key])) { // Concatenate arrays and replace elements on both
+				newDesc[key].forEach((nodeArray, i) => {
 						// [ [A,[values]], ..., [[X,[values]], ... ] index of X within main array? Using flat() length gets doubled.
-						const doubleIndex = music_graph_descriptors[key].flat().indexOf(nodeArray[0]);
+						const doubleIndex = oldDesc[key].flat().indexOf(nodeArray[0]);
 						const index =  !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
 						if (index !== -1) { // If present on both files, replace with new value
-							music_graph_descriptors[key][index] = music_graph_descriptors_user[key][i]; // Note replacing [A,[B,C]] with [A,[]] is the same than deleting the line, since no link will be created. And only links are added to the graph (not individual nodes).
+							oldDesc[key][index] = newDesc[key][i]; // Note replacing [A,[B,C]] with [A,[]] is the same than deleting the line, since no link will be created. And only links are added to the graph (not individual nodes).
 						} else { // Concat
-							music_graph_descriptors[key].push(music_graph_descriptors_user[key][i]);
+							oldDesc[key].push(newDesc[key][i]);
 						}
 					}
 				);
-			} else if (music_graph_descriptors[key].constructor === Set && music_graph_descriptors_user[key].constructor === Set) { // Merge sets and delete elements on both
-				const toDelete = music_graph_descriptors[key].intersection(music_graph_descriptors_user[key]); 
-				music_graph_descriptors[key] = music_graph_descriptors[key].union(music_graph_descriptors_user[key]);
-				music_graph_descriptors[key] = music_graph_descriptors[key].difference(toDelete);
+			} else if (oldDesc[key].constructor === Set && newDesc[key].constructor === Set) { // Merge sets and delete elements on both
+				const toDelete = oldDesc[key].intersection(newDesc[key]); 
+				oldDesc[key] = oldDesc[key].union(newDesc[key]);
+				oldDesc[key] = oldDesc[key].difference(toDelete);
 			} else { // Replace numbers, strings and booleans
-				music_graph_descriptors[key] = music_graph_descriptors_user[key];
+				oldDesc[key] = newDesc[key];
 			}
 	});
 } else {
