@@ -4,15 +4,19 @@
 /*
 	Helpers for the descriptors
 */
+music_graph_descriptors.asciify = function asciify(value) { // Used internally on all inputs below
+	return (typeof str === 'string' ? value : String(value)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0142/g, 'l');
+};
+
 music_graph_descriptors.getSubstitution = function getSubstitution(genreStyle) { // Doesn't check if the style exists at all at the graph
-	const pair = this.style_substitutions.find((pair) => {return pair[1].indexOf(genreStyle) !== -1;});
+	const pair = this.style_substitutions.find((pair) => {return pair[1].indexOf(this.asciify(genreStyle)) !== -1;});
 	return pair ? pair[0] : genreStyle;
 };
 
 music_graph_descriptors.replaceWithSubstitutions = function replaceWithSubstitutions(genreStyleArr) { // Doesn't work in arrays with duplicate items!
 	let left = genreStyleArr.length;
 	if (!left) {return [];}
-	const copy = [...genreStyleArr]; // ['House', 'Trance', 'Folk'] or ['House', 'Trance', 'Folk-Rock']
+	const copy = [...genreStyleArr].map((tag) => {return this.asciify(tag);}); // ['House', 'Trance', 'Folk'] or ['House', 'Trance', 'Folk-Rock']
 	this.style_substitutions.forEach((pair) => {
 		if (!left) {return;}
 		pair[1].forEach((sub) => {
@@ -26,7 +30,7 @@ music_graph_descriptors.replaceWithSubstitutions = function replaceWithSubstitut
 music_graph_descriptors.replaceWithSubstitutionsReverse = function replaceWithSubstitutionsReverse(genreStyleArr) { // Doesn't work in arrays with duplicate items!
 	let left = genreStyleArr.length;
 	if (!left) {return [];}
-	const copy = [...genreStyleArr]; // ['House_supergenre', 'Trance_supergenre', 'Folk Music_supercluster']
+	const copy = [...genreStyleArr].map((tag) => {return this.asciify(tag);}); // ['House_supergenre', 'Trance_supergenre', 'Folk Music_supercluster']
 	this.style_substitutions.forEach((pair) => {
 		if (!left) {return;}
 		const idx = copy.indexOf(pair[0]);
@@ -50,4 +54,19 @@ music_graph_descriptors.getInfluences = function getInfluences(genreStyle) {
 	const dbleIdx = this.style_primary_origin.flat().indexOf(this.getSubstitution(genreStyle));
 	const idx = !(dbleIdx & 1) ? dbleIdx / 2 : -1; // -1 for odd indexes, halved for even values
 	return idx !== -1 ? this.style_primary_origin[idx][1] : [];
+};
+
+music_graph_descriptors.nodeList = null;
+music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
+	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
+	// Get node list (+ weak substitutions + substitutions + style cluster)
+	if (!this.nodeList) {
+		this.nodeList = new Set(this.style_supergenre.flat(Infinity))
+			.union(new Set(this.style_weak_substitutions.flat(Infinity)))
+			.union(new Set(this.style_substitutions.flat(Infinity)))
+			.union(new Set(this.style_cluster.flat(Infinity)));
+	}
+	// Compare (- user exclusions - graph exclusions)
+	const missing = tags.difference(this.nodeList);
+	return missing.size === 0;
 };

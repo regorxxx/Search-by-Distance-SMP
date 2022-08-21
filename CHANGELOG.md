@@ -29,6 +29,7 @@
 - Descriptors: all style/genres on the graph use now ASCII only values, so it should be easier to match any value to them if required.
 - Tags: default genre and style tags use now '$ascii()' TF function. This will ensure a match when using accents, etc. See change above. On previous installations, change tags to (without quotes): '$ascii(%genre%)' & '$ascii(%style%)'
 - Tags: after tag remapping, a popup asks to rebuild the cache.
+- Cache: improved graph links cache asynchronous calculation.
 ### Removed
 ### Fixed
 - Descriptors: minor fix about 'Tuareg Music'.
