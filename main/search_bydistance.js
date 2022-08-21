@@ -73,8 +73,8 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', '$ascii(%genre%)'],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', '$ascii(%style%)'],
+	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', _ascii('%genre%')],
+	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', _ascii('%style%')],
 	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'mood'],
 	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%date%)'],
 	keyTag					:	['To remap key tag to other tag change this', 'key'],
@@ -239,7 +239,30 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
 			console.log('SearchByDistance: tags used for cache - ' + tags);
 			const tfo = fb.TitleFormat(tags);
-			const styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
+			const styleGenres = await new Promise((resolve) => {
+				const libItems = fb.GetLibraryItems().Convert();
+				const num = libItems.length;
+				let tagValues = [];
+				const promises = [];
+				let step = 0;
+				let prevProgress = -1;
+				// All styles/genres from library without duplicates
+				for (let i = 0; step < num; i ++) {
+					promises.push(new Promise((resolve) => {
+						step += 300;
+						const items = new FbMetadbHandleList(libItems.slice(i, step));
+						setTimeout((step) => {
+							tagValues.push(...new Set(tfo.EvalWithMetadbs(items).join('|').split(/\| *|, */g)));
+							const progress = Math.round(step / num * 4) * 25;
+							if (progress > prevProgress) {prevProgress = progress; console.log('Calculating tags ' + progress + '%.');}
+							resolve('done');
+						}, iDelayLibrary * 6 * i, step);
+					}));
+				}
+				Promise.all(promises).then(() => {
+					setTimeout(() => {resolve(new Set(tagValues));}, 500);
+				});
+			});
 			cacheLink = await calcCacheLinkSGV2(all_music_graph, styleGenres);
 		} else {
 			cacheLink = new Map();
