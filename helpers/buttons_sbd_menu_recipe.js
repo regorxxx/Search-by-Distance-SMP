@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/08/22
+//22/08/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -36,7 +36,7 @@ function createRecipeMenu(parent) {
 		recipe.name = input;
 		const filePath = folders.xxx + 'presets\\Search by\\recipes\\' + input + '.json';
 		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-		if (WshShell.Popup('Also add additional variables from properties?\n' + [...recipePropertiesAllowedKeys].join(', '), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+		if (WshShell.Popup('Also add additional variables from properties?\n' + [...recipePropertiesAllowedKeys].joinEvery(', ', 4), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
 			recipe.properties = {};
 			Object.keys(properties).forEach((rKey) => {
 				if (!recipePropertiesAllowedKeys.has(rKey)) {return;}
