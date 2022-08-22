@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [3.1.0](#310---2022-08-22)
 - [3.0.0](#300---2022-08-21)
 - [2.3.0](#230---2022-08-12)
 - [2.2.4](#224---2022-08-10)
@@ -24,6 +25,14 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+### Removed
+### Fixed
+
+## [3.1.0] - 2022-08-22
+### Added
+### Changed
+- UI: minor improvements to word lists within popups in some instances. Now split in new lines after X elements.
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
 
@@ -353,7 +362,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...v2.3.0
 [2.2.4]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.3...v2.2.4
