@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/08/22
+//23/08/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -419,9 +419,9 @@ function createConfigMenu(parent) {
 			include('..\\main\\search_bydistance_extra.js');
 			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: () => {
 				const items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist);
-				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <=' + Math.round(items.Count * 30 * fb.GetLibraryItems().Count / 70000) + ' secs', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-				let profiler = new FbProfiler('Calculate similar artists');
 				const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%artist%', checkKeys: ['%artist%']});
+				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <=' + Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000) + ' secs', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				let profiler = new FbProfiler('Calculate similar artists');
 				const newData = [];
 				handleList.Convert().forEach((selHandle) => {
 					const output = calculateSimilarArtists({properties, selHandle});
