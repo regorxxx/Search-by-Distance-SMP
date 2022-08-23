@@ -25,8 +25,15 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 ### Removed
 ### Fixed
+- UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
+- Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
+- Similar artists: remapped genre/style tags were not being properly used on filtering step.
+- Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
+- Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
+- Similar artists: in some cases similar artists were duplicated.
 
 ## [3.1.0] - 2022-08-22
 ### Added
