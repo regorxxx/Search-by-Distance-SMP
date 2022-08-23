@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/08/22
+//23/08/22
 
 include('search_bydistance.js');
 
@@ -7,27 +7,33 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
-	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['artist'], true).flat().filter(Boolean);
+	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
 	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
-	const selArtistTracks = removeDuplicatesV2({handleList: fb.GetQueryItems(fb.GetLibraryItems(), libQuery), checkKeys: ['title', 'artist', 'date']});
+	const selArtistTracks = removeDuplicatesV2({handleList: fb.GetQueryItems(fb.GetLibraryItems(), libQuery), checkKeys: ['TITLE', 'ARTIST', 'DATE']});
 	// Use only X random tracks instead of all of them
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
 	const newConfig = clone(properties);
+	const genreTag = newConfig.genreTag[1].split(',').filter(Boolean);
+	const genreQueryTag = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
+	const styleTag = newConfig.styleTag[1].split(',').filter(Boolean);
+	const styleQueryTag = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
+	const genreStyleTag = [...new Set(genreTag.concat(styleTag))];
 	// Find which genre/styles are nearest as pre-filter using the selected track
 	let forcedQuery = '';
 	if (method === 'reference') {
-		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['genre', 'style'], true).flat().filter(Boolean);
+		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
 		const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph);
-		const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
+		// const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
+		const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 		forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 	}
 	// Weight with all artist's tracks
 	const genreStyleWeight = new Map();
 	let weight = 1;
 	if (method === 'weighted') {
-		const genreStyle = getTagsValuesV3(selArtistTracks, ['genre', 'style'], true).flat(Infinity).filter(Boolean);
+		const genreStyle = getTagsValuesV3(selArtistTracks, genreStyleTag, true).flat(Infinity).filter(Boolean);
 		const size = genreStyle.length;
 		genreStyle.forEach((val) => {
 			if (genreStyleWeight.has(val)) {genreStyleWeight.set(val, genreStyleWeight.get(val) + 1);} 
@@ -41,9 +47,9 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	randomSelTracks.forEach((sel) => {
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
-			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), ['genre', 'style'], true).flat().filter(Boolean);
+			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
 			const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph);
-			const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
+			const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 			forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 			if (method === 'weighted') { // Weight will be <= 1 according to how representative of the artist's works is
 				weight = [...new Set(genreStyle)].reduce((total, val) => {return total + (genreStyleWeight.has(val) ? genreStyleWeight.get(val) : 0);}, 0);
@@ -63,7 +69,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		});
 		const [selectedHandlesArray, selectedHandlesData, ] = data ? data : [[], []];
 		// Group tracks per artist and sum their score
-		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), ['artist'], true);
+		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), ['ARTIST'], true);
 		const similArtistData = new Map();
 		let totalScore = 0;
 		const totalCount = selectedHandlesArray.length;
@@ -82,16 +88,17 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		for (const [key, value] of similArtistData) {
 			const count = value.count / totalCount * weight;
 			const score = value.score / totalScore * weight;
-			if (report.has(value.artist)) {
-				const data = report.get(value.artist);
+			const artist = value.artist.toString(); // To avoid weird things with different key objects
+			if (report.has(artist)) {
+				const data = report.get(artist);
 				data.count += count;
 				data.score += score;
 				report.set(artist, data);
-			} else {report.set(value.artist, {artist: value.artist, count, score});}
+			} else {report.set(artist, {artist, count, score});}
 		}
 	});
 	if (panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve scores', false);}
-	// Get all matched artists and sort by score, use only first X items
+	// Get all matched artists and sort by score
 	let total = [];
 	for (const [key, value] of report) {
 		const count = round(value.count / size * 100, 1);
@@ -131,12 +138,9 @@ function getNearestNodes(fromNode, maxDistance, graph = music_graph()) {
 }
 
 function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = music_graph()) {
-	let genreStyles = [];
+	let genreStyles = [...fromGenreStyles]; // Include theirselves
 	fromGenreStyles.forEach((node) => {getNearestNodes(node, maxDistance, graph).forEach((obj) => {genreStyles.push(obj.toId);});});
-	music_graph_descriptors.style_substitutions.forEach((pair) => { //TODO Substitutons method
-		const idx = genreStyles.indexOf(pair[0]);
-		if (idx !== -1) {genreStyles.splice(idx, 0, ...pair[1]);}
-	});
+	genreStyles = music_graph_descriptors.replaceWithSubstitutionsReverse([...new Set(genreStyles)]);
 	genreStyles = [...(new Set(genreStyles.filter((node) => {return !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi);})))];
 	return genreStyles;
 }
