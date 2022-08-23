@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/08/22
+//23/08/22
 
 /*	
 	Search by Distance
@@ -73,13 +73,13 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', _ascii('%genre%')],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', _ascii('%style%')],
-	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'mood'],
-	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%date%)'],
-	keyTag					:	['To remap key tag to other tag change this', 'key'],
-	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', 'bpm'],
-	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'composer'],
+	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', _ascii('%GENRE%')],
+	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', _ascii('%STYLE%')],
+	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'MOOD'],
+	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%DATE%)'],
+	keyTag					:	['To remap key tag to other tag change this', 'KEY'],
+	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', 'BPM'],
+	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'COMPOSER'],
 	customStrTag			:	['To use a custom string tag(s) change this (sep.by comma)', ''],
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', 
@@ -656,8 +656,9 @@ function do_searchby_distance({
 			if (genreWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				if (genreTag.length > 1) {query[queryl] += query_join(query_combinations(genre, genreTag, 'OR'), 'OR');}
-				else {query[queryl] += query_combinations(genre, genreTag, 'OR');}
+				const tagNameTF = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
+				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(genre, tagNameTF, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(genre, tagNameTF, 'OR');}
 			}
 		} else if (genreWeight !== 0 && bBasicLogging) {console.log('GenreWeight was not zero but selected track had no genre tags');}
         // Styles
@@ -667,8 +668,9 @@ function do_searchby_distance({
 			if (styleWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				if (styleTag.length > 1) {query[queryl] += query_join(query_combinations(style, styleTag, 'OR'), 'OR');}
-				else {query[queryl] += query_combinations(style, styleTag, 'OR');}
+				const tagNameTF = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
+				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(style, tagNameTF, 'OR'), 'OR');}
+				else {query[queryl] += query_combinations(style, tagNameTF, 'OR');}
 			}
 		} else if (styleWeight !== 0 && bBasicLogging) {console.log('styleWeight was not zero but selected track had no style tags');}
 		// Dyngenre
@@ -694,9 +696,9 @@ function do_searchby_distance({
 				query[queryl] = '';
 				const k = moodNumber >= kMoodNumber ? kMoodNumber : moodNumber; //on combinations of 6
 				const moodComb = k_combinations(mood, k);
-				
-				if (moodTag.length > 1) {query[queryl] += query_join(query_combinations(moodComb, moodTag, 'OR', 'AND'), 'OR');}
-				else {query[queryl] += query_combinations(moodComb, moodTag, 'OR', 'AND');}
+				const tagNameTF = moodTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
+				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(moodComb, tagNameTF, 'OR', 'AND'), 'OR');}
+				else {query[queryl] += query_combinations(moodComb, tagNameTF, 'OR', 'AND');}
 			}
 		} else if (moodWeight !== 0 && bBasicLogging) {console.log('moodWeight was not zero but selected track had no mood tags');}
         // Key
@@ -706,6 +708,7 @@ function do_searchby_distance({
 			if (keyWeight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
+				const tagNameTF = ((keyTag[0].indexOf('$') === -1) ? keyTag[0] : _q(keyTag[0])); // May be a tag or a function...
 				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
 				// Gets both, flat and sharp equivalences
 				const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
@@ -718,16 +721,16 @@ function do_searchby_distance({
 						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
 						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-						else {keyComb.push('key IS ' + nextKeySharp);}
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 					}
 					nextKeyObj = {...camelotKey};
 					for (let i = 0; i <  keyRange; i++) {
 						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
 						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-						else {keyComb.push('key IS ' + nextKeySharp);}
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 					}
 					// Minor axis after changing letter
 					nextKeyObj = {...camelotKey};
@@ -736,8 +739,8 @@ function do_searchby_distance({
 						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
 						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-						else {keyComb.push('key IS ' + nextKeySharp);}
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 					}
 					nextKeyObj = {...camelotKey};
 					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
@@ -745,8 +748,8 @@ function do_searchby_distance({
 						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
 						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-						else {keyComb.push('key IS ' + nextKeySharp);}
+						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 						i++;
 					}
 					// Different letter and same number
@@ -754,17 +757,17 @@ function do_searchby_distance({
 					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
 					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-					if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-					else {keyComb.push('key IS ' + nextKeySharp);}
+					if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+					else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 					// Same letter and number
 					nextKeyObj = {...camelotKey};
 					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
 					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-					if (nextKeyFlat !== nextKeySharp) {keyComb.push('key IS ' + nextKeySharp + ' OR key IS ' + nextKeyFlat);}
-					else {keyComb.push('key IS ' + nextKeySharp);}
+					if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
+					else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
 					// And combinate queries
 					if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
-				} else {query[queryl] = 'key IS ' + key;} // For non-standard notations just use simple matching
+				} else {query[queryl] = tagNameTF + ' IS ' + key;} // For non-standard notations just use simple matching
 			}
 		} else if (keyWeight !== 0 && bBasicLogging) {console.log('keyWeight was not zero but selected track had no key tags');}
 		// Date
@@ -775,7 +778,7 @@ function do_searchby_distance({
 				query[queryl] = '';
 				const dateUpper = date + dateRange;
 				const dateLower = date - dateRange;
-				const tagNameTF = ((dateTag[0].indexOf('$') === -1) ? dateTag[0] : '"' + dateTag[0] + '"'); // May be a tag or a function...
+				const tagNameTF = ((dateTag[0].indexOf('$') === -1) ? dateTag[0] : _q(dateTag[0])); // May be a tag or a function...
 				if (dateUpper !== dateLower) {query[queryl] += tagNameTF + ' GREATER ' + dateLower + ' AND ' + tagNameTF + ' LESS ' + dateUpper;} 
 				else {query[queryl] += tagNameTF + ' EQUAL ' + date;}
 			}
@@ -788,8 +791,9 @@ function do_searchby_distance({
 				query[queryl] = '';
 				const bmpUpper = round(bpm * (100 + bpmRange) / 100, 0);
 				const bmpLower = round(bpm * (100 - bpmRange) / 100, 0);
-				if (bmpUpper !== bmpLower) {query[queryl] += 'bpm GREATER ' + bmpLower + ' AND bpm LESS ' + bmpUpper;}
-				else {query[queryl] += 'bpm EQUAL ' + bpm;}
+				const tagNameTF = ((bpmTag[0].indexOf('$') === -1) ? bpmTag[0] : _q(bpmTag[0])); // May be a tag or a function...
+				if (bmpUpper !== bmpLower) {query[queryl] += tagNameTF + ' GREATER ' + bmpLower + ' AND ' + tagNameTF + ' LESS ' + bmpUpper;}
+				else {query[queryl] += tagNameTF + ' EQUAL ' + bpm;}
 			}
 		} else if (bpmWeight !== 0 && bBasicLogging) {console.log('bpmWeight was not zero but selected track had no bpm tags');}
 		// Composer
@@ -822,7 +826,7 @@ function do_searchby_distance({
 				query[queryl] = '';
 				const customNumUpper = customNum + customNumRange;
 				const customNumLower = customNum - customNumRange;
-				const tagNameTF = ((customNumTag[0].indexOf('$') === -1) ? customNumTag[0] : '"' + customNumTag[0] + '"'); // May be a tag or a function...
+				const tagNameTF = ((customNumTag[0].indexOf('$') === -1) ? customNumTag[0] : _q(customNumTag[0])); // May be a tag or a function...
 				if (customNumUpper !== customNumLower) {query[queryl] += tagNameTF + ' GREATER ' + customNumLower + ' AND ' + tagNameTF + ' LESS ' + customNumUpper;}
 				else {query[queryl] += tagNameTF + ' EQUAL ' + customNum;}
 			}
@@ -861,7 +865,8 @@ function do_searchby_distance({
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
 					influences = [...new Set(influences)];
-					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
+					const tagNameTF = [...new Set(genreTag.concat(styleTag))].map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
+					let temp = query_combinations(influences, tagNameTF, 'OR'); // min. array with 2 values or more if tags are remapped
 					temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
 					influencesQuery.push(temp);
 				}
@@ -875,7 +880,8 @@ function do_searchby_distance({
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
 					influences = [...new Set(influences)];
-					let temp = query_combinations(influences, genreTag.concat(styleTag), 'OR'); // min. array with 2 values or more if tags are remapped
+					const tagNameTF = [...new Set(genreTag.concat(styleTag))].map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
+					let temp = query_combinations(influences, tagNameTF, 'OR'); // min. array with 2 values or more if tags are remapped
 					temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
 					influencesQuery.push(temp);
 				}
@@ -942,7 +948,7 @@ function do_searchby_distance({
         let scoreData = [];
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
-			let tfo = fb.TitleFormat(genreTag.concat(styleTag).join('|'));
+			let tfo = fb.TitleFormat([...new Set(genreTag.concat(styleTag))].join('|'));
 			handleList.OrderByFormat(tfo, 1);
 		}
 		if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
