@@ -12,18 +12,18 @@ this final selection is done according to score, randomly chosen, etc.
 All settings are configurable on the properties panel and/ or menus.
 
 These are the weight/tags pairs checked by default:
-+-----------------+-------------++----------------+---------------+
-|      Weight     |     Tag     ||     Weight     |      Tag      |
-+-----------------+-------------++----------------+---------------+
-+-----------------+-------------++----------------+---------------+
-| genreWeight     | genre       || styleWeight    | style         |
-+-----------------+-------------++----------------+---------------+
-| dyngenreWeight  |(virtual tag)|| moodWeight     | mood          |
-+-----------------+-------------++----------------+---------------+
-| keyWeight       | key         || dateWeight     | $year(%date%) |
-+-----------------+-------------++----------------+---------------+
-| bpmWeight       | bpm         || composerWeight | composer      |
-+-----------------+-------------++----------------+---------------+
++-----------------+-----------------++----------------+-----------------+
+|      Weight     |       Tag       ||     Weight     |       Tag       |
++-----------------+-----------------++----------------+-----------------+
++-----------------+-----------------++----------------+-----------------+
+| genreWeight     | $ascii(%genre%) || styleWeight    | $ascii(%style%) |
++-----------------+-----------------++----------------+-----------------+
+| dyngenreWeight  | virtual tag     || moodWeight     | mood            |
++-----------------+-----------------++----------------+-----------------+
+| keyWeight       | key             || dateWeight     | $year(%date%)   |
++-----------------+-----------------++----------------+-----------------+
+| bpmWeight       | bpm             || composerWeight | composer        |
++-----------------+-----------------++----------------+-----------------+
 
 There are 2 custom tags which can be set by the user too:
 +-----------------+-----------++-----------------+-----------+
@@ -43,7 +43,7 @@ For example, linking genreWeight to 2 different genre tags on your files:
 | genre | allmusic_genre,my_genre_tag |
 +-------+-----------------------------+
 	
-Some weight/tags pairs can be linked to TitleFormat Expr. Use tag names 
+All weight/tags pairs can be linked to TitleFormat Expr. Use tag names 
 instead of TF expressions when possible (+ performance). 
 For example, see 'date': TF is used to have the same results for 
 tracks with YYYY-MM tags or YYYY tags.
@@ -52,8 +52,6 @@ tracks with YYYY-MM tags or YYYY tags.
 +-----------+--------------------+
 +-----------+--------------------+
 | date      | $year(%date%)      |
-+-----------+--------------------+
-| customNum | (empty by default) |
 +-----------+--------------------+
 	
 Genre and Style tags (or their remapped values) can be globally 

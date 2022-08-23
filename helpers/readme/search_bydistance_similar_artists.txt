@@ -22,9 +22,33 @@ the list if required.
 
 Search by Distance offers multiple filtering options based on those 
 results, which may be used on the customizable button or via recipes.
-Script uses both the JSON file and tags (if present, take precedence).
+Script uses both the JSON file and tags (take precedence if present).
 
 After scanning, results (from JSON) may also be saved to tags for all the
 tracks present on library by the analyzed artists. On tags, other tools
 like Playlist Tools may use them to easily create queries, pools, etc.
 Tag is named 'SIMILAR ARTISTS SEARCHBYDISTANCE'.
+
+NOTE: Estimated processing time will be shown on popups, have that in
+mind when processing a large library (it may be better to process it
+on different steps). It doesn't mind how many tracks you select, only
+how many different artists are found within that selection! Calculation
+time is proportional to the number of tracks on library squared though.
+
+Also note results are heavily dependent on tags, so if you totally
+change the tags from an artist discography, it would be recommended
+to rerun the analysis... obviously, adding new albums/tracks from an
+already properly tagged artist does not count here, since adding more
+'Rock' tracks by Aerosmith to your library will not change anything
+if all the existing tracks by Aerosmith were already representative
+of their main work (Rock). In any case think of your library like an
+Spotify server: whenever you add/edit tracks there, the global 
+statistics change and also the way tracks and artists inter-relate. It's
+a live thing. Use your own criterion about rerunning analysis when 
+needed, considering the time/exactness equation.
+
+Finally, it must be taken into consideration that 2 artists does not
+have to be considered mutually similar. i.e. A may be similar to B, 
+but B may be more similar to C. Since only the most [up to] 10 similar
+artists are taken into consideration, in some use-cases situations like
+those are possible.
