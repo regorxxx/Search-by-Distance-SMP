@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/08/22
+//24/08/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -598,6 +598,10 @@ function createConfigMenu(parent) {
 				properties.customName[1] = input;
 				overwriteProperties(properties); // Force overwriting
 				parent.text = input;
+				parent.w = _gr.CalcTextWidth(input, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30;
+				parent.w *= buttonsBar.config.scale;
+				parent.changeScale(buttonsBar.config.scale);
+				window.Repaint();
 			}
 		}});
 		menu.newEntry({menuName: subMenuName, entryText: 'Show shortcuts on tooltip', func: () => {
