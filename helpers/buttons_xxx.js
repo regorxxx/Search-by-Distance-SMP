@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/06/22
+//24/08/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -272,6 +272,14 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 
 	this.onClick = function (mask) {
 		this.func && this.func(mask);
+	};
+	
+	this.adjustNameWidth = function (newName, offset = 30) {
+		this.text = newName;
+		this.w = _gr.CalcTextWidth(this.text, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + offset;
+		this.w *= buttonsBar.config.scale;
+		this.changeScale(buttonsBar.config.scale);
+		window.Repaint();
 	};
 
 	this.changeScale = function (scale) {

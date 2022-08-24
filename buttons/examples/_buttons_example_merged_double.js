@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/22
+//24/08/22
 /*
 	You can merge sets of merged buttons too, mix them with individual buttons files, etc.
 	The same than buttons, you can include multiple times the same merged bar.
@@ -32,7 +32,7 @@ buttonsBar.config.toolbarColor = RGB(211,218,237);
 
 	/* 	
 		OR just add them manually:
-		include(folders.xxx + 'buttons\\buttons_search_same_style.js', {always_evaluate: true});
+		include(folders.xxx + 'buttons\\buttons_search_by_tags_combinations.js', {always_evaluate: true});
 		...
 	*/
 }

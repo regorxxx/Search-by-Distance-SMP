@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/22
+//24/08/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -23,7 +23,7 @@
 		skipped, instead of throwing and error! This is better than try/catch, since it doesn't omit coding errors while including them...
 */
 
-var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_same_by.js and search_same_by.js
+var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
 
 {
 	const dependencies = [
@@ -95,7 +95,7 @@ buttonsBar.config.scale =  barProperties.scale[1];
 
 // Buttons
 const buttonsPathDef = [	 // Add here your buttons names
-					'buttons_search_same_by.js',
+					'buttons_search_by_tags_combinations.js',
 					'buttons_playlist_remove_duplicates.js',
 					'buttons_search_bydistance.js',
 					'buttons_search_bydistance_customizable.js',
