@@ -24,10 +24,13 @@
 
 ## [Unreleased][]
 ### Added
+- Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 ### Changed
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
+- UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Similar artists: remapped genre/style tags were not being properly used on filtering step.
