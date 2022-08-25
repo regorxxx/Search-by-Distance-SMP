@@ -5,6 +5,7 @@ include('menu_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
 include('helpers_xxx_prototypes.js');
+include('helpers_xxx_time.js');
 
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
@@ -420,7 +421,8 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: () => {
 				const items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist);
 				const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%artist%', checkKeys: ['%artist%']});
-				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <=' + Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000) + ' secs', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
+				const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
+				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
 				let profiler = new FbProfiler('Calculate similar artists');
 				const newData = [];
 				handleList.Convert().forEach((selHandle) => {
