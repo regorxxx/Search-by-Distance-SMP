@@ -27,6 +27,7 @@
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 ### Changed
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
+- UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
