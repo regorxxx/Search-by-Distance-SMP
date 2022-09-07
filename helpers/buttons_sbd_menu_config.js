@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/08/22
+//07/09/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -634,7 +634,7 @@ function createConfigMenu(parent) {
 			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'
 		};
 		if (Object.keys(readmes).length) {
-			const rgex = /sep\b|separator\b/gi;
+			const rgex = /^sep$|^separator$/i;
 			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
 				if (rgex.test(value)) {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
 				else if (_isFile(value)) {
