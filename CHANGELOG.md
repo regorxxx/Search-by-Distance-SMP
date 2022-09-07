@@ -38,6 +38,7 @@
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
 - Similar artists: in some cases similar artists were duplicated.
+- Readmes: separators not being properly identified on readme files checking.
 
 ## [3.1.0] - 2022-08-22
 ### Added
