@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.0.0](#400---2022-09-15)
 - [3.1.0](#310---2022-08-22)
 - [3.0.0](#300---2022-08-21)
 - [2.3.0](#230---2022-08-12)
@@ -24,8 +25,20 @@
 
 ## [Unreleased][]
 ### Added
-- Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 ### Changed
+### Removed
+### Fixed
+
+## [4.0.0] - 2022-09-15
+### Added
+- Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
+- Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
+### Changed
+- GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
+- Descriptors: changed style cluster distance. Presets have been reworked to account for that.
+- Descriptors: updated descriptors with multiple additions.
+- Tags: reverted default string tags to raw tags instead of using '$ascii(%TAG%)' in favor of internally converting values to ASCII. Works better for multi-value tags in queries. It's recommended to reset tag remapping to default for most users (or manually removing the TF functions if using other tags).
+- Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - Helpers: updated helpers.
@@ -375,6 +388,7 @@
 ### Fixed
 
 [Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...HEAD
+[4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.2.4...v2.3.0
