@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/03/22
+//08/09/22
 
 /* 
 	These helper are used on debug function at 'music_graph_xxx.js' so we need it for the html file too
@@ -31,38 +31,25 @@ Set.prototype.difference = function(setB) {
     return difference;
 };
 
-// Finds distance between all SuperGenres present on foobar library. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSGV2(mygraph, styleGenres, limit = -1) {
-	let nodeList = [];
-	const iDelaySBDCache = 10;
-	const influenceMethod = 'adjacentNodes';
-	// Filter SGs with those on library
-	const descr = music_graph_descriptors;
-	nodeList = new Set([...descr.style_supergenre, ...descr.style_weak_substitutions, ...descr.style_substitutions, ...descr.style_cluster].flat(Infinity)); 
-	nodeList = [...nodeList.intersection(styleGenres)];
-	return new Promise((resolve) => {
-		let cache = new Map();
-		const promises = [];
-		const total = nodeList.length - 1;
-		let prevProgress = -1;
-		for (let i = 0; i < total; i++) {
-			for (let j = i + 1; j <= total; j++) {
-				promises.push(new Promise((resolve) => {
-					setTimeout(() => {
-						let [ij_distance, ij_antinfluenceDistance] = calc_map_distance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
-						if (limit === -1 || ij_distance <= limit) {
-							// Sorting removes the need to check A-B and B-A later...
-							cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
-						}
-						const progress = Math.round(i * j / (total * total) * 4) * 25;
-						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
-						resolve('done');
-					}, iDelaySBDCache * j);
-				}));
+function capitalize(s) {
+	if (!isString(s)) {return '';}
+	return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function capitalizeAll(s, sep = ' ', bJoinSep = true) { // Can use RegEx as separator, when using RegEx with capture groups to also include separators on split array, bJoinSep should be false to join 'as is'
+	if (typeof s !== 'string') {return '';}
+	if (isArray(sep)) {
+		const copy = Array.from(s.toLowerCase());
+		const len = s.length;
+		for (const sep_i of sep) {
+			s = capitalizeAll(s, sep_i, bJoinSep);
+			for (let i = 0; i < len; i++) {
+				if (s[i] === s[i].toUpperCase()) {
+					copy[i] = s[i];
+				}
 			}
 		}
-		Promise.all(promises).then(() => {
-			resolve(cache);
-		});
-	});
+		return copy.join('');
+	}
+	return s.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join(bJoinSep ? sep : ''); // Split, capitalize each subString and join
 }

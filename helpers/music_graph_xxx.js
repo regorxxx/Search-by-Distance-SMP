@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/08/22
+//08/09/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -28,7 +28,7 @@ if (typeof include !== 'undefined') { // On foobar
 /*
 	Creates Music Map links for foobar 
 */
-function music_graph(descriptor = music_graph_descriptors) {
+function musicGraph(descriptor = music_graph_descriptors) {
 		// Maps
 		const style_supergenre_supercluster = descriptor.style_supergenre_supercluster;
 		const style_supergenre_cluster = descriptor.style_supergenre_cluster;
@@ -60,7 +60,7 @@ function music_graph(descriptor = music_graph_descriptors) {
 			mygraph = createGraph();
 		} catch (e) {
 			mygraph = Viva.Graph.graph();
-			console.log('Warning: music_graph() used within html. You should use music_graph_fordrawing() instead! (Unless this is a call from debug func)');
+			console.log('Warning: musicGraph() used within html. You should use musicGraphForDrawing() instead! (Unless this is a call from debug func)');
 		}
 		let i, j, h;
 		let superGenreSets = [];
@@ -194,7 +194,7 @@ function music_graph(descriptor = music_graph_descriptors) {
 /*
 	Creates Music Map. This one skips absoluteWeight related links and substitutions! Used along VivaGraph on browsers
 */
-function music_graph_fordrawing(descriptor = music_graph_descriptors) {
+function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 		// Maps
 		const style_supergenre_supercluster = descriptor.style_supergenre_supercluster;
 		const style_supergenre_cluster = descriptor.style_supergenre_cluster;
@@ -244,7 +244,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 			mygraph = Viva.Graph.graph();
 		} catch (e) {
 			mygraph = createGraph();
-			console.log('Warning: music_graph_fordrawing() used within foobar. You should use music_graph() instead!');
+			console.log('Warning: musicGraphForDrawing() used within foobar. You should use musicGraph() instead!');
 		}
 		
 		//Create and fill graph with links (and nodes)
@@ -348,7 +348,7 @@ function music_graph_fordrawing(descriptor = music_graph_descriptors) {
 	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
 	Unoptimized code on multiple loops since this should be run only on demand for testing once on a while...
 */
-function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
+function graphDebug(graph = musicGraph(), bShowPopupOnPass = false) {
 	console.log('music_graph_descriptors_xxx: Basic debug enabled');
 	let bWarning = false;
 	
@@ -602,7 +602,7 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	// Test basic paths using the graph. 
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
 	let bGraphDeclared = true;
-	try {all_music_graph;}
+	try {allMusicGraph;}
 	catch(e) {
 		if (e.name === 'ReferenceError') {
 			bGraphDeclared = false;
@@ -617,7 +617,7 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 	}
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
-		const mygraph = bGraphDeclared ? all_music_graph : music_graph(); // Foobar graph, or HTML graph or a new one
+		const mygraph = bGraphDeclared ? allMusicGraph : musicGraph(); // Foobar graph, or HTML graph or a new one
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
@@ -632,15 +632,15 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 			if (i + 1 === superGenreNumbers) {nextIndex = 0;}
 			key_one = music_graph_descriptors.style_supergenre[i][0];
 			key_two = music_graph_descriptors.style_supergenre[nextIndex][0];
-			distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+			distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
 			if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-				let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 				console.log('Path: ' + idpath);
 				bWarning = true;
 			} else if (distanceGraph[0] < music_graph_descriptors.intra_supergenre) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-				let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 				console.log('Path: ' + idpath);
 				bWarning = true;
 			}
@@ -651,15 +651,15 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 			if(music_graph_descriptors.style_supergenre_cluster[i][0] !== 'SKIP' && music_graph_descriptors.style_supergenre_cluster[nextIndex][0] !== 'SKIP' ) {
 				key_one = music_graph_descriptors.style_supergenre_cluster[i][0];
 				key_two = music_graph_descriptors.style_supergenre_cluster[nextIndex][0];
-				distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+				distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
 				if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
 					console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-					let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+					let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 					console.log('Path: ' + idpath);
 					bWarning = true;
 				} else if (distanceGraph[0] < music_graph_descriptors.intra_supergenre) {
 					console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-					let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+					let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 					console.log('Path: ' + idpath);
 					bWarning = true;
 				}
@@ -670,15 +670,15 @@ function graphDebug(graph = music_graph(), bShowPopupOnPass = false) {
 			if (i + 1 === style_supergenre_superclusterNumbers) {nextIndex = 0;}
 			key_one = music_graph_descriptors.style_supergenre_supercluster[i][0];
 			key_two = music_graph_descriptors.style_supergenre_supercluster[nextIndex][0];
-			distanceGraph = calc_map_distance(mygraph, key_one, key_two, true);
+			distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
 			if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-				let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 				console.log('Path: ' + idpath);
 				bWarning = true;
 			} else if (distanceGraph[0] < music_graph_descriptors.inter_supergenre) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'inter_supergenre\' (' + music_graph_descriptors.inter_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-				let idpath = get_nodes_from_path(mygraph, pathFinder.find(key_one, key_two));
+				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
 				console.log('Path: ' + idpath);
 				bWarning = true;
 			}
@@ -717,7 +717,7 @@ function histogram(data, size) {
 	return histogram;
 }
 
-async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null, graph = music_graph(descriptor)} = {}) {
+async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null, graph = musicGraph(descriptor)} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
