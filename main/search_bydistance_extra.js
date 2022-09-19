@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/08/22
+//19/09/22
 
 include('search_bydistance.js');
 
@@ -24,7 +24,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	let forcedQuery = '';
 	if (method === 'reference') {
 		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
-		const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph);
+		const allowedGenres = getNearestGenreStyles(genreStyle, 50, allMusicGraph);
 		// const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
 		const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 		forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
@@ -48,7 +48,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
 			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
-			const allowedGenres = getNearestGenreStyles(genreStyle, 50, all_music_graph);
+			const allowedGenres = getNearestGenreStyles(genreStyle, 50, allMusicGraph);
 			const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 			forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 			if (method === 'weighted') { // Weight will be <= 1 according to how representative of the artist's works is
@@ -112,7 +112,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	return {artist: artist.join(', '), val: total};
 }
 
-function getNearestNodes(fromNode, maxDistance, graph = music_graph()) {
+function getNearestNodes(fromNode, maxDistance, graph = musicGraph()) {
 	const nodeList = [];
 	const nodeListSet = new Set([fromNode]);
 	let	remaining = graph.getLinks(fromNode);
@@ -137,7 +137,7 @@ function getNearestNodes(fromNode, maxDistance, graph = music_graph()) {
 	return nodeList;
 }
 
-function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = music_graph()) {
+function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph()) {
 	let genreStyles = [...fromGenreStyles]; // Include theirselves
 	fromGenreStyles.forEach((node) => {getNearestNodes(node, maxDistance, graph).forEach((obj) => {genreStyles.push(obj.toId);});});
 	genreStyles = music_graph_descriptors.replaceWithSubstitutionsReverse([...new Set(genreStyles)]);
@@ -188,4 +188,33 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	console.log(jsonQuery);
 	if (panelProperties.bProfile[1]) {test.Print('Task #6: Compare and get list of allowed artists', false);}
 	return jsonQuery ;
+}
+
+function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = 'GENRE', styleTag = 'STYLE', bAscii = true, bPopup = true} = {}) {
+	// Skipped values at pre-filter
+	const tagValuesExcluded = new Set(genreStyleFilter); // Filter holes and remove duplicates
+	// Get all tags and their frequency
+	const tagsToCheck = [...new Set(genreTag.concat(',', styleTag).split(',').filter(Boolean))]; // Merge and filter
+	if (!tagsToCheck.length && bPopup) {
+		fb.ShowPopupMessage('There are no tags to check set.', 'Search by distance');
+		return null;
+	}
+	// Get tags
+	let tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
+	if (bAscii) {	tags =  new Set([...tags].map((tag) => {return _asciify(tag);}));}
+	// Get node list (+ weak substitutions + substitutions + style cluster)
+	const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
+	// Compare (- user exclusions - graph exclusions)
+	const missing = [...tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions)].sort();
+	// Report
+	const userFile = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
+	const userFileFound = _isFile(userFile) ? '' : ' (not found)';
+	const userFileEmpty = !userFileFound.length && Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
+	const report = 'Graph descriptors:\n' +
+					'(scripts folder) .\\helpers\\music_graph_descriptors_xxx.js\n' +
+					'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + userFileFound + userFileEmpty + '\n\n' +
+					'List of tags not present on the graph descriptors:\n' +
+					missing.joinEvery(', ', 6);
+	if (bPopup) {fb.ShowPopupMessage(report, 'Search by distance');}
+	return missing;
 }
