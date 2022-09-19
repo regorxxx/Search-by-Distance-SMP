@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/09/22
+//19/09/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -360,17 +360,6 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Reset
-		menu.newEntry({entryText: 'Reset to default...', func: () => {
-			for (let key in SearchByDistance_properties) {
-				if (properties.hasOwnProperty(key)) {properties[key][1] = SearchByDistance_properties[key][1];}
-			}
-			properties.theme[1] = '';
-			properties.recipe[1] = '';
-			properties.data[1] = JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'});
-			overwriteProperties(properties); // Force overwriting
-		}});
-	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure properties: tags
 		const menuName = menu.newMenu('Remap tags');
@@ -408,6 +397,38 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
+		}
+		{
+			const options = ['bAscii'];
+			options.forEach((key, i) => {
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					properties[key][1] = !properties[key][1];
+					overwriteProperties(properties); // Updates panel
+					if (key === 'bAscii') {
+						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+						if (answer === popup.yes) {
+							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+						}
+					}
+				}, flags: recipe.hasOwnProperty(key) || (i !== 0 && !properties[options[0]][1]) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+			});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{	// Reset
+			menu.newEntry({menuName, entryText: 'Reset to default...', func: () => {
+				options.forEach((tagName) => {
+					if (properties.hasOwnProperty(tagName) && SearchByDistance_properties.hasOwnProperty(tagName)) {
+						properties[tagName][1] = SearchByDistance_properties[tagName][1];
+					}
+				});
+				overwriteProperties(properties); // Force overwriting
+				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+				if (answer === popup.yes) {
+					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+				}
+			}});
 		}
 	}
 	menu.newEntry({entryText: 'sep'});
@@ -511,42 +532,25 @@ function createConfigMenu(parent) {
 		const submenu = menu.newMenu('Debug and testing');
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
-				// Skipped values at pre-filter
-				const tagValuesExcluded = new Set(properties['genreStyleFilter'][1].split(',').filter(Boolean)); // Filter holes and remove duplicates
-				// Get all tags and their frequency
-				const tagsToCheck = [...new Set(properties['genreTag'][1].concat(',', properties['styleTag'][1]).split(',').filter(Boolean))]; // Merge and filter
-				if (!tagsToCheck.length) {
-					fb.ShowPopupMessage('There are no tags to check set at properties panel:\n' + properties['genreTag'][0], 'Search by distance');
-					return;
-				}
-				// Get tags
-				const tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
-				// Get node list (+ weak substitutions + substitutions + style cluster)
-				const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
-				// Compare (- user exclusions - graph exclusions)
-				const missing = tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions);
-				// Report
-				const userFile = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
-				const userFileFound = _isFile(userFile) ? '' : ' (not found)';
-				const userFileEmpty = !userFileFound.length && Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
-				const report = 'Graph descriptors:\n' +
-								'(scripts folder) .\\helpers\\music_graph_descriptors_xxx.js\n' +
-								'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + userFileFound + userFileEmpty + '\n\n' +
-								'List of tags not present on the graph descriptors:\n' +
-								[...missing].sort().joinEvery(', ', 6);
-				fb.ShowPopupMessage(report, 'Search by distance');
+				findStyleGenresMissingGraph({
+					genreStyleFilter: properties.genreStyleFilter[1].split(',').filter(Boolean),
+					genretag: properties.genreTag[1],
+					styleTag: properties.styleTag[1],
+					bAscii: properties.bAscii[1],
+					bPopup: true
+				});
 			}});
 			// Graph debug
 			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
 				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
-				graphDebug(all_music_graph, true); // Show popup on pass
+				graphDebug(allMusicGraph, true); // Show popup on pass
 				if (panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 			// Graph test
 			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
 				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
-				testGraph(all_music_graph);
-				testGraphV2(all_music_graph);
+				testGraph(allMusicGraph);
+				testGraphV2(allMusicGraph);
 				if (panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 			// Graph cache reset Async
@@ -561,7 +565,10 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
-				graphStatistics({properties, graph: all_music_graph}).then((resolve) => {console.log(resolve.text);});
+				graphStatistics({properties, graph: allMusicGraph}).then((resolve) => {
+					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
+					console.log(resolve.text);
+				});
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
@@ -652,6 +659,17 @@ function createConfigMenu(parent) {
 			});
 		} 
 		if (!iCount) {menu.newEntry({menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED});}
+	}
+	{	// Reset
+		menu.newEntry({entryText: 'Reset to default...', func: () => {
+			for (let key in SearchByDistance_properties) {
+				if (properties.hasOwnProperty(key)) {properties[key][1] = SearchByDistance_properties[key][1];}
+			}
+			properties.theme[1] = '';
+			properties.recipe[1] = '';
+			properties.data[1] = JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'});
+			overwriteProperties(properties); // Force overwriting
+		}});
 	}
 	return menu;
 }
