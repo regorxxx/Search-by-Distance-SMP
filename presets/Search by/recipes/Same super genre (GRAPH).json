@@ -14,5 +14,5 @@
 	"bpmRange": 25,
 	"scoreFilter": 60,
 	"method": "GRAPH",
-	"sbd_max_graph_distance": "music_graph_descriptors.intra_supergenre * 2/3"
+	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4"
 }
