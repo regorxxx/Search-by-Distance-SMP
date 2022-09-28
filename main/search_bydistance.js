@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/09/22
+//28/09/22
 
 /*	
 	Search by Distance
@@ -44,6 +44,7 @@ include('..\\helpers\\helpers_xxx_crc.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_tags.js');
+if (isCompatible('2.0', 'fb')) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
 include('..\\helpers\\helpers_xxx_math.js');
 include('..\\helpers\\camelot_wheel_xxx.js');
 include('..\\helpers\\dyngenre_map_xxx.js');
@@ -108,7 +109,8 @@ const SearchByDistance_properties = {
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
 	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4],
 	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
-	bAscii					:	['Asciify string values internally?', true]
+	bAscii					:	['Asciify string values internally?', true],
+	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')]
 };
 
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -337,7 +339,7 @@ if (panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist','bAscii']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii']);
 const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -365,7 +367,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
-function do_searchby_distance({
+async function do_searchby_distance({
 								// --->Default args (aka properties from the panel and input)
 								properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 								panelProperties			= (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
@@ -374,6 +376,7 @@ function do_searchby_distance({
 								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
 								// --->Args modifiers
 								bAscii					= properties.hasOwnProperty('bAscii') ? properties['bAscii'][1] : true, // Sanitize all tag values with ACII equivalent chars
+								bTagsCache				= properties.hasOwnProperty('bTagsCache') ? properties['bTagsCache'][1] : false, // Read from cache
 								// --->Weights
 								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
 								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
@@ -948,16 +951,32 @@ function do_searchby_distance({
 		}
 		if (!query[querylength].length) {query[querylength] = 'ALL';}
 		
+		// Preload lib items
+		const libraryItems = fb.GetLibraryItems();
+
+		// Prefill tag Cache
+		const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE']]
+			.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
+			.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
+			.filter((tagName) => {return !tagsCache.cache.has(tagName);});
+		if (bTagsCache && missingOnCache.length) {
+			console.log('Caching missing tags...');
+			await tagsCache.cacheLibraryTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+		}
+		
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		let handleList;
-		try {handleList = fb.GetQueryItems(fb.GetLibraryItems(), query[querylength]);} // Sanity check
+		try {handleList = fb.GetQueryItems(libraryItems, query[querylength]);} // Sanity check
 		catch (e) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
-		handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %ARTIST% - %DATE%', checkKeys: ['TITLE', 'ARTIST', 'DATE']});
-		
+		if (bTagsCache) {
+			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', checkKeys: ['TITLE', 'ARTIST', '$year(%DATE%)'], bTagsCache});
+		} else {
+			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', checkKeys: ['TITLE', 'ARTIST', '$year(%DATE%)']});
+		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
 		if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
@@ -970,18 +989,36 @@ function do_searchby_distance({
 			handleList.OrderByFormat(tfo, 1);
 		}
 		if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
-		
 		// Get the tag values for all the handle list. Skip those with weight 0.
 		// Now flat is not needed, we have 1 array of tags per track [i][j]
 		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length, but it's done per track.
 		// Using only boolean filter it's 3x faster than filtering by set, here bTagFilter becomes useful since we may skip +40K evaluations 
-		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handleList, genreTag, true) : null;
-		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? getTagsValuesV3(handleList, styleTag, true) : null;
-		const moodHandle = (moodWeight !== 0) ? getTagsValuesV3(handleList, moodTag, true) : null;
-		const composerHandle = (composerWeight !== 0) ? getTagsValuesV3(handleList, composerTag, true) : null;
-		const customStrHandle = (customStrWeight !== 0) ? getTagsValuesV3(handleList, customStrTag, true) : null;
-		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = getTagsValuesV4(handleList, restTagNames);
-		const titleHandle = getTagsValuesV3(handleList, ['TITLE'], true);
+		let tagsArr = [];
+		let z = 0;
+		if (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(genreTag.join(', '));}
+		if (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(styleTag.join(', '));}
+		if (moodWeight !== 0) {tagsArr.push(moodTag.join(', '));}
+		if (composerWeight !== 0) {tagsArr.push(composerTag.join(', '));}
+		if (customStrWeight !== 0) {tagsArr.push(customStrTag.join(', '));}
+		tagsArr.push('TITLE');
+		tagsArr.push(...restTagNames);
+		const tagsValByKey = [];
+		let tagsVal = [];
+		if (bTagsCache) {
+			tagsArr = tagsArr.map((tagName) => {return (tagName.indexOf('$') === -1 && tagName.toLowerCase() !== 'skip' ? '%' + tagName + '%' : tagName);});
+			tagsVal = tagsCache.getTags(tagsArr, handleList.Convert());
+			tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal[tag];});
+		} else {
+			tagsVal = getTagsValuesV3(handleList, tagsArr);
+			tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal.map((tag) => {return tag[i];});});
+		}
+		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? tagsValByKey[z++] : null;
+		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? tagsValByKey[z++] : null;
+		const moodHandle = (moodWeight !== 0) ? tagsValByKey[z++] : null;
+		const composerHandle = (composerWeight !== 0) ? tagsValByKey[z++] : null;
+		const customStrHandle = (customStrWeight !== 0) ? tagsValByKey[z++] : null;
+		const titleHandle = tagsValByKey[z++];
+		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = tagsValByKey.slice(z);
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
 		let i = 0;
 		while (i < tracktotal) {

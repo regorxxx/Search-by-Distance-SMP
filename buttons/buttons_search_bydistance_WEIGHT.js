@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/22
+//27/09/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -34,6 +34,7 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 	buttonsBar.list.push(properties);
 	// Update cache with user set tags
 	doOnce('Update SBD cache', debounce(updateCache, 3000))({properties});
+	doOnce('Load tags cache', debounce(() => {if (properties.bTagsCache[1]) {tagsCache.load();}}, 5000))();
 }
 
 /*	
