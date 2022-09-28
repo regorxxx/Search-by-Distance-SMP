@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/10/21
+//23/09/22
 
 /* 
 	crc32
@@ -19,7 +19,7 @@ function makeCRCTable() {
 }
 
 function crc32(str) {
-    if (!crcTable.lengt) {makeCRCTable();}
+    if (!crcTable.length) {makeCRCTable();}
     let crc = 0 ^ (-1);
     for (let i = 0; i < str.length; i++ ) {
         crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xFF];
