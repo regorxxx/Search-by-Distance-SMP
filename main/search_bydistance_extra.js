@@ -10,7 +10,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
 	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
-	const selArtistTracks = removeDuplicatesV2({handleList: fb.GetQueryItems(fb.GetLibraryItems(), libQuery), checkKeys: ['TITLE', 'ARTIST', 'DATE']});
+	const selArtistTracks = removeDuplicatesV2({handleList: fb.GetQueryItems(fb.GetLibraryItems(), libQuery)});
 	// Use only X random tracks instead of all of them
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
