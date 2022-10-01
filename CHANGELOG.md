@@ -42,6 +42,8 @@
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
+- Removed Duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
+- Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
@@ -52,6 +54,7 @@
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
 - Similar artists: in some cases similar artists were duplicated.
+- Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Readmes: separators not being properly identified on readme files checking.
 
 ## [3.1.0] - 2022-08-22

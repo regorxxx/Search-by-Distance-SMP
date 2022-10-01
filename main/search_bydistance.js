@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/09/22
+//30/09/22
 
 /*	
 	Search by Distance
@@ -90,16 +90,16 @@ const SearchByDistance_properties = {
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music'],
-	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75],
-	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70],
-	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre'],
-	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT'],
+	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music', {func: isStringWeak}, 'Children\'s Music'],
+	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75, {range: [[0,100]], func: isInt}, 75],
+	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70, {range: [[0,100]], func: isInt}, 70],
+	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', {func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, 'music_graph_descriptors.intra_supergenre'],
+	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT', {func: checkMethod}, 'WEIGHT'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	poolFilteringTag		:	['Filter pool by tag', 'artist'],
-	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1],
+	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
 	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
-	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100],
+	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100, {range: [[1,100]], func: isInt}, 100],
 	playlistLength			:	['Max Playlist Mix length', 50],
 	bSortRandom				:	['Sort final playlist randomly', true],
 	bProgressiveListOrder	:	['Sort final playlist by score', false],
@@ -107,12 +107,12 @@ const SearchByDistance_properties = {
 	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
 	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
-	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4],
+	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4, {range: [[2,99]], func: isInt}, 4],
 	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
 	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')]
 };
-
+// Checks
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
 	if (key.toLowerCase().endsWith('weight')) {
 		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
@@ -128,13 +128,6 @@ Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
 		SearchByDistance_properties[key].push({func: isBoolean}, SearchByDistance_properties[key][1]);
 	}
 });
-SearchByDistance_properties['genreStyleFilter'].push({func: isStringWeak}, SearchByDistance_properties['genreStyleFilter'][1]);
-SearchByDistance_properties['method'].push({func: isStringWeak}, SearchByDistance_properties['method'][1]);
-SearchByDistance_properties['sbd_max_graph_distance'].push({func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, SearchByDistance_properties['sbd_max_graph_distance'][1]);
-SearchByDistance_properties['playlistLength'].push({greater: 0, func: isInt}, SearchByDistance_properties['playlistLength'][1]);
-SearchByDistance_properties['scoreFilter'].push({range: [[0,100]], func: isInt}, SearchByDistance_properties['scoreFilter'][1]);
-SearchByDistance_properties['probPick'].push({range: [[1,100]], func: isInt}, SearchByDistance_properties['probPick'][1]);
-SearchByDistance_properties['progressiveListCreationN'].push({range: [[2,99]], func: isInt}, SearchByDistance_properties['progressiveListCreationN'][1]);
 
 const SearchByDistance_panelProperties = {
 	bCacheOnStartup 		:	['Calculates link cache on script startup (instead of on demand)', true],
@@ -150,6 +143,12 @@ const SearchByDistance_panelProperties = {
 	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
 	bStartLogging 			:	['Startup logging', false]
 };
+// Checks
+Object.keys(SearchByDistance_panelProperties).forEach( (key) => { // Checks
+	if (regExBool.test(key)) {
+		SearchByDistance_panelProperties[key].push({func: isBoolean}, SearchByDistance_panelProperties[key][1]);
+	}
+});
 
 var sbd_prefix = 'sbd_';
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { // Merge all properties when not loaded along buttons
@@ -552,8 +551,11 @@ async function do_searchby_distance({
 				console.log('Using selection as reference: ' + fb.TitleFormat('[%track% - ]%title%').EvalWithMetadb(sel) + ' (' + sel.RawPath + ')');
 			}
 		}
-		if (bProfile) {var test = new FbProfiler('do_searchby_distance');}
+		// Method check
+		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
 		
+		// Start calcs
+		if (bProfile) {var test = new FbProfiler('do_searchby_distance');}
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
@@ -955,13 +957,15 @@ async function do_searchby_distance({
 		const libraryItems = fb.GetLibraryItems();
 
 		// Prefill tag Cache
-		const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE']]
-			.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
-			.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
-			.filter((tagName) => {return !tagsCache.cache.has(tagName);});
-		if (bTagsCache && missingOnCache.length) {
-			console.log('Caching missing tags...');
-			await tagsCache.cacheLibraryTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+		if (bTagsCache) {
+			const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE'], ['$ascii($lower($trim(%TITLE%)))']]
+				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
+				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
+				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
+			if (missingOnCache.length) {
+				console.log('Caching missing tags...');
+				await tagsCache.cacheLibraryTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+			}
 		}
 		
 		// Load query
@@ -973,9 +977,9 @@ async function do_searchby_distance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', checkKeys: ['TITLE', 'ARTIST', '$year(%DATE%)'], bTagsCache});
+			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', bTagsCache});
 		} else {
-			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', checkKeys: ['TITLE', 'ARTIST', '$year(%DATE%)']});
+			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)'});
 		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
@@ -1583,7 +1587,7 @@ async function do_searchby_distance({
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
 								[newSelectedHandlesArray, , , newArgs['sel']] = do_searchby_distance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
-								selectedHandlesArray = removeDuplicatesV2({handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), checkKeys: ['title', 'artist', 'date']}).Convert();
+								selectedHandlesArray = removeDuplicatesV2({handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray))}).Convert();
 								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
 							}
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
@@ -1657,6 +1661,10 @@ async function do_searchby_distance({
 /* 
 	Helpers
 */
+
+function checkMethod(method) {
+	return (new Set(['WEIGHT','GRAPH','DYNGENRE']).has(method));
+}
 
 // Save and load cache on json
 function saveCache(cacheMap, path) {
