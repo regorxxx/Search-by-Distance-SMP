@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/08/22
+//30/09/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -94,8 +94,15 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.description = description;
 	this.text = text;
 	this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), gFont);} : _gr.CalcTextWidth(this.text, gFont);
-	this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null; // if using the default font, then it has probably failed to load the right one, skip icon
-	this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), gFontIcon);} : _gr.CalcTextWidth(this.icon, gFontIcon);
+	this.iconImage = this.gFontIcon === null;
+	if (this.iconImage) {
+		this.icon = icon; 
+		this.iconWidth = null;
+	} else {
+		// if using the default font, then it has probably failed to load the right one, skip icon
+		this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null; 
+		this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), gFontIcon);} : _gr.CalcTextWidth(this.icon, gFontIcon);
+	}
 	this.func = func;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
@@ -226,23 +233,36 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		}
 		// The rest...
 		if (this.icon !== null) {
-			const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
-			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			let textOffsetX = 0;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
-			if (iconCalculated) { // Icon
-				if (this.active) { // Draw copy of icon in background blurred
-					let icon = gdi.CreateImage(this.gFontIcon.Size, this.gFontIcon.Size);
-					const g = icon.GetGraphics();
-					g.DrawString(iconCalculated, this.gFontIcon, tintColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
-					icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, 0);
-					icon.ReleaseGraphics(g);
-					// Image gets shifted in x and y axis... since it's not using text flags
-					gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 9/10 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			if (this.iconImage) { // Icon image
+				if (iconCalculated.length) {
+					let icon = gdi.Image(iconCalculated);
+					if (icon) {
+						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
+						gr.DrawImage(icon, xCalc + wCalc / 2 - icon.Width * 7/10 - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						textOffsetX = icon.Width * 7/10;
+					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
 				}
-				gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			} else { // Icon text
+				const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
+				if (iconCalculated) { // Icon
+					if (this.active) { // Draw copy of icon in background blurred
+						let icon = gdi.CreateImage(this.gFontIcon.Size, this.gFontIcon.Size);
+						const g = icon.GetGraphics();
+						g.DrawString(iconCalculated, this.gFontIcon, tintColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
+						icon.ReleaseGraphics(g);
+						// Image gets shifted in x and y axis... since it's not using text flags
+						gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 9/10 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+					}
+					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+				}
+				textOffsetX = iconWidthCalculated;
 			}
 			// Text
-			gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, xCalc + iconWidthCalculated, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, xCalc + textOffsetX, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 		} else {
 			gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, xCalc, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 		}
@@ -289,9 +309,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		this.currH *= newScale;
 		this.currW *= newScale;
 		this.gFont = _gdiFont(this.gFont.Name, 12 * scale);
-		this.gFontIcon = _gdiFont(this.gFontIcon.Name, 12 * scale);
 		this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.gFont);} : _gr.CalcTextWidth(this.text, this.gFont);
-		this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon);} : _gr.CalcTextWidth(this.icon, this.gFontIcon);
+		if (!this.iconImage) {
+			this.gFontIcon = _gdiFont(this.gFontIcon.Name, 12 * scale);
+			this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon);} : _gr.CalcTextWidth(this.icon, this.gFontIcon);
+		}
 	};
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
