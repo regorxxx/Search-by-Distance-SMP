@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/09/22
+//30/09/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -14,11 +14,11 @@ var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { //You can simply add new properties here
-	customName:		['Name for the custom UI button', 'Customize!'],
-	theme: 			['Path to theme file (instead of using selection)', ''],
-	recipe: 		['Path to recipe file (instead of using properties)', ''],
-	data: 			['Internal data', JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'})],
-	bTooltipInfo:	['Show shortcuts on tooltip', true]
+	customName:		['Name for the custom UI button', 'Customize!', {func: isString}, 'Customize!'],
+	theme: 			['Path to theme file (instead of using selection)', '', {func: isStringWeak}, ''],
+	recipe: 		['Path to recipe file (instead of using properties)', '', {func: isStringWeak}, ''],
+	data: 			['Internal data', JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'}), {func: isJSON}, JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'})],
+	bTooltipInfo:	['Show shortcuts on tooltip', true, {func: isBoolean}, true]
 };
 newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
