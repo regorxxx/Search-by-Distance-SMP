@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/09/22
+//05/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -136,19 +136,19 @@ function createConfigMenu(parent) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
 			} else {
 				options = [
-					{title: 'Female vocals',			query: 'STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female'}, 
-					{title: 'Instrumentals',			query: 'STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0'},
-					{title: 'Acoustic tracks',			query: 'STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75'},
-					{title: 'Rating > 2',				query: '%RATING% GREATER 2'},
-					{title: 'Rating > 3',				query: '%RATING% GREATER 3'},
-					{title: 'Length < 6 min',			query: '%length_seconds% LESS 360'},
-					{title: 'Only Stereo',				query: '%channels% LESS 3 AND NOT COMMENT HAS Quad'},
+					{title: 'Female vocals',			query: globQuery.female}, 
+					{title: 'Instrumentals',			query: globQuery.instrumental},
+					{title: 'Acoustic tracks',			query: globQuery.acoustic},
+					{title: 'Rating > 2',				query: globQuery.ratingGr2},
+					{title: 'Rating > 3',				query: globQuery.ratingGr3},
+					{title: 'Length < 6 min',			query: globQuery.shortLength},
+					{title: 'Only Stereo',				query: globQuery.stereo},
 					{title: 'sep'},		
-					{title: 'No Female vocals',			query: 'NOT (STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female)'}, 
-					{title: 'No Instrumentals', 		query: 'NOT (STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0)'},
-					{title: 'No Acoustic tracks',		query: 'NOT (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)' },
-					{title: 'Not rated',				query: '%RATING% MISSING'},
-					{title: 'Not Live (unless Hi-Fi)',	query: 'NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi)'}
+					{title: 'No Female vocals',			query: globQuery.noFemale}, 
+					{title: 'No Instrumentals', 		query: globQuery.noInstrumental},
+					{title: 'No Acoustic tracks',		query: globQuery.noAcoustic},
+					{title: 'Not rated',				query: globQuery.noRating},
+					{title: 'Not Live (unless Hi-Fi)',	query: globQuery.noLive}
 				];
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});

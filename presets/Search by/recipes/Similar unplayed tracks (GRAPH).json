@@ -23,5 +23,5 @@
 	"bProgressiveListOrder": false,
 	"bProgressiveListCreation": false,
 	"progressiveListCreationN": 1,
-	"forcedQuery": "(%play_count% EQUAL 0) AND NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad"
+	"forcedQuery": "(%PLAY_COUNT% EQUAL 0) AND NOT (%RATING% EQUAL 2 OR %RATING% EQUAL 1) AND NOT (STYLE IS live AND NOT STYLE IS hi-fi) AND %CHANNELS% LESS 3 AND NOT COMMENT HAS quad"
 }

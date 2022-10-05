@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/09/22
+//05/10/22
 
 /*	
 	Search by Distance
@@ -77,14 +77,13 @@ const SearchByDistance_properties = {
 	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', 'GENRE'],
 	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', 'STYLE'],
 	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'MOOD'],
-	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', '$year(%DATE%)'],
+	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', globTags.date],
 	keyTag					:	['To remap key tag to other tag change this', 'KEY'],
 	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', 'BPM'],
 	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'COMPOSER'],
 	customStrTag			:	['To use a custom string tag(s) change this (sep.by comma)', ''],
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
-	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', 
-								'NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad AND TITLE PRESENT AND ARTIST PRESENT AND DATE PRESENT'],
+	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
 	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
@@ -958,7 +957,7 @@ async function do_searchby_distance({
 
 		// Prefill tag Cache
 		if (bTagsCache) {
-			const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE'], ['$ascii($lower($trim(%TITLE%)))']]
+			const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE'], [globTags.title]]
 				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});

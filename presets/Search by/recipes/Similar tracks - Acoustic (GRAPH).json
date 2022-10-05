@@ -15,5 +15,5 @@
 	"scoreFilter": 65,
 	"method": "GRAPH",
 	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4 * 3/4",
-	"forcedQuery": "(NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad) AND (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)"
+	"forcedQuery": "(NOT (%RATING% EQUAL 2 OR %RATING% EQUAL 1) AND NOT (STYLE IS live AND NOT STYLE IS hi-fi) AND %CHANNELS% LESS 3 AND NOT COMMENT HAS quad) AND (STYLE IS acoustic OR GENRE IS acoustic OR ACOUSTICNESS GREATER 75)"
 }

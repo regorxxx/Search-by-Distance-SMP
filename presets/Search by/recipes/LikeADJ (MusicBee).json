@@ -25,7 +25,7 @@
 	"bProgressiveListOrder": false,
 	"bProgressiveListCreation": false,
 	"progressiveListCreationN": 1,
-	"forcedQuery": "NOT (%rating% EQUAL 2 OR %rating% EQUAL 1) AND NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi) AND %channels% LESS 3 AND NOT COMMENT HAS Quad",
+	"forcedQuery": "NOT (%RATING% EQUAL 2 OR %RATING% EQUAL 1) AND NOT (STYLE IS live AND NOT STYLE IS hi-fi) AND %CHANNELS% LESS 3 AND NOT COMMENT HAS quad",
 	"bConditionAntiInfluences" : true,
 	"bUseAntiInfluencesFilter" : false
 }
