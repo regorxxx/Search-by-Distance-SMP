@@ -31,6 +31,7 @@
 
 ## [4.0.0] - 2022-09-15
 ### Added
+- Presets: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 - Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
 - Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
