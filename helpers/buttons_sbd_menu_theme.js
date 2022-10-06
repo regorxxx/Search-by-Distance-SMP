@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//06/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -39,6 +39,8 @@ function createThemeMenu(parent) {
 		const styleTag = properties.styleTag[1].split(',').filter(Boolean);
 		const moodTag = properties.moodTag[1].split(',').filter(Boolean);
 		const dateTag = properties.dateTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
+		const keyTag = properties.keyTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
+		const bpmTag = properties.bpmTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
 		const composerTag = properties.composerTag[1].split(',').filter(Boolean);
 		const customStrTag = properties.customStrTag[1].split(',').filter(Boolean);
 		const customNumTag = properties.customNumTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
@@ -49,7 +51,7 @@ function createThemeMenu(parent) {
 		const mood = moodTag.length ? getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean) : [];
 		const composer = composerTag.length ? getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean) : [];
 		const customStr = customStrTag.length ? getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean) : [];
-		const restTagNames = ['key', dateTag.length ? dateTag[0] : 'skip', 'bpm', customNumTag.length ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
+		const restTagNames = [keyTag.length ? keyTag[0] : 'skip', dateTag.length ? dateTag[0] : 'skip', bpmTag.length ? bpmTag[0] : 'skip', customNumTag.length ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
 		const [keyArr, dateArr, bpmArr, customNumArr] = getTagsValuesV4(selHandleList, restTagNames).flat();
 		const key = keyArr;
 		const date = dateTag.length ? [Number(dateArr[0])] : [];

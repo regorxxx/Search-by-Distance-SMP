@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/10/22
+//06/10/22
 
 /*	
 	Search by Distance
@@ -74,12 +74,12 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', 'GENRE'],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', 'STYLE'],
-	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', 'MOOD'],
+	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', globTags.genre],
+	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', globTags.style],
+	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', globTags.mood],
 	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', globTags.date],
-	keyTag					:	['To remap key tag to other tag change this', 'KEY'],
-	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', 'BPM'],
+	keyTag					:	['To remap key tag to other tag change this', globTags.key],
+	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', globTags.bpm],
 	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'COMPOSER'],
 	customStrTag			:	['To use a custom string tag(s) change this (sep.by comma)', ''],
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
@@ -234,10 +234,10 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 		if (panelProperties.bCacheOnStartup[1] || bForce) {
 			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {
 				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
-			}).join('|') : '%GENRE%';
+			}).join('|') : '%' + globTags.genre + '%';
 			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {
 				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
-			}).join('|') : '%STYLE%';
+			}).join('|') : '%' + globTags.style + '%';
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
 			console.log('SearchByDistance: tags used for cache - ' + tags);
 			const tfo = fb.TitleFormat(tags);
@@ -547,7 +547,7 @@ async function do_searchby_distance({
 				return;
 			}
 			if (bBasicLogging) {
-				console.log('Using selection as reference: ' + fb.TitleFormat('[%track% - ]%title%').EvalWithMetadb(sel) + ' (' + sel.RawPath + ')');
+				console.log('Using selection as reference: ' + fb.TitleFormat('[%TRACK% - ]%TITLE%').EvalWithMetadb(sel) + ' (' + sel.RawPath + ')');
 			}
 		}
 		// Method check
@@ -912,10 +912,10 @@ async function do_searchby_distance({
 			query[querylength] = influencesQuery.length ? query_join(influencesQuery, 'AND') : ''; // TODO: Add weight query, now is dynamically set
 		}
 		if (bSameArtistFilter && !bUseTheme) {
-			let tags = fb.TitleFormat('[%ARTIST%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
+			let tags = fb.TitleFormat('[%' + globTags.artist + '%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
 			let queryArtist = '';
 			if (tags.length) {
-				queryArtist = tags.map((artist) => {return 'ARTIST IS ' + artist;});
+				queryArtist = tags.map((artist) => {return globTags.artist + ' IS ' + artist;});
 				queryArtist = 'NOT ' + _p(query_join(queryArtist, 'OR'));
 			}
 			if (queryArtist.length) {
@@ -930,7 +930,7 @@ async function do_searchby_distance({
 			let querySimil = '';
 			if (!similTags.length && _isFile(file)) {
 				const data = _jsonParseFile(file, utf8);
-				const artist = fb.TitleFormat('%ARTIST%').EvalWithMetadb(sel);
+				const artist = fb.TitleFormat('%' + globTags.artist + '%').EvalWithMetadb(sel);
 				if (data) {
 					const dataArtist = data.find((obj) => {return obj.artist === artist;});
 					if (dataArtist) {dataArtist.val.forEach((artistObj) => {similTags.push(artistObj.artist);});}
@@ -938,7 +938,7 @@ async function do_searchby_distance({
 				if (!bSameArtistFilter) {similTags.push(artist);} // Always add the original artist as a valid value
 			}
 			if (similTags.length) {
-				querySimil = similTags.map((artist) => {return 'ARTIST IS ' + artist;});
+				querySimil = similTags.map((artist) => {return globTags.artist + ' IS ' + artist;});
 				querySimil = query_join(querySimil, 'OR');
 			}
 			if (querySimil.length) {
@@ -976,9 +976,9 @@ async function do_searchby_distance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)', bTagsCache});
+			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache});
 		} else {
-			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %ARTIST% - $year(%DATE%)'});
+			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date});
 		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
