@@ -1,25 +1,30 @@
 ﻿'use strict';
-//07/10/21
-
-// The Camelot Wheel lists musical keys that are displayed as ‘hours’ on a clock. For example, 4 o’clock corresponds to 4B or 4A. The ‘B’ letter represents major
-// keys, and the ‘A’ letter represents the minor keys. Two songs probably sound good together because they are “in key” with one another. The wheel can be used 
-// to easily mix songs following these rules:
-// 	-Perfect Match (nX -> nX): staying in the same 'hour' and letter. 
-//	-Energy Changes:
-//		- Energy Boost (nX -> n+1X): adding one 'hour' (+1), equivalent to going up a fifth.
-//		- Energy Drop (nX -> n-1X): subtracting one 'hour' (-1), equivalent to going down a fifth.
-//		- Energy Switch (nA -> nB): staying in he same 'hour' but changing the letter, equivalent to going from relative minor to major (and viceversa).
-// 	-Mood Changes:
-//		- Mood Boost (nA -> n+3B): adding three 'hours' (+3), equivalent to going from minor to major.
-//		- Mood Drop (nX -> n-3B): subtracting three 'hours' (-3), equivalent to going from major to minor.
-//	-Key Changes:
-//		- Dominant Key (nA -> n+1B): subtracting one 'hour' (+1) and changing the letter.
-//		- Sub Dominant Key (nB -> n-1A): subtracting one 'hour' (+1) and changing the letter.
-//	-Experimental Energy Changes:
-//		- Energy Boost ++ (nX -> n+2X): adding two 'hours' (+2), equivalent to going up a step.
-//		- Dramatic Energy Raise (nX -> n+7X): adding seven 'hours' (+7), equivalent to going up a half step.
-const camelotWheel = { // Use methods at bottom to get a copy of the objects and not just a reference to the originals
-	wheelNotationFlat: new Map([
+//10/10/22
+/* 
+	The Camelot Wheel lists musical keys that are displayed as 'hours' on a clock. For example, 4 o'clock 
+	corresponds to 4B or 4A. The 'B' letter represents major keys, and the ‘A’ letter represents the minor
+	keys. Two songs probably sound good together because they are “in key” with one another. 
+	The wheel can be used to easily mix songs following these rules:
+		-Perfect Match (nX -> nX): staying in the same 'hour' and letter. 
+		-Energy Changes:
+			- Energy Boost (nX -> n+1X): adding one 'hour' (+1), equivalent to going up a fifth.
+			- Energy Drop (nX -> n-1X): subtracting one 'hour' (-1), equivalent to going down a fifth.
+			- Energy Switch (nA -> nB): staying in he same 'hour' but changing the letter, equivalent to 
+				going from relative minor to major (and viceversa).
+		-Mood Changes:
+			- Mood Boost (nA -> n+3B): adding three 'hours' (+3), equivalent to going from minor to major.
+			- Mood Drop (nX -> n-3B): subtracting three 'hours' (-3), equivalent to going from major to minor.
+		-Key Changes:
+			- Dominant Key (nA -> n+1B): subtracting one 'hour' (+1) and changing the letter.
+			- Sub Dominant Key (nB -> n-1A): subtracting one 'hour' (+1) and changing the letter.
+		-Experimental Energy Changes:
+			- Energy Boost ++ (nX -> n+2X): adding two 'hours' (+2), equivalent to going up a step.
+			- Dramatic Energy Raise (nX -> n+7X): adding seven 'hours' (+7), equivalent to going up a half step.
+*/
+const camelotWheel = function () {
+	// Private fields
+	// Use methods at bottom to get a copy of the objects and not just a reference to the originals
+	const wheelNotationFlat = new Map([
 		[1	, {A: 'Abm'		, B: 'B'	, m: 'Am'		, d: 'C'	}], // Camelot Key
 		[2	, {A: 'Ebm'		, B: 'Gb'	, m: 'Em'		, d: 'G'	}],
 		[3	, {A: 'Bbm'		, B: 'Db'	, m: 'Bm'		, d: 'D'	}],
@@ -32,8 +37,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		[10	, {A: 'Bm'		, B: 'D'	, m: 'Cm'		, d: 'Eb'	}],
 		[11	, {A: 'Gbm'		, B: 'A'	, m: 'Gm'		, d: 'Bb'	}],
 		[12	, {A: 'Dbm'		, B: 'E'	, m: 'Dm'		, d: 'F'	}]
-	]),
-	wheelNotationSharp: new Map([
+	]);
+	const wheelNotationSharp = new Map([
 		[1	, {A: 'G#m'		, B: 'B'	, m: 'Am'		, d: 'C'	}],
 		[2	, {A: 'D#m'		, B: 'F#'	, m: 'Em'		, d: 'G'	}],
 		[3	, {A: 'A#m'		, B: 'C#'	, m: 'Bm'		, d: 'D'	}],
@@ -46,8 +51,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		[10	, {A: 'Bm'		, B: 'D'	, m: 'Cm'		, d: 'D#'	}],
 		[11	, {A: 'F#m'		, B: 'A'	, m: 'Gm'		, d: 'A#'	}],
 		[12	, {A: 'C#m'		, B: 'E'	, m: 'Dm'		, d: 'F'	}]
-	]),
-	wheelNotationOpen: new Map([
+	]);
+	const wheelNotationOpen = new Map([
 		[1	, {A: '6m'		, B: '6d'	, m: '1m'		, d: '1d'	}],
 		[2	, {A: '7m'		, B: '7d'	, m: '2m'		, d: '2d'	}],
 		[3	, {A: '8m'		, B: '8d'	, m: '3m'		, d: '3d'	}],
@@ -60,8 +65,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		[10	, {A: '3m'		, B: '3d'	, m: '10m'		, d: '10d'	}],
 		[11	, {A: '4m'		, B: '4d'	, m: '11m'		, d: '11d'	}],
 		[12	, {A: '5m'		, B: '5d'	, m: '12m'		, d: '12d'	}]
-	]),
-	wheelNotationCamelot: new Map([
+	]);
+	const wheelNotationCamelot = new Map([
 		[1	, {A: '1A'		, B: '1B'	, m: '8A'		, d: '8B'	}],
 		[2	, {A: '2A'		, B: '2B'	, m: '9A'		, d: '9B'	}],
 		[3	, {A: '3A'		, B: '3B'	, m: '10A'		, d: '10B'	}],
@@ -74,8 +79,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		[10	, {A: '10A'		, B: '10B'	, m: '5A'		, d: '5B'	}],
 		[11	, {A: '11A'		, B: '11B'	, m: '6A'		, d: '6B'	}],
 		[12	, {A: '12A'		, B: '12B'	, m: '7A'		, d: '7B'	}]
-	]),
-	keyNotationObject:  new Map([ //Merged sharp and flat key notations when there are equivalences
+	]);
+	const keyNotationObject = new Map([ //Merged sharp and flat key notations when there are equivalences
 		['G#m'	, {hour: 1	, letter: 'A'}], // Minor
 		['Abm'	, {hour: 1	, letter: 'A'}],
 		['D#m'	, {hour: 2	, letter: 'A'}],
@@ -158,8 +163,8 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		['3d'	, {hour: 10	, letter: 'B'}],
 		['4d'	, {hour: 11	, letter: 'B'}],
 		['5d'	, {hour: 12	, letter: 'B'}]
-	]),
-	keyNotation:  new Map([ //Merged sharp and flat key notations when there are equivalences
+	]);
+	const keyNotation = new Map([ //Merged sharp and flat key notations when there are equivalences
 		['G#m'	, '1A' 	], // Minor
 		['Abm'	, '1A' 	],
 		['D#m'	, '2A' 	],
@@ -242,94 +247,244 @@ const camelotWheel = { // Use methods at bottom to get a copy of the objects and
 		['3d'	, '10B'	],
 		['4d'	, '11B'	],
 		['5d'	, '12B'	]
-	]),
-	// Methods to retrieve Key Objects (x) from Key Strings (y)
-	// x: Camelot Key or Open Key -> {hour, letter}
-	// y: Standard Notation Key (flat and sharp), Camelot Key or Open Key -> string
-	hasKey(xy) {return (typeof xy === 'object' ? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') ? this.keyNotation.has(xy.hour + xy.letter) : false): this.keyNotation.has(xy));},
-	getKeyNotationObjectCamelot(y) {return (this.hasKey(y) ? {...this.keyNotationObject.get(y)} : null);}, // Retrieves camelot object
-	getKeyNotationObjectOpen(y) {const x = this.getKeyNotationObjectCamelot(y); if (x) {this.translateObjectCamelotToOpen(x);} return x;}, // Retrieves open key object
-	translateObjectCamelotToOpen(x) {if (x.hour >= 8) {x.hour -= 7;} else {x.hour += 5;} x.letter = (x.letter === 'A' ? 'm' : 'd'); return x;}, // {Camelot} -> {Open Key}
-	translateObjectOpenToCamelot(x) {if (x.hour <= 5) {x.hour += 7;} else {x.hour -= 5;} x.letter = (x.letter === 'm' ? 'A' : 'B'); return x;}, // {Open Key} -> {Camelot}
-	// Methods to retrieve Key Strings (y) from Key Objects (x)
-	getKeyNotationFlat(x) {return (this.hasKey(x) ? this.wheelNotationFlat.get(x.hour)[x.letter] : null);},
-	getKeyNotationSharp(x) {return (this.hasKey(x) ? this.wheelNotationSharp.get(x.hour)[x.letter] : null);},
-	getKeyNotationOpen(x) {return (this.hasKey(x) ? this.wheelNotationOpen.get(x.hour)[x.letter] : null);},
-	getKeyNotationCamelot(x) {return (this.hasKey(x) ? this.wheelNotationCamelot.get(x.hour)[x.letter] : null);},
-	// Methods to work with Key Objects (x)
-	// Beware to pass a copy of the object if you want a new key object, otherwise the original will be modified!
-	// Works for camelot or open key objects, no need to translate
-	perfectMatch(x) {return x;},
-	energyBoost(x) {x.hour = cyclicOffset(x.hour, 1, [1,12]); return x;},
-	energyDrop(x) {x.hour = cyclicOffset(x.hour, -1, [1,12]); return x;},
-	energySwitch(x) {x.letter = (x.letter === 'A' || x.letter === 'B' ? (x.letter === 'A' ? 'B' : 'A') : (x.letter === 'm' ? 'd' : 'm')); return x;},
-	moodBoost(x) {x.hour = cyclicOffset(x.hour, 3, [1,12]); return x;},
-	moodDrop(x) {x.hour = cyclicOffset(x.hour, -3, [1,12]); return x;},
-	domKey(x) {this.energySwitch(x); this.energyBoost(x); return x;},
-	subDomKey(x) {this.energySwitch(x); this.energyDrop(x); return x;},
-	energyRaise(x) {x.hour = cyclicOffset(x.hour, 7, [1,12]); return x;},
-	// Methods to create and apply patterns
-	createHarmonicMixingPattern(length) {return createHarmonicMixingPattern(length);},
-	applyPattern(x, pattern) {return applyPattern(x, pattern);},
-};
-
-/*
-	Helpers
-*/
-
-function createHarmonicMixingPattern(playlistLength) {
-	// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-	// TODO: randomize proportions a bit and use perfectMatch as default for the rest
-	const movements = {
-		perfectMatch: 	35	, // perfectMatch (=)
-		energyBoost	: 	10	, // energyBoost (+1)
-		energyDrop	:	10	, // energyDrop (-1)
-		energySwitch:	10	, // energySwitch (B/A)
-		moodBoost	:	5	, // moodBoost (+3)
-		moodDrop	:	5	, // moodDrop (-3)
-		energyRaise	:	5	, // energyRaise (+7)
-		domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
-		subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
-	}; // Sum must be 100%
-	let pattern = [];
-	Object.keys(movements).forEach((key) => {
-		pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
-	});
-	// Sort randomly
-	let last = pattern.length;
-	let n;
-	while (last > 0) {
-		n = Math.floor(Math.random() * last);
-		--last;
-		[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
-	}
-	
-	// Cut to desired length and output
-	if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
-	return pattern;
-}
-
-function applyPattern(key, pattern, bReturnObj = true) { // Works with both Camelot and Open Keys objects
-	let keyArr = [];
-	if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(key)) {
-		if (typeof key === 'string') {keyArr.push(camelotWheel.getKeyNotationObjectCamelot(key));}
-		else if (typeof key === 'object' && key.hasOwnProperty('hour') && key.hasOwnProperty('letter')) {keyArr.push(key);}
-		else {return keyArr;}
-		pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});
-		if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return camelotWheel.getKeyNotationSharp(keyObj);});} // Translate back
-	}
-	return keyArr;
-}
-
-if (typeof cyclicOffset === 'undefined') {
-	// Adds/subtracts 'offset' to 'reference' considering the values must follow cyclic logic within 'limits' range (both values included)
-	// Ex: [1,8], x = 5 -> x + 4 = 1 <=> cyclicOffset(5, 4, [1,8])
-	var cyclicOffset = function cyclicOffset(reference, offset, limits) {
-		if (offset && reference >= limits[0] && reference <= limits[1]) {
-			reference += offset;
-			if (reference < limits[0]) {reference += limits[1];}
-			if (reference > limits[1]) {reference -= limits[1];}
+	]);
+	// Public methods
+	/* 
+		Methods to retrieve Key Objects (x) from Key Strings (y)
+		x: Camelot Key or Open Key -> {hour, letter}
+		y: Standard Notation Key (flat and sharp), Camelot Key or Open Key -> string
+	 */
+	return {
+		getKeyNotationTable(bMap = true) {
+			return bMap ? new Map([...keyNotation.entries()]) : [...keyNotation.entries()];
+		},
+		getKeyNotationObjectTable(bMap = true) {
+			return bMap ? new Map([...keyNotationObject.entries()]) : [...keyNotationObject.entries()];
+		},
+		hasKey(xy) {
+			return (typeof xy === 'object' 
+				? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') 
+					? keyNotation.has(xy.hour + xy.letter) 
+					: false) 	
+				: keyNotation.has(xy)
+			);
+		},
+		getKeyNotationObjectCamelot(xy) { // Retrieves camelot object
+			if (typeof xy === 'object') {return this.getKeyNotationObjectCamelot(xy.hour + xy.letter);}
+			return (this.hasKey(xy) ? {...keyNotationObject.get(xy)} : null);
+		},
+		getKeyNotationObjectOpen(xy) { // Retrieves open key object
+			if (typeof xy === 'object') {return this.getKeyNotationObjectOpen(xy.hour + xy.letter);}
+			const x = this.getKeyNotationObjectCamelot(xy); 
+			if (x) {this.translateObjectCamelotToOpen(x);} 
+			return x;
+		},
+		translateObjectCamelotToOpen(x) { // {Camelot} -> {Open Key}
+			x.hour += (x.hour >= 8 ? -7 : 5);
+			x.letter = (x.letter === 'A' ? 'm' : 'd'); 
+			return x;
+		},
+		translateObjectOpenToCamelot(x) { // {Open Key} -> {Camelot}
+			x.hour += (x.hour <= 5 ? 7 : -5);
+			x.letter = (x.letter === 'm' ? 'A' : 'B'); 
+			return x;
+		},
+		translateToNotation(x, notation = ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ ) {
+			let keys = new Set();
+			notation.forEach((name) => {
+				switch (name) {
+					case 'flat':
+						keys.add(this.getKeyNotationFlat(x));
+						break;
+					case 'sharp':
+						keys.add(this.getKeyNotationSharp(x));
+						break;
+					case 'open':
+						keys.add(this.getKeyNotationOpen(x));
+						break;
+					case 'camelot':
+						keys.add(this.getKeyNotationCamelot(x));
+						break;
+					case 'openObj':
+						keys.add(this.getKeyNotationObjectOpen(x));
+						break;
+					case 'camelotObj':
+						keys.add(this.getKeyNotationObjectCamelot(x));
+						break;
+				}
+			});
+			return [...keys];
+		},
+		clone(x) {
+			return {...x};
+		},
+		/* 	
+			Methods to retrieve Key Strings (y) from Key Objects (x) 
+		*/
+		getKeyNotationFlat(x) {
+			return (this.hasKey(x) ? wheelNotationFlat.get(x.hour)[x.letter] : null);
+		},
+		getKeyNotationSharp(x) {
+			return (this.hasKey(x) ? wheelNotationSharp.get(x.hour)[x.letter] : null);
+		},
+		getKeyNotationOpen(x) {
+			return (this.hasKey(x) ? wheelNotationOpen.get(x.hour)[x.letter] : null);
+		},
+		getKeyNotationCamelot(x) {
+			return (this.hasKey(x) ? wheelNotationCamelot.get(x.hour)[x.letter] : null);
+		},
+		/* 	
+			Methods to work with Key Objects (x)
+			Beware to pass a copy of the object if you want a new key object, 
+			otherwise the original will be modified!
+			Works for Camelot or Open key objects, no need to translate
+		*/
+		perfectMatch(x) {return x;},
+		energyBoost(x) {
+			x.hour = this.cyclicOffset(x.hour, 1, [1,12]);
+			return x;
+		},
+		energyDrop(x) {
+			x.hour = this.cyclicOffset(x.hour, -1, [1,12]); 
+			return x;
+		},
+		energySwitch(x) {
+			x.letter = (x.letter === 'A' || x.letter === 'B' 
+				? (x.letter === 'A' 
+						? 'B' 
+						: 'A') 
+				: (x.letter === 'm' 
+					? 'd' 
+					: 'm')
+			); 
+			return x;
+		},
+		moodBoost(x) {
+			x.hour = this.cyclicOffset(x.hour, 3, [1,12]); 
+			return x;
+		},
+		moodDrop(x) {
+			x.hour = this.cyclicOffset(x.hour, -3, [1,12]); 
+			return x;
+		},
+		domKey(x) {
+			this.energySwitch(x); 
+			this.energyBoost(x); 
+			return x;
+		},
+		subDomKey(x) {
+			this.energySwitch(x); 
+			this.energyDrop(x); 
+			return x;
+		},
+		energyRaise(x) {
+			x.hour = this.cyclicOffset(x.hour, 7, [1,12]); 
+			return x;
+		},
+		/* 	
+			Methods to compare Key Objects (x1, x2)
+		*/
+		getHourDistance(xy1, xy2, bConvert = true) {
+			const diff = (bConvert 
+				? Math.abs(this.getKeyNotationObjectCamelot(xy1).hour - this.getKeyNotationObjectCamelot(xy2).hour)
+				: Math.abs(xy1.hour - xy2.hour)
+			);
+			return diff > 6 ? 12 - diff : diff;
+		},
+		getLetterDistance(xy1, xy2, bConvert = true) {
+			return (bConvert 
+				? this.getKeyNotationObjectCamelot(xy1).letter === this.getKeyNotationObjectCamelot(xy2).letter ? 0 : 1
+				: xy1.letter === xy2.letter ? 0 : 1
+			);
+		},
+		getDistance(xy1, xy2, bConvert = true) {
+			const x1C = bConvert ? this.getKeyNotationObjectCamelot(xy1): xy1;
+			const x2C = bConvert ? this.getKeyNotationObjectCamelot(xy2): xy2;
+			if (x1C && x2C) {
+				return (this.getLetterDistance(x1C, x2C, false) + this.getHourDistance(x1C, x2C, false));
+			}
+			return null;
+		},
+		/* 
+			Methods to create and apply patterns
+		*/
+		createRange(x, keyRange, notation = {name: ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ , bFlat: true}) {
+			// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
+			// Gets both, flat and sharp equivalences
+			let nextKeyObj, nextKeyFlat, nextKeySharp;
+			let keyComb = [];
+			[{...x}, this.energySwitch({...x})].forEach((keyObj, i) => {
+				[this.energyBoost, this.energyDrop].forEach((movement) => {
+					nextKeyObj = {...keyObj}; // Make a copy
+					// Mayor axis with same letter i = 0
+					// Minor axis after changing letter i = 1
+					for (let j = 0; j < keyRange - i; j++) {
+						nextKeyObj = movement(nextKeyObj);
+						const subKeyComb = this.translateToNotation(nextKeyObj, notation.name);
+						notation.bFlat ? keyComb.push(...subKeyComb) : keyComb.push(subKeyComb);
+					}
+				});
+				// Same letter and number or different letter
+				nextKeyObj = {...keyObj};		
+				const subKeyComb = this.translateToNotation(nextKeyObj, notation.name);
+				notation.bFlat ? keyComb.push(...subKeyComb) : keyComb.push(subKeyComb);
+			});
+			return (notation.bFlat ? [...keyComb] : keyComb); // To be used with a query, contains all keys within given range
+		},
+		createHarmonicMixingPattern(playlistLength) {
+			// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
+			// TODO: randomize proportions a bit and use perfectMatch as default for the rest
+			const movements = {
+				perfectMatch: 	35	, // perfectMatch (=)
+				energyBoost	: 	10	, // energyBoost (+1)
+				energyDrop	:	10	, // energyDrop (-1)
+				energySwitch:	10	, // energySwitch (B/A)
+				moodBoost	:	5	, // moodBoost (+3)
+				moodDrop	:	5	, // moodDrop (-3)
+				energyRaise	:	5	, // energyRaise (+7)
+				domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
+				subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
+			}; // Sum must be 100%
+			let pattern = [];
+			Object.keys(movements).forEach((key) => {
+				pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
+			});
+			// Sort randomly
+			let last = pattern.length;
+			let n;
+			while (last > 0) {
+				n = Math.floor(Math.random() * last);
+				--last;
+				[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
+			}
+			
+			// Cut to desired length and output
+			if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+			return pattern;
+		},
+		applyPattern(x, pattern, bReturnObj = true) {
+			let keyArr = [];
+			if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(x)) {
+				if (typeof x === 'string') {keyArr.push(camelotWheel.getKeyNotationObjectCamelot(x));}
+				else if (typeof x === 'object' && x.hasOwnProperty('hour') && x.hasOwnProperty('letter')) {keyArr.push(x);}
+				else {return keyArr;}
+				pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});
+				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return camelotWheel.getKeyNotationSharp(keyObj);});} // Translate back
+			}
+			return keyArr;
+		},
+		/*
+			Helpers
+		*/
+		// Adds/subtracts 'offset' to 'reference' considering the values must follow cyclic logic within 'limits' range (both values included)
+		// Ex: [1,8], x = 5 -> x + 4 = 1 <=> cyclicOffset(5, 4, [1,8])
+		cyclicOffset(reference, offset, limits) {
+			if (offset && reference >= limits[0] && reference <= limits[1]) {
+				reference += offset;
+				if (reference < limits[0]) {reference += limits[1];}
+				if (reference > limits[1]) {reference -= limits[1];}
+			}
+			return reference;
 		}
-		return reference;
-	};
-}
+	}
+}();
