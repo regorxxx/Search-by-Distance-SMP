@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/09/22
+//10/10/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -77,7 +77,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale)) {
+function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale), variables) {
 	this.state = state ? state : buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */
 	this.active = false;
@@ -107,6 +107,9 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
+	for (let key in variables) {
+		this[key] = variables[key];
+	}
 
 	this.containXY = function (x, y) {
 		return (this.currX <= x) && (x <= this.currX + this.currW) && (this.currY <= y) && (y <= this.currY + this.currH);
