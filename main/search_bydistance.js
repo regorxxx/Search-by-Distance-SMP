@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/10/22
+//10/10/22
 
 /*	
 	Search by Distance
@@ -726,61 +726,18 @@ async function do_searchby_distance({
 				query[queryl] = '';
 				const tagNameTF = ((keyTag[0].indexOf('$') === -1) ? keyTag[0] : _q(keyTag[0])); // May be a tag or a function...
 				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
-				// Gets both, flat and sharp equivalences
+				// Gets all equivalences
 				const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
 				if (camelotKey) {
-					let nextKeyObj, nextKeyFlat, nextKeySharp;
 					let keyComb = [];
-					// Mayor axis with same letter
-					nextKeyObj = {...camelotKey};
-					for (let i = 0; i < keyRange; i++) {
-						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
-						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
-					}
-					nextKeyObj = {...camelotKey};
-					for (let i = 0; i <  keyRange; i++) {
-						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
-						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
-					}
-					// Minor axis after changing letter
-					nextKeyObj = {...camelotKey};
-					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
-					for (let i = 0; i <  keyRange - 1; i++) {
-						nextKeyObj = camelotWheel.energyBoost(nextKeyObj);
-						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
-					}
-					nextKeyObj = {...camelotKey};
-					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
-					for (let i = 0; i < keyRange - 1; i++) {
-						nextKeyObj = camelotWheel.energyDrop(nextKeyObj);
-						nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-						nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-						if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-						else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
-						i++;
-					}
-					// Different letter and same number
-					nextKeyObj = {...camelotKey};
-					nextKeyObj = camelotWheel.energySwitch(nextKeyObj);
-					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-					if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-					else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
-					// Same letter and number
-					nextKeyObj = {...camelotKey};
-					nextKeyFlat = camelotWheel.wheelNotationSharp.get(nextKeyObj.hour)[nextKeyObj.letter];
-					nextKeySharp = camelotWheel.wheelNotationFlat.get(nextKeyObj.hour)[nextKeyObj.letter];
-					if (nextKeyFlat !== nextKeySharp) {keyComb.push(tagNameTF + ' IS ' + nextKeySharp + ' OR ' + tagNameTF + ' IS ' + nextKeyFlat);}
-					else {keyComb.push(tagNameTF + ' IS ' + nextKeySharp);}
+					const keysInRange = camelotWheel.createRange(camelotKey, keyRange, {name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false});
+					keysInRange.forEach((keyArr) => {
+						let subKeyComb = [];
+						keyArr.forEach((keyVal) => {
+							subKeyComb.push(tagNameTF + ' IS ' + keyVal);
+						});
+						keyComb.push(query_join(subKeyComb, 'OR'));
+					});
 					// And combinate queries
 					if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
 				} else {query[queryl] = tagNameTF + ' IS ' + key;} // For non-standard notations just use simple matching
@@ -1085,7 +1042,8 @@ async function do_searchby_distance({
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
 					if (camelotKey && camelotKeyNew) {
 						const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
-						const hourDifference = keyRange - Math.abs(camelotKey.hour - camelotKeyNew.hour);
+						const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
+						const hourDifference = keyRange - (diff > 6 ? 12 - diff : diff);
 						// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
 						if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
 							weightValue += (bLetterEqual) ? ((hourDifference + 1)/ (keyRange + 1)) * keyWeight : (hourDifference / keyRange) * keyWeight;  //becomes negative outside the allowed range!
@@ -1326,7 +1284,7 @@ async function do_searchby_distance({
 				if (key.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
-					const pattern = createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
+					const pattern = camelotWheel.createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
 					if (bSearchDebug) {console.log(pattern);}
 					let nextKeyObj;
 					let keyCache = new Map();
