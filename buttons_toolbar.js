@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/08/22
+//10/10/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -77,6 +77,7 @@ if (!barProperties.firstPopup[1]) {
 // Global toolbar color
 buttonsBar.config.toolbarColor = barProperties.toolbarColor[1];
 buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1 ? true : false; // Change this on buttons bars files to set the background color
+buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6;
 buttonsBar.config.textColor = barProperties.textColor[1];
 buttonsBar.config.activeColor = barProperties.activeColor[1];
 buttonsBar.config.animationColors = JSON.parse(barProperties.animationColors[1]);
