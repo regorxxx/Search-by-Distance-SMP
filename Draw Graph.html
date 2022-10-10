@@ -21,12 +21,22 @@
 		<script type="text/javascript" src="helpers/music_graph_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx.js"></script>
 		<!-- Try to load the user file at data otherwise the default one -->
-		<script type="text/javascript" src="../../../js_data/helpers/music_graph_descriptors_xxx_user.js" onerror="void(0)"></script>
 		<script>
-			if (typeof music_graph_descriptors_user === 'undefined') {
-				console.log('User descriptors file was not found at data folder, trying the helpers folder...');
-				document.write('<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_user.js"><\/script>');
-			}
+			'use strict';
+			(() => {
+				const fnOnLoad = function () {console.log('User descriptors file loaded at: ' + this.src);}
+				const path = '../../../js_data/', file = 'helpers/music_graph_descriptors_xxx_user.js';
+				const script = document.createElement('script');
+				script.src = path + file;
+				script.onload = fnOnLoad;
+				script.onerror = () => {
+					const scriptFallback = document.createElement('script');
+					scriptFallback.src = file;
+					scriptFallback.onload = fnOnLoad;
+					document.head.append(scriptFallback);
+				};
+				document.head.append(script);
+			})()
 		</script>
 		<script type="text/javascript" src="helpers/region_xxx.js"></script>
 		<script type="text/javascript" src="helpers/music_graph_descriptors_xxx_countries.js"></script>
@@ -347,7 +357,7 @@
 								}
 								if (link.data.weight !== undefined && link.data.weight !== null) {
 									<!-- linkDistance = link.data.weight; -->
-									const [distance, influence] = calc_map_distance(graph, link.fromId, link.toId, true, influenceMethod);
+									const [distance, influence] = calcGraphDistance(graph, link.fromId, link.toId, true, influenceMethod);
 									linkDistance = Math.round(distance - influence);
 								}
 								count++;
@@ -371,7 +381,7 @@
 					let borderColor = '#9b9b9b';
 					let text = '';
 					let textSize = '1.6vmin';
-					const [distance, influence] = calc_map_distance(graph, fromNode.id, toNode.id, true, influenceMethod);
+					const [distance, influence] = calcGraphDistance(graph, fromNode.id, toNode.id, true, influenceMethod);
 					const linkDistance = Math.round(distance - influence);
 					text += '<br>Selected node: <span style="background:' + bgcolor  + ';color:' + textColor + ';border: 1px dashed ' + borderColor + ';">&nbsp;' + toNode.id + '&nbsp;</span>';
 					text += '<br><span style="font-size: ' + textSize + ';">Distance: &nbsp;' +  linkDistance + '</span>'
