@@ -44,10 +44,13 @@
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - Removed Duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
+- Key: queries involving key tags now use all possibles equivalences in different notations (standard, Open keys, Camelot keys). For ex: '((KEY IS A) OR (KEY IS 4d) OR (KEY IS 11B))'.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
+- Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
+- Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
@@ -56,6 +59,7 @@
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
 - Similar artists: in some cases similar artists were duplicated.
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
+- Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
 - Readmes: separators not being properly identified on readme files checking.
 
 ## [3.1.0] - 2022-08-22
