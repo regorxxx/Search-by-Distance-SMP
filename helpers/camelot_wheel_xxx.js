@@ -259,7 +259,8 @@ const camelotWheel = function () {
 			return bMap ? new Map([...keyNotation.entries()]) : [...keyNotation.entries()];
 		},
 		getKeyNotationObjectTable(bMap = true) {
-			return bMap ? new Map([...keyNotationObject.entries()]) : [...keyNotationObject.entries()];
+			const entries = [...keyNotationObject.entries()].map((entry) => {return [entry[0], this.clone(entry[1])];});
+			return bMap ? new Map(entries) : entries;
 		},
 		hasKey(xy) {
 			return (typeof xy === 'object' 
