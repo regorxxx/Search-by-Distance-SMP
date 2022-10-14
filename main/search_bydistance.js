@@ -20,7 +20,7 @@
 	Any weight equal to zero or tag not set will be skipped for calcs. Therefore it's 
 	recommended to only use those really relevant, for speed improvements. There are 3
 	exceptions to this rule:
-		- dyngenreWeight > 0 & method = DYNGENRE:	
+		- dyngenreWeight > 0 & method = DYNGENRE:
 			genre and style tags will always be retrieved, even if their weight is set
 			to 0. They will not be considered for scoring... but are needed to calculate
 			dynGenre virtual tags.
