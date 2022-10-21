@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/09/22
+//20/10/22
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
@@ -28,7 +28,7 @@ function getDistanceFromPath(mygraph, path) {
 			throw new Error('Invalid path');
 		} else {
 			for (i = 0; i < path_length - 1;i++) {
-				let link = mygraph.getLink(path[i].id, path[i+1].id) || mygraph.getLink(path[i+1].id, path[i].id);
+				let link = mygraph.getNonOrientedLink(path[i].id, path[i+1].id);
 				if (distanceGraph !== Infinity) {distanceGraph += link.data.weight;}
 				else {distanceGraph = link.data.weight;}
 			}
@@ -94,7 +94,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 				case 'fullPath': { // Considering every consecutive link on the path {Hip-Hop <- Rap_supergenre}, {Rap_supergenre <- Rap_cluster}, ...
 					if (last !== 1) { // Otherwise we are repeating first->last multiple times, considered below
 						for (let i = 0; i < last; i++) { // size (<=n) (a)->{b}, (b)->{c}, (c)->{d}, ...
-							const link = mygraph.getLink(path[i].id, path[i + 1].id) || mygraph.getLink(path[i + 1].id, path[i].id);
+							const link = mygraph.getNonOrientedLink(path[i].id, path[i + 1].id);
 							if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
 						}
 					}
@@ -108,7 +108,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 						adjLinkNodeTo.add(path[last].id).add(path[last - 1].id);
 						adjLinkNodeFrom.forEach((nodeFrom) => { // size (<=4) (a)->{z}, (a)->{y}, (b)->{z}, (b)->{y}
 							adjLinkNodeTo.forEach((nodeTo) => {
-								const link = mygraph.getLink(nodeFrom, nodeTo) || mygraph.getLink(nodeTo, nodeFrom);
+								const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
 								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
 							});
 						});
@@ -119,8 +119,8 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 					if (last !== 1) { // Otherwise we are repeating first->last multiple times
 						let zeroLinkNodeFrom = new Set();
 						let zeroLinkNodeTo = new Set();
-						const linkFrom = mygraph.getLink(path[0].id, path[1].id) || mygraph.getLink(path[1].id, path[0].id);
-						const linkTo = mygraph.getLink(path[last].id, path[last - 1].id) || mygraph.getLink(path[last - 1].id, path[last].id);
+						const linkFrom = mygraph.getNonOrientedLink(path[0].id, path[1].id);
+						const linkTo = mygraph.getNonOrientedLink(path[last].id, path[last - 1].id);
 						if (linkFrom && linkFrom.data.weight === 0) {zeroLinkNodeFrom.add(linkFrom.fromId).add(linkFrom.toId);}
 						if (linkTo && linkTo.data.weight === 0) {zeroLinkNodeTo.add(linkTo.fromId).add(linkTo.toId);}
 						let bDone = false;
@@ -128,7 +128,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 							if (bDone) {return;}
 							zeroLinkNodeTo.forEach((nodeTo) => {
 								if (bDone) {return;}
-								const link = mygraph.getLink(nodeFrom, nodeTo) || mygraph.getLink(nodeTo, nodeFrom);
+								const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
 								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight; bDone = true;}
 							});
 						});
@@ -145,7 +145,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 				}
 			}
 			if (bDirect) { // Always applies when there is only 2 nodes no matter the method or using direct
-				const link = mygraph.getLink(path[0].id, path[last].id) || mygraph.getLink(path[last].id, path[0].id); // Size (<=1) (a)->{z}
+				const link = mygraph.getNonOrientedLink(path[0].id, path[last].id); // Size (<=1) (a)->{z}
 				if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
 			}
 		}
