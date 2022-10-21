@@ -420,7 +420,7 @@ const camelotWheel = function () {
 					// Mayor axis with same letter i = 0
 					// Minor axis after changing letter i = 1
 					for (let j = 0; j < keyRange - i; j++) {
-						nextKeyObj = movement(nextKeyObj);
+						nextKeyObj = movement.apply(this, [nextKeyObj]);
 						const subKeyComb = this.translateToNotation(nextKeyObj, notation.name);
 						notation.bFlat ? keyComb.push(...subKeyComb) : keyComb.push(subKeyComb);
 					}
@@ -465,12 +465,12 @@ const camelotWheel = function () {
 		},
 		applyPattern(x, pattern, bReturnObj = true) {
 			let keyArr = [];
-			if (Array.isArray(pattern) && pattern.length && camelotWheel.hasKey(x)) {
-				if (typeof x === 'string') {keyArr.push(camelotWheel.getKeyNotationObjectCamelot(x));}
+			if (Array.isArray(pattern) && pattern.length && this.hasKey(x)) {
+				if (typeof x === 'string') {keyArr.push(this.getKeyNotationObjectCamelot(x));}
 				else if (typeof x === 'object' && x.hasOwnProperty('hour') && x.hasOwnProperty('letter')) {keyArr.push(x);}
 				else {return keyArr;}
-				pattern.forEach( (movement, index) => {keyArr.push(camelotWheel[movement]({...keyArr[index - 1]}));});
-				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return camelotWheel.getKeyNotationSharp(keyObj);});} // Translate back
+				pattern.forEach( (movement, index) => {keyArr.push(this[movement]({...keyArr[index - 1]}));});
+				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return this.getKeyNotationSharp(keyObj);});} // Translate back
 			}
 			return keyArr;
 		},
