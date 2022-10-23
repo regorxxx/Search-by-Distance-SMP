@@ -73,7 +73,7 @@ tagsCache.cacheTags = function (tagNames, iSteps, iDelay, libItems = fb.GetLibra
 			}
 		}
 		Promise.all(promises).then(() => {
-			console.log('cacheLibraryTags: got ' + JSON.stringify(tagNames) + ' tags from ' + count + ' items.')
+			console.log('cacheTags: got ' + JSON.stringify(tagNames) + ' tags from ' + count + ' items.')
 			tagNames.forEach((tag) => {
 				this.updateCacheCRC(tag);
 			});

@@ -920,7 +920,7 @@ async function do_searchby_distance({
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
 			if (missingOnCache.length) {
 				console.log('Caching missing tags...');
-				await tagsCache.cacheLibraryTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+				await tagsCache.cacheTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
 			}
 		}
 		
