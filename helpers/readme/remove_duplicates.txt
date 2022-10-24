@@ -30,3 +30,15 @@ Usage on buttons:
 	related to those tags... that's why this tool may also be used to
 	filter playlists instead of removing real duplicates too.
 	
+Note on 'Advanced RegExp title matching':
+	Matching duplicates by %TITLE% may be somewhat tricky as soon as
+	a library contains multiple versions of the same track. For ex:
+	live, acoustic, remix versions, etc. To account for these, RegExp
+	may be used, to allow partial matching to tracks with things like
+	'(acoustic)' or '(2022 remix)' on the title.
+	
+	Obviously these are no real 'duplicates', but the philosophy behind
+	the 'remove duplicates' concept is not having 2 times the same song
+	on a playlist, so having multiple versions of the same track is
+	undesirable in many cases. This feature can be selectively enabled
+	or disabled.

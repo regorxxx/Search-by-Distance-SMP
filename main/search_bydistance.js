@@ -1,7 +1,7 @@
 ﻿'use strict';
-//10/10/22
+//24/10/22
 
-/*	
+/*
 	Search by Distance
 	-----------------------------------
 	Creates a playlist with similar tracks to the currently selected one according
@@ -109,7 +109,9 @@ const SearchByDistance_properties = {
 	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4, {range: [[2,99]], func: isInt}, 4],
 	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
-	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')]
+	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')],
+	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
+	checkDuplicatesBy		:	['Remove duplicates by', JSON.stringify(globTags.remDupl), {func: isJSON}, JSON.stringify(globTags.remDupl)]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -373,75 +375,77 @@ async function do_searchby_distance({
 								theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
 								recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
 								// --->Args modifiers
-								bAscii					= properties.hasOwnProperty('bAscii') ? properties['bAscii'][1] : true, // Sanitize all tag values with ACII equivalent chars
-								bTagsCache				= properties.hasOwnProperty('bTagsCache') ? properties['bTagsCache'][1] : false, // Read from cache
+								bAscii					= properties.hasOwnProperty('bAscii') ? properties.bAscii[1] : true, // Sanitize all tag values with ASCII equivalent chars
+								bTagsCache				= properties.hasOwnProperty('bTagsCache') ? properties.bTagsCache[1] : false, // Read from cache
+								bAdvTitle 				= properties.hasOwnProperty('bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
+								checkDuplicatesBy 		= properties.hasOwnProperty('checkDuplicatesBy') ? JSON.parse(properties.checkDuplicatesBy[1]) : globTags.remDupl,
 								// --->Weights
-								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties['genreWeight'][1]) : 0, // Number() is used to avoid bugs with dates or other values...
-								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties['styleWeight'][1]) : 0,
-								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties['dyngenreWeight'][1]) : 0,
-								moodWeight				= properties.hasOwnProperty('moodWeight') ? Number(properties['moodWeight'][1]) : 0,
-								keyWeight				= properties.hasOwnProperty('keyWeight') ? Number(properties['keyWeight'][1]) : 0,
-								dateWeight				= properties.hasOwnProperty('dateWeight') ? Number(properties['dateWeight'][1]) : 0,
-								bpmWeight				= properties.hasOwnProperty('bpmWeight') ? Number(properties['bpmWeight'][1]) : 0,
-								composerWeight 			= properties.hasOwnProperty('composerWeight') ? Number(properties['composerWeight'][1]) : 0,
-								customStrWeight 		= properties.hasOwnProperty('customStrWeight') ? Number(properties['customStrWeight'][1]) : 0, // Only used if tag is set at properties
-								customNumWeight 		= properties.hasOwnProperty('customNumWeight') ? Number(properties['customNumWeight'][1]) : 0, // Only used if tag is set at properties
+								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties.genreWeight[1]) : 0, // Number() is used to avoid bugs with dates or other values...
+								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties.styleWeight[1]) : 0,
+								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties.dyngenreWeight[1]) : 0,
+								moodWeight				= properties.hasOwnProperty('moodWeight') ? Number(properties.moodWeight[1]) : 0,
+								keyWeight				= properties.hasOwnProperty('keyWeight') ? Number(properties.keyWeight[1]) : 0,
+								dateWeight				= properties.hasOwnProperty('dateWeight') ? Number(properties.dateWeight[1]) : 0,
+								bpmWeight				= properties.hasOwnProperty('bpmWeight') ? Number(properties.bpmWeight[1]) : 0,
+								composerWeight 			= properties.hasOwnProperty('composerWeight') ? Number(properties.composerWeight[1]) : 0,
+								customStrWeight 		= properties.hasOwnProperty('customStrWeight') ? Number(properties.customStrWeight[1]) : 0, // Only used if tag is set at properties
+								customNumWeight 		= properties.hasOwnProperty('customNumWeight') ? Number(properties.customNumWeight[1]) : 0, // Only used if tag is set at properties
 								// --->Ranges (for associated weighting)
-								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties['dyngenreRange'][1]) : 0,
-								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties['keyRange'][1]) : 0,
-								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties['dateRange'][1]) : 0,
-								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties['bpmRange'][1]) : 0,
-								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties['customNumRange'][1]) : 0,
-								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties['bNegativeWeighting'][1] : true, // Assigns negative score for num. tags when they fall outside range
+								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties.dyngenreRange[1]) : 0,
+								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties.keyRange[1]) : 0,
+								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties.dateRange[1]) : 0,
+								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties.bpmRange[1]) : 0,
+								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties.customNumRange[1]) : 0,
+								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
 								// --->Pre-Scoring Filters
 								// Query to filter library
-								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties['forcedQuery'][1] : '',
+								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties.forcedQuery[1] : '',
 								// Exclude same artist
-								bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties['bSameArtistFilter'][1] : false,
+								bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties.bSameArtistFilter[1] : false,
 								// Similar artists
-								bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties['bSimilArtistsFilter'][1] : false, 
+								bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties.bSimilArtistsFilter[1] : false, 
 								// Filter anti-influences by query, before any scoring/distance calc.
-								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties['bConditionAntiInfluences'][1] : false, // Only for specific style/genres (for ex. Jazz) 
-								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties['bUseAntiInfluencesFilter'][1] : false,
+								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz) 
+								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
 								// Allows only influences by query, before any scoring/distance calc.
-								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties['bUseInfluencesFilter'][1] : false, 
+								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false, 
 								// --->Scoring Method
-								method					= properties.hasOwnProperty('method') ? properties['method'][1] : 'WEIGHT',
+								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'WEIGHT',
 								// --->Scoring filters
-								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties['scoreFilter'][1]) :  75,
-								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties['minScoreFilter'][1]) :  scoreFilter - 10,
-								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties['sbd_max_graph_distance'][1]) ? properties['sbd_max_graph_distance'][1] : Number(properties['sbd_max_graph_distance'][1])) : Infinity,
+								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) :  75,
+								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) :  scoreFilter - 10,
+								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties.sbd_max_graph_distance[1]) ? properties.sbd_max_graph_distance[1] : Number(properties.sbd_max_graph_distance[1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
-								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties['poolFilteringTag'][1].split(',').filter(Boolean) : [],
-								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties['poolFilteringN'][1]) : -1,
+								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties.poolFilteringTag[1].split(',').filter(Boolean) : [],
+								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties.poolFilteringN[1]) : -1,
 								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
 								// --->Playlist selection
 								// How tracks are chosen from pool
-								bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties['bRandomPick'][1] : false, // Get randomly
-								probPick				= properties.hasOwnProperty('probPick') ? Number(properties['probPick'][1]) : 100, // Get by scoring order but with x probability of being chosen
-								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties['playlistLength'][1]) : 50, // Max playlist size
+								bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties.bRandomPick[1] : false, // Get randomly
+								probPick				= properties.hasOwnProperty('probPick') ? Number(properties.probPick[1]) : 100, // Get by scoring order but with x probability of being chosen
+								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties.playlistLength[1]) : 50, // Max playlist size
 								// --->Playlist sorting
 								// How playlist is sorted (independently of playlist selection)
-								bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties['bSortRandom'][1] : false, // Random sorting 
-								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties['bProgressiveListOrder'][1] : false, // Sorting following progressive changes on tags (score)
-								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties['bScatterInstrumentals'][1] : false, // Intercalate instrumental tracks breaking clusters if possible
+								bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting 
+								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
+								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
 								// --->Special Playlists
 								// Use previous playlist selection, but override playlist sorting, since they use their own logic
-								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties['bInKeyMixingPlaylist'][1] : false, // Key changes following harmonic mixing rules like a DJ
-								bHarmonicMixDoublePass	= properties.hasOwnProperty('bHarmonicMixDoublePass') ? properties['bHarmonicMixDoublePass'][1] : false, // Usually outputs more tracks in harmonic mixing
-								bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties['bProgressiveListCreation'][1] : false, // Uses output tracks as new references, and so on...
-								progressiveListCreationN= bProgressiveListCreation ? Number(properties['progressiveListCreationN'][1]) : 1, // > 1 and < 100
+								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
+								bHarmonicMixDoublePass	= properties.hasOwnProperty('bHarmonicMixDoublePass') ? properties.bHarmonicMixDoublePass[1] : false, // Usually outputs more tracks in harmonic mixing
+								bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties.bProgressiveListCreation[1] : false, // Uses output tracks as new references, and so on...
+								progressiveListCreationN= bProgressiveListCreation ? Number(properties.progressiveListCreationN[1]) : 1, // > 1 and < 100
 								// --->Console logging
 								// Uses panelProperties instead of properties, so it always points to the right properties... used along buttons or not.
 								// They are the same for all instances within the same panel
-								bProfile 				= panelProperties.hasOwnProperty('bProfile') ? panelProperties['bProfile'][1] : false,
-								bShowQuery 				= panelProperties.hasOwnProperty('bShowQuery') ? panelProperties['bShowQuery'][1] : true,
-								bShowFinalSelection 	= panelProperties.hasOwnProperty('bShowFinalSelection') ? panelProperties['bShowFinalSelection'][1] : true,
-								bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties['bBasicLogging'][1] : false,
-								bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties['bSearchDebug'][1] : false,
+								bProfile 				= panelProperties.hasOwnProperty('bProfile') ? panelProperties.bProfile[1] : false,
+								bShowQuery 				= panelProperties.hasOwnProperty('bShowQuery') ? panelProperties.bShowQuery[1] : true,
+								bShowFinalSelection 	= panelProperties.hasOwnProperty('bShowFinalSelection') ? panelProperties.bShowFinalSelection[1] : true,
+								bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties.bBasicLogging[1] : false,
+								bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties.bSearchDebug[1] : false,
 								// --->Output
-								playlistName			= properties.hasOwnProperty('playlistName') ? properties['playlistName'][1] : 'Search...',
+								playlistName			= properties.hasOwnProperty('playlistName') ? properties.playlistName[1] : 'Search...',
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 								} = {}) {
 		const descr = music_graph_descriptors;
@@ -933,9 +937,9 @@ async function do_searchby_distance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache});
+			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesBy, bAdvTitle});
 		} else {
-			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date});
+			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesBy, bAdvTitle});
 		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
@@ -1544,7 +1548,11 @@ async function do_searchby_distance({
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
 								[newSelectedHandlesArray, , , newArgs['sel']] = do_searchby_distance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
-								selectedHandlesArray = removeDuplicatesV2({handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray))}).Convert();
+								selectedHandlesArray = removeDuplicatesV2({
+									handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), 
+									checkKeys: checkDuplicatesBy,
+									bAdvTitle
+									}).Convert();
 								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
 							}
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
