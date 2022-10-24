@@ -374,7 +374,7 @@ function createConfigMenu(parent) {
 				properties[tagName][1] = input;
 				overwriteProperties(properties);
 				if (tagName === 'genreTag' || tagName === 'styleTag') {
-					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 					}
@@ -407,14 +407,14 @@ function createConfigMenu(parent) {
 					properties[key][1] = !properties[key][1];
 					overwriteProperties(properties); // Updates panel
 					if (key === 'bAscii') {
-						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 						if (answer === popup.yes) {
 							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 						}
 					} else if (key === 'bTagsCache') {
 						if (properties.bTagsCache[1]) {
 							fb.ShowPopupMessage('This feature should only be enabled on Foobar2000 versions >= 2.0.\nPrevious versions already cached tags values, thus not requiring it.', 'Tags cache');
-							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
 							} else {
@@ -437,7 +437,7 @@ function createConfigMenu(parent) {
 					}
 				});
 				overwriteProperties(properties); // Force overwriting
-				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
+				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 				if (answer === popup.yes) {
 					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 				}
