@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/10/22
+//24/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -359,6 +359,39 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			{
+				const options = ['checkDuplicatesBy'];
+				options.forEach((key) => {
+					if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+					const idxEnd = properties[key][0].indexOf('(');
+					const value = recipe.hasOwnProperty(key) ? _recipe[key] : properties[key][1];
+					const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + '\t' + (typeof value === 'string' && value.length > 10 ? value.slice(0,10) + '...]' : value) + (recipe.hasOwnProperty(key) ? ' (forced by recipe)' : '');
+					menu.newEntry({menuName, entryText, func: () => {
+						let input = [];
+						try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(sep by comma)', 'Search by distance', properties[key][1], true));}
+						catch (e) {return;}
+						if (input) {input = input.filter((n) => n);}
+						if (isArrayEqual(JSON.parse(properties[key][1]), input)) {return;}
+						properties[key][1] = JSON.stringify(input);
+						overwriteProperties(properties); // Updates panel
+					}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				});
+			}
+			{
+				const options = ['bAdvTitle'];
+				options.forEach((key, i) => {
+					const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+					menu.newEntry({menuName, entryText, func: () => {
+						properties[key][1] = !properties[key][1];
+						if (key === 'bAdvTitle' && properties.bAdvTitle[1]) {fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');}
+						overwriteProperties(properties); // Updates panel
+					}, flags: recipe.hasOwnProperty(key) || (i !== 0 && !properties[options[0]][1]) ? MF_GRAYED : MF_STRING});
+					menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+				});
+			}
+		}
 	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure properties: tags
@@ -374,7 +407,7 @@ function createConfigMenu(parent) {
 				properties[tagName][1] = input;
 				overwriteProperties(properties);
 				if (tagName === 'genreTag' || tagName === 'styleTag') {
-					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 					}
@@ -407,14 +440,14 @@ function createConfigMenu(parent) {
 					properties[key][1] = !properties[key][1];
 					overwriteProperties(properties); // Updates panel
 					if (key === 'bAscii') {
-						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
 						if (answer === popup.yes) {
 							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 						}
 					} else if (key === 'bTagsCache') {
 						if (properties.bTagsCache[1]) {
 							fb.ShowPopupMessage('This feature should only be enabled on Foobar2000 versions >= 2.0.\nPrevious versions already cached tags values, thus not requiring it.', 'Tags cache');
-							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
 							} else {
@@ -437,7 +470,7 @@ function createConfigMenu(parent) {
 					}
 				});
 				overwriteProperties(properties); // Force overwriting
-				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, scriptName + ': ' + configMenu, popup.question + popup.yes_no);
 				if (answer === popup.yes) {
 					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 				}
