@@ -45,6 +45,8 @@
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - Removed Duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
 - Key: queries involving key tags now use all possibles equivalences in different notations (standard, Open keys, Camelot keys). For ex: '((KEY IS A) OR (KEY IS 4d) OR (KEY IS 11B))'.
+- Remove duplicates: advanced RegEx title matching option. For example, tracks like these would be considered to be duplicates: 'My track (live)', 'My track (acoustic)', 'My track (2022 remix)', ' My track [take 3]', ... but not those with keywords like 'part', 'pt.', 'act' or Roman numerals.
+- Remove duplicates: TF/tag expression to match duplicates along the advanced RegEx title matching option can be configured on the customizable button. Also found on properties panel.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
