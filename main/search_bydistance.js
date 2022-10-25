@@ -191,17 +191,22 @@ if (!panelProperties.firstPopup[1]) {
 /* 
 	Initialize maps/graphs at start. Global variables
 */
-const allMusicGraph = musicGraph();
-const [genre_map , style_map, genre_style_map] = dyngenre_map();
-const kMoodNumber = 6;  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library..
-const influenceMethod = 'adjacentNodes'; // direct, zeroNodes, adjacentNodes, fullPath
+const sbd = {
+	allMusicGraph: musicGraph(),
+	kMoodNumber: 6,  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
+	genre_map: [],
+	style_map: [],
+	genre_style_map: []
+};
+[sbd.genre_map , sbd.style_map, sbd.genre_style_map] = dyngenre_map();
 
 /* 
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
 if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
-const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + influenceMethod + 'v1.1.0');
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMissmatchCRC = panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
 	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
@@ -271,7 +276,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 					}
 				});
 			});
-			cacheLink = await calcCacheLinkSGV2(allMusicGraph, styleGenres);
+			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void(0), sbd.influenceMethod);
 		} else {
 			cacheLink = new Map();
 		}
@@ -291,8 +296,8 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 	}
 	// Multiple Graph testing and logging of results using the existing cache
 	if (panelProperties.bSearchDebug[1]) {
-		doOnce('Test 1',testGraph)(allMusicGraph);
-		doOnce('Test 2',testGraphV2)(allMusicGraph);
+		doOnce('Test 1',testGraph)(sbd.allMusicGraph);
+		doOnce('Test 2',testGraphV2)(sbd.allMusicGraph);
 	}
 }
 
@@ -332,7 +337,7 @@ addEventListener('on_script_unload', () => {
 */
 if (panelProperties.bGraphDebug[1]) {
 	if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
-	graphDebug(allMusicGraph);
+	graphDebug(sbd.allMusicGraph);
 	if (panelProperties.bProfile[1]) {profiler.Print();}
 }
 
@@ -710,10 +715,10 @@ async function do_searchby_distance({
 		const moodNumber = moodSet.size;
 		if (moodNumber !== 0) {
 			originalWeightValue += moodWeight;
-			if (moodWeight / totalWeight / moodNumber * kMoodNumber >= totalWeight / countWeights / 100) {
+			if (moodWeight / totalWeight / moodNumber * sbd.kMoodNumber >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				query[queryl] = '';
-				const k = moodNumber >= kMoodNumber ? kMoodNumber : moodNumber; //on combinations of 6
+				const k = moodNumber >= sbd.kMoodNumber ? sbd.kMoodNumber : moodNumber; //on combinations of 6
 				const moodComb = k_combinations(mood, k);
 				const tagNameTF = moodTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
 				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
@@ -1175,7 +1180,7 @@ async function do_searchby_distance({
 					if (cacheLinkSet.has(mapKey)) { // Mean distance from entire set (A,B,C) to (X,Y,Z)
 						mapDistance = cacheLinkSet.get(mapKey);
 					} else { // Calculate it if not found
-						mapDistance = calcMeanDistance(allMusicGraph, style_genreSet, style_genreSetNew);
+						mapDistance = calcMeanDistance(sbd.allMusicGraph, style_genreSet, style_genreSetNew, sbd.influenceMethod);
 						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
 					}
 				}

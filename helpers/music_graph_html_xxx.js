@@ -5,6 +5,8 @@
 	These helper are used on debug function at 'music_graph_xxx.js' so we need it for the html file too
 */
 
+const iDelaySBDCache = 2; // ms per step for style/genre node processing: search by distance
+
 Set.prototype.intersection = function(setB) {
     let intersection = new Set();
     for (let elem of setB) {
@@ -58,13 +60,11 @@ function capitalizeAll(s, sep = ' ', bJoinSep = true) { // Can use RegEx as sepa
 if (!Viva.Graph.graph().getNonOrientedLink) {
 	function getNonOrientedLink(aNodeId, bNodeId) {
 		// TODO: Use sorted links to speed this up
-		let node = this.getNode(aNodeId), i;
+		const node = this.getNode(aNodeId);
 		if (!node || !node.links) {return null;}
-		for (i = 0; i < node.links.length; ++i) {
+		for (let i = 0; i < node.links.length; ++i) {
 			const link = node.links[i];
-			if (link.fromId === aNodeId && link.toId === bNodeId || link.fromId === bNodeId && link.toId === aNodeId) {
-				return link;
-			}
+			if ((link.fromId === aNodeId && link.toId === bNodeId) || (link.fromId === bNodeId && link.toId === aNodeId)) {return link;}
 		}
 		return null; // no link.
 	}

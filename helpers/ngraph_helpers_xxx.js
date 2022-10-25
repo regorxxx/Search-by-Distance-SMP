@@ -161,7 +161,7 @@ var cacheLink;
 // worst case is O(i*j*k*lg(n)) time, greatly reduced by caching link distances.
 // where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
 // Pre-filtering number of tracks is the best approach to reduce calc time (!)
-function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
+function calcMeanDistance(mygraph, style_genre_reference, style_genre_new, influenceMethod = 'adjacentNodes') {
 	if (!cacheLink) {cacheLink = new Map();}
 	let mapDistance = Infinity;
 	// Compare smallest set to bigger set to find the smallest path and avoid asymmetric results
@@ -219,7 +219,7 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new) {
 }
 
 // Same than V1 but also checks for exclusions and arrays
-function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
+function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new, influenceMethod = 'adjacentNodes') {
 	// Convert to sets if needed
 	if (Array.isArray(style_genre_reference)) {style_genre_reference = new Set(style_genre_reference);}
 	if (Array.isArray(style_genre_new)) {style_genre_new = new Set(style_genre_new);}
@@ -228,7 +228,7 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
 	style_genre_reference = style_genre_reference.difference(map_distance_exclusions);
 	style_genre_new = style_genre_new.difference(map_distance_exclusions);
 	// And calc
-	return calcMeanDistance(mygraph, style_genre_reference, style_genre_new);
+	return calcMeanDistance(mygraph, style_genre_reference, style_genre_new, influenceMethod);
 }
 
 /*
@@ -236,7 +236,7 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new) {
 */
 
 // Finds distance between all nodes on map. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkAll(mygraph, limit = -1) {
+function calcCacheLinkAll(mygraph, limit = -1, influenceMethod = 'adjacentNodes') {
 		let cache = new Map();
 		let node_list = [];
 
@@ -249,7 +249,7 @@ function calcCacheLinkAll(mygraph, limit = -1) {
 		while (i < node_list_length){
 			let j = i + 1;
 			while (j < node_list_length){
-				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true);
+				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true, influenceMethod);
 				if (limit === -1 || ij_distance <= limit) {
 					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 				}
@@ -261,7 +261,7 @@ function calcCacheLinkAll(mygraph, limit = -1) {
 }
 
 // Finds distance between all SuperGenres on map. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSG(mygraph, limit = -1) {
+function calcCacheLinkSG(mygraph, limit = -1, influenceMethod = 'adjacentNodes') {
 		let cache = new Map();
 		let node_list = [];
 		
@@ -272,7 +272,7 @@ function calcCacheLinkSG(mygraph, limit = -1) {
 		while (i < node_list_length){
 			let j = i + 1;
 			while (j < node_list_length){
-				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true);
+				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true, influenceMethod);
 				if (limit === -1 || ij_distance <= limit) {
 					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 				}
@@ -284,7 +284,7 @@ function calcCacheLinkSG(mygraph, limit = -1) {
 }
 
 // Finds distance between all SuperGenres present on given set of style/genres. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...])*/, limit = -1) {
+function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...])*/, limit = -1, influenceMethod = 'adjacentNodes') {
 	let nodeList = [];
 	// Filter SGs with those on library
 	const descr = music_graph_descriptors;
@@ -293,10 +293,12 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 	return new Promise((resolve) => {
 		let cache = new Map();
 		const promises = [];
-		const total = nodeList.length - 1;
+		const iter = nodeList.length - 1;
+		const total = iter * (iter + 1) / 2;
 		let prevProgress = -1;
-		for (let i = 0; i < total; i++) {
-			for (let j = i + 1; j <= total; j++) {
+		let k = 0;
+		for (let i = 0; i < iter; i++) {
+			for (let j = i + 1; j <= iter; j++) {
 				promises.push(new Promise((resolve) => {
 					setTimeout(() => {
 						let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
@@ -304,10 +306,11 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 							// Sorting removes the need to check A-B and B-A later...
 							cache.set([nodeList[i], nodeList[j]].sort().join('-'), {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 						}
-						const progress = Math.round(i * j / (total * total) * 4) * 25;
+						k++;
+						const progress = Math.floor(k / total * 4) * 25;
 						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
 						resolve('done');
-					}, iDelaySBDCache * j);
+					}, iDelaySBDCache * k);
 				}));
 			}
 		}
