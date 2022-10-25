@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/09/22
+//25/10/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -28,7 +28,7 @@ if (typeof include !== 'undefined') { // On foobar
 /*
 	Creates Music Map links for foobar 
 */
-function musicGraph(descriptor = music_graph_descriptors) {
+function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		// Maps
 		const style_supergenre_supercluster = descriptor.style_supergenre_supercluster;
 		const style_supergenre_cluster = descriptor.style_supergenre_cluster;
@@ -60,7 +60,9 @@ function musicGraph(descriptor = music_graph_descriptors) {
 			mygraph = createGraph();
 		} catch (e) {
 			mygraph = Viva.Graph.graph();
-			console.log('Warning: musicGraph() used within html. You should use musicGraphForDrawing() instead! (Unless this is a call from debug func)');
+			if (!bHtml) {
+				console.log('Warning: musicGraph() used within html. You should use musicGraphForDrawing() instead! (Unless this is a call from graphDebug())');
+			}
 		}
 		let i, j, h;
 		let superGenreSets = [];
@@ -348,7 +350,7 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 	Extensive graph checking for debugging. Use this along the html rendering to check there are no duplicates, wrong links set, not connected nodes, typos, etc.
 	Unoptimized code on multiple loops since this should be run only on demand for testing once on a while...
 */
-function graphDebug(graph = musicGraph(), bShowPopupOnPass = false) {
+function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = false) {
 	console.log('music_graph_descriptors_xxx: Basic debug enabled');
 	let bWarning = false;
 	
@@ -617,7 +619,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false) {
 	}
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
-		const mygraph = bGraphDeclared ? allMusicGraph : musicGraph(); // Foobar graph, or HTML graph or a new one
+		const mygraph = bGraphDeclared ? allMusicGraph : musicGraph(void(0), bHtml); // Foobar graph, or HTML graph or a new one
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
