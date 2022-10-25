@@ -502,7 +502,7 @@
 						document.getElementById('statisticsButton').innerHTML = 'Calculating...';
 						document.getElementById("statisticsButton").className = 'animation roy';
 						setTimeout(() => {
-								graphStatistics().then((resolve) => {
+								graphStatistics({bHtml: true}).then((resolve) => {
 									data = resolve; 
 									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>'); 
 									popupContent.innerHTML = '<br>' + data.text;

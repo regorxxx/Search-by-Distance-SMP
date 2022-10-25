@@ -719,7 +719,7 @@ function histogram(data, size) {
 	return histogram;
 }
 
-async function graphStatistics({descriptor = music_graph_descriptors, bFoobar = false, properties = null, graph = musicGraph(descriptor)} = {}) {
+async function graphStatistics({descriptor = music_graph_descriptors, bHtml = false, bFoobar = false, properties = null, graph = musicGraph(descriptor, bHtml)} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
