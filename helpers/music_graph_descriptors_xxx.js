@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/09/22
+//25/10/22
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -42,15 +42,18 @@
 	That's an easy way to see if you added nodes at a wrong place, things not linked, etc. Much easier than checking matrices and lists of strings!
 	
 	Finally, the function 'do_searchby_distance()' does all the calculations for similarity between tracks.
+	
+	Tests are also available with the buttons present on these scripts (customizable button and Playlist Tools).
 */
 const music_graph_descriptors = {
 	/*
-		-------------------------
-		Graph nodes and links
-		-------------------------
+		----------------------------------------------------------------------------------------------------
+											Graph nodes and links											
+		----------------------------------------------------------------------------------------------------
 	*/
-	
-	// Music clusters, Supergenres, Genres, Styles:
+	/*
+		-> Music & Supergenres clusters: Mega-Groups of related musical clusters. No need to usually touch these
+	*/
 	// Mega-Groups of related supergenre's groups: 4 big groups of popular music connected + the others
 	style_supergenre_supercluster: [
 		['Heavy Music_supercluster'				,	['Industrial_cluster','Metal_cluster','Punk Rock_supergenre','Hardcore Punk_supergenre']],
@@ -60,7 +63,6 @@ const music_graph_descriptors = {
 		['Folk Music_supercluster'				,	['Folk_cluster'					]],
 		['Classical Music_supercluster'			,	['Classical Music_cluster'		]]
 	],
-	
 	// Groups of related Supergenres
 	style_supergenre_cluster: [
 		['Industrial_cluster'				,	['Industrial_supergenre'			]],
@@ -79,9 +81,13 @@ const music_graph_descriptors = {
 		['Folk_cluster'						,	['Modern Folk_supergenre','European Pre-Modern Folk_supergenre','South American Folk_supergenre','North American Folk_supergenre','Nordic Folk_supergenre','Celtic Folk_supergenre','African Folk_supergenre','Asian Folk_supergenre','European Folk_supergenre','South European Folk_supergenre']],
 		['Classical Music_cluster'			,	['Classical Medieval Era_supergenre','Classical Renaissance Era_supergenre','Classical Baroque Era_supergenre','Classical Classical Era_supergenre','Classical Romantic Era_supergenre','Classical Modernist Era_supergenre','Japanese Classical_supergenre','Indian Classical_supergenre']]
 	],
-	
-	// Mega-Groups of genres and styles
-	// Here you put genres and styles into their main category. Like Progressive Rock and Hard Rock into Rock&Roll Supergenre.
+	/*
+		-> SuperGenres: Mega-Groups of genres and styles. Users may want to edit these at the user's descriptor file
+	*/
+	// Here genres and styles are put into their main category. Like 'Progressive Rock' and 'Hard Rock' into 'Rock&Roll Supergenre'
+	// This points to genre and styles which are considered to belong to the same parent musical genre, while not necessarily being
+	// considered 'similar' in an 'listening session' sense. For ex. 'Space Rock' and 'Sourthern Rock' can be considered Rock but pretty
+	// different when looking for Rock tracks. On the other hand, they are similar if you compare them to Jazz.
 	style_supergenre: [
 		['Industrial_supergenre'			,	['Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
 		['Metal_supergenre'					,	['Groove Metal','Post-Metal','Neo-Classical Metal','Stoner Doom','Stoner Sludge','Metalcore','Nu Metal','Rap Metal','Grunge Metal','Symphonic Metal','Gothic Metal','Black Metal','Ambient Metal','Atmospheric Black Metal','Stoner Metal','Sludge Metal','Death Metal','Grindcore','Doom Metal','Crossover Thrash','Extreme Metal','Speed Metal','Thrash Metal','British Metal','Glam Metal','Hair Metal','Pop Metal','Power Metal','Progressive Metal','Classic Metal','Proto-Metal']],
@@ -125,9 +131,9 @@ const music_graph_descriptors = {
 		['Japanese Classical_supergenre',		['Kabuki']],
 		['Indian Classical_supergenre',			['Hindustani']]
 	],
-	
 	// Small groups of related genres and styles
-	// For ex. instead of adding sub-styles to other places,we can add them here:
+	// This points to genre and styles which are usually considered pretty similar in an 'listening session' sense.
+	// For ex. instead of adding sub-styles to other places, we can add them here
 	style_cluster: [
 		['Synth & Wave XL'					,	['Minimal Wave','Minimal Industrial','Darkwave','Coldwave','Electroclash','Synth-Pop','Futurepop','Synthwave','Vaporwave','Synth']],
 		['Lounge XL'						,	['Lounge','Exotica','Latin-Jazz','Bossa Nova','Samba']],
@@ -197,8 +203,12 @@ const music_graph_descriptors = {
 		['Ambient XL'						,	['Ambient','Ambient Industrial','Nature Music','Ambient Rock','Ambient Folk','Ambient Electronic','Ambient Metal','Ambient New Age','Ambient Classical','Ambient Funk']],
 		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan']]
 	],
-	
-	// Weighted connections between related styles or genres. Origins or derivatives.
+	/*
+		-> Influences: Special relations between genres and styles. Like origins, derivatives or things considered 'anti-influences'. 
+		Users may want to edit these at the user's descriptor file
+	*/
+	// Primary influence. For example one style being the origin of other.
+	// For ex. 'Rockabilly' and 'Rockabilly revival'.
 	style_primary_origin: [
 		['Rock & Roll'						,	['Rockabilly','Surf Rock','Garage Rock','Beat Music','R&B','Skiffle','Hillbilly','Country Boogie','Brill Building Sound','Psychobilly']],
 		['New Orleans R&B'					,	['Rock & Roll','Ska']],
@@ -292,7 +302,7 @@ const music_graph_descriptors = {
 		['Dembow'							,	['Dancehall']],
 		['Renaissance Rock'					,	['British Folk-Rock','Progressive Folk','Celtic Rock']]
 	],
-	
+	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
 		['Trip Hop'							,	['Acid Jazz','Roots Reggae','Chemical Breaks']],
 		['Future Bass'						,	['Chillwave','Trap','Ghetto House']],
@@ -304,7 +314,8 @@ const music_graph_descriptors = {
 		['Dembow'							,	['Dub']],
 		['Renaissance Rock'					,	['New Age','Medieval','Renaissance']]
 	],
-	
+	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
+	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
 	style_anti_influence: [
 		['Classical Music_supercluster'		,	['Heavy Music_supercluster','Pop & Rock Music_supercluster','Rythm Music_supercluster','Electronic Music_supercluster','Breakbeat Dance_cluster','Four-to-the-floor Dance_cluster','Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre','Rap_cluster','Hardcore Punk_supergenre','Electronic Music_supercluster','Techno_supergenre','House_supergenre','Trance_supergenre','Folk-Rock','Alt. Rock']],
 		['British Folk-Rock'				,	['Americana','Country_supergenre','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
@@ -332,7 +343,9 @@ const music_graph_descriptors = {
 		['Desert Blues'						,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Hard Rock','Heartland Rock']],
 		['Anatolian Rock'					,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Heartland Rock']]
 	],
-	
+	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
+	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound 
+	// really bad together on the same listening session, even if the search of similar tracks is broadened a lot.
 	style_anti_influences_conditional: [
 		'Classical Music_supercluster',
 		'Jazz_supergenre',
@@ -343,10 +356,13 @@ const music_graph_descriptors = {
 		'Anatolian Rock',
 		'Desert Blues'
 	],
-	
+	/*
+		-> Subsittutions: for genres and styles considered to be almost equal or even strict substitutions. 
+		Users may want to edit these at the user's descriptor file, specially to add their own substitutions
+		to avoid retagging their files.
+	*/
 	// Genres or styles that are pretty similar but not exactly the same. Combinations must be added as multiple entries.
 	// {A->[B,C]} EQUAL TO {A->B, A->C} BUT NOT INCLUDED {B->C}
-	// For ex. instead of adding sub-styles to other places, we can add them here:
 	style_weak_substitutions: [
 		['Rock & Roll'						,	['Rockabilly'						]],
 		['Psychedelic Rock'					,	['Psychedelic Folk','Acid Rock'		]],
@@ -373,7 +389,6 @@ const music_graph_descriptors = {
 		['Glam Metal'						,	['Hair Metal'						]],
 		['British Folk-Jazz'				,	['Folk-Jazz'						]]
 	],
-	
 	// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 	// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
 	// Example: we tag files as 'Golden Age Rock' and/or '60s Rock' instead of 'Classic Rock' (the value at the graph), then
@@ -439,7 +454,13 @@ const music_graph_descriptors = {
 		['Folk Baroque'						,	['Folk-Baroque'						]],
 		['Anatolian Rock'					,	['Anadolu Rock'						]]
 	],
-	
+	/*
+		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
+		on 'style_supergenre' (at top) is skipped anyway for all purposes, so it's not a requisite but it makes 
+		the search faster. Users may want to edit these at the user's descriptor file, specially if they have a lot
+		of values on style or genre tags used for classification but not directly related to a genre or style. For ex:
+		'Film Score', 'Soundtrack', 'Anime Music', ...
+	*/
 	// For graph filtering
 	map_distance_exclusions: new Set([
 	'Female Vocal','Spanish Rock','Radio Program','Soundtrack','Piano Jazz',
@@ -451,53 +472,56 @@ const music_graph_descriptors = {
 	'African','Indian','Nubian','Greek','Spanish Hip-Hop','German Rock','Israeli',
 	'Spoken Word','Israeli Rock','Uruguayan Rock','Mexican Rock','Italian Rock',
 	'Asian Folk','Torch Songs','Dummy','Rock Opera','Musical','Tuareg Music','Tex-Mex',
-	'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock','Turkish'
+	'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock','Turkish',
+	'Film Score', 'Anime Music'
 	]),
 	/*
-		-------------------------
-		Weighting, for Foobar2000
-		-------------------------
+		----------------------------------------------------------------------------------------------------
+											Weighting, for Graph Creation									
+				These are the weight values for graph links between styles(S) and genres(G)
+		----------------------------------------------------------------------------------------------------
 	*/
-	
-	// These are the weight values for graph links between styles(S) and genres(G):
-	// Direct: A -> B (weight applied x1)
-	// Direct connections should have bigger costs since they are not accumulative
+	/* 
+		Direct: A -> B (weight applied x1)
+		Direct connections should have bigger costs since they are not accumulative
+	*/
 	primary_origin: 185, //Primary origin / Derivative x1
 	secondary_origin: 300, //Secondary origin / Derivative x1
-	// const derivatives = 300; //Various influences / Derivatives x1
 	weak_substitutions: 20, //Almost equal x1
-	
-	// Indirect: A ->( Clusters )-> B (weight applied x2 or more)
-	// Note the weight is accumulative, so bigger clusters' weights add to the previous path cost
-	// Ej: Style A -> Supergenre -> Supergenre Cluster -> Supergenre -> Style B
+	/* 
+		Indirect: A ->( Clusters )-> B (weight applied x2 or more)
+		Note the weight is accumulative, so bigger clusters' weights add to the previous path cost
+		Ej: Style A -> Supergenre -> Supergenre Cluster -> Supergenre -> Style B
+	*/
 	cluster: 42, //Related style / genre: Southern Rock(S) -> Heartland Rock(S)
 	intra_supergenre: 100, //Traverse between the same supergenre(SG): Southern Rock(G) -> Classic Rock(SG) -> Hard Rock(G)
 	supergenre_cluster: 50, //Traverse between the same supergenre group(SG): Classic Rock(SG) -> Rock(SGG) -> Punk (SG)
 	supergenre_supercluster: 75, //Traverse between the same music group(MG): Rap(SGG)->Rhythm Music(MG)->R&B(SGG)
-	
-	// Special:
+	/*
+		Special:
+	*/
 	inter_supergenre: 200, //Traverse between different contiguous supergenres groups(SGG): Rock(SGG) -> Pop(SGG)
 	inter_supergenre_supercluster: 300, //Traverse between different contiguous supergenres groups(SGG): Rock(SGG) -> Pop(SGG)
 	substitutions: 0, //Direct connections (substitutions)
-	
-	// Influences:
+	/*
+		Influences:
+	*/
 	anti_influence: 100, //backlash / anti-influence between two nodes (added directly to the total path distance): A -> ? -> B
 	primary_origin_influence: -10, //primary origin-influence between two nodes (added directly to the total path distance): A -> ? -> B
 	secondary_origin_influence: -5, //secondary origin-influence between two nodes (added directly to the total path distance): A -> ? -> B
-	
-	/*	Note on intra_supergenre:
+	/*	
+		Note on intra_supergenre:
+		-------------------------
 		Use that value as the 'basic' distance value for similar genre/styles: x3/2, x2, etc.
 		Having in mind that the max distance between 2 points on the graph will probably be ~ x4-x5 that value.
 		A lower value (cluster or 1/2) would only output the nearest or almost same genre/styles.
-	*/
-	
-	/*	Note on anti_influence:
+		Note on anti_influence:
+		-------------------------
 		It applies to anything listed on style_anti_influence. Same logic than the rest.
 		The value is added to the total distance calculated between 2 nodes. i.e. if Rock to Jazz had a distance of 300,
 		if they had an anti-influence link, then the total distance would be 300 + 100 = 400. Being farther than before...
-	*/
-	
-	/*	Note on primary_origin_influence (same applies to secondary_origin_influence):
+		Note on primary_origin_influence (same applies to secondary_origin_influence):
+		-------------------------
 		It only applies to those nodes which have a primary origin link AND are in the same Supergenre (SG).
 		Contrary to anti_influence which applies globally and only on nodes listed in its associated array.
 		This is done to account for genres/styles which are nearer than others on the same Supergenre, 
@@ -509,18 +533,17 @@ const music_graph_descriptors = {
 		But also when considering intra-Supergenre related nodes with primary_origin links (90) against cluster related nodes
 		without such link (85) the cluster related ones are still neared than the others.
 	*/
-	
-	/* 
-		-------------------------
-		For drawing 
-		-------------------------
+	/*
+		----------------------------------------------------------------------------------------------------
+													For drawing 											
+				These are the weight values for graph links between styles(S) and genres(G)
+		----------------------------------------------------------------------------------------------------
 	*/
-	
 	// Assigns colors to labels and nodes
 	// Anything named '..._supergenre' will be added to the html color label legend automatically.
 	// If more than one '...Folk..._supergenre' or '...Classical..._supergenre' is found, then it will be skipped.
 	// i.e. It will list Folk and Classical only once, even if there are multiple (sub)SuperGenres.
-	map_colors: [
+	map_colors: [	// Todo: use colorbrewer sequential palettes
 	// Supergenres
 	['Industrial_supergenre'				,'#e04103'],
 	['Metal_supergenre'						,'#D88417'],
