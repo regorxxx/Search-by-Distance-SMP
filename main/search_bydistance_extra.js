@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/10/22
+//26/10/22
 
 include('search_bydistance.js');
 
@@ -24,7 +24,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	let forcedQuery = '';
 	if (method === 'reference') {
 		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
-		const allowedGenres = getNearestGenreStyles(genreStyle, 50, allMusicGraph);
+		const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 		// const allowedGenresQuery = allowedGenres.map((tag) => {return _p('GENRE IS ' + tag + ' OR STYLE IS ' + tag);}).join(' OR ');
 		const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 		forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
@@ -48,7 +48,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
 			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
-			const allowedGenres = getNearestGenreStyles(genreStyle, 50, allMusicGraph);
+			const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 			const allowedGenresQuery = allowedGenres.map((tag) => {return _p(genreQueryTag[0] + ' IS ' + tag + ' OR ' + styleQueryTag[0] + ' IS ' + tag);}).join(' OR ');
 			forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 			if (method === 'weighted') { // Weight will be <= 1 according to how representative of the artist's works is

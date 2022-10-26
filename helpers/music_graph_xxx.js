@@ -604,7 +604,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	// Test basic paths using the graph. 
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
 	let bGraphDeclared = true;
-	try {allMusicGraph;}
+	try {sbd && sbd.allMusicGraph;}
 	catch(e) {
 		if (e.name === 'ReferenceError') {
 			bGraphDeclared = false;
@@ -619,7 +619,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	}
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
-		const mygraph = bGraphDeclared ? allMusicGraph : musicGraph(void(0), bHtml); // Foobar graph, or HTML graph or a new one
+		const mygraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void(0), bHtml); // Foobar graph, or HTML graph or a new one
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
@@ -719,7 +719,14 @@ function histogram(data, size) {
 	return histogram;
 }
 
-async function graphStatistics({descriptor = music_graph_descriptors, bHtml = false, bFoobar = false, properties = null, graph = musicGraph(descriptor, bHtml)} = {}) {
+async function graphStatistics({
+		descriptor = music_graph_descriptors, 
+		bHtml = false, 
+		bFoobar = false, 
+		properties = null, 
+		graph = musicGraph(descriptor, bHtml), 
+		influenceMethod // Must be provided
+		} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
@@ -730,7 +737,7 @@ async function graphStatistics({descriptor = music_graph_descriptors, bHtml = fa
 	} else { // or the entire graph
 		styleGenres = new Set([...descriptor.style_supergenre, ...descriptor.style_weak_substitutions, ...descriptor.style_substitutions, ...descriptor.style_cluster].flat(Infinity));
 	}
-	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres);
+	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres, void(0), influenceMethod);
 	// Calc basic statistics
 	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1};
 	const distances = [];

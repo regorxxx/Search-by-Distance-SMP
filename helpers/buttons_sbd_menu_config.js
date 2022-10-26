@@ -589,14 +589,14 @@ function createConfigMenu(parent) {
 			// Graph debug
 			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
 				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
-				graphDebug(allMusicGraph, true); // Show popup on pass
+				graphDebug(sbd.allMusicGraph, true); // Show popup on pass
 				if (panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 			// Graph test
 			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
 				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
-				testGraph(allMusicGraph);
-				testGraphV2(allMusicGraph);
+				testGraph(sbd.allMusicGraph);
+				testGraphV2(sbd.allMusicGraph);
 				if (panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 		}
@@ -628,7 +628,7 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
-				graphStatistics({properties, graph: allMusicGraph}).then((resolve) => {
+				graphStatistics({properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod}).then((resolve) => {
 					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
 					console.log(resolve.text);
 				});
