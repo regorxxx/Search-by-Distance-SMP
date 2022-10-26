@@ -5,7 +5,7 @@
 	These helper are used on debug function at 'music_graph_xxx.js' so we need it for the html file too
 */
 
-const iDelaySBDCache = 2; // ms per step for style/genre node processing: search by distance
+const iDelaySBDCache = 0.55; // ms per step for style/genre node processing: search by distance
 
 Set.prototype.intersection = function(setB) {
     let intersection = new Set();
