@@ -22,136 +22,130 @@ try { // On foobar
 // Needs valid path! i.e. if path is from NodeA to NodeA, it outputs nothing
 // O(0.55 * ln(n))
 function getDistanceFromPath(mygraph, path) {
-		let distanceGraph = Infinity;
-		let path_length = path.length;
-		let i ;
-		if (path.length === 1) {
-			throw new Error('Invalid path');
-		} else {
-			for (i = 0; i < path_length - 1;i++) {
-				let link = mygraph.getNonOrientedLink(path[i].id, path[i+1].id);
-				if (distanceGraph !== Infinity) {distanceGraph += link.data.weight;}
-				else {distanceGraph = link.data.weight;}
-			}
+	let distanceGraph = Infinity;
+	let pathLength = path.length - 1;
+	if (pathLength === 0) {
+		throw new Error('Invalid path');
+	} else {
+		for (let i = 0; i < pathLength; i++) {
+			let link = mygraph.getNonOrientedLink(path[i].id, path[i+1].id);
+			if (distanceGraph !== Infinity) {distanceGraph += link.data.weight;}
+			else {distanceGraph = link.data.weight;}
 		}
-		return distanceGraph;
+	}
+	return distanceGraph;
 }
 
 // Finds distance between two nodes, Path is calculated on the fly.
 // O(0.55 * ln(n))
 function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influenceMethod = 'adjacentNodes' /* direct, zeroNodes, adjacentNodes, fullPath */) {
-		const method = 'NBA'; // Minimal speed differences found for our weighted graph...
-		
-		let distanceGraph = Infinity;
-		let influenceDistanceGraph = 0;
-		
-		
-		if (!keyOne || !keyTwo || !mygraph) {
-			return [distanceGraph , influenceDistanceGraph];
-		}
-		
-		let nodeOne = mygraph.getNode(keyOne);
-		let nodeTwo = mygraph.getNode(keyTwo);
-		if (!nodeOne || !nodeTwo) { //If node not on graph, skip calc.
-			return [distanceGraph , influenceDistanceGraph];
-		}
-		
-		if (nodeOne === nodeTwo) { //Same node, skip calc.
-			distanceGraph = 0;
-			return [distanceGraph , influenceDistanceGraph];
-		}
-		
-		let pathFinder;
-		if (method === 'A*greedy') {
-			pathFinder = aStarBi(mygraph, {
-				distance(fromNode, toNode, link) {
-				return link.data.weight;
-				}
+	const method = 'NBA'; // Minimal speed differences found for our weighted graph...
+	let distanceGraph = Infinity;
+	let influenceDistanceGraph = 0;
+
+	if (!keyOne || !keyTwo || !mygraph) {
+		return [distanceGraph , influenceDistanceGraph];
+	}
+	let nodeOne = mygraph.getNode(keyOne);
+	let nodeTwo = mygraph.getNode(keyTwo);
+	if (!nodeOne || !nodeTwo) { //If node not on graph, skip calc.
+		return [distanceGraph , influenceDistanceGraph];
+	}
+	if (nodeOne === nodeTwo) { //Same node, skip calc.
+		return [0 , influenceDistanceGraph];
+	}
+	
+	let pathFinder;
+	if (method === 'A*greedy') {
+		pathFinder = aStarBi(mygraph, {
+			distance(fromNode, toNode, link) {
+			return link.data.weight;
+			}
 		});
-		} else if (method === 'A*') {
-			pathFinder = aStarPathSearch(mygraph, {
-				distance(fromNode, toNode, link) {
-				return link.data.weight;
+	} else if (method === 'A*') {
+		pathFinder = aStarPathSearch(mygraph, {
+			distance(fromNode, toNode, link) {
+			return link.data.weight;
+			}
+		});
+	} else {
+		pathFinder = nba(mygraph, {
+			distance(fromNode, toNode, link) {
+			return link.data.weight;
+			}
+		});
+	}
+	
+	let path = [];
+	path = pathFinder.find(keyOne, keyTwo);
+	distanceGraph = getDistanceFromPath(mygraph, path);
+	
+	if (bUseInfluence) { 
+		// Checks links between pairs of nodes to find if they are (anti)influences
+		// For ex: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues
+		// Where {Hip-Hop <- Rap_supergenre} and {Blues_supergenre <- Blues} are zero distance links
+		let last = path.length - 1; // Is always >= 1
+		let bDirect = false;
+		switch (influenceMethod) {
+			case 'fullPath': { // Considering every consecutive link on the path {Hip-Hop <- Rap_supergenre}, {Rap_supergenre <- Rap_cluster}, ...
+				if (last !== 1) { // Otherwise we are repeating first->last multiple times, considered below
+					for (let i = 0; i < last; i++) { // size (<=n) (a)->{b}, (b)->{c}, (c)->{d}, ...
+						const link = mygraph.getNonOrientedLink(path[i].id, path[i + 1].id);
+						if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
+					}
 				}
-			});
-		} else {
-			pathFinder = nba(mygraph, {
-				distance(fromNode, toNode, link) {
-				return link.data.weight;
-				}
-			});
-		}
-		
-		let path = [];
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		
-		if (bUseInfluence) { 
-			// Checks links between pairs of nodes to find if they are (anti)influences
-			// For ex: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues
-			// Where {Hip-Hop <- Rap_supergenre} and {Blues_supergenre <- Blues} are zero distance links
-			let last = path.length - 1; // Is always >= 1
-			let bDirect = false;
-			switch (influenceMethod) {
-				case 'fullPath': { // Considering every consecutive link on the path {Hip-Hop <- Rap_supergenre}, {Rap_supergenre <- Rap_cluster}, ...
-					if (last !== 1) { // Otherwise we are repeating first->last multiple times, considered below
-						for (let i = 0; i < last; i++) { // size (<=n) (a)->{b}, (b)->{c}, (c)->{d}, ...
-							const link = mygraph.getNonOrientedLink(path[i].id, path[i + 1].id);
+				// falls through
+			}
+			case 'adjacentNodes': { // Considering the adjacent nodes no matter their distance, so compare node set {Hip-Hop, Rap_supergenre} to {Blues_supergenre, Blues}
+				if (last !== 1) { // Otherwise we are repeating first->last multiple times
+					let adjLinkNodeFrom = new Set();
+					let adjLinkNodeTo = new Set();
+					adjLinkNodeFrom.add(path[0].id).add(path[1].id);
+					adjLinkNodeTo.add(path[last].id).add(path[last - 1].id);
+					adjLinkNodeFrom.forEach((nodeFrom) => { // size (<=4) (a)->{z}, (a)->{y}, (b)->{z}, (b)->{y}
+						adjLinkNodeTo.forEach((nodeTo) => {
+							const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
 							if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
-						}
-					}
-					// falls through
-				}
-				case 'adjacentNodes': { // Considering the adjacent nodes no matter their distance, so compare node set {Hip-Hop, Rap_supergenre} to {Blues_supergenre, Blues}
-					if (last !== 1) { // Otherwise we are repeating first->last multiple times
-						let adjLinkNodeFrom = new Set();
-						let adjLinkNodeTo = new Set();
-						adjLinkNodeFrom.add(path[0].id).add(path[1].id);
-						adjLinkNodeTo.add(path[last].id).add(path[last - 1].id);
-						adjLinkNodeFrom.forEach((nodeFrom) => { // size (<=4) (a)->{z}, (a)->{y}, (b)->{z}, (b)->{y}
-							adjLinkNodeTo.forEach((nodeTo) => {
-								const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
-								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
-							});
 						});
-					} else {bDirect = true;}
-					break;
-				}
-				case 'zeroNodes': { // Considering only the adjacent nodes at zero distance, equivalent to prev. method but only when links are substitutions
-					if (last !== 1) { // Otherwise we are repeating first->last multiple times
-						let zeroLinkNodeFrom = new Set();
-						let zeroLinkNodeTo = new Set();
-						const linkFrom = mygraph.getNonOrientedLink(path[0].id, path[1].id);
-						const linkTo = mygraph.getNonOrientedLink(path[last].id, path[last - 1].id);
-						if (linkFrom && linkFrom.data.weight === 0) {zeroLinkNodeFrom.add(linkFrom.fromId).add(linkFrom.toId);}
-						if (linkTo && linkTo.data.weight === 0) {zeroLinkNodeTo.add(linkTo.fromId).add(linkTo.toId);}
-						let bDone = false;
-						zeroLinkNodeFrom.forEach((nodeFrom) => { // size (<=1) Note substitutions require their influence links to be added to the generic item, so there is only (A=a)->(Z=z)
-							if (bDone) {return;}
-							zeroLinkNodeTo.forEach((nodeTo) => {
-								if (bDone) {return;}
-								const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
-								if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight; bDone = true;}
-							});
-						});
-					}
-					// falls through
-				}
-				case 'direct': { // zero nodes method also includes any direct link between the last and first node even when the distance is not zero. Built-in in adjacent nodes
-					bDirect = true;
-					break;
-				}
-				default: {
-					console.log('calcGraphDistance: influence method not recognized \'' + influenceMethod + '\'.');
-					break;
-				}
+					});
+				} else {bDirect = true;}
+				break;
 			}
-			if (bDirect) { // Always applies when there is only 2 nodes no matter the method or using direct
-				const link = mygraph.getNonOrientedLink(path[0].id, path[last].id); // Size (<=1) (a)->{z}
-				if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
+			case 'zeroNodes': { // Considering only the adjacent nodes at zero distance, equivalent to prev. method but only when links are substitutions
+				if (last !== 1) { // Otherwise we are repeating first->last multiple times
+					let zeroLinkNodeFrom = new Set();
+					let zeroLinkNodeTo = new Set();
+					const linkFrom = mygraph.getNonOrientedLink(path[0].id, path[1].id);
+					const linkTo = mygraph.getNonOrientedLink(path[last].id, path[last - 1].id);
+					if (linkFrom && linkFrom.data.weight === 0) {zeroLinkNodeFrom.add(linkFrom.fromId).add(linkFrom.toId);}
+					if (linkTo && linkTo.data.weight === 0) {zeroLinkNodeTo.add(linkTo.fromId).add(linkTo.toId);}
+					let bDone = false;
+					zeroLinkNodeFrom.forEach((nodeFrom) => { // size (<=1) Note substitutions require their influence links to be added to the generic item, so there is only (A=a)->(Z=z)
+						if (bDone) {return;}
+						zeroLinkNodeTo.forEach((nodeTo) => {
+							if (bDone) {return;}
+							const link = mygraph.getNonOrientedLink(nodeFrom, nodeTo);
+							if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight; bDone = true;}
+						});
+					});
+				}
+				// falls through
+			}
+			case 'direct': { // zero nodes method also includes any direct link between the last and first node even when the distance is not zero. Built-in in adjacent nodes
+				bDirect = true;
+				break;
+			}
+			default: {
+				console.log('calcGraphDistance: influence method not recognized \'' + influenceMethod + '\'.');
+				break;
 			}
 		}
-		return [distanceGraph, influenceDistanceGraph];
+		if (bDirect) { // Always applies when there is only 2 nodes no matter the method or using direct
+			const link = mygraph.getNonOrientedLink(path[0].id, path[last].id); // Size (<=1) (a)->{z}
+			if (link && link.data.hasOwnProperty('absoluteWeight') && link.data.absoluteWeight) {influenceDistanceGraph += link.data.absoluteWeight;}
+		}
+	}
+	return [distanceGraph, influenceDistanceGraph];
 }
 
 // Finds distance between two sets of nodes
@@ -298,7 +292,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 		const iter = nodeList.length - 1;
 		const total = iter * (iter + 1) / 2;
 		const initDelay = Math.round(0.015 * total);
-		const iterDelay = Math.round(5.5 * Math.log(total)) / 100; // O(0.55 * ln(n))
+		const iterDelay = Math.round(5.5 * Math.log(total)) / 100; // O(0.55 * ln(n)), on n > 250K, processing > 60 ms and UI becomes sluggish
 		let prevProgress = -1;
 		let k = 0, h = 0;
 		for (let i = 0; i < iter; i++) {
