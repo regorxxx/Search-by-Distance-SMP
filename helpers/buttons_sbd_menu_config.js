@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/10/22
+//26/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -602,13 +602,17 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{ 	// Graph cache reset Async
-			menu.newEntry({menuName: submenu, entryText: 'Reset link cache', func: () => {
+			menu.newEntry({menuName: submenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
+				if (sbd.isCalculatingCache) {
+					fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console.', 'Graph cache');
+ 					return;
+				}
 				_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
 				_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
 				cacheLink = void(0);
 				cacheLinkSet = void(0);
 				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
-			}});
+			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : (properties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
 				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return properties[key][1].split(',').filter(Boolean);});

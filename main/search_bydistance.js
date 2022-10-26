@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/10/22
+//26/10/22
 
 /*
 	Search by Distance
@@ -197,7 +197,8 @@ const sbd = {
 	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
 	genre_map: [],
 	style_map: [],
-	genre_style_map: []
+	genre_style_map: [],
+	isCalculatingCache: false
 };
 [sbd.genre_map , sbd.style_map, sbd.genre_style_map] = dyngenre_map();
 
@@ -239,6 +240,8 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
 		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
 		if (panelProperties.bCacheOnStartup[1] || bForce) {
+			if (sbd.isCalculatingCache) {return;}
+			sbd.isCalculatingCache = true;
 			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {
 				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
 			}).join('|') : '%' + globTags.genre + '%';
@@ -262,7 +265,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						const items = new FbMetadbHandleList(libItems.slice(i, step));
 						setTimeout((step) => {
 							tagValues.push(...new Set(tfo.EvalWithMetadbs(items).join('|').split(/\| *|, */g)));
-							const progress = Math.round(step / num * 4) * 25;
+							const progress = Math.floor(step / num * 4) * 25;
 							if (progress > prevProgress) {prevProgress = progress; console.log('Calculating tags ' + (progress <= 100 ? progress : 100) + '%.');}
 							resolve('done');
 						}, iDelayLibrary * 6 * i, step);
@@ -277,6 +280,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 				});
 			});
 			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void(0), sbd.influenceMethod);
+			sbd.isCalculatingCache = false;
 		} else {
 			cacheLink = new Map();
 		}
