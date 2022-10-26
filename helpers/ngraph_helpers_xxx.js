@@ -296,9 +296,10 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 		const iter = nodeList.length - 1;
 		const total = iter * (iter + 1) / 2;
 		let prevProgress = -1;
-		let k = 0;
+		let k = 0, h = 0;
 		for (let i = 0; i < iter; i++) {
 			for (let j = i + 1; j <= iter; j++) {
+				h++;
 				promises.push(new Promise((resolve) => {
 					setTimeout(() => {
 						let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
@@ -310,7 +311,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 						const progress = Math.floor(k / total * 4) * 25;
 						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
 						resolve('done');
-					}, iDelaySBDCache * k);
+					}, iDelaySBDCache * h);
 				}));
 			}
 		}
