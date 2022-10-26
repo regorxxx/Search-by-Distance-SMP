@@ -70,6 +70,7 @@
 - Cache: graph links cache re-calculation is now blocked when there is already an on-going calculation. User is asked to manually re-run it afterwards via popups now.
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
+- Buttons: multiple crashes due to wrong variable name when opening popups.
 - Readmes: separators not being properly identified on readme files checking.
 
 ## [3.1.0] - 2022-08-22
