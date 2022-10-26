@@ -20,6 +20,7 @@ try { // On foobar
 
 // Gets total weight distance for the path
 // Needs valid path! i.e. if path is from NodeA to NodeA, it outputs nothing
+// O(0.55 * ln(n))
 function getDistanceFromPath(mygraph, path) {
 		let distanceGraph = Infinity;
 		let path_length = path.length;
@@ -37,6 +38,7 @@ function getDistanceFromPath(mygraph, path) {
 }
 
 // Finds distance between two nodes, Path is calculated on the fly.
+// O(0.55 * ln(n))
 function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influenceMethod = 'adjacentNodes' /* direct, zeroNodes, adjacentNodes, fullPath */) {
 		const method = 'NBA'; // Minimal speed differences found for our weighted graph...
 		
@@ -295,6 +297,8 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 		const promises = [];
 		const iter = nodeList.length - 1;
 		const total = iter * (iter + 1) / 2;
+		const initDelay = Math.round(0.015 * total);
+		const iterDelay = Math.round(5.5 * Math.log(total)) / 100; // O(0.55 * ln(n))
 		let prevProgress = -1;
 		let k = 0, h = 0;
 		for (let i = 0; i < iter; i++) {
@@ -311,7 +315,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 						const progress = Math.floor(k / total * 4) * 25;
 						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
 						resolve('done');
-					}, iDelaySBDCache * h);
+					}, initDelay + iterDelay * h);
 				}));
 			}
 		}
