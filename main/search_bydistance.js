@@ -713,7 +713,7 @@ async function do_searchby_distance({
 		if (dyngenreWeight !== 0 && style_genre_length !== 0) {
 			// This virtual tag is calculated with previous values
 			for (const style_genre_i of style_genreSet) {
-				const dyngenre_i = genre_style_map.get(style_genre_i);
+				const dyngenre_i = sbd.genre_style_map.get(style_genre_i);
 				if (dyngenre_i) {dyngenre = dyngenre.concat(dyngenre_i);}
 			}
 			dyngenreNumber = dyngenre.length;
@@ -1128,7 +1128,7 @@ async function do_searchby_distance({
 			if (dyngenreWeight !== 0 && dyngenreNumber !== 0) {
 				if (style_genreSetNew.size !== 0) {
 					for (let style_genreNew_i of style_genreSetNew) {
-						const dyngenre_i = genre_style_map.get(style_genreNew_i);
+						const dyngenre_i = sbd.genre_style_map.get(style_genreNew_i);
 						if (dyngenre_i) {dyngenreNew = dyngenreNew.concat(dyngenre_i);}
 					}
 				}
