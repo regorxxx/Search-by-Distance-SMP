@@ -604,7 +604,7 @@ function createConfigMenu(parent) {
 		{ 	// Graph cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
 				if (sbd.isCalculatingCache) {
-					fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console.', 'Graph cache');
+					fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console (or animation).', 'Graph cache');
  					return;
 				}
 				_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
@@ -628,9 +628,13 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
+			if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphStatistics');}
+				parent.switchAnimation('graphStatistics', true);
 				graphStatistics({properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod}).then((resolve) => {
 					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
 					console.log(resolve.text);
+					parent.switchAnimation('graphStatistics', false);
+					if (panelProperties.bProfile[1]) {profiler.Print();}
 				});
 			}});
 		}

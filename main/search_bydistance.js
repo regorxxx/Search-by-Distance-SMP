@@ -238,10 +238,16 @@ if (typeof cacheLinkSet === 'undefined') {
 }
 async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, properties = null} = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
-		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('calcCacheLinkSGV2');}
+		if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('updateCache');}
 		if (panelProperties.bCacheOnStartup[1] || bForce) {
 			if (sbd.isCalculatingCache) {return;}
 			sbd.isCalculatingCache = true;
+			if (typeof buttonsBar !== 'undefined') {
+				buttonsBar.listKeys.flat(Infinity).filter((key) => {return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i);})
+					.forEach((key) => {
+						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
+					});
+			}
 			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {
 				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
 			}).join('|') : '%' + globTags.genre + '%';
