@@ -54,6 +54,7 @@
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
+- Cache: improved graph links cache asynchronous calculation.
 ### Removed
 ### Fixed
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
@@ -65,6 +66,7 @@
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
 - Similar artists: in some cases similar artists were duplicated.
+- Cache: graph links cache re-calculation is now blocked when there is already an on-going calculation. User is asked to manually re-run it afterwards via popups now.
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
 - Readmes: separators not being properly identified on readme files checking.
