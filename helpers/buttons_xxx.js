@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/22
+//26/10/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -573,6 +573,7 @@ function addButton(newButtons) {
 		}
 	}
 	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
+	return newButtons;
 }
 
 function buttonSizeCheck () {

@@ -31,7 +31,6 @@ doOnce('Load tags cache', debounce(() => {if (newButtonsProperties.bTagsCache[1]
 /*
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
 */
-
 addButton({
 	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30, h: 22}, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
