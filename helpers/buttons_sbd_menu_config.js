@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/10/22
+//27/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -267,8 +267,10 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Menu to configure final sorting:
-		const menuName = menu.newMenu('Set final sorting');
-		const options = ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals'];
+		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
+		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '')
+		const menuName = menu.newMenu(menuText, void(0), menuFlags);
+		const options = ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle'];
 		options.forEach((key) => {
 			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 			const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
