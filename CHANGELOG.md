@@ -47,7 +47,7 @@
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
-- UI: customizable button now doesn't allow setting playlist sorting when using harminic mixing. Submenu is greyed out.
+- UI: customizable button now doesn't allow setting playlist sorting when using harmonic mixing. Submenu is greyed out.
 - Removed Duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
 - Remove duplicates: advanced RegEx title matching option. For example, tracks like these would be considered to be duplicates: 'My track (live)', 'My track (acoustic)', 'My track (2022 remix)', ' My track [take 3]', ... but not those with keywords like 'part', 'pt.', 'act' or Roman numerals.
 - Remove duplicates: TF/tag expression to match duplicates along the advanced RegEx title matching option can be configured on the customizable button. Also found on properties panel.
