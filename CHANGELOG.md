@@ -35,6 +35,7 @@
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 - Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
 - Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
+- Smart Shuffle: shuffles tracks according to tags (Artist by default) in a semi-random pattern, ensuring no 2 consecutive tracks have the same tag value. Follows [Spotify design](https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/). Overrides any other sorting when enabled. Note this is different to intercalation, since the order will be randomized on every call, and also the position of tracks which may differ according to some random offset.
 ### Changed
 - GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
 - GRAPH: minor performance improvement using non-oriented links.
@@ -46,16 +47,18 @@
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
+- UI: customizable button now doesn't allow setting playlist sorting when using harminic mixing. Submenu is greyed out.
 - Removed Duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
 - Remove duplicates: advanced RegEx title matching option. For example, tracks like these would be considered to be duplicates: 'My track (live)', 'My track (acoustic)', 'My track (2022 remix)', ' My track [take 3]', ... but not those with keywords like 'part', 'pt.', 'act' or Roman numerals.
 - Remove duplicates: TF/tag expression to match duplicates along the advanced RegEx title matching option can be configured on the customizable button. Also found on properties panel.
 - Key: queries involving key tags now use all possibles equivalences in different notations (standard, Open keys, Camelot keys). For ex: '((KEY IS A) OR (KEY IS 4d) OR (KEY IS 11B))'.
+- Cache: improved graph links cache asynchronous calculation.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
-- Cache: improved graph links cache asynchronous calculation.
+- Logging: added some console warnings when specific sorting options override others.
 ### Removed
 ### Fixed
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
