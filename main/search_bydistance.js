@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/10/22
+//27/10/22
 
 /*
 	Search by Distance
@@ -111,7 +111,9 @@ const SearchByDistance_properties = {
 	bAscii					:	['Asciify string values internally?', true],
 	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
-	checkDuplicatesBy		:	['Remove duplicates by', JSON.stringify(globTags.remDupl), {func: isJSON}, JSON.stringify(globTags.remDupl)]
+	checkDuplicatesBy		:	['Remove duplicates by', JSON.stringify(globTags.remDupl), {func: isJSON}, JSON.stringify(globTags.remDupl)],
+	bSmartShuffle			:	['Smart Shuffle by Artist', false],
+	smartShuffleTag			:	['Smart Shuffle tag', globTags.artist]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -195,12 +197,12 @@ const sbd = {
 	allMusicGraph: musicGraph(),
 	kMoodNumber: 6,  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
-	genre_map: [],
-	style_map: [],
-	genre_style_map: [],
+	genreMap: [],
+	styleMap: [],
+	genreStyleMap: [],
 	isCalculatingCache: false
 };
-[sbd.genre_map , sbd.style_map, sbd.genre_style_map] = dyngenre_map();
+[sbd.genreMap , sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 
 /* 
 	Reuse cache on the same session, from other panels and from json file
@@ -354,8 +356,8 @@ if (panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii']);
-const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag', 'smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMissmatchCRC) {
@@ -445,6 +447,7 @@ async function do_searchby_distance({
 								bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting 
 								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
 								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
+								bSmartShuffle			= properties.hasOwnProperty('bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
 								// --->Special Playlists
 								// Use previous playlist selection, but override playlist sorting, since they use their own logic
 								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
@@ -586,6 +589,7 @@ async function do_searchby_distance({
 		const composerTag = (composerWeight !== 0) ? (recipeProperties.composerTag || properties.composerTag[1]).split(',').filter(Boolean) : [];
 		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(',').filter(Boolean) : [];
 		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const smartShuffleTag = recipeProperties.smartShuffleTag || properties.smartShuffleTag[1];
 		
 		// Check input
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
@@ -593,13 +597,26 @@ async function do_searchby_distance({
 		scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 		minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
 		bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
-		if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {fb.ShowPopupMessage('Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag); return;}
-		if (customNumTag.length > 1) { // Safety Check. Warn users if they try wrong settings
-			if (bBasicLogging) {console.log('Check \'' + properties['customNumTag'][0] + '\' value (' + properties['customNumTag'][1] + '). Must be only one tag name!.');}
+		if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {
+			fb.ShowPopupMessage('Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag); 
 			return;
 		}
-		if (genreTag.length === 0 && styleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) { // Can not use those methods without genre/style tags at all
-			if (bBasicLogging) {console.log('Check \'' + properties['genreTag'][0] + '\' and \''  + properties['styleTag'][0] + '\'. Both can not be empty when using GRAPH or DYNGENRE methods.');}
+		if (bSmartShuffle && !smartShuffleTag || !smartShuffleTag.length) {
+			fb.ShowPopupMessage('smartShuffleTag is not set or has an invalid value:\n' + smartShuffleTag);
+			return;
+		}
+		// Safety Check. Warn users if they try wrong settings
+		if (customNumTag.length > 1) {
+			if (bBasicLogging) {
+				console.log('Check \'' + properties['customNumTag'][0] + '\' value (' + properties['customNumTag'][1] + '). Must be only one tag name!.');
+			}
+			return;
+		}
+		// Can not use those methods without genre/style tags at all
+		if (genreTag.length === 0 && styleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) {
+			if (bBasicLogging) {
+				console.log('Check \'' + properties['genreTag'][0] + '\' and \''  + properties['styleTag'][0] + '\'. Both can not be empty when using GRAPH or DYNGENRE methods.');
+			}
 			return;
 		}
 		
@@ -713,7 +730,7 @@ async function do_searchby_distance({
 		if (dyngenreWeight !== 0 && style_genre_length !== 0) {
 			// This virtual tag is calculated with previous values
 			for (const style_genre_i of style_genreSet) {
-				const dyngenre_i = sbd.genre_style_map.get(style_genre_i);
+				const dyngenre_i = sbd.genreStyleMap.get(style_genre_i);
 				if (dyngenre_i) {dyngenre = dyngenre.concat(dyngenre_i);}
 			}
 			dyngenreNumber = dyngenre.length;
@@ -1128,7 +1145,7 @@ async function do_searchby_distance({
 			if (dyngenreWeight !== 0 && dyngenreNumber !== 0) {
 				if (style_genreSetNew.size !== 0) {
 					for (let style_genreNew_i of style_genreSetNew) {
-						const dyngenre_i = sbd.genre_style_map.get(style_genreNew_i);
+						const dyngenre_i = sbd.genreStyleMap.get(style_genreNew_i);
 						if (dyngenre_i) {dyngenreNew = dyngenreNew.concat(dyngenre_i);}
 					}
 				}
@@ -1299,7 +1316,7 @@ async function do_searchby_distance({
 				// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements. 
 				// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
 				// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
-				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = false;
+				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = false;
 				if (key.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
@@ -1486,7 +1503,6 @@ async function do_searchby_distance({
 			finalPlaylistLength = selectedHandlesArray.length;
 			// Note that bRandomPick makes playlist randomly sorted too (but using different sets of tracks on every call)!
 			if (bSortRandom) {
-				if (bProgressiveListOrder) {console.log('Warning: bSortRandom and bProgressiveListOrder are both set to true, but last one overrides random order.');}
 				for (let i = finalPlaylistLength - 1; i > 0; i--) {
 					const j = Math.floor(Math.random() * (i + 1));
 					[selectedHandlesArray[i], selectedHandlesArray[j]] = [selectedHandlesArray[j], selectedHandlesArray[i]];
@@ -1496,18 +1512,18 @@ async function do_searchby_distance({
 			// Forces progressive changes on tracks, independently of the previous sorting/picking methods
 			// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
 			if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
-				if (bSortRandom) {console.log('Warning: bProgressiveListOrder is overriding random sorting when used along bSortRandom.');}
+				if (bSortRandom) {console.log('Warning: Sorting by Score is overriding Random Sorting.');}
 				selectedHandlesData.sort(function (a, b) {return b.score - a.score;});
 				selectedHandlesArray.sort(function (a, b) {return b.score - a.score;});
 				if (method === 'GRAPH') { // First sorted by graph distance, then by score
 					selectedHandlesData.sort(function (a, b) {return a.mapDistance - b.mapDistance;});
 					selectedHandlesArray.sort(function (a, b) {return a.mapDistance - b.mapDistance;}); 
 				}
-			} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: bProgressiveListOrder has no use if tracks are already choosen by scoring order from pool.');}
+			} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: Sorting by Score has no use if tracks are already chosen by scoring order from pool.');}
 			// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks. 
 			// May override previous sorting methods (only for instrumental tracks). 
 			// Finds instrumental track indexes, and move them to a random range without overlapping.
-			if (bScatterInstrumentals) { // Could reuse scatter_by_tags but since we already have the tags... done here
+			if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
 				let newOrder = [];
 				for (let i = 0; i < finalPlaylistLength; i++) {
 					const index = selectedHandlesData[i].index;
@@ -1538,9 +1554,21 @@ async function do_searchby_distance({
 						selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
 						selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
 					});
-				} else if (toMoveTracks) {console.log('Warning: Could not scatter instrumentals. Interval is too low. (' + toMoveTracks + ' < 2)');}
+				} else if (toMoveTracks) {console.log('Warning: Not possible to apply Instrumental track\'s Scattering. Interval is too low. (' + toMoveTracks + ' < 2)');}
 			}
-			
+			// Spotify's smart shuffle by artist
+			if (bSmartShuffle) { // Sort arrays in place using original data
+				if (bSortRandom) {console.log('Warning: Smart Shuffle is overriding Random Sorting.');}
+				if (bScatterInstrumentals) {console.log('Warning: Smart Shuffle  is overriding Instrumental track\'s Scattering.');}
+				const shuffle = shuffleByTags({
+					tagName: smartShuffleTag, 
+					data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
+					selItems: null,
+					bSendToActivePls: false
+				});
+				selectedHandlesArray = shuffle.handleArray;
+				selectedHandlesData = shuffle.dataArray;
+			}
 			// Progressive list creation, uses output tracks as new references, and so on...
 			// Note it can be combined with 'bInKeyMixingPlaylist', creating progressive playlists with harmonic mixing for every sub-group of tracks
 			if (bProgressiveListCreation) {
