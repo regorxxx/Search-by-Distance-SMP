@@ -1,9 +1,9 @@
 ﻿'use strict';
 //07/10/21
 
-function dyngenre_map() {
+function dyngenreMap() {
 		// DYNGENRE Maps
-		const genre_array = [
+		const genreArray = [
 		//break
 		["Industrial"						,	[0						]],
 		["Heavy Metal"						,	[1						]],
@@ -40,9 +40,9 @@ function dyngenre_map() {
 		["Classical"						,	[60						]],
 		["Opera"							,	[61						]] 
 		];
-		const genre_map = new Map(genre_array);
+		const genreMap = new Map(genreArray);
 		
-		const style_array = [
+		const styleArray = [
 		["Krautrock"						,	[0						]],
 		["Electro-Industrial"				,	[0						]],
 		["Ambient Industrial"				,	[0						]],
@@ -66,19 +66,18 @@ function dyngenre_map() {
 		["Chill-Out Downtempo"				,	[18						]],
 		["Ambiental"						,	[18						]]
 		];
-		const style_map = new Map(style_array);
+		const styleMap = new Map(styleArray);
 		
-		const join_map = new Map(genre_array.concat(style_array));
-		
-		return [genre_map , style_map, join_map];
+		const genreStyleMap = new Map(genreArray.concat(styleArray));
+		return [genreMap , styleMap, genreStyleMap];
 }
 
 /* 
 	Helpers
 */
-function dyn_genre_range(reference, offset, bReturnLimits = false) {
-	const breaks_array = [0,18,30,31,59,61]; // Cycles on pairs of two. Hardcoded see dyngenre_map()
-	const breaks_array_length = breaks_array.length;
+function dynGenreRange(reference, offset, bReturnLimits = false) {
+	const breaksArray = [0,18,30,31,59,61]; // Cycles on pairs of two. Hardcoded see dyngenreMap()
+	const breaksArrayLen = breaksArray.length;
 	let bFound = false;
 	let lowRange = reference;
 	let highRange = reference;
@@ -87,12 +86,11 @@ function dyn_genre_range(reference, offset, bReturnLimits = false) {
 		// Preliminary values
 		lowRange -= offset;
 		highRange += offset;
-		
 		// First we have to find in which range the reference is placed!
 		let i = 0;
-		while (i < breaks_array_length) {
-			lowerLimit = breaks_array[i];
-			upperLimit = breaks_array[i+1];
+		while (i < breaksArrayLen) {
+			lowerLimit = breaksArray[i];
+			upperLimit = breaksArray[i+1];
 			if (reference >= lowerLimit && reference <= upperLimit) { //Between selected pair
 				if (lowRange < lowerLimit) {
 					lowRange += upperLimit + 1 - lowerLimit; // We treat the lower limit as "zero value"
