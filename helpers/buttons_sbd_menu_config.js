@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/10/22
+//30/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -618,13 +618,13 @@ function createConfigMenu(parent) {
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : (properties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
 				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return properties[key][1].split(',').filter(Boolean);});
-				const tags = keys.concat([['TITLE']])
+				const tags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 					.filter((tagName) => {return !tagsCache.cache.has(tagName);});
 				tagsCache.clear(tags);
 				tagsCache.save();
-				tagsCache.cacheTags(tags, iStepsLibrary, iDelayLibrary, fb.GetLibraryItems().Convert(), true);
+				tagsCache.cacheTags(tags, iStepsLibrary, iDelayLibrary, fb.GetLibraryItems().Convert(), true).then(() => {tagsCache.save();});
 			}, flags: properties.bTagsCache[1] ? MF_STRING : MF_GRAYED});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});

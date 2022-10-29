@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/10/22
+//30/10/22
 
 /*
 	Search by Distance
@@ -590,6 +590,8 @@ async function do_searchby_distance({
 		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(',').filter(Boolean) : [];
 		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
 		const smartShuffleTag = recipeProperties.smartShuffleTag || properties.smartShuffleTag[1];
+		const genreStyleTag = [...new Set(genreTag.concat(styleTag))].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
+		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
 		
 		// Check input
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
@@ -878,9 +880,8 @@ async function do_searchby_distance({
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
 					influences = [...new Set(influences)];
-					const tagNameTF = [...new Set(genreTag.concat(styleTag))].map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-					const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-					let temp = query_combinations(influences, tagNameTF, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+					const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+					let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
 					temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
 					influencesQuery.push(temp);
 				}
@@ -894,9 +895,8 @@ async function do_searchby_distance({
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 				if (influences.length) {
 					influences = [...new Set(influences)];
-					const tagNameTF = [...new Set(genreTag.concat(styleTag))].map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-					const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-					let temp = query_combinations(influences, tagNameTF, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+					const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+					let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
 					temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
 					influencesQuery.push(temp);
 				}
@@ -957,6 +957,7 @@ async function do_searchby_distance({
 			if (missingOnCache.length) {
 				console.log('Caching missing tags...');
 				await tagsCache.cacheTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+				tagsCache.save();
 			}
 		}
 		
@@ -981,7 +982,7 @@ async function do_searchby_distance({
         let scoreData = [];
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
-			let tfo = fb.TitleFormat([...new Set(genreTag.concat(styleTag))].join('|'));
+			let tfo = fb.TitleFormat(genreStyleTag.join('|'));
 			handleList.OrderByFormat(tfo, 1);
 		}
 		if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
@@ -991,17 +992,17 @@ async function do_searchby_distance({
 		// Using only boolean filter it's 3x faster than filtering by set, here bTagFilter becomes useful since we may skip +40K evaluations 
 		let tagsArr = [];
 		let z = 0;
-		if (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(genreTag.join(', '));}
-		if (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(styleTag.join(', '));}
-		if (moodWeight !== 0) {tagsArr.push(moodTag.join(', '));}
-		if (composerWeight !== 0) {tagsArr.push(composerTag.join(', '));}
-		if (customStrWeight !== 0) {tagsArr.push(customStrTag.join(', '));}
-		tagsArr.push('TITLE');
-		tagsArr.push(...restTagNames);
+		if (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(genreTag);}
+		if (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(styleTag);}
+		if (moodWeight !== 0) {tagsArr.push(moodTag);}
+		if (composerWeight !== 0) {tagsArr.push(composerTag);}
+		if (customStrWeight !== 0) {tagsArr.push(customStrTag);}
+		tagsArr.push(['TITLE']);
+		tagsArr.push(...restTagNames.map((t) => {return [t];}));
+		tagsArr = tagsArr.map((arr) => {return arr.map((tag) => {return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag);}).join(', ');});
 		const tagsValByKey = [];
 		let tagsVal = [];
 		if (bTagsCache) {
-			tagsArr = tagsArr.map((tagName) => {return (tagName.indexOf('$') === -1 && tagName.toLowerCase() !== 'skip' ? '%' + tagName + '%' : tagName);});
 			tagsVal = tagsCache.getTags(tagsArr, handleList.Convert());
 			tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal[tag];});
 		} else {
@@ -1284,7 +1285,7 @@ async function do_searchby_distance({
 			while (i--) {handlePoolArray.push(handleList[scoreData[i].index]);}
 			let handlePool = new FbMetadbHandleList(handlePoolArray);
 			handlePool = removeDuplicates({handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN}); // n + 1
-			const [titleHandlePool] = getTagsValuesV4(handlePool, ['title'], void(0), void(0), null);
+			const [titleHandlePool] = getTagsValuesV4(handlePool, ['TITLE'], void(0), void(0), null);
 			let filteredScoreData = [];
 			i = 0;
 			while (i < handlePool.Count) {
