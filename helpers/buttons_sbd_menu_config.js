@@ -705,7 +705,7 @@ function createConfigMenu(parent) {
 			'Similar Artists': folders.xxx + 'helpers\\readme\\search_bydistance_similar_artists.txt',
 			'User descriptors': folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt',
 			sep3: 'sep',
-			'Tagging requisites': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
+			'Tagging requisites': folders.xxx + 'helpers\\readme\\tags_structure.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
 			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'
 		};
