@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/10/22
+//30/10/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -729,8 +729,12 @@ async function graphStatistics({
 		} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
-		const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%genre%';
-		const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {return '%' + tag + '%';}).join('|') : '%style%';
+		const genreTag = properties && properties.hasOwnProperty('genreTag') 
+			? JSON.parse(properties.genreTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|') 
+			: _t(globTags.genre);
+		const styleTag = properties && properties.hasOwnProperty('styleTag') 
+			? JSON.parse(properties.genreTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|') 
+			: _t(globTags.style);
 		const tags = [genreTag, styleTag].filter(Boolean).join('|');
 		const tfo = fb.TitleFormat(tags);
 		styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
