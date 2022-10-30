@@ -553,16 +553,16 @@ function createConfigMenu(parent) {
 			}});
 			// Graph debug
 			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
-				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
+				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
 				graphDebug(sbd.allMusicGraph, true); // Show popup on pass
-				if (panelProperties.bProfile[1]) {profiler.Print();}
+				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 			// Graph test
 			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
-				if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
+				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
 				testGraph(sbd.allMusicGraph);
 				testGraphV2(sbd.allMusicGraph);
-				if (panelProperties.bProfile[1]) {profiler.Print();}
+				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
@@ -593,13 +593,13 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
-			if (panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphStatistics');}
+			if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphStatistics');}
 				parent.switchAnimation('graphStatistics', true);
 				graphStatistics({properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod}).then((resolve) => {
 					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
 					console.log(resolve.text);
 					parent.switchAnimation('graphStatistics', false);
-					if (panelProperties.bProfile[1]) {profiler.Print();}
+					if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 				});
 			}});
 		}
