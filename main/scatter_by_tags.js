@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/10/22
+//30/10/22
 
 include('..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
@@ -175,7 +175,7 @@ function intercalateByTags({
 // Based on: https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/
 // Note for some proportions there is an exact solution, and that's used instead of relying on the random method
 function shuffleByTags({
-		tagName = 'ARTIST',
+		tagName = ['ARTIST'],
 		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 		bSendToActivePls = true,
 		data = {handleArray: [], dataArray: [], tagsArray: []} // Shallow copies are made
@@ -190,7 +190,6 @@ function shuffleByTags({
 	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {return null;}
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
-	tagName = tagName.split(/;|,/g);
 	let dataArray = dataLen ? [...data.dataArray] : null;
 	let selItemsArray = dataHandleLen 
 			? [...data.handleArray]

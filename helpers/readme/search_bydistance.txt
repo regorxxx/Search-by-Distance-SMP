@@ -16,7 +16,7 @@ These are the weight/tags pairs checked by default:
 |      Weight     |       Tag       ||     Weight     |       Tag       |
 +-----------------+-----------------++----------------+-----------------+
 +-----------------+-----------------++----------------+-----------------+
-| genreWeight     | $ascii(%genre%) || styleWeight    | $ascii(%style%) |
+| genreWeight     | genre           || styleWeight    | style           |
 +-----------------+-----------------++----------------+-----------------+
 | dyngenreWeight  | virtual tag     || moodWeight     | mood            |
 +-----------------+-----------------++----------------+-----------------+
@@ -58,12 +58,12 @@ Genre and Style tags (or their remapped values) can be globally
 filtered. See 'genreStyleFilter'. Case sensitive. For example, when
 comparing genre values from track A to track B, 'Soundtrack' and 
 'Radio Program' values are omitted:
-+------------------+--------------------------+
-| Filter           | Values                   |
-+------------------+--------------------------+
-+------------------+--------------------------+
-| genreStyleFilter | Soundtrack,Radio Program |
-+------------------+--------------------------+
++---------------------+--------------------------+
+| Filter              | Values                   |
++---------------------+--------------------------+
++---------------------+--------------------------+
+| genreStyleFilterTag | Soundtrack,Radio Program |
++---------------------+--------------------------+
 	
 There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
 +----------+--------------------------+---------------------------------+

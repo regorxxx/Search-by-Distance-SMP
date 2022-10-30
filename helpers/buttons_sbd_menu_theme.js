@@ -35,15 +35,15 @@ function createThemeMenu(parent) {
 	// Create theme
 	themeMenu.newEntry({entryText: 'Create theme file with selected track', func: () => {
 		// Tag names
-		const genreTag = properties.genreTag[1].split(/\| */).filter(Boolean);
-		const styleTag = properties.styleTag[1].split(/\| */).filter(Boolean);
-		const moodTag = properties.moodTag[1].split(/\| */).filter(Boolean);
-		const dateTag = properties.dateTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
-		const keyTag = properties.keyTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
-		const bpmTag = properties.bpmTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
-		const composerTag = properties.composerTag[1].split(/\| */).filter(Boolean);
-		const customStrTag = properties.customStrTag[1].split(/\| */).filter(Boolean);
-		const customNumTag = properties.customNumTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
+		const genreTag = JSON.parse(properties.genreTag[1]).filter(Boolean);
+		const styleTag = JSON.parse(properties.styleTag[1]).filter(Boolean);
+		const moodTag = JSON.parse(properties.moodTag[1]).filter(Boolean);
+		const dateTag = JSON.parse(properties.dateTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
+		const keyTag = JSON.parse(properties.keyTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
+		const bpmTag = JSON.parse(properties.bpmTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
+		const composerTag = JSON.parse(properties.composerTag[1]).filter(Boolean);
+		const customStrTag = JSON.parse(properties.customStrTag[1]).filter(Boolean);
+		const customNumTag = JSON.parse(properties.customNumTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
 		// Tag Values
 		const selHandleList = new FbMetadbHandleList(fb.GetFocusItem());
 		const genre = genreTag.length ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean) : [];

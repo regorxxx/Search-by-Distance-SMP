@@ -54,7 +54,7 @@
 - Key: queries involving key tags now use all possibles equivalences in different notations (standard, Open keys, Camelot keys). For ex: '((KEY IS A) OR (KEY IS 4d) OR (KEY IS 11B))'.
 - Cache: improved graph links cache asynchronous calculation.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
-- Properties: remapped tags properties have been rewriten, previous config will be lost.
+- Properties: remapped tags properties have been rewritten, previous config will be lost. Tags now follow a JSON format, which will be more compatible with TF functions in any field.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.

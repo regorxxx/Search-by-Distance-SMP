@@ -23,21 +23,76 @@ function createConfigMenu(parent) {
 	}
 	// Recipe forced properties?
 	const bProperties = recipe.hasOwnProperty('properties');
+	// Helpers
+	const createTagMenu = (menuName, options) => {
+		options.forEach((key) => {
+			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
+			const idxEnd = properties[key][0].indexOf('(');
+			const value = JSON.parse(bProperties && recipe.properties.hasOwnProperty(key) ? _recipe[key] : properties[key][1]).join(',');
+			const entryText = properties[key][0].substring(
+				properties[key][0].indexOf('.') + 1, idxEnd !== -1 
+					? idxEnd - 1 
+					: Infinity
+				) + '...' + '\t[' + (
+					typeof value === 'string' && value.length > 10 
+					? value.slice(0,10) + '...' 
+					: value
+				) + ']' + (
+					bProperties && recipe.properties.hasOwnProperty(key) 
+						? ' (forced by recipe)' 
+						: ''
+				);
+			menu.newEntry({menuName, entryText, func: () => {
+				let input = '';
+				try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(JSON)', 'Search by distance', properties[key][1], true));}
+				catch (e) {return;}
+				if (input) {input = input.filter((n) => n);}
+				if (isArrayEqual(JSON.parse(properties[key][1]), input)) {return;}
+				properties[key][1] = JSON.stringify(input);
+				overwriteProperties(properties); // Updates panel
+				if (key === 'genreTag' || key === 'styleTag') {
+					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+					if (answer === popup.yes) {
+						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+					}
+				}
+			}, flags: bProperties && recipe.properties.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+		});
+	};
+	
+	const createSwitchMenu = (menuName, option, values, flag = [], hook = null) => {
+		values.forEach((key, i) => {
+			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED}); return;}
+			const entryText = key + (recipe.hasOwnProperty(option) && recipe[option] === key ? '\t(forced by recipe)' : '');
+			menu.newEntry({menuName, entryText, func: () => {
+				properties[option][1] = key;
+				if (hook) {hook(key, i);}
+				overwriteProperties(properties); // Updates panel
+			}, flags: recipe.hasOwnProperty(key) || (flag[i] !== void(0) ? flag[i] : false) ? MF_GRAYED : MF_STRING});
+			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(option) ? recipe[option] === key : properties[option][1] === key);});
+		});
+	};
+	
+	const createBoolMenu = (menuName, options, flag = [], hook = null) => {
+		options.forEach((key, i) => {
+			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED}); return;}
+			const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+			menu.newEntry({menuName, entryText, func: () => {
+				properties[key][1] = !properties[key][1];
+				if (hook) {hook(key, i);}
+				overwriteProperties(properties); // Updates panel
+			}, flags: recipe.hasOwnProperty(key) || (flag[i] !== void(0) ? flag[i] : false) ? MF_GRAYED : MF_STRING});
+			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+		});
+	};
+	
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure methods:
 		const menuName = menu.newMenu('Set method');
 		{
-			const options = ['WEIGHT', 'GRAPH', 'DYNGENRE'];
-			options.forEach((key) => {
-				const entryText = key + (recipe.hasOwnProperty('method') && recipe.method  === key ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					properties.method[1] = key;
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty('method') ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty('method') ? recipe.method === key : properties.method[1] === key);});
-			});
+			createSwitchMenu(menuName, 'method', ['WEIGHT', 'GRAPH', 'DYNGENRE']);
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
@@ -102,15 +157,7 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
-			const options = ['bNegativeWeighting'];
-			options.forEach((key) => {
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					properties[key][1] = !properties[key][1];
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-			});
+			createBoolMenu(menuName, ['bNegativeWeighting']);
 		}
 	}
 	{	// Menu to configure pre-scoring filters:
@@ -202,20 +249,7 @@ function createConfigMenu(parent) {
 	{	// Menu to configure post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Menu to configure properties: tags filter
-			const options = ['poolFilteringTag'];
-			options.forEach((key) => {
-				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
-				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
-				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
-					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1], true);}
-					catch(e) {return;}
-					if (properties[key][1] === input) {return;}
-					properties[key][1] = input;
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-			});
+			createTagMenu(menuName, ['poolFilteringTag']);
 		}
 		{
 			const options = ['poolFilteringN'];
@@ -238,15 +272,7 @@ function createConfigMenu(parent) {
 	{	// Menu to configure pool picking:
 		const menuName = menu.newMenu('Set pool picking');
 		{
-			const options = ['bRandomPick'];
-			options.forEach((key) => {
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					properties[key][1] = !properties[key][1];
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-			});
+			createBoolMenu(menuName, ['bRandomPick']);
 		}
 		{
 			const options = ['probPick'];
@@ -270,31 +296,18 @@ function createConfigMenu(parent) {
 		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '')
 		const menuName = menu.newMenu(menuText, void(0), menuFlags);
-		const options = ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle'];
-		options.forEach((key) => {
-			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
-			const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-			menu.newEntry({menuName, entryText, func: () => {
-				properties[key][1] = !properties[key][1];
-				if (key === 'bSortRandom' && properties.bProgressiveListOrder[1]) {properties.bProgressiveListOrder[1] = !properties.bProgressiveListOrder[1];}
-				else if (key === 'bProgressiveListOrder' && properties.bSortRandom[1]) {properties.bSortRandom[1] = !properties.bSortRandom[1];}
-				overwriteProperties(properties); // Updates panel
-			}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
+		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle'], void(0), (key) => {
+			let toDisable = [];
+			if (key === 'bSortRandom') {toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];}
+			else if (key === 'bProgressiveListOrder') {toDisable = ['bSortRandom', 'bSmartShuffle'];}
+			else if (key === 'bSmartShuffle') {toDisable = ['bSortRandom', 'bProgressiveListOrder'];}
+			toDisable.forEach((noKey) => {if (properties[noKey][1]) {properties[noKey][1] = !properties[noKey][1];}});
 		});
 	}
 	{	// Menu to configure Special playlists:
 		const menuName = menu.newMenu('Special playlist rules');
 		{
-			const options = ['bProgressiveListCreation'];
-			options.forEach((key) => {
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					properties[key][1] = !properties[key][1];
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-			});
+			createBoolMenu(menuName, ['bProgressiveListCreation']);
 		}
 		{
 			const options = ['progressiveListCreationN'];
@@ -315,15 +328,11 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
-			const options = ['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'];
-			options.forEach((key, i) => {
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					properties[key][1] = !properties[key][1];
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) || (i !== 0 && !properties[options[0]][1]) ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-			});
+			createBoolMenu(
+				menuName, 
+				['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'], 
+				[void(0), recipe.hasOwnProperty('bInKeyMixingPlaylist') && !recipe.bInKeyMixingPlaylist || !recipe.hasOwnProperty('bInKeyMixingPlaylist') && !properties.bInKeyMixingPlaylist[1]]
+			);
 		}
 	}
 	{	// Menu to configure other playlist attributes:
@@ -364,22 +373,7 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			{
-				const options = ['checkDuplicatesBy'];
-				options.forEach((key) => {
-					if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
-					const idxEnd = properties[key][0].indexOf('(');
-					const value = recipe.hasOwnProperty(key) ? _recipe[key] : properties[key][1];
-					const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + '\t' + (typeof value === 'string' && value.length > 10 ? value.slice(0,10) + '...]' : value) + (recipe.hasOwnProperty(key) ? ' (forced by recipe)' : '');
-					menu.newEntry({menuName, entryText, func: () => {
-						let input = [];
-						try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(sep by comma)', 'Search by distance', properties[key][1], true));}
-						catch (e) {return;}
-						if (input) {input = input.filter((n) => n);}
-						if (isArrayEqual(JSON.parse(properties[key][1]), input)) {return;}
-						properties[key][1] = JSON.stringify(input);
-						overwriteProperties(properties); // Updates panel
-					}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-				});
+				createTagMenu(menuName, ['checkDuplicatesByTag']);
 			}
 			{
 				const options = ['bAdvTitle'];
@@ -398,41 +392,8 @@ function createConfigMenu(parent) {
 	menu.newEntry({entryText: 'sep'});
 	{	// Menu to configure properties: tags
 		const menuName = menu.newMenu('Remap tags');
-		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'];
-		options.forEach((tagName) => {
-			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (bProperties && recipe.properties.hasOwnProperty(tagName) ? '\t[' + recipe.properties[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
-				let input = '';
-				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \'|\')', 'Search by distance', properties[tagName][1], true);} 
-				catch(e) {return;}
-				if (!input.length) {return;}
-				if (input === properties[tagName][1]) {return;}
-				properties[tagName][1] = input;
-				overwriteProperties(properties);
-				if (tagName === 'genreTag' || tagName === 'styleTag') {
-					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-					if (answer === popup.yes) {
-						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
-					}
-				}
-			}, flags: bProperties && recipe.properties.hasOwnProperty(tagName) ? MF_GRAYED : MF_STRING});
-		});
-		menu.newEntry({menuName, entryText: 'sep'});
-		{	// Menu to configure properties: tags filter
-			const options = ['genreStyleFilter'];
-			options.forEach((key) => {
-				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
-				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
-					try {input = utils.InputBox(window.ID, 'Enter tags sep by comma:', 'Search by distance', properties[key][1], true);}
-					catch(e) {return;}
-					if (properties[key][1] === input) {return;}
-					properties[key][1] = input;
-					overwriteProperties(properties); // Updates panel
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
-			});
-		}
+		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag','sep', 'smartShuffleTag', 'sep', 'genreStyleFilterTag'];
+		createTagMenu(menuName, options);
 		menu.newEntry({menuName, entryText: 'sep'});
 		{	// Cache
 			const options = ['bAscii', 'bTagsCache'];
@@ -583,7 +544,7 @@ function createConfigMenu(parent) {
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
 				findStyleGenresMissingGraph({
-					genreStyleFilter: properties.genreStyleFilter[1].split(/| */).filter(Boolean),
+					genreStyleFilterTag: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
 					genretag: properties.genreTag[1],
 					styleTag: properties.styleTag[1],
 					bAscii: properties.bAscii[1],

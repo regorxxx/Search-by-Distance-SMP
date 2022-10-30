@@ -74,28 +74,28 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by |)', globTags.genre],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by |)', globTags.style],
-	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by |)', globTags.mood],
-	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', globTags.date],
-	keyTag					:	['To remap key tag to other tag change this', globTags.key],
-	bpmTag					:	['To remap bpm tag to other tag change this (sep. by |)', globTags.bpm],
-	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by |)', 'COMPOSER'],
-	customStrTag			:	['To use a custom string tag(s) change this (sep.by |)', ''],
-	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
+	genreTag				:	['Genre tag remap (multiple allowed)', JSON.stringify([globTags.genre])],
+	styleTag				:	['Style tag remap (multiple allowed)', JSON.stringify([globTags.style])],
+	moodTag					:	['Mood tag remap (multiple allowed)', JSON.stringify([globTags.mood])],
+	dateTag					:	['Date tag remap (single value tag or TF expression)', JSON.stringify([globTags.date])],
+	keyTag					:	['Key tag remap (single value)', JSON.stringify([globTags.key])],
+	bpmTag					:	['BPM tag remap (single value)', JSON.stringify([globTags.bpm])],
+	composerTag				:	['Composer tag remap (multiple allowed)', JSON.stringify(['COMPOSER'])],
+	customStrTag			:	['Custom string tag (multiple allowed)', JSON.stringify([])],
+	customNumTag			:	['Custom numeric tag (single value tag or TF expression)', JSON.stringify([])],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
 	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by |)', 'Children\'s Music', {func: isStringWeak}, 'Children\'s Music'],
+	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music'])],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75, {range: [[0,100]], func: isInt}, 75],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', {func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT', {func: checkMethod}, 'WEIGHT'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
-	poolFilteringTag		:	['Filter pool by tag', 'artist'],
+	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
 	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
 	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100, {range: [[1,100]], func: isInt}, 100],
@@ -110,9 +110,9 @@ const SearchByDistance_properties = {
 	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
-	checkDuplicatesBy		:	['Remove duplicates by', JSON.stringify(globTags.remDupl), {func: isJSON}, JSON.stringify(globTags.remDupl)],
+	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
 	bSmartShuffle			:	['Smart Shuffle by Artist', false],
-	smartShuffleTag			:	['Smart Shuffle tag', globTags.artist]
+	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -125,7 +125,7 @@ Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
 	} else if (key.toLowerCase().endsWith('query')) {
 		SearchByDistance_properties[key].push({func: (query) => {return checkQuery(query, true);}}, SearchByDistance_properties[key][1]);
 	} else if (key.toLowerCase().endsWith('tag')) {
-		SearchByDistance_properties[key].push({func: isStringWeak}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({func: isJSON}, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
 		SearchByDistance_properties[key].push({func: isBoolean}, SearchByDistance_properties[key][1]);
 	}
@@ -408,7 +408,7 @@ async function do_searchby_distance({
 								bAscii					= properties.hasOwnProperty('bAscii') ? properties.bAscii[1] : true, // Sanitize all tag values with ASCII equivalent chars
 								bTagsCache				= panelProperties.hasOwnProperty('bTagsCache') ? panelProperties.bTagsCache[1] : false, // Read from cache
 								bAdvTitle 				= properties.hasOwnProperty('bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
-								checkDuplicatesBy 		= properties.hasOwnProperty('checkDuplicatesBy') ? JSON.parse(properties.checkDuplicatesBy[1]) : globTags.remDupl,
+								checkDuplicatesByTag 	= properties.hasOwnProperty('checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
 								// --->Weights
 								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties.genreWeight[1]) : 0, // Number() is used to avoid bugs with dates or other values...
 								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties.styleWeight[1]) : 0,
@@ -593,16 +593,16 @@ async function do_searchby_distance({
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.genreTag || properties.genreTag[1]).split(/\| */).filter(Boolean) : [];
-		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.styleTag || properties.styleTag[1]).split(/\| */).filter(Boolean) : [];
-		const moodTag = (moodWeight !== 0) ?(recipeProperties.moodTag || properties.moodTag[1]).split(/\| */).filter(Boolean) : [];
-		const dateTag = (dateWeight !== 0) ?(recipeProperties.dateTag || properties.dateTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? (recipeProperties.keyTag || properties.keyTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const bpmTag = (bpmWeight !== 0) ? (recipeProperties.bpmTag || properties.bpmTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const composerTag = (composerWeight !== 0) ? (recipeProperties.composerTag || properties.composerTag[1]).split(/\| */).filter(Boolean) : [];
-		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(/\| */).filter(Boolean) : [];
-		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const smartShuffleTag = recipeProperties.smartShuffleTag || properties.smartShuffleTag[1];
+		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? JSON.parse(recipeProperties.genreTag || properties.genreTag[1]).filter(Boolean) : [];
+		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? JSON.parse(recipeProperties.styleTag || properties.styleTag[1]).filter(Boolean) : [];
+		const moodTag = (moodWeight !== 0) ? JSON.parse(recipeProperties.moodTag || properties.moodTag[1]).filter(Boolean) : [];
+		const dateTag = (dateWeight !== 0) ? JSON.parse(recipeProperties.dateTag || properties.dateTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? JSON.parse(recipeProperties.keyTag || properties.keyTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const bpmTag = (bpmWeight !== 0) ? JSON.parse(recipeProperties.bpmTag || properties.bpmTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const composerTag = (composerWeight !== 0) ? JSON.parse(recipeProperties.composerTag || properties.composerTag[1]).filter(Boolean) : [];
+		const customStrTag = (customStrWeight !== 0) ? JSON.parse(recipeProperties.customStrTag || properties.customStrTag[1]).filter(Boolean) : [];
+		const customNumTag = (customNumWeight !== 0) ? JSON.parse(recipeProperties.customNumTag || properties.customNumTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]);
 		const genreStyleTag = [...new Set(genreTag.concat(styleTag))].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
 		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
 		
@@ -679,9 +679,9 @@ async function do_searchby_distance({
 		
 		// Tag filtering: applied globally. Matched values omitted on both calcs, graph and scoring..
 		// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
-		// It's faster than applying array.filter(Boolean).filter(genreStyleFilter)
-		const genreStyleFilter = properties['genreStyleFilter'][1].length ? new Set(properties['genreStyleFilter'][1].split(/\| */).concat('')) : null;
-		const bTagFilter = genreStyleFilter ? true : false; // Only use filter when required
+		// It's faster than applying array.filter(Boolean).filter(genreStyleFilterTag)
+		const genreStyleFilter = new Set(JSON.parse(properties['genreStyleFilterTag'][1]).concat(''));
+		const bTagFilter = !genreStyleFilter.isEqual(new Set([''])) ? true : false; // Only use filter when required
 		
 		// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)
 		// We use flat since it's only 1 track: genre[0][i] === genre.flat()[i]
@@ -983,9 +983,9 @@ async function do_searchby_distance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesBy, bAdvTitle});
+			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
 		} else {
-			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesBy, bAdvTitle});
+			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
 		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
@@ -1607,7 +1607,7 @@ async function do_searchby_distance({
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 								selectedHandlesArray = removeDuplicatesV2({
 									handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), 
-									checkKeys: checkDuplicatesBy,
+									checkKeys: checkDuplicatesByTag,
 									bAdvTitle
 									}).Convert();
 								if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
