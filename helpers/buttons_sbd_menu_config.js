@@ -44,7 +44,7 @@ function createConfigMenu(parent) {
 				);
 			menu.newEntry({menuName, entryText, func: () => {
 				let input = '';
-				try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(JSON)', 'Search by distance', properties[key][1], true));}
+				try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(JSON)\nFor example:\n["GENRE","$replace(%DISCOGS_GENRE%,\', &&\',\',\')","GENRE2"]', 'Search by distance', properties[key][1], true));}
 				catch (e) {return;}
 				if (input) {input = input.filter((n) => n);}
 				if (isArrayEqual(JSON.parse(properties[key][1]), input)) {return;}
