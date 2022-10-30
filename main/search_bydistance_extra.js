@@ -4,8 +4,7 @@
 include('search_bydistance.js');
 
 function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
-	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
-	if (panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
+	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
 	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
@@ -43,7 +42,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	}
 	// Add all possible exclusions to make it faster (even if it less precise)
 	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(','))))].join(',');
-	if (panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
 	randomSelTracks.forEach((sel) => {
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
@@ -62,7 +61,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
 		const data = do_searchby_distance({
 			properties: newConfig,
-			panelProperties,
+			panelProperties: sbd.panelProperties,
 			sel, theme, recipe,
 			// --->Pre-Scoring Filters
 			forcedQuery: dateQuery ? forcedQuery + ' AND ' + dateQuery : forcedQuery
@@ -97,7 +96,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 			} else {report.set(artist, {artist, count, score});}
 		}
 	});
-	if (panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve scores', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve scores', false);}
 	// Get all matched artists and sort by score
 	let total = [];
 	for (const [key, value] of report) {
@@ -146,15 +145,14 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 }
 
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
-	const panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix);
 	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
 	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
 	include('..\\helpers\\world_map_tables.js');
-	if (panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
+	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist
 	const dataId = 'artist';
 	const selId = fb.TitleFormat(_bt(dataId)).EvalWithMetadb(selHandle);
-	if (panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
 	// Retrieve world map data
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
 	const worldMapData = [];
@@ -162,23 +160,23 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) {data.forEach((item) => {worldMapData.push(item);});}
 	}
-	if (panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve world map data', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve world map data', false);}
 	// Retrieve current country
 	const selLocale = (worldMapData.find((obj) => {return (obj[dataId] === selId);}) || {}).val || [''];
 	const selCountry = selLocale.slice(-1)[0];
-	if (panelProperties.bProfile[1]) {test.Print('Task #3: Retrieve current country', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #3: Retrieve current country', false);}
 	console.log(selCountry);
 	// Retrieve current region
 	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(isoMap.get(selCountry.toLowerCase()));
 	console.log(selRegion);
 	const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
 	console.log(selMainRegion);
-	if (panelProperties.bProfile[1]) {test.Print('Task #4: Retrieve current region', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #4: Retrieve current region', false);}
 	// Set allowed countries from current region
 	const allowCountryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion);
 	const allowCountryName = new Set(allowCountryISO.map((iso) => {return isoMapRev.get(iso);}));
 	allowCountryName.forEach((name) => {if (nameReplacersRev.has(name)) {allowCountryName.add(nameReplacersRev.get(name));}}); // Add alternate names
-	if (panelProperties.bProfile[1]) {test.Print('Task #5: Retrieve allowed countries from current region', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #5: Retrieve allowed countries from current region', false);}
 	// Compare and get list of allowed artists
 	const jsonQuery = [];
 	worldMapData.forEach((item) => {
@@ -186,7 +184,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 		if (country && allowCountryName.has(country)) {jsonQuery.push(item[dataId]);}
 	});
 	console.log(jsonQuery);
-	if (panelProperties.bProfile[1]) {test.Print('Task #6: Compare and get list of allowed artists', false);}
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #6: Compare and get list of allowed artists', false);}
 	return jsonQuery ;
 }
 
