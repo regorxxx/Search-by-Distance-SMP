@@ -1,9 +1,9 @@
 ﻿'use strict';
-//26/10/22
+//30/10/22
 
 include('search_bydistance.js');
 
-function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
+async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
@@ -43,7 +43,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 	// Add all possible exclusions to make it faster (even if it less precise)
 	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(','))))].join(',');
 	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
-	randomSelTracks.forEach((sel) => {
+	for await (const sel of randomSelTracks) {
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
 			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
@@ -59,7 +59,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 		const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
 		const dateQuery = date && date.length ? _p(dateQueryTag + ' GREATER ' + (Number(date)- Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2))) : null;
 		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
-		const data = do_searchby_distance({
+		const data = await do_searchby_distance({
 			properties: newConfig,
 			panelProperties: sbd.panelProperties,
 			sel, theme, recipe,
@@ -95,7 +95,7 @@ function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = nu
 				report.set(artist, data);
 			} else {report.set(artist, {artist, count, score});}
 		}
-	});
+	}
 	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve scores', false);}
 	// Get all matched artists and sort by score
 	let total = [];
