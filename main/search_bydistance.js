@@ -263,10 +263,10 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
 					});
 			}
-			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/\| */).map((tag) => {
+			const genreTag = properties && properties.hasOwnProperty('genreTag') ? JSON.parse(properties.genreTag[1]).map((tag) => {
 				return tag.indexOf('$') === -1 ? _t(tag): tag;
 			}).join('|') : _t(globTags.genre);
-			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/\| */).map((tag) => {
+			const styleTag = properties && properties.hasOwnProperty('styleTag') ? JSON.parse(properties.styleTag[1]).map((tag) => {
 				return tag.indexOf('$') === -1 ? _t(tag) : tag;
 			}).join('|') : t(globTags.style);
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
