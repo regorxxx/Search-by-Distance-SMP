@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/10/22
+//30/10/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -35,15 +35,15 @@ function createThemeMenu(parent) {
 	// Create theme
 	themeMenu.newEntry({entryText: 'Create theme file with selected track', func: () => {
 		// Tag names
-		const genreTag = properties.genreTag[1].split(',').filter(Boolean);
-		const styleTag = properties.styleTag[1].split(',').filter(Boolean);
-		const moodTag = properties.moodTag[1].split(',').filter(Boolean);
-		const dateTag = properties.dateTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
-		const keyTag = properties.keyTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
-		const bpmTag = properties.bpmTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
-		const composerTag = properties.composerTag[1].split(',').filter(Boolean);
-		const customStrTag = properties.customStrTag[1].split(',').filter(Boolean);
-		const customNumTag = properties.customNumTag[1].split(',').filter(Boolean); // only allows 1 value, but put it into an array
+		const genreTag = properties.genreTag[1].split(/\| */).filter(Boolean);
+		const styleTag = properties.styleTag[1].split(/\| */).filter(Boolean);
+		const moodTag = properties.moodTag[1].split(/\| */).filter(Boolean);
+		const dateTag = properties.dateTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
+		const keyTag = properties.keyTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
+		const bpmTag = properties.bpmTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
+		const composerTag = properties.composerTag[1].split(/\| */).filter(Boolean);
+		const customStrTag = properties.customStrTag[1].split(/\| */).filter(Boolean);
+		const customNumTag = properties.customNumTag[1].split(/\| */).filter(Boolean); // only allows 1 value, but put it into an array
 		// Tag Values
 		const selHandleList = new FbMetadbHandleList(fb.GetFocusItem());
 		const genre = genreTag.length ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean) : [];

@@ -74,14 +74,14 @@ const SearchByDistance_properties = {
 	customStrWeight			:	['CustomStr Weight for final scoring', 0],
 	customNumWeight			:	['CustomNum Weight for final scoring', 0],
 	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by comma)', globTags.genre],
-	styleTag				:	['To remap style tag to other tag(s) change this (sep. by comma)', globTags.style],
-	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by comma)', globTags.mood],
+	genreTag				:	['To remap genre tag to other tag(s) change this (sep. by |)', globTags.genre],
+	styleTag				:	['To remap style tag to other tag(s) change this (sep. by |)', globTags.style],
+	moodTag					:	['To remap mood tag to other tag(s) change this (sep. by |)', globTags.mood],
 	dateTag					:	['To remap date tag or TF expression change this (1 numeric value / track)', globTags.date],
 	keyTag					:	['To remap key tag to other tag change this', globTags.key],
-	bpmTag					:	['To remap bpm tag to other tag change this (sep. by comma)', globTags.bpm],
-	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by comma)', 'COMPOSER'],
-	customStrTag			:	['To use a custom string tag(s) change this (sep.by comma)', ''],
+	bpmTag					:	['To remap bpm tag to other tag change this (sep. by |)', globTags.bpm],
+	composerTag				:	['To remap composer tag to other tag(s) change this (sep. by |)', 'COMPOSER'],
+	customStrTag			:	['To use a custom string tag(s) change this (sep.by |)', ''],
 	customNumTag			:	['To use a custom numeric tag or TF expression change this (1 numeric value / track)', ''],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
@@ -89,7 +89,7 @@ const SearchByDistance_properties = {
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by comma)', 'Children\'s Music', {func: isStringWeak}, 'Children\'s Music'],
+	genreStyleFilter		:	['Filter these values globally for genre/style (sep. by |)', 'Children\'s Music', {func: isStringWeak}, 'Children\'s Music'],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75, {range: [[0,100]], func: isInt}, 75],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', {func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, 'music_graph_descriptors.intra_supergenre'],
@@ -263,12 +263,12 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
 					});
 			}
-			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/, */g).map((tag) => {
-				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
-			}).join('|') : '%' + globTags.genre + '%';
-			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/, */g).map((tag) => {
-				return tag.indexOf('$') === -1 ? '%' + tag + '%' : tag;
-			}).join('|') : '%' + globTags.style + '%';
+			const genreTag = properties && properties.hasOwnProperty('genreTag') ? properties.genreTag[1].split(/\| */).map((tag) => {
+				return tag.indexOf('$') === -1 ? _t(tag): tag;
+			}).join('|') : _t(globTags.genre);
+			const styleTag = properties && properties.hasOwnProperty('styleTag') ? properties.styleTag[1].split(/\| */).map((tag) => {
+				return tag.indexOf('$') === -1 ? _t(tag) : tag;
+			}).join('|') : t(globTags.style);
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
 			console.log('SearchByDistance: tags used for cache - ' + tags);
 			const tfo = fb.TitleFormat(tags);
@@ -447,7 +447,7 @@ async function do_searchby_distance({
 								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties.sbd_max_graph_distance[1]) ? properties.sbd_max_graph_distance[1] : Number(properties.sbd_max_graph_distance[1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
-								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties.poolFilteringTag[1].split(',').filter(Boolean) : [],
+								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties.poolFilteringTag[1].split(/\| */).filter(Boolean) : [],
 								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties.poolFilteringN[1]) : -1,
 								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
 								// --->Playlist selection
@@ -593,15 +593,15 @@ async function do_searchby_distance({
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.genreTag || properties.genreTag[1]).split(',').filter(Boolean) : [];
-		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.styleTag || properties.styleTag[1]).split(',').filter(Boolean) : [];
-		const moodTag = (moodWeight !== 0) ?(recipeProperties.moodTag || properties.moodTag[1]).split(',').filter(Boolean) : [];
-		const dateTag = (dateWeight !== 0) ?(recipeProperties.dateTag || properties.dateTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? (recipeProperties.keyTag || properties.keyTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const bpmTag = (bpmWeight !== 0) ? (recipeProperties.bpmTag || properties.bpmTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const composerTag = (composerWeight !== 0) ? (recipeProperties.composerTag || properties.composerTag[1]).split(',').filter(Boolean) : [];
-		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(',').filter(Boolean) : [];
-		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(',').filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.genreTag || properties.genreTag[1]).split(/\| */).filter(Boolean) : [];
+		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? (recipeProperties.styleTag || properties.styleTag[1]).split(/\| */).filter(Boolean) : [];
+		const moodTag = (moodWeight !== 0) ?(recipeProperties.moodTag || properties.moodTag[1]).split(/\| */).filter(Boolean) : [];
+		const dateTag = (dateWeight !== 0) ?(recipeProperties.dateTag || properties.dateTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? (recipeProperties.keyTag || properties.keyTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const bpmTag = (bpmWeight !== 0) ? (recipeProperties.bpmTag || properties.bpmTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const composerTag = (composerWeight !== 0) ? (recipeProperties.composerTag || properties.composerTag[1]).split(/\| */).filter(Boolean) : [];
+		const customStrTag = (customStrWeight !== 0) ? (recipeProperties.customStrTag || properties.customStrTag[1]).split(/\| */).filter(Boolean) : [];
+		const customNumTag = (customNumWeight !== 0) ? (recipeProperties.customNumTag || properties.customNumTag[1]).split(/\| */).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
 		const smartShuffleTag = recipeProperties.smartShuffleTag || properties.smartShuffleTag[1];
 		const genreStyleTag = [...new Set(genreTag.concat(styleTag))].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
 		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
@@ -680,7 +680,7 @@ async function do_searchby_distance({
 		// Tag filtering: applied globally. Matched values omitted on both calcs, graph and scoring..
 		// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
 		// It's faster than applying array.filter(Boolean).filter(genreStyleFilter)
-		const genreStyleFilter = properties['genreStyleFilter'][1].length ? new Set(properties['genreStyleFilter'][1].split(',').concat('')) : null;
+		const genreStyleFilter = properties['genreStyleFilter'][1].length ? new Set(properties['genreStyleFilter'][1].split(/\| */).concat('')) : null;
 		const bTagFilter = genreStyleFilter ? true : false; // Only use filter when required
 		
 		// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)

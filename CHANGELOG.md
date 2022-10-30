@@ -54,6 +54,7 @@
 - Key: queries involving key tags now use all possibles equivalences in different notations (standard, Open keys, Camelot keys). For ex: '((KEY IS A) OR (KEY IS 4d) OR (KEY IS 11B))'.
 - Cache: improved graph links cache asynchronous calculation.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
+- Properties: remapped tags properties have been rewriten, previous config will be lost.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
@@ -66,6 +67,7 @@
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
+- Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').
 - Similar artists: remapped genre/style tags were not being properly used on filtering step.
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.

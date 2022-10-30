@@ -402,7 +402,7 @@ function createConfigMenu(parent) {
 		options.forEach((tagName) => {
 			menu.newEntry({menuName, entryText: 'Set ' + tagName.replace('Tag','') + ' tag' + (bProperties && recipe.properties.hasOwnProperty(tagName) ? '\t[' + recipe.properties[tagName] + '] (forced by recipe)' : '\t[' + properties[tagName][1] + ']'), func: () => {
 				let input = '';
-				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \',\')', 'Search by distance', properties[tagName][1], true);} 
+				try {input = utils.InputBox(window.ID, 'Input tag name(s) (sep by \'|\')', 'Search by distance', properties[tagName][1], true);} 
 				catch(e) {return;}
 				if (!input.length) {return;}
 				if (input === properties[tagName][1]) {return;}
@@ -583,7 +583,7 @@ function createConfigMenu(parent) {
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
 				findStyleGenresMissingGraph({
-					genreStyleFilter: properties.genreStyleFilter[1].split(',').filter(Boolean),
+					genreStyleFilter: properties.genreStyleFilter[1].split(/| */).filter(Boolean),
 					genretag: properties.genreTag[1],
 					styleTag: properties.styleTag[1],
 					bAscii: properties.bAscii[1],
@@ -619,7 +619,7 @@ function createConfigMenu(parent) {
 			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
-				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return properties[key][1].split(',').filter(Boolean);});
+				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return properties[key][1].split(/| */).filter(Boolean);});
 				const tags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)

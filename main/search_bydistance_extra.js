@@ -14,9 +14,9 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
 	const newConfig = clone(properties);
-	const genreTag = newConfig.genreTag[1].split(',').filter(Boolean);
+	const genreTag = newConfig.genreTag[1].split(/| */).filter(Boolean);
 	const genreQueryTag = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
-	const styleTag = newConfig.styleTag[1].split(',').filter(Boolean);
+	const styleTag = newConfig.styleTag[1].split(/| */).filter(Boolean);
 	const styleQueryTag = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
 	const genreStyleTag = [...new Set(genreTag.concat(styleTag))];
 	// Find which genre/styles are nearest as pre-filter using the selected track
@@ -41,7 +41,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 		genreStyleWeight.forEach((val, key) => {genreStyleWeight.set(key, val / size);});
 	}
 	// Add all possible exclusions to make it faster (even if it less precise)
-	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(','))))].join(',');
+	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(/| */))))].join(',');
 	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
 	for await (const sel of randomSelTracks) {
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
@@ -192,7 +192,7 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = 'GENRE',
 	// Skipped values at pre-filter
 	const tagValuesExcluded = new Set(genreStyleFilter); // Filter holes and remove duplicates
 	// Get all tags and their frequency
-	const tagsToCheck = [...new Set(genreTag.concat(',', styleTag).split(',').filter(Boolean))]; // Merge and filter
+	const tagsToCheck = [...new Set(genreTag.concat(',', styleTag).split(/| */).filter(Boolean))]; // Merge and filter
 	if (!tagsToCheck.length && bPopup) {
 		fb.ShowPopupMessage('There are no tags to check set.', 'Search by distance');
 		return null;
