@@ -51,6 +51,7 @@ include('..\\helpers\\dyngenre_map_xxx.js');
 include('..\\helpers\\music_graph_xxx.js');
 include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
+include('scatter_by_tags.js');
 include('..\\helpers\\callbacks_xxx.js');
 
 checkCompatible('1.6.1', 'smp');
