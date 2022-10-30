@@ -50,12 +50,14 @@ NOTES AND WARNINGS:
 
 - GENRE and STYLE tags from Discogs or other sources: 
 Some tagging sources offer conglomerate of genre/styles as a single
-value. For ex. 'Folk, World & Country'. For all purposes, GENRE and
+value. For ex. 'Folk, World, & Country'. For all purposes, GENRE and
 STYLE tags are usually split into multiple values by comma, so it 
-will be split into 'Folk', 'World' and '& Country'. Tag properly your 
-files, splitting the values into real genre/styles instead of 
-conglomerates to avoid this situation or just don't use those values
-on tools like 'Search by distance', which would made no sense.
+will be split into 'Folk', 'World' and '& Country'. In such case, tag
+may be remapped to something like "$replace(%GENRE%,', &',',')". 
+Otherwise tag properly your files, splitting the values into real 
+genre/styles instead of conglomerates to avoid this situation or just
+don't use those values on tools like 'Search by distance', which would
+made no sense.
 
 - Getting KEY tag from different sources:
 Different software use different algorithms to compute KEY, therefore it
