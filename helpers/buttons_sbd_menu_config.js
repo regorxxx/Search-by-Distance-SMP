@@ -545,8 +545,8 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
 				findStyleGenresMissingGraph({
 					genreStyleFilterTag: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
-					genretag: properties.genreTag[1],
-					styleTag: properties.styleTag[1],
+					genretag: JSON.parse(properties.genreTag[1]),
+					styleTag: JSON.parse(properties.styleTag[1]),
 					bAscii: properties.bAscii[1],
 					bPopup: true
 				});
@@ -580,7 +580,7 @@ function createConfigMenu(parent) {
 			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
-				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return properties[key][1].split(/| */).filter(Boolean);});
+				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return JSON.parse(properties[key][1]).filter(Boolean);});
 				const tags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)

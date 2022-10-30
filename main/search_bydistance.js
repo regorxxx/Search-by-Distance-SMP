@@ -447,7 +447,7 @@ async function do_searchby_distance({
 								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties.sbd_max_graph_distance[1]) ? properties.sbd_max_graph_distance[1] : Number(properties.sbd_max_graph_distance[1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
-								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? properties.poolFilteringTag[1].split(/\| */).filter(Boolean) : [],
+								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? JSON.parse(properties.poolFilteringTag[1]).filter(Boolean) : [],
 								poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties.poolFilteringN[1]) : -1,
 								bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
 								// --->Playlist selection

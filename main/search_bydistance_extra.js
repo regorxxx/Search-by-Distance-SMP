@@ -14,9 +14,9 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
 	const newConfig = clone(properties);
-	const genreTag = newConfig.genreTag[1].split(/| */).filter(Boolean);
+	const genreTag = JSON.parse(newConfig.genreTag[1]).filter(Boolean);
 	const genreQueryTag = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
-	const styleTag = newConfig.styleTag[1].split(/| */).filter(Boolean);
+	const styleTag = JSON.parse(styleTag[1]).filter(Boolean);
 	const styleQueryTag = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
 	const genreStyleTag = [...new Set(genreTag.concat(styleTag))];
 	// Find which genre/styles are nearest as pre-filter using the selected track
@@ -188,11 +188,11 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	return jsonQuery ;
 }
 
-function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = 'GENRE', styleTag = 'STYLE', bAscii = true, bPopup = true} = {}) {
+function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = ['GENRE'], styleTag = ['STYLE'], bAscii = true, bPopup = true} = {}) {
 	// Skipped values at pre-filter
 	const tagValuesExcluded = new Set(genreStyleFilter); // Filter holes and remove duplicates
 	// Get all tags and their frequency
-	const tagsToCheck = [...new Set(genreTag.concat(',', styleTag).split(/| */).filter(Boolean))]; // Merge and filter
+	const tagsToCheck = [...new Set(genreTag.concat(styleTag).filter(Boolean))]; // Merge and filter
 	if (!tagsToCheck.length && bPopup) {
 		fb.ShowPopupMessage('There are no tags to check set.', 'Search by distance');
 		return null;
