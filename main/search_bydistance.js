@@ -100,9 +100,9 @@ const SearchByDistance_properties = {
 	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
 	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100, {range: [[1,100]], func: isInt}, 100],
 	playlistLength			:	['Max Playlist Mix length', 50],
-	bSortRandom				:	['Sort final playlist randomly', true],
+	bSortRandom				:	['Sort final playlist randomly', false],
 	bProgressiveListOrder	:	['Sort final playlist by score', false],
-	bScatterInstrumentals	:	['Intercalate instrumental tracks', true],
+	bScatterInstrumentals	:	['Intercalate instrumental tracks', false],
 	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
 	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
@@ -111,7 +111,7 @@ const SearchByDistance_properties = {
 	bAscii					:	['Asciify string values internally?', true],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
-	bSmartShuffle			:	['Smart Shuffle by Artist', false],
+	bSmartShuffle			:	['Smart Shuffle by Artist', true],
 	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])]
 };
 // Checks
@@ -263,12 +263,12 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
 					});
 			}
-			const genreTag = properties && properties.hasOwnProperty('genreTag') ? JSON.parse(properties.genreTag[1]).map((tag) => {
-				return tag.indexOf('$') === -1 ? _t(tag): tag;
-			}).join('|') : _t(globTags.genre);
-			const styleTag = properties && properties.hasOwnProperty('styleTag') ? JSON.parse(properties.styleTag[1]).map((tag) => {
-				return tag.indexOf('$') === -1 ? _t(tag) : tag;
-			}).join('|') : t(globTags.style);
+			const genreTag = properties && properties.hasOwnProperty('genreTag') 
+				? JSON.parse(properties.genreTag[1]).map((tag) => {	return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|') 
+				: _t(globTags.genre);
+			const styleTag = properties && properties.hasOwnProperty('styleTag') 
+				? JSON.parse(properties.styleTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag) : tag;}).join('|') 
+				: _t(globTags.style);
 			const tags = [genreTag, styleTag].filter(Boolean).join('|');
 			console.log('SearchByDistance: tags used for cache - ' + tags);
 			const tfo = fb.TitleFormat(tags);
@@ -1573,7 +1573,7 @@ async function do_searchby_distance({
 			// Spotify's smart shuffle by artist
 			if (bSmartShuffle) { // Sort arrays in place using original data
 				if (bSortRandom) {console.log('Warning: Smart Shuffle is overriding Random Sorting.');}
-				if (bScatterInstrumentals) {console.log('Warning: Smart Shuffle  is overriding Instrumental track\'s Scattering.');}
+				if (bScatterInstrumentals) {console.log('Warning: Smart Shuffle is overriding Instrumental track\'s Scattering.');}
 				const shuffle = shuffleByTags({
 					tagName: smartShuffleTag, 
 					data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
