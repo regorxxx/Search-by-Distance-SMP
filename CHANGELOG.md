@@ -72,6 +72,7 @@
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
 - Similar artists: in some cases similar artists were duplicated.
+- Similar artists: crash when date tag was not set (now uses tracks from any date in such case).
 - Cache: graph links cache re-calculation is now blocked when there is already an on-going calculation. User is asked to manually re-run it afterwards via popups now.
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
