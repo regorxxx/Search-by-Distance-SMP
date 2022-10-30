@@ -5,6 +5,7 @@ include('callbacks_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
 include('helpers_xxx_crc.js');
+if (!isCompatible('2.0', 'fb')) {console.log('Tags Cache is being used on foobar <2.0. This is not recommended.');}
 
 // Tags cache
 // Tag retrieval is too slow when retrieving tags on Foobar 2.0+
@@ -160,6 +161,7 @@ tagsCache.load = function (folder = this.folder) {
 			resolve('done');
 		});
 	});
+	console.log('Tags Cache loaded.');
 }
 
 tagsCache.unload = function () {

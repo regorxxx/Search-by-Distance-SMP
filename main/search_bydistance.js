@@ -210,12 +210,10 @@ if (!sbd.panelProperties.firstPopup[1]) {
 */
 if (sbd.panelProperties.bTagsCache[1]) {
 	if (typeof tagsCache === 'undefined') {
-		console.log('Tags Cache is being used on foobar <2.0. This is not recommended.');
 		include('..\\helpers\\helpers_xxx_tags_cache.js');
 	}
 	doOnce('Load tags cache', debounce(() => {
 		tagsCache.load();
-		tagsCache.enable();
 	}, 5000))();
 }
 
