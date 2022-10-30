@@ -12,8 +12,8 @@ if (typeof include !== 'undefined') { // On foobar
 	let userDescriptor = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 	if (utils.IsFile(userDescriptor)) {
 		try {
-			// console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);
 			include(userDescriptor);
+			console.log('User\'s music_graph_descriptors - File loaded: ' + userDescriptor);
 		} catch (e) { 
 			console.log('Error loading user\'s music_graph_descriptors. Using default file instead.');
 		}
