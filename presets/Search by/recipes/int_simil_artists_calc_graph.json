@@ -29,6 +29,7 @@
 	"probPick": 100,
 	"playlistLength": 200,
 	"bSortRandom": false,
+	"bSmartShuffle": false,
 	"bProgressiveListOrder": false,
 	"bScatterInstrumentals": false,
 	"bInKeyMixingPlaylist": false,
