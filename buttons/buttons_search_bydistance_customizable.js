@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/09/22
+//30/10/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -26,7 +26,6 @@ newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // A
 buttonsBar.list.push(newButtonsProperties);
 // Update cache with user set tags
 doOnce('Update SBD cache', debounce(updateCache, 3000))({properties: newButtonsProperties});
-doOnce('Load tags cache', debounce(() => {if (newButtonsProperties.bTagsCache[1]) {tagsCache.load();}}, 5000))();
 
 /*
 	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
