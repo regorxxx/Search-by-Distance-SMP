@@ -46,6 +46,11 @@ If you use other tag names then you have these options:
 3. Configure scripts to remap standard tags to your own tags.
 4. Configure your tagging tools to output proper tag names.
 
+WARNING: All tags will be split by comma into multiple values. This is 
+specially important for 'genre' or 'style' tags, since values like:
+'Folk, World & Country' will be split into 'Folk', 'World', '& Country'.
+Tag properly your files to avoid this situation.
+
 --------------------------------------------------------------------------
 Example:
 --------------------------------------------------------------------------

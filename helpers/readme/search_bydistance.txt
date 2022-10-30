@@ -163,6 +163,18 @@ But there is a workaround, let's say you only use genre tags (and put
 all values together there). Then set style weight to zero. 
 It will just check genre tags and the graph part will work the same anyway.
 
+Some tagging sources (Discogs) offer conglomerate of genre/styles as
+a single value. For ex. 'Folk, World & Country'. For all purposes, 
+GENRE and STYLE tags are usually split into multiple values by comma, 
+so it will be split into 'Folk', 'World' and '& Country'. Obviously this
+will be unusable since the last value is not valid, a tag can not be
+'Country' and 'Folk' at the same time and 'World' is not considered
+a genre.
+
+Tag properly your files, splitting the values into real genre/styles 
+instead of conglomerates to avoid this situation or just don't use 
+those values for GRAPH method, which makes no sense.
+
 Note about GRAPH/DYNGENRE exclusions:
 -------------------------------------
 Apart from the global filter (which applies to genre/style string 
