@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/22
+//01/11/22
 
 include('..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
@@ -116,9 +116,7 @@ function intercalateByTags({
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
 		if (valMap.has(val)) {
-			const newVal = valMap.get(val);
-			newVal.push(i);
-			valMap.set(val, newVal);
+			valMap.get(val).push(i);
 		} else {
 			valMap.set(val, [i]);
 		}
@@ -186,7 +184,7 @@ function shuffleByTags({
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
 	if (dataHandleLen <= 2 && itemsCount <= 2) {return null;}
-	if (!tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {return null;}
+	if (!Array.isArray(tagName) || !tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {return null;}
 	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {return null;}
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
@@ -212,9 +210,7 @@ function shuffleByTags({
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
 		if (valMap.has(val)) {
-			const newVal = valMap.get(val);
-			newVal.push(i);
-			valMap.set(val, newVal);
+			valMap.get(val).push(i);
 		} else {
 			valMap.set(val, [i]);
 		}
@@ -234,9 +230,9 @@ function shuffleByTags({
 	// Calculate timeline
 	let timeLine = [];
 	if (bSolved) {
-		const keys = [...valMap.keys()].filter((key) => {return key !== solution;});
+		const keys = [...tagValues].filter((key) => {return key !== solution;});
 		timeLine = Array(totalTracks).fill(null).map((val, i) => {
-			return {pos: i, key: (i % 2 === 0 ? solution : keys.splice(Math.floor(Math.random() * keys.length), 1)[0])};
+			return {pos: i, key: i % 2 === 0 ? solution : keys.splice(Math.floor(Math.random() * keys.length), 1)[0]};
 		});
 	} else {
 		const timeLineMap = new ReverseIterableMap();
@@ -256,13 +252,13 @@ function shuffleByTags({
 			}
 		}
 	}
-	timeLine.forEach((track) => {
+	timeLine.forEach((track, i) => {
 		const key = track.key;
 		const tracks = valMap.get(key);
 		const tracksNum = tracks.length;
 		// Select a random track with chosen value
 		const n = Math.floor(Math.random() * tracksNum);
-		const index = tracks.splice(n, 1);
+		const index = tracks.splice(n, 1)[0];
 		selItemsArrayOut.push(selItemsArray[index]);
 		tagValuesOut.push(tagValues[index]);
 		if (dataArray) {dataValuesOut.push(dataArray[index]);}
