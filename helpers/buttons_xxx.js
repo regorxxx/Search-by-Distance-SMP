@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/10/22
+//01/10/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -47,6 +47,9 @@ buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordina
 buttonsBar.tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
+buttonsBar.useThemeManager = function useThemeManager() {
+	return (this.config.bUseThemeManager && this.config.partAndStateID === 1);
+}
 
 function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.orientation, recalc = true) {
 	let newCoordinates;
@@ -88,7 +91,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.moveX = null;
 	this.moveY = null;
 	this.originalWindowWidth = window.Width;
-	this.g_theme = buttonsBar.config.bUseThemeManager ? window.CreateThemeManager('Button') : null;
+	this.g_theme = buttonsBar.useThemeManager() ? window.CreateThemeManager('Button') : null;
 	this.gFont = gFont;
 	this.gFontIcon = gFontIcon;
 	this.description = description;
@@ -157,14 +160,14 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
 		// Check SO allows button theme
-		if (buttonsBar.config.bUseThemeManager && !this.g_theme) { // may have been changed before drawing but initially not set
+		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
 			this.g_theme = window.CreateThemeManager('Button');
 			if (!this.g_theme) {
 				buttonsBar.config.bUseThemeManager = false; 
 				console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using experimental buttons');
 			}
 		}
-		if (buttonsBar.config.bUseThemeManager) {
+		if (buttonsBar.useThemeManager()) {
 			// Themed Button states
 			switch (this.state) {
 				case buttonStates.normal: {
@@ -193,41 +196,62 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		if (this.moveY) {yCalc = this.moveY;}
 		const textCalculated = isFunction(this.text) ? this.text(this) : this.text;
 		// Draw button
-		if (buttonsBar.config.bUseThemeManager) {this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);}
+		if (buttonsBar.useThemeManager()) {this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);}
 		else {
 			const x = xCalc + 1;
 			const y = yCalc;
 			const w =  wCalc - 4;
 			const h =  hCalc - 2;
 			const arc = 3;
-			gr.SetSmoothingMode(4); // Antialias for lines
+			gr.SetSmoothingMode(2); // Antialias for lines
+			const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 			switch (this.state) {
 				case buttonStates.normal:
-					gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-					gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-					gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
-					gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
-					gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
+					if (bDrawBackground) {
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
+					}
 					break;
 				case buttonStates.hover:
 					buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
-					gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-					gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-					gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
-					gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
+					if (bDrawBackground) {
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
+					} else {
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(160,160,160));
+					}
 					gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
-					gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225,243,252,255));
-					gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(17,166,248,50));
+					if (bDrawBackground) {
+						gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, RGBA(225,243,252,255));
+						gr.FillRoundRect(x, y + h / 2, w, h / 2, arc, arc, RGBA(17,166,248,50));
+					} else {
+						gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, RGBA(255,255,255,50));
+						gr.FillRoundRect(x, y + h / 2, w, h / 2, arc, arc, RGBA(0,0,0,10));
+					}
 					break;
 				case buttonStates.down:
-					gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-					gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-					gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+					if (bDrawBackground) {
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+					}
 					gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
-					gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
-					gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225,243,252,255));
-					gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(37,196,255,80));
-					gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 3, RGBA(0,0,0,50));
+					if (bDrawBackground) {
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
+						gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225,243,252,255));
+						gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(37,196,255,80));
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 3, RGBA(0,0,0,50));
+					} else {
+						gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(0,0,0,20));
+						gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,20));
+						gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,10));
+						gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(0,0,0,10));
+					}
 					break;
 				case buttonStates.hide:
 					return;
