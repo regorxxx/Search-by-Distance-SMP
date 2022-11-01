@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/22
+//01/10/22
 
 /*
 	Search by Distance
@@ -1604,7 +1604,7 @@ async function do_searchby_distance({
 							for (let i = 0; i < progressiveListCreationN; i++) {
 								const prevtLength = selectedHandlesArray.length;
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
-								[newSelectedHandlesArray, , , newArgs['sel']] = do_searchby_distance(newArgs);
+								[newSelectedHandlesArray, , , newArgs['sel']] = await do_searchby_distance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 								selectedHandlesArray = removeDuplicatesV2({
 									handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), 
