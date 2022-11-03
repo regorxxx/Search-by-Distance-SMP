@@ -31,7 +31,7 @@ Tag|TF|Tag|TF
 -------------|----------------|--------------|-------------
 dateTag | $year(%date%) | customNumWeight | (unused by default)	 
 	
-![search_by_distance_white](https://user-images.githubusercontent.com/83307074/183678441-416b39c1-3fc5-4bca-a45c-60c3f9220723.png)
+![Graph method](/_images/search_by_distance_GRAPH_diagram.png)
 	
 There are 3 methods to calculate similarity between tracks: WEIGHT, GRAPH (see above) and DYNGENRE.
 
