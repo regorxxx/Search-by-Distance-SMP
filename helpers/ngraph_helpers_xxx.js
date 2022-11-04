@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/10/22
+//03/11/22
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
@@ -206,7 +206,7 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new, influ
 			if (mapDistance < Infinity) { // If they are linked
 				mapDistance += influenceDistance; // Adds positive/negative influence distance ('negative' means nearer...)
 				mapDistance /= difference.size;  // mean distance
-				mapDistance = round(mapDistance,1); // And rounds the final value
+				mapDistance = round(mapDistance, 1); // And rounds the final value
 				if (mapDistance < 0) {mapDistance = 0;} // Safety check, since influence may lower values below zero
 			}
 		}
@@ -231,61 +231,40 @@ function calcMeanDistanceV2(mygraph, style_genre_reference, style_genre_new, inf
 	Precompute
 */
 
-// Finds distance between all nodes on map. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkAll(mygraph, limit = -1, influenceMethod = 'adjacentNodes') {
-		let cache = new Map();
-		let node_list = [];
-
-		mygraph.forEachNode(function(node){
-			node_list.push(node.id);}
-		);
-		
-		let node_list_length = node_list.length;
-		let i = 0;
-		while (i < node_list_length){
-			let j = i + 1;
-			while (j < node_list_length){
-				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true, influenceMethod);
-				if (limit === -1 || ij_distance <= limit) {
-					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
-				}
-				j++;
-			}
-			i++;
-		}
-		return cache;
-}
-
+/* 
+	nodeList = []; // All nodes on map
+	mygraph.forEachNode(function(node){
+		nodeList.push(node.id);}
+	); 
+*/
 // Finds distance between all SuperGenres on map. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSG(mygraph, limit = -1, influenceMethod = 'adjacentNodes') {
-		let cache = new Map();
-		let node_list = [];
-		
-		node_list = [...new Set(music_graph_descriptors.style_supergenre.flat(2))]; // all values without duplicates
-		
-		let node_list_length = node_list.length;
-		let i = 0;
-		while (i < node_list_length){
-			let j = i + 1;
-			while (j < node_list_length){
-				let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, node_list[i], node_list[j], true, influenceMethod);
-				if (limit === -1 || ij_distance <= limit) {
-					cache.set(node_list[i]+ '-' + node_list[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
-				}
-				j++;
+function calcCacheLinkSG(mygraph, nodeList = [...new Set(music_graph_descriptors.style_supergenre.flat(2))], limit = -1, influenceMethod = 'adjacentNodes') {
+	let cache = new Map();
+	let nodeListLen = nodeList.length;
+	let i = 0;
+	while (i < nodeListLen){
+		let j = i + 1;
+		while (j < nodeListLen){
+			let [ij_distance, ij_antinfluenceDistance] = calcGraphDistance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
+			if (limit === -1 || ij_distance <= limit) {
+				cache.set(nodeList[i]+ '-' + nodeList[j], {distance: ij_distance, influenceDistance: ij_antinfluenceDistance});
 			}
-			i++;
+			j++;
 		}
-		return cache;
+		i++;
+	}
+	return cache;
 }
 
 // Finds distance between all SuperGenres present on given set of style/genres. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
 function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...])*/, limit = -1, influenceMethod = 'adjacentNodes') {
-	let nodeList = [];
 	// Filter SGs with those on library
 	const descr = music_graph_descriptors;
-	nodeList = new Set([...descr.style_supergenre, ...descr.style_weak_substitutions, ...descr.style_substitutions, ...descr.style_cluster].flat(Infinity)); 
-	nodeList = [...nodeList.intersection(styleGenres)];
+	const nodeList = [
+		...new Set(
+			[...descr.style_supergenre, ...descr.style_weak_substitutions, ...descr.style_substitutions, ...descr.style_cluster].flat(Infinity)
+		).intersection(styleGenres)
+	]; 
 	return new Promise((resolve) => {
 		let cache = new Map();
 		const promises = [];

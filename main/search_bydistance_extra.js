@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/22
+//03/11/22
 
 include('search_bydistance.js');
 
@@ -205,7 +205,7 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = ['GENRE'
 	}
 	// Get tags
 	let tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
-	if (bAscii) {	tags =  new Set([...tags].map((tag) => {return _asciify(tag);}));}
+	if (bAscii) {tags =  new Set([...tags].map((tag) => {return _asciify(tag);}));}
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
 	// Compare (- user exclusions - graph exclusions)

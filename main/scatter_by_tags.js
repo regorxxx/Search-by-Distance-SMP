@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/11/22
+//03/11/22
 
 include('..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
@@ -172,6 +172,7 @@ function intercalateByTags({
 // Applies semi-random patterns, not allowing the same artist 2 times in a row, while not falling into strict intercalation
 // Based on: https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/
 // Note for some proportions there is an exact solution, and that's used instead of relying on the random method
+// Beware it returns null when items are <= 2. Just reuse original list in such case
 function shuffleByTags({
 		tagName = ['ARTIST'],
 		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
@@ -183,9 +184,9 @@ function shuffleByTags({
 	const dataTagsLen = data && data.tagsArray ? data.tagsArray.length : 0;
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
-	if (dataHandleLen <= 2 && itemsCount <= 2) {return null;}
-	if (!Array.isArray(tagName) || !tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {return null;}
-	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {return null;}
+	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items.'); return null;}
+	if (!Array.isArray(tagName) || !tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {console.log('shuffleByTags: wrong arguments.'); return null;}
+	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length does not match items count.'); return null;}
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
 	let dataArray = dataLen ? [...data.dataArray] : null;
@@ -252,7 +253,7 @@ function shuffleByTags({
 			}
 		}
 	}
-	timeLine.forEach((track, i) => {
+	timeLine.forEach((track) => {
 		const key = track.key;
 		const tracks = valMap.get(key);
 		const tracksNum = tracks.length;
