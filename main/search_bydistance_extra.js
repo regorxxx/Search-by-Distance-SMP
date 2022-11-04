@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/11/22
+//04/11/22
 
 include('search_bydistance.js');
 
@@ -212,11 +212,28 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = ['GENRE'
 	const missing = [...tags.difference(nodeList).difference(tagValuesExcluded).difference(music_graph_descriptors.map_distance_exclusions)].sort();
 	// Report
 	const userFile = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
-	const userFileFound = _isFile(userFile) ? '' : ' (not found)';
-	const userFileEmpty = !userFileFound.length && Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
-	const report = 'Graph descriptors:\n' +
-					'(scripts folder) .\\helpers\\music_graph_descriptors_xxx.js\n' +
-					'(profile folder) .\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + userFileFound + userFileEmpty + '\n\n' +
+	const userFileNotFound = _isFile(userFile) ? '' : ' (not found)';
+	const userFileEmpty = !userFileNotFound.length && Object.keys(music_graph_descriptors_user).length ? '' : ' (empty)';
+	const report = 'Missing genre/styles may be added to your user\'s descriptors file, either\n' + 
+					'as new entries or as substitutions where required.\n\n' +
+					(missing.length 
+						? 	'In case you find a genre/style which is missing, check is not a misspelling\n' + 
+							'or alternate term for an existing entry (otherwise tag properly your files\n' + 
+							'or add the substitution to your file), and then if  you think it should be\n' + 
+							'added to the Graph, let me know at: (but do your work first!)\n' +
+							'https://github.com/regorxxx/Music-Graph/issues\n\n' +
+							'An example of a good report of missing genre/style would be:\n' + 
+							'"Hey check this Metal style, you missed from the 90s which is not equal\n' + 
+							'to \'Black Metal\' or any other present style (+ youtube link)"\n\n' +
+							'An example of a bad report of missing genre/style would be:\n' + 
+							'"Hey, \'Folk/Rock\' is missing, but it\'s a known genre. Add it please."\n' +
+							'(This is not valid because there is already a \'Folk-Rock\' entry, just use\n' +
+							'substitutions since that\'s their reason of existence. Also it\'s not\n' +
+							'planned to add every possible substitution to the original graph)\n\n' +
+							'Graph descriptors:\n'
+						:	'') +
+					'[scripts folder]\\helpers\\music_graph_descriptors_xxx.js\n' +
+					'[profile folder]\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + (userFileNotFound || userFileEmpty) + '\n\n' +
 					'List of tags not present on the graph descriptors:\n' +
 					missing.joinEvery(', ', 6);
 	if (bPopup) {fb.ShowPopupMessage(report, 'Search by distance');}
