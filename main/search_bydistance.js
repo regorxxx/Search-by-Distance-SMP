@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/10/22
+//04/11/22
 
 /*
 	Search by Distance
@@ -53,6 +53,8 @@ include('..\\helpers\\music_graph_test_xxx.js');
 include('remove_duplicates.js');
 include('scatter_by_tags.js');
 include('..\\helpers\\callbacks_xxx.js');
+include('search_bydistance_extra.js');
+
 
 checkCompatible('1.6.1', 'smp');
 
@@ -90,10 +92,11 @@ const SearchByDistance_properties = {
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music'])],
+	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music','?'])],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75, {range: [[0,100]], func: isInt}, 75],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70, {range: [[0,100]], func: isInt}, 70],
-	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', {func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x);}}, 'music_graph_descriptors.intra_supergenre'],
+	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
+		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT', {func: checkMethod}, 'WEIGHT'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
@@ -181,7 +184,7 @@ const sbd = {
 
 // Info Popup
 if (!sbd.panelProperties.firstPopup[1]) {
-	sbd.panelProperties.firstPopup[1] = true;
+	// sbd.panelProperties.firstPopup[1] = true; // Do it on script unloading the first time it successfully closed, so it can be reused somewhere if needed
 	overwriteProperties(sbd.panelProperties); // Updates panel
 	const readmeKeys = [{name: 'search_bydistance', title: 'Search by Distance'}, {name: 'tags_structure', title: 'Tagging requisites'}]; // Must read files on first execution
 	readmeKeys.forEach((objRead) => {
@@ -189,6 +192,10 @@ if (!sbd.panelProperties.firstPopup[1]) {
 		const readme = _open(readmePath, utf8);
 		if (readme.length) {fb.ShowPopupMessage(readme, objRead.title);}
 	});
+	// Make the user check their tags before use...
+	if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {
+		doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(sbd.panelProperties);
+	}
 }
 
 /* 
@@ -356,6 +363,10 @@ addEventListener('on_script_unload', () => {
 	if (sbd.panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Saving Cache.');}
 	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
 	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
+	if (!sbd.panelProperties.firstPopup[1]) {
+		sbd.panelProperties.firstPopup[1] = true;
+		overwriteProperties(sbd.panelProperties); // Updates panel
+	}
 });
 
 /* 
@@ -536,23 +547,9 @@ async function do_searchby_distance({
 			}
 		}
 		// Parse args
-		if (isString(sbd_max_graph_distance)) { // Safety check
-			if (sbd_max_graph_distance.length >= 50) {
-				console.log('Error parsing sbd_max_graph_distance (length >= 50): ' + sbd_max_graph_distance);
-				return;
-			}
-			if (sbd_max_graph_distance.indexOf('music_graph_descriptors') === -1 || sbd_max_graph_distance.indexOf('()') !== -1 || sbd_max_graph_distance.indexOf(',') !== -1) {
-				console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + sbd_max_graph_distance);
-				return;
-			}
-			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
-			if (sbd_max_graph_distance.indexOf('+') === -1 && sbd_max_graph_distance.indexOf('-') === -1 && sbd_max_graph_distance.indexOf('*') === -1 && sbd_max_graph_distance.indexOf('/') === -1 && validVars.indexOf(sbd_max_graph_distance) === -1) {
-				console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + sbd_max_graph_distance);
-				return;
-			}
-			sbd_max_graph_distance = Math.floor(eval(sbd_max_graph_distance));
-			if (bBasicLogging) {console.log('Parsed sbd_max_graph_distance to: ' + sbd_max_graph_distance);}
-		}
+		sbd_max_graph_distance = parseGraphDistance(sbd_max_graph_distance, descr, bBasicLogging)
+		if (sbd_max_graph_distance === null) {return;}
+		
 		// Theme check
 		const bUseTheme = theme && (theme.length || Object.keys(theme).length);
 		if (bUseTheme) {
@@ -562,7 +559,6 @@ async function do_searchby_distance({
 				theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', utf8);
 				if (!theme) {return;}
 			}
-			
 			// Array of objects
 			const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
 			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
@@ -603,7 +599,7 @@ async function do_searchby_distance({
 		const composerTag = (composerWeight !== 0) ? JSON.parse(recipeProperties.composerTag || properties.composerTag[1]).filter(Boolean) : [];
 		const customStrTag = (customStrWeight !== 0) ? JSON.parse(recipeProperties.customStrTag || properties.customStrTag[1]).filter(Boolean) : [];
 		const customNumTag = (customNumWeight !== 0) ? JSON.parse(recipeProperties.customNumTag || properties.customNumTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]);
+		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
 		const genreStyleTag = [...new Set(genreTag.concat(styleTag))].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
 		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
 		
@@ -1539,50 +1535,54 @@ async function do_searchby_distance({
 			// May override previous sorting methods (only for instrumental tracks). 
 			// Finds instrumental track indexes, and move them to a random range without overlapping.
 			if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
-				let newOrder = [];
-				for (let i = 0; i < finalPlaylistLength; i++) {
-					const index = selectedHandlesData[i].index;
-					const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
-					const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
-					const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
-					if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
-						newOrder.push(i);
+				if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
+					let newOrder = [];
+					for (let i = 0; i < finalPlaylistLength; i++) {
+						const index = selectedHandlesData[i].index;
+						const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
+						const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
+						const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
+						if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
+							newOrder.push(i);
+						}
 					}
+					// Reorder
+					const toMoveTracks = newOrder.length;
+					if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
+					const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
+					if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
+						let removed = [], removedData = [];
+						[...newOrder].reverse().forEach((index) => {
+							removed.push(...selectedHandlesArray.splice(index, 1));
+							removedData.push(...selectedHandlesData.splice(index, 1));
+						});
+						removed.reverse();
+						removedData.reverse();
+						removed.forEach((handle, index) => {
+							const i_scatterInterval = index * scatterInterval;
+							let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
+							if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
+							if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j);}
+							selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
+							selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
+						});
+					} else if (toMoveTracks) {console.log('Warning: Not possible to apply Instrumental track\'s Scattering. Interval is too low. (' + toMoveTracks + ' < 2)');}
 				}
-				// Reorder
-				const toMoveTracks = newOrder.length;
-				if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
-				const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
-				if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
-					let removed = [], removedData = [];
-					[...newOrder].reverse().forEach((index) => {
-						removed.push(...selectedHandlesArray.splice(index, 1));
-						removedData.push(...selectedHandlesData.splice(index, 1));
-					});
-					removed.reverse();
-					removedData.reverse();
-					removed.forEach((handle, index) => {
-						const i_scatterInterval = index * scatterInterval;
-						let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
-						if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
-						if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j);}
-						selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
-						selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
-					});
-				} else if (toMoveTracks) {console.log('Warning: Not possible to apply Instrumental track\'s Scattering. Interval is too low. (' + toMoveTracks + ' < 2)');}
 			}
 			// Spotify's smart shuffle by artist
 			if (bSmartShuffle) { // Sort arrays in place using original data
 				if (bSortRandom) {console.log('Warning: Smart Shuffle is overriding Random Sorting.');}
 				if (bScatterInstrumentals) {console.log('Warning: Smart Shuffle is overriding Instrumental track\'s Scattering.');}
-				const shuffle = shuffleByTags({
-					tagName: smartShuffleTag, 
-					data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
-					selItems: null,
-					bSendToActivePls: false
-				});
-				selectedHandlesArray = shuffle.handleArray;
-				selectedHandlesData = shuffle.dataArray;
+				if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
+					const shuffle = shuffleByTags({
+						tagName: smartShuffleTag, 
+						data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
+						selItems: null,
+						bSendToActivePls: false
+					});
+					selectedHandlesArray = shuffle.handleArray;
+					selectedHandlesData = shuffle.dataArray;
+				}
 			}
 			// Progressive list creation, uses output tracks as new references, and so on...
 			// Note it can be combined with 'bInKeyMixingPlaylist', creating progressive playlists with harmonic mixing for every sub-group of tracks
@@ -1684,6 +1684,55 @@ async function do_searchby_distance({
 /* 
 	Helpers
 */
+
+function parseGraphDistance(sbd_max_graph_distance, descr = music_graph_descriptors, bBasicLogging = true) {
+	let output = sbd_max_graph_distance;
+	if (isString(output)) { // Safety check
+		if (!Number.isNaN(Number(output))) {
+			output = Number(output);
+			if (output.toString() !== sbd_max_graph_distance) {
+				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (not a valid number): ' + output, 'Search by Distance');
+				return null;
+			}
+		} else {
+			if (output.length >= 50) {
+				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (length >= 50): ' + output, 'Search by Distance');
+				return null;
+			}
+			if (output.indexOf('music_graph_descriptors') === -1 || output.indexOf('()') !== -1 || output.indexOf(',') !== -1) {
+				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + output), 'Search by Distance';
+				return null;
+			}
+			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
+			if (output.indexOf('+') === -1 && output.indexOf('-') === -1 && output.indexOf('*') === -1 && output.indexOf('/') === -1 && validVars.indexOf(output) === -1) {
+				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + output, 'Search by Distance');
+				return null;
+			}
+			output = eval(output);
+			if (Number.isNaN(output)) {fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (not a valid number): ' + output, 'Search by Distance');}
+		}
+		if (bBasicLogging) {console.log('Parsed sbd_max_graph_distance to: ' + output);}
+	}
+	if (Number.isFinite(output)) {output = Math.round(output);}
+	if (output < 0) {
+		fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (< 0): ' + output, 'Search by Distance');
+		return null;
+	}
+	return output;
+}
+
+function findStyleGenresMissingGraphCheck(properties) {
+	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, 'Search by distance', popup.question + popup.yes_no);
+	if (answer === popup.yes) {
+		findStyleGenresMissingGraph({
+			genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
+			genretag: JSON.parse(properties.genreTag[1]),
+			styleTag: JSON.parse(properties.styleTag[1]),
+			bAscii: properties.bAscii[1],
+			bPopup: true
+		});
+	}	
+}
 
 function checkMethod(method) {
 	return (new Set(['WEIGHT','GRAPH','DYNGENRE']).has(method));
