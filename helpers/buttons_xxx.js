@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/10/22
+//02/11/22
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -159,6 +159,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
+		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 		// Check SO allows button theme
 		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
 			this.g_theme = window.CreateThemeManager('Button');
@@ -198,13 +199,8 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		// Draw button
 		if (buttonsBar.useThemeManager()) {this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);}
 		else {
-			const x = xCalc + 1;
-			const y = yCalc;
-			const w =  wCalc - 4;
-			const h =  hCalc - 2;
-			const arc = 3;
+			const x = xCalc + 1; const y = yCalc; const w = wCalc - 4; const h = hCalc - 2; const arc = 3;
 			gr.SetSmoothingMode(2); // Antialias for lines
-			const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 			switch (this.state) {
 				case buttonStates.normal:
 					if (bDrawBackground) {
@@ -302,7 +298,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 				else {
 					if (!bDone) {
 						bDone = true;
-						gr.FillGradRect(xCalc + 1, yCalc + 1, wCalc - 2, hCalc - 2, animation.animStep * 90, animation.colors[0], animation.colors[1], 1);
+						const x = xCalc + 1; const y = yCalc; const w = wCalc - 4; const h = hCalc - 2;	const arc = 3;
+						if (bDrawBackground) { // 90 degrees produces a glitch on the left at step = 2 XD so lets put 88...
+							gr.FillGradRect(x, y + 1, w + 2, h, animation.animStep * 88, animation.colors[0], animation.colors[1], 1);
+						} else {
+							gr.FillGradRect(x, y + 1, w + 1, h, animation.animStep * 90, animation.colors[1], animation.colors[0], 0.5);
+							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, animation.colors[0]);
+						}
 						const now = Date.now();
 						if (now - animation.date > 2000) {
 							animation.animStep++;
