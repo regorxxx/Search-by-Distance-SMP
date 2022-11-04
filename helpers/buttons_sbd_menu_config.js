@@ -1,11 +1,12 @@
 ﻿'use strict';
-//30/10/22
+//04/11/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
 include('helpers_xxx_prototypes.js');
 include('helpers_xxx_time.js');
+include('helpers_xxx_input.js');
 
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
@@ -43,11 +44,9 @@ function createConfigMenu(parent) {
 						: ''
 				);
 			menu.newEntry({menuName, entryText, func: () => {
-				let input = '';
-				try {input = JSON.parse(utils.InputBox(window.ID, 'Enter tag(s) or TF expression(s):\n(JSON)\nFor example:\n["GENRE","$replace(%DISCOGS_GENRE%,\', &&\',\',\')","GENRE2"]', 'Search by distance', properties[key][1], true));}
-				catch (e) {return;}
-				if (input) {input = input.filter((n) => n);}
-				if (isArrayEqual(JSON.parse(properties[key][1]), input)) {return;}
+				const example = '["GENRE","$replace(%DISCOGS_GENRE%,\', &&\',\',\')","GENRE2"]';
+				const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\n\nFor example:\n' + example, 'Search by distance', example, void(0), true);
+				if (input === null) {return;}
 				properties[key][1] = JSON.stringify(input);
 				overwriteProperties(properties); // Updates panel
 				if (key === 'genreTag' || key === 'styleTag') {
@@ -98,7 +97,6 @@ function createConfigMenu(parent) {
 		{
 			const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
 			const options = ['scoreFilter', 'minScoreFilter', 'sep', 'sbd_max_graph_distance'];
-			const lowerHundred = new Set(['scoreFilter', 'minScoreFilter']);
 			const bIsGraph = recipe.hasOwnProperty('method') && recipe.method  === 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] === 'GRAPH';
 			options.forEach((key) => {
 				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED}); return;}
@@ -108,10 +106,15 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? val.toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : val) + ']');
 				menu.newEntry({menuName, entryText, func: () => {
 					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, val, true));}
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
-					if (lowerHundred.has(key) && input > 100) {return;}
+					if (key !== 'sbd_max_graph_distance') {
+						input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', 75, [(input) => input < 100 ]);
+						if (input === null) {return;}
+					} else {
+						try {input = utils.InputBox(window.ID, 'Enter number: (greater than 0)', 'Search by distance', val, true);} catch(e) {return;}
+						if (input === null) {return;}
+						if (parseGraphDistance(input) === null) {return;}
+						if (!Number.isNaN(Number(input))) {input = Number(input);} // Force a number type if possible
+					}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags});
@@ -129,11 +132,8 @@ function createConfigMenu(parent) {
 			const bPresent = recipe.hasOwnProperty(weightName);
 			const entryText = 'Set ' + weightName.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[weightName]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[weightName][1]) + ']');
 			menu.newEntry({menuName, entryText, func: () => {
-				let input;
-				try {input = Number(utils.InputBox(window.ID, 'Input weight value:', 'Search by distance', properties[weightName][1], true));} 
-				catch(e) {return;}
-				if (isNaN(input)) {return;}
-				if (input === properties[weightName][1]) {return;}
+				const input = Input.number('int positive', properties[weightName][1], 'Enter number:', 'Search by distance', 30);
+				if (input === null) {return;}
 				properties[weightName][1] = input;
 				overwriteProperties(properties);
 			}, flags: bPresent || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
@@ -448,7 +448,6 @@ function createConfigMenu(parent) {
 			const file = folders.data + 'searchByDistance_artists.json';
 			const iNum = 10;
 			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
-			include('..\\main\\search_bydistance_extra.js');
 			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: async () => {
 				const items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist);
 				const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%ARTIST%', checkKeys: ['%ARTIST%']});
@@ -544,7 +543,7 @@ function createConfigMenu(parent) {
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
 				findStyleGenresMissingGraph({
-					genreStyleFilterTag: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
+					genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
 					genretag: JSON.parse(properties.genreTag[1]),
 					styleTag: JSON.parse(properties.styleTag[1]),
 					bAscii: properties.bAscii[1],
