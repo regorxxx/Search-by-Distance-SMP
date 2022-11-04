@@ -45,6 +45,7 @@
 - Tags: reverted default string tags to raw tags instead of using '$ascii(%TAG%)' in favor of internally converting values to ASCII. Works better for multi-value tags in queries. It's recommended to reset tag remapping to default for most users (or manually removing the TF functions if using other tags).
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
+- Tags: the buttons now ask to check for missing genre/styles on the Graph on first initialization.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
 - UI: customizable button now doesn't allow setting playlist sorting when using harmonic mixing. Submenu is greyed out.
@@ -55,6 +56,8 @@
 - Cache: improved graph links cache asynchronous calculation.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Properties: remapped tags properties have been rewritten, previous config will be lost. Tags now follow a JSON format, which will be more compatible with TF functions in any field.
+- Properties: 'Exclude any track with graph distance greater than (only GRAPH method)' property now also allows 'Infinity' as value, which equals to allowing any genre/style on the graph. But it may be used in conjuction with other filters, like influences or similar artists, thus not being equivalent to 'WEIGHT' or 'DYNGENRE' methods.
+- Buttons: reworked input popups for settings on customizable button with specific descriptions, extensive error checking (with feedback popups), etc. It should be pretty clear now what's allowed on every setting, and non valid values will throw a warning (instead of just silently being discarded).
 - Buttons: improved 'no background mode' on buttons toolbar with colors and shades adapted to the toolbar background color and following the design of native Foobar2000 buttons for a seamless integration.
 - Buttons: improved 'no background mode' on buttons toolbar with proper animations (no longer a bad looking rectangle gradient).
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
