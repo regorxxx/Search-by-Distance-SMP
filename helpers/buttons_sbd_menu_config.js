@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/11/22
+//07/11/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -88,7 +88,7 @@ function createConfigMenu(parent) {
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
-	{	// Menu to configure methods:
+	{	// Methods
 		const menuName = menu.newMenu('Set method');
 		{
 			createSwitchMenu(menuName, 'method', ['WEIGHT', 'GRAPH', 'DYNGENRE']);
@@ -107,11 +107,11 @@ function createConfigMenu(parent) {
 				menu.newEntry({menuName, entryText, func: () => {
 					let input;
 					if (key !== 'sbd_max_graph_distance') {
-						input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', 75, [(input) => input < 100 ]);
+						input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
 						if (input === null) {return;}
 					} else {
-						try {input = utils.InputBox(window.ID, 'Enter number: (greater than 0)', 'Search by distance', val, true);} catch(e) {return;}
-						if (input === null) {return;}
+						try {input = utils.InputBox(window.ID, 'Enter number: (greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance', val, true);} catch(e) {return;}
+						if (!input || !input.length) {return;}
 						if (parseGraphDistance(input) === null) {return;}
 						if (!Number.isNaN(Number(input))) {input = Number(input);} // Force a number type if possible
 					}
@@ -121,38 +121,35 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Menu to configure properties: weights
+	{	// Weights
 		const menuName = menu.newMenu('Set weights');
 		const options = ['genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'dateWeight', 'keyWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight'];
 		const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
 		const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
-		options.forEach((weightName) => {
-			const bIsDyngenreRecipe = weightName === 'dyngenreWeight' && bIsDyngenreMethodRecipe;
-			const bIsDyngenreProp = weightName === 'dyngenreWeight' && bIsDyngenreMethodProp;
-			const bPresent = recipe.hasOwnProperty(weightName);
-			const entryText = 'Set ' + weightName.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[weightName]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[weightName][1]) + ']');
+		options.forEach((key) => {
+			const bIsDyngenreRecipe = key === 'dyngenreWeight' && bIsDyngenreMethodRecipe;
+			const bIsDyngenreProp = key === 'dyngenreWeight' && bIsDyngenreMethodProp;
+			const bPresent = recipe.hasOwnProperty(key);
+			const entryText = 'Set ' + key.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[key]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[key][1]) + ']');
 			menu.newEntry({menuName, entryText, func: () => {
-				const input = Input.number('int positive', properties[weightName][1], 'Enter number:', 'Search by distance', 30);
+				const input = Input.number('int positive', properties[key][1], 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
 				if (input === null) {return;}
-				properties[weightName][1] = input;
+				properties[key][1] = input;
 				overwriteProperties(properties);
 			}, flags: bPresent || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
 		});
 	}
-	{	// Menu to configure properties: ranges
+	{	// Ranges
 		const menuName = menu.newMenu('Set ranges');
 		{
 			const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
-			options.forEach((rangeName) => {
-				menu.newEntry({menuName, entryText: 'Set ' + rangeName.replace('Range','') + ' range' + (recipe.hasOwnProperty(rangeName) ? '\t[' + recipe[rangeName] + '] (forced by recipe)' : '\t[' + properties[rangeName][1] + ']'), func: () => {
-					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Input range value:', 'Search by distance', properties[rangeName][1], true));} 
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
-					if (input === properties[rangeName][1]) {return;}
-					properties[rangeName][1] = input;
+			options.forEach((key) => {
+				menu.newEntry({menuName, entryText: 'Set ' + key.replace('Range','') + ' range' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']'), func: () => {
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
+					if (input === null) {return;}
+					properties[key][1] = input;
 					overwriteProperties(properties);
-				}, flags: recipe.hasOwnProperty(rangeName) ? MF_GRAYED : MF_STRING});
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
@@ -160,9 +157,9 @@ function createConfigMenu(parent) {
 			createBoolMenu(menuName, ['bNegativeWeighting']);
 		}
 	}
-	{	// Menu to configure pre-scoring filters:
+	{	// Pre-scoring filters:
 		const menuName = menu.newMenu('Set pre-scoring filters');
-		{	// Menu to configure properties: forcedQuery
+		{	// Forced Query
 			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: () => {
 				let input = '';
 				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', properties['forcedQuery'][1], true);}
@@ -174,7 +171,7 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 		}
-		{ // Menu to configure properties: additional filters
+		{	// Additional filters
 			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
 			let options = [];
 			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
@@ -230,7 +227,7 @@ function createConfigMenu(parent) {
 			}});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
-		{ // Menu to configure properties: influences filter
+		{	// Influences filter
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
 			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
 			options.forEach((key) => {
@@ -246,53 +243,45 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Menu to configure post-scoring filters:
+	{	// Post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
-		{ // Menu to configure properties: tags filter
+		{ // Tags filter
 			createTagMenu(menuName, ['poolFilteringTag']);
 		}
 		{
 			const options = ['poolFilteringN'];
-			const lowerHundred = new Set(['probPick']);
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
-					if (lowerHundred.has(key) && input > 100) {return;}
+					const input = Input.number('int', properties[key][1], 'Enter number: (greater or equal to 0)\n(-1 to disable)', 'Search by distance', properties[key][3], [(input) => input >= -1]);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
 	}
-	{	// Menu to configure pool picking:
+	{	// Pool picking:
 		const menuName = menu.newMenu('Set pool picking');
 		{
 			createBoolMenu(menuName, ['bRandomPick']);
 		}
 		{
 			const options = ['probPick'];
-			const lowerHundred = new Set(['probPick']);
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
-					if (lowerHundred.has(key) && input > 100) {return;}
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100]);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 			});
 		}
 	}
-	{	// Menu to configure final sorting:
+	{	// Final sorting
 		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '')
 		const menuName = menu.newMenu(menuText, void(0), menuFlags);
@@ -304,7 +293,7 @@ function createConfigMenu(parent) {
 			toDisable.forEach((noKey) => {if (properties[noKey][1]) {properties[noKey][1] = !properties[noKey][1];}});
 		});
 	}
-	{	// Menu to configure Special playlists:
+	{	// Special playlists:
 		const menuName = menu.newMenu('Special playlist rules');
 		{
 			createBoolMenu(menuName, ['bProgressiveListCreation']);
@@ -316,11 +305,8 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
-					if (lowerHundred.has(key) && input > 100) {return;}
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 2 and 100)', 'Search by distance', properties[key][3], [(input) => input >= 2 && input <= 100]);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
@@ -344,11 +330,8 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input = '';
-					try {input = utils.InputBox(window.ID, 'Enter TF expression:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %artist%\'\'s Mix   ->   ACDC\'s Mix\n\n%sbd_theme% is available when using themes to avoid showing the raw TF expression (since there is no track to evaluate it with). When a theme is not being used, it\'s evaluated as a tag.\nFor ex: $if2(%sbd_theme%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', properties[key][1], true);}
-					catch(e) {return;}
-					if (!input.length) {return;}
-					if (properties[key][1] === input) {return;}
+					const input = Input.string('string', properties[key][1], 'Enter TF expression:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %artist%\'\'s Mix   ->   ACDC\'s Mix\n\n%sbd_theme% is available when using themes to avoid showing the raw TF expression (since there is no track to evaluate it with). When a theme is not being used, it\'s evaluated as a tag.\nFor ex: $if2(%sbd_theme%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', '%artist%\'\'s Mix', void(0), true);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
@@ -361,10 +344,8 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input;
-					try {input = Number(utils.InputBox(window.ID, 'Enter number:', window.Name, properties[key][1], true));}
-					catch(e) {return;}
-					if (isNaN(input)) {return;}
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance', properties[key][3], [(input) => input >= 0]);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
@@ -376,16 +357,12 @@ function createConfigMenu(parent) {
 				createTagMenu(menuName, ['checkDuplicatesByTag']);
 			}
 			{
-				const options = ['bAdvTitle'];
-				options.forEach((key, i) => {
-					const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
-					menu.newEntry({menuName, entryText, func: () => {
-						properties[key][1] = !properties[key][1];
-						if (key === 'bAdvTitle' && properties.bAdvTitle[1]) {fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');}
-						overwriteProperties(properties); // Updates panel
-					}, flags: recipe.hasOwnProperty(key) || (i !== 0 && !properties[options[0]][1]) ? MF_GRAYED : MF_STRING});
-					menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
-				});
+				createBoolMenu(
+					menuName, 
+					['bAdvTitle'], 
+					void(0),
+					(key) => {if (key === 'bAdvTitle' && properties.bAdvTitle[1]) {fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');}}
+				);
 			}
 		}
 	}
@@ -445,90 +422,11 @@ function createConfigMenu(parent) {
 	{	// Other tools
 		const submenu = menu.newMenu('Other tools');
 		{
-			const file = folders.data + 'searchByDistance_artists.json';
-			const iNum = 10;
-			const tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE';
-			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: async () => {
-				const items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist);
-				const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%ARTIST%', checkKeys: ['%ARTIST%']});
-				const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
-				if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-				let profiler = new FbProfiler('Calculate similar artists');
-				const newData = [];
-				const handleArr = handleList.Convert();
-				for await (const selHandle of handleArr) {
-					const output = await calculateSimilarArtists({properties, selHandle});
-					if (output.val.length) {newData.push(output);}
-				};
-				if (!newData.length) {console.log('Nothing found.'); return;}
-				if (!_isFile(file)) {
-					newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});
-					_save(file, JSON.stringify(newData, null, '\t'));
-				} else {
-					const data = _jsonParseFile(file, utf8);
-					if (data) {
-						const idxMap = new Map();
-						data.forEach((obj, idx) => {idxMap.set(obj.artist, idx);});
-						newData.forEach((obj) => {
-							const idx = idxMap.get(obj.artist);
-							if (idx >= 0) {data[idx] = obj;}
-							else {data.push(obj);}
-							console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));
-						});
-					}
-					_deleteFile(file);
-					_save(file, JSON.stringify(data || newData, null, '\t'));
-				}
-				profiler.Print();
-				if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-				else {
-					newData.forEach((obj) => {
-						const artist = obj.artist.split(', ');
-						const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
-						if (!similarArtists.length) {return;}
-						const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
-						const count = artistTracks.Count;
-						if (count) {
-							let arr = [];
-							for (let i = 0; i < count; ++i) {
-								arr.push({
-									[tagName] : similarArtists
-								});
-							}
-							artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
-							console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
-						}
-					});
-				}
+			menu.newEntry({menuName: submenu, entryText: 'Calculate similar artists tags', func: () => {
+				calculateSimilarArtistsFromPls({items: plman.GetPlaylistSelectedItems(plman.ActivePlaylist), properties});
 			}});
 			menu.newEntry({menuName: submenu, entryText: 'Write similar artists tags', func: () => {
-				if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-				if (!_isFile(file)) {return;}
-				else {
-					const data = _jsonParseFile(file, utf8);
-					if (data) {
-						const bRewrite = WshShell.Popup('Rewrite previously added similar artist tags?', 0, window.Name, popup.question + popup.yes_no) === popup.yes;
-						const queryNoRw = ' AND ' + tagName + ' MISSING';
-						data.forEach((obj) => {
-							const artist = obj.artist.split(', ');
-							const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
-							if (!similarArtists.length) {return;}
-							const queryArtists = artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ');
-							const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), (bRewrite ? queryArtists : _p(queryArtists) + queryNoRw));
-							const count = artistTracks.Count;
-							if (count) {
-								let arr = [];
-								for (let i = 0; i < count; ++i) {
-									arr.push({
-										[tagName] : similarArtists
-									});
-								}
-								artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
-								console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
-							}
-						});
-					}
-				}
+				writeSimilarArtistsTags();
 			}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/11/22
+//07/11/22
 
 // Helpers for input popup and checking proper values are provided
 // Provides extensive error popups on output to give feedback to the user
@@ -110,7 +110,7 @@ const Input = Object.seal(Object.freeze({
 					break;
 				}
 			}
-			if (checks && !checks.some((check) => {return check.call(this, newVal);})) {
+			if (checks && checks.length && !checks.some((check) => {return check.call(this, newVal);})) {
 				throw new Error('Invalid checks');
 			}
 		}
@@ -137,20 +137,47 @@ const Input = Object.seal(Object.freeze({
 			else {newVal = String(input);}
 			switch (type) {
 				case 'string': {
+					if (bFilterEmpty && !newVal.length) {throw new Error('Empty')}
 					break;
 				}
 			}
-			if (checks && !checks.some((check) => {return check.call(this, newVal);})) {
+			if (checks && checks.length  && !checks.some((check) => {return check.call(this, newVal);})) {
 				throw new Error('Invalid checks');
 			}
 		}
 		catch (e) {
 			if (e.message === 'Invalid type' || e.name === 'SyntaxError') {
 				fb.ShowPopupMessage('Value is not valid:\n' + input + '\n\nValue must be an ' + type.toUpperCase() + '\n\nExample:\n' + example, title);
+			} else if (e.message === 'Empty') {
+				fb.ShowPopupMessage('Value is not valid:\n' + input + '\n\nValue must be a non zero length string.\n\nExample:\n' + example, title);
 			} else if (e.message === 'Invalid checks') {
 				fb.ShowPopupMessage('Value is not valid:\n' + input + '\n\nValue must pass these checks:\n' + checks.join('\n') + '\n\nExample:\n' + example, title);
 			} else if (e.message !== 'InputBox failed:\nDialog window was closed') {
 				fb.ShowPopupMessage(e.name + '\n\n' + e.message, title);
+			}
+			return null;
+		}
+		if (oldVal === newVal) {return null;}
+		return newVal;
+	},
+	query: function (oldVal, message, title, example, checks = [], bFilterEmpty = false) {
+		let newVal;
+		try {
+			newVal = this.string('string', oldVal, message, title, example);
+			if (newVal === null) {throw new Error('Invalid string');}
+			if (!newVal.length && bFilterEmpty) {newVal = 'ALL';}
+			try {fb.GetQueryItems(new FbMetadbHandleList(), newVal);} // Sanity check
+			catch (e) {throw new Error('Invalid query');}
+			if (bFilterEmpty && fb.GetQueryItems(fb.GetLibraryItems(), newVal).Count === 0) {throw new Error('Zero items query');}
+			if (checks && checks.length  && !checks.some((check) => {return check.call(this, newVal);})) {
+				throw new Error('Invalid checks');
+			}
+		}
+		catch (e) {
+			if (e.message === 'Invalid query') {
+				fb.ShowPopupMessage('Query not valid:\n' + input + '\n\nValue must follow query syntax:\nhttps://wiki.hydrogenaud.io/index.php?title=Foobar2000:Query_syntax', title);
+			} else if (e.message === 'Zero items query') {
+				fb.ShowPopupMessage('Query returns no items (on current library):\n' + input, title);
 			}
 			return null;
 		}
