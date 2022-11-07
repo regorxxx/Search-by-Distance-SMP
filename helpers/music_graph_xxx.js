@@ -709,9 +709,11 @@ function histogram(data, size) {
 	let max = -Infinity;
 	for (const item of data) {
 		if (item < min) {min = item;}
-		else if (item > max) {max = item;}
+		if (item > max) {max = item;}
 	}
-	const bins = Math.ceil((max - min + 1) / size);
+	if (min === Infinity) {min = 0;}
+	if (max === -Infinity) {max = 0;}
+	let bins = Math.ceil((max - min + 1) / size);
 	const histogram = new Array(bins).fill(0);
 	for (const item of data) {
 		histogram[Math.floor((item - min) / size)]++;
