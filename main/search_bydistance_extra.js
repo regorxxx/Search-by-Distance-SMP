@@ -1,8 +1,9 @@
 ﻿'use strict';
-//04/11/22
+//01/11/22
 
 include('search_bydistance.js');
 
+// Similar artists
 async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
@@ -117,6 +118,92 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 	return {artist: artist.join(', '), val: total};
 }
 
+async function calculateSimilarArtistsFromPls({items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties} = {}) {
+	const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%ARTIST%', checkKeys: ['%ARTIST%']});
+	const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
+	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) {return;}
+	let profiler = new FbProfiler('Calculate similar artists');
+	const newData = [];
+	const handleArr = handleList.Convert();
+	for await (const selHandle of handleArr) {
+		const output = await calculateSimilarArtists({properties, selHandle});
+		if (output.val.length) {newData.push(output);}
+	};
+	if (!newData.length) {console.log('Nothing found.'); return [];}
+	if (!_isFile(file)) {
+		newData.forEach((obj) => {console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));});
+		_save(file, JSON.stringify(newData, null, '\t'));
+	} else {
+		const data = _jsonParseFile(file, utf8);
+		if (data) {
+			const idxMap = new Map();
+			data.forEach((obj, idx) => {idxMap.set(obj.artist, idx);});
+			newData.forEach((obj) => {
+				const idx = idxMap.get(obj.artist);
+				if (idx >= 0) {data[idx] = obj;}
+				else {data.push(obj);}
+				console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));
+			});
+		}
+		_deleteFile(file);
+		_save(file, JSON.stringify(data || newData, null, '\t'));
+	}
+	profiler.Print();
+	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) {return;}
+	else {
+		newData.forEach((obj) => {
+			const artist = obj.artist.split(', ');
+			const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
+			if (!similarArtists.length) {return;}
+			const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
+			const count = artistTracks.Count;
+			if (count) {
+				let arr = [];
+				for (let i = 0; i < count; ++i) {
+					arr.push({
+						[tagName] : similarArtists
+					});
+				}
+				artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
+				console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
+			}
+		});
+	}
+	return newData;
+}
+
+function writeSimilarArtistsTags({file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE'} = {}) {
+	if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return false;}
+	if (!_isFile(file)) {return false;}
+	else {
+		const data = _jsonParseFile(file, utf8);
+		if (data) {
+			const bRewrite = WshShell.Popup('Rewrite previously added similar artist tags?', 0, window.Name, popup.question + popup.yes_no) === popup.yes;
+			const queryNoRw = ' AND ' + tagName + ' MISSING';
+			data.forEach((obj) => {
+				const artist = obj.artist.split(', ');
+				const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
+				if (!similarArtists.length) {return;}
+				const queryArtists = artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ');
+				const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), (bRewrite ? queryArtists : _p(queryArtists) + queryNoRw));
+				const count = artistTracks.Count;
+				if (count) {
+					let arr = [];
+					for (let i = 0; i < count; ++i) {
+						arr.push({
+							[tagName] : similarArtists
+						});
+					}
+					artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
+					console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
+				}
+			});
+		}
+	}
+	return true;
+}
+
+// Similar genre/styles
 function getNearestNodes(fromNode, maxDistance, graph = musicGraph()) {
 	const nodeList = [];
 	const nodeListSet = new Set([fromNode]);
@@ -150,6 +237,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 	return genreStyles;
 }
 
+// Similar culture zone
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
 	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
 	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
@@ -194,6 +282,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	return jsonQuery ;
 }
 
+// Utilities
 function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = ['GENRE'], styleTag = ['STYLE'], bAscii = true, bPopup = true} = {}) {
 	// Skipped values at pre-filter
 	const tagValuesExcluded = new Set(genreStyleFilter); // Filter holes and remove duplicates

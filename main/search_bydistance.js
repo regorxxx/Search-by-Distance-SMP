@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/11/22
+//07/11/22
 
 /*
 	Search by Distance
@@ -10,7 +10,7 @@
 	
 	When their score is over 'scoreFilter', then they are included in the final pool.
 	After all tracks have been evaluated and the final pool is complete, some of 
-	them are chosen to populate 	the playlist. You can choose whether this final
+	them are chosen to populate the playlist. You can choose whether this final
 	selection is done according to score, randomly chosen, etc. All settings are 
 	configurable on the properties panel (or set in the files when called using 
 	buttons, etc.)
@@ -110,7 +110,7 @@ const SearchByDistance_properties = {
 	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
 	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
-	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <100)', 4, {range: [[2,99]], func: isInt}, 4],
+	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <=100)', 4, {range: [[2,100]], func: isInt}, 4],
 	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
