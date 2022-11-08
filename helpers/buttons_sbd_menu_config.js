@@ -67,7 +67,7 @@ function createConfigMenu(parent) {
 				properties[option][1] = key;
 				if (hook) {hook(key, i);}
 				overwriteProperties(properties); // Updates panel
-			}, flags: recipe.hasOwnProperty(key) || (flag[i] !== void(0) ? flag[i] : false) ? MF_GRAYED : MF_STRING});
+			}, flags: recipe.hasOwnProperty(option) || (flag[i] !== void(0) ? flag[i] : false) ? MF_GRAYED : MF_STRING});
 			menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(option) ? recipe[option] === key : properties[option][1] === key);});
 		});
 	};
@@ -88,33 +88,51 @@ function createConfigMenu(parent) {
 	// Header
 	menu.newEntry({entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
-	{	// Methods
-		const menuName = menu.newMenu('Set method');
+	{	// Search Methods
+		const menuName = menu.newMenu('Set Search method');
 		{
 			createSwitchMenu(menuName, 'method', ['WEIGHT', 'GRAPH', 'DYNGENRE']);
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
-			const options = ['scoreFilter', 'minScoreFilter', 'sep', 'sbd_max_graph_distance'];
+			const key = 'sbd_max_graph_distance';
 			const bIsGraph = recipe.hasOwnProperty('method') && recipe.method  === 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] === 'GRAPH';
+			const flags = recipe.hasOwnProperty(key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
+			const idxEnd = properties[key][0].indexOf('(');
+			const val = properties[key][1];
+			let displayedVal = recipe.hasOwnProperty(key) ? recipe[key] : val;
+			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + sbd_max_graph_distance : displayedVal;
+			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + displayedVal + '] (forced by recipe)' :  '\t[' + displayedVal + ']');
+			menu.newEntry({menuName, entryText, func: () => {
+				let input;
+				try {input = utils.InputBox(window.ID, 'Enter number: (greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance', val, true);} catch(e) {return;}
+				if (!input || !input.length) {return;}
+				if (parseGraphDistance(input) === null) {return;}
+				if (!Number.isNaN(Number(input))) {input = Number(input);} // Force a number type if possible
+				properties[key][1] = input;
+				overwriteProperties(properties); // Updates panel
+			}, flags});
+		}
+	}
+	{	// Scoring methods
+		const menuName = menu.newMenu('Set Scoring method');
+		{
+			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC']);
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const options = ['scoreFilter', 'minScoreFilter'];
 			options.forEach((key) => {
 				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED}); return;}
-				const flags = recipe.hasOwnProperty(key) ? MF_GRAYED : ((bIsGraph && key === 'sbd_max_graph_distance' || key !== 'sbd_max_graph_distance') ? MF_STRING : MF_GRAYED);
+				const flags = recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING;
 				const idxEnd = properties[key][0].indexOf('(');
 				const val = properties[key][1];
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? recipe[key].split('.').pop() + ' --> ' + sbd_max_graph_distance : recipe[key]) + '] (forced by recipe)' :  '\t[' + (key === 'sbd_max_graph_distance' && isNaN(val) ? val.toString().split('.').pop() + ' --> ' + sbd_max_graph_distance : val) + ']');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + val + ']');
 				menu.newEntry({menuName, entryText, func: () => {
 					let input;
-					if (key !== 'sbd_max_graph_distance') {
-						input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
-						if (input === null) {return;}
-					} else {
-						try {input = utils.InputBox(window.ID, 'Enter number: (greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance', val, true);} catch(e) {return;}
-						if (!input || !input.length) {return;}
-						if (parseGraphDistance(input) === null) {return;}
-						if (!Number.isNaN(Number(input))) {input = Number(input);} // Force a number type if possible
-					}
+					input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
+					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags});

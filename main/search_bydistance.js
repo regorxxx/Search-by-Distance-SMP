@@ -93,11 +93,11 @@ const SearchByDistance_properties = {
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
 	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music','?'])],
-	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 75, {range: [[0,100]], func: isInt}, 75],
-	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 70, {range: [[0,100]], func: isInt}, 70],
+	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
+	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
 	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
 		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
-	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'WEIGHT', {func: checkMethod}, 'WEIGHT'],
+	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
@@ -116,7 +116,8 @@ const SearchByDistance_properties = {
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
 	bSmartShuffle			:	['Smart Shuffle by Artist', true],
-	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])]
+	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
+	scoringDistribution		:	['Scoring distribution method', 'LINEAR', {func: checkScoringDistribution}, 'LINEAR']
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
@@ -381,7 +382,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoringDistribution', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag', 'smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -452,7 +453,8 @@ async function do_searchby_distance({
 								// Allows only influences by query, before any scoring/distance calc.
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false, 
 								// --->Scoring Method
-								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'WEIGHT',
+								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
+								scoringDistribution		= properties.hasOwnProperty('scoringDistribution') ? properties.scoringDistribution[1] : 'LINEAR',
 								// --->Scoring filters
 								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) :  75,
 								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) :  scoreFilter - 10,
@@ -1027,6 +1029,7 @@ async function do_searchby_distance({
 		const titleHandle = tagsValByKey[z++];
 		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = tagsValByKey.slice(z);
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
+		const betha = 0.5; // For logarithmic scoring method
 		let i = 0;
 		while (i < tracktotal) {
             let weightValue = 0;
@@ -1063,14 +1066,26 @@ async function do_searchby_distance({
 			if (genreWeight !== 0 && genreNumber !== 0 && genreNew.length) {
 				let common = genreSet.intersectionSize(genreNewSet);
 				if (common) {
-					weightValue += genreWeight / genreNumber * common;
+					const proportion = common / genreNumber; // It's never zero!
+					const alpha = 2 - Math.abs(genreNumber - genreNew.length) / Math.max(genreNumber, genreNew.length);
+					if (scoringDistribution === 'LINEAR') {
+						weightValue += genreWeight * proportion;
+					} else if (scoringDistribution === 'LOGARITHMIC') {
+						weightValue += genreWeight * ((1 + Math.log(proportion) * betha) + ((1 - proportion) * betha) ** (Math.exp(proportion) * alpha));
+					}
 				}
 			}
 			
 			if (styleWeight !== 0 && styleNumber !== 0 && styleNew.length) {
 				let common = styleSet.intersectionSize(styleNewSet);
 				if (common) {
-					weightValue += styleWeight / styleNumber * common;
+					const proportion = common / styleNumber;
+					const alpha = 2 - Math.abs(genreNumber - genreNew.length) / Math.max(genreNumber, genreNew.length);
+					if (scoringDistribution === 'LINEAR') {
+						weightValue += styleWeight * proportion;
+					} else if (scoringDistribution === 'LOGARITHMIC') {
+						weightValue += genreWeight * ((1 + Math.log(proportion) * betha) + ((1 - proportion) * betha) ** (Math.exp(proportion) * alpha));
+					}
 				}
 			}
 			
@@ -1736,6 +1751,10 @@ function findStyleGenresMissingGraphCheck(properties) {
 
 function checkMethod(method) {
 	return (new Set(['WEIGHT','GRAPH','DYNGENRE']).has(method));
+}
+
+function checkScoringDistribution(distr) {
+	return (new Set(['LINEAR','LOGARITHMIC']).has(distr));
 }
 
 // Save and load cache on json
