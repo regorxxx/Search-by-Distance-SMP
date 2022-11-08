@@ -44,7 +44,7 @@ include('..\\helpers\\helpers_xxx_crc.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_tags.js');
-if (isCompatible('2.0', 'fb')) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
+if (isFoobarV2) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
 include('..\\helpers\\helpers_xxx_math.js');
 include('..\\helpers\\camelot_wheel_xxx.js');
 include('..\\helpers\\dyngenre_map_xxx.js');
@@ -148,7 +148,7 @@ const SearchByDistance_panelProperties = {
 	bAllMusicDescriptors	:	['Load All Music descriptors?', false],
 	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
 	bStartLogging 			:	['Startup logging', false],
-	bTagsCache				:	['Read tags from cache instead of files?', isCompatible('2.0', 'fb')]
+	bTagsCache				:	['Read tags from cache instead of files?', isFoobarV2]
 };
 // Checks
 Object.keys(SearchByDistance_panelProperties).forEach( (key) => { // Checks

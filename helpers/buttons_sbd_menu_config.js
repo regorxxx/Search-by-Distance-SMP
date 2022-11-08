@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/11/22
+//08/11/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -376,7 +376,7 @@ function createConfigMenu(parent) {
 			const options = ['bAscii', 'bTagsCache'];
 			options.forEach((key, i) => {
 				const propObj = key === 'bTagsCache' ? sbd.panelProperties : properties;
-				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : '');
+				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isFoobarV2 ? '\t-only Fb >= 2.0-' : '');
 				menu.newEntry({menuName, entryText, func: () => {
 					propObj[key][1] = !propObj[key][1];
 					overwriteProperties(propObj); // Updates panel
@@ -398,13 +398,13 @@ function createConfigMenu(parent) {
 							tagsCache.unload();
 						}
 					}
-				}, flags: recipe.hasOwnProperty(key) || (key === 'bTagsCache' && !isCompatible('2.0', 'fb')) ? MF_GRAYED : MF_STRING});
+				}, flags: recipe.hasOwnProperty(key) || (key === 'bTagsCache' && !isFoobarV2) ? MF_GRAYED : MF_STRING});
 				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : propObj[key][1]);});
 			});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{	// Reset
-			menu.newEntry({menuName, entryText: 'Reset to default...', func: () => {
+			menu.newEntry({menuName, entryText: 'Restore defaults...', func: () => {
 				options.forEach((tagName) => {
 					if (properties.hasOwnProperty(tagName) && SearchByDistance_properties.hasOwnProperty(tagName)) {
 						properties[tagName][1] = SearchByDistance_properties[tagName][1];
@@ -476,7 +476,7 @@ function createConfigMenu(parent) {
 				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
 			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
 			// Tags cache reset Async
-			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isCompatible('2.0', 'fb') ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
+			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isFoobarV2 ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
 				const keys = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag'].map((key) => {return JSON.parse(properties[key][1]).filter(Boolean);});
 				const tags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
@@ -549,6 +549,18 @@ function createConfigMenu(parent) {
 		menu.newCheckMenu(subMenuName, 'Show shortcuts on tooltip', void(0), () => {return properties.bTooltipInfo[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
+	{	// Reset
+		menu.newEntry({entryText: 'Restore defaults...', func: () => {
+			for (let key in SearchByDistance_properties) {
+				if (properties.hasOwnProperty(key)) {properties[key][1] = SearchByDistance_properties[key][1];}
+			}
+			properties.theme[1] = '';
+			properties.recipe[1] = '';
+			properties.data[1] = JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'});
+			overwriteProperties(properties); // Force overwriting
+		}});
+	}
+	menu.newEntry({entryText: 'sep'});
 	{	// Readmes
 		const subMenuName = menu.newMenu('Readmes...');
 		menu.newEntry({menuName: subMenuName, entryText: 'Open popup with readme:', func: null, flags: MF_GRAYED});
@@ -588,17 +600,6 @@ function createConfigMenu(parent) {
 			});
 		} 
 		if (!iCount) {menu.newEntry({menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED});}
-	}
-	{	// Reset
-		menu.newEntry({entryText: 'Reset to default...', func: () => {
-			for (let key in SearchByDistance_properties) {
-				if (properties.hasOwnProperty(key)) {properties[key][1] = SearchByDistance_properties[key][1];}
-			}
-			properties.theme[1] = '';
-			properties.recipe[1] = '';
-			properties.data[1] = JSON.stringify({forcedTheme: '', theme: 'None', recipe: 'None'});
-			overwriteProperties(properties); // Force overwriting
-		}});
 	}
 	return menu;
 }

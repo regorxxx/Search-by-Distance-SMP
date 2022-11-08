@@ -1,11 +1,11 @@
 ﻿'use strict';
-//28/09/22
+//08/11/22
 
 include('callbacks_xxx.js');
 include('helpers_xxx.js');
 include('helpers_xxx_file.js');
 include('helpers_xxx_crc.js');
-if (!isCompatible('2.0', 'fb')) {console.log('Tags Cache is being used on foobar <2.0. This is not recommended.');}
+if (!isFoobarV2) {console.log('Tags Cache is being used on foobar <2.0. This is not recommended.');}
 
 // Tags cache
 // Tag retrieval is too slow when retrieving tags on Foobar 2.0+
