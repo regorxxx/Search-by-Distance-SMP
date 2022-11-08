@@ -22,6 +22,7 @@
 	"bSimilArtistsFilter": false,
 	"bSameArtistFilter": false,
 	"method": "GRAPH",
+	"scoringDistribution": "LOGARITHMIC",
 	"scoreFilter": 75,
 	"sbd_max_graph_distance": "music_graph_descriptors.intra_supergenre / 2",
 	"bPoolFiltering": false,
