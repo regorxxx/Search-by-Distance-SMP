@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/11/22
+//08/11/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -37,11 +37,11 @@ if (!sbd.panelProperties.firstPopup[1]) {
 addButton({
 	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30, h: 22}, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
-			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
+			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
 			createRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL + MK_SHIFT) {
-			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
+			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			if (this.buttonsProperties['customName'][1] === 'Customize!') {
 				let input = '';
@@ -72,10 +72,10 @@ function buttonTooltip(parent) {
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
-	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click to set theme) ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
-	else {info += '\nTheme ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
+	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click for other config and tools)';}
 	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe;} 
 	else {info += '\nRecipe  ' + data.recipe;}
-	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click for other config and tools)';}
+	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)  ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
+	else {info += '\nTheme ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
 	return info;
 }
