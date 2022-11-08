@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/11/22
+//08/11/22
 
 include('search_bydistance.js');
 
@@ -149,7 +149,13 @@ async function calculateSimilarArtistsFromPls({items = plman.GetPlaylistSelected
 		_save(file, JSON.stringify(data || newData, null, '\t'));
 	}
 	profiler.Print();
-	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) {return;}
+	const report = newData.map((obj) => // List of artists with tabbed similar artists + score
+		obj.artist + ':\n\t' + (obj.val.map((sim) =>
+			_b(sim.scoreW) + '\t' + sim.artist
+		).join('\n\t') || '-NONE-')
+	).join('\n\n');
+	fb.ShowPopupMessage(report, 'Search by distance');
+	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Similar artists', popup.question + popup.yes_no) === popup.no) {return;}
 	else {
 		newData.forEach((obj) => {
 			const artist = obj.artist.split(', ');
@@ -323,6 +329,11 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreTag = ['GENRE'
 						:	'') +
 					'[scripts folder]\\helpers\\music_graph_descriptors_xxx.js\n' +
 					'[profile folder]\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + (userFileNotFound || userFileEmpty) + '\n\n' +
+					(missing.length > 5
+						?	'If you don\'t plan to retag your files or add substitutions and there are\n' +
+							'too many missing genre/styles, then it\'s recommended to use only\n' +
+							'\'WEIGHT\' or \'DYNGENRE\' methods on the scripts.\n\n'
+						:	'') +
 					'List of tags not present on the graph descriptors:\n' +
 					missing.joinEvery(', ', 6);
 	if (bPopup) {fb.ShowPopupMessage(report, 'Search by distance');}
