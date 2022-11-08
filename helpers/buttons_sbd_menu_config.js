@@ -216,27 +216,42 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
 			const switchQuery = (input, query) => {
-				if (input.indexOf(query) !== -1) {
-					input = input.replace(query, ''); // Query
-					input = input.slice(1, -1); // Remove parentheses
+				const cleanParentheses = (input, query) => {
+					let cache = '';
+					while (input !== cache) {
+						cache = input;
+						input = input.replace(new RegExp('\\(\\(' + query + '\\)\\)', 'i'), _p(query));
+						input = input.replace(new RegExp('^\\(' + query + '\\)$', 'i'), query);
+						input = input.replace(new RegExp('^\\(([^\\(\\)]*)\\)$', 'i'), '$1');
+						input = input.replace(new RegExp('\\(\\(([^\\(\\)]*)\\)\\)', 'i'), '$1');
+					}
+					return input;
+				};
+				if (input === query) {input = '';}
+				else if (input.indexOf(query) !== -1) {
+					input = cleanParentheses(input, query);
+					input = input.replace(new RegExp('^\\(*' + query + '\\)*$|\\(?' + query + '\\)? AND | AND \\(?' + query + '\\)?', 'i'), '');
+					input = cleanParentheses(input, query);
 				} else {
-					input = input.length ? _p(input) + query : query;
+					input = input.length ? _p(input) + ' AND ' + _p(query) : query;
 				}
 				return input;
 			};
 			options.forEach((obj) => {
 				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
 				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
-				const query = properties['forcedQuery'][1].length ? ' AND ' + _p(obj.query) : obj.query;
 				let input = '';
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
-					input = switchQuery(properties['forcedQuery'][1], query);
+					input = switchQuery(properties['forcedQuery'][1], obj.query);
 					try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
 					catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
 					properties['forcedQuery'][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(subMenuName, entryText, void(0), () => {return properties['forcedQuery'][1].indexOf(query) !== -1 || (recipe.hasOwnProperty('forcedQuery') && recipe.forcedQuery.indexOf(query) !== -1);});
+				menu.newCheckMenu(subMenuName, entryText, void(0), () => {
+					const prop = recipe.hasOwnProperty('forcedQuery') ? recipe.forcedQuery : properties['forcedQuery'][1];
+					return prop.indexOf(obj.query) !== -1;
+				});
 			});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
 			menu.newEntry({menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {

@@ -1,15 +1,15 @@
 ﻿[
 	{
 		"title": "Female vocals",
-		"query": "STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female"
+		"query": "STYLE IS female vocal OR STYLE IS female OR GENRE IS female vocal OR GENRE IS female OR GENDER IS female"
 	}, 
 	{
 		"title": "Instrumentals",
-		"query": "STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0"
+		"query": "STYLE IS instrumental OR GENRE IS instrumental OR SPEECHINESS EQUAL 0"
 	},
 	{
 		"title": "Acoustic tracks", 
-		"query": "STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75"
+		"query": "STYLE IS acoustic OR GENRE IS acoustic OR ACOUSTICNESS GREATER 75"
 	},	
 	{
 		"title": "Rating > 2",
@@ -17,30 +17,30 @@
 	},
 	{
 		"title": "Rating > 3",
-		"query": "%RATING% GREATER 2"
+		"query": "%RATING% GREATER 3"
 	},
 	{
 		"title": "Length < 6 min",
-		"query": "%length_seconds% LESS 360"
+		"query": "%LENGTH_SECONDS% LESS 360"
 	},
 	{
 		"title": "Only Stereo",
-		"query": "%channels% LESS 3 AND NOT COMMENT HAS Quad"
+		"query": "%CHANNELS% LESS 3 AND NOT COMMENT HAS Quad"
 	},
 	{
 		"title": "sep"
 	},
 	{
 		"title": "No Female vocals",
-		"query": "NOT (STYLE IS Female Vocal OR STYLE IS Female OR GENRE IS Female Vocal OR GENRE IS Female OR GENDER IS Female)"
+		"query": "NOT (STYLE IS female vocal OR STYLE IS female OR GENRE IS female vocal OR GENRE IS female OR GENDER IS female)"
 	}, 
 	{
 		"title": "No Instrumentals",
-		"query": "NOT (STYLE IS Instrumental OR GENRE IS Instrumental OR SPEECHINESS EQUAL 0)"
+		"query": "NOT (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHINESS EQUAL 0)"
 	},
 	{
 		"title": "No Acoustic tracks", 
-		"query": "NOT (STYLE IS Acoustic OR GENRE IS Acoustic OR ACOUSTICNESS GREATER 75)"
+		"query": "NOT (STYLE IS acoustic OR GENRE IS acoustic OR ACOUSTICNESS GREATER 75)"
 	},
 	{
 		"title": "Not Rated",
@@ -48,6 +48,6 @@
 	},
 	{
 		"title": "Not Live (unless Hi-Fi)",
-		"query": "NOT (STYLE IS Live AND NOT STYLE IS Hi-Fi)"
+		"query": "(NOT GENRE IS live AND NOT STYLE IS live) OR ((GENRE IS live OR STYLE IS live) AND GENRE IS hi-fi)"
 	}
 ]
