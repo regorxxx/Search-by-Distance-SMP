@@ -118,7 +118,7 @@ function createConfigMenu(parent) {
 	{	// Scoring methods
 		const menuName = menu.newMenu('Set Scoring method');
 		{
-			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC']);
+			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC', 'LOGISTIC']);
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{

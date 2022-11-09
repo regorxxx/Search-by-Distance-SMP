@@ -163,6 +163,18 @@ function tryMethod(fn, parent) {
 	};
 }
 
+function memoize(fn) {
+	const results = {};
+	return (...args) => {
+		// Create key for cache
+		const argsKey = JSON.stringify(args);
+		if (!results.hasOwnProperty(argsKey)) {
+			results[argsKey] = fn(...args)
+		}
+		return results[argsKey];
+	};
+}
+
 /* 
 	Array and objects manipulation 
 */

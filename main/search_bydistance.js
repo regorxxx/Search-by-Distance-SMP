@@ -1029,7 +1029,6 @@ async function do_searchby_distance({
 		const titleHandle = tagsValByKey[z++];
 		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = tagsValByKey.slice(z);
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
-		const betha = 0.5; // For logarithmic scoring method
 		let i = 0;
 		while (i < tracktotal) {
             let weightValue = 0;
@@ -1066,26 +1065,18 @@ async function do_searchby_distance({
 			if (genreWeight !== 0 && genreNumber !== 0 && genreNew.length) {
 				let common = genreSet.intersectionSize(genreNewSet);
 				if (common) {
-					const proportion = common / genreNumber; // It's never zero!
-					const alpha = 2 - Math.abs(genreNumber - genreNew.length) / Math.max(genreNumber, genreNew.length);
-					if (scoringDistribution === 'LINEAR') {
-						weightValue += genreWeight * proportion;
-					} else if (scoringDistribution === 'LOGARITHMIC') {
-						weightValue += genreWeight * ((1 + Math.log(proportion) * betha) + ((1 - proportion) * betha) ** (Math.exp(proportion) * alpha));
-					}
+					weightValue += scoringDistribution === 'LINEAR' // Avoid memoizing last var if not needed
+							? genreWeight * weightDistribution(scoringDistribution, common / genreNumber)
+							: genreWeight * weightDistribution(scoringDistribution, common / genreNumber, genreNumber, genreNewSet.size);
 				}
 			}
 			
 			if (styleWeight !== 0 && styleNumber !== 0 && styleNew.length) {
 				let common = styleSet.intersectionSize(styleNewSet);
 				if (common) {
-					const proportion = common / styleNumber;
-					const alpha = 2 - Math.abs(genreNumber - genreNew.length) / Math.max(genreNumber, genreNew.length);
-					if (scoringDistribution === 'LINEAR') {
-						weightValue += styleWeight * proportion;
-					} else if (scoringDistribution === 'LOGARITHMIC') {
-						weightValue += genreWeight * ((1 + Math.log(proportion) * betha) + ((1 - proportion) * betha) ** (Math.exp(proportion) * alpha));
-					}
+					weightValue += scoringDistribution === 'LINEAR' // Avoid memoizing last var if not needed
+							? styleWeight * weightDistribution(scoringDistribution, common / styleNumber)
+							: styleWeight * weightDistribution(scoringDistribution, common / styleNumber, styleNumber, styleNewSet.size);
 				}
 			}
 			
@@ -1754,7 +1745,7 @@ function checkMethod(method) {
 }
 
 function checkScoringDistribution(distr) {
-	return (new Set(['LINEAR','LOGARITHMIC']).has(distr));
+	return (new Set(['LINEAR','LOGARITHMIC','LOGISTIC']).has(distr));
 }
 
 // Save and load cache on json
@@ -1809,3 +1800,17 @@ function processRecipe(initialRecipe) {
 	}
 	return toAdd;
 }
+
+const weightDistribution = memoize((scoringDistribution, proportion /* Should never be zero! */, tagNumber = 0, newTagNumber = 0) => {
+	let proportionWeight = 1;
+	if (scoringDistribution === 'LINEAR') {
+		proportionWeight = proportion;
+	} else if (scoringDistribution === 'LOGARITHMIC') {
+		const alpha = 2 - Math.abs(tagNumber - newTagNumber) / Math.max(tagNumber, newTagNumber);
+		proportionWeight = ((1 + Math.log(proportion) * 0.5) + ((1 - proportion) * 0.5) ** (Math.exp(proportion) * alpha));
+	} else if (scoringDistribution === 'LOGISTIC') {
+		const alpha = 2 + Math.abs(tagNumber - newTagNumber);
+		proportionWeight = Math.max(1 - 2/(Math.exp(alpha * proportion) + 1), Math.min(Math.log(1 + proportion * 1.8), 1));
+	}
+	return proportionWeight;
+});
