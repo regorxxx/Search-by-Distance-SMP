@@ -1,0 +1,8 @@
+title: Composer
+script_language_version: '1.1'
+script: "$noop(Standarizes special composer labels)\n$noop(Removes brackets and uses\
+  \ capitalization)\n$noop(Merges multiple fields to composer)\n\n$copymerge(composer,lyricist)\n\
+  $copymerge(composer,writer)\n$copymerge(composer,remixer)\n\n$if($inmulti(%composer%,[traditional]),\n\
+  \t$set(composer,Traditional)\n)\n$if($inmulti(%composer%,[uknown]),\n\t$unset(composer)\n\
+  )\n$if($inmulti(%composer%,[anonymous]),\n\t$unset(composer)\n)\n"
+id: f4eba2ad-45b1-4ecb-995b-d7069e0de902

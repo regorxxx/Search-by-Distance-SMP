@@ -1,0 +1,5 @@
+title: Folksonomy
+script_language_version: '1.1'
+script: |
+  $set(folksonomy,%genre%)
+id: 7097f06a-8132-4980-b118-206c4affa800

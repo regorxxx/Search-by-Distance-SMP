@@ -73,6 +73,7 @@
 - Logging: added some console warnings when specific sorting options override others.
 ### Removed
 ### Fixed
+- Presets: fixed misspelling of 'SPEECHNESS' at multiple places/presets, on queries, tag name, picard scripts, etc.
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.

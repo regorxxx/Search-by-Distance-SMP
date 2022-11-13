@@ -2,10 +2,10 @@
 	{
 		"title": "Female vocals",
 		"query": "STYLE IS female vocal OR STYLE IS female OR GENRE IS female vocal OR GENRE IS female OR GENDER IS female"
-	}, 
+	},
 	{
 		"title": "Instrumentals",
-		"query": "STYLE IS instrumental OR GENRE IS instrumental OR SPEECHINESS EQUAL 0"
+		"query": "STYLE IS instrumental OR GENRE IS instrumental OR SPEECHNESS EQUAL 0 OR LANGUAGE IS zxx"
 	},
 	{
 		"title": "Acoustic tracks", 
@@ -36,7 +36,7 @@
 	}, 
 	{
 		"title": "No Instrumentals",
-		"query": "NOT (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHINESS EQUAL 0)"
+		"query": "NOT (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHNESS EQUAL 0)"
 	},
 	{
 		"title": "No Acoustic tracks", 

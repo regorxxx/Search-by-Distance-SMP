@@ -15,5 +15,5 @@
 	"scoreFilter": 65,
 	"method": "GRAPH",
 	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4 * 3/4",
-	"forcedQuery": "(NOT (%RATING% EQUAL 2 OR %RATING% EQUAL 1) AND NOT (STYLE IS live AND NOT STYLE IS hi-fi) AND %CHANNELS% LESS 3 AND NOT COMMENT HAS quad) AND (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHINESS EQUAL 0)"
+	"forcedQuery": "(NOT (%RATING% EQUAL 2 OR %RATING% EQUAL 1) AND NOT (STYLE IS live AND NOT STYLE IS hi-fi) AND %CHANNELS% LESS 3 AND NOT COMMENT HAS quad) AND (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHNESS EQUAL 0 OR LANGUAGE IS zxx)"
 }
