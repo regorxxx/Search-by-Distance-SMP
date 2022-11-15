@@ -606,10 +606,13 @@ function createConfigMenu(parent) {
 			'Method: GRAPH': folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
 			'Method: WEIGHT': folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
 			sep2: 'sep',
+			'Scoring methods': folders.xxx + 'helpers\\readme\\search_bydistance_scoring.txt',
+			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_bydistance_scoring.png',
+			sep3: 'sep',
 			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
 			'Similar Artists': folders.xxx + 'helpers\\readme\\search_bydistance_similar_artists.txt',
 			'User descriptors': folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt',
-			sep3: 'sep',
+			sep4: 'sep',
 			'Tagging requisites': folders.xxx + 'helpers\\readme\\tags_structure.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
 			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'
@@ -623,8 +626,12 @@ function createConfigMenu(parent) {
 					if (readme.length) {
 						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
 							if (_isFile(value)) {
-								const readme = _open(value, utf8);
-								if (readme.length) {fb.ShowPopupMessage(readme, key);}
+								if (value.endsWith('.png')) {
+									_run(value);
+								} else {
+									const readme = _open(value, utf8);
+									if (readme.length) {fb.ShowPopupMessage(readme, key);}
+								}
 							} else {console.log('Readme not found: ' + value);}
 						}});
 						iCount++;

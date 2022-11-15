@@ -1,0 +1,23 @@
+﻿Similarity scoring for genre and style weighting. There are multiple 
+scoring methods available, i.e. how tags from a library track are 
+compared against a reference track to retrieve similarity:
+
+	- LINEAR: simple proportion, i.e. if 3/4 tags match, then its
+		similarity score will be 75%. Thus being always being
+		"linear" no matter the tag count.
+	- LOGARITHMIC: uses a logarithmic curve to map linear scoring to a
+		curve. Little sensitivity to tag values counts (n). i.e. if
+		75% of values match, then it will output a score near 80%
+		for all tag counts (n).
+	- LOGISTIC: uses the logistic curve to map linear scoring. High
+		sensitivity to tag values counts (n). i.e. if 75% of values
+		match, then it will output a score from ~80% to ~95% 
+		depending on tag counts (n).
+
+'LOGARITHMIC' and 'LOGISTIC' scoring methods take into account that tracks 
+with a lot of genre/style tags don't return so many matches because it's 
+almost impossible to match all of them. Therefore a curve is used, giving 
+an extra weight to lower matches, specially for high tag values counts (n).
+
+A chart comparing the available methods can be found at:
+'.\helpers\readme\search_bydistance_scoring.png'
