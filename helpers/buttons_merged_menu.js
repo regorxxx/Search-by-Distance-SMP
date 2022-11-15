@@ -1,5 +1,5 @@
 ﻿'use strict'
-//01/07/22
+//15/11/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -193,6 +193,7 @@ function createButtonsMenu(name) {
 			barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
 			overwriteProperties(barProperties);
 			buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6; // buttons_xxx.js
+			window.Repaint();
 		}});
 		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});

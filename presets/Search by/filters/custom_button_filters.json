@@ -25,7 +25,7 @@
 	},
 	{
 		"title": "Only Stereo",
-		"query": "%CHANNELS% LESS 3 AND NOT COMMENT HAS Quad"
+		"query": "%CHANNELS% LESS 3 AND NOT COMMENT HAS quad"
 	},
 	{
 		"title": "sep"
@@ -36,7 +36,7 @@
 	}, 
 	{
 		"title": "No Instrumentals",
-		"query": "NOT (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHNESS EQUAL 0)"
+		"query": "NOT (STYLE IS instrumental OR GENRE IS instrumental OR SPEECHNESS EQUAL 0 OR LANGUAGE IS zxx)"
 	},
 	{
 		"title": "No Acoustic tracks", 
@@ -48,6 +48,6 @@
 	},
 	{
 		"title": "Not Live (unless Hi-Fi)",
-		"query": "(NOT GENRE IS live AND NOT STYLE IS live) OR ((GENRE IS live OR STYLE IS live) AND GENRE IS hi-fi)"
+		"query": "(NOT (GENRE IS live AND STYLE IS live)) OR ((GENRE IS live OR STYLE IS live) AND GENRE IS hi-fi)"
 	}
 ]
