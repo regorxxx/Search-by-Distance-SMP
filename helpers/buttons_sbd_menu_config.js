@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//15/11/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -118,7 +118,7 @@ function createConfigMenu(parent) {
 	{	// Scoring methods
 		const menuName = menu.newMenu('Set Scoring method');
 		{
-			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC', 'LOGISTIC']);
+			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL']);
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{

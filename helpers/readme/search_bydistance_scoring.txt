@@ -3,8 +3,8 @@ scoring methods available, i.e. how tags from a library track are
 compared against a reference track to retrieve similarity:
 
 	- LINEAR: simple proportion, i.e. if 3/4 tags match, then its
-		similarity score will be 75%. Thus being always being
-		"linear" no matter the tag count.
+		similarity score will be 75%. Thus being always "linear" 
+		no matter the tag count.
 	- LOGARITHMIC: uses a logarithmic curve to map linear scoring to a
 		curve. Little sensitivity to tag values counts (n). i.e. if
 		75% of values match, then it will output a score near 80%
@@ -13,11 +13,22 @@ compared against a reference track to retrieve similarity:
 		sensitivity to tag values counts (n). i.e. if 75% of values
 		match, then it will output a score from ~80% to ~95% 
 		depending on tag counts (n).
+	- NORMAL: uses the cumulative distribution function of a normal
+		distribution to map linear scoring. Medium sensitivity to
+		tag values counts (n). i.e. if 50% of values match, then it
+		will output a score from ~70% to ~90% depending on tag
+		counts (n). S-shaped, giving more weight to high scores.
 
 'LOGARITHMIC' and 'LOGISTIC' scoring methods take into account that tracks 
 with a lot of genre/style tags don't return so many matches because it's 
 almost impossible to match all of them. Therefore a curve is used, giving 
 an extra weight to lower matches, specially for high tag values counts (n).
+
+'NORMAL' scoring method just acts like a high-pass filter for scoring,
+where the turning point is set at 40%. High tag value counts just make it
+smoother. This method considers that similar tracks follow a normal
+distribution where the most similar ones will all be over the 40% simil.
+critical point.
 
 A chart comparing the available methods can be found at:
 '.\helpers\readme\search_bydistance_scoring.png'

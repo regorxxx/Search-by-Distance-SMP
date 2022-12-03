@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//29/11/22
 
 /*
 	Search by Distance
@@ -46,6 +46,7 @@ include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_tags.js');
 if (isFoobarV2) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
 include('..\\helpers\\helpers_xxx_math.js');
+include('..\\helpers\\helpers_xxx_statistics.js');
 include('..\\helpers\\camelot_wheel_xxx.js');
 include('..\\helpers\\dyngenre_map_xxx.js');
 include('..\\helpers\\music_graph_xxx.js');
@@ -862,7 +863,7 @@ async function do_searchby_distance({
 		const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
 		if (bProfile) {test.Print('Task #1: Reference track / theme', false);}
 		
-        // Create final query
+		// Create final query
 		// Pre filtering by query greatly speeds up the next part (weight and graph distance calcs), but it requires variable queries according to the weights.
 		// i.e. if genreWeight is set too high, then only same genre tracks would pass the later score/distance filter... 
 		// But having the same values for other tags could make the track pass to the final pool too, specially for Graph method. 
@@ -1745,7 +1746,7 @@ function checkMethod(method) {
 }
 
 function checkScoringDistribution(distr) {
-	return (new Set(['LINEAR','LOGARITHMIC','LOGISTIC']).has(distr));
+	return (new Set(['LINEAR','LOGARITHMIC','LOGISTIC','NORMAL']).has(distr));
 }
 
 // Save and load cache on json
@@ -1803,7 +1804,7 @@ function processRecipe(initialRecipe) {
 
 const weightDistribution = memoize((scoringDistribution, proportion /* Should never be zero! */, tagNumber = 0, newTagNumber = 0) => {
 	let proportionWeight = 1;
-	if (scoringDistribution === 'LINEAR') {
+	if (scoringDistribution === 'LINEAR' || proportion === 1 || proportion === 0) {
 		proportionWeight = proportion;
 	} else if (scoringDistribution === 'LOGARITHMIC') {
 		const alpha = 2 - Math.abs(tagNumber - newTagNumber) / Math.max(tagNumber, newTagNumber);
@@ -1811,6 +1812,10 @@ const weightDistribution = memoize((scoringDistribution, proportion /* Should ne
 	} else if (scoringDistribution === 'LOGISTIC') {
 		const alpha = 2 + Math.abs(tagNumber - newTagNumber);
 		proportionWeight = Math.max(1 - 2/(Math.exp(alpha * proportion) + 1), Math.min(Math.log(1 + proportion * 1.8), 1));
+	} else if (scoringDistribution === 'NORMAL') {
+		const sigma = 0.3 * (1 + Math.abs(tagNumber - newTagNumber)) / Math.max(tagNumber, newTagNumber);
+		const mu = 0.4;
+		proportionWeight = cdfz((proportion - mu) / sigma);
 	}
 	return proportionWeight;
 });
