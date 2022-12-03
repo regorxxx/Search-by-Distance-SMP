@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/10/22
+//25/11/22
 
 /* 
 	Objects
@@ -378,11 +378,11 @@ function cyclicOffset(reference, offset, limits) {
 
 const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
-function round(floatnum, decimals){
+function round(floatnum, decimals, eps = 10**-14){
 	let result;
 	if (decimals > 0) {
 		if (decimals === 15) {result = floatnum;}
-		else {result = Math.round(floatnum * Math.pow(10, decimals)) / Math.pow(10, decimals);}
+		else {result = Math.round(floatnum * Math.pow(10, decimals) + eps) / Math.pow(10, decimals);}
 	} else {result =  Math.round(floatnum);}
 	return result;
 }
@@ -417,3 +417,8 @@ const regExBool = /^b[A-Z]\w*/;
 */
 // Allows forward and backward iteration
 try {include('..\\helpers-external\\reverse-iterable-map-5.0.0\\reverse-iterable-map.js');} catch (e) {/* continue regardless of error */}
+
+/* 
+	SMP
+*/
+include('helpers_xxx_prototypes_smp.js');

@@ -1,13 +1,18 @@
 ﻿'use strict';
-//07/11/22
+//29/11/22
 
 // Helpers for input popup and checking proper values are provided
 // Provides extensive error popups on output to give feedback to the user
 // Returns null when default value (oldVal) matches output
 // Ex input.json('array numbers', [0, 2], 'Input an Array of numbers:', 'Input', JSON.stringify([0, 2])),
 const Input = Object.seal(Object.freeze({
+	data: Object.seal({last: null, lastInput: null}),
+	get isLastEqual() {
+		return this.data.last === this.data.lastInput;
+	},
 	json: function (type, oldVal, message, title, example, checks = [], bFilterFalse = false) {
 		const types = new Set(['array', 'array numbers', 'array strings', 'array booleans', 'object']);
+		this.data.last = oldVal; this.data.lastInput = null;
 		if (!types.has(type)) {throw new Error('Invalid type: ' + type);}
 		let input, newVal;
 		const oldValStr = JSON.stringify(oldVal);
@@ -72,11 +77,12 @@ const Input = Object.seal(Object.freeze({
 			}
 			return null;
 		}
-		if (oldValStr === JSON.stringify(newVal)) {return null;}
+		if (oldValStr === JSON.stringify(newVal)) {this.data.lastInput = newVal; return null;}
 		return newVal;
 	},
 	number: function (type, oldVal, message, title, example, checks = []) {
 		const types = new Set(['int', 'int positive', 'int negative', 'float', 'float positive', 'float negative']);
+		this.data.last = oldVal; this.data.lastInput = null;
 		if (!types.has(type)) {throw new Error('Invalid type: ' + type);}
 		let input, newVal;
 		try {
@@ -124,11 +130,12 @@ const Input = Object.seal(Object.freeze({
 			}
 			return null;
 		}
-		if (oldVal === newVal) {return null;}
+		if (oldVal === newVal) {this.data.lastInput = newVal; return null;}
 		return newVal;
 	},
 	string: function (type, oldVal, message, title, example, checks = [], bFilterEmpty = false) {
 		const types = new Set(['string']);
+		this.data.last = oldVal; this.data.lastInput = null;
 		if (!types.has(type)) {throw new Error('Invalid type: ' + type);}
 		let input, newVal;
 		try {
@@ -157,11 +164,12 @@ const Input = Object.seal(Object.freeze({
 			}
 			return null;
 		}
-		if (oldVal === newVal) {return null;}
+		if (oldVal === newVal) {this.data.lastInput = newVal; return null;}
 		return newVal;
 	},
 	query: function (oldVal, message, title, example, checks = [], bFilterEmpty = false) {
 		let newVal;
+		this.data.last = oldVal; this.data.lastInput = null;
 		try {
 			newVal = this.string('string', oldVal, message, title, example);
 			if (newVal === null) {throw new Error('Invalid string');}
@@ -181,7 +189,7 @@ const Input = Object.seal(Object.freeze({
 			}
 			return null;
 		}
-		if (oldVal === newVal) {return null;}
+		if (oldVal === newVal) {this.data.lastInput = newVal; return null;}
 		return newVal;
 	}
 }));
