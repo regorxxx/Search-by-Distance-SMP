@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/12/22
+//05/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -165,6 +165,7 @@ function createConfigMenu(parent) {
 	{	// Tags and weights
 		const menuName = menu.newMenu('Set Tags and weighting');
 		const options = [...new Set([...Object.keys(tags), ...recipeTags])];
+		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
 		options.forEach((key) => {
 			const subMenuName = menu.newMenu(capitalize(key), menuName);
 			{	// Remap
@@ -241,7 +242,38 @@ function createConfigMenu(parent) {
 					menu.newCheckMenu(subMenuName2, entryText, void(0), () => {return (tag.scoringDistribution === option);});
 				});
 			}
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			{	// Delete
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && !tags.hasOwnProperty(key);
+				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
+				menu.newEntry({menuName: subMenuName, entryText: 'Delete tag...' + (bRecipe ? '\t(forced by recipe)' : bDefTag ? '\t(default tag)' : ''), func: () => {
+					delete tags[key];
+					properties.tags[1] = JSON.stringify(tags);
+					overwriteProperties(properties); // Updates panel
+				}, flags: bRecipe || bDefTag ? MF_GRAYED : MF_STRING});
+			}
 		});
+		{	// New tag
+			menu.newEntry({menuName, entryText: 'New tag...', func: () => {
+				const nTag = {weight: 0, tf: [], scoringDistribution: 'LINEAR', type: []};
+				const name = Input.string('string', '', 'Enter name:', 'Search by distance', 'myTag');
+				if (name === null) {return;}
+				'string', 'multiple', 'graph'
+				if (WshShell.Popup('Is a string?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('string');} 
+				else {nTag.type.push('number');}
+				if (WshShell.Popup('Is multi-valued?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('multiple');} 
+				else {nTag.type.push('single');}
+				if (nTag.type.includes('string')) {
+					if (WshShell.Popup('Is a genre/style-like tag?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('graph');} 
+				} else if (nTag.type.includes('number')) {
+					if (WshShell.Popup('Uses absolute range?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('absRange'); nTag.range = 0;} 
+					else if (WshShell.Popup('Uses percent range?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('percentRange');}
+				}
+				tags[name] = nTag;
+				properties.tags[1] = JSON.stringify(tags);
+				overwriteProperties(properties); // Updates panel
+			}});
+		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];

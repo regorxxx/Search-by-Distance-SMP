@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/12/22
+//05/12/22
 
 /*
 	Search by Distance
@@ -71,9 +71,7 @@ const SearchByDistance_properties = {
 		key:		{weight: 5,	 tf: [globTags.key],	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
 		bpm:		{weight: 5,	 tf: [globTags.bpm],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
 		date:		{weight: 10, tf: [globTags.date],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
-		composer:	{weight: 0,	 tf: ['COMPOSER'],		scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
-		customStr:	{weight: 0,	 tf: [],				scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
-		customNum:	{weight: 0,	 tf: [],				scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 0}
+		composer:	{weight: 0,	 tf: ['COMPOSER'],		scoringDistribution: 'LINEAR', type: ['string', 'multiple']}
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
