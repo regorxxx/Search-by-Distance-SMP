@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/11/22
+//05/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -40,7 +40,7 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 }
 
 /*
-	Some button examples for 'search_bydistance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling do_searchby_distance() outside buttons, it would work with default arguments.
+	Some button examples for 'search_bydistance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling searchByDistance() outside buttons, it would work with default arguments.
 */
 
 addButton({
@@ -51,9 +51,9 @@ addButton({
 					bpmRange: 25, probPick: 100, scoreFilter: 70, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre / 2, 
 					dyngenreWeight: 25, dyngenreRange: 1,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix, 0)}; // Mix with only nearest tracks
-		do_searchby_distance(args); 
+		searchByDistance(args); 
 		t1 = Date.now();
-		console.log('Call to do_searchby_distance NearestTracks took ' + (t1 - t0) + ' milliseconds.');
+		console.log('Call to searchByDistance NearestTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar tracks': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Tracks', function () {
 		let t0 = Date.now();
@@ -62,9 +62,9 @@ addButton({
 					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.cluster, 
 					dyngenreWeight: 10, dyngenreRange: 1,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix, 0)}; // Mix a bit varied on styles/genres most from the same decade
-		do_searchby_distance(args);
+		searchByDistance(args);
 		t1 = Date.now();
-		console.log('Call to do_searchby_distance SimilarTracks took ' + (t1 - t0) + ' milliseconds.');
+		console.log('Call to searchByDistance SimilarTracks took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar genres': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function () {
 		let t0 = Date.now();
@@ -73,9 +73,9 @@ addButton({
 					bpmRange: 25, probPick: 100, scoreFilter: 60, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 3/2, 
 					dyngenreWeight: 10, dyngenreRange: 2,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix, 0)}; // Mix even more varied on styles/genres most from the same decade
-		do_searchby_distance(args);
+		searchByDistance(args);
 		t1 = Date.now();
-		console.log('Call to do_searchby_distance SimilarGenres took ' + (t1 - t0) + ' milliseconds.');
+		console.log('Call to searchByDistance SimilarGenres took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar mood': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Mood', function () {
 		let t0 = Date.now();
@@ -84,8 +84,8 @@ addButton({
 					bpmRange: 25, probPick: 100, scoreFilter: 50, sbd_max_graph_distance: music_graph_descriptors.intra_supergenre * 4, 
 					dyngenreWeight: 5, dyngenreRange: 4,
 					properties: getPropertiesPairs(this.buttonsProperties, this.prefix, 0)}; // Mix with different genres but same mood from any date
-		do_searchby_distance(args);
+		searchByDistance(args);
 		t1 = Date.now();
-		console.log('Call to do_searchby_distance SimilarMood took ' + (t1 - t0) + ' milliseconds.');
+		console.log('Call to searchByDistance SimilarMood took ' + (t1 - t0) + ' milliseconds.');
 	}, null, void(0), 'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
 });

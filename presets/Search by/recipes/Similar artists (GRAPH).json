@@ -1,17 +1,28 @@
 {
 	"name": "Similar artists (G)",
-	"genreWeight": 10,
-	"styleWeight": 5,
-	"moodWeight": 5,
-	"keyWeight": 2,
-	"dateWeight": 2,
-	"bpmWeight": 5,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"keyRange": 1, 
-	"dateRange": 20, 
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 10
+		},
+		"style": {
+			"weight": 5
+		},
+		"mood": {
+			"weight": 5
+		},
+		"key": {
+			"weight": 2,
+			"range": 1
+		},
+		"bpm": {
+			"weight": 5,
+			"range": 25
+		},
+		"date": {
+			"weight": 2,
+			"range": 20
+		}
+	},
 	"bSameArtistFilter": true,
 	"bSimilArtistsFilter": true,
 	"method": "GRAPH",

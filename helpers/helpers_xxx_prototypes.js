@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/22
+//04/12/22
 
 /* 
 	Objects
@@ -105,6 +105,14 @@ String.prototype.replaceAll = function replaceAll(word, newWord) {
 	let copy = this;
 	while (copy.indexOf(word) !== -1) {copy = copy.replace(word, newWord);}
 	return copy;
+};
+
+String.prototype.count = function count(c) { 
+	let result = 0, i = 0;
+	for (i; i < this.length; i++) {
+		if (this[i] == c) {result++;}
+	}
+	return result;
 };
 
 function capitalize(s) {

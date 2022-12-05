@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//05/12/22
 
 include('search_bydistance.js');
 
@@ -66,7 +66,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 			}
 		}
 		// Compare by genre/style and date using graph method. Exclude anti-influences (faster). All config found on the recipe file
-		const data = await do_searchby_distance({
+		const data = await searchByDistance({
 			properties: newConfig,
 			panelProperties: sbd.panelProperties,
 			sel, theme, recipe,

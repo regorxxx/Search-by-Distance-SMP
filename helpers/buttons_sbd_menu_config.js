@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/22
+//04/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -12,6 +12,7 @@ function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
 	let recipe = {};
+	const tags = JSON.parse(properties.tags[1]);
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
 		recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}: _jsonParseFileCheck(recipePath + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
@@ -20,16 +21,42 @@ function createConfigMenu(parent) {
 	if (recipe.hasOwnProperty('recipe')) {
 		const toAdd = processRecipe(recipe.recipe);
 		delete toAdd.recipe;
-		Object.keys(toAdd).forEach((key) => {if (!recipe.hasOwnProperty(key)) {recipe[key] = toAdd[key];}});
+		Object.keys(toAdd).forEach((key) => {
+			if (!recipe.hasOwnProperty(key)) {
+				recipe[key] = toAdd[key];
+			} else if (key === 'tags') {
+				for (let key in toAdd.tags) {
+					if (!recipe.tags.hasOwnProperty(key)) {
+						recipe.tags[key] = toAdd.tags[key];
+					} else {
+						for (let subKey in toAdd.tags[key]) {
+							if (!recipe.tags[key].hasOwnProperty(subKey)) {
+								recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+	// Process placeholders for tags
+	if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
+		for (let key in tags) {
+			if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
+		}
 	}
 	// Recipe forced properties?
 	const bProperties = recipe.hasOwnProperty('properties');
+	// Recipe forced tags?
+	const bRecipeTags = recipe.hasOwnProperty('tags');
+	// Recipe-only tags?
+	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
 	// Helpers
 	const createTagMenu = (menuName, options) => {
 		options.forEach((key) => {
 			if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 			const idxEnd = properties[key][0].indexOf('(');
-			const value = JSON.parse(bProperties && recipe.properties.hasOwnProperty(key) ? _recipe[key] : properties[key][1]).join(',');
+			const value = JSON.parse(bProperties && recipe.properties.hasOwnProperty(key) ? recipe[key] : properties[key][1]).join(',');
 			const entryText = properties[key][0].substring(
 				properties[key][0].indexOf('.') + 1, idxEnd !== -1 
 					? idxEnd - 1 
@@ -44,7 +71,7 @@ function createConfigMenu(parent) {
 						: ''
 				);
 			menu.newEntry({menuName, entryText, func: () => {
-				const example = '["GENRE","$replace(%DISCOGS_GENRE%,\', &&\',\',\')","GENRE2"]';
+				const example = '["GENRE","GENRE2"]';
 				const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\n\nFor example:\n' + example, 'Search by distance', example, void(0), true);
 				if (input === null) {return;}
 				properties[key][1] = JSON.stringify(input);
@@ -114,12 +141,6 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties); // Updates panel
 			}, flags});
 		}
-	}
-	{	// Scoring methods
-		const menuName = menu.newMenu('Set Scoring method');
-		{
-			createSwitchMenu(menuName, 'scoringDistribution', ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL']);
-		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
 			const options = ['scoreFilter', 'minScoreFilter'];
@@ -138,41 +159,140 @@ function createConfigMenu(parent) {
 				}, flags});
 			});
 		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		createBoolMenu(menuName, ['bNegativeWeighting']);
 	}
-	{	// Weights
-		const menuName = menu.newMenu('Set weights');
-		const options = ['genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'dateWeight', 'keyWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight'];
-		const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
-		const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
+	{	// Tags and weights
+		const menuName = menu.newMenu('Set Tags and weighting');
+		const options = [...new Set([...Object.keys(tags), ...recipeTags])];
 		options.forEach((key) => {
-			const bIsDyngenreRecipe = key === 'dyngenreWeight' && bIsDyngenreMethodRecipe;
-			const bIsDyngenreProp = key === 'dyngenreWeight' && bIsDyngenreMethodProp;
-			const bPresent = recipe.hasOwnProperty(key);
-			const entryText = 'Set ' + key.replace('Weight','') + ' weight' + (bPresent || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : recipe[key]) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : properties[key][1]) + ']');
-			menu.newEntry({menuName, entryText, func: () => {
-				const input = Input.number('int positive', properties[key][1], 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
-				if (input === null) {return;}
-				properties[key][1] = input;
-				overwriteProperties(properties);
-			}, flags: bPresent || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
-		});
-	}
-	{	// Ranges
-		const menuName = menu.newMenu('Set ranges');
-		{
-			const options = ['dateRange', 'keyRange', 'bpmRange','customNumRange'];
-			options.forEach((key) => {
-				menu.newEntry({menuName, entryText: 'Set ' + key.replace('Range','') + ' range' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']'), func: () => {
-					const input = Input.number('int positive', properties[key][1], 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
+			const subMenuName = menu.newMenu(capitalize(key), menuName);
+			{	// Remap
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('tf');
+				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				if (!tag.type.includes('virtual')) {
+					const value = tag.tf.join(',');
+					const entryText = 'Remap...' + '\t[' + (
+						typeof value === 'string' && value.length > 10 
+							? value.slice(0,10) + '...' 
+							: value
+						) + ']' + (bRecipe ? ' (forced by recipe)' : '');
+					menu.newEntry({menuName: subMenuName, entryText, func: () => {
+						const example = '["GENRE","LASTFM_GENRE","GENRE2"]';
+						const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\n\nFor example:\n' + example, 'Search by distance', example, void(0), true);
+						if (input === null) {return;}
+						tags[key].tf = input;
+						properties.tags[1] = JSON.stringify(tags);
+						overwriteProperties(properties); // Updates panel
+						if (tag.type.includes('graph')) {
+							const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+							if (answer === popup.yes) {
+								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+							}
+						}
+					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
+				} else {
+					const entryText = 'Remap...\t[virtual]';
+					menu.newEntry({menuName: subMenuName, entryText, flags: MF_GRAYED});
+				}
+			}
+			{	// Ranges
+				if ((tags[key] || recipe.tags[key]).hasOwnProperty('range')) {
+					const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('range');
+					const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+					menu.newEntry({menuName: subMenuName, entryText: 'Range\t[' + tag.range + ']' + (bRecipe ? '(forced by recipe)' : ''), func: () => {
+						const input = Input.number('int positive', tag.range, 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
+						if (input === null) {return;}
+						tags[key].range = input;
+						properties.tags[1] = JSON.stringify(tags);
+						overwriteProperties(properties);
+					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
+				}
+			}
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			{	// Weights
+				const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
+				const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
+				const bIsDyngenreRecipe = (key === 'dynGenre' && bIsDyngenreMethodRecipe);
+				const bIsDyngenreProp = (key === 'dynGenre' && bIsDyngenreMethodProp);
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('weight');
+				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const entryText = 'Weight' + (bRecipe || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : tag.weight) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : tag.weight) + ']');
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					const input = Input.number('int positive', tag.weight, 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
 					if (input === null) {return;}
-					properties[key][1] = input;
+					tags[key].weight = input;
+					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties);
-				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+				}, flags: bRecipe || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
+			}
+			{	// Scoring
+				const options = ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL'];
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('scoringDistribution');
+				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const subMenuName2 = menu.newMenu('Scoring...', subMenuName);
+				options.forEach((option, i) => {
+					const entryText = option + (bRecipe && tag.scoringDistribution === option ? '\t(forced by recipe)' : '');
+					menu.newEntry({menuName: subMenuName2, entryText, func: () => {
+						tags[key].scoringDistribution = key;
+						properties.tags[1] = JSON.stringify(tags);
+						overwriteProperties(properties); // Updates panel
+					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
+					menu.newCheckMenu(subMenuName2, entryText, void(0), () => {return (tag.scoringDistribution === option);});
+				});
+			}
+		});
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
+			createTagMenu(menuName, options);
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{	// Cache
+			const options = ['bAscii', 'bTagsCache'];
+			options.forEach((key, i) => {
+				const propObj = key === 'bTagsCache' ? sbd.panelProperties : properties;
+				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isFoobarV2 ? '\t-only Fb >= 2.0-' : '');
+				menu.newEntry({menuName, entryText, func: () => {
+					propObj[key][1] = !propObj[key][1];
+					overwriteProperties(propObj); // Updates panel
+					if (key === 'bAscii') {
+						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+						if (answer === popup.yes) {
+							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+						}
+					} else if (key === 'bTagsCache') {
+						if (propObj.bTagsCache[1]) {
+							fb.ShowPopupMessage('This feature should only be enabled on Foobar2000 versions >= 2.0.\nPrevious versions already cached tags values, thus not requiring it.', 'Tags cache');
+							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+							if (answer === popup.yes) {
+								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
+							} else {
+								tagsCache.load();
+							}
+						} else {
+							tagsCache.unload();
+						}
+					}
+				}, flags: recipe.hasOwnProperty(key) || (key === 'bTagsCache' && !isFoobarV2) ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : propObj[key][1]);});
 			});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
-		{
-			createBoolMenu(menuName, ['bNegativeWeighting']);
+		{	// Reset
+			menu.newEntry({menuName, entryText: 'Restore defaults...', func: () => {
+				const options = ['tags', 'smartShuffleTag', 'genreStyleFilterTag', 'bAscii'];
+				options.forEach((tagName) => {
+					if (properties.hasOwnProperty(tagName) && SearchByDistance_properties.hasOwnProperty(tagName)) {
+						properties[tagName][1] = SearchByDistance_properties[tagName][1];
+					}
+				});
+				overwriteProperties(properties); // Force overwriting
+				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+				if (answer === popup.yes) {
+					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+				}
+			}});
 		}
 	}
 	{	// Pre-scoring filters:
@@ -397,58 +517,6 @@ function createConfigMenu(parent) {
 					(key) => {if (key === 'bAdvTitle' && properties.bAdvTitle[1]) {fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');}}
 				);
 			}
-		}
-	}
-	menu.newEntry({entryText: 'sep'});
-	{	// Menu to configure properties: tags
-		const menuName = menu.newMenu('Remap tags');
-		const options = ['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag','sep', 'smartShuffleTag', 'sep', 'genreStyleFilterTag'];
-		createTagMenu(menuName, options);
-		menu.newEntry({menuName, entryText: 'sep'});
-		{	// Cache
-			const options = ['bAscii', 'bTagsCache'];
-			options.forEach((key, i) => {
-				const propObj = key === 'bTagsCache' ? sbd.panelProperties : properties;
-				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isFoobarV2 ? '\t-only Fb >= 2.0-' : '');
-				menu.newEntry({menuName, entryText, func: () => {
-					propObj[key][1] = !propObj[key][1];
-					overwriteProperties(propObj); // Updates panel
-					if (key === 'bAscii') {
-						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-						if (answer === popup.yes) {
-							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
-						}
-					} else if (key === 'bTagsCache') {
-						if (propObj.bTagsCache[1]) {
-							fb.ShowPopupMessage('This feature should only be enabled on Foobar2000 versions >= 2.0.\nPrevious versions already cached tags values, thus not requiring it.', 'Tags cache');
-							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-							if (answer === popup.yes) {
-								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
-							} else {
-								tagsCache.load();
-							}
-						} else {
-							tagsCache.unload();
-						}
-					}
-				}, flags: recipe.hasOwnProperty(key) || (key === 'bTagsCache' && !isFoobarV2) ? MF_GRAYED : MF_STRING});
-				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : propObj[key][1]);});
-			});
-		}
-		menu.newEntry({menuName, entryText: 'sep'});
-		{	// Reset
-			menu.newEntry({menuName, entryText: 'Restore defaults...', func: () => {
-				options.forEach((tagName) => {
-					if (properties.hasOwnProperty(tagName) && SearchByDistance_properties.hasOwnProperty(tagName)) {
-						properties[tagName][1] = SearchByDistance_properties[tagName][1];
-					}
-				});
-				overwriteProperties(properties); // Force overwriting
-				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-				if (answer === popup.yes) {
-					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
-				}
-			}});
 		}
 	}
 	menu.newEntry({entryText: 'sep'});

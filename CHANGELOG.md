@@ -33,6 +33,7 @@
 ### Added
 - Configuration: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
+- Tags: reworked the entire tag system to allow for indefinite custom tags, with weights, ranges, scoring distribution methods, ... Recipes and buttons have been reworked too to account for this.
 - Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
 - Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
 - Smart Shuffle: shuffles tracks according to tags (Artist by default) in a semi-random pattern, ensuring no 2 consecutive tracks have the same tag value. Follows [Spotify design](https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/). Overrides any other sorting when enabled. Contrary to [Spotify's preferences to recently played/loved tracks](https://thetab.com/uk/2021/11/17/spotify-shuffle-explained-228639), this algorithm is truly "random" in the sense that there is no preference for any track, it just ensures artists are distributed evenly with some randomness. Also differs from from 'Scatter by tags' (intercalate) at [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/) in the way tracks are ordered (without strict alternation), i.e. it doesn't follow a pattern ABCABAA when it's possible to ensure no A tracks are together (ABACABA).
@@ -77,6 +78,7 @@
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
+- UI: recipes were not properly numbered when they had duplicates names.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
 - Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').

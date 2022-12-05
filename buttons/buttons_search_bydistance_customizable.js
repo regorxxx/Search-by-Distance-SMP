@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//05/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -58,7 +58,7 @@ addButton({
 					}
 				}
 			} else {
-				do_searchby_distance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
+				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
 			}
 		}
 	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand)

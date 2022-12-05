@@ -1,17 +1,28 @@
 {
 	"name": "Similar tracks (G)",
-	"genreWeight": 10,
-	"styleWeight": 5,
-	"moodWeight": 5,
-	"keyWeight": 5,
-	"dateWeight": 25,
-	"bpmWeight": 5,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"keyRange": 1, 
-	"dateRange": 15, 
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 10
+		},
+		"style": {
+			"weight": 5
+		},
+		"mood": {
+			"weight": 5
+		},
+		"key": {
+			"weight": 5,
+			"range": 1
+		},
+		"bpm": {
+			"weight": 5,
+			"range": 25
+		},
+		"date": {
+			"weight": 25,
+			"range": 15
+		}
+	},
 	"scoreFilter": 65,
 	"method": "GRAPH",
 	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4 * 3/4"

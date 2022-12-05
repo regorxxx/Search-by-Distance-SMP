@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/11/22
+//04/12/22
 
 /*
 	Search by Distance
@@ -63,30 +63,24 @@ checkCompatible('1.6.1', 'smp');
 	Properties
 */
 const SearchByDistance_properties = {
-	genreWeight				: 	['Genre Weight for final scoring', 15],
-	styleWeight				:	['Style Weight for final scoring', 15],
-	dyngenreWeight			:	['Dynamic Genre Weight for final scoring (only with DYNGENRE method)', 40],
-	dyngenreRange			:	['Dynamic Genre Range (only tracks within range will score)', 1],
-	moodWeight				:	['Mood Weight for final scoring', 10],
-	keyWeight				:	['Key Weight for final scoring', 5],
-	keyRange				:	['Key Range (uses Camelot Wheel \'12 hours\' scale)', 1],
-	dateWeight				:	['Date Weight for final scoring', 10],
-	dateRange				:	['Date Range (only tracks within range will score positively)', 15],
-	bpmWeight				:	['BPM Weight for final scoring', 5],
-	bpmRange				:	['BPM Range in % (for considering BPM Weight)', 25],
-	composerWeight			:	['Composer Weight for final scoring', 0],
-	customStrWeight			:	['CustomStr Weight for final scoring', 0],
-	customNumWeight			:	['CustomNum Weight for final scoring', 0],
-	customNumRange			:	['CustomNum Range for final scoring', 0],
-	genreTag				:	['Genre tag remap (multiple allowed)', JSON.stringify([globTags.genre])],
-	styleTag				:	['Style tag remap (multiple allowed)', JSON.stringify([globTags.style])],
-	moodTag					:	['Mood tag remap (multiple allowed)', JSON.stringify([globTags.mood])],
-	dateTag					:	['Date tag remap (single value tag or TF expression)', JSON.stringify([globTags.date])],
-	keyTag					:	['Key tag remap (single value)', JSON.stringify([globTags.key])],
-	bpmTag					:	['BPM tag remap (single value)', JSON.stringify([globTags.bpm])],
-	composerTag				:	['Composer tag remap (multiple allowed)', JSON.stringify(['COMPOSER'])],
-	customStrTag			:	['Custom string tag (multiple allowed)', JSON.stringify([])],
-	customNumTag			:	['Custom numeric tag (single value tag or TF expression)', JSON.stringify([])],
+	tags					:	['Tags used for scoring', JSON.stringify({
+		genre:		{weight: 15, tf: [globTags.genre],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		style:		{weight: 15, tf: [globTags.style],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		dynGenre:	{weight: 40, tf: [],				scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
+		mood:		{weight: 10, tf: [globTags.mood],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+		key:		{weight: 5,	 tf: [globTags.key],	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
+		bpm:		{weight: 5,	 tf: [globTags.bpm],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
+		date:		{weight: 10, tf: [globTags.date],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
+		composer:	{weight: 0,	 tf: ['COMPOSER'],		scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
+		customStr:	{weight: 0,	 tf: [],				scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
+		customNum:	{weight: 0,	 tf: [],				scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 0}
+	})],
+	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
+	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
+	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
+		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
+	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
+	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
 	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
@@ -94,12 +88,6 @@ const SearchByDistance_properties = {
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
 	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music','?'])],
-	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
-	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
-	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
-		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
-	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
-	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
 	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
 	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
@@ -112,25 +100,23 @@ const SearchByDistance_properties = {
 	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
 	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
 	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <=100)', 4, {range: [[2,100]], func: isInt}, 4],
-	playlistName			:	['Playlist name (TF allowed)', 'Search...'],
+	playlistName			:	['Playlist name (TF allowed)', 'Search...', {func: isString}, 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
-	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
+	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	bSmartShuffle			:	['Smart Shuffle by Artist', true],
-	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
-	scoringDistribution		:	['Scoring distribution method', 'LINEAR', {func: checkScoringDistribution}, 'LINEAR']
+	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])]
 };
 // Checks
-Object.keys(SearchByDistance_properties).forEach( (key) => { // Checks
-	if (key.toLowerCase().endsWith('weight')) {
+Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
+	const k = key.toLowerCase();
+	if (k.endsWith('weight')) {
 		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
-	} else if (key.toLowerCase().endsWith('range')) {
+	} else if (k.endsWith('length')) {
 		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
-	} else if (key.toLowerCase().endsWith('length')) {
-		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
-	} else if (key.toLowerCase().endsWith('query')) {
+	} else if (k.endsWith('query')) {
 		SearchByDistance_properties[key].push({func: (query) => {return checkQuery(query, true);}}, SearchByDistance_properties[key][1]);
-	} else if (key.toLowerCase().endsWith('tag')) {
+	} else if (k.endsWith('tag') || k.endsWith('tags')) {
 		SearchByDistance_properties[key].push({func: isJSON}, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
 		SearchByDistance_properties[key].push({func: isBoolean}, SearchByDistance_properties[key][1]);
@@ -174,7 +160,6 @@ if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') 
 
 const sbd = {
 	allMusicGraph: musicGraph(),
-	kMoodNumber: 6,  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
 	genreMap: [],
 	styleMap: [],
@@ -383,8 +368,8 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'genreWeight', 'styleWeight', 'dyngenreWeight', 'moodWeight', 'keyWeight', 'dateWeight', 'bpmWeight', 'composerWeight', 'customStrWeight', 'customNumWeight', 'dyngenreRange', 'keyRange', 'dateRange', 'bpmRange', 'customNumRange', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoringDistribution', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
-const recipePropertiesAllowedKeys = new Set(['genreTag', 'styleTag', 'moodTag', 'dateTag', 'keyTag', 'bpmTag', 'composerTag', 'customStrTag', 'customNumTag', 'smartShuffleTag']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMissmatchCRC) {
@@ -411,7 +396,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
-async function do_searchby_distance({
+async function searchByDistance({
 								// --->Default args (aka properties from the panel and input)
 								properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 								panelProperties			= (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
@@ -424,22 +409,7 @@ async function do_searchby_distance({
 								bAdvTitle 				= properties.hasOwnProperty('bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
 								checkDuplicatesByTag 	= properties.hasOwnProperty('checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
 								// --->Weights
-								genreWeight				= properties.hasOwnProperty('genreWeight') ? Number(properties.genreWeight[1]) : 0, // Number() is used to avoid bugs with dates or other values...
-								styleWeight				= properties.hasOwnProperty('styleWeight') ? Number(properties.styleWeight[1]) : 0,
-								dyngenreWeight			= properties.hasOwnProperty('dyngenreWeight') ? Number(properties.dyngenreWeight[1]) : 0,
-								moodWeight				= properties.hasOwnProperty('moodWeight') ? Number(properties.moodWeight[1]) : 0,
-								keyWeight				= properties.hasOwnProperty('keyWeight') ? Number(properties.keyWeight[1]) : 0,
-								dateWeight				= properties.hasOwnProperty('dateWeight') ? Number(properties.dateWeight[1]) : 0,
-								bpmWeight				= properties.hasOwnProperty('bpmWeight') ? Number(properties.bpmWeight[1]) : 0,
-								composerWeight 			= properties.hasOwnProperty('composerWeight') ? Number(properties.composerWeight[1]) : 0,
-								customStrWeight 		= properties.hasOwnProperty('customStrWeight') ? Number(properties.customStrWeight[1]) : 0, // Only used if tag is set at properties
-								customNumWeight 		= properties.hasOwnProperty('customNumWeight') ? Number(properties.customNumWeight[1]) : 0, // Only used if tag is set at properties
-								// --->Ranges (for associated weighting)
-								dyngenreRange 			= dyngenreWeight !== 0 && properties.hasOwnProperty('dyngenreRange') ? Number(properties.dyngenreRange[1]) : 0,
-								keyRange 				= keyWeight !== 0 && properties.hasOwnProperty('keyRange') ? Number(properties.keyRange[1]) : 0,
-								dateRange				= dateWeight !== 0 && properties.hasOwnProperty('dateRange') ? Number(properties.dateRange[1]) : 0,
-								bpmRange				= bpmWeight !== 0 && properties.hasOwnProperty('bpmRange')? Number(properties.bpmRange[1]) : 0,
-								customNumRange 			= customNumWeight !== 0  && properties.hasOwnProperty('customNumRange') ? Number(properties.customNumRange[1]) : 0,
+								tags					= properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null,
 								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
 								// --->Pre-Scoring Filters
 								// Query to filter library
@@ -498,7 +468,7 @@ async function do_searchby_distance({
 		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Recipe check
-		const bUseRecipe = recipe && (recipe.length || Object.keys(recipe).length);
+		const bUseRecipe = !!(recipe && (recipe.length || Object.keys(recipe).length));
 		const recipeProperties = {};
 		if (bUseRecipe) {
 			let path;
@@ -516,8 +486,25 @@ async function do_searchby_distance({
 			if (recipe.hasOwnProperty('recipe')) { // Process nested recipes
 				let toAdd = processRecipe(recipe.recipe);
 				delete toAdd.recipe;
-				Object.keys(toAdd).forEach((key) => {if (!recipe.hasOwnProperty(key)) {recipe[key] = toAdd[key];}});
+				Object.keys(toAdd).forEach((key) => {
+					if (!recipe.hasOwnProperty(key)) {
+						recipe[key] = toAdd[key];
+					} else if (key === 'tags') {
+						for (let key in toAdd.tags) {
+							if (!recipe.tags.hasOwnProperty(key)) {
+								recipe.tags[key] = toAdd.tags[key];
+							} else {
+								for (let subKey in toAdd.tags[key]) {
+									if (!recipe.tags[key].hasOwnProperty(subKey)) {
+										recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+									}
+								}
+							}
+						}
+					}
+				});
 			}
+			if (bSearchDebug) {console.log(recipe);}
 			Object.keys(recipe).forEach((key) => { // Process current recipe
 				const value = recipe[key] !== null ? recipe[key] : Infinity;
 				if (recipeAllowedKeys.has(key)) {
@@ -533,14 +520,22 @@ async function do_searchby_distance({
 								recipeProperties[rKey] = newProperties[rKey];
 							});
 						}
+					} else if (key === 'tags') { // Overrule current ones (but don't touch original object!)
+						recipeProperties.tags = recipe.tags;
 					} else {
 						if (isStringWeak(value)) {
 							eval(key + ' = \'' + value + '\'');
 						} else if (isArrayStrings(value)) {
 							const newVal = '\'' + value.join('\',\'') + '\'';
 							eval(key + ' = [' + newVal + ']');
-						} else {eval(key + ' = ' + value);}
+						} else if (typeof value === 'object') {
+							const newVal = JSON.stringify(value);
+							eval(key + ' = ' +  newVal );
+						} else {
+							eval(key + ' = ' + value);
+						}
 						if (key === 'theme') {bOverwriteTheme = true;}
+						if (bSearchDebug) {console.log(key, value, eval(key));}
 					}
 				} else {console.log('Recipe has a variable not recognized: ' + key);}
 			});
@@ -549,12 +544,13 @@ async function do_searchby_distance({
 				if (bOverwriteTheme) {console.log('Recipe forces its own theme.');}
 			}
 		}
+		const bUseRecipeTags = !!(bUseRecipe && recipeProperties.hasOwnProperty('tags'));
 		// Parse args
 		sbd_max_graph_distance = parseGraphDistance(sbd_max_graph_distance, descr, bBasicLogging)
 		if (sbd_max_graph_distance === null) {return;}
 		
 		// Theme check
-		const bUseTheme = theme && (theme.length || Object.keys(theme).length);
+		const bUseTheme = !!(theme && (theme.length || Object.keys(theme).length));
 		if (bUseTheme) {
 			let path;
 			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
@@ -587,23 +583,39 @@ async function do_searchby_distance({
 		}
 		// Method check
 		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
-	
+		// Tags check
+		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Start calcs
-		if (bProfile) {var test = new FbProfiler('do_searchby_distance');}
+		if (bProfile) {var test = new FbProfiler('searchByDistance');}
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const genreTag = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? JSON.parse(recipeProperties.genreTag || properties.genreTag[1]).filter(Boolean) : [];
-		const styleTag = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? JSON.parse(recipeProperties.styleTag || properties.styleTag[1]).filter(Boolean) : [];
-		const moodTag = (moodWeight !== 0) ? JSON.parse(recipeProperties.moodTag || properties.moodTag[1]).filter(Boolean) : [];
-		const dateTag = (dateWeight !== 0) ? JSON.parse(recipeProperties.dateTag || properties.dateTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const keyTag = (keyWeight !== 0 || bInKeyMixingPlaylist) ? JSON.parse(recipeProperties.keyTag || properties.keyTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const bpmTag = (bpmWeight !== 0) ? JSON.parse(recipeProperties.bpmTag || properties.bpmTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
-		const composerTag = (composerWeight !== 0) ? JSON.parse(recipeProperties.composerTag || properties.composerTag[1]).filter(Boolean) : [];
-		const customStrTag = (customStrWeight !== 0) ? JSON.parse(recipeProperties.customStrTag || properties.customStrTag[1]).filter(Boolean) : [];
-		const customNumTag = (customNumWeight !== 0) ? JSON.parse(recipeProperties.customNumTag || properties.customNumTag[1]).filter(Boolean) : []; // This one only allows 1 value, but we put it into an array
+		const calcTags = {genreStyle: {weight: 0, tf: [], type: ['virtual']}};
+		for (let key in tags) {
+			const tag = tags[key];
+			const calcTag = {weight: tag.weight, tf: [], scoringDistribution: tag.scoringDistribution, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
+			// Overwrite with properties
+			if (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key)) {
+				Object.keys(recipeProperties.tags[key]).filter((k) => k !== 'tf').forEach((k) => {
+					calcTag[k] = recipeProperties.tags[key][k];
+				});
+			}
+			// Get proper TF
+			const type = tag.type;
+			if (tag.weight !== 0 || (type.includes('graph') && (method === 'DYNGENRE' || method === 'GRAPH')) || (type.includes('keyMix') && bInKeyMixingPlaylist)) {
+				calcTag.tf = (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key) ? (recipeProperties.tags[key].tf || tag.tf) : tag.tf).filter(Boolean);
+				if (type.includes('graph')) {calcTags.genreStyle.tf.push(...calcTag.tf);}
+			}
+			if (calcTag.tf.length || type.includes('virtual')) {calcTags[key] = calcTag;}
+			// Safety Check. Warn users if they try wrong settings
+			if (type.includes('single') && calcTag.tf.length > 1) {
+				console.log('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.');
+				return;
+			}
+		}
+		if (bSearchDebug) {console.log(calcTags);}
 		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
-		const genreStyleTag = [...new Set(genreTag.concat(styleTag))].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
+		const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
 		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
 		
 		// Check input
@@ -620,41 +632,34 @@ async function do_searchby_distance({
 			fb.ShowPopupMessage('smartShuffleTag is not set or has an invalid value:\n' + smartShuffleTag);
 			return;
 		}
-		// Safety Check. Warn users if they try wrong settings
-		if (customNumTag.length > 1) {
-			if (bBasicLogging) {
-				console.log('Check \'' + properties['customNumTag'][0] + '\' value (' + properties['customNumTag'][1] + '). Must be only one tag name!.');
-			}
-			return;
-		}
+		
 		// Can not use those methods without genre/style tags at all
-		if (genreTag.length === 0 && styleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) {
+		if (genreStyleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) {
 			if (bBasicLogging) {
-				console.log('Check \'' + properties['genreTag'][0] + '\' and \''  + properties['styleTag'][0] + '\'. Both can not be empty when using GRAPH or DYNGENRE methods.');
+				console.log('Check \'genre\' and \'style\' tags. Both can not be empty when using GRAPH or DYNGENRE methods.');
 			}
 			return;
 		}
 		
 		// Zero weights if there are no tag names to look for
-		if (genreTag.length === 0) {genreWeight = 0;}
-		if (styleTag.length === 0) {styleWeight = 0;}
-		if (moodTag.length === 0) {moodWeight = 0;}
-		if (dateTag.length === 0) {dateWeight = 0;}
-		if (keyTag.length === 0) {keyWeight = 0; bInKeyMixingPlaylist = false;}
-		if (bpmTag.length === 0) {bpmWeight = 0;}
-		if (composerTag.length === 0) {composerWeight = 0;}
-		if (customStrTag.length === 0) {customStrWeight = 0;}
-		if (customNumTag.length === 0) {customNumWeight = 0;}
+		for (let key in calcTags) {
+			const tag = calcTags[key];
+			if (tag.type.includes('virtual')) {continue;}
+			if (tag.tf.length === 0) {
+				tag.weight = 0;
+				if (tag.type.includes('keyMix')) {bInKeyMixingPlaylist = false;}
+			}
+		}
 		
 		if (method === 'DYNGENRE') {  // Warn users if they try wrong settings
-			if (dyngenreWeight === 0) {
-				if (bBasicLogging) {console.log('Check \'' + properties['dyngenreWeight'][0] + '\' value (' + dyngenreWeight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
+			if (calcTags.dynGenre.weight === 0) {
+				if (bBasicLogging) {console.log('Check \'dynGenre\' weight value (' + calcTags.dynGenre.weight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
 				return;
 			} else {method = 'WEIGHT';} // For calcs they are the same!
-		} else {dyngenreWeight = 0;}
-	
-		const totalWeight = genreWeight + styleWeight + dyngenreWeight +  moodWeight + keyWeight + dateWeight + bpmWeight + customStrWeight + customNumWeight + composerWeight; //100%
-		const countWeights = (genreWeight ? 1 : 0) + (styleWeight ? 1 : 0) + (dyngenreWeight ? 1 : 0) + (moodWeight ? 1 : 0) + (keyWeight ? 1 : 0) + (dateWeight ? 1 : 0) + (bpmWeight ? 1 : 0) + (customStrWeight ? 1 : 0) + (customNumWeight ? 1 : 0) + (composerWeight ? 1 : 0);
+		} else {calcTags.dynGenre.weight = 0;}
+		
+		const totalWeight = Object.keys(calcTags).reduce((total, key) => {return total + calcTags[key].weight}, 0); //100%
+		const countWeights = Object.keys(calcTags).reduce((total, key) => {return (total + (calcTags[key].weight !== 0 ? 1 : 0));}, 0);
 		
 		if (!playlistLength) {
 			if (bBasicLogging) {console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.');}
@@ -662,7 +667,7 @@ async function do_searchby_distance({
 		}
 		if (!totalWeight && method === 'WEIGHT') {
 			if (bBasicLogging) {
-				if (properties['dyngenreWeight'][1] !== 0) {console.log('Check weight values, all are set to zero and ' + properties['dyngenreWeight'][0] + ' is not used for WEIGHT method.');}
+				if (calcTags.dynGenre.weight !== 0) {console.log('Check weight values, all are set to zero and \'dynGenre\' weight is not used for WEIGHT method.');}
 				else {console.log('Check weight values, all are set to zero.');}
 			}
 			return;
@@ -688,177 +693,98 @@ async function do_searchby_distance({
 		// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length.
 		// Using only boolean filter it's 3x faster than filtering by set
 		const selHandleList = bUseTheme ? null : new FbMetadbHandleList(sel);
-		const genre = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? theme.tags[0].genre : getTagsValuesV3(selHandleList, genreTag, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean): [];
-		const style = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? (bUseTheme ? theme.tags[0].style : getTagsValuesV3(selHandleList, styleTag, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean): [];
-		const mood = (moodWeight !== 0) ? (bUseTheme ? theme.tags[0].mood : getTagsValuesV3(selHandleList, moodTag, true).flat()).filter(Boolean) : [];
-		const composer = (composerWeight !== 0) ? (bUseTheme ? theme.tags[0].composer : getTagsValuesV3(selHandleList, composerTag, true).flat()).filter(Boolean) : [];
-		const customStr = (customStrWeight !== 0) ? (bUseTheme ? theme.tags[0].customStr : getTagsValuesV3(selHandleList, customStrTag, true).flat()).filter(Boolean) : [];
-		if (bAscii) {
-			[genre, style, mood, composer, customStr].forEach((arr) => {
-				arr.forEach((tag, i) => {arr[i] = _asciify(tag);});
-			});
+		for (let key in calcTags) {
+			const tag = calcTags[key];
+			tag.reference = [];
+			if (tag.type.includes('virtual')) {continue;}
+			if (tag.weight !== 0 || (tag.tf.length !== 0 && (tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH')) || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+				 tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
+			}
+			if (tag.type.includes('single')) {
+				if (tag.type.includes('string')) {
+					tag.reference = tag.reference[0] || '';
+				} else if (tag.type.includes('number')) {
+					tag.reference = Number(tag.reference[0]) || null;
+				}
+			}
+			if (tag.type.includes('string')) {
+				if (tag.type.includes('multiple')) {
+					if (tag.reference.length && bAscii) {tag.reference.forEach((val, i) => {tag.reference[i] = _asciify(val);});}
+					tag.referenceSet = new Set(tag.reference);
+					tag.referenceNumber = tag.referenceSet.size;
+				} else {
+					if (tag.reference.length && bAscii) {tag.reference = _asciify(tag.reference);}
+				}
+			}
 		}
-		const restTagNames = [(keyWeight !== 0 || bInKeyMixingPlaylist) ? keyTag[0] : 'skip', (dateWeight !== 0) ? dateTag[0] : 'skip', (bpmWeight !== 0) ? bpmTag[0] : 'skip', (customNumWeight !== 0) ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
-		const [keyArr, dateArr, bpmArr, customNumArr] = bUseTheme ? [theme.tags[0].key, theme.tags[0].date, theme.tags[0].bpm, theme.tags[0].customNum]: getTagsValuesV4(selHandleList, restTagNames).flat();
-		const key = (keyWeight !== 0 || bInKeyMixingPlaylist) ? keyArr[0] : '';
-		const date =(dateWeight !== 0 && dateArr[0] !== '') ? Number(dateArr[0]) : null;
-		const bpm = (bpmWeight !== 0 && bpmArr[0] !== '') ? Number(bpmArr[0]) : null;
-		const customNum = (customNumWeight !== 0 && customNumArr[0] !== '') ? Number(customNumArr[0]) : null;
 		// Sets for later comparison
-		const style_genreSet = new Set(genre.concat(style)).difference(map_distance_exclusions); // We remove exclusions
-		const genreSet = new Set(genre);
-		const styleSet = new Set(style);
-		const moodSet = new Set(mood);
-		const composerSet = new Set(composer);
-		const customStrSet = new Set(customStr);
+		calcTags.genreStyle.referenceSet = new Set(calcTags.genre.reference.concat(calcTags.style.reference)).difference(map_distance_exclusions); // Remove exclusions
+		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 		
 		let originalWeightValue = 0;
-		// Genres
-        const genreNumber = genreSet.size;
-		if (genreNumber !== 0) {
-			originalWeightValue += genreWeight;
-			if (genreWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const tagNameTF = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(genre, tagNameTF, 'OR', void(0), match), 'OR');}
-				else {query[queryl] += query_combinations(genre, tagNameTF, 'OR');}
+		// Queries and ranges
+		for (let key in calcTags) {
+			const tag = calcTags[key];
+			const type = tag.type;
+			if (type.includes('virtual')) {continue;}
+			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.length || tag.reference !== null))) {
+				originalWeightValue += tag.weight;
+				if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
+					queryl = query.length;
+					query[queryl] = '';
+					const tagNameTF = type.includes('multiple') // May be a tag or a function...
+						? tag.tf.map((t) => {return ((t.indexOf('$') === -1) ? t : _q(t));})
+						: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
+					if (type.includes('keyRange')) {
+						const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
+						if (camelotKey) {
+							let keyComb = [];
+							const keysInRange = camelotWheel.createRange(camelotKey, tag.range, {name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false});
+							keysInRange.forEach((keyArr) => {
+								let subKeyComb = [];
+								keyArr.forEach((keyVal) => {
+									subKeyComb.push(tagNameTF + ' IS ' + keyVal);
+								});
+								keyComb.push(query_join(subKeyComb, 'OR'));
+							});
+							// And combinate queries
+							if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
+						} else {query[queryl] = tagNameTF + ' IS ' + tag.reference;} // For non-standard notations just use simple matching
+					} else if (type.includes('percentRange')) {
+						const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
+						const rangeLower = round(tag.reference * (100 - tag.range) / 100, 0);
+						if (rangeUpper !== rangeLower) {query[queryl] += tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
+						else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
+					} else if (type.includes('absRange')) {
+						const rangeUpper = tag.reference + tag.range;
+						const rangeLower = tag.reference - tag.range;
+						if (rangeUpper !== rangeLower) {query[queryl] += tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
+						else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
+					} else if (type.includes('combinations')) {
+						const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
+						const tagComb = k_combinations(tag.reference, k);
+						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+						if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(tagComb, tagNameTF, 'OR', 'AND', void(0), match), 'OR');}
+						else {query[queryl] += query_combinations(tagComb, tagNameTF, 'OR', 'AND');}
+					} else {
+						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+						if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');}
+						else {query[queryl] += query_combinations(tag.reference, tagNameTF, 'OR');}
+					}
+				}
+			} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags');}
+		}
+		// Dyngenre virtual tag is calculated with previous values
+		if (calcTags.genreStyle.referenceSize !== 0 && calcTags.dynGenre.weight !== 0) {
+			for (const genreStyle in calcTags.genreStyle.referenceSet) {
+				const dynGenre = sbd.genreStyleMap.get(genreStyle);
+				if (dynGenre) {calcTags.dynGenre.reference.push(...dynGenre);}
 			}
-		} else if (genreWeight !== 0 && bBasicLogging) {console.log('GenreWeight was not zero but selected track had no genre tags');}
-        // Styles
-		const styleNumber = styleSet.size;
-		if (styleNumber !== 0) {
-			originalWeightValue += styleWeight;
-			if (styleWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const tagNameTF = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(style, tagNameTF, 'OR', void(0), match), 'OR');}
-				else {query[queryl] += query_combinations(style, tagNameTF, 'OR');}
+			calcTags.dynGenre.referenceNumber = calcTags.dynGenre.reference.length;
+			if (calcTags.dynGenre.referenceNumber !== 0) {
+				originalWeightValue += calcTags.dynGenre.weight;
 			}
-		} else if (styleWeight !== 0 && bBasicLogging) {console.log('styleWeight was not zero but selected track had no style tags');}
-		// Dyngenre
-		const style_genre_length = style_genreSet.size;
-		let dyngenreNumber = 0, dyngenre = [];
-		if (dyngenreWeight !== 0 && style_genre_length !== 0) {
-			// This virtual tag is calculated with previous values
-			for (const style_genre_i of style_genreSet) {
-				const dyngenre_i = sbd.genreStyleMap.get(style_genre_i);
-				if (dyngenre_i) {dyngenre = dyngenre.concat(dyngenre_i);}
-			}
-			dyngenreNumber = dyngenre.length;
-			if (dyngenreNumber !== 0) {
-				originalWeightValue += dyngenreWeight;
-			}
-		} else if (dyngenreWeight !== 0 && bBasicLogging) {console.log('dyngenreWeight was not zero but selected track had no style nor genre tags');}
-        // Moods
-		const moodNumber = moodSet.size;
-		if (moodNumber !== 0) {
-			originalWeightValue += moodWeight;
-			if (moodWeight / totalWeight / moodNumber * sbd.kMoodNumber >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const k = moodNumber >= sbd.kMoodNumber ? sbd.kMoodNumber : moodNumber; //on combinations of 6
-				const moodComb = k_combinations(mood, k);
-				const tagNameTF = moodTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(moodComb, tagNameTF, 'OR', 'AND', void(0), match), 'OR');}
-				else {query[queryl] += query_combinations(moodComb, tagNameTF, 'OR', 'AND');}
-			}
-		} else if (moodWeight !== 0 && bBasicLogging) {console.log('moodWeight was not zero but selected track had no mood tags');}
-        // Key
-		const keyLength = key.length;
-		if (keyLength) {
-			originalWeightValue += keyWeight;
-			if (keyWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const tagNameTF = ((keyTag[0].indexOf('$') === -1) ? keyTag[0] : _q(keyTag[0])); // May be a tag or a function...
-				// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
-				// Gets all equivalences
-				const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
-				if (camelotKey) {
-					let keyComb = [];
-					const keysInRange = camelotWheel.createRange(camelotKey, keyRange, {name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false});
-					keysInRange.forEach((keyArr) => {
-						let subKeyComb = [];
-						keyArr.forEach((keyVal) => {
-							subKeyComb.push(tagNameTF + ' IS ' + keyVal);
-						});
-						keyComb.push(query_join(subKeyComb, 'OR'));
-					});
-					// And combinate queries
-					if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
-				} else {query[queryl] = tagNameTF + ' IS ' + key;} // For non-standard notations just use simple matching
-			}
-		} else if (keyWeight !== 0 && bBasicLogging) {console.log('keyWeight was not zero but selected track had no key tags');}
-		// Date
-		if (date !== null) {
-			originalWeightValue += dateWeight;
-			if (dateWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const dateUpper = date + dateRange;
-				const dateLower = date - dateRange;
-				const tagNameTF = ((dateTag[0].indexOf('$') === -1) ? dateTag[0] : _q(dateTag[0])); // May be a tag or a function...
-				if (dateUpper !== dateLower) {query[queryl] += tagNameTF + ' GREATER ' + dateLower + ' AND ' + tagNameTF + ' LESS ' + dateUpper;} 
-				else {query[queryl] += tagNameTF + ' EQUAL ' + date;}
-			}
-		} else if (dateWeight !== 0 && bBasicLogging) {console.log('dateWeight was not zero but selected track had no date tags');}
-		// BPM
-		if (bpm !== null) {
-			originalWeightValue += bpmWeight;
-			if (bpmWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const bmpUpper = round(bpm * (100 + bpmRange) / 100, 0);
-				const bmpLower = round(bpm * (100 - bpmRange) / 100, 0);
-				const tagNameTF = ((bpmTag[0].indexOf('$') === -1) ? bpmTag[0] : _q(bpmTag[0])); // May be a tag or a function...
-				if (bmpUpper !== bmpLower) {query[queryl] += tagNameTF + ' GREATER ' + bmpLower + ' AND ' + tagNameTF + ' LESS ' + bmpUpper;}
-				else {query[queryl] += tagNameTF + ' EQUAL ' + bpm;}
-			}
-		} else if (bpmWeight !== 0 && bBasicLogging) {console.log('bpmWeight was not zero but selected track had no bpm tags');}
-		// Composer
-		const composerNumber = composerSet.size;
-		if (composerNumber !== 0) {
-			originalWeightValue += composerWeight;
-			if (composerWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const tagNameTF = composerTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				if (composerTag.length > 1) {query[queryl] += query_join(query_combinations(composer, tagNameTF, 'OR', void(0), match), 'OR');}
-				else {query[queryl] += query_combinations(composer, composerTag, 'OR');}
-			}
-		} else if (composerWeight !== 0 && bBasicLogging) {console.log('composerWeight was not zero but selected track had no composer tags');}
-        // customStringTag
-		const customStrNumber = customStrSet.size;
-		if (customStrNumber !== 0) {
-			originalWeightValue += customStrWeight;
-			if (customStrWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const tagNameTF = customStrTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));}); // May be a tag or a function...
-				const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				if (customStrTag.length > 1) {query[queryl] += query_join(query_combinations(customStr, tagNameTF, 'OR', void(0), match), 'OR');}
-				else {query[queryl] += query_combinations(customStr, customStrTag, 'OR');}
-			}
-		} else if (customStrWeight !== 0 && bBasicLogging) {console.log('customStrWeight was not zero but selected track had no custom string tags');}
-		// customNumTag
-		if (customNum !== null) {
-			originalWeightValue += customNumWeight;
-			if (customNumWeight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
-				query[queryl] = '';
-				const customNumUpper = customNum + customNumRange;
-				const customNumLower = customNum - customNumRange;
-				const tagNameTF = ((customNumTag[0].indexOf('$') === -1) ? customNumTag[0] : _q(customNumTag[0])); // May be a tag or a function...
-				if (customNumUpper !== customNumLower) {query[queryl] += tagNameTF + ' GREATER ' + customNumLower + ' AND ' + tagNameTF + ' LESS ' + customNumUpper;}
-				else {query[queryl] += tagNameTF + ' EQUAL ' + customNum;}
-			}
-		} else if (customNumWeight !== 0 && bBasicLogging) {console.log('customNumWeight was not zero but selected track had no custom number tags');}
+		} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) {console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags');}
 		// Total score
 		const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
 		if (bProfile) {test.Print('Task #1: Reference track / theme', false);}
@@ -869,7 +795,7 @@ async function do_searchby_distance({
 		// But having the same values for other tags could make the track pass to the final pool too, specially for Graph method. 
 		// So a variable pre-filter would be needed, calculated according to the input weight values and -estimated- later filters scoring.
 		// Also an input track missing some tags could break the pre-filter logic if not adjusted.
-        queryl = query.length;
+		queryl = query.length;
 		if (queryl === 0) {
 			if (!originalScore) {
 				console.log('No query available for selected track. Probably missing tags!');
@@ -877,17 +803,17 @@ async function do_searchby_distance({
 			} else {query[queryl] = '';} // Pre-Filter may not be relevant according to weights...
 		}
 		const querylength = query.length;
-		if (method === 'WEIGHT' && dyngenreWeight === 0) { // Weight method. Pre-filtering is really simple...
+		if (method === 'WEIGHT' && calcTags.dynGenre.weight === 0) { // Weight method. Pre-filtering is really simple...
 			if (querylength === 1 && !query[0].length) {query[querylength] = '';}
 			else {query[querylength] = query_join(query, 'OR');} //join previous query's
-		} else if (method === 'WEIGHT' && dyngenreWeight !== 0) { //Dyngenre method.
+		} else if (method === 'WEIGHT' && calcTags.dynGenre.weight !== 0) { //Dyngenre method.
 			query[querylength] = ''; // TODO: Add weight query, now is dynamically set
 		} else { // Graph Method
 			let influencesQuery = [];
 			if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
 				let influences = [];
-				style_genreSet.forEach((styleGenre) => {
-					let anti = bConditionAntiInfluences ? descr.getConditionalAntiInfluences(styleGenre) : descr.getAntiInfluences(styleGenre);
+				calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
+					let anti = bConditionAntiInfluences ? descr.getConditionalAntiInfluences(genreStyle) : descr.getAntiInfluences(genreStyle);
 					if (anti.length) {influences.push(...descr.replaceWithSubstitutionsReverse(anti));}
 				});
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
@@ -901,8 +827,8 @@ async function do_searchby_distance({
 			}
 			if (bUseInfluencesFilter) { // Outputs only influences using queries (and changes other settings!)
 				let influences = [];
-				style_genreSet.forEach((styleGenre) => {
-					let infl = descr.getInfluences(styleGenre);
+				calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
+					let infl = descr.getInfluences(genreStyle);
 					if (infl.length) {influences.push(...descr.replaceWithSubstitutionsReverse(infl));}
 				});
 				// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
@@ -963,7 +889,7 @@ async function do_searchby_distance({
 
 		// Prefill tag Cache
 		if (bTagsCache) {
-			const missingOnCache = [genreTag, styleTag, moodTag, dateTag, keyTag, bpmTag, composerTag, customStrTag, customNumTag, ['TITLE'], [globTags.title]]
+			const missingOnCache = Object.keys(calcTags).map(tag => tag.tf).push(['TITLE'], [globTags.title])
 				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
@@ -1005,13 +931,14 @@ async function do_searchby_distance({
 		// Using only boolean filter it's 3x faster than filtering by set, here bTagFilter becomes useful since we may skip +40K evaluations 
 		let tagsArr = [];
 		let z = 0;
-		if (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(genreTag);}
-		if (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) {tagsArr.push(styleTag);}
-		if (moodWeight !== 0) {tagsArr.push(moodTag);}
-		if (composerWeight !== 0) {tagsArr.push(composerTag);}
-		if (customStrWeight !== 0) {tagsArr.push(customStrTag);}
+		for (let key in calcTags) {
+			const tag = calcTags[key];
+			if (tag.type.includes('virtual')) {continue;}
+			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
+				tagsArr.push(tag.tf);
+			}
+		}
 		tagsArr.push(['TITLE']);
-		tagsArr.push(...restTagNames.map((t) => {return [t];}));
 		tagsArr = tagsArr.map((arr) => {return arr.map((tag) => {return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag);}).join(', ');});
 		const tagsValByKey = [];
 		let tagsVal = [];
@@ -1022,178 +949,155 @@ async function do_searchby_distance({
 			tagsVal = getTagsValuesV3(handleList, tagsArr);
 			tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal.map((tag) => {return tag[i];});});
 		}
-		const genreHandle = (genreTag.length && (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? tagsValByKey[z++] : null;
-		const styleHandle = (styleTag.length && (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH')) ? tagsValByKey[z++] : null;
-		const moodHandle = (moodWeight !== 0) ? tagsValByKey[z++] : null;
-		const composerHandle = (composerWeight !== 0) ? tagsValByKey[z++] : null;
-		const customStrHandle = (customStrWeight !== 0) ? tagsValByKey[z++] : null;
+		for (let key in calcTags) {
+			const tag = calcTags[key];
+			if (tag.type.includes('virtual')) {continue;}
+			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
+				tag.handle = tagsValByKey[z++];
+			} else {
+				tag.handle = null;
+			}
+		}
 		const titleHandle = tagsValByKey[z++];
-		const [keyHandle, dateHandle, bpmHandle, customNumHandle] = tagsValByKey.slice(z);
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
 		let i = 0;
 		while (i < tracktotal) {
-            let weightValue = 0;
+			let weightValue = 0;
 			let mapDistance = Infinity; // We consider points are not linked by default
-			let dyngenreNumberNew = 0;
-			let dyngenreNew = [];
-			
 			// Get the tags according to weight and filter ''. Also create sets for comparison
-			const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? genreHandle[i].filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean) : [];
-			const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0 || method === 'GRAPH') ? styleHandle[i].filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean) : [];
-			const moodNew = (moodWeight !== 0) ? moodHandle[i].filter(Boolean) : [];
-			const composerNew = (composerWeight !== 0) ? composerHandle[i].filter(Boolean) : [];
-			const customStrNew = (customStrWeight !== 0) ? customStrHandle[i].filter(Boolean) : [];
-			if (bAscii) {
-				[genreNew, styleNew, moodNew, composerNew, customStrNew].forEach((arr) => {
-					arr.forEach((tag, i) => {arr[i] = _asciify(tag);});
-				});
+			const handleTag = {genreStyle: {set: []}};
+			for (let key in calcTags) {
+				const tag = calcTags[key];
+				if (tag.type.includes('virtual')) {continue;}
+				const type = tag.type;
+				handleTag[key] = {};
+				if (tag.weight !== 0 || type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH')) {
+					if (type.includes('multiple')) {
+						if (type.includes('graph') && bTagFilter) {
+							handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
+						} else {
+							handleTag[key].val = tag.handle[i].filter(Boolean);
+						}
+					} else {
+						handleTag[key].val = type.includes('string') ? tag.handle[i][0] : Number(tag.handle[i][0]);
+					}
+				} else {
+					if (type.includes('multiple')) {
+						handleTag[key].val = [];
+					} else {
+						handleTag[key].val = type.includes('string') ? '' : null;
+					}
+				}
+				if (type.includes('string')) {
+					if (type.includes('multiple')) {
+						if (handleTag[key].val.length && bAscii) {handleTag[key].val.forEach((val, i) => {handleTag[key].val[i] = _asciify(val);});}
+						handleTag[key].set = new Set(handleTag[key].val);
+						handleTag[key].number = handleTag[key].set.size;
+					} else {
+						if (handleTag[key].val.length && bAscii) {handleTag[key].val = _asciify(handleTag[key].val);}
+					}
+				}
+				if (type.includes('graph')) {
+					handleTag.genreStyle.set.push(...handleTag[key].val);
+				}
 			}
-			const genreNewSet = new Set(genreNew);
-			const styleNewSet = new Set(styleNew);
-			const moodNewSet = new Set(moodNew);
-			const composerNewSet = new Set(composerNew);
-			const customStrNewSet = new Set(customStrNew);
-			
-			const keyNew = (keyWeight !== 0) ? keyHandle[i][0] : '';
-			const dateNew = (dateWeight !== 0 && dateHandle[i][0] !== '') ? Number(dateHandle[i][0]) : null;
-			const bpmNew =(bpmWeight !== 0 && bpmHandle[i][0] !== '') ? Number(bpmHandle[i][0]) : null;
-			const customNumNew = (customNumWeight !== 0 && customNumHandle[i][0] !== '') ? Number(customNumHandle[i][0]) : null;
-			
-			const style_genreSetNew = new Set(genreNew.concat(styleNew)).difference(map_distance_exclusions); // Remove exclusions
+			handleTag.genreStyle.set = new Set(handleTag.genreStyle.set).difference(map_distance_exclusions); // Remove exclusions
 			
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
-			if (genreWeight !== 0 && genreNumber !== 0 && genreNew.length) {
-				let common = genreSet.intersectionSize(genreNewSet);
-				if (common) {
-					weightValue += scoringDistribution === 'LINEAR' // Avoid memoizing last var if not needed
-							? genreWeight * weightDistribution(scoringDistribution, common / genreNumber)
-							: genreWeight * weightDistribution(scoringDistribution, common / genreNumber, genreNumber, genreNewSet.size);
-				}
-			}
-			
-			if (styleWeight !== 0 && styleNumber !== 0 && styleNew.length) {
-				let common = styleSet.intersectionSize(styleNewSet);
-				if (common) {
-					weightValue += scoringDistribution === 'LINEAR' // Avoid memoizing last var if not needed
-							? styleWeight * weightDistribution(scoringDistribution, common / styleNumber)
-							: styleWeight * weightDistribution(scoringDistribution, common / styleNumber, styleNumber, styleNewSet.size);
-				}
-			}
-			
-			if (moodWeight !== 0 && moodNumber !== 0 && moodNew.length) {
-				let common = moodSet.intersectionSize(moodNewSet);
-				if (common) {
-					weightValue += moodWeight / moodNumber * common;
-				}
-			}
-			
-			if (keyWeight !== 0 && keyLength !== 0 && keyNew.length) {
-				if (key === keyNew) { // Not only fastest but also allows for arbitrary key notations (although only using simple matching)
-					weightValue += keyWeight;
-				} else if (keyRange !== 0){
-					const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(keyNew);
-					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(key);
-					if (camelotKey && camelotKeyNew) {
-						const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
-						const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
-						const hourDifference = keyRange - (diff > 6 ? 12 - diff : diff);
-						// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
-						if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
-							weightValue += (bLetterEqual) ? ((hourDifference + 1)/ (keyRange + 1)) * keyWeight : (hourDifference / keyRange) * keyWeight;  //becomes negative outside the allowed range!
+			for (let key in calcTags) {
+				const tag = calcTags[key];
+				const type = tag.type;
+				if (type.includes('virtual')) {continue;}
+				const scoringDistr = tag.scoringDistribution;
+				if (type.includes('multiple') && tag.referenceNumber !== 0 && handleTag[key].number !== 0) {
+					let common = tag.referenceSet.intersectionSize(handleTag[key].set);
+					if (common !== 0) {
+						weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+							? tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber)
+							: tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber, tag.referenceNumber, handleTag[key].number);
+					}
+				} else if (type.includes('single')) {
+					const newTag = handleTag[key].val;
+					if (type.includes('string') && tag.reference.length && newTag.length) {
+						if (newTag === tag.reference) {
+							weightValue += tag.weight;
+						} else if (type.includes('keyRange') && tag.range !== 0) {
+							const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
+							const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
+							if (camelotKey && camelotKeyNew) {
+								const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
+								const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
+								const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
+								// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
+								if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
+									const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range);  //becomes negative outside the allowed range!
+									weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+										? tag.weight * weightDistribution(scoringDistr, score)
+										: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
+								}
+							}
+						}
+					} else if (type.includes('number') && tag.reference !== null && newTag !== null) {
+						if (newTag === tag.reference) {
+							weightValue += tag.weight;
+						} else if (type.includes('percentRange') && tag.range !== 0) {
+							const range = tag.reference * tag.range / 100;
+							const difference = range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+								weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+									? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
+									: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
+							}
+						} else if (type.includes('absRange') && tag.range !== 0) {
+							const difference = tag.range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+								weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+									? tag.weight * weightDistribution(scoringDistr, difference / tag.range)
+									: tag.weight * weightDistribution(scoringDistr, difference / tag.range, tag.range, Math.abs(difference));
+							}
 						}
 					}
 				}
 			}
-			
-			if (dateWeight !== 0 && date !== null) {
-				if (dateNew !== null) {
-					if (date === dateNew){
-						weightValue += dateWeight;
-					} else if (dateRange !== 0) {
-						const dateDifference = dateRange - Math.abs(date -  dateNew);
-						if ((dateDifference < 0 && bNegativeWeighting) || dateDifference > 0) {
-							weightValue += (dateDifference / dateRange) * dateWeight;  //becomes negative outside the allowed range!
-						}
+			if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
+				handleTag.dynGenre = {val: [], number: 0};
+				if (handleTag.genreStyle.set.size !== 0) {
+					for (const genreStyle of handleTag.genreStyle.set) {
+						const dynGenre = sbd.genreStyleMap.get(genreStyle);
+						if (dynGenre) {handleTag.dynGenre.val.push(...dynGenre);}
 					}
 				}
-			}
-			
-			if (bpmWeight !== 0 && bpm !== null) {
-				if (bpmNew !== null) {
-					if (bpm === bpmNew){
-						weightValue += bpmWeight;
-					} else if (bpmRange !== 0) {
-						const iRange = bpm * bpmRange / 100;
-						const bpmdifference = iRange - Math.abs(bpm -  bpmNew);
-						if ((bpmdifference < 0 && bNegativeWeighting) || bpmdifference > 0) {
-							weightValue += (bpmdifference / bpmRange / bpm * 100 ) * bpmWeight; //becomes negative outside the allowed range!
-						}
-					}
-				}
-			}
-			
-			if (composerWeight !== 0 && composerNumber !== 0 && composerNew.length) {
-				let common = composerSet.intersectionSize(composerNewSet);
-				if (common) {
-					weightValue += composerWeight / composerNumber * common;
-				}
-			}
-			
-			if (customStrWeight !== 0 && customStrNumber !== 0 && customStrNew.length) {
-				let common = customStrSet.intersectionSize(customStrNewSet);
-				if (common) {
-					weightValue += customStrWeight / customStrNumber * common;
-				}
-			}
-			
-			if (customNumWeight !== 0 && customNum !== null) {
-				if (customNumNew !== null) {
-					if (customNum === customNumNew){
-						weightValue += customNumWeight;
-					} else if (customNumRange !== 0) {
-						const customNumdifference = customNumRange - Math.abs(customNum - customNumNew);
-						if ((customNumdifference < 0 && bNegativeWeighting) || customNumdifference > 0) {
-							weightValue += (customNumdifference / customNumRange) * customNumWeight;  //becomes negative outside the allowed range!
-						}
-					}
-				}
-			}
-			
-			if (dyngenreWeight !== 0 && dyngenreNumber !== 0) {
-				if (style_genreSetNew.size !== 0) {
-					for (let style_genreNew_i of style_genreSetNew) {
-						const dyngenre_i = sbd.genreStyleMap.get(style_genreNew_i);
-						if (dyngenre_i) {dyngenreNew = dyngenreNew.concat(dyngenre_i);}
-					}
-				}
-				dyngenreNumberNew = dyngenreNew.length;
-				if (dyngenreNumberNew !== 0) {
+				handleTag.dynGenre.number = handleTag.dynGenre.val.length;
+				if (handleTag.dynGenre.number !== 0) {
 					let j = 0;
-					while (j < dyngenreNumber) {
+					let score = 0;
+					while (j < calcTags.dynGenre.referenceNumber) {
 						let h = 0;
-							while (h < dyngenreNumberNew) {
-								if (dyngenreNew[h] === dyngenre[j]) {
-									weightValue += dyngenreWeight / dyngenreNumber;
+							while (h < handleTag.dynGenre.number) {
+								const newVal = handleTag.dynGenre.val[h];
+								const refVal = calcTags.dynGenre.reference[j];
+								if (newVal === refVal) {
+									score += 1 / calcTags.dynGenre.referenceNumber;
 									break;
-								} else if (dyngenreRange !== 0) {
-									const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](dyngenre[j], dyngenreRange, true);
+								} else if (calcTags.dynGenre.range !== 0) {
+									const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](refVal, calcTags.dynGenre.range, true);
 									if (valueLower !== -1) { //All or none are -1
-										if (valueLower > dyngenre[j]) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
-											if (lowerLimit <= dyngenreNew[h] && dyngenreNew[h] <= valueLower) {  // (lowerLimit , x)
-												weightValue += dyngenreWeight / dyngenreNumber;
+										if (valueLower > refVal) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
+											if (lowerLimit <= newVal && newVal <= valueLower) {  // (lowerLimit , x)
+												score += 1 / calcTags.dynGenre.referenceNumber;
 												break;
 											}
-											else if (valueLower <= dyngenreNew[h] && dyngenreNew[h] <= dyngenre[j]) {  // (x, x + y)
-												weightValue += dyngenreWeight / dyngenreNumber;
+											else if (valueLower <= newVal && newVal <= refVal) {  // (x, x + y)
+												score += 1 / calcTags.dynGenre.referenceNumber;
 												break;
 											}
-											else if (valueUpper <= dyngenreNew[h] && dyngenreNew[h] <= upperLimit) { // (x - y, upperLimit)
-												weightValue += dyngenreWeight / dyngenreNumber;
+											else if (valueUpper <= newVal && newVal <= upperLimit) { // (x - y, upperLimit)
+												score += 1 / calcTags.dynGenre.referenceNumber;
 												break;
 											}
-										} else if (valueLower <= dyngenreNew[h] && dyngenreNew[h] <= valueUpper) {
-											weightValue += dyngenreWeight / dyngenreNumber;
+										} else if (valueLower <= newVal && newVal <= valueUpper) {
+											score += 1 / calcTags.dynGenre.referenceNumber;
 											break;
 										}
 									}
@@ -1202,8 +1106,13 @@ async function do_searchby_distance({
 						}
 						j++;
 					}
+					const scoringDistr = tag.scoringDistribution;
+					weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+						? calcTags.dynGenre.weight * weightDistribution(scoringDistr, score)
+						: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
 				}
 			}
+			
 			const score = round(weightValue * 10000 / originalScore / totalWeight, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 			
 			if (method === 'GRAPH') {
@@ -1217,15 +1126,15 @@ async function do_searchby_distance({
 					// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
 					// Pre-filtering number of tracks is the best approach to reduce calc time (!)
 					// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
-					const fromDiff = style_genreSet.difference(style_genreSetNew);
-					const toDiff = style_genreSetNew.difference(style_genreSet);
+					const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
+					const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
 					const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
-					const toStyleGenre = fromDiff.size < toDiff.size ? style_genreSetNew : style_genreSet;
-					let mapKey = [[...difference].sort(),[...toStyleGenre].sort()].join(' -> ');
+					const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
+					let mapKey = [[...difference].sort(),[...toGenreStyle].sort()].join(' -> ');
 					if (cacheLinkSet.has(mapKey)) { // Mean distance from entire set (A,B,C) to (X,Y,Z)
 						mapDistance = cacheLinkSet.get(mapKey);
 					} else { // Calculate it if not found
-						mapDistance = calcMeanDistance(sbd.allMusicGraph, style_genreSet, style_genreSetNew, sbd.influenceMethod);
+						mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
 						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
 					}
 				}
@@ -1335,7 +1244,7 @@ async function do_searchby_distance({
 				// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
 				// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
 				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = false;
-				if (key.length) {
+				if (calcTags.key.reference.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
 					const pattern = camelotWheel.createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
@@ -1354,7 +1263,7 @@ async function do_searchby_distance({
 						const indexScore = nextIndexScore;
 						const index = nextIndex;
 						if (!keyCache.has(index)) {
-							const keyCurrent = keyHandle[index][0];
+							const keyCurrent = calcTags.key.handle[index][0];
 							camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
 							if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
 						} else {camelotKeyCurrent = keyCache.get(index);}
@@ -1368,7 +1277,7 @@ async function do_searchby_distance({
 							for (const indexNewScore of toCheck) {
 								const indexNew = scoreData[indexNewScore].index;
 								if (!keyCache.has(indexNew)) {
-									const keyNew = keyHandle[indexNew][0];
+									const keyNew = calcTags.key.handle[indexNew][0];
 									camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
 									if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
 									else {toCheck.delete(indexNew);}
@@ -1465,7 +1374,7 @@ async function do_searchby_distance({
 							i++;
 						}
 					} else { 
-						if (probPick < 100) {	//Random but starting from high score picked tracks
+						if (probPick < 100) { //Random but starting from high score picked tracks
 							let randomseed = 0;
 							let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
 							let i = 0;
@@ -1611,7 +1520,7 @@ async function do_searchby_distance({
 							for (let i = 0; i < progressiveListCreationN; i++) {
 								const prevtLength = selectedHandlesArray.length;
 								if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
-								[newSelectedHandlesArray, , , newArgs['sel']] = await do_searchby_distance(newArgs);
+								[newSelectedHandlesArray, , , newArgs['sel']] = await searchByDistance(newArgs);
 								// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 								selectedHandlesArray = removeDuplicatesV2({
 									handleList: new FbMetadbHandleList(selectedHandlesArray.concat(newSelectedHandlesArray)), 
@@ -1778,8 +1687,28 @@ function processRecipe(initialRecipe) {
 		const newPath = !_isFile(newRecipe) && _isFile(recipePath + newRecipe) ? recipePath + newRecipe : newRecipe;
 		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8);
 		if (!newRecipeObj) {console.log('Recipe not found: ' + newPath);}
-		else {toAdd = {...newRecipeObj, ...toAdd};}
+		else {
+			if (newRecipeObj.hasOwnProperty('tags') && toAdd.hasOwnProperty('tags')) {
+				const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
+				toAdd = {...newRecipeObj, ...toAdd, tags};
+			} else {toAdd = {...newRecipeObj, ...toAdd};}
+		}
 		return newRecipeObj;
+	};
+	const deepMergeTags = (newTags, toAddTags) => {
+		const tags = {...newTags};
+		for (let key in toAddTags) {
+			if (!tags.hasOwnProperty(key)) {
+				tags[key] = toAddTags[key];
+			} else {
+				for (let subKey in toAddTags[key]) {
+					if (!tags[key].hasOwnProperty(subKey)) {
+						tags[key][subKey] = toAddTags[key][subKey];
+					}
+				}
+			}
+		}
+		return tags;
 	};
 	let newRecipe = initialRecipe;
 	while (newRecipe.length) {
@@ -1792,7 +1721,13 @@ function processRecipe(initialRecipe) {
 				const newRecipeObj = processRecipeFile(subRecipe);
 				if (!newRecipeObj) {newRecipe = ''; break;}
 				newRecipe = newRecipeObj.recipe || '';
-				if (newRecipe.length) {toAdd = {...processRecipe(newRecipe), ...toAdd};}
+				if (newRecipe.length) {
+					const procRecipe = processRecipe(newRecipe);
+					if (procRecipe.hasOwnProperty('tags') && toAdd.hasOwnProperty('tags')) {
+						const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
+						toAdd = {...procRecipe, ...toAdd, tags};
+					} else {toAdd = {...procRecipe, ...toAdd};}
+				}
 			}
 		} else {
 			console.log('Recipe not found: ' + newRecipe);

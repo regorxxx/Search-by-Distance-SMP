@@ -1,17 +1,28 @@
 {
 	"name": "Same super-genre (G)",
-	"genreWeight": 5,
-	"styleWeight": 0,
-	"moodWeight": 15,
-	"keyWeight": 10,
-	"dateWeight": 25,
-	"bpmWeight": 5,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"keyRange": 2, 
-	"dateRange": 25, 
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 5
+		},
+		"style": {
+			"weight": 0
+		},
+		"mood": {
+			"weight": 15
+		},
+		"key": {
+			"weight": 10,
+			"range": 2
+		},
+		"bpm": {
+			"weight": 5,
+			"range": 25
+		},
+		"date": {
+			"weight":25,
+			"range": 25
+		}
+	},
 	"scoreFilter": 60,
 	"method": "GRAPH",
 	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4"

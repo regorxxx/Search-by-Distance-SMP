@@ -1,4 +1,8 @@
 {
 	"name": "Test recipe nesting",
-	"genreWeight": 150
+	"tags": {
+		"genre": {
+			"weight": 150
+		}
+	}
 }

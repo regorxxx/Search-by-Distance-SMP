@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/08/22
+//05/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -21,13 +21,22 @@ function createRecipeMenu(parent) {
 		}
 	});
 	// Header
-	recipeMenu.newEntry({entryText: 'Set recipe file: (Shift + Click to hide)', func: null, flags: MF_GRAYED});
+	recipeMenu.newEntry({entryText: 'Set recipe file: (Ctrl + Click to hide)', func: null, flags: MF_GRAYED});
 	recipeMenu.newEntry({entryText: 'sep'});
 	recipeMenu.newEntry({entryText: 'Create recipe file with current config', func: () => {
 		const recipe = {name: ''};
 		// Retrieve allowed keys
 		const excludedKeys = new Set(['name', 'properties', 'panelProperties', 'theme', 'recipe', 'bPoolFiltering', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bStartLogging', 'bSearchDebug', 'bCreatePlaylist']);
-		recipeAllowedKeys.forEach((key) => {if (!excludedKeys.has(key)) {recipe[key] = properties[key][1];}});
+		recipeAllowedKeys.forEach((key) => {
+			if (!excludedKeys.has(key)) {
+				const check = properties[key][2];
+				if (check && typeof check === 'object' && check.hasOwnProperty('func') && check.func === isJSON) {
+					recipe[key] = JSON.parse(properties[key][1]);
+				} else {
+					recipe[key] = properties[key][1];
+				}
+			}
+		});
 		// Recipe obj
 		let input = '';
 		try {input = utils.InputBox(window.ID, 'Enter Recipe name', 'Search by distance', 'my recipe', true).toString();}
@@ -36,11 +45,22 @@ function createRecipeMenu(parent) {
 		recipe.name = input;
 		const filePath = folders.xxx + 'presets\\Search by\\recipes\\' + input + '.json';
 		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
-		if (WshShell.Popup('Also add additional variables from properties?\n' + [...recipePropertiesAllowedKeys].joinEvery(', ', 4), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+		if (WshShell.Popup('Include tag remapping?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {
+			for (let key in recipe.tags) {
+				delete recipe.tags[key].tf;
+				delete recipe.tags[key].type;
+			}
+		}
+		if (WshShell.Popup('Also add additional variables?\n' + [...recipePropertiesAllowedKeys].joinEvery(', ', 4), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
 			recipe.properties = {};
 			Object.keys(properties).forEach((rKey) => {
 				if (!recipePropertiesAllowedKeys.has(rKey)) {return;}
-				recipe.properties[rKey] = properties[rKey][1];
+				const check = properties[rKey][2];
+				if (check && typeof check === 'object' && check.hasOwnProperty('func') && check.func === isJSON) {
+					recipe.properties[rKey] = JSON.parse(properties[rKey][1]);
+				} else {
+					recipe.properties[rKey] = properties[rKey][1];
+				}
 			});
 		}
 		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t'));
@@ -95,6 +115,7 @@ function createRecipeMenu(parent) {
 		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath,'.\\profile\\') : file.replace(fb.ProfilePath,'.\\')): file);
 	});
 	const menus = [];
+	const names = {};
 	options.forEach((file, j) => {
 		const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
 		if (!recipe) {return;}
@@ -106,11 +127,12 @@ function createRecipeMenu(parent) {
 			else {console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance');}
 		}
 		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
-		let i = 1;
-		const entryText = menus.indexOf(name) === -1 ? name : name + ' (' + ++i + ')';
+		if (names.hasOwnProperty(name)) {names[name]++;}
+		else {names[name] = 1;}
+		const entryText = names[name] === 1 ? name : name + ' ' + _p(names[name]);
 		menus.push(entryText);
 		recipeMenu.newEntry({entryText, func: () => {
-			if (utils.IsKeyPressed(VK_SHIFT)) {
+			if (utils.IsKeyPressed(VK_CONTROL)) {
 				_runCmd('attrib +H ' + _q(file), false);
 				if (properties.recipe[1] === file) { // Set to none when hiding current recipe
 					properties.recipe[1] = '';

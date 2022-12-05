@@ -41,7 +41,7 @@
 	Execute 'Draw Graph.html' on your browser and it should load the graph set on this file. So whatever you edit here, it gets shown on the rendered version. 
 	That's an easy way to see if you added nodes at a wrong place, things not linked, etc. Much easier than checking matrices and lists of strings!
 	
-	Finally, the function 'do_searchby_distance()' does all the calculations for similarity between tracks.
+	Finally, the function 'searchByDistance()' does all the calculations for similarity between tracks.
 	
 	Tests are also available with the buttons present on these scripts (customizable button and Playlist Tools).
 */

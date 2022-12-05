@@ -1,17 +1,27 @@
 {
 	"name": "Similar unplayed tracks (G)",
-	"genreWeight": 25,
-	"styleWeight": 15,
-	"moodWeight": 25,
-	"keyWeight": 0,
-	"dateWeight": 10,
-	"bpmWeight": 25,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"dateRange": 25,
-	"keyRange": 0,
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 25
+		},
+		"style": {
+			"weight": 15
+		},
+		"mood": {
+			"weight": 25
+		},
+		"key": {
+			"weight": 0
+		},
+		"bpm": {
+			"weight": 25,
+			"range": 25
+		},
+		"date": {
+			"weight": 10,
+			"range": 25
+		}
+	},
 	"scoreFilter": 50,
 	"method": "GRAPH",
 	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4 * 3/4",
