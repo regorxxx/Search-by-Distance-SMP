@@ -885,7 +885,7 @@ async function searchByDistance({
 
 		// Prefill tag Cache
 		if (bTagsCache) {
-			const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf).concat(['TITLE'], [globTags.title])
+			const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf).concat([['TITLE'], [globTags.title]])
 				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
