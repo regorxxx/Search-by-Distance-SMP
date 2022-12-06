@@ -196,7 +196,7 @@ function createConfigMenu(parent) {
 					const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('range');
 					const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
 					menu.newEntry({menuName: subMenuName, entryText: 'Range\t[' + tag.range + ']' + (bRecipe ? '(forced by recipe)' : ''), func: () => {
-						const input = Input.number('int positive', tag.range, 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
+						const input = Input.number('int positive', tag.range, 'Enter number: (greater or equal to 0)', 'Search by distance', 10);
 						if (input === null) {return;}
 						tags[key].range = input;
 						properties.tags[1] = JSON.stringify(tags);
@@ -214,7 +214,7 @@ function createConfigMenu(parent) {
 				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
 				const entryText = 'Weight' + (bRecipe || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : tag.weight) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : tag.weight) + ']');
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
-					const input = Input.number('int positive', tag.weight, 'Enter number: (greater or equal to 0)', 'Search by distance', properties[key][3]);
+					const input = Input.number('int positive', tag.weight, 'Enter number: (greater or equal to 0)', 'Search by distance', 15);
 					if (input === null) {return;}
 					tags[key].weight = input;
 					properties.tags[1] = JSON.stringify(tags);
@@ -229,7 +229,7 @@ function createConfigMenu(parent) {
 				options.forEach((option, i) => {
 					const entryText = option + (bRecipe && tag.scoringDistribution === option ? '\t(forced by recipe)' : '');
 					menu.newEntry({menuName: subMenuName2, entryText, func: () => {
-						tags[key].scoringDistribution = key;
+						tags[key].scoringDistribution = option;
 						properties.tags[1] = JSON.stringify(tags);
 						overwriteProperties(properties); // Updates panel
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
