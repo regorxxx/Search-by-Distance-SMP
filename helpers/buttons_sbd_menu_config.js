@@ -320,9 +320,14 @@ function createConfigMenu(parent) {
 					}
 				});
 				overwriteProperties(properties); // Force overwriting
-				const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-				if (answer === popup.yes) {
-					menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+				const newTags = JSON.parse(properties.tags[1]);
+				const newGraphTags = Object.values(newTags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity);
+				const oldGraphTags = Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity);
+				if (!isArrayEqual(newGraphTags, oldGraphTags)) {
+					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+					if (answer === popup.yes) {
+						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
+					}
 				}
 			}});
 		}
