@@ -76,12 +76,6 @@ function createConfigMenu(parent) {
 				if (input === null) {return;}
 				properties[key][1] = JSON.stringify(input);
 				overwriteProperties(properties); // Updates panel
-				if (key === 'genreTag' || key === 'styleTag') {
-					const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-					if (answer === popup.yes) {
-						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
-					}
-				}
 			}, flags: bProperties && recipe.properties.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
 		});
 	};
@@ -256,18 +250,24 @@ function createConfigMenu(parent) {
 		{	// New tag
 			menu.newEntry({menuName, entryText: 'New tag...', func: () => {
 				const nTag = {weight: 0, tf: [], scoringDistribution: 'LINEAR', type: []};
-				const name = Input.string('string', '', 'Enter name:', 'Search by distance', 'myTag');
+				const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values will be filled later.', 'Search by distance', 'myTag');
 				if (name === null) {return;}
 				'string', 'multiple', 'graph'
-				if (WshShell.Popup('Is a string?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('string');} 
-				else {nTag.type.push('number');}
-				if (WshShell.Popup('Is multi-valued?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('multiple');} 
+				if (WshShell.Popup('Is multi-valued?\n\nTag may make use of multiple or single values. For ex. GENRE usually have more than one value, while DATE is meant to store a single value.\nSingle-valued configured tags will skip any value past the first one.\nMulti-valued tags can only be of \'string\' type.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('multiple', 'string');}
 				else {nTag.type.push('single');}
-				if (nTag.type.includes('string')) {
-					if (WshShell.Popup('Is a genre/style-like tag?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('graph');} 
-				} else if (nTag.type.includes('number')) {
-					if (WshShell.Popup('Uses absolute range?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('absRange'); nTag.range = 0;} 
-					else if (WshShell.Popup('Uses percent range?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('percentRange');}
+				if (nTag.type.includes('single')) {
+					if (WshShell.Popup('Are tag values strings?\n\nTag values may be considered as strings or numbers. For ex. GENRE, TITLE, etc. are strings, while DATE or BPM are numbers.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('string');} 
+					else {nTag.type.push('number');}
+					if (nTag.type.includes('string')) {
+						if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('graph');} 
+					} else if (nTag.type.includes('number')) {
+						if (WshShell.Popup('Uses absolute range?\n\nSince tag values are numbers, comparison is done within a range. Absolute range will make the configurable range to be used as an absolute value, i.e. 30 equals to +-30. For ex. for dates.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('absRange'); nTag.range = 0;} 
+						else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percentual value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('percentRange');}
+					}
+				} else {
+					if (nTag.type.includes('string')) {
+						if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('graph');}
+					}
 				}
 				tags[name] = nTag;
 				properties.tags[1] = JSON.stringify(tags);
