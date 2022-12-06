@@ -573,10 +573,11 @@ function createConfigMenu(parent) {
 		const submenu = menu.newMenu('Debug and testing');
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
+				const tags = JSON.parse(properties.tags[1]);
 				findStyleGenresMissingGraph({
 					genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
-					genretag: JSON.parse(properties.genreTag[1]),
-					styleTag: JSON.parse(properties.styleTag[1]),
+					genreTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
+					styleTag: [],
 					bAscii: properties.bAscii[1],
 					bPopup: true
 				});

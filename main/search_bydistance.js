@@ -1619,7 +1619,7 @@ function parseGraphDistance(sbd_max_graph_distance, descr = music_graph_descript
 			}
 			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
 			if (output.indexOf('+') === -1 && output.indexOf('-') === -1 && output.indexOf('*') === -1 && output.indexOf('/') === -1 && validVars.indexOf(output) === -1) {
-				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (using no arithmetic or variable): ' + output, 'Search by Distance');
 				return null;
 			}
 			output = eval(output);
@@ -1638,10 +1638,11 @@ function parseGraphDistance(sbd_max_graph_distance, descr = music_graph_descript
 function findStyleGenresMissingGraphCheck(properties) {
 	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, 'Search by distance', popup.question + popup.yes_no);
 	if (answer === popup.yes) {
+		const tags = JSON.parse(properties.tags[1]);
 		findStyleGenresMissingGraph({
 			genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
-			genretag: JSON.parse(properties.genreTag[1]),
-			styleTag: JSON.parse(properties.styleTag[1]),
+			genreTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
+			styleTag: [],
 			bAscii: properties.bAscii[1],
 			bPopup: true
 		});
