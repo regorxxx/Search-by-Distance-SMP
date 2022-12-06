@@ -256,15 +256,13 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
 					});
 			}
-			const genreTag = properties && properties.hasOwnProperty('genreTag') 
-				? JSON.parse(properties.genreTag[1]).map((tag) => {	return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|') 
-				: _t(globTags.genre);
-			const styleTag = properties && properties.hasOwnProperty('styleTag') 
-				? JSON.parse(properties.styleTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag) : tag;}).join('|') 
-				: _t(globTags.style);
-			const tags = [genreTag, styleTag].filter(Boolean).join('|');
-			console.log('SearchByDistance: tags used for cache - ' + tags);
-			const tfo = fb.TitleFormat(tags);
+			const tags = properties && properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null;
+			const genreStyleTags = tags
+				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity)
+					.map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|')
+				: _t(globTags.genre) + '|' + _t(globTags.style);
+			console.log('SearchByDistance: tags used for cache - ' + genreStyleTags);
+			const tfo = fb.TitleFormat(genreStyleTags);
 			const styleGenres = await new Promise((resolve) => {
 				const libItems = fb.GetLibraryItems().Convert();
 				const num = libItems.length;
@@ -887,7 +885,7 @@ async function searchByDistance({
 
 		// Prefill tag Cache
 		if (bTagsCache) {
-			const missingOnCache = Object.keys(calcTags).map(tag => tag.tf).push(['TITLE'], [globTags.title])
+			const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf).push(['TITLE'], [globTags.title])
 				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
