@@ -52,6 +52,7 @@
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
 - UI: customizable button now doesn't allow setting playlist sorting when using harmonic mixing. Submenu is greyed out.
+- UI: buttons now show info about background processing if any is being done (usually also animated).
 - Similar artists: now shows a popup with the report of similar artists found along their similarity scoring. Previously this info was only logged to console.
 - Similar artists: now uses 'LOGARITHMIC' scoring method by default (set on preset file, can still be manually changed there).
 - Removed duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
