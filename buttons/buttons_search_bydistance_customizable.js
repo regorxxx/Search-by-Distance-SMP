@@ -58,7 +58,7 @@ addButton({
 					}
 				}
 			} else {
-				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
+				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this}); // All set according to properties panel!
 			}
 		}
 	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand)

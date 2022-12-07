@@ -253,7 +253,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 			if (typeof buttonsBar !== 'undefined') {
 				buttonsBar.listKeys.flat(Infinity).filter((key) => {return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i);})
 					.forEach((key) => {
-						buttonsBar.buttons[key].switchAnimation('isCalculatingCache', true, () =>  !sbd.isCalculatingCache);
+						buttonsBar.buttons[key].switchAnimation('Link cache', true, () =>  !sbd.isCalculatingCache);
 					});
 			}
 			const tags = properties && properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null;
@@ -459,6 +459,8 @@ async function searchByDistance({
 								// --->Output
 								playlistName			= properties.hasOwnProperty('playlistName') ? properties.playlistName[1] : 'Search...',
 								bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
+								// --->Misc
+								parent					= null
 								} = {}) {
 		const descr = music_graph_descriptors;
 		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
@@ -891,7 +893,9 @@ async function searchByDistance({
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
 			if (missingOnCache.length) {
 				console.log('Caching missing tags...');
+				if (parent) {parent.switchAnimation('Tag cache', true);}
 				await tagsCache.cacheTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+				if (parent) {parent.switchAnimation('Tag cache', false);}
 				tagsCache.save();
 			}
 		}

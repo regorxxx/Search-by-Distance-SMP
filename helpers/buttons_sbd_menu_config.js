@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/12/22
+//06/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -630,11 +630,11 @@ function createConfigMenu(parent) {
 		{
 			menu.newEntry({menuName: submenu, entryText: 'Graph statistics', func: () => {
 			if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphStatistics');}
-				parent.switchAnimation('graphStatistics', true);
+				parent.switchAnimation('Graph statistics', true);
 				graphStatistics({properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod}).then((resolve) => {
 					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
 					console.log(resolve.text);
-					parent.switchAnimation('graphStatistics', false);
+					parent.switchAnimation('Graph statistics', false);
 					if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 				});
 			}});

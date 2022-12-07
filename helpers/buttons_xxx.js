@@ -155,7 +155,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.isAnyAnimationActive = function () {
 		return this.animation.some((obj) => {return obj.bActive;});
 	};
-
+	
+	this.getAnimationText = function () {
+		return this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '';
+	};
+	
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
@@ -176,7 +180,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					break;
 				}
 				case buttonStates.hover: {
-					buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+					buttonsBar.tooltipButton.SetValue(
+						this.getAnimationText() + (buttonsBar.config.bShowID 
+							? this.descriptionWithID(this) 
+							: (isFunction(this.description) 
+								? this.description(this) 
+								: this.description)
+					), true); // ID or just description, according to string or func.
 					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 					break;
 				}
@@ -212,7 +222,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					}
 					break;
 				case buttonStates.hover:
-					buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+					buttonsBar.tooltipButton.SetValue(
+						this.getAnimationText() + (buttonsBar.config.bShowID
+							? this.descriptionWithID(this)
+							: (isFunction(this.description)
+								? this.description(this)
+								: this.description)
+					) , true); // ID or just description, according to string or func.
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
 						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
