@@ -616,7 +616,7 @@ function createConfigMenu(parent) {
 			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isFoobarV2 ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
-				const keys = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf);
+				const keys = Object.values(tags).filter(t => !t.type.includes('virtual')).map(t => t.tf);
 				const tags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
