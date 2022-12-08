@@ -1327,8 +1327,8 @@ async function searchByDistance({
 										let idx = -1;
 										if (keyMap.has(j)) {idx = keyMap.get(j);}
 										else {idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx);}
-										const selKey = keyHandle[idx];
-										return selKey[0] === keyHandle[i][0];
+										const selKey = calcTags.key.handle[idx];
+										return selKey[0] === calcTags.key.handle[i][0];
 									});
 									if (matchIdx !== -1) {
 										const currTrack = handleList[currTrackData.index];
@@ -1455,8 +1455,9 @@ async function searchByDistance({
 					let newOrder = [];
 					for (let i = 0; i < finalPlaylistLength; i++) {
 						const index = selectedHandlesData[i].index;
-						const genreNew = (genreWeight !== 0 || dyngenreWeight !== 0) ? genreHandle[index].filter(Boolean) : [];
-						const styleNew = (styleWeight !== 0 || dyngenreWeight !== 0) ? styleHandle[index].filter(Boolean) : [];
+						// TODO: use any graph var
+						const genreNew = (calcTags.genre.weight !== 0 || calcTags.dynGenre.weight !== 0) ? calcTags.genre.handle[index].filter(Boolean) : [];
+						const styleNew = (calcTags.style.weight !== 0 || calcTags.dynGenre.weight !== 0) ? calcTags.style.handle[index].filter(Boolean) : [];
 						const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
 						if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
 							newOrder.push(i);

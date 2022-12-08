@@ -15,9 +15,11 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
 	const newConfig = clone(properties);
-	const genreTag = JSON.parse(newConfig.genreTag[1]).filter(Boolean);
+	const tags = JSON.parse(newConfig.tags[1]);
+	// TODO: use any graph var
+	const genreTag = tags.genre.tf.filter(Boolean);
 	const genreQueryTag = genreTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
-	const styleTag = JSON.parse(newConfig.styleTag[1]).filter(Boolean);
+	const styleTag = tags.style.tf.filter(Boolean);
 	const styleQueryTag = styleTag.map((tag) => {return ((tag.indexOf('$') === -1) ? tag : _q(tag));});
 	const genreStyleTag = [...new Set(genreTag.concat(styleTag))];
 	// Find which genre/styles are nearest as pre-filter using the selected track
@@ -58,7 +60,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 		// Further filter the tracks using a date range
 		let dateQuery = '';
 		if (Number.isFinite(dateRange)) {
-			const dateTag = JSON.parse(newConfig.dateTag[1])[0];
+			const dateTag = tags.date.tf[0];
 			if (dateTag) {
 				const dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
 				const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
