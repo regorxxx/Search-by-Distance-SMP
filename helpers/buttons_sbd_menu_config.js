@@ -617,13 +617,13 @@ function createConfigMenu(parent) {
 			// Tags cache reset Async
 			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isFoobarV2 ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
 				const keys = Object.values(tags).filter(t => !t.type.includes('virtual')).map(t => t.tf);
-				const tags = keys.concat([['TITLE'], [globTags.title]])
+				const cacheTags = keys.concat([['TITLE'], [globTags.title]])
 					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 					.filter((tagName) => {return tagsCache.cache.has(tagName);});
-				tagsCache.clear(tags);
+				tagsCache.clear(cacheTags);
 				tagsCache.save();
-				tagsCache.cacheTags(tags, iStepsLibrary, iDelayLibrary, fb.GetLibraryItems().Convert(), true).then(() => {tagsCache.save();});
+				tagsCache.cacheTags(cacheTags, iStepsLibrary, iDelayLibrary, fb.GetLibraryItems().Convert(), true).then(() => {tagsCache.save();});
 			}, flags: sbd.panelProperties.bTagsCache[1] ? MF_STRING : MF_GRAYED});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
