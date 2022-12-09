@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/12/22
+//09/12/22
 
 /*
 	Search by Distance
@@ -546,7 +546,8 @@ async function searchByDistance({
 		// Parse args
 		sbd_max_graph_distance = parseGraphDistance(sbd_max_graph_distance, descr, bBasicLogging)
 		if (sbd_max_graph_distance === null) {return;}
-		
+		// Tags check
+		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Theme check
 		const bUseTheme = !!(theme && (theme.length || Object.keys(theme).length));
 		if (bUseTheme) {
@@ -557,8 +558,9 @@ async function searchByDistance({
 				if (!theme) {return;}
 			}
 			// Array of objects
-			const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
-			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
+			const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
+			// Theme tags must contain at least all the user tags
+			const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck));}) : 0;
 			const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
 			if (!bCheck) {
 				console.log('Theme selected for mix is missing some keys: ' + (theme.hasOwnProperty('name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
@@ -581,8 +583,6 @@ async function searchByDistance({
 		}
 		// Method check
 		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
-		// Tags check
-		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Start calcs
 		if (bProfile) {var test = new FbProfiler('searchByDistance');}
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
@@ -887,7 +887,7 @@ async function searchByDistance({
 
 		// Prefill tag Cache
 		if (bTagsCache) {
-			const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf).concat([['TITLE'], [globTags.title]])
+			const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf.filter(Boolean)).concat([['TITLE'], [globTags.title]])
 				.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
 				.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
 				.filter((tagName) => {return !tagsCache.cache.has(tagName);});
@@ -1453,13 +1453,14 @@ async function searchByDistance({
 			if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
 				if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
 					let newOrder = [];
+					// TODO Profile
+					const [language, speechness] = getTagsValuesV4(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS'], false);
 					for (let i = 0; i < finalPlaylistLength; i++) {
 						const index = selectedHandlesData[i].index;
-						// TODO: use any graph var
-						const genreNew = (calcTags.genre.weight !== 0 || calcTags.dynGenre.weight !== 0) ? calcTags.genre.handle[index].filter(Boolean) : [];
-						const styleNew = (calcTags.style.weight !== 0 || calcTags.dynGenre.weight !== 0) ? calcTags.style.handle[index].filter(Boolean) : [];
-						const tagSet_i = new Set(genreNew.concat(styleNew).map((item) => {return item.toLowerCase();}));
-						if (tagSet_i.has('instrumental')) { // Any match, then add to reorder list
+						const genreStyleTag = Object.values(calcTags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual') && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
+							.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
+						const tagSet_i = new Set(genreStyleTag.map((item) => {return item.toLowerCase();}));
+						if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || speechness[i][0] === 0) { // Any match, then add to reorder list
 							newOrder.push(i);
 						}
 					}
@@ -1644,8 +1645,7 @@ function findStyleGenresMissingGraphCheck(properties) {
 		const tags = JSON.parse(properties.tags[1]);
 		findStyleGenresMissingGraph({
 			genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
-			genreTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
-			styleTag: [],
+			genreStyleTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
 			bAscii: properties.bAscii[1],
 			bPopup: true
 		});

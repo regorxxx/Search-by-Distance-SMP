@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/22
+//09/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -12,6 +12,7 @@ function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes']);
 	const properties = parent.buttonsProperties;
+	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);
 	const testRegex = /test_.*|int_.*/i;
 	// Recipe forced theme?
@@ -35,35 +36,27 @@ function createThemeMenu(parent) {
 	// Create theme
 	themeMenu.newEntry({entryText: 'Create theme file with selected track', func: () => {
 		// Tag names
-		const genreTag = JSON.parse(properties.genreTag[1]).filter(Boolean);
-		const styleTag = JSON.parse(properties.styleTag[1]).filter(Boolean);
-		const moodTag = JSON.parse(properties.moodTag[1]).filter(Boolean);
-		const dateTag = JSON.parse(properties.dateTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
-		const keyTag = JSON.parse(properties.keyTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
-		const bpmTag = JSON.parse(properties.bpmTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
-		const composerTag = JSON.parse(properties.composerTag[1]).filter(Boolean);
-		const customStrTag = JSON.parse(properties.customStrTag[1]).filter(Boolean);
-		const customNumTag = JSON.parse(properties.customNumTag[1]).filter(Boolean); // only allows 1 value, but put it into an array
-		// Tag Values
+		const themeTagsKeys = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
+		const themeTagsTf = themeTagsKeys.map((k) => tags[k].tf.filter(Boolean));
+		// Retrieve values
 		const selHandleList = new FbMetadbHandleList(fb.GetFocusItem());
-		const genre = genreTag.length ? getTagsValuesV3(selHandleList, genreTag, true).flat().filter(Boolean) : [];
-		const style = styleTag.length ? getTagsValuesV3(selHandleList, styleTag, true).flat().filter(Boolean) : [];
-		const mood = moodTag.length ? getTagsValuesV3(selHandleList, moodTag, true).flat().filter(Boolean) : [];
-		const composer = composerTag.length ? getTagsValuesV3(selHandleList, composerTag, true).flat().filter(Boolean) : [];
-		const customStr = customStrTag.length ? getTagsValuesV3(selHandleList, customStrTag, true).flat().filter(Boolean) : [];
-		const restTagNames = [keyTag.length ? keyTag[0] : 'skip', dateTag.length ? dateTag[0] : 'skip', bpmTag.length ? bpmTag[0] : 'skip', customNumTag.length ? customNumTag[0] : 'skip']; // 'skip' returns empty arrays...
-		const [keyArr, dateArr, bpmArr, customNumArr] = getTagsValuesV4(selHandleList, restTagNames).flat();
-		const key = keyArr;
-		const date = dateTag.length ? [Number(dateArr[0])] : [];
-		const bpm = bpmArr.length ? [Number(bpmArr[0])] : [];
-		const customNum = customNumTag.length ? [Number(customNumArr[0])] : [];
+		const themeTagsValues = themeTagsTf.map((tf) => getTagsValuesV3(selHandleList, tf, true).flat().filter(Boolean));
+		// Force data type
+		themeTagsKeys.forEach((key, i) => {
+			if (tags[key].type.includes('number')) {
+				themeTagsValues[i] = themeTagsValues[i].map((val) => Number(val)); 
+			}
+		});
+		// Tags obj
+		const themeTags = {};
+		themeTagsKeys.forEach((key, i) => {themeTags[key] = themeTagsValues[i];});
 		// Theme obj
 		let input = '';
 		try {input = utils.InputBox(window.ID, 'Enter theme name', 'Search by distance', 'my theme', true);}
 		catch (e) {return;}
 		if (!input.length) {return;}
 		const theme = {name: input, tags: []};
-		theme.tags.push({genre, style, mood, key, date, bpm, composer, customStr, customNum});
+		theme.tags.push(themeTags);
 		const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
 		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {return;}
 		const bDone = _save(filePath, JSON.stringify(theme, null, '\t'));
@@ -103,7 +96,7 @@ function createThemeMenu(parent) {
 	}, flags: !bHasForcedTheme ? MF_STRING : MF_GRAYED});
 	themeMenu.newEntry({entryText: 'sep'});
 	// All entries
-	const tagsToCheck = ['genre', 'style', 'mood', 'key', 'date', 'bpm', 'composer', 'customStr', 'customNum'];
+	const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
 	// List
 	const options = [];
 	files.forEach((file) => {
@@ -113,7 +106,8 @@ function createThemeMenu(parent) {
 		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
 		if (!theme) {return;}
 		// Check
-		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !isArrayEqual(Object.keys(tagArr), tagsToCheck);}) : 0;
+		// Theme tags must contain at least all the user tags
+		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck));}) : 0;
 		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
 		if (!bCheck) {
 			console.log('File is not a valid theme: ' + (theme.hasOwnProperty('tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));
