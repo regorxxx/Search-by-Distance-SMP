@@ -156,7 +156,7 @@ function query_combinations(tagsArray, queryKey, tagsArrayLogic /*AND, OR [NOT]*
 		}
 		let tagsArrayLength = tagsArray.length;
 		let query = '';
-		let isArray = Object.prototype.toString.call(tagsArray[0]) === '[object Array]' ? 1 : 0; //subtagsArray
+		let isArray = Object.prototype.toString.call(tagsArray[0]) === '[object Array]'; //subtagsArray
 		if (!isArray) { //no subtagsArrays
 			if (logicDic.indexOf(tagsArrayLogic) === -1) {
 				console.log('query_combinations(): tagsArrayLogic (' + tagsArrayLogic + ') is wrong');
