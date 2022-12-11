@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/22
+//11/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -340,8 +340,15 @@ function createConfigMenu(parent) {
 				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', properties['forcedQuery'][1], true);}
 				catch(e) {return;}
 				if (properties['forcedQuery'][1] === input) {return;}
-				try {fb.GetQueryItems(new FbMetadbHandleList(), input);} // Sanity check
-				catch (e) {fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return;}
+				try {if (input.length && fb.GetQueryItems(new FbMetadbHandleList(), input).Count === 0) {throw new Error('No items');}} // Sanity check
+				catch (e) {
+					if (e.message === 'No items') {
+						fb.ShowPopupMessage('Query returns zero items on current library. Check it and add it again:\n' + input, 'Search by distance'); 
+					} else {
+						fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); 
+					}
+					return;
+				}
 				properties['forcedQuery'][1] = input;
 				overwriteProperties(properties); // Updates panel
 			}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
@@ -362,7 +369,7 @@ function createConfigMenu(parent) {
 					{title: 'Rating > 3',				query: globQuery.ratingGr3},
 					{title: 'Length < 6 min',			query: globQuery.shortLength},
 					{title: 'Only Stereo',				query: globQuery.stereo},
-					{title: 'sep'},		
+					{title: 'sep'},
 					{title: 'No Female vocals',			query: globQuery.noFemale}, 
 					{title: 'No Instrumentals', 		query: globQuery.noInstrumental},
 					{title: 'No Acoustic tracks',		query: globQuery.noAcoustic},
@@ -377,8 +384,8 @@ function createConfigMenu(parent) {
 					let cache = '';
 					while (input !== cache) {
 						cache = input;
-						input = input.replace(new RegExp('\\(\\(' + query + '\\)\\)', 'i'), _p(query));
-						input = input.replace(new RegExp('^\\(' + query + '\\)$', 'i'), query);
+						input = input.replace(new RegExp('\\(\\(' + queryRegExp(query) + '\\)\\)', 'i'), _p(query));
+						input = input.replace(new RegExp('^\\(' + queryRegExp(query) + '\\)$', 'i'), query);
 						input = input.replace(new RegExp('^\\(([^\\(\\)]*)\\)$', 'i'), '$1');
 						input = input.replace(new RegExp('\\(\\(([^\\(\\)]*)\\)\\)', 'i'), '$1');
 					}
@@ -387,13 +394,14 @@ function createConfigMenu(parent) {
 				if (input === query) {input = '';}
 				else if (input.indexOf(query) !== -1) {
 					input = cleanParentheses(input, query);
-					input = input.replace(new RegExp('^\\(*' + query + '\\)*$|\\(?' + query + '\\)? AND | AND \\(?' + query + '\\)?', 'i'), '');
+					input = input.replace(new RegExp('^\\(*' + queryRegExp(query) + '\\)*$|\\(?' + queryRegExp(query) + '\\)? AND | AND \\(?' + queryRegExp(query) + '\\)?', 'i'), '');
 					input = cleanParentheses(input, query);
 				} else {
 					input = input.length ? _p(input) + ' AND ' + _p(query) : query;
 				}
 				return input;
 			};
+			const queryRegExp = (query) => {return query.replace('(', '\\(').replace(')','\\)');}
 			options.forEach((obj) => {
 				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
 				const entryText = obj.title + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : '');
@@ -407,7 +415,7 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 				menu.newCheckMenu(subMenuName, entryText, void(0), () => {
 					const prop = recipe.hasOwnProperty('forcedQuery') ? recipe.forcedQuery : properties['forcedQuery'][1];
-					return prop.indexOf(obj.query) !== -1;
+					return prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')','\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)'));
 				});
 			});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
