@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/22
+//11/12/22
 
 /*
 	Search by Distance
@@ -604,7 +604,7 @@ async function searchByDistance({
 				calcTag.tf = (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key) ? (recipeProperties.tags[key].tf || tag.tf) : tag.tf).filter(Boolean);
 				if (type.includes('graph')) {calcTags.genreStyle.tf.push(...calcTag.tf);}
 			}
-			if (calcTag.tf.length || type.includes('virtual')) {calcTags[key] = calcTag;}
+			calcTags[key] = calcTag;
 			// Safety Check. Warn users if they try wrong settings
 			if (type.includes('single') && calcTag.tf.length > 1) {
 				console.log('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.');
@@ -695,7 +695,7 @@ async function searchByDistance({
 			const tag = calcTags[key];
 			tag.reference = [];
 			if (tag.type.includes('virtual')) {continue;}
-			if (tag.weight !== 0 || (tag.tf.length !== 0 && (tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH')) || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+			if (tag.weight !== 0 || (tag.tf.length && (tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH')) || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 				 tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
 			}
 			if (tag.type.includes('single')) {
@@ -724,6 +724,7 @@ async function searchByDistance({
 		for (let key in calcTags) {
 			const tag = calcTags[key];
 			const type = tag.type;
+			if (tag.weight === 0 || tag.tf.length === 0) {continue;}
 			if (type.includes('virtual')) {continue;}
 			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.length || tag.reference !== null))) {
 				originalWeightValue += tag.weight;
@@ -908,10 +909,12 @@ async function searchByDistance({
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
-		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
-		} else {
-			handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
+		if (checkDuplicatesByTag.length) {
+			if (bTagsCache) {
+				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
+			} else {
+				handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
+			}
 		}
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
@@ -971,7 +974,7 @@ async function searchByDistance({
 				if (tag.type.includes('virtual')) {continue;}
 				const type = tag.type;
 				handleTag[key] = {};
-				if (tag.weight !== 0 || type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH')) {
+				if (tag.weight !== 0 || tag.tf.length && (type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH'))) {
 					if (type.includes('multiple')) {
 						if (type.includes('graph') && bTagFilter) {
 							handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
@@ -1453,7 +1456,6 @@ async function searchByDistance({
 			if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
 				if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
 					let newOrder = [];
-					// TODO Profile
 					const [language, speechness] = getTagsValuesV4(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS'], false);
 					for (let i = 0; i < finalPlaylistLength; i++) {
 						const index = selectedHandlesData[i].index;
