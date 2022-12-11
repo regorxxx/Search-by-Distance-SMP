@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//10/12/22
 
 /*
 	Remove duplicates
@@ -73,8 +73,8 @@ function removeDuplicates({handleList = null, sortOutput = null, checkKeys = glo
 	const count = tfoCopy.length;
 	if (bAdvTitle) {
 		const titleRe = globRegExp.title.re;
-		const titleReV2 = globRegExp.title.ingAposVerbs.re;
-		const titleReV3 = globRegExp.title.ingVerbs.re;
+		const titleReV2 = globRegExp.ingAposVerbs.re;
+		const titleReV3 = globRegExp.ingVerbs.re;
 		while (i < count) {
 			const str = tfoCopy[i].replace(titleRe, '').replace(titleReV2, 'ing').replace(titleReV3, '$&g').trim();
 			if (countMap.has(str)) {
@@ -317,13 +317,13 @@ async function removeDuplicatesV3({handleList = null, sortOutput = null, checkKe
 function showDuplicates({handleList = null, sortOutput = null, checkKeys = globTags.remDupl, bAdvTitle = false, bProfile = false} = {}) {
 	// Check input
 	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
-		console.log('do_remove_duplicatesV2: checkKeys [' + checkKeys + '] was null, empty or not an array');
+		console.log('showDuplicates: checkKeys [' + checkKeys + '] was null, empty or not an array');
 		return; //Array was null or not an array
 	} else {
 		let i = checkKeys.length;
 		while (i--){
 			if (Object.prototype.toString.call(checkKeys[i]) !== '[object String]' || checkKeys[i] === '') {
-				console.log('do_remove_duplicatesV2: checkKeys [' + checkKeys + '] some keys are not String objects');
+				console.log('showDuplicates: checkKeys [' + checkKeys + '] some keys are not String objects');
 				return; //Array was null or not an array
 			}
 		}
