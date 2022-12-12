@@ -61,7 +61,32 @@ addButton({
 				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this}); // All set according to properties panel!
 			}
 		}
-	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand)
+	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
+	{
+		'on_notify_data': (parent, name, info) => {
+			if (name === 'bio_imgChange') {return;}
+			switch (name) {
+				case 'Search by Distance: share configuration': {
+					if (info) {
+						if (info.notifyThis && parent.name === info.name) {return;} // Don't apply to same button
+						parent.switcHighlight(true);
+						const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
+						if (answer === popup.yes) {
+							parent.buttonsProperties.tags[1] = String(info.tags[1]);
+							parent.buttonsProperties.forcedQuery[1] = String(info.forcedQuery[1]);
+							parent.buttonsProperties.genreStyleFilterTag[1] = String(info.genreStyleFilterTag[1]);
+							parent.buttonsProperties.poolFilteringTag[1] = String(info.poolFilteringTag[1]);
+							parent.buttonsProperties.checkDuplicatesByTag[1] = String(info.checkDuplicatesByTag[1]);
+							parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
+							overwriteProperties(parent.buttonsProperties);
+						}
+						parent.switcHighlight(false);
+					}
+					break;
+				}
+			}
+		}
+	})
 });
 
 // Helper

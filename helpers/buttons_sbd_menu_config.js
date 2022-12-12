@@ -706,6 +706,19 @@ function createConfigMenu(parent) {
 			overwriteProperties(properties); // Force overwriting
 		}});
 	}
+	{	// Reset
+		menu.newEntry({entryText: 'Share configuration...', func: () => {
+			const list = ['tags', 'forced query', 'gennre\style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
+			const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n' + capitalizePartial(list.join(', ')), 0, 'Search by distance', popup.question + popup.yes_no);
+			if (answer === popup.yes) {
+				const obj = clone(properties);
+				obj.name = parent.name;
+				window.NotifyOthers('Search by Distance: share configuration', obj);
+				obj.notifyThis = true;
+				window.NotifyThis('Search by Distance: share configuration', obj);
+			}
+		}});
+	}
 	menu.newEntry({entryText: 'sep'});
 	{	// Readmes
 		const subMenuName = menu.newMenu('Readmes...');

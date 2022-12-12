@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/12/22
+//12/12/22
 
 /* 
 	Objects
@@ -118,6 +118,11 @@ String.prototype.count = function count(c) {
 function capitalize(s) {
 	if (!isString(s)) {return '';}
 	return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function capitalizePartial(s) {
+	if (!isString(s)) {return '';}
+	return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function capitalizeAll(s, sep = ' ', bJoinSep = true) { // Can use RegEx as separator, when using RegEx with capture groups to also include separators on split array, bJoinSep should be false to join 'as is'
