@@ -1026,7 +1026,7 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['British Trad Rock'				]],
 			// [*									,	['Britpop'							]],
 			// [-									,	['C-86'								]],
-			// [-									,	['Chamber Pop'						]],
+			['Baroque Pop'						,	['Chamber Pop'						]],
 			// [*									,	['Chillwave'						]],
 			// [-									,	['Cocktail'							]],
 			// [-									,	['Cold Wave'						]],

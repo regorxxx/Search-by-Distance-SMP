@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/11/22
+//10/12/22
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -453,7 +453,8 @@ const music_graph_descriptors = {
 		['Folk Metal'						,	['Folk-Metal'						]],
 		['Folk Baroque'						,	['Folk-Baroque'						]],
 		['Anatolian Rock'					,	['Anadolu Rock'						]],
-		['Joik'								,	['Yoik','Luohti','Vuolle','Juoiggus']]
+		['Joik'								,	['Yoik','Luohti','Vuolle','Juoiggus']],
+		['Baroque Pop'						,	['Chamber pop'						]]
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
