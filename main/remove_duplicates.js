@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/12/22
+//12/12/22
 
 /*
 	Remove duplicates
@@ -29,15 +29,15 @@ if (isFoobarV2) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
 // 'nAllowed = 0' removes all duplicates.
 function removeDuplicates({handleList = null, sortOutput = null, checkKeys = globTags.remDupl, nAllowed = 0, bAdvTitle = false, bProfile = false} = {}) {
 	// Check input
-	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
+	if (checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log('removeDuplicates: checkKeys [' + checkKeys + '] was null, empty or not an array');
-		return; //Array was null or not an array
+		return handleList;
 	} else {
 		let i = checkKeys.length;
 		while (i--){
 			if (Object.prototype.toString.call(checkKeys[i]) !== '[object String]' || checkKeys[i] === '') {
 				console.log('removeDuplicates: checkKeys [' + checkKeys + '] some keys are not String objects');
-				return; //Array was null or not an array
+				return handleList;
 			}
 		}
 	}
@@ -132,13 +132,13 @@ function removeDuplicatesV2({handleList = null, sortOutput = null, checkKeys = g
 	// Check input
 	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log('removeDuplicatesV2: checkKeys [' + checkKeys + '] was null, empty or not an array');
-		return; //Array was null or not an array
+		return handleList;
 	} else {
 		let i = checkKeys.length;
 		while (i--){
 			if (Object.prototype.toString.call(checkKeys[i]) !== '[object String]' || checkKeys[i] === '') {
 				console.log('removeDuplicatesV2: checkKeys [' + checkKeys + '] some keys are not String objects');
-				return; //Array was null or not an array
+				return handleList;
 			}
 		}
 	}
@@ -222,13 +222,13 @@ async function removeDuplicatesV3({handleList = null, sortOutput = null, checkKe
 	// Check input
 	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log('removeDuplicatesV3: checkKeys [' + checkKeys + '] was null, empty or not an array');
-		return; //Array was null or not an array
+		return handleList;
 	} else {
 		let i = checkKeys.length;
 		while (i--){
 			if (Object.prototype.toString.call(checkKeys[i]) !== '[object String]' || checkKeys[i] === '') {
 				console.log('removeDuplicatesV3: checkKeys [' + checkKeys + '] some keys are not String objects');
-				return; //Array was null or not an array
+				return handleList;
 			}
 		}
 	}
@@ -318,13 +318,13 @@ function showDuplicates({handleList = null, sortOutput = null, checkKeys = globT
 	// Check input
 	if ( checkKeys === null || Object.prototype.toString.call(checkKeys) !== '[object Array]' || checkKeys.length === null || checkKeys.length === 0) {
 		console.log('showDuplicates: checkKeys [' + checkKeys + '] was null, empty or not an array');
-		return; //Array was null or not an array
+		return handleList;
 	} else {
 		let i = checkKeys.length;
 		while (i--){
 			if (Object.prototype.toString.call(checkKeys[i]) !== '[object String]' || checkKeys[i] === '') {
 				console.log('showDuplicates: checkKeys [' + checkKeys + '] some keys are not String objects');
-				return; //Array was null or not an array
+				return handleList;
 			}
 		}
 	}
