@@ -31,6 +31,7 @@
 
 ## [4.0.0] - 2022-09-15
 ### Added
+- Configuration: settings may now be shared among all search by distance buttons using the new menu entry. A popup asks to copy the configuration for every found button, which is highlighted on the buttons bar.
 - Configuration: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 - Tags: reworked the entire tag system to allow for indefinite custom tags, with weights, ranges, scoring distribution methods, ... Recipes and buttons have been reworked too to account for this.
@@ -76,6 +77,7 @@
 ### Removed
 ### Fixed
 - Remove duplicates: tags may now be set to empty '[]', which disables the feature. Previously threw a crash.
+- Recursive Playlist: when duplicates removal tags are set to empty, feature is disabled and a popup warns about it. Previously threw a crash.
 - Presets: fixed misspelling of 'SPEECHNESS' at multiple places/presets, on queries, tag name, Picard scripts, etc.
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
