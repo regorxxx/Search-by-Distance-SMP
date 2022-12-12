@@ -648,7 +648,7 @@ async function searchByDistance({
 			return;
 		}
 		if (bProgressiveListCreation && !checkDuplicatesByTag || !checkDuplicatesByTag.length) {
-			console.popup('Warning: Progressive list creation is enabled, but no tags for duplicates removal are provided.', 'Search by distance');
+			console.popup('Warning: Recursive playlist creation is enabled, but no tags for duplicates removal are provided.', 'Search by distance');
 			return;
 		}
 		// Can not use those methods without genre/style tags at all
