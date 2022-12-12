@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/12/22
+//12/12/22
 
 /*
 	Search by Distance
@@ -318,26 +318,43 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 }
 
 addEventListener('on_notify_data', (name, info) => {
-	if (name) {
-		if (name.indexOf('SearchByDistance: requires cacheLink map') !== -1 && typeof cacheLink !== 'undefined' && cacheLink.size) { // When asked to share cache, delay 1 sec. to allow script loading
-			debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
-			console.log('SearchByDistance: Requested Cache - cacheLink.');
+	if (name === 'bio_imgChange') {return;}
+	switch (name) {
+		case 'SearchByDistance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
+			if (typeof cacheLink !== 'undefined' && cacheLink.size) { 
+				debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
+				console.log('SearchByDistance: Requested Cache - cacheLink.');
+			}
+			break;
 		}
-		if (name.indexOf('SearchByDistance: requires cacheLinkSet map') !== -1 && typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) { // When asked to share cache, delay 1 sec. to allow script loading
-			debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
-			console.log('SearchByDistance: Requested Cache - cacheLinkSet.');
-		} 
-		if (name.indexOf('SearchByDistance: cacheLink map') !== -1 && info) {
-			console.log('SearchByDistance: Used Cache - cacheLink from other panel.');
-			let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-			data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-			updateCache({newCacheLink: new Map(data)});
+		case 'SearchByDistance: requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
+			if (typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) {
+				debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
+				console.log('SearchByDistance: Requested Cache - cacheLinkSet.');
+			}
+			break;
 		}
-		if (name.indexOf('SearchByDistance: cacheLinkSet map') !== -1 && info) {
-			console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
-			let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-			data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-			updateCache({newCacheLinkSet: new Map(data)});
+		case 'SearchByDistance: cacheLink map': {
+			if (info) {
+				console.log('SearchByDistance: Used Cache - cacheLink from other panel.');
+				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
+				data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+				updateCache({newCacheLink: new Map(data)});
+			}
+			break;
+		}
+		case 'SearchByDistance: cacheLinkSet map': {
+			if (info) {
+				console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
+				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
+				data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
+				updateCache({newCacheLinkSet: new Map(data)});
+			}
+			break;
+		}
+		case 'SearchByDistance: requires cacheLink map': {
+			
+			break;
 		}
 	}
 });
@@ -623,14 +640,17 @@ async function searchByDistance({
 		minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
 		bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
 		if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {
-			fb.ShowPopupMessage('Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag); 
+			console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, 'Search by distance'); 
 			return;
 		}
 		if (bSmartShuffle && !smartShuffleTag || !smartShuffleTag.length) {
-			fb.ShowPopupMessage('smartShuffleTag is not set or has an invalid value:\n' + smartShuffleTag);
+			console.popup('Warning: Smart Shuffle Tag is not set or has an invalid value:\n' + smartShuffleTag, 'Search by distance');
 			return;
 		}
-		
+		if (bProgressiveListCreation && !checkDuplicatesByTag || !checkDuplicatesByTag.length) {
+			console.popup('Warning: Progressive list creation is enabled, but no tags for duplicates removal are provided.', 'Search by distance');
+			return;
+		}
 		// Can not use those methods without genre/style tags at all
 		if (genreStyleTag.length === 0 && (method === 'GRAPH' || method === 'DYNGENRE')) {
 			if (bBasicLogging) {
@@ -909,7 +929,7 @@ async function searchByDistance({
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
-		if (checkDuplicatesByTag.length) {
+		if (checkDuplicatesByTag && checkDuplicatesByTag.length) {
 			if (bTagsCache) {
 				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			} else {
@@ -1230,7 +1250,7 @@ async function searchByDistance({
 			scoreData = filteredScoreData; // Maintains only selected references...
 			poolLength = scoreData.length;
 			if (bBasicLogging) {console.log('Pool of tracks after post-filtering, ' + ++poolFilteringN + ' tracks per ' + poolFilteringTag.join(', ') + ': ' + poolLength + ' tracks');}
-		}	
+		}
 		
 		// Final selection
 		// In Key Mixing or standard methods.
@@ -1535,7 +1555,7 @@ async function searchByDistance({
 							}
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
 					} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.');}
-				} else {console.log('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).');}
+				} else {console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).');}
 			}
 			// Logging
 			if (bProfile) {test.Print('Task #6: Final Selection', false);}
