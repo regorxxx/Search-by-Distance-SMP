@@ -43,6 +43,8 @@
 ### Changed
 - GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
 - GRAPH: minor performance improvement using non-oriented links.
+- GRAPH: greater performance improvement using pre-filter queries (the same used on WEIGHT method).
+- DYNGENRE: greater performance improvement using pre-filter queries (the same used on WEIGHT method).
 - Descriptors: changed style cluster distance. Presets have been reworked to account for that.
 - Descriptors: updated descriptors with multiple additions.
 - Descriptors: updated and improved descriptors documentation (present on .js files).
@@ -50,6 +52,7 @@
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - Tags: the buttons now ask to check for missing genre/styles on the Graph on first initialization.
+- Tags: genre/styles not present on the descriptors are no longer considered to calculate the mean distance on GRAPH method. It was supposed to be done via exclusions, but that method did leave some things values on non properly configured setups.
 - UI: shift modifier now opens configuration menu on customizable button, and Shift + Ctrl now sets the theme. This is done to follow the same behavior than other buttons having the configuration menu on Shift.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
@@ -75,6 +78,7 @@
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
 - Logging: added some console warnings when specific sorting options override others.
+- Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
 ### Removed
 ### Fixed
 - Remove duplicates: tags may now be set to empty '[]', which disables the feature. Previously threw a crash.
@@ -84,6 +88,7 @@
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
 - UI: recipes were not properly numbered when they had duplicates names.
+- UI: some GRAPH-only options where available to configure when using other methods. Now greyed out.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
 - Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').
