@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/01/22
+//14/12/22
 
 /*
 	Helpers for the descriptors
@@ -57,8 +57,7 @@ music_graph_descriptors.getInfluences = function getInfluences(genreStyle) {
 };
 
 music_graph_descriptors.nodeList = null;
-music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
-	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
+music_graph_descriptors.getNodeList = function getNodeList() {
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	if (!this.nodeList) {
 		this.nodeList = new Set(this.style_supergenre.flat(Infinity))
@@ -66,7 +65,23 @@ music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
 			.union(new Set(this.style_substitutions.flat(Infinity)))
 			.union(new Set(this.style_cluster.flat(Infinity)));
 	}
+	return this.nodeList;
+}
+
+music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
+	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
 	// Compare (- user exclusions - graph exclusions)
-	const missing = tags.difference(this.nodeList);
+	const missing = tags.difference(this.getNodeList());
 	return missing.size === 0;
+};
+
+music_graph_descriptors.filterArrWithGraph = function filterWithGraph(genreStyleArr) {
+	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
+	const present = tags.intersection(this.getNodeList());
+	return [...present];
+};
+
+// Skips set conversion and asciify
+music_graph_descriptors.filterSetWithGraph = function filterWithGraph(genreStyleSet) {
+	return genreStyleSet.intersection(this.getNodeList());
 };

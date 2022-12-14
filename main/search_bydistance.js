@@ -698,7 +698,7 @@ async function searchByDistance({
 		let queryl = 0;
 		
 		// These should be music characteristics not genre/styles. Like 'electric blues' o 'acoustic', which could apply to any blues style... those things are not connected by graph, but considered only for weight scoring instead.
-		const map_distance_exclusions = descr.map_distance_exclusions; // Set
+		const graphExclusions = descr.map_distance_exclusions; // Set
 		
 		// Tag filtering: applied globally. Matched values omitted on both calcs, graph and scoring..
 		// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
@@ -736,8 +736,10 @@ async function searchByDistance({
 			}
 		}
 		// Sets for later comparison
-		calcTags.genreStyle.referenceSet = new Set(calcTags.genre.reference.concat(calcTags.style.reference)).difference(map_distance_exclusions); // Remove exclusions
-		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
+		if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0) {
+			calcTags.genreStyle.referenceSet = new Set(calcTags.genre.reference.concat(calcTags.style.reference)).difference(graphExclusions); // Remove exclusions
+			calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
+		}
 		
 		let originalWeightValue = 0;
 		// Queries and ranges
@@ -826,7 +828,8 @@ async function searchByDistance({
 			if (querylength === 1 && !query[0].length) {query[querylength] = '';}
 			else {query[querylength] = query_join(query, 'OR');} //join previous query's
 		} else if (method === 'WEIGHT' && calcTags.dynGenre.weight !== 0) { //Dyngenre method.
-			query[querylength] = ''; // TODO: Add weight query, now is dynamically set
+			if (querylength === 1 && !query[0].length) {query[querylength] = '';}
+			else {query[querylength] = query_join(query, 'OR');} //join previous query's
 		} else { // Graph Method
 			let influencesQuery = [];
 			if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
@@ -859,8 +862,12 @@ async function searchByDistance({
 					influencesQuery.push(temp);
 				}
 			}
-			
-			query[querylength] = influencesQuery.length ? query_join(influencesQuery, 'AND') : ''; // TODO: Add weight query, now is dynamically set
+			if (influencesQuery.length) {
+				query[querylength] = query_join(influencesQuery, 'AND');
+			} else {
+				if (querylength === 1 && !query[0].length) {query[querylength] = '';}
+				else {query[querylength] = query_join(query, 'OR');} //join previous query's
+			}
 		}
 		if (bSameArtistFilter && !bUseTheme) {
 			let tags = fb.TitleFormat('[%' + globTags.artist + '%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
@@ -983,6 +990,7 @@ async function searchByDistance({
 		}
 		const titleHandle = tagsValByKey[z++];
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
+		const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 		let i = 0;
 		while (i < tracktotal) {
 			let weightValue = 0;
@@ -1020,19 +1028,26 @@ async function searchByDistance({
 						if (handleTag[key].val.length && bAscii) {handleTag[key].val = _asciify(handleTag[key].val);}
 					}
 				}
-				if (type.includes('graph')) {
+				if (type.includes('graph') && (method === 'GRAPH' || calcTags.dynGenre.weight !== 0)) {
 					handleTag.genreStyle.set.push(...handleTag[key].val);
 				}
 			}
-			handleTag.genreStyle.set = new Set(handleTag.genreStyle.set).difference(map_distance_exclusions); // Remove exclusions
+			if (method === 'GRAPH') {
+				handleTag.genreStyle.set = descr.filterSetWithGraph(new Set(handleTag.genreStyle.set).difference(graphExclusions)); // Remove anything not on Graph
+			} else if (calcTags.dynGenre.weight !== 0) {
+				handleTag.genreStyle.set = new Set(handleTag.genreStyle.set).difference(graphExclusions); // Remove exclusions
+			}
 			
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
-			for (let key in calcTags) {
+			let leftWeight = totalWeight;
+			let currScoreAvailable = 100;
+			for (let key of sortTagKeys) {
 				const tag = calcTags[key];
 				const type = tag.type;
-				if (type.includes('virtual')) {continue;}
 				if (tag.weight === 0) {continue;}
+				if (type.includes('virtual')) {continue;}
+				if (currScoreAvailable < minScoreFilter) {continue;} // Break asap
 				const scoringDistr = tag.scoringDistribution;
 				if (type.includes('multiple')){
 					const newTag = handleTag[key].number;
@@ -1108,7 +1123,11 @@ async function searchByDistance({
 						}
 					}
 				}
+				leftWeight -= tag.weight;
+				currScoreAvailable = round((weightValue + leftWeight) * 100 / originalWeightValue, 1);
 			}
+			if (currScoreAvailable < minScoreFilter) {i++; continue;} // Break asap
+			
 			if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
 				handleTag.dynGenre = {val: [], number: 0};
 				if (handleTag.genreStyle.set.size !== 0) {
@@ -1164,7 +1183,7 @@ async function searchByDistance({
 				}
 			}
 			
-			const score = round(weightValue * 10000 / originalScore / totalWeight, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
+			const score = round(weightValue * 100 / originalWeightValue, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 			
 			if (method === 'GRAPH') {
 				// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
@@ -1200,8 +1219,8 @@ async function searchByDistance({
 					scoreData.push({ index: i, name: titleHandle[i][0], score });
 				}
 			}
-            i++;
-        }
+			i++;
+		}
 		if (bProfile) {test.Print('Task #5: Score and Distance', false);}
 		let poolLength = scoreData.length;
 		if (method === 'WEIGHT') {
