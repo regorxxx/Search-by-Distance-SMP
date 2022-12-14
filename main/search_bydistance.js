@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/12/22
+//14/12/22
 
 /*
 	Search by Distance
@@ -64,14 +64,14 @@ checkCompatible('1.6.1', 'smp');
 */
 const SearchByDistance_properties = {
 	tags					:	['Tags used for scoring', JSON.stringify({
-		genre:		{weight: 15, tf: [globTags.genre],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		style:		{weight: 15, tf: [globTags.style],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		dynGenre:	{weight: 40, tf: [],				scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
-		mood:		{weight: 10, tf: [globTags.mood],	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
-		key:		{weight: 5,	 tf: [globTags.key],	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
-		bpm:		{weight: 5,	 tf: [globTags.bpm],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
-		date:		{weight: 10, tf: [globTags.date],	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
-		composer:	{weight: 0,	 tf: ['COMPOSER'],		scoringDistribution: 'LINEAR', type: ['string', 'multiple']}
+		genre:		{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		style:		{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		dynGenre:	{weight: 40, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
+		mood:		{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+		key:		{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
+		bpm:		{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
+		date:		{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
+		composer:	{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']}
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
@@ -605,10 +605,10 @@ async function searchByDistance({
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const calcTags = {genreStyle: {weight: 0, tf: [], type: ['virtual']}};
+		const calcTags = {genreStyle: {weight: 0, tf: [], baseScore: 0, type: ['virtual']}};
 		for (let key in tags) {
 			const tag = tags[key];
-			const calcTag = {weight: tag.weight, tf: [], scoringDistribution: tag.scoringDistribution, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
+			const calcTag = {weight: tag.weight, tf: [], scoringDistribution: tag.scoringDistribution, baseScore: tag.baseScore || 0, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
 			// Overwrite with properties
 			if (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key)) {
 				Object.keys(recipeProperties.tags[key]).filter((k) => k !== 'tf').forEach((k) => {
@@ -1032,52 +1032,78 @@ async function searchByDistance({
 				const tag = calcTags[key];
 				const type = tag.type;
 				if (type.includes('virtual')) {continue;}
+				if (tag.weight === 0) {continue;}
 				const scoringDistr = tag.scoringDistribution;
-				if (type.includes('multiple') && tag.referenceNumber !== 0 && handleTag[key].number !== 0) {
-					let common = tag.referenceSet.intersectionSize(handleTag[key].set);
-					if (common !== 0) {
-						weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-							? tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber)
-							: tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber, tag.referenceNumber, handleTag[key].number);
+				if (type.includes('multiple')){
+					const newTag = handleTag[key].number;
+					if (tag.referenceNumber !== 0) {
+						if (newTag !== 0) {
+							let common = tag.referenceSet.intersectionSize(handleTag[key].set);
+							if (common !== 0) {
+								weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+									? tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber)
+									: tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber, tag.referenceNumber, newTag);
+							}
+						} else if (tag.baseScore !== 0) { // When compared track is missing this tag, add a base score
+							weightValue += scoringDistr === 'LINEAR'
+								? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
+								: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.referenceNumber, tag.referenceNumber);
+						}
 					}
 				} else if (type.includes('single')) {
 					const newTag = handleTag[key].val;
-					if (type.includes('string') && tag.reference.length && newTag.length) {
-						if (newTag === tag.reference) {
-							weightValue += tag.weight;
-						} else if (type.includes('keyRange') && tag.range !== 0) {
-							const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
-							const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
-							if (camelotKey && camelotKeyNew) {
-								const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
-								const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
-								const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
-								// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
-								if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
-									const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range);  //becomes negative outside the allowed range!
-									weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-										? tag.weight * weightDistribution(scoringDistr, score)
-										: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
+					if (type.includes('string')) {
+						if (tag.reference.length) {
+							if (newTag.length) {
+								if (newTag === tag.reference) {
+									weightValue += tag.weight;
+								} else if (type.includes('keyRange') && tag.range !== 0) {
+									const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
+									const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
+									if (camelotKey && camelotKeyNew) {
+										const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
+										const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
+										const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
+										// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
+										if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
+											const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range);  //becomes negative outside the allowed range!
+											weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+												? tag.weight * weightDistribution(scoringDistr, score)
+												: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
+										}
+									}
 								}
+							} else if (tag.baseScore !== 0) {
+								weightValue += scoringDistr === 'LINEAR'
+									? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
+									: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.range, tag.range);
 							}
 						}
-					} else if (type.includes('number') && tag.reference !== null && newTag !== null) {
-						if (newTag === tag.reference) {
-							weightValue += tag.weight;
-						} else if (type.includes('percentRange') && tag.range !== 0) {
-							const range = tag.reference * tag.range / 100;
-							const difference = range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
-							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-								weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-									? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
-									: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
-							}
-						} else if (type.includes('absRange') && tag.range !== 0) {
-							const difference = tag.range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
-							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-								weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-									? tag.weight * weightDistribution(scoringDistr, difference / tag.range)
-									: tag.weight * weightDistribution(scoringDistr, difference / tag.range, tag.range, Math.abs(difference));
+					} else if (type.includes('number')) {
+						if (tag.reference !== null) {
+							if (newTag !== null) {
+								if (newTag === tag.reference) {
+									weightValue += tag.weight;
+								} else if (type.includes('percentRange') && tag.range !== 0) {
+									const range = tag.reference * tag.range / 100;
+									const difference = range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+									if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+										weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+											? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
+											: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
+									}
+								} else if (type.includes('absRange') && tag.range !== 0) {
+									const difference = tag.range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+									if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+										weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+											? tag.weight * weightDistribution(scoringDistr, difference / tag.range)
+											: tag.weight * weightDistribution(scoringDistr, difference / tag.range, tag.range, Math.abs(difference));
+									}
+								}
+							} else if (tag.baseScore !== 0) {
+								weightValue += scoringDistr === 'LINEAR'
+									? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
+									: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.range, tag.range);
 							}
 						}
 					}
@@ -1129,10 +1155,12 @@ async function searchByDistance({
 						}
 						j++;
 					}
-					const scoringDistr = tag.scoringDistribution;
+					const scoringDistr = calcTags.dynGenre.scoringDistribution;
 					weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 						? calcTags.dynGenre.weight * weightDistribution(scoringDistr, score)
 						: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
+				} else if (calcTags.dynGenre.baseScore !== 0) {
+					weightValue += Math.min(calcTags.dynGenre.weight, calcTags.dynGenre.weight * calcTags.dynGenre.baseScore / 100); 
 				}
 			}
 			

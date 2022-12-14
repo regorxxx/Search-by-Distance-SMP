@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/12/22
+//13/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -196,7 +196,7 @@ function createConfigMenu(parent) {
 					const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('range');
 					const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
 					menu.newEntry({menuName: subMenuName, entryText: 'Range\t[' + tag.range + ']' + (bRecipe ? '(forced by recipe)' : ''), func: () => {
-						const input = Input.number('int positive', tag.range, 'Enter number: (greater or equal to 0)', 'Search by distance', 10);
+						const input = Input.number('int positive', tag.range, 'Range sets how numeric tags should be compared.\nA zero value forces an exact match, while greater ranges allow some interval to be compared against.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 10);
 						if (input === null) {return;}
 						tags[key].range = input;
 						properties.tags[1] = JSON.stringify(tags);
@@ -214,7 +214,7 @@ function createConfigMenu(parent) {
 				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
 				const entryText = 'Weight' + (bRecipe || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : tag.weight) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : tag.weight) + ']');
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
-					const input = Input.number('int positive', tag.weight, 'Enter number: (greater or equal to 0)', 'Search by distance', 15);
+					const input = Input.number('int positive', tag.weight, 'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 15);
 					if (input === null) {return;}
 					tags[key].weight = input;
 					properties.tags[1] = JSON.stringify(tags);
@@ -235,6 +235,19 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
 					menu.newCheckMenu(subMenuName2, entryText, void(0), () => {return (tag.scoringDistribution === option);});
 				});
+			}
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			{	// Base score
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('baseScore');
+				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					const input = Input.number('int positive', tag.baseScore, 'Base score sets the minimum score (in %) given to this tag in case the compared track is missing it (when it\'s present on the reference). In most cases this should be set to zero, but it may be changed for some tags in case the library is not fully tagged, and thus missing values for some tracks.\n\nNote this value is further transformed by the scoring distribution method. i.e. 50% equals a final score of 50% for linear method.\n\nEnter number: (from 0 to 100)', 'Search by distance', 15, [(n) => n >= 0 && n <= 100]);
+					if (input === null) {return;}
+					tags[key].baseScore = input;
+					properties.tags[1] = JSON.stringify(tags);
+					overwriteProperties(properties);
+				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 			{	// Delete
@@ -708,7 +721,7 @@ function createConfigMenu(parent) {
 	}
 	{	// Reset
 		menu.newEntry({entryText: 'Share configuration...', func: () => {
-			const list = ['tags', 'forced query', 'gennre\style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
+			const list = ['tags', 'forced query', 'gennre/style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
 			const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n' + capitalizePartial(list.join(', ')), 0, 'Search by distance', popup.question + popup.yes_no);
 			if (answer === popup.yes) {
 				const obj = clone(properties);
