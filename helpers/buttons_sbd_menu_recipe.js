@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/12/22
+//15/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -70,7 +70,7 @@ function createRecipeMenu(parent) {
 	{	// Recipe tools
 		const menuName = recipeMenu.newMenu('More options...');
 		{	// Readme
-			const readmePath = folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt';
+			const readmePath = folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt';
 			recipeMenu.newEntry({menuName, entryText: 'Open readme...', func: () => {
 				const readme = _open(readmePath, utf8); // Executed on script load
 				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}

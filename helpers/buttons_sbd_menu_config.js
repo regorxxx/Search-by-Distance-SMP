@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/12/22
+//15/12/22
 
 include('menu_xxx.js');
 include('helpers_xxx.js');
@@ -671,7 +671,7 @@ function createConfigMenu(parent) {
 				const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 				if (!_isFile(file)){
 					_copyFile(folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js', file);
-					const readme = _open(folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt', utf8);
+					const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt', utf8);
 					if (readme.length) {fb.ShowPopupMessage(readme, 'User descriptors');}
 				}
 				if (_isFile(file)){_explorer(file); _run('notepad.exe', file);}
@@ -741,18 +741,18 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 		let iCount = 0;
 		const readmes = {
-			Main: folders.xxx + 'helpers\\readme\\search_bydistance.txt',
+			Main: folders.xxx + 'helpers\\readme\\search_by_distance.txt',
 			sep1: 'sep',
-			'Method: DYNGENRE': folders.xxx + 'helpers\\readme\\search_bydistance_dyngenre.txt',
-			'Method: GRAPH': folders.xxx + 'helpers\\readme\\search_bydistance_graph.txt',
-			'Method: WEIGHT': folders.xxx + 'helpers\\readme\\search_bydistance_weight.txt',
+			'Method: DYNGENRE': folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt',
+			'Method: GRAPH': folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt',
+			'Method: WEIGHT': folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt',
 			sep2: 'sep',
-			'Scoring methods': folders.xxx + 'helpers\\readme\\search_bydistance_scoring.txt',
-			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_bydistance_scoring.png',
+			'Scoring methods': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt',
+			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png',
 			sep3: 'sep',
-			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_bydistance_recipes_themes.txt',
-			'Similar Artists': folders.xxx + 'helpers\\readme\\search_bydistance_similar_artists.txt',
-			'User descriptors': folders.xxx + 'helpers\\readme\\search_bydistance_user_descriptors.txt',
+			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt',
+			'Similar Artists': folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt',
+			'User descriptors': folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt',
 			sep4: 'sep',
 			'Tagging requisites': folders.xxx + 'helpers\\readme\\tags_structure.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/08/22
+//15/12/22
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
@@ -19,12 +19,12 @@ buttonsBar.config.toolbarColor = RGB(211,218,237);
 
 {	// Buttons
 	let buttonsPath = [	 // Add here your buttons path
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
-						folders.xxx + 'buttons\\buttons_search_bydistance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
+						folders.xxx + 'buttons\\buttons_search_by_distance_customizable.js',
 						];
 	
 	for (let i = 0; i < buttonsPath.length; i++) {

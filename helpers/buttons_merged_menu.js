@@ -16,7 +16,7 @@ function createButtonsMenu(name) {
 	if (!_isFolder(folders.data)) {_createFolder(folders.data);}
 	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js','buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js','buttons_fingerprint_tools.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
-	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_others_']; // By order of priority if it matches multiple strings
+	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
 	function isAllowed(fileName) {return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName);}
 	function isAllowedV2(fileName) {return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js');}
@@ -28,7 +28,12 @@ function createButtonsMenu(name) {
 			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
 			let subMenuFolder = subCategories.find((folder) => {return entryText.indexOf(folder) !== -1;}) || 'Others';
 			if (subMenuFolder && subMenuFolder.length) {
-				subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;
+				subMenuFolder = (subMenuFolder === '_playlist_tools' 
+					? 'Playlist Tools' 
+					: subMenuFolder === '_search_by_distance' 
+						? 'Search by Distance'
+						: capitalizeAll(subMenuFolder.replace(/[_]/g,''))
+				) + invId;
 				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 			}
 			entryText = entryText.replace('buttons_', '');
