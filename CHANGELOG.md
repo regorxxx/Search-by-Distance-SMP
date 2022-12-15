@@ -73,6 +73,7 @@
 - Buttons: reworked input popups for settings on customizable button with specific descriptions, extensive error checking (with feedback popups), etc. It should be pretty clear now what's allowed on every setting, and non valid values will throw a warning (instead of just silently being discarded).
 - Buttons: improved 'no background mode' on buttons toolbar with colors and shades adapted to the toolbar background color and following the design of native Foobar2000 buttons for a seamless integration.
 - Buttons: improved 'no background mode' on buttons toolbar with proper animations (no longer a bad looking rectangle gradient).
+- Buttons: generic button ('buttons_search_bydistance.js') can now be configured (although not in the same way than the customizable button). It replaces the buttons for specific methods, since the search method can now be set.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
@@ -80,6 +81,7 @@
 - Logging: added some console warnings when specific sorting options override others.
 - Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
 ### Removed
+- Buttons: removed method specific buttons, now replaced with the generic one (which can be configured).
 ### Fixed
 - Remove duplicates: tags may now be set to empty '[]', which disables the feature. Previously threw a crash.
 - Recursive Playlist: when duplicates removal tags are set to empty, feature is disabled and a popup warns about it. Previously threw a crash.
