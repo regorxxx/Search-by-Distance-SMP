@@ -116,14 +116,14 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{
-			const sbd_max_graph_distance = recipe.hasOwnProperty('sbd_max_graph_distance') ? parseGraphVal(recipe.sbd_max_graph_distance) : parseGraphVal(properties.sbd_max_graph_distance[1]);
-			const key = 'sbd_max_graph_distance';
+			const graphDistance = recipe.hasOwnProperty('graphDistance') ? parseGraphVal(recipe.graphDistance) : parseGraphVal(properties.graphDistance[1]);
+			const key = 'graphDistance';
 			const bIsGraph = recipe.hasOwnProperty('method') && recipe.method  === 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] === 'GRAPH';
 			const flags = recipe.hasOwnProperty(key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
 			const idxEnd = properties[key][0].indexOf('(');
 			const val = properties[key][1];
 			let displayedVal = recipe.hasOwnProperty(key) ? recipe[key] : val;
-			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + sbd_max_graph_distance : displayedVal;
+			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
 			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + displayedVal + '] (forced by recipe)' :  '\t[' + displayedVal + ']');
 			menu.newEntry({menuName, entryText, func: () => {
 				let input;
@@ -543,7 +543,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					const input = Input.string('string', properties[key][1], 'Enter TF expression:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %artist%\'\'s Mix   ->   ACDC\'s Mix\n\n%sbd_theme% is available when using themes to avoid showing the raw TF expression (since there is no track to evaluate it with). When a theme is not being used, it\'s evaluated as a tag.\nFor ex: $if2(%sbd_theme%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', '%artist%\'\'s Mix', void(0), true);
+					const input = Input.string('string', properties[key][1], 'Enter TF expression for playlist name:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %ARTIST%\'\'s Mix   ->   ACDC\'s Mix\n\nAs special tag, %SBD_THEME% is also available when using themes. When a theme is not being used, it\'s evaluated as usual.\nFor ex: $if2(%SBD_THEME%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', '%ARTIST%\'\'s Mix', void(0), true);
 					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
@@ -788,16 +788,16 @@ function createConfigMenu(parent) {
 function parseGraphVal(val) {
 	if (isString(val)) { // Safety check
 		if (val.length >= 50) {
-			console.log('Error parsing sbd_max_graph_distance (length >= 50): ' + val);
+			console.log('Error parsing graphDistance (length >= 50): ' + val);
 			return;
 		}
 		if (val.indexOf('music_graph_descriptors') === -1 || val.indexOf('()') !== -1 || val.indexOf(',') !== -1) {
-			console.log('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + val);
+			console.log('Error parsing graphDistance (is not a valid variable or using a func): ' + val);
 			return;
 		}
 		const validVars = Object.keys(music_graph_descriptors).map((key) => {return 'music_graph_descriptors.' + key;});
 		if (val.indexOf('+') === -1 && val.indexOf('-') === -1 && val.indexOf('*') === -1 && val.indexOf('/') === -1 && validVars.indexOf(val) === -1) {
-			console.log('Error parsing sbd_max_graph_distance (using no arithmethics or variable): ' + val);
+			console.log('Error parsing graphDistance (using no arithmethics or variable): ' + val);
 			return;
 		}
 		val = Math.floor(eval(val));

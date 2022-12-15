@@ -28,7 +28,7 @@
 	"method": "GRAPH",
 	"scoreFilter": 65,
 	"minScoreFilter": 50,
-	"sbd_max_graph_distance": "music_graph_descriptors.intra_supergenre",
+	"graphDistance": "music_graph_descriptors.intra_supergenre",
 	"bRandomPick": true,
 	"probPick": 100,
 	"playlistName": "Search..."

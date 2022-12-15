@@ -35,7 +35,7 @@
 	"bSameArtistFilter": false,
 	"method": "GRAPH",
 	"scoreFilter": 75,
-	"sbd_max_graph_distance": "music_graph_descriptors.intra_supergenre / 2",
+	"graphDistance": "music_graph_descriptors.intra_supergenre / 2",
 	"bPoolFiltering": false,
 	"bRandomPick": false,
 	"probPick": 100,

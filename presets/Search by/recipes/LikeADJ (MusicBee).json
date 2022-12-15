@@ -30,7 +30,7 @@
 	},
 	"scoreFilter": 50,
 	"method": "GRAPH",
-	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4",
+	"graphDistance": "music_graph_descriptors.cluster * 4",
 	"probPick": 100,
 	"bRandomPick": false,
 	"bInKeyMixingPlaylist": true,

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/12/22
+//15/12/22
 
 /*
 	Search by Distance
@@ -75,7 +75,7 @@ const SearchByDistance_properties = {
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
-	sbd_max_graph_distance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
+	graphDistance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
 		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
@@ -381,7 +381,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'sbd_max_graph_distance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -438,11 +438,10 @@ async function searchByDistance({
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false, 
 								// --->Scoring Method
 								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
-								scoringDistribution		= properties.hasOwnProperty('scoringDistribution') ? properties.scoringDistribution[1] : 'LINEAR',
 								// --->Scoring filters
 								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) :  75,
 								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) :  scoreFilter - 10,
-								sbd_max_graph_distance	= properties.hasOwnProperty('sbd_max_graph_distance') ? (isString(properties.sbd_max_graph_distance[1]) ? properties.sbd_max_graph_distance[1] : Number(properties.sbd_max_graph_distance[1])) : Infinity,
+								graphDistance			= properties.hasOwnProperty('graphDistance') ? (isString(properties.graphDistance[1]) ? properties.graphDistance[1] : Number(properties.graphDistance[1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 								poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? JSON.parse(properties.poolFilteringTag[1]).filter(Boolean) : [],
@@ -561,8 +560,8 @@ async function searchByDistance({
 		}
 		const bUseRecipeTags = !!(bUseRecipe && recipeProperties.hasOwnProperty('tags'));
 		// Parse args
-		sbd_max_graph_distance = parseGraphDistance(sbd_max_graph_distance, descr, bBasicLogging)
-		if (sbd_max_graph_distance === null) {return;}
+		graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging)
+		if (graphDistance === null) {return;}
 		// Tags check
 		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Theme check
@@ -1208,9 +1207,9 @@ async function searchByDistance({
 						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
 					}
 				}
-			} // Distance / style_genre_new_length < sbd_max_graph_distance / style_genre_length ?
+			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 			if (method === 'GRAPH') {
-				if (mapDistance <= sbd_max_graph_distance) {
+				if (mapDistance <= graphDistance) {
 					scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance});
 				}
 			}
@@ -1271,7 +1270,7 @@ async function searchByDistance({
 			scoreData.sort(function (a, b) {return a.mapDistance - b.mapDistance;}); // First sorted by graph distance, then by weight
 			poolLength = scoreData.length;
 			if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' +  scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
-			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + sbd_max_graph_distance +': ' + poolLength + ' tracks');}
+			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance +': ' + poolLength + ' tracks');}
 		}
 		
 		// Post Filter (note there are no real duplicates at this point)
@@ -1313,6 +1312,10 @@ async function searchByDistance({
 				// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements. 
 				// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track... 
 				// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
+				if (bSortRandom) {console.log('Warning: Harmonic mixing is overriding Random Sorting.');}
+				if (bScatterInstrumentals) {console.log('Warning: Harmonic mixing is overriding Instrumental track\'s Scattering.');}
+				if (bProgressiveListOrder) {console.log('Warning: Harmonic mixing is overriding sort by score.');}
+				if (bSmartShuffle) {console.log('Warning: Harmonic mixing is overriding Smart Shuffle.');}
 				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = false;
 				if (calcTags.key.reference.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
@@ -1481,8 +1484,8 @@ async function searchByDistance({
 					if (isFinite(playlistLength)) {
 						if (method === 'GRAPH') {
 							if (bBasicLogging) {
-								let propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
-								console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+								let propertyText = properties.hasOwnProperty('graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
+								console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
 							}
 						}
 						if (bBasicLogging) {
@@ -1617,8 +1620,8 @@ async function searchByDistance({
 			if (bBasicLogging) {
 				let propertyText = '';
 				if (method === 'GRAPH') {
-					propertyText = properties.hasOwnProperty('sbd_max_graph_distance') ? properties['sbd_max_graph_distance'][0] : SearchByDistance_properties['sbd_max_graph_distance'][0];
-					console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + sbd_max_graph_distance + ').');
+					propertyText = properties.hasOwnProperty('graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
+					console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
 				}
 				propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
 				console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
@@ -1672,37 +1675,37 @@ async function searchByDistance({
 	Helpers
 */
 
-function parseGraphDistance(sbd_max_graph_distance, descr = music_graph_descriptors, bBasicLogging = true) {
-	let output = sbd_max_graph_distance;
+function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBasicLogging = true) {
+	let output = graphDistance;
 	if (isString(output)) { // Safety check
 		if (!Number.isNaN(Number(output))) {
 			output = Number(output);
-			if (output.toString() !== sbd_max_graph_distance) {
-				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (not a valid number): ' + output, 'Search by Distance');
+			if (output.toString() !== graphDistance) {
+				fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance');
 				return null;
 			}
 		} else {
 			if (output.length >= 50) {
-				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (length >= 50): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (length >= 50): ' + output, 'Search by Distance');
 				return null;
 			}
 			if (output.indexOf('music_graph_descriptors') === -1 || output.indexOf('()') !== -1 || output.indexOf(',') !== -1) {
-				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (is not a valid variable or using a func): ' + output), 'Search by Distance';
+				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output), 'Search by Distance';
 				return null;
 			}
 			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
 			if (output.indexOf('+') === -1 && output.indexOf('-') === -1 && output.indexOf('*') === -1 && output.indexOf('/') === -1 && validVars.indexOf(output) === -1) {
-				fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (using no arithmetic or variable): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (using no arithmetic or variable): ' + output, 'Search by Distance');
 				return null;
 			}
 			output = eval(output);
-			if (Number.isNaN(output)) {fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (not a valid number): ' + output, 'Search by Distance');}
+			if (Number.isNaN(output)) {fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance');}
 		}
-		if (bBasicLogging) {console.log('Parsed sbd_max_graph_distance to: ' + output);}
+		if (bBasicLogging) {console.log('Parsed graphDistance to: ' + output);}
 	}
 	if (Number.isFinite(output)) {output = Math.round(output);}
 	if (output < 0) {
-		fb.ShowPopupMessage('Error parsing sbd_max_graph_distance (< 0): ' + output, 'Search by Distance');
+		fb.ShowPopupMessage('Error parsing graphDistance (< 0): ' + output, 'Search by Distance');
 		return null;
 	}
 	return output;
