@@ -1,12 +1,12 @@
 ﻿'use strict';
-//05/12/22
+//15/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
 try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_config.js'); // Button menu
@@ -32,7 +32,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 }
 
 /*
-	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
+	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
 	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30, h: 22}, newButtonsProperties.customName[1], function (mask) {

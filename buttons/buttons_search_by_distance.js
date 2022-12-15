@@ -7,7 +7,7 @@ include('..\\helpers\\buttons_xxx_menu.js');
 
 try {window.DefinePanel('Search by Distance Buttons', {author:'xxx'});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\helpers_xxx_properties.js');
 var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
@@ -48,13 +48,13 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 }
 
 /*
-	Some button examples for 'search_bydistance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling searchByDistance() outside buttons, it would work with default arguments.
+	Some button examples for 'search_by_distance.js'. Look at that file to see what they do. Note you must explicitly pass all arguments to make them work, since it's within buttons framework. If we were calling searchByDistance() outside buttons, it would work with default arguments.
 */
 
 addButton({
 	'Search by Distance nearest tracks': new themedButton({x: 0, y: 0, w: 106, h: 22}, 'Nearest Tracks', function (mask) {
 		if (mask === MK_SHIFT) {
-			settingsMenu(this, true, ['buttons_search_bydistance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
+			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			// Mix with only nearest tracks
 			const tags = JSON.parse(this.buttonsProperties.tags[1]);
@@ -68,7 +68,7 @@ addButton({
 	}, null, void(0), 'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar tracks': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Tracks', function (mask) {
 		if (mask === MK_SHIFT) {
-			settingsMenu(this, true, ['buttons_search_bydistance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
+			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			// Mix a bit varied on styles/genres most from the same decade
 			const tags = JSON.parse(this.buttonsProperties.tags[1]);
@@ -82,7 +82,7 @@ addButton({
 	}, null, void(0), 'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar genres': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function (mask) {
 		if (mask === MK_SHIFT) {
-			settingsMenu(this, true, ['buttons_search_bydistance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
+			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			// Mix even more varied on styles/genres most from the same decade
 			const tags = JSON.parse(this.buttonsProperties.tags[1]);
@@ -96,7 +96,7 @@ addButton({
 	}, null, void(0), 'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
 	'Search by Distance similar mood': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Mood', function (mask) {
 		if (mask === MK_SHIFT) {
-			settingsMenu(this, true, ['buttons_search_bydistance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
+			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
 		} else {
 			// Mix with different genres but same mood from any date
 			const tags = JSON.parse(this.buttonsProperties.tags[1]);

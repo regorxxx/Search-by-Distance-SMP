@@ -1,7 +1,7 @@
 ﻿'use strict';
-//09/12/22
+//15/12/22
 
-include('search_bydistance.js');
+include('search_by_distance.js');
 
 // Similar artists
 async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
