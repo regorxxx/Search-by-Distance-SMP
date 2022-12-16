@@ -79,6 +79,7 @@
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
 - Logging: added some console warnings when specific sorting options override others.
+- Presets: updated all Picard scripts with comments, setting examples, new scripts (for folksonomy tags, performers, ...), code improvements, etc.
 - Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
 - Minor performance improvement (usually on subsequent calls) caching all TitleFormat expressions.
 ### Removed
