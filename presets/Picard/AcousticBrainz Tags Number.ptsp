@@ -1,31 +1,31 @@
 title: AcousticBrainz Tags Number
 script_language_version: '1.1'
-script: "$noop(Sets -number- tags from AcousticBrainz high/low level data)\n$noop(Recommended\
-  \ to removes all high/low level data afterwards)\n$noop(Requires: AcousticBrainz\
-  \ Tags plugin 2.2+)\n$noop(Requires: All high-level and subset of low-level tags\
-  \ enabled at plugin config)\n\n$noop(Timbre tags: brightness -number-)\n$set(_temp,%ab:hi:timbre:bright%)\n\
-  $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\
-  \t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\t\t\t$set(_temp,$substr(%_temp%,2,4))\n\
-  \t\t)\n\t)\n\t$set(brightness,%_temp%)\n)\n\n$noop(Danceability tags: danceness\
-  \ -number-)\n$set(_temp,%ab:hi:danceability:danceable%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
+script: "$noop(22/11/2022)\n$noop(Sets -number- tags from AcousticBrainz high/low\
+  \ level data)\n$noop(Recommended to removes all high/low level data afterwards)\n\
+  $noop(Requires: AcousticBrainz Tags plugin 2.2+)\n$noop(Requires: All high-level\
+  \ and subset of low-level tags enabled at plugin config)\n\n$noop(Timbre tags: brightness\
+  \ -number-)\n$set(_temp,%ab:hi:timbre:bright%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
   \t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\
-  \t\t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(danceness,%_temp%)\n\
-  )\n\n$noop(Gender tags: femaleness -number-)\n$set(_temp,%ab:hi:gender:female%)\n\
+  \t\t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(brightness,%_temp%)\n\
+  )\n\n$noop(Danceability tags: danceness -number-)\n$set(_temp,%ab:hi:danceability:danceable%)\n\
   $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\
   \t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\t\t\t$set(_temp,$substr(%_temp%,2,4))\n\
-  \t\t)\n\t)\n\t$set(femaleness,%_temp%)\n)\n\n$noop(Voice/Instrumental tags: speechness\
-  \ -number-)\n$set(_temp,%ab:hi:voice_instrumental:voice%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
+  \t\t)\n\t)\n\t$set(danceness,%_temp%)\n)\n\n$noop(Gender tags: femaleness -number-)\n\
+  $set(_temp,%ab:hi:gender:female%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\
+  \t\t$if($eq($substr(%_temp%,2,3),0),\n\t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\t\
+  \t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(femaleness,%_temp%)\n)\n\
+  \n$noop(Voice/Instrumental tags: speechness -number-)\n$set(_temp,%ab:hi:voice_instrumental:voice%)\n\
+  $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\
+  \t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\t\t\t$set(_temp,$substr(%_temp%,2,4))\n\
+  \t\t)\n\t)\n\t$set(speechness,%_temp%)\n)\n\n$noop(Acousticness tags: acousticness\
+  \ -number-)\n$set(_temp,%ab:hi:mood_acoustic:acoustic%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
   \t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\
-  \t\t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(speechness,%_temp%)\n\
-  )\n\n$noop(Acousticness tags: acousticness -number-)\n$set(_temp,%ab:hi:mood_acoustic:acoustic%)\n\
-  $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\
-  \t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\t\t\t$set(_temp,$substr(%_temp%,2,4))\n\
-  \t\t)\n\t)\n\t$set(acousticness,%_temp%)\n)\n\n$noop(Valence tags: Valence -number-)\n\
-  $set(_tempA,%ab:hi:mood_happy:happy%)\n$set(_tempB,$get(ab:hi:mood_sad:not sad))\n\
-  $if(%_tempA%,\n$if(%_tempB%,\n\t$if($in(%_tempA%,-),\n\t\t$set(_tempA,0),\n\t\t\
-  $if($eq($substr(%_tempA%,2,3),0),\n\t\t\t$set(_tempA,$substr(%_tempA%,3,4)),\n\t\
-  \t\t$set(_tempA,$substr(%_tempA%,2,4))\n\t\t)\n\t)\n\t$if($in(%_tempB%,-),\n\t\t\
-  $set(_tempB,0),\n\t\t$if($eq($substr(%_tempB%,2,3),0),\n\t\t\t$set(_tempB,$substr(%_tempB%,3,4)),\n\
+  \t\t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(acousticness,%_temp%)\n\
+  )\n\n$noop(Valence tags: Valence -number-)\n$set(_tempA,%ab:hi:mood_happy:happy%)\n\
+  $set(_tempB,$get(ab:hi:mood_sad:not sad))\n$if(%_tempA%,\n$if(%_tempB%,\n\t$if($in(%_tempA%,-),\n\
+  \t\t$set(_tempA,0),\n\t\t$if($eq($substr(%_tempA%,2,3),0),\n\t\t\t$set(_tempA,$substr(%_tempA%,3,4)),\n\
+  \t\t\t$set(_tempA,$substr(%_tempA%,2,4))\n\t\t)\n\t)\n\t$if($in(%_tempB%,-),\n\t\
+  \t$set(_tempB,0),\n\t\t$if($eq($substr(%_tempB%,2,3),0),\n\t\t\t$set(_tempB,$substr(%_tempB%,3,4)),\n\
   \t\t\t$set(_tempB,$substr(%_tempB%,2,4))\n\t\t)\n\t)\n\t$set(valence,$div($add(%_tempA%,%_tempB%),2))\n\
   ))\n\n$noop(Tonality tags: tonaleness -number-)\n$set(_temp,%ab:hi:tonal_atonal:tonal%)\n\
   $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\
@@ -34,5 +34,5 @@ script: "$noop(Sets -number- tags from AcousticBrainz high/low level data)\n$noo
   $set(_temp,%ab:lo:tonal:chords_changes_rate%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
   \t\t$set(_temp,0),\n\t\t$if($eq($substr(%_temp%,2,3),0),\n\t\t\t$set(_temp,$substr(%_temp%,3,4)),\n\
   \t\t\t$set(_temp,$substr(%_temp%,2,4))\n\t\t)\n\t)\n\t$set(chords_rate,%_temp%)\n\
-  )\n"
-id: 7955ddeb-ae20-4621-a00f-125df997927a
+  )\n$noop(Clean)\n$delete(_temp)\n$delete(_tempA)\n$delete(_tempB)\n"
+id: c685b06a-7311-43c5-824e-20706b69dfbd

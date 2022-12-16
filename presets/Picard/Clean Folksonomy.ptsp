@@ -1,0 +1,56 @@
+title: Clean Folksonomy
+script_language_version: '1.1'
+script: "$noop(16/12/2022)\n$noop(Standarizes instruments and adds capitalization)\n\
+  $noop(Requires: Genre to Folksonomy script)\n\n$setmulti(_temp,)\n$setmulti(_temp2,)\n\
+  $foreach(%folksonomy%,\n\t$set(_temp2,%_loop_value%)\n\t$noop(Rap)\n\t$if($eq(%_loop_value%,Rap),$set(_temp2,Hip-Hop))\n\
+  \t$if($eq(%_loop_value%,Hip Hop),$set(_temp2,Hip-Hop))\n\t$if($eq(%_loop_value%,Hip\
+  \ Hop Rap),$set(_temp2,Hip-Hop))\n\t$if($eq(%_loop_value%,Hip Hop/Rap),$set(_temp2,Hip-Hop))\n\
+  \t$if($eq(%_loop_value%,Hip-Hop/Rap),$set(_temp2,Hip-Hop))\n\t$if($eq(%_loop_value%,Jazz\
+  \ Hip-Hop),$set(_temp2,Jazz-Rap))\n\t$if($eq(%_loop_value%,Jazz Hip Hop),$set(_temp2,Jazz-Rap))\n\
+  \t$if($eq(%_loop_value%,Jazz Rap),$set(_temp2,Jazz-Rap))\n\t$if($eq(%_loop_value%,West\
+  \ Coast Hip Hop),$set(_temp2,West Coast Hip-Hop))\n\t$noop(Rock)\n\t$if($eq(%_loop_value%,Aor),$set(_temp2,Album\
+  \ Rock))\n\t$if($eq(%_loop_value%,Blues-Rock),$set(_temp2,Blues Rock))\n\t$if($eq(%_loop_value%,Pop\
+  \ / Rock / Metal),$set(_temp2,Rock))\n\t$if($eq(%_loop_value%,Pop/Rock),$set(_temp2,Pop\
+  \ Rock))\n\t$if($eq(%_loop_value%,Prog Rock),$set(_temp2,Progressive Rock))\n\t\
+  $if($eq(%_loop_value%,Prog-Rock),$set(_temp2,Progressive Rock))\n\t$if($eq(%_loop_value%,Progressive),$set(_temp2,Progressive\
+  \ Rock))\n\t$if($eq(%_loop_value%,Alternative/Indie Rock),$set(_temp2,Alternative\
+  \ Rock))\n\t$if($eq(%_loop_value%,Alternrock),$set(_temp2,Alternative Rock))\n\t\
+  $if($eq(%_loop_value%,Postrock),$set(_temp2,Post-Rock))\n\t$if($eq(%_loop_value%,Classic\
+  \ Soft Rock),$set(_temp2,Soft Rock))\n\t$noop(Folk)\n\t$if($eq(%_loop_value%,Folk\
+  \ Rock),$set(_temp2,Folk-Rock))\n\t$if($eq(%_loop_value%,Pop-Folk),$set(_temp2,Folk\
+  \ Pop))\n\t$noop(Experimental)\n\t$if($eq(%_loop_value%,Avantgarde),$set(_temp2,Avant-Garde))\n\
+  \t$if($eq(%_loop_value%,Psych),$set(_temp2,Psychedelic Rock))\n\t$if($eq(%_loop_value%,Psychedelic),$set(_temp2,Psychedelic\
+  \ Rock))\n\t$noop(Soul)\n\t$if($eq(%_loop_value%,R B),$set(_temp2,R&B))\n\t$if($eq(%_loop_value%,Soul\
+  \ Jazz),$set(_temp2,Soul-Jazz))\n\t$if($eq(%_loop_value%,Rap Hip-Hop R B),$set(_temp2,Neo\
+  \ Soul))\n\t$if($eq(%_loop_value%,Neo-Soul),$set(_temp2,Neo Soul))\n\t$noop(Jazz)\n\
+  \t$if($eq(%_loop_value%,Jazz Instrument),$setmulti(_temp2,Jazz; Instrumental))\n\
+  \t$if($eq(%_loop_value%,Jazz Instrumental),$setmulti(_temp2,Jazz; Instrumental))\n\
+  \t$if($eq(%_loop_value%,Instrumental Jazz),$setmulti(_temp2,Jazz; Instrumental))\n\
+  \t$if($eq(%_loop_value%,Post Bop),$set(_temp2,Post-Bop))\n\t$if($eq(%_loop_value%,Bop),$set(_temp2,Bebop))\n\
+  \t$if($eq(%_loop_value%,Bossanova),$set(_temp2,Bossa Nova))\n\t$if($eq(%_loop_value%,Modernjazz),$set(_temp2,Modern\
+  \ Jazz))\n\t$if($eq(%_loop_value%,Jazz Vocal),$set(_temp2,Vocal Jazz))\n\t$if($eq(%_loop_value%,Jazz\
+  \ Vocals),$set(_temp2,Vocal Jazz))\n\t$if($eq(%_loop_value%,Vocals),$set(_temp2,Vocal\
+  \ Jazz))\n\t$if($eq(%_loop_value%,Vocal),$set(_temp2,Vocal Jazz))\n\t$if($eq(%_loop_value%,Hard\
+  \ Bop),$set(_temp2,Hard-Bop))\n\t$noop(Metal)\n\t$if($eq(%_loop_value%,Posthardcore),$set(_temp2,Post-Hardcore))\n\
+  \t$if($eq(%_loop_value%,Postmetal),$set(_temp2,Post-Metal))\n\t$if($eq(%_loop_value%,Metal),$set(_temp2,Heavy\
+  \ Metal))\n\t$if($eq(%_loop_value%,Stoner),$set(_temp2,Stoner Rock))\n\t$if($eq(%_loop_value%,Desert\
+  \ Rock),$set(_temp2,Stoner Rock))\n\t$if($eq(%_loop_value%,Doom),$set(_temp2,Doom\
+  \ Metal))\n\t$noop(African)\n\t$if($eq(%_loop_value%,Tichumaren),$set(_temp2,Tishoumaren))\n\
+  \t$if($eq(%_loop_value%,Touareg),$set(_temp2,Tuareg))\n\t$if($eq(%_loop_value%,Touareg\
+  \ Guitar),$setmulti(_temp2,Tuareg; Desert Blues))\n\t$if($eq(%_loop_value%,Tuareg\
+  \ Guitar),$setmulti(_temp2,Tuareg; Desert Blues))\n\t$if($eq(%_loop_value%,Tuareg\
+  \ Blues),$setmulti(_temp2,Tuareg; Desert Blues))\n\t$if($eq(%_loop_value%,African\
+  \ Blues),$setmulti(_temp2,African; Desert Blues))\n\t$noop(Misc)\n\t$if($eq(%_loop_value%,Latin\
+  \ American),$set(_temp2,Latin))\n\t$if($eq(%_loop_value%,Christmas/Holiday),$set(_temp2,Christmas))\n\
+  \t$if($eq(%_loop_value%,World-Fusion),$set(_temp2,World))\n\t$if($eq(%_loop_value%,World\
+  \ Music),$set(_temp2,World))\n\t$if($eq(%_loop_value%,Female Vocals),$set(_temp2,Female\
+  \ Vocal))\n\t$noop(Countries)\n\t$if($eq(%_loop_value%,Madrid),$set(_temp2,Spanish))\n\
+  \t$if($eq(%_loop_value%,Barcelona),$set(_temp2,Spanish))\n\t$if($eq(%_loop_value%,Boston),$set(_temp2,English))\n\
+  \t$if($eq(%_loop_value%,Houston),$set(_temp2,English))\n\t$if($eq(%_loop_value%,Portland),$set(_temp2,English))\n\
+  \t$if($eq(%_loop_value%,Italy),$set(_temp2,Italian))\n\t$if($eq(%_loop_value%,Cairo),$set(_temp2,Egyptian))\n\
+  \t$if($eq(%_loop_value%,Agadez),$setmulti(_temp2,African; Nigerian))\n\t$if($eq(%_loop_value%,Niger),$set(_temp2,Nigerian))\n\
+  \t$if($eq(%_loop_value%,Illighadad),$set(_temp2,Nigerian))\n\t$if($eq(%_loop_value%,Africa),$set(_temp2,African))\n\
+  \t$if($eq(%_loop_value%,Zagreb),$set(_temp2,Croatian))\n\t$noop(Add to list)\n\t\
+  $copymerge(_temp,_temp2)\n)\n$copy(folksonomy,$sortmulti(_temp))\n$delete(_temp)\n\
+  $delete(_temp2)\n"
+id: bfd9509b-b18c-4dc7-ba8d-1831d500c746

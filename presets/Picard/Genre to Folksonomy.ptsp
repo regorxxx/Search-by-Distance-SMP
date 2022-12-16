@@ -1,0 +1,9 @@
+title: Genre to Folksonomy
+script_language_version: '1.1'
+script: "$noop(22/11/2022)\n$noop(Retrieve folksonomy tags and capitalize)\n$noop(Requires:\
+  \ \"Use genres from MusicBrainz\" option at Metadata/Genres)\n$noop(Requires: \"\
+  Use folksonomy tags as genres\" option at Metadata/Genres)\n$noop(Recommended: genre\
+  \ tag set in non-overwrite tag list;\n\tthis way only the new folksonomy tag is\
+  \ written\n\tand the genre tag is left as is -written by the user-\t\t\n)\n\n$if(%genre%,\n\
+  \t$setmulti(folksonomy,$map($sortmulti(%genre%),$title(%_loop_value%)))\n)\n"
+id: c24f9708-7bcc-4c94-9883-b44831842f4e

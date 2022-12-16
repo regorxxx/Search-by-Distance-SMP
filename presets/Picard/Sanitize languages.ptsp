@@ -1,0 +1,7 @@
+title: Sanitize languages
+script_language_version: '1.1'
+script: "$noop(22/11/2022)\n$noop(In case there is no track's language, use the one\
+  \ from the release)\n\n$if($not(%language%), \n\t$if(%_releaselanguage%,\n\t\t$set(language,%_releaselanguage%),\n\
+  \t)\n)\n\n$noop(ISO 639-3 \"no linguistic content\")\n$if($inmulti(%genre%,Instrumental),\n\
+  \t$set(language,zxx),\n)\n"
+id: e50b9c9b-1756-46b6-985c-5184fbf494dd

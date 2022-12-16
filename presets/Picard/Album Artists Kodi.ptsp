@@ -1,0 +1,7 @@
+title: Album Artists Kodi
+script_language_version: '1.1'
+script: "$noop(22/11/2022)\n$noop(Multi-artists for Kodi)\n\n$if($gt($lenmulti(%_albumartists%),1),\n\
+  \t$setmulti(albumartists,%_albumartists%)\n\t,\n\t$if($gt($lenmulti(%artists%),1),\n\
+  \t\t$setmulti(albumartists,%artists%)\n\t\t,\n\t\t$if($gt($lenmulti(%artist%),1),\n\
+  \t\t\t$setmulti(albumartists,%artist%)\n\t\t)\n\t)\n)\n"
+id: 7d13310b-77a2-4dc5-89f2-c704eb7d1cfc

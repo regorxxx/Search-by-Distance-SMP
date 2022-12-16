@@ -1,10 +1,11 @@
 title: Plugin Instrumentals
 script_language_version: '1.1'
-script: "$noop(Standarizes instruments and adds capitalization)\n\n$noop(Internal\
-  \ variable for new instruments)\n$setmulti(_toadd,)\n$setmulti(_temp,)\n$noop(Internal\
-  \ variable for genre)\n$setmulti(_genrelow,%genre%)\n$setmulti(_stylelow,%style%)\n\
-  $setmulti(_genrelow,$map(%_genrelow%,$lower(%_loop_value%)))\n$setmulti(_stylelow,$map(%_stylelow%,$lower(%_loop_value%)))\n\
-  $noop(Create replacements for some instruments)\n$noop(All vocals to Vocals)\n$if($or($inmulti(%instruments%,lead\
+script: "$noop(22/11/2022)\n$noop(Standarizes instruments and adds capitalization)\n\
+  $noop(Requires: Instruments plugin)\n\n$noop(Internal variable for new instruments)\n\
+  $setmulti(_toadd,)\n$setmulti(_temp,)\n$noop(Internal variable for genre)\n$setmulti(_genrelow,%genre%)\n\
+  $setmulti(_stylelow,%style%)\n$setmulti(_genrelow,$map(%_genrelow%,$lower(%_loop_value%)))\n\
+  $setmulti(_stylelow,$map(%_stylelow%,$lower(%_loop_value%)))\n$noop(Create replacements\
+  \ for some instruments)\n$noop(All vocals to Vocals)\n$if($or($inmulti(%instruments%,lead\
   \ vocals),$inmulti(%instruments%,other vocals),$inmulti(%instruments%,background\
   \ vocals),$inmulti(%instruments%,spoken vocals)),\n\t$setmulti(_temp,Vocals)\n\t\
   $copymerge(_toadd,_temp)\n)\n$noop(Guitar to acoustic or electric version)\n$if($or($inmulti(%instruments%,guitar),$inmulti(%instruments%,guitar\
@@ -24,5 +25,5 @@ script: "$noop(Standarizes instruments and adds capitalization)\n\n$noop(Interna
   \ acoustic guitar,Spanish acoustic guitar,strings,other instruments),$title(%_loop_value%)))\n\
   $noop(Merge replacements if needed)\n$if(%_toadd%,\n\t$copymerge(instruments,_toadd)\n\
   )\n$noop(Sort and remove empty elements with map)\n$if(instruments,\n\t\n\t$setmulti(instruments,$map($sortmulti(%instruments%),%_loop_value%))\n\
-  )\n"
-id: 0e52ffcf-7705-4df1-9fab-b10c0e8d7249
+  )\n$noop(Clean)\n$delete(_genrelow)\n$delete(_stylelow)\n$delete(_toadd)\n$delete(_temp)\n"
+id: c89faaf2-9464-4ab2-b08e-5cd6d41ebe77

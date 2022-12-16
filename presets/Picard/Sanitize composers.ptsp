@@ -1,0 +1,9 @@
+title: Sanitize composers
+script_language_version: '1.1'
+script: "$noop(22/11/2022)\n$noop(Standarizes special composer labels)\n$noop(Removes\
+  \ brackets and uses capitalization)\n$noop(Merges multiple fields to composer)\n\
+  \n$copymerge(composer,lyricist)\n$copymerge(composer,writer)\n$copymerge(composer,remixer)\n\
+  \n$if($inmulti(%composer%,[traditional]),\n\t$set(composer,Traditional)\n)\n$if($inmulti(%composer%,[uknown]),\n\
+  \t$unset(composer)\n)\n$if($inmulti(%composer%,[anonymous]),\n\t$unset(composer)\n\
+  )\n"
+id: 080da1d6-bdd3-4637-b94b-1d1bd7a5e03a

@@ -1,10 +1,15 @@
 title: Merge Moods
 script_language_version: '1.1'
 script: |
+  $noop(22/11/2022)
   $noop(Merges all mood tags)
+  $noop(Requires: AcousticBrainz Tags plugin 2.2+)
+  $noop(Requires: Mood tag renamed to ab:mood at plugin config)
+  $noop(Requires: Last.fm.ng plugin 2.2+)
+  $noop(Requires: Mood tag renamed to mood_lastfm at plugin config -ini file-)
 
   $copymerge(mood,ab:mood)
   $copymerge(mood,mood_lastfm)
   $delete(ab:mood)
   $delete(mood_lastfm)
-id: ee361978-6d53-478f-b51e-3e0eb6b7e0f7
+id: e0c08b7d-f921-41ab-b5ff-099981435986
