@@ -28,20 +28,34 @@ FbTitleFormat.prototype.EvalWithMetadbsAsync = function EvalWithMetadbsAsync(han
 	});
 }
 
-{	// Augment fb.TitleFormat with 'Expression' property
+// Add caching
+Object.defineProperty(fb, 'tfCache', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: {}
+});
+
+// Augment fb.TitleFormat() with 'Expression' property and add caching
+{
 	const old = fb.TitleFormat;
 	fb.TitleFormat = function TitleFormat() {
-		const that = old.apply(fb, [...arguments]);
+		const bCache = fb.tfCache.hasOwnProperty(arguments[0]);
+		const that = bCache ? fb.tfCache[arguments[0]] : old.apply(fb, [...arguments]);
 		that.Expression = arguments[0];
+		if (!bCache) {fb.tfCache[arguments[0]] = that;}
 		return that;
 	}
 }
 
-{	// Augment FbTitleFormat with 'Expression' property
+// Augment FbTitleFormat() constructor with 'Expression' property and add caching
+{
 	const old = FbTitleFormat;
 	FbTitleFormat = function FbTitleFormat() {
-		const that = old(...arguments);
+		const bCache = fb.tfCache.hasOwnProperty(arguments[0]);
+		const that = bCache ? fb.tfCache[arguments[0]] : old(...arguments);
 		that.Expression = arguments[0];
+		if (!bCache) {fb.tfCache[arguments[0]] = that;}
 		return that;
 	}
 }
