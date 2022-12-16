@@ -79,6 +79,7 @@ const SearchByDistance_properties = {
 		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
+	bFilterWithGraph		:	['Filter values not present on the graph', true],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
 	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
@@ -381,7 +382,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -424,6 +425,7 @@ async function searchByDistance({
 								// --->Weights
 								tags					= properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null,
 								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
+								bFilterWithGraph		= properties.hasOwnProperty('bFilterWithGraph') ? properties.bFilterWithGraph[1] : false, // Filter graph search with valid values (slow)
 								// --->Pre-Scoring Filters
 								// Query to filter library
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties.forcedQuery[1] : '',
@@ -980,6 +982,11 @@ async function searchByDistance({
 		}
 		for (let key in calcTags) {
 			const tag = calcTags[key];
+			tag.bVirtual = tag.type.includes('virtual'); // TODO move at top
+			tag.bMultiple = tag.type.includes('multiple');
+			tag.bString = tag.type.includes('string');
+			tag.bGraph = tag.type.includes('graph');
+			tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH');
 			if (tag.type.includes('virtual')) {continue;}
 			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
 				tag.handle = tagsValByKey[z++];
@@ -995,46 +1002,49 @@ async function searchByDistance({
 			let weightValue = 0;
 			let mapDistance = Infinity; // We consider points are not linked by default
 			// Get the tags according to weight and filter ''. Also create sets for comparison
-			const handleTag = {genreStyle: {set: []}};
+			const handleTag = {genreStyle: {set: new Set()}};
 			for (let key in calcTags) {
 				const tag = calcTags[key];
-				if (tag.type.includes('virtual')) {continue;}
-				const type = tag.type;
+				if (tag.bVirtual) {continue;}
 				handleTag[key] = {};
-				if (tag.weight !== 0 || tag.tf.length && (type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH'))) {
-					if (type.includes('multiple')) {
-						if (type.includes('graph') && bTagFilter) {
+				if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) {
+					if (tag.bMultiple) {
+						if (tag.bGraph && bTagFilter) {
 							handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
 						} else {
 							handleTag[key].val = tag.handle[i].filter(Boolean);
 						}
 					} else {
-						handleTag[key].val = type.includes('string') ? tag.handle[i][0] : Number(tag.handle[i][0]);
+						handleTag[key].val = tag.bString ? tag.handle[i][0] : Number(tag.handle[i][0]);
 					}
 				} else {
-					if (type.includes('multiple')) {
+					if (tag.bMultiple) {
 						handleTag[key].val = [];
 					} else {
-						handleTag[key].val = type.includes('string') ? '' : null;
+						handleTag[key].val = tag.bString ? '' : null;
 					}
 				}
-				if (type.includes('string')) {
-					if (type.includes('multiple')) {
-						if (handleTag[key].val.length && bAscii) {handleTag[key].val.forEach((val, i) => {handleTag[key].val[i] = _asciify(val);});}
+				if (tag.bString) {
+					const valLen = handleTag[key].val.length;
+					if (tag.bMultiple) {
+						if (valLen && bAscii) {handleTag[key].val.forEach((val, i) => {handleTag[key].val[i] = _asciify(val);});}
 						handleTag[key].set = new Set(handleTag[key].val);
 						handleTag[key].number = handleTag[key].set.size;
 					} else {
-						if (handleTag[key].val.length && bAscii) {handleTag[key].val = _asciify(handleTag[key].val);}
+						if (valLen && bAscii) {handleTag[key].val = _asciify(handleTag[key].val);}
+					}
+					if (tag.bGraphDyn && valLen) {
+						if (bFilterWithGraph) {
+							handleTag[key].val.forEach((val) => {
+								if (!graphExclusions.has(val) && descr.getNodeList().has(val)) {handleTag.genreStyle.set.add(val);}
+							});
+						} else {
+							handleTag[key].val.forEach((val) => {
+								if (!graphExclusions.has(val)) {handleTag.genreStyle.set.add(val);}
+							});
+						}
 					}
 				}
-				if (type.includes('graph') && (method === 'GRAPH' || calcTags.dynGenre.weight !== 0)) {
-					handleTag.genreStyle.set.push(...handleTag[key].val);
-				}
-			}
-			if (method === 'GRAPH') {
-				handleTag.genreStyle.set = descr.filterSetWithGraph(new Set(handleTag.genreStyle.set).difference(graphExclusions)); // Remove anything not on Graph
-			} else if (calcTags.dynGenre.weight !== 0) {
-				handleTag.genreStyle.set = new Set(handleTag.genreStyle.set).difference(graphExclusions); // Remove exclusions
 			}
 			
 			// O(i*j*k) time
