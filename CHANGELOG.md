@@ -33,6 +33,7 @@
 ### Added
 - Configuration: settings may now be shared among all search by distance buttons using the new menu entry. A popup asks to copy the configuration for every found button, which is highlighted on the buttons bar.
 - Configuration: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
+- Configuration: new setting to omit genre/styles not present on the descriptors  while calculating the mean distance on GRAPH method. It was supposed to be done via exclusions, but that method did leave some things values on non properly configured setups, while this setting covers all use-cases (although it requires more processing time).
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 - Tags: reworked the entire tag system to allow for indefinite custom tags, with weights, ranges, scoring distribution methods, ... Recipes and buttons have been reworked too to account for this.
 - Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
@@ -52,7 +53,6 @@
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - Tags: the buttons now ask to check for missing genre/styles on the Graph on first initialization.
-- Tags: genre/styles not present on the descriptors are no longer considered to calculate the mean distance on GRAPH method. It was supposed to be done via exclusions, but that method did leave some things values on non properly configured setups.
 - UI: shift modifier now opens configuration menu on customizable button, and Shift + Ctrl now sets the theme. This is done to follow the same behavior than other buttons having the configuration menu on Shift.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
@@ -80,6 +80,7 @@
 - HTML: internal changes for non-oriented links.
 - Logging: added some console warnings when specific sorting options override others.
 - Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
+- Minor performance improvement (usually on subsequent calls) caching all TitleFormat expressions.
 ### Removed
 - Buttons: removed method specific buttons, now replaced with the generic one (which can be configured).
 ### Fixed
