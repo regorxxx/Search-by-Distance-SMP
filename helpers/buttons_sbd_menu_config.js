@@ -154,7 +154,12 @@ function createConfigMenu(parent) {
 			});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
-		createBoolMenu(menuName, ['bNegativeWeighting']);
+		createBoolMenu(menuName, ['bNegativeWeighting', 'bFilterWithGraph'], 
+			[
+				void(0), 
+				recipe.hasOwnProperty('method') && recipe.method  !== 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] !== 'GRAPH'
+			]
+		);
 	}
 	{	// Tags and weights
 		const menuName = menu.newMenu('Set Tags and weighting');
