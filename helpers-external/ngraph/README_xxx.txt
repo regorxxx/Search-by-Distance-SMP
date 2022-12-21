@@ -3,6 +3,6 @@ require(...) -> include(...)
 module.exports -> REMOVED
 eventify -> REMOVED
 
-Look at 'ngraph_helpers_xxx.js' for my own additions. The graph definition is at 'search_bydistance.js'.
+Look at 'ngraph_helpers_xxx.js' for my own additions. The graph definition is at 'search_by_distance.js'.
 
 'jquery.min.jsm.js' and 'vivagraph.min.js' are meant to be used within html files, not foobar.

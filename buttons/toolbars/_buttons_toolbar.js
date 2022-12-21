@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/22
+//15/12/22
 
 /*
 	This is an example of how merging buttons works. Just include them...
@@ -98,8 +98,8 @@ buttonsBar.config.scale =  barProperties.scale[1];
 const buttonsPathDef = [	 // Add here your buttons names
 					'buttons_search_by_tags_combinations.js',
 					'buttons_playlist_remove_duplicates.js',
-					'buttons_search_bydistance.js',
-					'buttons_search_bydistance_customizable.js',
+					'buttons_search_by_distance.js',
+					'buttons_search_by_distance_customizable.js',
 					'buttons_playlist_tools.js',
 					'buttons_playlist_history.js',
 				].map((name) => {return folders.xxx + 'buttons\\' + name;});

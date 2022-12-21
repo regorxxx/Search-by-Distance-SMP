@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/22
+//12/12/22
 
 /* 
 	Objects
@@ -107,9 +107,22 @@ String.prototype.replaceAll = function replaceAll(word, newWord) {
 	return copy;
 };
 
+String.prototype.count = function count(c) { 
+	let result = 0, i = 0;
+	for (i; i < this.length; i++) {
+		if (this[i] == c) {result++;}
+	}
+	return result;
+};
+
 function capitalize(s) {
 	if (!isString(s)) {return '';}
 	return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function capitalizePartial(s) {
+	if (!isString(s)) {return '';}
+	return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function capitalizeAll(s, sep = ' ', bJoinSep = true) { // Can use RegEx as separator, when using RegEx with capture groups to also include separators on split array, bJoinSep should be false to join 'as is'

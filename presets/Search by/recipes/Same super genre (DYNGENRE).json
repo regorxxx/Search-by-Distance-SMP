@@ -1,19 +1,32 @@
 {
 	"name": "Same super-genre (D)",
-	"genreWeight": 5,
-	"styleWeight": 5,
-	"moodWeight": 15,
-	"keyWeight": 10,
-	"dateWeight": 25,
-	"bpmWeight": 5,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"keyRange": 1, 
-	"dateRange": 15, 
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 5
+		},
+		"style": {
+			"weight": 5
+		},
+		"dynGenre": {
+			"weight": 40,
+			"range": 1
+		},
+		"mood": {
+			"weight": 15
+		},
+		"key": {
+			"weight": 10,
+			"range": 1
+		},
+		"bpm": {
+			"weight": 5,
+			"range": 25
+		},
+		"date": {
+			"weight": 25,
+			"range": 15
+		}
+	},
 	"scoreFilter": 60,
-	"method": "DYNGENRE",
-	"dyngenreWeight": 40,
-	"dyngenreRange": 1
+	"method": "DYNGENRE"
 }

@@ -1,18 +1,18 @@
 title: AcousticBrainz Tags Labels
 script_language_version: '1.1'
-script: "$noop(Sets -label- tags from AcousticBrainz high/low level data)\n$noop(Recommended\
-  \ to removes all high/low level data afterwards)\n$noop(Requires: AcousticBrainz\
-  \ Tags plugin 2.2+)\n$noop(Requires: All high-level and subset of low-level tags\
-  \ enabled at plugin config)\n\n$noop(Timbre tags: timbre -label-)\n$set(_temp,%ab:hi:timbre:bright%)\n\
-  $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,Dark),\n\t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Bright,Dark))\n\
-  \t)\n\t$set(timbre,%_temp%)\n)\n\n$noop(Danceability tags: danceability -label-)\n\
-  $set(_temp,%ab:hi:danceability:danceable%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
-  \t\t$set(_temp,Not danceable),\n\t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Danceable,Not\
+script: "$noop(22/11/2022)\n$noop(Sets -label- tags from AcousticBrainz high/low level\
+  \ data)\n$noop(Recommended to removes all high/low level data afterwards)\n$noop(Requires:\
+  \ AcousticBrainz Tags plugin 2.2+)\n$noop(Requires: All high-level and subset of\
+  \ low-level tags enabled at plugin config)\n\n$noop(Timbre tags: timbre -label-)\n\
+  $set(_temp,%ab:hi:timbre:bright%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,Dark),\n\
+  \t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Bright,Dark))\n\t)\n\t$set(timbre,%_temp%)\n\
+  )\n\n$noop(Danceability tags: danceability -label-)\n$set(_temp,%ab:hi:danceability:danceable%)\n\
+  $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,Not danceable),\n\t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Danceable,Not\
   \ danceable))\n\t)\n\t$set(danceability,%_temp%)\n)\n\n$noop(Gender tags: gender\
   \ -label-)\n$set(_temp,%ab:hi:gender:female%)\n$if(%_temp%,\n\t$if($in(%_temp%,-),\n\
   \t\t$set(_temp,Male),\n\t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Female,Male))\n\
   \t)\n\t$set(gender,%_temp%)\n)\n\n$noop(Tonality tags: tonality -label-)\n$set(_temp,%ab:hi:tonal_atonal:tonal%)\n\
   $if(%_temp%,\n\t$if($in(%_temp%,-),\n\t\t$set(_temp,Atonal),\n\t\t$set(_temp,$if($gte($substr(%_temp%,2,3),5),Tonal,Atonal))\n\
   \t)\n\t$set(tonality,%_temp%)\n)\n\n$noop(Chords tags: chords_key -label-)\n$set(_temp,%ab:lo:tonal:chords_key%)\n\
-  $if(%_temp%,\n\t$set(chords_key,%_temp%)\n)\n"
-id: 8f555ea3-2b7e-4076-80b5-62d106fd2a8f
+  $if(%_temp%,\n\t$set(chords_key,%_temp%)\n)\n$noop(Clean)\n$delete(_temp)\n"
+id: 6f2eb0c1-bc27-4713-b478-febd0dae434b

@@ -1,22 +1,36 @@
 {
 	"name": "LikeADJ (MusicBee)",
-	"genreWeight": 25,
-	"styleWeight": 0,
-	"moodWeight": 25,
-	"keyWeight": 0,
-	"dateWeight": 0,
-	"bpmWeight": 25,
-	"composerWeight": 0,
-	"customNumTag": "ENERGY",
-	"customStrWeight": 0,
-	"customNumWeight": 25,
-	"customNumRange": 2,
-	"dateRange": 0,
-	"keyRange": 0,
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 25
+		},
+		"mood": {
+			"weight": 25
+		},
+		"bpm": {
+			"weight": 25,
+			"range": 25
+		},
+		"energy": {
+			"weight": 25,
+			"tf": [
+				"ENERGY"
+			],
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"number",
+				"single",
+				"absRange"
+			],
+			"range": 2
+		},
+		"*": {
+			"weight": 0
+		}
+	},
 	"scoreFilter": 50,
 	"method": "GRAPH",
-	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4",
+	"graphDistance": "music_graph_descriptors.cluster * 4",
 	"probPick": 100,
 	"bRandomPick": false,
 	"bInKeyMixingPlaylist": true,

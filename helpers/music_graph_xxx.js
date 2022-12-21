@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/22
+//15/12/22
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -779,7 +779,7 @@ async function graphStatistics({
 		if (acumFreq <= 0) {break;} else {i++;}
 	}
 	statistics.median = i > 0 ? (Number(histEntries[i - 1][0]) + Number(histEntries[i][0])) / 2 : Number(histEntries[i][0]);
-	// Usually follows a normal distribution, so that may give us some key parameters for graph filtering 'sbd_max_graph_distance'
+	// Usually follows a normal distribution, so that may give us some key parameters for graph filtering 'graphDistance'
 	// In real world usage it is not A -> B but {A,B,C} -> {C,D} or similar... i.e. sets of styles/genres
 	// Anyway since the total distance is divided by the num of tags, the results are still applicable
 	const offset = poz(-3);

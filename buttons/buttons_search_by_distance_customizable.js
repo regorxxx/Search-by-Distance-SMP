@@ -1,12 +1,12 @@
 ﻿'use strict';
-//08/11/22
+//15/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
 try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_bydistance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\buttons_sbd_menu_theme.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_recipe.js'); // Button menu
 include('..\\helpers\\buttons_sbd_menu_config.js'); // Button menu
@@ -32,7 +32,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 }
 
 /*
-	Some button examples for 'search_bydistance.js'. Look at that file to see what they do.
+	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
 	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30, h: 22}, newButtonsProperties.customName[1], function (mask) {
@@ -58,10 +58,35 @@ addButton({
 					}
 				}
 			} else {
-				do_searchby_distance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1]}); // All set according to properties panel!
+				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this}); // All set according to properties panel!
 			}
 		}
-	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand)
+	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
+	{
+		'on_notify_data': (parent, name, info) => {
+			if (name === 'bio_imgChange') {return;}
+			switch (name) {
+				case 'Search by Distance: share configuration': {
+					if (info) {
+						if (info.notifyThis && parent.name === info.name) {return;} // Don't apply to same button
+						parent.switcHighlight(true);
+						const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
+						if (answer === popup.yes) {
+							parent.buttonsProperties.tags[1] = String(info.tags[1]);
+							parent.buttonsProperties.forcedQuery[1] = String(info.forcedQuery[1]);
+							parent.buttonsProperties.genreStyleFilterTag[1] = String(info.genreStyleFilterTag[1]);
+							parent.buttonsProperties.poolFilteringTag[1] = String(info.poolFilteringTag[1]);
+							parent.buttonsProperties.checkDuplicatesByTag[1] = String(info.checkDuplicatesByTag[1]);
+							parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
+							overwriteProperties(parent.buttonsProperties);
+						}
+						parent.switcHighlight(false);
+					}
+					break;
+				}
+			}
+		}
+	})
 });
 
 // Helper

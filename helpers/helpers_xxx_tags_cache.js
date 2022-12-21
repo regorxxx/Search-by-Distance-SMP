@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/11/22
+//06/12/22
 
 include('callbacks_xxx.js');
 include('helpers_xxx.js');
@@ -198,7 +198,7 @@ tagsCache.enable = function () {
 			if (!this.enabled) {return;}
 			const keys = [...this.cache.keys()];
 			if (keys.length) {
-				this.deleteTags(keys, handleList);
+				this.deleteTags(keys, handleList.Convert());
 			}
 		}),
 		addEventListener('on_script_unload', () => {

@@ -1,0 +1,25 @@
+# List of values to add at Metadata/Genres to exclude non-wanted folksonomy tags
+# Others are cleaned/replaced with "Clean Folksonomy" script
+-seen live
+-favorites
+-fixme
+-owned
+-bogus release
+-no cover art
+-ams records
+-bonus
+-c.l. smooth
+-federico idà
+-franco patrignani
+-franco vinci
+-the new yorker
+-guitar
+-international
+-laut.de
+-mpb
+-nina simone
+-pete rock
+-mashup
+-lauryn hill
+-Should Be Public Domain
+-batteur

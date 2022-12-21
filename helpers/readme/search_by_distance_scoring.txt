@@ -31,4 +31,4 @@ distribution where the most similar ones will all be over the 40% simil.
 critical point.
 
 A chart comparing the available methods can be found at:
-'.\helpers\readme\search_bydistance_scoring.png'
+'.\helpers\readme\search_by_distance_scoring.png'

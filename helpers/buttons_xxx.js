@@ -80,9 +80,11 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale), variables) {
+function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale), variables = null, listener = null) {
+	this.name = '';
 	this.state = state ? state : buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */
+	this.highlight = false;
 	this.active = false;
 	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
 	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
@@ -110,8 +112,16 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
-	for (let key in variables) {
-		this[key] = variables[key];
+	if (variables) {
+		for (let key in variables) {
+			this[key] = variables[key];
+		}
+	}
+	if (listener) {
+		for (let key in listener) {
+			const func = listener[key].bind(this, this);
+			addEventListener(key, func);
+		}
 	}
 
 	this.containXY = function (x, y) {
@@ -143,6 +153,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		throttledRepaint();
 	};
 	
+	this.switcHighlight = function (bActive = null) {
+		this.highlight =  bActive !== null ? bActive : !this.highlight;
+		window.Repaint();
+	};
+	
 	this.cleanAnimation = function () {
 		if (this.animation.length) {this.animation = this.animation.filter((animation) => {return animation.bActive;});}
 	};
@@ -155,7 +170,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.isAnyAnimationActive = function () {
 		return this.animation.some((obj) => {return obj.bActive;});
 	};
-
+	
+	this.getAnimationText = function () {
+		return this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '';
+	};
+	
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
@@ -176,7 +195,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					break;
 				}
 				case buttonStates.hover: {
-					buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+					buttonsBar.tooltipButton.SetValue(
+						this.getAnimationText() + (buttonsBar.config.bShowID 
+							? this.descriptionWithID(this) 
+							: (isFunction(this.description) 
+								? this.description(this) 
+								: this.description)
+					), true); // ID or just description, according to string or func.
 					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 					break;
 				}
@@ -212,7 +237,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					}
 					break;
 				case buttonStates.hover:
-					buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? this.descriptionWithID(this) : (isFunction(this.description) ? this.description(this) : this.description) ) , true); // ID or just description, according to string or func.
+					buttonsBar.tooltipButton.SetValue(
+						this.getAnimationText() + (buttonsBar.config.bShowID
+							? this.descriptionWithID(this)
+							: (isFunction(this.description)
+								? this.description(this)
+								: this.description)
+					) , true); // ID or just description, according to string or func.
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
 						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
@@ -317,6 +348,12 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 			}
 		});
 		this.cleanAnimation(); // Remove finished ones
+		// Process button highlighting
+		if (this.highlight) {
+			const x = xCalc + 1; const y = yCalc; const w = wCalc - 4; const h = hCalc - 2;
+			gr.FillSolidRect(x, y, w, h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
+			gr.DrawRect(x, y, w, h, 1, invert(buttonsBar.config.toolbarColor));
+		}
 	};
 
 	this.onClick = function (mask) {
@@ -597,6 +634,10 @@ function addButton(newButtons) {
 			Object.defineProperty(newButtons, buttonName + Object.keys(buttonsBar.buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
 			delete newButtons[buttonName];
 		}
+	}
+	// Add names to objects
+	for (let buttonName in newButtons) {
+		newButtons[buttonName].name = buttonName;
 	}
 	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
 	return newButtons;

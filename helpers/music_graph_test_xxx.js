@@ -5,7 +5,7 @@
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
 // Uses NBA pathFinder as default. Edit key_one and key_two as required.
 function testGraph(mygraph) {
-			
+		var test = new FbProfiler('testGraph');
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
@@ -237,6 +237,7 @@ function testGraph(mygraph) {
 		console.log(idpath);
 		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
 		console.log(distanceGraph);
+		test.Print('Task #1', false);
 }
 
 // FOR TESTING: compares array of styles to other array and computes mean distance (similar to the main function)
@@ -245,7 +246,7 @@ function testGraph(mygraph) {
 // It will output things like this, ready to use here:
 // 		[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]
 function testGraphV2(mygraph) {
-
+		var test = new FbProfiler('testGraphV2');
 		let distanceGraph = Infinity;
 		let arrayOne = [];
 		let arrayTwo = [];
@@ -385,4 +386,5 @@ function testGraphV2(mygraph) {
 		arrayTwo = [ 'Blues' ];
 		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
 		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
+		test.Print('Task #1', false);
 }

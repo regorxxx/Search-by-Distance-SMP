@@ -1,4 +1,20 @@
 {
 	"name": "Test tag remap",
-	"properties": {"genreTag": "A",	"styleTag":	"B", "moodTag": "C", "dateTag": "D", "keyTag": "E", "bpmTag": "F", "composerTag": "G", "customStrTag": "", "customNumTag": ""}
+	"tags": {
+		"genre": {
+			"tf": [
+				"A"
+			]
+		},
+		"style": {
+			"tf": [
+				"B"
+			]
+		},
+		"mood": {
+			"tf": [
+				"C"
+			]
+		}
+	}
 }

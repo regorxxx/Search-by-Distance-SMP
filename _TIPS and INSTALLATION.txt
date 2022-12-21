@@ -164,18 +164,15 @@ are listed below for convenience:
 				- .\buttons\buttons_search_same_style_moods.js (*)
 			+ .\main\search_same_style.js
 				- .\buttons\buttons_search_same_style.js (*)
-			+ .\main\search_bydistance.js [+]
+			+ .\main\search_by_distance.js [+]
 				- ALSO READ: helpers\music_graph_descriptors_xxx.js
 				- ALSO SEE: Draw Graph.html
-				- .\buttons\buttons_search_bydistance_customizable.js (*) (configurable with menus)
-				- .\buttons\buttons_search_bydistance_DYNGENRE.js (*) (pre-configured)
-				- .\buttons\buttons_search_bydistance_GRAPH.js (*) (pre-configured)
-				- .\buttons\buttons_search_bydistance_WEIGHT.js (*) (pre-configured)
-				- .\buttons\buttons_search_bydistance.js (*) (uses properties panel for config)
+				- .\buttons\buttons_search_by_distance_customizable.js (*) (configurable with menus)
+				- .\buttons\buttons_search_by_distance.js (*) (configurable with menus)
 				- .\buttons\buttons_playlist_tools.js (*)
 			+ Draw Graph.html
 				- ALSO READ: helpers\music_graph_descriptors_xxx.js
-				- ALSO SEE: search_bydistance.js
+				- ALSO SEE: search_by_distance.js
 				- NOT meant to be used within foobar.
 				- Load the file in any browser to use it.
 			+ .\main\remove_duplicates.js
@@ -211,11 +208,8 @@ are working standalone examples, all are marked with (*).
 		+ .\buttons\buttons_playlist_tools_pool.js (*)
 		+ .\buttons\buttons_playlist_history.js (*)
 	+ .\buttons\buttons_remove_duplicates.js (*)
-	+ .\buttons\buttons_search_bydistance.js (*)
-	+ .\buttons\buttons_search_bydistance_customizable.js (*)
-	+ .\buttons\buttons_search_bydistance_DYNGENRE.js (*)
-	+ .\buttons\buttons_search_bydistance_GRAPH.js (*)
-	+ .\buttons\buttons_search_bydistance_WEIGHT.js (*)
+	+ .\buttons\buttons_search_by_distance.js (*)
+	+ .\buttons\buttons_search_by_distance_customizable.js (*)
 	+ .\buttons\buttons_search_same_style.js (*)
 	+ .\buttons\buttons_search_same_style_moods.js
 	+ .\buttons\buttons_search_same_by.js (*)
@@ -227,7 +221,7 @@ are working standalone examples, all are marked with (*).
 	
 For complete buttons bar with merged buttons, check list below. Adding/removing buttons to create
 your own bar is easy.
-	+ .\main\search_bydistance.js
+	+ .\main\search_by_distance.js
 		- buttons_toolbar.js (*) (and just configure it to only add related buttons)
 		- .\buttons\toolbars\_buttons_toolbar_sbd_customizable.js (*)
 	+ ALL:
@@ -244,7 +238,7 @@ and bars. They do nothing by their-selves, since they have no functionality asso
 	
 The 'helpers' folder contains common files used by most of the scripts. Don't touch or load these alone.
 'music_graph_descriptors_xxx.js', 'music_graph_descriptors_xxx_user.js' and 'dyngenre_map_xxx.js' files,
-are related to 'search_bydistance' & 'search_same_by'. Look at those files to understand what they do. 
+are related to 'search_by_distance' & 'search_same_by'. Look at those files to understand what they do. 
 Some users may want to add their own genres/styles at 'music_graph_descriptors_xxx_user.js', to do so a
 copy of the file must be placed at (profile folder) '.\\js_data\\helpers\\' (or use the custom button).
 

@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [4.0.0](#400---2022-09-15)
+- [4.0.0](#400---2022-12-12)
 - [3.1.0](#310---2022-08-22)
 - [3.0.0](#300---2022-08-21)
 - [2.3.0](#230---2022-08-12)
@@ -29,17 +29,23 @@
 ### Removed
 ### Fixed
 
-## [4.0.0] - 2022-09-15
+## [4.0.0] - 2022-12-12
 ### Added
+- Configuration: settings may now be shared among all search by distance buttons using the new menu entry. A popup asks to copy the configuration for every found button, which is highlighted on the buttons bar.
 - Configuration: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
+- Configuration: new setting to omit genre/styles not present on the descriptors  while calculating the mean distance on GRAPH method. It was supposed to be done via exclusions, but that method did leave some things values on non properly configured setups, while this setting covers all use-cases (although it requires more processing time).
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
+- Tags: reworked the entire tag system to allow for indefinite custom tags, with weights, ranges, scoring distribution methods, ... Recipes and buttons have been reworked too to account for this.
 - Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
 - Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
 - Smart Shuffle: shuffles tracks according to tags (Artist by default) in a semi-random pattern, ensuring no 2 consecutive tracks have the same tag value. Follows [Spotify design](https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/). Overrides any other sorting when enabled. Contrary to [Spotify's preferences to recently played/loved tracks](https://thetab.com/uk/2021/11/17/spotify-shuffle-explained-228639), this algorithm is truly "random" in the sense that there is no preference for any track, it just ensures artists are distributed evenly with some randomness. Also differs from from 'Scatter by tags' (intercalate) at [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/) in the way tracks are ordered (without strict alternation), i.e. it doesn't follow a pattern ABCABAA when it's possible to ensure no A tracks are together (ABACABA).
 - Scoring Method: new options to set scoring method ('LOGARITHMIC', 'LOGISTIC', 'LINEAR', 'NORMAL'). Default behavior is 'LINEAR' (working the same as before). 'LOGARITHMIC' and 'LOGISTIC' scoring methods take into account that some tracks having a lot of values for some tags don't return so many matches because it's almost impossible to match all of them. Therefore it applies a logarithmic curve, giving an extra weight to lower matches, specially for high tag values counts (n). For ex. when 50% of the tags are matched, that equals to 50% weight applied on 'LINEAR' method but ~70% weight for 'LOGARITHMIC' method and 64%(n<=1) to 85%(n=3) for 'LOGISTIC' method. 'LOGISTIC' method is much more sensitive to the tag value count (n). Configurable per tag. Added related readme to this feature along a chart comparison.
+- Base Score: new option to added base score for tags, in case tag is missing for the analyzed tracks. For ex. if BPM is set with a non-zero weight, and the reference track has such tag, usually the script would scan the entire library and check for tracks within a range compatible; in case a track has non BPM tag it would score zero for that tag, which may be undesirable in some situations (when not all tracks on a library contain the same tags or have not been tagedd yet). In such case, that track would always get a lower scoring than any other, since the others have a BPM tag to compare against. Base score option allows to give a default score to such tracks, associated to the tag, to minimize the impact of track missing a tag (in relation to other tracks). Value is zero by default (previous behavior), but may be changed selectively for every tag. Value is also sensible to the scoring method set (see above).
 ### Changed
 - GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
 - GRAPH: minor performance improvement using non-oriented links.
+- GRAPH: greater performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
+- DYNGENRE: greater performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
 - Descriptors: changed style cluster distance. Presets have been reworked to account for that.
 - Descriptors: updated descriptors with multiple additions.
 - Descriptors: updated and improved descriptors documentation (present on .js files).
@@ -51,6 +57,7 @@
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
 - UI: customizable button now doesn't allow setting playlist sorting when using harmonic mixing. Submenu is greyed out.
+- UI: buttons now show info about background processing if any is being done (usually also animated).
 - Similar artists: now shows a popup with the report of similar artists found along their similarity scoring. Previously this info was only logged to console.
 - Similar artists: now uses 'LOGARITHMIC' scoring method by default (set on preset file, can still be manually changed there).
 - Removed duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
@@ -66,20 +73,30 @@
 - Buttons: reworked input popups for settings on customizable button with specific descriptions, extensive error checking (with feedback popups), etc. It should be pretty clear now what's allowed on every setting, and non valid values will throw a warning (instead of just silently being discarded).
 - Buttons: improved 'no background mode' on buttons toolbar with colors and shades adapted to the toolbar background color and following the design of native Foobar2000 buttons for a seamless integration.
 - Buttons: improved 'no background mode' on buttons toolbar with proper animations (no longer a bad looking rectangle gradient).
+- Buttons: generic button ('buttons_search_bydistance.js') can now be configured (although not in the same way than the customizable button). It replaces the buttons for specific methods, since the search method can now be set.
 - Helpers: rewritten [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation) helper.
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
 - Logging: added some console warnings when specific sorting options override others.
+- Presets: updated all Picard scripts with comments, setting examples, new scripts (for folksonomy tags, performers, ...), code improvements, etc.
+- Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
+- Minor performance improvement (usually on subsequent calls) caching all TitleFormat expressions.
 ### Removed
+- Buttons: removed method specific buttons, now replaced with the generic one (which can be configured).
 ### Fixed
-- Presets: fixed misspelling of 'SPEECHNESS' at multiple places/presets, on queries, tag name, picard scripts, etc.
+- Remove duplicates: tags may now be set to empty '[]', which disables the feature. Previously threw a crash.
+- Recursive Playlist: when duplicates removal tags are set to empty, feature is disabled and a popup warns about it. Previously threw a crash.
+- Presets: fixed misspelling of 'SPEECHNESS' at multiple places/presets, on queries, tag name, Picard scripts, etc.
 - Key: tracks with a key difference greater than 6 were not properly evaluated, since they are nearer on the key wheel. Being the real distance (6 - difference). i.e. a track with key 12A would be considered at a distance 11 from a track 1A, instead of a distance 1. This happened at the scoring stage (it was properly evaluated at other places), resulting in less tracks being output as similar tracks in most cases (where KEY was used for weighting).
 - UI: after renaming custom button, button width was not properly adjusted. Width on panel reload and after renaming did not match.
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
+- UI: recipes were not properly numbered when they had duplicates names.
+- UI: some GRAPH-only options where available to configure when using other methods. Now greyed out.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
 - Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').
+- Tags: no longer asks to rebuild link cache if genre/style tags have not changed after tag resetting (more of an improvement than a fix).
 - Similar artists: remapped genre/style tags were not being properly used on filtering step.
 - Similar artists: remapped genre/style tags were not working as expected with TF functions (which are now the default behavior for ASCII handling).
 - Similar artists: calculation did not have into consideration tracks with same genre/style values on filtering step.
@@ -89,6 +106,7 @@
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
 - Buttons: multiple crashes due to wrong variable name when opening popups.
+- Buttons: forced query is now checked for queries returning no items on current library, which are now considered non-valid.
 - Readmes: separators not being properly identified on readme files checking.
 
 ## [3.1.0] - 2022-08-22

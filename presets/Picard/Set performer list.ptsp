@@ -1,0 +1,6 @@
+title: Set performer list
+script_language_version: '1.1'
+script: "$noop(22/11/2022)\n$noop(Retrieve list of all musicians involved as multi-value\
+  \ tag)\n\n$setmulti(_performer,$unique($performer(,; )))\n$if(%_performer%,\n\t\
+  $setmulti(performer,%_performer%)\n\t,\n\t$unset(performer)\n)\n$delete(_performer)\n"
+id: 785814fc-10b2-4a9c-bae6-d356118cf712

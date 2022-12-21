@@ -1,9 +1,9 @@
 Themes are 'tag containers' which emulate track's tags, to be used with 
-'search_bydistance' buttons and tools instead of evaluating with a selected 
+'Search by Distance' buttons and tools instead of evaluating with a selected 
 track.
 
 Recipes are 'variables containers' which emulate the input of 
-'search_bydistance' buttons and tools instead of using hardcoded variables 
+'Search by Distance' buttons and tools instead of using hardcoded variables 
 or properties. Recipes may also contain a forced theme, either the entire 
 object or a link to a theme file (path or filename).
 
@@ -18,4 +18,4 @@ as they are only meant as examples. Create a copy and rename to use them.
 
 Filters are pre-defined queries meant to be used as forced queries to filter 
 the library, independently of the recipe, theme or other config set. 
-Currently used on the customizable 'search_bydistance' button.
+Currently used on the customizable 'Search by Distance' button.

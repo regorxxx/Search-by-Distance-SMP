@@ -1,6 +1,7 @@
 title: AcousticBrainz High_Low Tags Remove
 script_language_version: '1.1'
 script: |
+  $noop(22/11/2022)
   $noop(Removes all high/low level tags retrieved by AcousticBrainz Tags plugin)
   $noop(Meant to be used along other scripts which uses this data first)
   $noop(Requires: AcousticBrainz Tags plugin 2.2+)
@@ -111,4 +112,4 @@ script: |
 
   $noop(acousticbrainz_genre-mood)
   $unset(ab:genre)
-id: 6c22c820-a06d-4a8e-858e-19b644382c3c
+id: 4682fc53-7ee8-4365-8bfc-2fbd78a2c934

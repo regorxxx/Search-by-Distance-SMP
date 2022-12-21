@@ -1,18 +1,29 @@
 {
 	"name": "Similar mood (G)",
-	"genreWeight": 0,
-	"styleWeight": 5,
-	"moodWeight": 15,
-	"keyWeight": 10,
-	"dateWeight": 0,
-	"bpmWeight": 5,
-	"composerWeight": 0,
-	"customStrWeight": 0,
-	"customNumWeight": 0,
-	"keyRange": 2, 
-	"dateRange": 100, 
-	"bpmRange": 25,
+	"tags": {
+		"genre": {
+			"weight": 0
+		},
+		"style": {
+			"weight": 5
+		},
+		"mood": {
+			"weight": 15
+		},
+		"key": {
+			"weight": 10,
+			"range": 2
+		},
+		"bpm": {
+			"weight": 5,
+			"range": 25
+		},
+		"date": {
+			"weight": 0,
+			"range": 100
+		}
+	},
 	"scoreFilter": 50,
 	"method": "GRAPH",
-	"sbd_max_graph_distance": "music_graph_descriptors.cluster * 4 * 3"
+	"graphDistance": "music_graph_descriptors.cluster * 4 * 3"
 }
