@@ -106,7 +106,11 @@ function loadButtonsFile(bStartup = false) {
 			{name: 'Top Tracks', files: ['buttons_search_top_tracks.js', 'buttons_search_top_tracks_from_date.js', 'buttons_search_top_tracks_from_date.js']},
 			{name: 'Library search', files: ['buttons_search_by_tags_combinations.js', 'buttons_search_by_tags_queries.js', 'buttons_search_quicksearch.js']},
 			{name: 'Playlist manipulation', files: ['buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_playlist_filter.js', 'buttons_playlist_history.js']},
-			{name: 'Device priority', files: ['buttons_others_device_priority.js', 'buttons_others_device_selector.js']},
+			{name: 'Device priority', files: _isFile(folders.xxx + 'buttons\\buttons_others_device_selector.js')
+				? ['buttons_others_device_priority.js', 'buttons_others_device_selector.js']
+				: ['buttons_others_device_priority.js']
+			},
+			{name: 'ListenBrainz', files: ['buttons_listenbrainz_tools.js']},
 			{name: 'Full (no Search by Distance)', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_playlist_tools_macros.js', 'buttons_search_by_tags_combinations.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js','buttons_search_quicksearch.js']},
 			{name: 'Full', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']},
 			{name: 'Blank', files: []}
