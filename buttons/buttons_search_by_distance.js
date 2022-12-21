@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/12/22
+//19/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -7,7 +7,7 @@ include('..\\helpers\\buttons_xxx_menu.js');
 
 try {window.DefinePanel('Search by Distance Buttons', {author:'xxx'});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\helpers_xxx_properties.js');
 var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
