@@ -37,7 +37,7 @@ function roughSizeOfObject(object) {
 			objectList.push(value);
 			for (let i in value) {if (!value.hasOwnProperty(i)) {continue;} stack.push(value[i]);}
 		}
-	}
+	} // TODO Handle lists? TF?
 	return bytes;
 }
 
@@ -230,7 +230,7 @@ Array.prototype.rotate = (function() {
 	};
 })();
 
-Array.prototype.swap = function (i, j) { 
+Array.prototype.swap = function(i, j) { 
 	[this[i], this[j]] = [this[j], this[i]];
 	return this;
 };
