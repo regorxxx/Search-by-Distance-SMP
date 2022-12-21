@@ -44,8 +44,8 @@
 ### Changed
 - GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
 - GRAPH: minor performance improvement using non-oriented links.
-- GRAPH: greater performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
-- DYNGENRE: greater performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
+- GRAPH: variable performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
+- DYNGENRE: variable performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
 - Descriptors: changed style cluster distance. Presets have been reworked to account for that.
 - Descriptors: updated descriptors with multiple additions.
 - Descriptors: updated and improved descriptors documentation (present on .js files).
@@ -80,8 +80,9 @@
 - HTML: internal changes for non-oriented links.
 - Logging: added some console warnings when specific sorting options override others.
 - Presets: updated all Picard scripts with comments, setting examples, new scripts (for folksonomy tags, performers, ...), code improvements, etc.
-- Minor performance improvement breaking the calculations when the current track can not reach the minimum score.
-- Minor performance improvement (usually on subsequent calls) caching all TitleFormat expressions.
+- Minor performance improvement (aprox. 10%) breaking the calculations when the current track can not reach the minimum score.
+- Minor performance improvement (aprox. <3%, usually on subsequent calls) caching all TitleFormat expressions.
+- Greater performance improvement (aprox. 30%) swapping the order of some elements on the query to short-circuit it faster and grouping combinations, -for ex. moods-, by matched elements.
 ### Removed
 - Buttons: removed method specific buttons, now replaced with the generic one (which can be configured).
 ### Fixed
