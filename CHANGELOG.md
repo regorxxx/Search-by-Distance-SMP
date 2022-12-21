@@ -69,6 +69,8 @@
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Properties: remapped tags properties have been rewritten, previous config will be lost. Tags now follow a JSON format, which will be more compatible with TF functions in any field.
 - Properties: 'Exclude any track with graph distance greater than (only GRAPH method)' property now also allows 'Infinity' as value, which equals to allowing any genre/style on the graph. But it may be used in conjuction with other filters, like influences or similar artists, thus not being equivalent to 'WEIGHT' or 'DYNGENRE' methods.
+- Buttons: default method of installation requires now to load the toolbar (no more single buttons support), from there, any button can be loaded as desired.
+- Buttons: the buttons bar now shows a message when no buttons have been added, left clicking shows a popup with available buttons presets. Right clicking opens the menu to configure the toolbar or add buttons manually.
 - Buttons: reworked pre-defined filters switching, using RegExp, which should hopefully work in almost any case no matter their order or position on the forced query.
 - Buttons: reworked input popups for settings on customizable button with specific descriptions, extensive error checking (with feedback popups), etc. It should be pretty clear now what's allowed on every setting, and non valid values will throw a warning (instead of just silently being discarded).
 - Buttons: improved 'no background mode' on buttons toolbar with colors and shades adapted to the toolbar background color and following the design of native Foobar2000 buttons for a seamless integration.
