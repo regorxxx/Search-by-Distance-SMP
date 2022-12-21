@@ -1,9 +1,9 @@
 ﻿'use strict';
-//15/12/22
+//19/12/22
 
-include('menu_xxx.js');
-include('helpers_xxx.js');
-include('helpers_xxx_file.js');
+include('..\\..\\helpers\\menu_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_file.js');
 
 const recipeMenu = new _menu();
 

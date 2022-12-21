@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/12/22
+//21/12/22
 
 /*
 	Search by Distance
@@ -34,26 +34,26 @@
 			similarity scoring.
 */ 
 
-include('..\\helpers-external\\ngraph\\a-star.js');
-include('..\\helpers-external\\ngraph\\a-greedy-star.js');
-include('..\\helpers-external\\ngraph\\NBA.js');
-include('..\\helpers\\ngraph_helpers_xxx.js');
+include('..\\..\\helpers-external\\ngraph\\a-star.js');
+include('..\\..\\helpers-external\\ngraph\\a-greedy-star.js');
+include('..\\..\\helpers-external\\ngraph\\NBA.js');
+include('..\\..\\helpers\\ngraph_helpers_xxx.js');
 var bLoadTags = true; // This tells the helper to load tags descriptors extra files
-include('..\\helpers\\helpers_xxx.js');
-include('..\\helpers\\helpers_xxx_crc.js');
-include('..\\helpers\\helpers_xxx_prototypes.js');
-include('..\\helpers\\helpers_xxx_properties.js');
-include('..\\helpers\\helpers_xxx_tags.js');
-if (isFoobarV2) {include('..\\helpers\\helpers_xxx_tags_cache.js');}
-include('..\\helpers\\helpers_xxx_math.js');
-include('..\\helpers\\helpers_xxx_statistics.js');
-include('..\\helpers\\camelot_wheel_xxx.js');
-include('..\\helpers\\dyngenre_map_xxx.js');
-include('..\\helpers\\music_graph_xxx.js');
-include('..\\helpers\\music_graph_test_xxx.js');
-include('remove_duplicates.js');
-include('scatter_by_tags.js');
-include('..\\helpers\\callbacks_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_crc.js');
+include('..\\..\\helpers\\helpers_xxx_prototypes.js');
+include('..\\..\\helpers\\helpers_xxx_properties.js');
+include('..\\..\\helpers\\helpers_xxx_tags.js');
+if (isFoobarV2) {include('..\\..\\helpers\\helpers_xxx_tags_cache.js');}
+include('..\\..\\helpers\\helpers_xxx_math.js');
+include('..\\..\\helpers\\helpers_xxx_statistics.js');
+include('..\\..\\helpers\\camelot_wheel_xxx.js');
+include('..\\..\\helpers\\dyngenre_map_xxx.js');
+include('..\\..\\helpers\\music_graph_xxx.js');
+include('..\\..\\helpers\\music_graph_test_xxx.js');
+include('..\\filter_and_query\\remove_duplicates.js');
+include('..\\sort\\scatter_by_tags.js');
+include('..\\..\\helpers\\callbacks_xxx.js');
 include('search_by_distance_extra.js');
 
 
@@ -744,7 +744,9 @@ async function searchByDistance({
 		
 		let originalWeightValue = 0;
 		// Queries and ranges
-		for (let key in calcTags) {
+		const sortedByCombs = Object.keys(calcTags)
+			.sort((a, b) => (calcTags[a].type.includes('combinations') ? 1 : 0) - (calcTags[b].type.includes('combinations') ? 1 : 0));
+		for (let key of sortedByCombs) {
 			const tag = calcTags[key];
 			const type = tag.type;
 			if (tag.weight === 0 || tag.tf.length === 0) {continue;}
@@ -753,7 +755,6 @@ async function searchByDistance({
 				originalWeightValue += tag.weight;
 				if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 					queryl = query.length;
-					query[queryl] = '';
 					const tagNameTF = type.includes('multiple') // May be a tag or a function...
 						? tag.tf.map((t) => {return ((t.indexOf('$') === -1) ? t : _q(t));})
 						: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
@@ -775,23 +776,50 @@ async function searchByDistance({
 					} else if (type.includes('percentRange')) {
 						const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
 						const rangeLower = round(tag.reference * (100 - tag.range) / 100, 0);
-						if (rangeUpper !== rangeLower) {query[queryl] += tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
+						if (rangeUpper !== rangeLower) {query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
 						else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
 					} else if (type.includes('absRange')) {
 						const rangeUpper = tag.reference + tag.range;
 						const rangeLower = tag.reference - tag.range;
-						if (rangeUpper !== rangeLower) {query[queryl] += tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
+						if (rangeUpper !== rangeLower) {query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;} 
 						else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
 					} else if (type.includes('combinations')) {
 						const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
 						const tagComb = k_combinations(tag.reference, k);
 						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(tagComb, tagNameTF, 'OR', 'AND', void(0), match), 'OR');}
-						else {query[queryl] += query_combinations(tagComb, tagNameTF, 'OR', 'AND');}
+						// Group as small as possible for query purposes
+						const tagCombSet = tagComb.map((a) => new Set(a));
+						let groups = [];
+						tagCombSet.forEach((s, i) => {
+							let bDone = false;
+							groups.forEach((sg, j) => {
+								const intersection = sg.base.intersection(s);
+								if (sg.base.size === s.size && intersection.size === sg.base.size - 1 || sg.base.size === s.size - 1 && intersection.size === sg.base.size) {
+									if (sg.base.size === s.size) {
+										sg.or.add(...sg.base.difference(intersection));
+										sg.base = intersection;
+									}
+									sg.or.add(...s.difference(intersection));
+									bDone = true;
+								}
+							});
+							if (!bDone) {groups.push({base: s, or: new Set()});}
+						});
+						groups = groups.map((o) => {return {base: [...o.base], or: [...o.or]};});
+						groups = groups.map((o) => {
+							return (o.or.length 
+								? query_join(query_combinations(o.base, tagNameTF, 'AND').concat(query_combinations(o.or, tagNameTF, 'OR')), 'AND') 
+								: void(0)
+							);
+						}).filter(Boolean);
+						query[queryl] = query_join(groups, 'OR');
+						// const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+						// if (tagNameTF.length > 1) {query[queryl] = query_join(query_combinations(tagComb, tagNameTF, 'OR', 'AND', void(0), match), 'OR');}
+						// else {query[queryl] = query_combinations(tagComb, tagNameTF, 'OR', 'AND');}
 					} else {
 						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						if (tagNameTF.length > 1) {query[queryl] += query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');}
-						else {query[queryl] += query_combinations(tag.reference, tagNameTF, 'OR');}
+						if (tagNameTF.length > 1) {query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');}
+						else {query[queryl] = query_combinations(tag.reference, tagNameTF, 'OR');}
 					}
 				}
 			} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags');}
@@ -906,7 +934,8 @@ async function searchByDistance({
 			}
 		}
 		if (forcedQuery.length) { //Add user input query to the previous one
-			if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(forcedQuery);}
+			// Swap order to improve performance, since the forced query always short circuits the search
+			if (query[querylength].length) {query[querylength] = _p(forcedQuery) + ' AND ' + _p(query[querylength]);}
 			else {query[querylength] += forcedQuery;}
 		}
 		if (!query[querylength].length) {query[querylength] = 'ALL';}
@@ -931,9 +960,8 @@ async function searchByDistance({
 		
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
-		let handleList;
-		try {handleList = fb.GetQueryItems(libraryItems, query[querylength]);} // Sanity check
-		catch (e) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
+		let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
+		if (!handleList) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks

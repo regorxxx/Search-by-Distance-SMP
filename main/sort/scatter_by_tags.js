@@ -1,8 +1,8 @@
 ﻿'use strict';
-//03/11/22
+//19/12/22
 
-include('..\\helpers\\helpers_xxx_basic_js.js');
-include('..\\helpers\\helpers_xxx_prototypes.js');
+include('..\\..\\helpers\\helpers_xxx_basic_js.js');
+include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 
 /*	
 	Scatter by tags

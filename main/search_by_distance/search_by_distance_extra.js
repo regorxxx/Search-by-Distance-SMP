@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/12/22
+//19/12/22
 
 include('search_by_distance.js');
 
@@ -244,7 +244,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
 	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
 	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
-	include('..\\helpers\\world_map_tables.js');
+	include('..\\world_map\\world_map_tables.js');
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist
 	const dataId = 'artist';

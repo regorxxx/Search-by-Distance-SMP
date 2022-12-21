@@ -1,12 +1,12 @@
 ﻿'use strict';
-//15/12/22
+//19/12/22
 
-include('menu_xxx.js');
-include('helpers_xxx.js');
-include('helpers_xxx_file.js');
-include('helpers_xxx_prototypes.js');
-include('helpers_xxx_time.js');
-include('helpers_xxx_input.js');
+include('..\\..\\helpers\\menu_xxx.js');
+include('..\\..\\helpers\\helpers_xxx.js');
+include('..\\..\\helpers\\helpers_xxx_file.js');
+include('..\\..\\helpers\\helpers_xxx_prototypes.js');
+include('..\\..\\helpers\\helpers_xxx_time.js');
+include('..\\..\\helpers\\helpers_xxx_input.js');
 
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
@@ -145,8 +145,7 @@ function createConfigMenu(parent) {
 				const val = properties[key][1];
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + val + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					let input;
-					input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
+					const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
 					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
