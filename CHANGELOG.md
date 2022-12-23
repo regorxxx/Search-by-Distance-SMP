@@ -106,6 +106,7 @@
 - Similar artists: in some cases similar artists were duplicated.
 - Similar artists: crash when date tag was not set (now uses tracks from any date in such case).
 - Cache: graph links cache re-calculation is now blocked when there is already an on-going calculation. User is asked to manually re-run it afterwards via popups now.
+- Cache: graph links cache is not re-calculated on first init after installation if there are other 'Search by Distance' buttons present on other panels.
 - Buttons: crash when adding buttons files not associated to a category by their filename. Only relevant for developers.
 - Buttons: no background on buttons configuration for toolbar was not properly set on script init/reloading.
 - Buttons: multiple crashes due to wrong variable name when opening popups.
