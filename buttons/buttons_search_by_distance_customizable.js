@@ -1,10 +1,10 @@
 ﻿'use strict';
-//19/12/22
+//22/12/22
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 
-try {window.DefinePanel('Search by Distance Customizable Button', {author:'xxx'});} catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */} //May be loaded along other buttons
+try {window.DefineScript('Search by Distance Customizable Button', {author:'xxx', features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */} //May be loaded along other buttons
 
 include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('helpers\\buttons_sbd_menu_theme.js'); // Button menu
@@ -64,7 +64,8 @@ addButton({
 	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
 	{
 		'on_notify_data': (parent, name, info) => {
-			if (name === 'bio_imgChange') {return;}
+			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev') {return;}
+			if (!name.startsWith('Search by Distance')) {return;}
 			switch (name) {
 				case 'Search by Distance: share configuration': {
 					if (info) {
@@ -81,6 +82,7 @@ addButton({
 							overwriteProperties(parent.buttonsProperties);
 						}
 						parent.switcHighlight(false);
+						window.Repaint();
 					}
 					break;
 				}
