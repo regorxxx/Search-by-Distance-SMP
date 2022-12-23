@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/12/22
+//23/12/22
 
 /*
 	Search by Distance
@@ -219,9 +219,11 @@ if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorC
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMissmatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
-	console.log('SearchByDistance: CRC mistmatch. Deleting old json cache.');
-	_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
-	_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+	if (sbd.panelProperties.descriptorCRC[1] !== -1) { // There may be multiple panels, don't nuke it on first init on a new panel
+		console.log('Search by Distance: CRC mistmatch. Deleting old json cache.');
+		_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
+		_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+	}
 	sbd.panelProperties.descriptorCRC[1] = descriptorCRC;
 	overwriteProperties(sbd.panelProperties); // Updates panel
 }
@@ -230,20 +232,20 @@ if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 var cacheLinkSet;
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLink.json');
-	if (data.size) {cacheLink = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Used Cache - cacheLink from file.');}}
+	if (data.size) {cacheLink = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Used Cache - cacheLink from file.');}}
 }
 if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
-	if (data.size) {cacheLinkSet = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Used Cache - cacheLinkSet from file.');}}
+	if (data.size) {cacheLinkSet = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Used Cache - cacheLinkSet from file.');}}
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: sbd.panelProperties});}
 // Ask others instances to share cache on startup
 if (typeof cacheLink === 'undefined') {
-	window.NotifyOthers('SearchByDistance: requires cacheLink map', true);
+	setTimeout(() => {window.NotifyOthers('Search by Distance: requires cacheLink map', true);}, 1000);
 }
 if (typeof cacheLinkSet === 'undefined') {
-	window.NotifyOthers('SearchByDistance: requires cacheLinkSet map', true);
+	setTimeout(() => {window.NotifyOthers('Search by Distance: requires cacheLinkSet map', true);}, 1000);
 }
 async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, properties = null} = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
@@ -262,7 +264,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity)
 					.map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|')
 				: _t(globTags.genre) + '|' + _t(globTags.style);
-			console.log('SearchByDistance: tags used for cache - ' + genreStyleTags);
+			console.log('Search by Distance: tags used for cache - ' + genreStyleTags);
 			const tfo = fb.TitleFormat(genreStyleTags);
 			const styleGenres = await new Promise((resolve) => {
 				const libItems = fb.GetLibraryItems().Convert();
@@ -299,15 +301,15 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 		}
 		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
 		if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
-		console.log('SearchByDistance: New Cache - cacheLink');
-		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);
+		console.log('Search by Distance: New Cache - cacheLink');
+		window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);
 	} else if (newCacheLink) {
 		cacheLink = newCacheLink;
 	}
 	if (typeof cacheLinkSet === 'undefined' && !newCacheLinkSet) { // only required if on_notify_data did not fire before
 		cacheLinkSet = new Map();
-		console.log('SearchByDistance: New Cache - cacheLinkSet');
-		window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);
+		console.log('Search by Distance: New Cache - cacheLinkSet');
+		window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);
 	} else if (newCacheLinkSet) {
 		cacheLinkSet = newCacheLinkSet;
 	}
@@ -319,41 +321,42 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 }
 
 addEventListener('on_notify_data', (name, info) => {
-	if (name === 'bio_imgChange') {return;}
+	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev') {return;}
+	if (!name.startsWith('Search by Distance')) {return;}
 	switch (name) {
-		case 'SearchByDistance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
+		case 'Search by Distance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLink !== 'undefined' && cacheLink.size) { 
-				debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}}, 1000)();
-				console.log('SearchByDistance: Requested Cache - cacheLink.');
+				debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);}}, 1000)();
+				console.log('Search by Distance: Requested Cache - cacheLink.');
 			}
 			break;
 		}
-		case 'SearchByDistance: requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
+		case 'Search by Distance: requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) {
-				debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
-				console.log('SearchByDistance: Requested Cache - cacheLinkSet.');
+				debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
+				console.log('Search by Distance: Requested Cache - cacheLinkSet.');
 			}
 			break;
 		}
-		case 'SearchByDistance: cacheLink map': {
+		case 'Search by Distance: cacheLink map': {
 			if (info) {
-				console.log('SearchByDistance: Used Cache - cacheLink from other panel.');
+				console.log('Search by Distance: Used Cache - cacheLink from other panel.');
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
 				updateCache({newCacheLink: new Map(data)});
 			}
 			break;
 		}
-		case 'SearchByDistance: cacheLinkSet map': {
+		case 'Search by Distance: cacheLinkSet map': {
 			if (info) {
-				console.log('SearchByDistance: Used Cache - cacheLinkSet from other panel.');
+				console.log('Search by Distance: Used Cache - cacheLinkSet from other panel.');
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
 				updateCache({newCacheLinkSet: new Map(data)});
 			}
 			break;
 		}
-		case 'SearchByDistance: requires cacheLink map': {
+		case 'Search by Distance: requires cacheLink map': {
 			
 			break;
 		}
@@ -361,7 +364,7 @@ addEventListener('on_notify_data', (name, info) => {
 });
 
 addEventListener('on_script_unload', () => {
-	if (sbd.panelProperties.bStartLogging[1]) {console.log('SearchByDistance: Saving Cache.');}
+	if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Saving Cache.');}
 	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
 	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
 	if (!sbd.panelProperties.firstPopup[1]) {
@@ -602,7 +605,7 @@ async function searchByDistance({
 		// Method check
 		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
 		// Start calcs
-		if (bProfile) {var test = new FbProfiler('searchByDistance');}
+		if (bProfile) {var test = new FbProfiler('Search by Distance');}
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
@@ -1702,8 +1705,8 @@ async function searchByDistance({
 			if (bBasicLogging) {console.log('Final selection length: ' + finalPlaylistLength + ' tracks.');}
 		}
 		// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
-		if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLink map', cacheLink);}
-		if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers(window.Name + ' SearchByDistance: cacheLinkSet map', cacheLinkSet);}
+		if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);}
+		if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);}
 		// Output handle list (as array), the score data, current selection (reference track) and more distant track
 		return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handleList[scoreData[poolLength - 1].index] : -1)];
 }
@@ -1778,7 +1781,7 @@ function saveCache(cacheMap, path) {
 function loadCache(path) {
 	let cacheMap = new Map();
 	if (_isFile(path)) {
-		if (utils.GetFileSize(path) > 400000000) {console.log('SearchByDistance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
+		if (utils.GetFileSize(path) > 400000000) {console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
 		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  utf8);
 		if (obj) { 
 			obj = Object.entries(obj);
