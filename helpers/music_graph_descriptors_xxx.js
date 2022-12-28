@@ -97,7 +97,7 @@ const music_graph_descriptors = {
 		['Alternative_supergenre'			,	['Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Celtic Rock','Pop Punk','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
 		['Hardcore Punk_supergenre'			,	['Metalcore','Post-Hardcore','Math Rock','Grindcore','Crossover Thrash','Hardcore Punk','Anarcho-Punk','Stoner Rock','Stoner Sludge','Proto-Stoner Rock']],
 		['Contemporary_supergenre'			,	['Indie','Freak Folk','Neo-Prog','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Post-Britpop','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock']],
-		['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Electroclash','Post-Britpop','Emo Pop','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
+		['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
 		['Modern Folk_supergenre'			,	['Folk-Rock','Folk Pop','Folk Baroque','Folk Metal','Psychedelic Folk','Contemporary Folk','Folk-Jazz','Folktronica','Progressive Folk','Folk Punk','Hang Music','Ambient Folk']],
 		['European Pre-Modern Folk_supergenre',	['Medieval','Renaissance']],
 		['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango','Samba','Nueva Gaita','Mambo']],
@@ -155,7 +155,7 @@ const music_graph_descriptors = {
 		['Extreme Metal XL'					,	['Extreme Metal','Black Metal','Death Metal','Doom Metal','Thrash Metal','Speed Metal']],
 		['British Folk-Rock XL'				,	['British Folk-Rock','British Folk-Jazz','Folk Baroque']],
 		['Roots Rock'						,	['Country Pop','Country Rock','Heartland Rock','Southern Rock','Pub Rock','Folk-Rock','Celtic Rock']],
-		['Mainstream Pop'					,	['Urban Soul','Electropop','Dance Pop','Disco Pop','Hypersoul','Contemporary R&B']],
+		['Mainstream Pop'					,	['Urban Soul','Electropop','Dance Pop','Disco Pop','Hypersoul','Contemporary R&B','Sophisti-Pop']],
 		['Traditional Pop'					,	['Vaudeville Blues','Doo Wop','Vocal Pop']],
 		['Vocal Pop'						,	['R&B','Doo Wop','Rockabilly','Brill Building Sound','Close Harmony','Jazz-Pop']],
 		['Disco XL'							,	['Funktronica','Electrofunk','Disco','Eurodisco','Disco Pop']],
@@ -302,7 +302,8 @@ const music_graph_descriptors = {
 		['Dembow'							,	['Dancehall']],
 		['Renaissance Rock'					,	['British Folk-Rock','Progressive Folk','Celtic Rock']],
 		['Nueva Gaita'						,	['Folktronica','Colombian Folk']],
-		['Mambo'							,	['Son','Swing']]
+		['Mambo'							,	['Son','Swing']],
+		['Sophisti-Pop'						,	['Soul-Jazz','80s Rock','New Wave']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -316,7 +317,8 @@ const music_graph_descriptors = {
 		['Dembow'							,	['Dub']],
 		['Renaissance Rock'					,	['New Age','Medieval','Renaissance']],
 		['Nueva Gaita'						,	['Pagan Folk','Ambient Folk']],
-		['Mambo'							,	['Afro-Cuban']]
+		['Mambo'							,	['Afro-Cuban']],
+		['Sophisti-Pop'						,	['Urban Soul','Techno']]
 	],
 	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -345,7 +347,8 @@ const music_graph_descriptors = {
 		['Heavy Prog'						,	['Fusion', 'Jazz-Rock','Symphonic Rock','Crossover Prog','Southern Rock','Heartland Rock','Soft Rock']],
 		['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']],
 		['Desert Blues'						,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Hard Rock','Heartland Rock']],
-		['Anatolian Rock'					,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Heartland Rock']]
+		['Anatolian Rock'					,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Heartland Rock']],
+		['Sophisti-Pop'						,	['Classic Rock','Metal_supergenre','Post-Britpop','Europop','Dance Pop','Disco Pop']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound 
