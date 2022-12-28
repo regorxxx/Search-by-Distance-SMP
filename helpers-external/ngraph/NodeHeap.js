@@ -1,3 +1,4 @@
+// 28/12/2022
 'use strict';
 
 /**
@@ -20,6 +21,7 @@ function NodeHeap(data, options) {
   options = options || {};
 
   this.data = data || [];
+  Object.defineProperty(this, 'length', {enumerable: true, configurable: true, writable: true, value: 0}); // Ensure there is no getter
   this.length = this.data.length;
   this.compare = options.compare || defaultCompare;
   this.setNodeId = options.setNodeId || noop;

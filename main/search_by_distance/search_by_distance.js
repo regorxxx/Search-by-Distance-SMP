@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/12/22
+//28/12/22
 
 /*
 	Search by Distance
@@ -487,7 +487,7 @@ async function searchByDistance({
 		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Recipe check
-		const bUseRecipe = !!(recipe && (recipe.length || Object.keys(recipe).length));
+		const bUseRecipe = !!(recipe && (typeof recipe === 'string' && recipe.length || Object.keys(recipe).length));
 		const recipeProperties = {};
 		if (bUseRecipe) {
 			let path;
@@ -570,7 +570,7 @@ async function searchByDistance({
 		// Tags check
 		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Theme check
-		const bUseTheme = !!(theme && (theme.length || Object.keys(theme).length));
+		const bUseTheme = !!(theme && (typeof recipe === 'string' && theme.length || Object.keys(theme).length));
 		if (bUseTheme) {
 			let path;
 			if (isString(theme)) { // File path: try to use plain path or themes folder + filename
@@ -754,7 +754,7 @@ async function searchByDistance({
 			const type = tag.type;
 			if (tag.weight === 0 || tag.tf.length === 0) {continue;}
 			if (type.includes('virtual')) {continue;}
-			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.length || tag.reference !== null))) {
+			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.tf.length || tag.reference !== null))) {
 				originalWeightValue += tag.weight;
 				if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 					queryl = query.length;
