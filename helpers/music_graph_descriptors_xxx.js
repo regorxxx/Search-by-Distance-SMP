@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/12/22
+//03/01/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -89,7 +89,7 @@ const music_graph_descriptors = {
 	// considered 'similar' in an 'listening session' sense. For ex. 'Space Rock' and 'Sourthern Rock' can be considered Rock but pretty
 	// different when looking for Rock tracks. On the other hand, they are similar if you compare them to Jazz.
 	style_supergenre: [
-		['Industrial_supergenre'			,	['Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
+		['Industrial_supergenre'			,	['Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Folk','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
 		['Metal_supergenre'					,	['Groove Metal','Post-Metal','Neo-Classical Metal','Stoner Doom','Stoner Sludge','Metalcore','Nu Metal','Rap Metal','Grunge Metal','Symphonic Metal','Gothic Metal','Black Metal','Ambient Metal','Atmospheric Black Metal','Stoner Metal','Sludge Metal','Death Metal','Grindcore','Doom Metal','Crossover Thrash','Extreme Metal','Speed Metal','Thrash Metal','British Metal','Glam Metal','Hair Metal','Pop Metal','Power Metal','Progressive Metal','Classic Metal','Proto-Metal']],
 		['Rock & Roll_supergenre'			,	['Rockabilly Revival','Garage Rock','Surf Rock','Rock & Roll','Rockabilly','Skiffle']],
 		['Classic Rock_supergenre'			,	['Proto-Metal','Heartland Rock','Arena Rock','Southern Rock','Glam Rock','Proto-Prog','Progressive Rock','Proto-Prog','Crossover Prog','Symphonic Rock','Heavy Prog','Eclectic Prog','Flamenco Rock','Krautrock','Math Rock','Neo-Prog','Italian Prog. Rock','Japanese Prog. Rock','Space Rock','Avant-Prog','Hard Rock','Detroit Rock','Blues Rock','Boogie Rock','Acid Rock','Psychedelic Rock','Space Rock','Raga Rock','Anatolian Rock','Psychedelic Pop','Funk Rock','British Psychedelia','Renaissance Rock','Folk-Rock','Canterbury Scene','Chicano Rock','Latin Rock','Candombe Beat','Beat Music','Tulsa Sound']],
@@ -102,7 +102,7 @@ const music_graph_descriptors = {
 		['European Pre-Modern Folk_supergenre',	['Medieval','Renaissance']],
 		['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango','Samba','Nueva Gaita','Mambo']],
 		['North American Folk_supergenre'	,	['Folk-Rock','Freak Folk','Traditional Folk','Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk','Old-Timey','Appalachian']],
-		['Nordic Folk_supergenre'			,	['Polka','Traditional European Folk','Pagan Folk','German Folk','Joik']],
+		['Nordic Folk_supergenre'			,	['Polka','Traditional European Folk','Pagan Folk','German Folk','Joik','Nordic Folk']],
 		['Celtic Folk_supergenre'			,	['Circle','Jig','Scottish','Celtic Folk','Traditional European Folk','Bal Folk','Irish','Scottish Folk','Celtic New Age']],
 		['African Folk_supergenre'			,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
 		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk']],
@@ -196,10 +196,11 @@ const music_graph_descriptors = {
 		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk']],
 		['African Folk XL'					,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
 		['Bal Folk XL'						,	['Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Jig','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals']],
-		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Folk Metal','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani']],
-		['Celtic Folk XL'					,	['Celtic Folk','Folk Metal','Pagan Folk','Joik']],
+		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani']],
+		['Celtic-Nordic Folk XL'			,	['Celtic Folk','Folk Metal','Pagan Folk','Joik','Nordic Folk']],
 		['European Pre-Modern Folk XL'		,	['Medieval','Renaissance']],
 		['Modern Folk XL'					,	['Contemporary Folk','Folk Pop','Folk-Rock']],
+		['Neo Folk XL'						,	['Industrial Folk','Folk Metal','Pagan Folk']],
 		['Ambient XL'						,	['Ambient','Ambient Industrial','Nature Music','Ambient Rock','Ambient Folk','Ambient Electronic','Ambient Metal','Ambient New Age','Ambient Classical','Ambient Funk']],
 		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan']]
 	],
@@ -303,7 +304,9 @@ const music_graph_descriptors = {
 		['Renaissance Rock'					,	['British Folk-Rock','Progressive Folk','Celtic Rock']],
 		['Nueva Gaita'						,	['Folktronica','Colombian Folk']],
 		['Mambo'							,	['Son','Swing']],
-		['Sophisti-Pop'						,	['Soul-Jazz','80s Rock','New Wave']]
+		['Sophisti-Pop'						,	['Soul-Jazz','80s Rock','New Wave']],
+		['Industrial Folk'					,	['Pagan Folk','Nordic Folk','Progressive Folk','Folk Metal']],
+		['Neo Folk XL'						,	['Dark Ambient']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -461,7 +464,8 @@ const music_graph_descriptors = {
 		['Folk Baroque'						,	['Folk-Baroque'						]],
 		['Anatolian Rock'					,	['Anadolu Rock'						]],
 		['Joik'								,	['Yoik','Luohti','Vuolle','Juoiggus']],
-		['Baroque Pop'						,	['Chamber pop'						]]
+		['Baroque Pop'						,	['Chamber pop'						]],
+		['Pagan Folk'						,	['Dark Folk','Folk Noir'			]]
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
