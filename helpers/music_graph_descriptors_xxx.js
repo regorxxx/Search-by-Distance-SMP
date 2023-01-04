@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/23
+//04/01/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -426,6 +426,7 @@ const music_graph_descriptors = {
 		['House_supergenre'					,	['House'							]],
 		['Trance_supergenre'				,	['Trance'							]],
 		['Folk Music_supercluster'			,	['Folk','Folk-Rock'					]],
+		['Breakbeat_supergenre'				,	['Breakbeat'						]],
 		['Classical Renaissance Era_supergenre',['Classical Renaissance'			]],
 		['Classical Medieval Era_supergenre',	['Classical Medieval'				]],
 		['Classical Baroque Era_supergenre',	['Baroque'							]],
