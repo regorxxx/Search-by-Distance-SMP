@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/12/22
+//08/01/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -380,7 +380,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	// Usually fires if you add A as substitution to B but also add A as primary/secondary origin to B. Or as anti-influence.
 	const wrongLinks = influenceLinks.intersection(zeroLinks); // This one requires music_graph_html_xxx.js when loaded within html!
 	if (wrongLinks.size !== 0) {
-		console.log('music_graph_descriptors_xxx Warning: there are some links with distance equal to 0 but a non zero influence distance modifier.\n' + '	' + Array.from(wrongLinks).join(', '));
+		console.log('music_graph_descriptors_xxx Warning: there are some links with distance equal to 0 but a non zero influence distance modifier.\n' + '	' + [...wrongLinks].join(', '));
 		bWarning = true;
 	}
 	// Standard keys >= 0

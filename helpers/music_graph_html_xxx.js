@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/10/22
+//08/01/23
 
 /* 
 	These helper are used on debug function at 'music_graph_xxx.js' so we need it for the html file too
@@ -38,7 +38,7 @@ function capitalize(s) {
 function capitalizeAll(s, sep = ' ', bJoinSep = true) { // Can use RegEx as separator, when using RegEx with capture groups to also include separators on split array, bJoinSep should be false to join 'as is'
 	if (typeof s !== 'string') {return '';}
 	if (isArray(sep)) {
-		const copy = Array.from(s.toLowerCase());
+		const copy = [...s.toLowerCase()];
 		const len = s.length;
 		for (const sep_i of sep) {
 			s = capitalizeAll(s, sep_i, bJoinSep);
