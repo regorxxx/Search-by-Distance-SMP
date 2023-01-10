@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//10/01/22
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -166,9 +166,11 @@ function createConfigMenu(parent) {
 		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
 		options.forEach((key) => {
 			const subMenuName = menu.newMenu(capitalize(key), menuName);
+			const baseTag = tags[key];
+			const defTag = {weight: 0, tf: '', baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
-				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('tf');
-				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('tf') || !baseTag);
+				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
 				if (!tag.type.includes('virtual')) {
 					const value = tag.tf.join(',');
 					const entryText = 'Remap...' + '\t[' + (
@@ -180,7 +182,7 @@ function createConfigMenu(parent) {
 						const example = '["GENRE","LASTFM_GENRE","GENRE2"]';
 						const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\n\nFor example:\n' + example, 'Search by distance', example, void(0), true);
 						if (input === null) {return;}
-						tags[key].tf = input;
+						baseTag.tf = input;
 						properties.tags[1] = JSON.stringify(tags);
 						overwriteProperties(properties); // Updates panel
 						if (tag.type.includes('graph')) {
@@ -196,13 +198,13 @@ function createConfigMenu(parent) {
 				}
 			}
 			{	// Ranges
-				if ((tags[key] || recipe.tags[key]).hasOwnProperty('range')) {
+				if ((baseTag || recipe.tags[key]).hasOwnProperty('range')) {
 					const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('range');
-					const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+					const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
 					menu.newEntry({menuName: subMenuName, entryText: 'Range\t[' + tag.range + ']' + (bRecipe ? '(forced by recipe)' : ''), func: () => {
 						const input = Input.number('int positive', tag.range, 'Range sets how numeric tags should be compared.\nA zero value forces an exact match, while greater ranges allow some interval to be compared against.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 10);
 						if (input === null) {return;}
-						tags[key].range = input;
+						baseTag.range = input;
 						properties.tags[1] = JSON.stringify(tags);
 						overwriteProperties(properties);
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
@@ -214,26 +216,26 @@ function createConfigMenu(parent) {
 				const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
 				const bIsDyngenreRecipe = (key === 'dynGenre' && bIsDyngenreMethodRecipe);
 				const bIsDyngenreProp = (key === 'dynGenre' && bIsDyngenreMethodProp);
-				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('weight');
-				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('weight') || !baseTag);
+				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
 				const entryText = 'Weight' + (bRecipe || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : tag.weight) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : tag.weight) + ']');
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
 					const input = Input.number('int positive', tag.weight, 'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 15);
 					if (input === null) {return;}
-					tags[key].weight = input;
+					baseTag.weight = input;
 					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties);
 				}, flags: bRecipe || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING});
 			}
 			{	// Scoring
 				const options = ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL'];
-				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('scoringDistribution');
-				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('scoringDistribution') || !baseTag);
+				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
 				const subMenuName2 = menu.newMenu('Scoring...', subMenuName);
 				options.forEach((option, i) => {
 					const entryText = option + (bRecipe && tag.scoringDistribution === option ? '\t(forced by recipe)' : '');
 					menu.newEntry({menuName: subMenuName2, entryText, func: () => {
-						tags[key].scoringDistribution = option;
+						baseTag.scoringDistribution = option;
 						properties.tags[1] = JSON.stringify(tags);
 						overwriteProperties(properties); // Updates panel
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
@@ -242,13 +244,13 @@ function createConfigMenu(parent) {
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 			{	// Base score
-				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && recipe.tags[key].hasOwnProperty('baseScore');
-				const tag = bRecipe ? {...tags[key], ...recipe.tags[key]} : tags[key];
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('baseScore') || !baseTag);
+				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
 				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
 					const input = Input.number('int positive', tag.baseScore, 'Base score sets the minimum score (in %) given to this tag in case the compared track is missing it (when it\'s present on the reference). In most cases this should be set to zero, but it may be changed for some tags in case the library is not fully tagged, and thus missing values for some tracks.\n\nNote this value is further transformed by the scoring distribution method. i.e. 50% equals a final score of 50% for linear method.\n\nEnter number: (from 0 to 100)', 'Search by distance', 15, [(n) => n >= 0 && n <= 100]);
 					if (input === null) {return;}
-					tags[key].baseScore = input;
+					baseTag.baseScore = input;
 					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties);
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
