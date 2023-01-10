@@ -16,6 +16,7 @@
 			"tf": [
 				"ENERGY"
 			],
+			"baseScore": 0,
 			"scoringDistribution": "LINEAR",
 			"type": [
 				"number",
