@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/01/22
+//11/01/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -15,34 +15,45 @@ function createConfigMenu(parent) {
 	const tags = JSON.parse(properties.tags[1]);
 	// Recipe forced theme?
 	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}: _jsonParseFileCheck(recipePath + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
-	}
-	// Process nested recipes
-	if (recipe.hasOwnProperty('recipe')) {
-		const toAdd = processRecipe(recipe.recipe);
-		delete toAdd.recipe;
-		Object.keys(toAdd).forEach((key) => {
-			if (!recipe.hasOwnProperty(key)) {
-				recipe[key] = toAdd[key];
-			} else if (key === 'tags') {
-				for (let key in toAdd.tags) {
-					if (!recipe.tags.hasOwnProperty(key)) {
-						recipe.tags[key] = toAdd.tags[key];
-					} else {
-						for (let subKey in toAdd.tags[key]) {
-							if (!recipe.tags[key].hasOwnProperty(subKey)) {
-								recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+		recipe = _isFile(properties.recipe[1]) 
+			? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}
+			: _jsonParseFileCheck(recipePath + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
+		if (Object.keys(recipe).length !== 0) {
+			const result = testRecipe({json: recipe, baseTags: tags});
+			if (!result.valid) {console.popup(result.report.join('\n\t- '), 'Recipe error');}
+			// Process nested recipes
+			if (recipe.hasOwnProperty('recipe')) {
+				const toAdd = processRecipe(recipe.recipe);
+				delete toAdd.recipe;
+				Object.keys(toAdd).forEach((key) => {
+					if (!recipe.hasOwnProperty(key)) {
+						recipe[key] = toAdd[key];
+					} else if (key === 'tags') {
+						for (let key in toAdd.tags) {
+							if (!recipe.tags.hasOwnProperty(key)) {
+								recipe.tags[key] = toAdd.tags[key];
+							} else {
+								for (let subKey in toAdd.tags[key]) {
+									if (!recipe.tags[key].hasOwnProperty(subKey)) {
+										recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+									}
+								}
 							}
 						}
 					}
+				});
+			}
+			// Process placeholders for tags
+			if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
+				for (let key in recipe.tags) { // Recipe's tags missing some property
+					for (let prop in recipe.tags['*']) {
+						if (!recipe.tags[key].hasOwnProperty(prop)) {recipe.tags[key][prop] = recipe.tags['*'][prop];}
+					}
+				}
+				for (let key in tags) { // Base tags not on recipe
+					if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
 				}
 			}
-		});
-	}
-	// Process placeholders for tags
-	if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
-		for (let key in tags) {
-			if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
 		}
 	}
 	// Recipe forced properties?
@@ -167,7 +178,7 @@ function createConfigMenu(parent) {
 		options.forEach((key) => {
 			const subMenuName = menu.newMenu(capitalize(key), menuName);
 			const baseTag = tags[key];
-			const defTag = {weight: 0, tf: '', baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
+			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
 				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('tf') || !baseTag);
 				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//11/01/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -12,6 +12,7 @@ function createRecipeMenu(parent) {
 	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
+	const tags = JSON.parse(properties.tags[1]);
 	// Hide test files first
 	const testRegex = /test_.*|int_.*/i;
 	files.forEach((file) => {
@@ -129,7 +130,8 @@ function createRecipeMenu(parent) {
 		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
 		if (names.hasOwnProperty(name)) {names[name]++;}
 		else {names[name] = 1;}
-		const entryText = names[name] === 1 ? name : name + ' ' + _p(names[name]);
+		const result = testRecipe({json: recipe, baseTags: tags});
+		const entryText = (names[name] === 1 ? name : name + ' ' + _p(names[name])) + (!result.valid ? '\t(error)' : '');
 		menus.push(entryText);
 		recipeMenu.newEntry({entryText, func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -141,6 +143,8 @@ function createRecipeMenu(parent) {
 					properties.data[1] = JSON.stringify(data);
 					overwriteProperties(properties);
 				}
+			} else if (!result.valid) { // Don't allow to use a recipe with errors, show report instead
+				console.popup(result.report.join('\n\t- '), 'Recipe error'); 
 			} else {
 				properties.recipe[1] = file;
 				data.recipe = name;

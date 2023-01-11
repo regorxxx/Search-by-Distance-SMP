@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/22
+//11/01/23
 
 /*
 	Search by Distance
@@ -411,6 +411,105 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t'));
 }
 
+function testRecipe({path = null, json = null, baseTags = null} = {}) {
+	const result = {valid: true , report: []};
+	let recipe;
+	if (!path && !json) {result.valid = false; result.report.push('No recipe provided.'); return result;}
+	if (!baseTags) {result.valid = false; result.report.push('No tags provided.'); return result;}
+	else if (path) {
+		if (_isFile(path)) {
+			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
+		} else {result.valid = false; result.report.push('Recipe file not found.'); return result;}
+	} else {recipe = clone(json);}
+	if (Object.keys(recipe).length === 0) {result.valid = false; result.report.push('Recipe is empty.'); return result;}
+	// Process nested recipes
+	if (recipe.hasOwnProperty('recipe')) {
+		const toAdd = processRecipe(recipe.recipe);
+		delete toAdd.recipe;
+		Object.keys(toAdd).forEach((key) => {
+			if (!recipe.hasOwnProperty(key)) {
+				recipe[key] = toAdd[key];
+			} else if (key === 'tags') {
+				for (let key in toAdd.tags) {
+					if (!recipe.tags.hasOwnProperty(key)) {
+						recipe.tags[key] = toAdd.tags[key];
+					} else {
+						for (let subKey in toAdd.tags[key]) {
+							if (!recipe.tags[key].hasOwnProperty(subKey)) {
+								recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+	const tags = recipe.hasOwnProperty('tags') ? recipe.tags : null;
+	// Process placeholders for tags
+	if (tags) {
+		if (recipe.tags.hasOwnProperty('*')) {
+			for (let key in tags) {
+				for (let prop in tags['*']) {
+					if (!tags[key].hasOwnProperty(prop)) {tags[key][prop] = tags['*'][prop];}
+				}
+			}
+		}
+	}
+	// Test
+	for (let key in recipe) {
+		if (!recipeAllowedKeys.has(key)) {
+			result.valid = false;
+			result.report.push('Recipe contains non valid key: ' + key); 
+		}
+	}
+	const validVarTypes = ['string', 'number'];
+	const validValTypes = ['multiple', 'single'];
+	const checkKeys = ['weight', 'tf', 'baseScore', 'scoringDistribution'];
+	const validTagKeys = ['range', 'type', 'combs', ...checkKeys];
+	for (let key in tags) {
+		if (key === '*') {continue;}
+		const tag = baseTags.hasOwnProperty(key) ? {...clone(baseTags[key]), ...tags[key]} : tags[key];
+		// Type
+		if (!tag.hasOwnProperty('type') || tag.type.length === 0) {
+			result.valid = false;
+			result.report.push('Tag missing type declaration: ' + key); 
+		} else {
+			if (!validVarTypes.some((t) => tag.type.includes(t))) {
+				result.valid = false;
+				result.report.push('Tag missing variable type ' + _p(validVarTypes.join(', ')) + ': ' + key); 
+			}
+			if (!validValTypes.some((t) => tag.type.includes(t))) {
+				result.valid = false;
+				result.report.push('Tag missing multi-value type ' + _p(validValTypes.join(', ')) + ': ' + key); 
+			}
+			// Range
+			const rangeRegx = /-*range/i;
+			if (tag.hasOwnProperty('range') && !tag.type.some((t) => rangeRegx.test(t))) {
+				result.valid = false;
+				result.report.push('Tag missing range type: ' + key); 
+			} else if (tag.type.some((t) => rangeRegx.test(t)) && !tag.hasOwnProperty('range')) {
+				result.valid = false;
+				result.report.push('Tag missing range property: ' + key); 
+			}
+		}
+		// General keys
+		for (let check of checkKeys) {
+			if (!tag.hasOwnProperty(check)) {
+				result.valid = false;
+				result.report.push('Tag missing property ' + _p(check) + ': ' + key); 
+			}
+		}
+		for (let check in tag) {
+			if (!validTagKeys.includes(check)) {
+				result.valid = false;
+				result.report.push('Tag contains non valid property ' + _p(check) + ': ' + key); 
+			}
+		}
+	}
+	if (!result.valid) {result.report.splice(0, 0, 'Recipe non valid: ' + recipe.name + (path ? '\n' + path : '') + '\n');}
+	return result;
+}
+
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
 async function searchByDistance({
@@ -486,6 +585,8 @@ async function searchByDistance({
 		const descr = music_graph_descriptors;
 		const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
+		// Tags check
+		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Recipe check
 		const bUseRecipe = !!(recipe && (typeof recipe === 'string' && recipe.length || Object.keys(recipe).length));
 		const recipeProperties = {};
@@ -494,9 +595,11 @@ async function searchByDistance({
 			if (isString(recipe)) { // File path
 				path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
 				recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
-				if (!recipe) {console.log('Recipe not found: ' + path); return;}
+				if (!recipe) {console.popup('Recipe not found: ' + path, 'Search by distance'); return;}
 			}
-			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
+			// Check recipe but don't crash
+			const result = testRecipe({json: recipe, baseTags: tags});
+			if (!result.valid) {console.popup(result.report.join('\n\t- '), 'Recipe error');}
 			// Rewrite args or use destruct when passing args
 			// Sel is omitted since it's a function or a handle
 			// Note a theme may be set within a recipe too, overwriting any other theme set
@@ -558,17 +661,27 @@ async function searchByDistance({
 					}
 				} else {console.log('Recipe has a variable not recognized: ' + key);}
 			});
+			// Process placeholders for tags
+			if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
+				for (let key in recipe.tags) { // Recipe's tags missing some property
+					for (let prop in recipe.tags['*']) {
+						if (!recipe.tags[key].hasOwnProperty(prop)) {recipe.tags[key][prop] = recipe.tags['*'][prop];}
+					}
+				}
+				for (let key in tags) { // Base tags not on recipe
+					if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
+				}
+			}
 			if (bBasicLogging) {
+				const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
 				console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
 				if (bOverwriteTheme) {console.log('Recipe forces its own theme.');}
 			}
 		}
 		const bUseRecipeTags = !!(bUseRecipe && recipeProperties.hasOwnProperty('tags'));
 		// Parse args
-		graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging)
+		graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging);
 		if (graphDistance === null) {return;}
-		// Tags check
-		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
 		// Theme check
 		const bUseTheme = !!(theme && (typeof recipe === 'string' && theme.length || Object.keys(theme).length));
 		if (bUseTheme) {
@@ -606,13 +719,22 @@ async function searchByDistance({
 		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
 		// Start calcs
 		if (bProfile) {var test = new FbProfiler('Search by Distance');}
+		// Copy recipe tags
+		if (bUseRecipeTags) {
+			for (let key in recipeProperties.tags) {
+				if (!tags.hasOwnProperty(key) && key !== '*') {
+					tags[key] = recipeProperties.tags[key];
+				}
+			}
+		}
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
 		const calcTags = {genreStyle: {weight: 0, tf: [], baseScore: 0, type: ['virtual']}};
 		for (let key in tags) {
 			const tag = tags[key];
-			const calcTag = {weight: tag.weight, tf: [], scoringDistribution: tag.scoringDistribution, baseScore: tag.baseScore || 0, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
+			// Set base values
+			const calcTag = {weight: tag.weight || 0, tf: [], scoringDistribution: tag.scoringDistribution || 'LINEAR', baseScore: tag.baseScore || 0, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
 			// Overwrite with properties
 			if (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key)) {
 				Object.keys(recipeProperties.tags[key]).filter((k) => k !== 'tf').forEach((k) => {
@@ -628,11 +750,11 @@ async function searchByDistance({
 			calcTags[key] = calcTag;
 			// Safety Check. Warn users if they try wrong settings
 			if (type.includes('single') && calcTag.tf.length > 1) {
-				console.log('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.');
+				console.popup('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.');
 				return;
 			}
 		}
-		if (bSearchDebug) {console.log(calcTags);}
+		if (bSearchDebug) {console.log(JSON.stringify(calcTags, void(0), '\t'));}
 		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
 		const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
 		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
