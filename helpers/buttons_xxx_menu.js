@@ -1,11 +1,11 @@
 ﻿'use strict';
-//08/11/22
+//12/01/23
 
 include('menu_xxx.js');
 include('helpers_xxx_properties.js')
 include('helpers_xxx_file.js');
 
-function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}) {
+function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}) {
 	const menu = new _menu();
 	const properties = parent.buttonsProperties;
 	const parentName = isFunction(parent.text) ? parent.text(parent) : parent.text;
@@ -48,12 +48,15 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 				}
 				if (value === input) {return;}
 				if (!checkProperty(properties[key], input)) {return;} // Apply properties check which should be personalized for input value
-				properties[key][1] = input;
+				properties[key][1] = (type === 'object' ? JSON.stringify(input) : input);
 				overwriteProperties(properties); // Updates panel
 				if (popups && popups.hasOwnProperty(key)) {
 					if (type !== 'boolean' || (type === 'boolean' && input)) {
 						fb.ShowPopupMessage(popups[key].popup, parentName);
 					}
+				}
+				if (callbacks && callbacks.hasOwnProperty(key)) {
+					callbacks[key](input);
 				}
 			}});
 			if (type === 'boolean') {
