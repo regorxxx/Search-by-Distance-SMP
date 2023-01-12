@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/22
+//12/01/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -65,7 +65,7 @@ addButton({
 			const args = {...defArgs, minScoreFilter: 65, scoreFilter: 70, graphDistance: music_graph_descriptors.intra_supergenre / 2};
 			searchByDistance(args);
 		}
-	}, null, void(0), 'Random mix with only nearest tracks', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix with only nearest tracks'}),
 	'Search by Distance similar tracks': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Tracks', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
@@ -79,7 +79,7 @@ addButton({
 			const args = {...defArgs, minScoreFilter: 55, scoreFilter: 60, graphDistance: music_graph_descriptors.cluster};
 			searchByDistance(args);
 		}
-	}, null, void(0), 'Random mix a bit varied on styles (but similar genre), most tracks within a decade', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix a bit varied on styles (but similar genre), most tracks within a decade'}),
 	'Search by Distance similar genres': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Genres', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
@@ -93,7 +93,7 @@ addButton({
 			const args = {...defArgs, minScoreFilter: 55, scoreFilter: 60, graphDistance: music_graph_descriptors.intra_supergenre * 3/2};
 			searchByDistance(args);
 		}
-	}, null, void(0), 'Random mix even more varied on styles/genres, most tracks within a decade', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix even more varied on styles/genres, most tracks within a decade'}),
 	'Search by Distance similar mood': new themedButton({x: 0, y: 0, w: 103, h: 22}, 'Similar Mood', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], {bAdvTitle: {popup: globRegExp.title.desc}}).btn_up(this.currX, this.currY + this.currH);
@@ -107,5 +107,18 @@ addButton({
 			const args = {...defArgs, minScoreFilter: 45, scoreFilter: 50, graphDistance: music_graph_descriptors.intra_supergenre * 4};
 			searchByDistance(args);
 		}
-	}, null, void(0), 'Random mix with different genres but same mood from any date', prefix, newButtonsProperties, chars.wand),
+	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix with different genres but same mood from any date'}),
 });
+
+// Helper
+function buttonTooltipSbd(parent) {
+	let info = parent.descriptionText;
+	// Modifiers
+	const bShift = utils.IsKeyPressed(VK_SHIFT);
+	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
+	if (bShift || bInfo) {
+		info += '\n-----------------------------------------------------';
+		info += '\n(Shift + L. Click to open config menu)';
+	}
+	return info;
+}

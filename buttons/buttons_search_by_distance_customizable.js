@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/22
+//12/01/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -61,7 +61,7 @@ addButton({
 				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this}); // All set according to properties panel!
 			}
 		}
-	}, null, void(0), buttonTooltip, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
+	}, null, void(0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
 	{
 		'on_notify_data': (parent, name, info) => {
 			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev') {return;}
@@ -92,7 +92,7 @@ addButton({
 });
 
 // Helper
-function buttonTooltip(parent) {
+function buttonTooltipSbdCustom(parent) {
 	const data = JSON.parse(parent.buttonsProperties.data[1]);
 	const bTooltipInfo = parent.buttonsProperties.bTooltipInfo[1];
 	let info = 'Search similar tracks according to configuration' + '\n-----------------------------------------------------';
