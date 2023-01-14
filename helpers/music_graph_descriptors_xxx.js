@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/23
+//14/01/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -306,7 +306,9 @@ const music_graph_descriptors = {
 		['Mambo'							,	['Son','Swing']],
 		['Sophisti-Pop'						,	['Soul-Jazz','80s Rock','New Wave']],
 		['Industrial Folk'					,	['Pagan Folk','Nordic Folk','Progressive Folk','Folk Metal']],
-		['Neo Folk XL'						,	['Dark Ambient']]
+		['Neo Folk XL'						,	['Dark Ambient']],
+		['Cool Jazz'						,	['Bebop']],
+		['Hard-Bop'							,	['Bebop']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -321,7 +323,11 @@ const music_graph_descriptors = {
 		['Renaissance Rock'					,	['New Age','Medieval','Renaissance']],
 		['Nueva Gaita'						,	['Pagan Folk','Ambient Folk']],
 		['Mambo'							,	['Afro-Cuban']],
-		['Sophisti-Pop'						,	['Urban Soul','Techno']]
+		['Sophisti-Pop'						,	['Urban Soul','Techno']],
+		['Cool Jazz'						,	['Swing']],
+		['Hard-Bop'							,	['Jazz-Funk']],
+		['Bossa Nova'						,	['Cool Jazz']],
+		['Post-Bop'							,	['Mainstream Jazz','Free Jazz']]
 	],
 	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -351,7 +357,8 @@ const music_graph_descriptors = {
 		['Jazz-Rap'							,	['Gangsta','Hardcore Rap','Horrorcore']],
 		['Desert Blues'						,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Hard Rock','Heartland Rock']],
 		['Anatolian Rock'					,	['Modern Electric Blues','Contemporary Blues','Chicago Blues','Funk Blues','British Blues','80s Rock','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Glam Rock','Classic Funk','Rap_supergenre','Contemporary Rock','Boogie Rock','Garage Rock Revival','Aussie Rock', '90s Rock','Progressive Rock','Folk Pop','Americana','Contemporary Folk','Pop Rock','Neo-Psychedelia','Southern Rock','Cantautor','Latin Folk XL','Neo-Traditional Folk','Close Harmony','Alt. Rock','Freak Folk','Country_supergenre','Country Folk','Electropop','Medieval','Roots Rock','Pagan Folk','Chanson','Heartland Rock']],
-		['Sophisti-Pop'						,	['Classic Rock','Metal_supergenre','Post-Britpop','Europop','Dance Pop','Disco Pop']]
+		['Sophisti-Pop'						,	['Classic Rock','Metal_supergenre','Post-Britpop','Europop','Dance Pop','Disco Pop']],
+		['Cool Jazz'						,	['Hard-Bop']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound 
@@ -466,7 +473,9 @@ const music_graph_descriptors = {
 		['Anatolian Rock'					,	['Anadolu Rock'						]],
 		['Joik'								,	['Yoik','Luohti','Vuolle','Juoiggus']],
 		['Baroque Pop'						,	['Chamber pop'						]],
-		['Pagan Folk'						,	['Dark Folk','Folk Noir'			]]
+		['Pagan Folk'						,	['Dark Folk','Folk Noir'			]],
+		['Hard-Bop'							,	['East Coast Jazz'					]],
+		['Cool Jazz'						,	['West Coast Jazz'					]]
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
