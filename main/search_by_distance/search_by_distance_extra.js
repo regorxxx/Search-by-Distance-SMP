@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//18/01/23
 
 include('search_by_distance.js');
 
@@ -242,8 +242,8 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 
 // Similar culture zone
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
-	include('..\\helpers\\music_graph_descriptors_xxx_countries.js');
-	include('..\\helpers\\music_graph_descriptors_xxx_culture.js');
+	include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
+	include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
 	include('..\\world_map\\world_map_tables.js');
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist
@@ -324,7 +324,7 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreStyleTag = ['G
 							'planned to add every possible substitution to the original graph)\n\n' +
 							'Graph descriptors:\n'
 						:	'') +
-					'[scripts folder]\\helpers\\music_graph_descriptors_xxx.js\n' +
+					'[scripts folder]\\main\\music_graph\\music_graph_descriptors_xxx.js\n' +
 					'[profile folder]\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + (userFileNotFound || userFileEmpty) + '\n\n' +
 					(missing.length > 5
 						?	'If you don\'t plan to retag your files or add substitutions and there are\n' +

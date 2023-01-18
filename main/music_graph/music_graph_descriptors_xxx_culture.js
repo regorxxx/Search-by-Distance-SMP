@@ -1,10 +1,10 @@
 ﻿'use strict';
-//08/01/22
+//18/01/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
 	include('music_graph_descriptors_xxx.js');
-	include('region_xxx.js');
+	include('..\\map\\region_xxx.js');
 	include('music_graph_descriptors_xxx_countries.js');
 }
 

@@ -1,8 +1,8 @@
 ﻿'use strict';
-//08/01/22
+//18/01/23
 
 if (typeof include !== 'undefined') {
-	include('region_xxx.js');
+	include('..\\map\\region_xxx.js');
 }
 
 /*

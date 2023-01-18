@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/01/23
+//18/01/23
 
 /*
 	Search by Distance
@@ -37,7 +37,7 @@
 include('..\\..\\helpers-external\\ngraph\\a-star.js');
 include('..\\..\\helpers-external\\ngraph\\a-greedy-star.js');
 include('..\\..\\helpers-external\\ngraph\\NBA.js');
-include('..\\..\\helpers\\ngraph_helpers_xxx.js');
+include('ngraph_helpers_xxx.js');
 var bLoadTags = true; // This tells the helper to load tags descriptors extra files
 include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_crc.js');
@@ -49,8 +49,8 @@ include('..\\..\\helpers\\helpers_xxx_math.js');
 include('..\\..\\helpers\\helpers_xxx_statistics.js');
 include('..\\..\\helpers\\camelot_wheel_xxx.js');
 include('..\\..\\helpers\\dyngenre_map_xxx.js');
-include('..\\..\\helpers\\music_graph_xxx.js');
-include('..\\..\\helpers\\music_graph_test_xxx.js');
+include('..\\music_graph\\music_graph_xxx.js');
+include('..\\music_graph\\music_graph_test_xxx.js');
 include('..\\filter_and_query\\remove_duplicates.js');
 include('..\\sort\\scatter_by_tags.js');
 include('..\\..\\helpers\\callbacks_xxx.js');

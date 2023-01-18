@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/01/23
+//18/01/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -681,13 +681,13 @@ function createConfigMenu(parent) {
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{ // Open descriptors
 			menu.newEntry({menuName: submenu, entryText: 'Open main descriptor', func: () => {
-				const file = folders.xxx + 'helpers\\music_graph_descriptors_xxx.js';
+				const file = folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx.js';
 				if (_isFile(file)){_explorer(file); _run('notepad.exe', file);}
 			}});
 			menu.newEntry({menuName: submenu, entryText: 'Open user descriptor', func: () => {
 				const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 				if (!_isFile(file)){
-					_copyFile(folders.xxx + 'helpers\\music_graph_descriptors_xxx_user.js', file);
+					_copyFile(folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx_user.js', file);
 					const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt', utf8);
 					if (readme.length) {fb.ShowPopupMessage(readme, 'User descriptors');}
 				}
