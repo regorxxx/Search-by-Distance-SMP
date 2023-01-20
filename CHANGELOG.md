@@ -97,6 +97,7 @@
 - UI: estimated time for similar artist calculation was not properly computed when having multiple tracks by same artist(s) on selection.
 - UI: recipes were not properly numbered when they had duplicates names.
 - UI: some GRAPH-only options where available to configure when using other methods. Now greyed out.
+- UI: don't show tooltip during buttons drag n drop.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
 - Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').
