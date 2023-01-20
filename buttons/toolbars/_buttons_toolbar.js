@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/22
+//20/01/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -96,7 +96,7 @@ if (!barProperties.firstPopup[1]) {
 function loadButtonsFile(bStartup = false) {
 	let names = [];
 	const file = folders.data + barProperties.name[1] + '.json';
-	if (!_isFile(file)) {
+	const presetPopup = () => {
 		if (bStartup && !buttonsBar.firstPopup) {return false;}
 		// Show popup with presets
 		const presets = [
@@ -119,10 +119,14 @@ function loadButtonsFile(bStartup = false) {
 		if (input == null) {return false;}
 		names = presets[input - 1].files.map((path) => {return path.split('\\').pop();});
 		_save(file, JSON.stringify(names, null, '\t'));
+	}
+	if (!_isFile(file)) {
+		presetPopup();
 	} else {
 		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, utf8);
 		if (data) {names = data.map((path) => {return path.split('\\').pop();});}
 		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths TODO
+		if (!names.length) {presetPopup();}
 	}
 	buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});
 	return buttonsPath.length;
@@ -160,5 +164,6 @@ addEventListener('on_paint', (gr) => {
 });
 
 addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
-	!buttonsPath.length && loadButtonsFile() && includeButtons() && window.Repaint();
+	!buttonsPath.length && loadButtonsFile() && includeButtons();
+	window.Repaint();
 });

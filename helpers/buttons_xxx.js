@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/12/22
+//20/01/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -195,13 +195,15 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					break;
 				}
 				case buttonStates.hover: {
-					buttonsBar.tooltipButton.SetValue(
-						this.getAnimationText() + (buttonsBar.config.bShowID 
-							? this.descriptionWithID(this) 
-							: (isFunction(this.description) 
-								? this.description(this) 
-								: this.description)
-					), true); // ID or just description, according to string or func.
+					if (!buttonsBar.move.bIsMoving) {
+						buttonsBar.tooltipButton.SetValue(
+							this.getAnimationText() + (buttonsBar.config.bShowID 
+								? this.descriptionWithID(this) 
+								: (isFunction(this.description) 
+									? this.description(this) 
+									: this.description)
+						), true); // ID or just description, according to string or func.
+					}
 					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 					break;
 				}
@@ -466,8 +468,13 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		buttonsBar.curBtn && buttonsBar.curBtn.changeState(buttonStates.hover);
 	}
 	// Toolbar Tooltip
-	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length) {
+	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length && !buttonsBar.move.bIsMoving) {
 		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip , true);
+	}
+	// Disable on drag n drop
+	if (buttonsBar.tooltipButton.bActive && buttonsBar.move.bIsMoving) {
+		buttonsBar.tooltipButton.Deactivate();
+		buttonsBar.tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
 	}
 	// Move buttons
 	if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
