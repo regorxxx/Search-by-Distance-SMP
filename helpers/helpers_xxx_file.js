@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//27/01/23
 
 include(fb.ComponentPath + 'docs\\Codepages.js');
 include('helpers_xxx.js');
@@ -115,6 +115,21 @@ function _deleteFile(file, bForce = true) {
 			return false;
 		}
 		return !(_isFile(file));
+	}
+	return false;
+}
+
+// Delete. Can not be undone.
+function _deleteFolder(folder, bForce = true) {
+	if (_isFolder(folder)) {
+		if (folder.startsWith('.\\')) {folder = fb.FoobarPath + folder.replace('.\\','');}
+		if (folder.endsWith('\\')) {folder = folder.slice(0, -1);}
+		try {
+			fso.DeleteFolder(folder, bForce);
+		} catch (e) {
+			return false;
+		}
+		return !(_isFolder(folder));
 	}
 	return false;
 }
@@ -254,6 +269,22 @@ function _save(file, value, bBOM = false) {
 	}
 	console.log('Error saving to ' + file);
 	return false;
+}
+
+function _saveFSO(file, value, bUTF16) {
+	if (file.startsWith('.\\')) {file = fb.FoobarPath + file.replace('.\\','');}
+	const filePath = utils.SplitFilePath(file)[0];
+	if (!_isFolder(filePath)) {_createFolder(filePath);}
+    if (_isFolder(filePath)) {
+        try {
+            const fileObj = fso.CreateTextFile(file, true, bUTF16);
+            fileObj.Write(value);
+            fileObj.Close();
+            return true;
+        } catch (e) {}
+    }
+    console.log('Error saving to ' + file); 
+    return false;
 }
 
 function _saveSplitJson(file, value, replacer = void(0), space = void(0), splitBy = 50000, bBOM = false) {
