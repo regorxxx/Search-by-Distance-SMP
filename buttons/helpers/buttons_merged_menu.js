@@ -1,5 +1,5 @@
 ﻿'use strict'
-//25/12/22
+//01/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -279,17 +279,18 @@ function createButtonsMenu(name) {
 			if (readme.length) {fb.ShowPopupMessage(readme, 'Toolbar');}
 		}});
 		if (readmeList) {
+			// Add additional readmes
+			if (readmeList.hasOwnProperty('buttons_search_quicksearch.js')) {readmeList['Dynamic queries'] = 'dynamic_query.txt';}
+			// Process
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
 			Object.keys(readmeList).forEach((fileName) => {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {return;}
-				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;});
-				if (subMenuFolder && subMenuFolder.length) {
-					subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;;
-					if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
-				}
+				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;}) || 'Others';
+				subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;;
+				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 				const entryText = fileName.replace('buttons_', '');
-				menu.newEntry({menuName: subMenuFolder || 'Others', entryText, func: () => {
+				menu.newEntry({menuName: subMenuFolder, entryText, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
 						fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8), readmeFile);
 					}
