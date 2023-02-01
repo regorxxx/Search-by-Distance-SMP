@@ -287,7 +287,7 @@ function createButtonsMenu(name) {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {return;}
 				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;}) || 'Others';
-				subMenuFolder = (subMenuFolder === '_playlist_tools' ? 'Playlist Tools' : capitalizeAll(subMenuFolder.replace(/[_]/g,''))) + invId;;
+				subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,' ').trim()) + invId;
 				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
 				const entryText = fileName.replace('buttons_', '');
 				menu.newEntry({menuName: subMenuFolder, entryText, func: () => {
