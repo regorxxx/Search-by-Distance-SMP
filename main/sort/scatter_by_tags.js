@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//30/01/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -135,6 +135,7 @@ function intercalateByTags({
 	if (bSendToActivePls) {
 		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection, 
 		// so inserted tracks get sent to the right position. Only works for contiguous selections!
+		const focusIdx = plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist);
 		plman.UndoBackup(plman.ActivePlaylist);
 		plman.InsertPlaylistItems(plman.ActivePlaylist, plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist), selItemsArray);
 		plman.RemovePlaylistSelection(plman.ActivePlaylist); 

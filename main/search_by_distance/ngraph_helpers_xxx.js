@@ -3,11 +3,11 @@
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar
-	include('..\\helpers-external\\ngraph\\ngraph.graph.js');
-	include('..\\helpers-external\\ngraph\\a-star.js');
-	include('..\\helpers-external\\ngraph\\a-greedy-star.js');
-	include('..\\helpers-external\\ngraph\\NBA.js');
-	include('helpers_xxx_prototypes.js');
+	include('..\\..\\helpers-external\\ngraph\\ngraph.graph.js');
+	include('..\\..\\helpers-external\\ngraph\\a-star.js');
+	include('..\\..\\helpers-external\\ngraph\\a-greedy-star.js');
+	include('..\\..\\helpers-external\\ngraph\\NBA.js');
+	include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 } catch (e) { // On browsers
 	// Same files must be loaded on html
 	// Replace helpers_xxx_prototypes.js with music_graph_html_xxx.js
