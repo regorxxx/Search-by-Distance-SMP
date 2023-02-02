@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/01/23
+//02/02/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -22,7 +22,7 @@ const buttonsBar = {};
 buttonsBar.config = {
 	bShowID: true, // Show Prefixes + ID on tooltips
 	toolbarTooltip: '', // Shown on toolbar
-	toolbarColor: RGB(211,218,237), // Toolbar color
+	toolbarColor: utils.GetSysColour(15), // Toolbar color
 	bToolbar: false, // Change this on buttons bars files to set the background color
 	textColor: RGB(0,0,0),
 	activeColor: RGB(0, 163, 240),
@@ -32,7 +32,8 @@ buttonsBar.config = {
 	bAlignSize: true,
 	bUseThemeManager: true,
 	partAndStateID: 1, // 1 standard button, 6  bg/border button (+hover)
-	scale: _scale(0.7, false)
+	scale: _scale(0.7, false),
+	bIconMode: false
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
@@ -164,7 +165,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	
 	this.isAnimationActive = function (name) {
 		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
-		return idx !== -1 && this.animation[idx].bActive;
+		return (idx !== -1 && this.animation[idx].bActive);
 	};
 	
 	this.isAnyAnimationActive = function () {
@@ -172,7 +173,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	};
 	
 	this.getAnimationText = function () {
-		return this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '';
+		return (this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '');
+	};
+	
+	this.headerText = function () {
+		return (buttonsBar.config.bIconMode ? this.text + '\n-----------------------------------------------------\n' : '');
 	};
 	
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
@@ -197,7 +202,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 				case buttonStates.hover: {
 					if (!buttonsBar.move.bIsMoving) {
 						buttonsBar.tooltipButton.SetValue(
-							this.getAnimationText() + (buttonsBar.config.bShowID 
+							this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID 
 								? this.descriptionWithID(this) 
 								: (isFunction(this.description) 
 									? this.description(this) 
@@ -216,13 +221,19 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 				}
 			}
 		}
+		const textCalculated = buttonsBar.config.bIconMode 
+			? ''
+			: isFunction(this.text) ? this.text(this) : this.text;
+		if (buttonsBar.config.bIconMode) {
+			w = 30;
+			w *= buttonsBar.config.scale;
+		}
 		// New coordinates must be calculated and stored to interact with UI
 		let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w, h});
 		this.currX = xCalc; this.currY = yCalc; this.currW = wCalc; this.currH = hCalc;
 		// When moving buttons, the button may be drawn at another position though
 		if (this.moveX) {xCalc = this.moveX;}
 		if (this.moveY) {yCalc = this.moveY;}
-		const textCalculated = isFunction(this.text) ? this.text(this) : this.text;
 		// Draw button
 		if (buttonsBar.useThemeManager()) {this.g_theme.DrawThemeBackground(gr, xCalc, yCalc, wCalc, hCalc);}
 		else {
@@ -240,7 +251,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					break;
 				case buttonStates.hover:
 					buttonsBar.tooltipButton.SetValue(
-						this.getAnimationText() + (buttonsBar.config.bShowID
+						this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID
 							? this.descriptionWithID(this)
 							: (isFunction(this.description)
 								? this.description(this)
@@ -291,13 +302,15 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		if (this.icon !== null) {
 			let textOffsetX = 0;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
-			const textWidthCalculated = isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			const textWidthCalculated = buttonsBar.config.bIconMode 
+				? 0
+				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			if (this.iconImage) { // Icon image
 				if (iconCalculated.length) {
 					let icon = gdi.Image(iconCalculated);
 					if (icon) {
 						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
-						gr.DrawImage(icon, xCalc + wCalc / 2 - icon.Width * 7/10 - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						gr.DrawImage(icon, xCalc + wCalc / 2 - (buttonsBar.config.bIconMode ? 0 : icon.Width * 7/10) - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 						textOffsetX = icon.Width * 7/10;
 					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
 				}
@@ -311,9 +324,9 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
 						icon.ReleaseGraphics(g);
 						// Image gets shifted in x and y axis... since it's not using text flags
-						gr.DrawImage(icon, xCalc + wCalc / 2 - iconWidthCalculated * 9/10 - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						gr.DrawImage(icon, xCalc + wCalc / 2 - (buttonsBar.config.bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 					}
-					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - iconWidthCalculated / 5 - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - (buttonsBar.config.bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
 				textOffsetX = iconWidthCalculated;
 			}
@@ -362,10 +375,14 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		this.func && this.func(mask);
 	};
 	
+	this.adjustButtonWidth = function (newName, offset = 30) {
+		this.w = _gr.CalcTextWidth(newName, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + offset;
+		this.w *= buttonsBar.config.scale;
+	};
+	
 	this.adjustNameWidth = function (newName, offset = 30) {
 		this.text = newName;
-		this.w = _gr.CalcTextWidth(this.text, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + offset;
-		this.w *= buttonsBar.config.scale;
+		this.adjustButtonWidth(newName, offset);
 		this.changeScale(buttonsBar.config.scale);
 		window.Repaint();
 	};
@@ -419,8 +436,7 @@ function chooseButton(x, y) {
 addEventListener('on_paint', (gr) => {
 	// Toolbar
 	if (buttonsBar.config.bToolbar){
-		if (buttonsBar.oldButtonCoordinates.x < window.Width) {gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);} // Toolbar color fix
-		else {gr.FillSolidRect(0, 0, window.Width, window.Height, utils.GetSysColour(15));} // Default
+		gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);
 	}
 	// Buttons
 	for (let key in buttonsBar.oldButtonCoordinates) {

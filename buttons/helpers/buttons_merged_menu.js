@@ -1,5 +1,5 @@
 ﻿'use strict'
-//01/02/23
+//02/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -268,6 +268,13 @@ function createButtonsMenu(name) {
 			buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
 			window.Reload();
 		}});
+		menu.newEntry({menuName, entryText: 'Icons-only mode', func: () => {
+			barProperties.bIconMode[1] = !barProperties.bIconMode[1];
+			overwriteProperties(barProperties);
+			buttonsBar.config.bIconMode = barProperties.bIconMode[1]; // buttons_xxx.js
+			window.Repaint();
+		}});
+		menu.newCheckMenu(menuName, 'Icons-only mode', void(0), () => {return barProperties.bIconMode[1];});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{
@@ -280,6 +287,10 @@ function createButtonsMenu(name) {
 		}});
 		if (readmeList) {
 			// Add additional readmes
+			readmeList['Tagging requisites'] = 'tags_structure.txt';
+			readmeList['Tags sources'] = 'tags_sources.txt';
+			readmeList['Other tags notes'] = 'tags_notes.txt';
+			readmeList['Global tag remapping'] = 'tags_global_remap.txt';
 			if (readmeList.hasOwnProperty('buttons_search_quicksearch.js')) {readmeList['Dynamic queries'] = 'dynamic_query.txt';}
 			// Process
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
