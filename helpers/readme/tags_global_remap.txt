@@ -1,0 +1,41 @@
+﻿All tools use a default set of tags, pretty standard, remapped like:
+	- Date -> $year(%DATE%)			- Artist -> ARTIST
+	- Genre: -> GENRE				- Style: -> STYLE
+	- Mood: -> MOOD					- Bpm -> BPM
+	- Key -> KEY					- Rating -> %RATING%
+
+For a comprehensive list check:
+[FOOBAR PROFILE FOLDER]\js_data\presets\global\globTags.json
+
+By default all tools will tend to use such associations whenever they are
+not configured to use other tags or remapping. Many tools have specific
+customizable remapping options (for ex. 'Search by Distance' tools), while
+others -which use queries- are simply easily editable manually.
+
+In case you want to globally remap a tag, without having to manually edit
+the configuration of every tool... the files found at the folder at top
+can be edited. In such case every new script installed will automatically
+load those values, and existing tools will require a 'Restore defaults',
+'Reset configuration' or similar action to reload them.
+
+Note your personalized settings may be lost on the process, so it should
+be done as soon as possible when installing scripts for the first time.
+
+This may come handy for tools which involve queries, since those are 
+usually set on the scripts their-selves and can not be set in a way
+compatible with every user's tag patterns. This patches that hole.
+
+Example:
+	Let's say in our library the date of a track is associated to
+	'ORIGINAL RELEASE DATE' instead of 'DATE' tag (not recommended,
+	such tagging pattern will break compatibility with most software).
+	
+	If we want to remap all date usage to our custom tag, just edit
+	'globTags.json' and change:
+		[...]
+		"date": "$year(%DATE%)",
+		[...]
+	To:
+		[...]
+		"date": "$year(%ORIGINAL RELEASE DATE%)",
+		[...]
