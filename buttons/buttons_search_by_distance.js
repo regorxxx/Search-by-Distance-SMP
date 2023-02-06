@@ -112,7 +112,16 @@ addButton({
 
 // Helper
 function buttonTooltipSbd(parent) {
-	let info = parent.descriptionText;
+	let info = parent.descriptionText + ':';
+	info += '\nMethod:\t' + parent.buttonsProperties.method[1];
+	const sort = (
+		(parent.buttonsProperties.bSmartShuffle[1] ? 'Smart Shuffle' : '') 
+		|| (parent.buttonsProperties.bInKeyMixingPlaylist[1] ? 'Harmonic Mix' : '')
+		|| (parent.buttonsProperties.bSortRandom[1] ? 'Random' : '')
+		|| (parent.buttonsProperties.bProgressiveListOrder[1] ? 'Score' : '')
+	);
+	info += sort ? '   ' + _p(sort) : '';
+	info += '\nTracks:\t' + parent.buttonsProperties.playlistLength[1];
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];

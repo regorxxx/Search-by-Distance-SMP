@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/01/23
+//06/02/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -95,14 +95,24 @@ addButton({
 function buttonTooltipSbdCustom(parent) {
 	const data = JSON.parse(parent.buttonsProperties.data[1]);
 	const bTooltipInfo = parent.buttonsProperties.bTooltipInfo[1];
-	let info = 'Search similar tracks according to configuration' + '\n-----------------------------------------------------';
+	let info = 'Search similar tracks by acoustic-folksonomy models:';
+	info += '\nRecipe:\t' + data.recipe;
+	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
+	info += '\nMethod:\t' + parent.buttonsProperties.method[1];
+	const sort = (
+		(parent.buttonsProperties.bSmartShuffle[1] ? 'Smart Shuffle' : '') 
+		|| (parent.buttonsProperties.bInKeyMixingPlaylist[1] ? 'Harmonic Mix' : '')
+		|| (parent.buttonsProperties.bSortRandom[1] ? 'Random' : '')
+		|| (parent.buttonsProperties.bProgressiveListOrder[1] ? 'Score' : '')
+	);
+	info += sort ? '   ' + _p(sort) : '';
+	info += '\nTracks:\t' + parent.buttonsProperties.playlistLength[1];
+	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
 	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click for other config and tools)';}
-	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)  ->  ' + data.recipe;} 
-	else {info += '\nRecipe  ' + data.recipe;}
-	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)  ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
-	else {info += '\nTheme ->  ' + (data.forcedTheme.length ? data.forcedTheme : data.theme);}
+	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)'} 
+	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)'}
 	return info;
 }
