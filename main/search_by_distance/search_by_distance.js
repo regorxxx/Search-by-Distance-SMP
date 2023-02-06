@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/01/23
+//06/02/23
 
 /*
 	Search by Distance
@@ -215,7 +215,7 @@ if (sbd.panelProperties.bTagsCache[1]) {
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
-if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
+// if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMissmatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
@@ -227,7 +227,7 @@ if (bMissmatchCRC) {
 	sbd.panelProperties.descriptorCRC[1] = descriptorCRC;
 	overwriteProperties(sbd.panelProperties); // Updates panel
 }
-if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
+// if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 // Start cache
 var cacheLinkSet;
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
@@ -249,7 +249,7 @@ if (typeof cacheLinkSet === 'undefined') {
 }
 async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, properties = null} = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
-		if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('updateCache');}
+		const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('updateCache') : null;
 		if (sbd.panelProperties.bCacheOnStartup[1] || bForce) {
 			if (sbd.isCalculatingCache) {return;}
 			sbd.isCalculatingCache = true;
@@ -377,7 +377,7 @@ addEventListener('on_script_unload', () => {
 	Warnings about links/nodes set wrong
 */
 if (sbd.panelProperties.bGraphDebug[1]) {
-	if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
+	const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
 	graphDebug(sbd.allMusicGraph);
 	if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 }
@@ -718,7 +718,7 @@ async function searchByDistance({
 		// Method check
 		if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
 		// Start calcs
-		if (bProfile) {var test = new FbProfiler('Search by Distance');}
+		const test = bProfile ? new FbProfiler('Search by Distance') : null;
 		// Copy recipe tags
 		if (bUseRecipeTags) {
 			for (let key in recipeProperties.tags) {
