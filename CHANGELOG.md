@@ -55,6 +55,7 @@
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
 - Tags: all remapped tags now also allow TF functions instead of just tag names. Behavior previously available only on date and custom num tags.
 - Tags: the buttons now ask to check for missing genre/styles on the Graph on first initialization.
+- UI: unified tooltip structure and available info on all buttons (short description + relevant settings + keyboard modifiers).
 - UI: shift modifier now opens configuration menu on customizable button, and Shift + Ctrl now sets the theme. This is done to follow the same behavior than other buttons having the configuration menu on Shift.
 - UI: estimated time for similar artist calculation is now formatted into hours, min and seconds.
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
