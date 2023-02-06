@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/01/23
+//05/02/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -41,8 +41,9 @@ function scatterByTags({
 	}
 	// Reorder
 	const toMoveTracks = newOrder.length;
-	const scatterInterval = toMoveTracks ? Math.round(totalTracks / toMoveTracks) : 0;
+	let scatterInterval = toMoveTracks ? totalTracks / toMoveTracks : 0;
 	if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
+		scatterInterval = Math.round(totalTracks / toMoveTracks);
 		let removed = [];
 		[...newOrder].reverse().forEach((index) => {
 			removed.push(...selItemsArray.splice(index, 1));
