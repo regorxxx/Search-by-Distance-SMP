@@ -1,5 +1,5 @@
 ﻿'use strict'
-//02/02/23
+//08/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -268,13 +268,58 @@ function createButtonsMenu(name) {
 			buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
 			window.Reload();
 		}});
-		menu.newEntry({menuName, entryText: 'Icons-only mode', func: () => {
-			barProperties.bIconMode[1] = !barProperties.bIconMode[1];
-			overwriteProperties(barProperties);
-			buttonsBar.config.bIconMode = barProperties.bIconMode[1]; // buttons_xxx.js
-			window.Repaint();
-		}});
-		menu.newCheckMenu(menuName, 'Icons-only mode', void(0), () => {return barProperties.bIconMode[1];});
+		{
+			const subMenu = menu.newMenu('Icons-only mode...', menuName);
+			menu.newEntry({menuName: subMenu, entryText: 'All buttons', func: () => {
+				barProperties.bIconMode[1] = !barProperties.bIconMode[1];
+				overwriteProperties(barProperties);
+				buttonsBar.config.bIconMode = barProperties.bIconMode[1]; // buttons_xxx.js
+				window.Repaint();
+			}});
+			menu.newCheckMenu(subMenu, 'All buttons', void(0), () => {return barProperties.bIconMode[1];});
+			menu.newEntry({menuName: subMenu, entryText: 'sep'});
+			buttonsBar.listKeys.forEach((arrKeys, idx) => {
+				const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
+				if (arrKeys.some((key) => buttonsBar.buttons[key].hasOwnProperty('bIconMode'))) {
+					menu.newEntry({menuName: subMenu, entryText, func: () => {
+						let cache;
+						for (let key of arrKeys) {
+							const button = buttonsBar.buttons[key];
+							const properties = button.buttonsProperties;
+							if (properties.hasOwnProperty('bIconMode')) {
+								// A single button file may have multiple buttons sharing the same properties or not
+								if (JSON.stringify(cache) !== JSON.stringify(properties)) { 
+									properties.bIconMode[1] = !properties.bIconMode[1];
+									overwriteProperties(properties);
+									cache = properties;
+								}
+								button.bIconMode = properties.bIconMode[1];
+							}
+						}
+						window.Repaint();
+					}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
+					menu.newCheckMenu(subMenu, entryText, void(0), () => {return arrKeys.some((key) => buttonsBar.buttons[key].bIconMode);});
+				}
+			});
+			menu.newEntry({menuName: subMenu, entryText: 'sep'});
+			menu.newEntry({menuName: subMenu, entryText: 'Restore every button', func: () => {
+				buttonsBar.listKeys.forEach((arrKeys, idx) => {
+					if (arrKeys.some((key) => buttonsBar.buttons[key].hasOwnProperty('bIconMode'))) {
+						let cache;
+						for (let key of arrKeys) {
+							const button = buttonsBar.buttons[key];
+							const properties = button.buttonsProperties;
+							if (properties.hasOwnProperty('bIconMode')) {
+								properties.bIconMode[1] = false;
+								overwriteProperties(properties);
+								button.bIconMode = false;
+							}
+						}
+					}
+				});
+				window.Repaint();
+			}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
+		}
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

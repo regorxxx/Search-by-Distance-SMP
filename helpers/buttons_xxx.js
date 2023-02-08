@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/02/23
+//08/02/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -177,8 +177,13 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	};
 	
 	this.headerText = function () {
-		return (buttonsBar.config.bIconMode ? this.text + '\n-----------------------------------------------------\n' : '');
+		const name = (isFunction(this.text) ? this.text(this) : this.text) || (this.defText && isFunction(this.defText) ? this.defText(this) : this.defText || '')
+		return (this.isIconMode() ? name + '\n-----------------------------------------------------\n' : '');
 	};
+	
+	this.isIconMode = function () { // Either global or for current button
+		return (buttonsBar.config.bIconMode || this.bIconMode || !(isFunction(this.text) ? this.text(this) : this.text).length);
+	}
 	
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
 		// Draw?
@@ -221,10 +226,11 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 				}
 			}
 		}
-		const textCalculated = buttonsBar.config.bIconMode 
+		const bIconMode = this.isIconMode();
+		const textCalculated = bIconMode
 			? ''
 			: isFunction(this.text) ? this.text(this) : this.text;
-		if (buttonsBar.config.bIconMode) {
+		if (bIconMode) {
 			w = 30;
 			w *= buttonsBar.config.scale;
 		}
@@ -302,7 +308,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		if (this.icon !== null) {
 			let textOffsetX = 0;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
-			const textWidthCalculated = buttonsBar.config.bIconMode 
+			const textWidthCalculated = bIconMode 
 				? 0
 				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			if (this.iconImage) { // Icon image
@@ -310,7 +316,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					let icon = gdi.Image(iconCalculated);
 					if (icon) {
 						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
-						gr.DrawImage(icon, xCalc + wCalc / 2 - (buttonsBar.config.bIconMode ? 0 : icon.Width * 7/10) - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						gr.DrawImage(icon, xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 						textOffsetX = icon.Width * 7/10;
 					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
 				}
@@ -324,9 +330,9 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
 						icon.ReleaseGraphics(g);
 						// Image gets shifted in x and y axis... since it's not using text flags
-						gr.DrawImage(icon, xCalc + wCalc / 2 - (buttonsBar.config.bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						gr.DrawImage(icon, xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 					}
-					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - (buttonsBar.config.bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
 				textOffsetX = iconWidthCalculated;
 			}
@@ -658,9 +664,15 @@ function addButton(newButtons) {
 			delete newButtons[buttonName];
 		}
 	}
-	// Add names to objects
+	// Add extra variables
 	for (let buttonName in newButtons) {
-		newButtons[buttonName].name = buttonName;
+		const button = newButtons[buttonName];
+		// Add names to objects
+		button.name = buttonName;
+		// Add icons mode
+		if (button.buttonsProperties.hasOwnProperty('bIconMode')) {
+			button.bIconMode = button.buttonsProperties.bIconMode[1];
+		}
 	}
 	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
 	return newButtons;
