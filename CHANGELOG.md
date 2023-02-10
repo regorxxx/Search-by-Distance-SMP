@@ -37,7 +37,7 @@
 - Presets: new preset 'Similar artists (G)' to make use of Similar Artists analysis. Similar artists calculation is -obviously- required first.
 - Presets: added multiple integrity checks for presets which should ensure they are properly written. Warnings are shown with popups in case errors are found, when using the settings menu at the customizable button, selecting a preset (the list also shows an error warning on name) or when creating a new playlist with the tools.
 - Tags: reworked the entire tag system to allow for indefinite custom tags, with weights, ranges, scoring distribution methods, ... Recipes and buttons have been reworked too to account for this.
-- Tags: tags cache for Foobar2000 2.0, enabled by default. Disabled on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions.
+- Tags: tags cache for Foobar2000 2.0, disabled by default. Disabled (forced) on lower versions (since it brings no improvement on processing time). After proper setup and caching of all library tags associated to remapped tags, processing time should be similar to Foobar2000 1.6+ versions. Enable it only on V2 in case [low memory mode](https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Version_2.0_Beta_Change_Log#Beta_20) is enabled.
 - Tags: menu entry to -only- reset tag remapping. Asks for cache rebuilding afterwards.
 - Smart Shuffle: shuffles tracks according to tags (Artist by default) in a semi-random pattern, ensuring no 2 consecutive tracks have the same tag value. Follows [Spotify design](https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/). Overrides any other sorting when enabled. Contrary to [Spotify's preferences to recently played/loved tracks](https://thetab.com/uk/2021/11/17/spotify-shuffle-explained-228639), this algorithm is truly "random" in the sense that there is no preference for any track, it just ensures artists are distributed evenly with some randomness. Also differs from from 'Scatter by tags' (intercalate) at [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/) in the way tracks are ordered (without strict alternation), i.e. it doesn't follow a pattern ABCABAA when it's possible to ensure no A tracks are together (ABACABA).
 - Scoring Method: new options to set scoring method ('LOGARITHMIC', 'LOGISTIC', 'LINEAR', 'NORMAL'). Default behavior is 'LINEAR' (working the same as before). 'LOGARITHMIC' and 'LOGISTIC' scoring methods take into account that some tracks having a lot of values for some tags don't return so many matches because it's almost impossible to match all of them. Therefore it applies a logarithmic curve, giving an extra weight to lower matches, specially for high tag values counts (n). For ex. when 50% of the tags are matched, that equals to 50% weight applied on 'LINEAR' method but ~70% weight for 'LOGARITHMIC' method and 64%(n<=1) to 85%(n=3) for 'LOGISTIC' method. 'LOGISTIC' method is much more sensitive to the tag value count (n). Configurable per tag. Added related readme to this feature along a chart comparison.
@@ -61,6 +61,8 @@
 - UI: buttons are animated while graph links cache or graph statistics are being calculated.
 - UI: customizable button now doesn't allow setting playlist sorting when using harmonic mixing. Submenu is greyed out.
 - UI: buttons now show info about background processing if any is being done (usually also animated).
+- UI: unified buttons size normalization settings and behavior for all axis modes. 
+- UI: unified button icon alignment on reflow modes.
 - Similar artists: now shows a popup with the report of similar artists found along their similarity scoring. Previously this info was only logged to console.
 - Similar artists: now uses 'LOGARITHMIC' scoring method by default (set on preset file, can still be manually changed there).
 - Removed duplicates: all uses of function changed to make use of '$year(%DATE%)' and '$ascii($lower($trim(%TITLE%))' instead of 'DATE' and 'TITLE'. This is a changed ported from Search by Distance, to ensure the most matches possible.
@@ -101,6 +103,8 @@
 - UI: some GRAPH-only options where available to configure when using other methods. Now greyed out.
 - UI: don't show tooltip during buttons drag n drop.
 - UI: background color mismatch when resizing windows and using custom background colors.
+- UI: fixed reflow mode in some cases when resizing back to the required width/height to show all buttons on a single row/column.
+- UI: fixed reflow mode in some cases when normalization mode was not active and buttons had different size; non needed empty space was added in some rows/columns.
 - Tags: remapped key tag was not being used on queries (used 'KEY' in any case). It only affected queries, tags were being retrieved using the right name though.
 - Tags: remapped key and BPM tags were not being used on theme creation.
 - Tags: remapped tags with commas were not working properly (for example within a function like '$replace(%GENRE%, &,',')').

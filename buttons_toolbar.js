@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/02/23
+//08/02/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -55,7 +55,8 @@ let barProperties = {
 	scale:				['UI scale', _scale(0.7, false)],
 	activeColor:		['Buttons\' active icon color', buttonsBar.config.activeColor],
 	animationColors:	['Buttons\' animation colors', JSON.stringify(buttonsBar.config.animationColors)],
-	bIconMode:			['Show only button\'s icons', false]
+	bIconMode:			['Show only button\'s icons', false],
+	bIconModeExpand:	['Expand to full button on hover', false]
 };
 setProperties(barProperties);
 barProperties = getPropertiesPairs(barProperties);
@@ -76,6 +77,7 @@ buttonsBar.config.bShowID = barProperties.bShowId[1];
 buttonsBar.config.orientation = barProperties.orientation[1];
 // Icon-only mode
 buttonsBar.config.bIconMode = barProperties.bIconMode[1];
+buttonsBar.config.bIconModeExpand = barProperties.bIconModeExpand[1];
 // Reflow
 buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Align all widths and heights according to orientation

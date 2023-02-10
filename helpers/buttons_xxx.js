@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/23
+//10/02/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -11,7 +11,7 @@ include('callbacks_xxx.js');
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
 	as new buttons instances on the same toolbar. Coordinates get updated when loading multiple buttons, removing the need to manually set them.
 	Check '_buttons_blank.js' to see the universal buttons structure. It loads on foobar but does nothing, it's just empty.
-	Check '_buttons_blank_merged.js' to see the universal structure for merging butons, creating an entire bar
+	Check '_buttons_blank_merged.js' to see the universal structure for merging buttons, creating an entire bar
 	Check '_buttons_example.js' for a working example of buttons within foobar.
 	Check '_buttons_example_merged.js' for a working example of a buttons bar within foobar.
 	Check '_buttons_example_merged_double.js' for a working example of merging multiple buttons and bars within foobar.
@@ -33,7 +33,8 @@ buttonsBar.config = {
 	bUseThemeManager: true,
 	partAndStateID: 1, // 1 standard button, 6  bg/border button (+hover)
 	scale: _scale(0.7, false),
-	bIconMode: false
+	bIconMode: false,
+	bIconModeExpand: false
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
@@ -61,6 +62,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, isFunction(coord[c])];}));
 	const iCoord = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? coord[c]() : coord[c]];}));
 	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]();} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
+	let cache = {w: old.w, h: old.h};
 	if (recalc) {
 		if (orientation === 'x') {old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h);}
 		else if (orientation === 'y') {old.y += iCoord.y + iCoord.h; old.w = Math.max(old.w, iCoord.w);}
@@ -68,12 +70,12 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	if (buttonsBar.config.bReflow && !bFirstButton) {
 		if (orientation === 'x' && old.x  > window.Width) {
 			newCoordinates.x = coord.x;
-			newCoordinates.y = old.y + old.h;
+			newCoordinates.y = old.y + cache.h;
 			old.x = iCoord.x + iCoord.w;
 			old.y = newCoordinates.y;
 		} else if (orientation === 'y' && old.y  > window.Height) {
 			newCoordinates.y = coord.y;
-			newCoordinates.x = old.x + old.w;
+			newCoordinates.x = old.x + cache.w;
 			old.y = iCoord.y + iCoord.h;
 			old.x = newCoordinates.x;
 		}
@@ -113,6 +115,8 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
+	this.bIconMode = false;
+	this.bIconModeExpand = false;
 	if (variables) {
 		for (let key in variables) {
 			this[key] = variables[key];
@@ -182,10 +186,10 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	};
 	
 	this.isIconMode = function () { // Either global or for current button
-		return (buttonsBar.config.bIconMode || this.bIconMode || !(isFunction(this.text) ? this.text(this) : this.text).length);
+		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
 	}
 	
-	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h) {
+	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false) {
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
@@ -316,7 +320,10 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 					let icon = gdi.Image(iconCalculated);
 					if (icon) {
 						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
-						gr.DrawImage(icon, xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2, yCalc + icon.Height * 1/6, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
+							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2
+							: xCalc + icon.Width / 2;
+						gr.DrawImage(icon, iconX, yCalc + hCalc / 2 - icon.Height * 1/2, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 						textOffsetX = icon.Width * 7/10;
 					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
 				}
@@ -330,9 +337,15 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
 						icon.ReleaseGraphics(g);
 						// Image gets shifted in x and y axis... since it's not using text flags
-						gr.DrawImage(icon, xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2, yCalc + iconWidthCalculated * 1/3, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
+							? xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2
+							: xCalc + icon.Width * 3/5;
+						gr.DrawImage(icon, iconX, yCalc + hCalc / 2 - iconWidthCalculated * 1/2, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 					}
-					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
+							? xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2
+							: xCalc - wCalc / 2 + iconWidthCalculated * 5/4;
+					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconX, yCalc, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
 				textOffsetX = iconWidthCalculated;
 			}
@@ -412,16 +425,26 @@ const throttledRepaint = throttle(() => window.Repaint(), 1000);
 function drawAllButtons(gr) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
 	const bAlignSize = buttonsBar.config.bAlignSize;
+	const bReflow = buttonsBar.config.bReflow;
 	// First calculate the max width or height so all buttons get aligned
-	let maxSize = bAlignSize ? getButtonsMaxSize() : -1;
+	const maxSize = bAlignSize ? getButtonsMaxSize() : {w: -1, h: -1, totalW: 0, totalH: 0};
+	const maxSizeNoReflow = getButtonsMaxSize(false);
 	// Size check
 	doOnce('Buttons Size Check', buttonSizeCheck)();
 	// Then draw
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
-			if (bAlignSize) {button.draw(gr, void(0), void(0), orientation === 'x' ? void(0) : maxSize, orientation === 'x' ? maxSize : void(0));}
-			else {button.draw(gr);}
+			// Don't normalize size in certain axis if not needed
+			if (bAlignSize && orientation === 'x') {
+				const bNormalize = maxSize.totalW > window.Width && maxSizeNoReflow.totalW > window.Width;
+				button.draw(gr, void(0), void(0), bReflow && bNormalize ? maxSize.w : void(0), maxSize.h, bReflow && bNormalize);
+			} else if (bAlignSize && orientation === 'y') {
+				const bNormalize = maxSize.totalH > window.Height && maxSizeNoReflow.totalH > window.Height;
+				button.draw(gr, void(0), void(0), maxSize.w, bReflow && bNormalize ? maxSize.h : void(0), true);
+			} else {
+				button.draw(gr);
+			}
 		}
 	}
 }
@@ -488,6 +511,28 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	old && old.changeState(buttonStates.normal);
 	if (!buttonsBar.move.bIsMoving) {
 		buttonsBar.curBtn && buttonsBar.curBtn.changeState(buttonStates.hover);
+		if (buttonsBar.config.bIconModeExpand && buttonsBar.config.orientation === 'x') {
+			if (buttonsBar.curBtn && !buttonsBar.curBtn.bIconModeExpand) {
+				const curBtn = buttonsBar.curBtn;
+				let oldBtn = old && old !== buttonsBar.curBtn ? old : null;
+				setTimeout(() => {
+					if (buttonsBar.curBtn === curBtn) {
+						curBtn.bIconModeExpand = true;
+						if (oldBtn) { // In case mouse is moved fast, multiple buttons may be 'old'
+							let bContract = false;
+							for (let key in buttonsBar.buttons) {
+								oldBtn = buttonsBar.buttons[key];
+								if (oldBtn !== curBtn) {
+									if (!bContract) {continue;}
+									oldBtn.bIconModeExpand = false;
+								} else {bContract = true;}
+							}
+						}
+						window.Repaint();
+					}
+				}, 200);
+			}
+		}
 	}
 	// Toolbar Tooltip
 	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length && !buttonsBar.move.bIsMoving) {
@@ -540,7 +585,7 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
 		for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
 	}
-	window.Repaint();
+	if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn) {window.Repaint();}
 });
 
 addEventListener('on_mouse_leave', () => {
@@ -549,6 +594,20 @@ addEventListener('on_mouse_leave', () => {
 		buttonsBar.curBtn.changeState(buttonStates.normal);
 		window.Repaint();
 		buttonsBar.curBtn = null;
+	}
+	if (buttonsBar.config.bIconModeExpand) {
+		let bDone = false;
+		for (let key in buttonsBar.buttons) {
+			if (buttonsBar.buttons[key].bIconModeExpand) {bDone = true; break;}
+		}
+		if (bDone) {
+			setTimeout(() => {
+				for (let key in buttonsBar.buttons) {
+					buttonsBar.buttons[key].bIconModeExpand = false;
+				}
+				window.Repaint();
+			}, 200);
+		}
 	}
 });
 
@@ -679,21 +738,31 @@ function addButton(newButtons) {
 }
 
 function buttonSizeCheck () {
-	const orientation = buttonsBar.config.orientation;
+	const orientation = buttonsBar.config.orientation.toLowerCase();
 	const maxSize = getButtonsMaxSize();
-	if (buttonsBar.config.scale > 1 && maxSize > -1) {
-		if (orientation === 'x' && maxSize > window.Height || orientation === 'y' && maxSize > window.Width) {
+	if (buttonsBar.config.scale > 1 && maxSize.x > -1) {
+		if (orientation === 'x' && maxSize.h > window.Height || orientation === 'y' && maxSize.w > window.Width) {
 			fb.ShowPopupMessage('Buttons ' + (orientation === 'x' ? 'height' : 'width') + ' is greater than current panel size, probably due to a wrong DPI or scale setting.\nIt\'s recommended to reconfigure the buttons scale via menus.', 'Buttons');
 		}
 	}
 }
 
-function getButtonsMaxSize() {
-	const orientation = buttonsBar.config.orientation;
-	let maxSize = -1;
+function getButtonsMaxSize(bCurrent = true) {
+	const orientation = buttonsBar.config.orientation.toLowerCase();
+	// const bReflow = buttonsBar.config.bReflow;
+	let maxSize = {w: -1, h: -1, totalW: 0, totalH: 0};
 	for (let key in buttonsBar.buttons) {
 		const button = buttonsBar.buttons[key];
-		maxSize = (orientation === 'x' ? Math.max(button.currH, maxSize) : Math.max(button.currW, maxSize));
+		maxSize.h = Math.max(bCurrent ? button.currH : button.h, maxSize.h) ;
+		if (button.isIconMode()) {
+			maxSize.w = Math.max(30, maxSize.w);
+		} else {
+			maxSize.w = Math.max(bCurrent ? button.currW : button.w, maxSize.w);
+		}
+		if (orientation === 'x') {maxSize.totalW += (bCurrent ? button.currW : button.w);}
+		if (orientation === 'y') {maxSize.totalH += (bCurrent ? button.currH : button.h);}
 	}
+	if (orientation === 'x') {maxSize.totalH = maxSize.h;}
+	if (orientation === 'y') {maxSize.totalW = maxSize.w;}
 	return maxSize;
 }

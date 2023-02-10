@@ -226,13 +226,13 @@ function createButtonsMenu(name) {
 			window.Repaint();
 		}});
 		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void(0), () => {return barProperties.bReflow[1];});
-		menu.newEntry({menuName, entryText: 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), func: () => {
+		menu.newEntry({menuName, entryText: 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), func: () => {
 			barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
 			overwriteProperties(barProperties);
 			buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
-		menu.newCheckMenu(menuName, 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), void(0), () => {return barProperties.bAlignSize[1];});
+		menu.newCheckMenu(menuName, 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), void(0), () => {return barProperties.bAlignSize[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
 			let input = buttonsBar.config.scale;
@@ -262,7 +262,7 @@ function createButtonsMenu(name) {
 		menu.newCheckMenu(menuName, 'Show properties IDs on tooltip', void(0), () => {return barProperties.bShowId[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		const orientation = barProperties.orientation[1].toLowerCase();
-		menu.newEntry({menuName, entryText: 'Toolbar orientation \t[' + orientation + ']', func: () => {
+		menu.newEntry({menuName, entryText: 'Toolbar orientation \t[' + orientation.toUpperCase() + ']', func: () => {
 			barProperties.orientation[1] = orientation === 'x' ? 'y' : 'x';
 			overwriteProperties(barProperties);
 			buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
@@ -270,13 +270,26 @@ function createButtonsMenu(name) {
 		}});
 		{
 			const subMenu = menu.newMenu('Icons-only mode...', menuName);
-			menu.newEntry({menuName: subMenu, entryText: 'All buttons', func: () => {
+			menu.newEntry({menuName: subMenu, entryText: 'Force for all buttons', func: () => {
 				barProperties.bIconMode[1] = !barProperties.bIconMode[1];
 				overwriteProperties(barProperties);
 				buttonsBar.config.bIconMode = barProperties.bIconMode[1]; // buttons_xxx.js
-				window.Repaint();
+				// When normalizing size, sizers are dynamically calculated on paint... so need to force it
+				if (buttonsBar.config.bAlignSize) {
+					buttonsBar.config.bAlignSize = false; // buttons_xxx.js
+					window.Repaint(true);
+					buttonsBar.config.bAlignSize = true; // buttons_xxx.js
+				}
+				window.Repaint(true);
 			}});
-			menu.newCheckMenu(subMenu, 'All buttons', void(0), () => {return barProperties.bIconMode[1];});
+			menu.newCheckMenu(subMenu, 'Force for all buttons', void(0), () => {return buttonsBar.config.bIconMode;});
+			menu.newEntry({menuName: subMenu, entryText: 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), func: () => {
+				barProperties.bIconModeExpand[1] = !barProperties.bIconModeExpand[1];
+				overwriteProperties(barProperties);
+				buttonsBar.config.bIconModeExpand = barProperties.bIconModeExpand[1]; // buttons_xxx.js
+				window.Repaint();
+			}, flags: buttonsBar.config.orientation === 'x' ? MF_STRING : MF_GRAYED});
+			menu.newCheckMenu(subMenu, 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), void(0), () => {return buttonsBar.config.bIconModeExpand;});
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
 				const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
