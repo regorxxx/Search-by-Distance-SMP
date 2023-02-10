@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/02/23
+//10/02/23
 
 /*
 	Search by Distance
@@ -135,7 +135,7 @@ const SearchByDistance_panelProperties = {
 	bAllMusicDescriptors	:	['Load All Music descriptors?', false],
 	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
 	bStartLogging 			:	['Startup logging', false],
-	bTagsCache				:	['Read tags from cache instead of files?', isFoobarV2]
+	bTagsCache				:	['Read tags from cache instead of files?', false]
 };
 // Checks
 Object.keys(SearchByDistance_panelProperties).forEach( (key) => { // Checks
