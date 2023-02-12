@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/01/23
+//12/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -325,7 +325,12 @@ function createConfigMenu(parent) {
 						}
 					} else if (key === 'bTagsCache') {
 						if (propObj.bTagsCache[1]) {
-							fb.ShowPopupMessage('This feature should only be enabled on Foobar2000 versions >= 2.0.\nPrevious versions already cached tags values, thus not requiring it.', 'Tags cache');
+							fb.ShowPopupMessage(
+								'This feature should only be enabled on Foobar2000 versions >= 2.0 32 bit.' +
+								'\n\nPrevious versions already cached tags values, thus not requiring it. Only enable it in case low memory mode is used, if better performance is desired. See:\n' +
+								'https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Version_2.0_Beta_Change_Log#Beta_20' +
+								'\n\nWarning: it may behave badly on really big libraries (+100K tracks) or if thousands of tracks are tagged/edited at the same time.\nIf you experience crashes or RAM allocation failures, disable it.'
+							, 'Tags cache');
 							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
