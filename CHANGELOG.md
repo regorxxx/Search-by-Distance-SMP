@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [4.0.0](#400---2022-12-12)
+- [4.0.0](#400---2023-02-15)
 - [3.1.0](#310---2022-08-22)
 - [3.0.0](#300---2022-08-21)
 - [2.3.0](#230---2022-08-12)
@@ -29,7 +29,7 @@
 ### Removed
 ### Fixed
 
-## [4.0.0] - 2022-12-12
+## [4.0.0] - 2023-02-15
 ### Added
 - Configuration: settings may now be shared among all search by distance buttons using the new menu entry. A popup asks to copy the configuration for every found button, which is highlighted on the buttons bar.
 - Configuration: added user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' to edit default queries and tags for multiple tools. Usually used internally or on properties panel. Don't forget to reload the panels/restart foobar and restore defaults on all relevant buttons and menus to use the new values. It's recommended to do it upon installation of this update.
@@ -456,7 +456,7 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...HEAD
 [4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.3.0...v3.0.0
