@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/23
+//16/02/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -56,7 +56,9 @@ let barProperties = {
 	activeColor:		['Buttons\' active icon color', buttonsBar.config.activeColor],
 	animationColors:	['Buttons\' animation colors', JSON.stringify(buttonsBar.config.animationColors)],
 	bIconMode:			['Show only button\'s icons', false],
-	bIconModeExpand:	['Expand to full button on hover', false]
+	bIconModeExpand:	['Expand to full button on hover', false],
+	buttonColor:		['Buttons\' color', -1],
+	transparency:		['Buttons\' transparency', 0]
 };
 setProperties(barProperties);
 barProperties = getPropertiesPairs(barProperties);
@@ -69,6 +71,8 @@ buttonsBar.config.toolbarColor = barProperties.toolbarColor[1];
 buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1 ? true : false; // To set the background color
 buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6;
 buttonsBar.config.textColor = barProperties.textColor[1];
+buttonsBar.config.buttonColor = barProperties.buttonColor[1];
+buttonsBar.config.toolbarTransparency = barProperties.transparency[1];
 buttonsBar.config.activeColor = barProperties.activeColor[1];
 buttonsBar.config.animationColors = JSON.parse(barProperties.animationColors[1]);
 // Show Id on tooltips

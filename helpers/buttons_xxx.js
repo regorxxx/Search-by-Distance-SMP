@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/23
+//16/02/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -22,9 +22,11 @@ const buttonsBar = {};
 buttonsBar.config = {
 	bShowID: true, // Show Prefixes + ID on tooltips
 	toolbarTooltip: '', // Shown on toolbar
-	toolbarColor: utils.GetSysColour(15), // Toolbar color
+	toolbarColor: utils.GetSysColour(15),
+	toolbarTransparency: 0,
 	bToolbar: false, // Change this on buttons bars files to set the background color
 	textColor: RGB(0,0,0),
+	buttonColor: -1,
 	activeColor: RGB(0, 163, 240),
 	animationColors: [RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30)],
 	orientation: 'x',
@@ -189,7 +191,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
 	}
 	
-	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false) {
+	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false, bLast = false) {
 		// Draw?
 		if (this.state === buttonStates.hide) {return;}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
@@ -249,6 +251,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		else {
 			const x = xCalc + 1; const y = yCalc; const w = wCalc - 4; const h = hCalc - 2; const arc = 3;
 			gr.SetSmoothingMode(2); // Antialias for lines
+			const toolbarAlpha = Math.max(0, Math.min(buttonsBar.config.toolbarTransparency, 100));
 			switch (this.state) {
 				case buttonStates.normal:
 					if (bDrawBackground) {
@@ -257,6 +260,9 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
 						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
+					} else if (buttonsBar.config.buttonColor !== -1) {
+						if (toolbarAlpha) {gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, toolbarAlpha));}
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, opaqueColor(buttonsBar.config.buttonColor, 50));
 					}
 					break;
 				case buttonStates.hover:
@@ -290,17 +296,44 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
 						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
 					}
-					gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
 					if (bDrawBackground) {
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
 						gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225,243,252,255));
 						gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(37,196,255,80));
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 3, RGBA(0,0,0,50));
 					} else {
-						gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(0,0,0,20));
-						gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,20));
-						gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,10));
-						gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(0,0,0,10));
+						if (buttonsBar.config.buttonColor !== -1) {
+							gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(invert(invert(buttonsBar.config.buttonColor,  true)), 5));
+							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, opaqueColor(buttonsBar.config.buttonColor, 25));
+							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, opaqueColor(buttonsBar.config.buttonColor, 25));
+							gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, opaqueColor(buttonsBar.config.buttonColor, 10));
+							gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, opaqueColor(buttonsBar.config.buttonColor, 10));
+						} else if (buttonsBar.config.bToolbar) {
+							const base = invert(buttonsBar.config.toolbarColor, true);
+							const rgbBase = toRGB(base);
+							const alpha = isDark(...rgbBase) ? 20 : 80;
+							gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(base, 10));
+							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(...rgbBase, alpha));
+							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(...rgbBase, alpha));
+							gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(...rgbBase, alpha / 2));
+							gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(...rgbBase, alpha / 2));
+						} else {
+							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(0,0,0,20));
+							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,20));
+							gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,10));
+							gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(0,0,0,10));
+						}
+					}
+					if (buttonsBar.config.buttonColor !== -1) {
+						if (buttonsBar.config.bToolbar) {
+							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, blendColors(invert(buttonsBar.config.toolbarColor,  true), buttonsBar.config.buttonColor, 0.4));
+						} else {
+							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, invert(invert(buttonsBar.config.buttonColor,  true)));
+						}
+					} else if (buttonsBar.config.bToolbar) {
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, invert(buttonsBar.config.toolbarColor, true));
+					} else {
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
 					}
 					break;
 				case buttonStates.hide:

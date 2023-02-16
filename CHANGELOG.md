@@ -24,8 +24,13 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+## [Unreleased][]
 ### Added
+- UI: added settings for buttons color (the border and filling).
+- UI: added settings for buttons transparency (the filling).
 ### Changed
+- UI: enhanced colors and shading for buttons on mouse over/down when using custom toolbar color modes, etc.
+- UI: pressing Ctrl resets selected setting on buttons bar colors submenu.
 ### Removed
 ### Fixed
 

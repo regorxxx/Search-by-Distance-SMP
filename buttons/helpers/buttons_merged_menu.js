@@ -1,5 +1,5 @@
 ﻿'use strict'
-//08/02/23
+//16/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -167,35 +167,78 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'sep'});
 	{
 		const menuName = menu.newMenu('Colors...');
+		menu.newEntry({menuName, entryText: 'Pressing Ctrl resets selected setting:', flags: MF_GRAYED});
+		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set custom bar color...', func: () => {
-			barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.toolbarColor[1] = -1;
+				buttonsBar.config.bToolbar = false; // buttons_xxx.js
+				buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;
+			} else {
+				barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
+				buttonsBar.config.bToolbar = true; // buttons_xxx.js
+				buttonsBar.config.toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
+			}
 			overwriteProperties(barProperties);
-			buttonsBar.config.bToolbar = true; // buttons_xxx.js
-			buttonsBar.config.toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
-		menu.newEntry({menuName, entryText: 'Set custom text color...', func: () => {
-			barProperties.textColor[1] = utils.ColourPicker(window.ID, barProperties.textColor[1]);
+		menu.newEntry({menuName, entryText: 'Set custom button color...', func: () => {
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.buttonColor[1] = -1;
+				buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
+			} else {
+				barProperties.buttonColor[1] = utils.ColourPicker(window.ID, barProperties.buttonColor[1]);
+				buttonsBar.config.buttonColor = barProperties.buttonColor[1]; // buttons_xxx.js
+			}
 			overwriteProperties(barProperties);
-			buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
+		menu.newEntry({menuName, entryText: 'Set custom text color...', func: () => {
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.textColor[1] = buttonsBar.config.textColor = buttonsBar.config.default.buttonColor;
+			} else {
+				barProperties.textColor[1] = utils.ColourPicker(window.ID, barProperties.textColor[1]);
+				buttonsBar.config.textColor = barProperties.textColor[1]; // buttons_xxx.js
+			}
+			overwriteProperties(barProperties);
 			window.Repaint();
 		}});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set active button color...', func: () => {
-			barProperties.activeColor[1] = utils.ColourPicker(window.ID, barProperties.activeColor[1]);
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.activeColor[1] = buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
+			} else {
+				barProperties.activeColor[1] = utils.ColourPicker(window.ID, barProperties.activeColor[1]);
+				buttonsBar.config.activeColor = barProperties.activeColor[1]; // buttons_xxx.js
+			}
 			overwriteProperties(barProperties);
-			buttonsBar.config.activeColor = barProperties.activeColor[1]; // buttons_xxx.js
 			window.Repaint();
 		}});
 		menu.newEntry({menuName, entryText: 'Set animation button colors...', func: () => {
-			let colors = JSON.parse(barProperties.animationColors[1]);
-			colors = [RGBA(...toRGB(utils.ColourPicker(window.ID, colors[0])), 50), RGBA(...toRGB(utils.ColourPicker(window.ID, colors[1])), 30)];
-			barProperties.animationColors[1] = JSON.stringify(colors);
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.animationColors[1] = JSON.stringify(buttonsBar.config.default.animationColors)
+				buttonsBar.config.animationColors = buttonsBar.config.default.animationColors;
+			} else {
+				let colors = JSON.parse(barProperties.animationColors[1]);
+				colors = [RGBA(...toRGB(utils.ColourPicker(window.ID, colors[0])), 50), RGBA(...toRGB(utils.ColourPicker(window.ID, colors[1])), 30)];
+				barProperties.animationColors[1] = JSON.stringify(colors);
+				buttonsBar.config.animationColors = colors; // buttons_xxx.js
+			}
 			overwriteProperties(barProperties);
-			buttonsBar.config.animationColors = colors; // buttons_xxx.js
 			window.Repaint(); // Note existing animations will use the previous colors, since the (default) colors are applied per animation once before firing
 		}});
 		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Set transparency...' + '\t[' + buttonsBar.config.toolbarTransparency + ']', func: () => {
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.transparency[1] = buttonsBar.config.toolbarTransparency = buttonsBar.config.default.toolbarTransparency;
+			} else {
+				const input = Input.number('int positive', buttonsBar.config.toolbarTransparency, 'Enter value:\n(0 to 100)', 'Buttons bar', 50, [n => n <= 100]);
+				if (input === null) {return;}
+				barProperties.transparency[1] = buttonsBar.config.toolbarTransparency = input;
+			}
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
 		menu.newEntry({menuName, entryText: 'No background buttons', func: () => {
 			barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
 			overwriteProperties(barProperties);
@@ -206,7 +249,10 @@ function createButtonsMenu(name) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
 			barProperties.toolbarColor[1] = -1;
+			barProperties.buttonColor[1] = -1;
 			buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;
+			buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
+			barProperties.transparency[1] = buttonsBar.config.toolbarTransparency = buttonsBar.config.default.toolbarTransparency;
 			barProperties.textColor[1] = buttonsBar.config.textColor = buttonsBar.config.default.textColor;
 			barProperties.activeColor[1] =  buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
 			barProperties.animationColors[1] = JSON.stringify(buttonsBar.config.default.animationColors);
