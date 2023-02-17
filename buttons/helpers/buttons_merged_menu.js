@@ -1,5 +1,5 @@
 ﻿'use strict'
-//16/02/23
+//17/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -101,14 +101,12 @@ function createButtonsMenu(name) {
 	}
 	{
 		const subMenu = menu.newMenu('Change buttons position');
-		menu.newEntry({menuName: subMenu, entryText: 'Buttons can also be moved on UI while pressing R. Click:', flags: MF_GRAYED});
+		menu.newEntry({menuName: subMenu, entryText: 'Can also be moved pressing R. Click:', flags: MF_GRAYED});
 		menu.newEntry({menuName: subMenu, entryText: 'sep'});
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
-				let input;
-				try {input = Number(utils.InputBox(window.ID, 'Enter new position.\n(1 - ' + buttonsPath.length +')', 'Buttons bar', idx + 1));}
-				catch (e) {return;}
-				if (isNaN(input) || input > buttonsPath.length) {return;}
+				const input = Input.number('int positive', idx + 1, 'Enter new position:\n(1 - ' + buttonsPath.length +')', 'Buttons bar', buttonsPath.length, [n => n > 0 && n <= buttonsPath.length]);
+				if (input === null) {return;}
 				buttonsPath.splice(input - 1, 0, buttonsPath.splice(idx, 1)[0]);
 				buttonsBar.list.splice(input - 1, 0, buttonsBar.list.splice(idx, 1)[0]);
 				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
@@ -142,7 +140,7 @@ function createButtonsMenu(name) {
 					});
 				}
 				window.Reload();
-			}});
+			}, flags: buttonsPath.length > 1 ? MF_STRING : MF_GRAYED});
 		});
 	}
 	menu.newEntry({entryText: 'sep'});
@@ -247,7 +245,7 @@ function createButtonsMenu(name) {
 		}});
 		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
-		menu.newEntry({menuName, entryText: 'Reset...', func: () => {
+		menu.newEntry({menuName, entryText: 'Reset all configuration...', func: () => {
 			barProperties.toolbarColor[1] = -1;
 			barProperties.buttonColor[1] = -1;
 			buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;
@@ -280,12 +278,9 @@ function createButtonsMenu(name) {
 		}});
 		menu.newCheckMenu(menuName, 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), void(0), () => {return barProperties.bAlignSize[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
-		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
-			let input = buttonsBar.config.scale;
-			try {input = Number(utils.InputBox(window.ID, 'Enter number:', 'Buttons bar', input, true));}
-			catch(e) {return;}
-			if (isNaN(input)) {return;}
-			if (buttonsBar.config.scale === input) {return;}
+	menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
+			const input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
+			if (input === null) {return;}
 			for (let key in buttonsBar.buttons) {
 				if (!Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {continue;}
 				buttonsBar.buttons[key].changeScale(input);

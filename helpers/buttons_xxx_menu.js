@@ -1,11 +1,20 @@
 ﻿'use strict';
-//12/01/23
+//17/02/23
 
 include('menu_xxx.js');
 include('helpers_xxx_properties.js')
 include('helpers_xxx_file.js');
 
-function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}) {
+function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}, extraEntries = null) {
+	/*
+		parent:			button context
+		bShowValues:	show value along the menu entry
+		readmeFiles:	list of files to show on radme submenu
+		popups:			{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, popup will appear.
+		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, callback will fire (after changing the setting).
+		extraEntries:	function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
+	*/
+	if (extraEntries && !isFunction(extraEntries)) {throw new Error('settingsMenu: extraEntries is not a function');}
 	const menu = new _menu();
 	const properties = parent.buttonsProperties;
 	const parentName = isFunction(parent.text) ? parent.text(parent) : parent.text;
@@ -64,6 +73,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			}
 		});
 	}
+	if (extraEntries) {extraEntries(menu, this);}
 	menu.newEntry({entryText: 'sep'});
 	menu.newEntry({entryText: 'Restore defaults...', func: () => {
 		const options = Object.keys(properties);
