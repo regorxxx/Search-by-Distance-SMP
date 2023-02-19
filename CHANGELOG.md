@@ -37,6 +37,7 @@
 ### Changed
 - UI: enhanced colors and shading for buttons on mouse over/down when using custom toolbar color modes, etc.
 - UI: pressing Ctrl resets selected setting on buttons bar colors submenu.
+- Helpers: updated helpers
 ### Removed
 ### Fixed
 - Buttons: fixed 'Restore default buttons' entry crash (not needed anymore since there are no more 'default buttons'), now replaced with 'Restore all buttons' (which simply restores back default settings for every button).
