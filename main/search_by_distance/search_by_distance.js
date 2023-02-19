@@ -182,6 +182,14 @@ if (!sbd.panelProperties.firstPopup[1]) {
 	if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {
 		doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(sbd.panelProperties);
 	}
+	// SMP Bug: https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205
+	// Force setting it to true at 30 secs after startup
+	setTimeout(() => {
+		if (!sbd.panelProperties.firstPopup[1]) {
+			sbd.panelProperties.firstPopup[1] = true;
+			overwriteProperties(sbd.panelProperties);
+		}
+	}, 60000);
 }
 
 /* 
@@ -367,10 +375,12 @@ addEventListener('on_script_unload', () => {
 	if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Saving Cache.');}
 	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
 	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
-	if (!sbd.panelProperties.firstPopup[1]) {
-		sbd.panelProperties.firstPopup[1] = true;
-		overwriteProperties(sbd.panelProperties); // Updates panel
-	}
+	// SMP Bug: https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205
+	// if (!sbd.panelProperties.firstPopup[1]) {
+		// sbd.panelProperties.firstPopup[1] = true;
+		// overwriteProperties(sbd.panelProperties); // Updates panel
+	// }
+	// console.flush();
 });
 
 /* 
