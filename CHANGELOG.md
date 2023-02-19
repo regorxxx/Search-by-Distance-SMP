@@ -24,6 +24,11 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
 ## [Unreleased][]
 ### Added
 - UI: added settings for buttons color (the border and filling).
@@ -33,6 +38,9 @@
 - UI: pressing Ctrl resets selected setting on buttons bar colors submenu.
 ### Removed
 ### Fixed
+- Buttons: fixed 'Restore default buttons' entry crash (not needed anymore since there are no more 'default buttons'), now replaced with 'Restore all buttons' (which simply restores back default settings for every button).
+- Readmes: added missing 'Toolbar' readme.
+- Workaround for [SMP bug](https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205) which made properties not being saved when closing foobar. That made the initial popups on first installation to keep firing on every restart.
 
 ## [4.0.0] - 2023-02-15
 ### Added
