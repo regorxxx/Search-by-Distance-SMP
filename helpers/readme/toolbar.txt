@@ -1,0 +1,26 @@
+﻿Toolbar panel allows to fully configure sub-modules loaded as buttons.
+R. Click to configure the toolbar:
+	- Add new buttons
+	- Remove
+	- Change order
+	- Restore defaults
+	- Change colors
+	- Change text size
+	- Change orientation and buttons wrap
+	
+Hold R. Click to reorder buttons.
+	
+The button list is automatically built from this path: '.\buttons\*.js'
+
+Some buttons can be 'duplicated'. i.e. having multiple instances with
+different settings. Whenever that's not possible, menu entry will be
+greyed if there is already copy of the button on the toolbar.
+
+Finally, some buttons may require another one to be loaded first... it's
+also indicated in the related entry if the requirement is not met.
+
+Once added, check their tooltips to find relevant info about their usage, 
+settings, mouse + key modifiers, etc. Buttons which are meant to be
+configured using the properties panel have their prefix added to the
+tooltip text ('sbd0', 'rd0', ...) to make it easier to find their
+associated properties.
