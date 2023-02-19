@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.0.1](#401---2023-02-19)
 - [4.0.0](#400---2023-02-15)
 - [3.1.0](#310---2022-08-22)
 - [3.0.0](#300---2022-08-21)
@@ -29,7 +30,7 @@
 ### Removed
 ### Fixed
 
-## [Unreleased][]
+## [4.0.1] - 2023-02-19
 ### Added
 - UI: added settings for buttons color (the border and filling).
 - UI: added settings for buttons transparency (the filling).
@@ -469,7 +470,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v2.3.0...v3.0.0
