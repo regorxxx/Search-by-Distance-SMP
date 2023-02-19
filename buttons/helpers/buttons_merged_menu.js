@@ -1,5 +1,5 @@
 ﻿'use strict'
-//17/02/23
+//19/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -144,23 +144,13 @@ function createButtonsMenu(name) {
 		});
 	}
 	menu.newEntry({entryText: 'sep'});
-	menu.newEntry({entryText:'Restore default buttons', func: () => {
-		// Restore buttons
-		buttonsPath = [...buttonsPathDef];
-		// Remove all properties
-		buttonsBar.list.forEach((properties) => {deleteProperties(properties);});
-		// Save and reload
-		const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-		_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
-		if (readmeList) {
-			fileNames.forEach((fileName) => {
-				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
-				if (readmeFile.length && _isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
-					fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8), readmeFile);
-				}
-			});
+	menu.newEntry({entryText:'Restore all buttons', func: () => {
+		const answer = WshShell.Popup('This will maintain the current layout but delete any customized setting on all buttons. Are you sure?', 0, 'Toolbar', popup.question + popup.yes_no);
+		if (answer === popup.yes) {
+			// Remove all properties and reload
+			buttonsBar.list.forEach((properties) => {deleteProperties(properties);});
+			window.Reload();
 		}
-		window.Reload();
 	}});
 	menu.newEntry({entryText: 'sep'});
 	{
