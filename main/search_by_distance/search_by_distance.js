@@ -380,7 +380,7 @@ addEventListener('on_script_unload', () => {
 		// sbd.panelProperties.firstPopup[1] = true;
 		// overwriteProperties(sbd.panelProperties); // Updates panel
 	// }
-	// console.flush();
+	console.flush();
 });
 
 /* 
