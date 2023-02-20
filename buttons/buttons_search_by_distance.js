@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/23
+//20/02/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -118,8 +118,7 @@ function buttonTooltipSbd(parent) {
 	const sort = (
 		(parent.buttonsProperties.bSmartShuffle[1] ? 'Smart Shuffle' : '') 
 		|| (parent.buttonsProperties.bInKeyMixingPlaylist[1] ? 'Harmonic Mix' : '')
-		|| (parent.buttonsProperties.bSortRandom[1] ? 'Random' : '')
-		|| (parent.buttonsProperties.bProgressiveListOrder[1] ? 'Score' : '')
+		|| ('Random sorting')
 	);
 	info += sort ? '   ' + _p(sort) : '';
 	info += '\nTracks:\t' + parent.buttonsProperties.playlistLength[1];
