@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.0.2](#402---2023-02-20)
 - [4.0.1](#401---2023-02-19)
 - [4.0.0](#400---2023-02-15)
 - [3.1.0](#310---2022-08-22)
@@ -29,6 +30,14 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.0.2] - 2023-02-20
+### Added
+### Changed
+- Helpers: updated helpers
+### Removed
+### Fixed
+- Buttons: 'buttons_search_by_distance.js' crash when showing tooltip under certain configurations.
 
 ## [4.0.1] - 2023-02-19
 ### Added
@@ -471,7 +480,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...HEAD
+[4.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.0.0...v3.1.0
