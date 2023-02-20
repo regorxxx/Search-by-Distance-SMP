@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/02/23
+//20/02/23
 
 /*
 	Search by Distance
@@ -886,7 +886,7 @@ async function searchByDistance({
 			const type = tag.type;
 			if (tag.weight === 0 || tag.tf.length === 0) {continue;}
 			if (type.includes('virtual')) {continue;}
-			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.tf.length || tag.reference !== null))) {
+			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
 				originalWeightValue += tag.weight;
 				if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 					queryl = query.length;
