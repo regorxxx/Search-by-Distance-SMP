@@ -38,6 +38,7 @@
 ### Removed
 ### Fixed
 - Buttons: 'buttons_search_by_distance.js' crash when showing tooltip under certain configurations.
+- Tags: Queries created with some tracks missing tags were wrong, thus giving 0 results, due to not working checks for missing tags since 4.0.0 tag system rework.
 
 ## [4.0.1] - 2023-02-19
 ### Added
