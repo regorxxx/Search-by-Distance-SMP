@@ -1,5 +1,5 @@
 ﻿'use strict'
-//19/02/23
+//21/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -107,39 +107,7 @@ function createButtonsMenu(name) {
 			menu.newEntry({menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
 				const input = Input.number('int positive', idx + 1, 'Enter new position:\n(1 - ' + buttonsPath.length +')', 'Buttons bar', buttonsPath.length, [n => n > 0 && n <= buttonsPath.length]);
 				if (input === null) {return;}
-				buttonsPath.splice(input - 1, 0, buttonsPath.splice(idx, 1)[0]);
-				buttonsBar.list.splice(input - 1, 0, buttonsBar.list.splice(idx, 1)[0]);
-				const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
-				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
-				// Since properties have a prefix according to their loading order when there are multiple instances of the same
-				// script, moving a button when there other 'clones' means the other buttons may get their properties names
-				// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
-				const properties = buttonsBar.list[input - 1];
-				const keys = properties ? Object.keys(properties) : [];
-				if (keys.length) {
-					const prefix = properties[Object.keys(properties)[0]][0].split('_')[0];
-					const currentId = prefix.slice(0, prefix.length - 1);
-					let currentIdNumber = 0;
-					// Just rewrite all Ids with same prefix
-					buttonsBar.list.forEach((oldProperties) => {
-						const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
-						if (oldKeys.length) {
-							const oldPrefix = oldProperties[oldKeys[0]][0].split('_')[0];
-							const oldId = oldPrefix.slice(0, oldPrefix.length - 1);
-							if (oldId === currentId) {
-								const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
-								deleteProperties(oldProperties); // Delete it at panel
-								for (const key in backup) { // Update Id
-									if (!Object.prototype.hasOwnProperty.call(backup, key)) {continue;}
-									backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
-								}
-								setProperties(backup, '', 0, false, true); // And restore at new position
-								if (oldPrefix !== prefix) {currentIdNumber++;}
-							}
-						}
-					});
-				}
-				window.Reload();
+				moveButton(buttonsBar.listKeys[idx][0],buttonsBar.listKeys[input - 1][0]);
 			}, flags: buttonsPath.length > 1 ? MF_STRING : MF_GRAYED});
 		});
 	}

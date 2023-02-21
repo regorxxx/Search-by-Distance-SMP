@@ -37,6 +37,7 @@
 ### Changed
 ### Removed
 ### Fixed
+- Buttons: properties were sometimes reset/mixed/not saved properly moving buttons using the 'Change buttons position' menu. It worked fine using drag n' drop though.
 - Buttons: 'buttons_search_by_distance.js' crash when looking for missing genre/styles on Graph.
 
 ## [4.0.2] - 2023-02-20
