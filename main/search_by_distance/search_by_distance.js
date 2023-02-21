@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/02/23
+//21/02/23
 
 /*
 	Search by Distance
@@ -1887,11 +1887,11 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 function findStyleGenresMissingGraphCheck(properties) {
 	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, 'Search by distance', popup.question + popup.yes_no);
 	if (answer === popup.yes) {
-		const tags = JSON.parse(properties.tags[1]);
+		const tags = JSON.parse(properties.tags[1]); // At least tags must be provided, genreStyleFilter and bAscii are optional
 		findStyleGenresMissingGraph({
-			genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
+			genreStyleFilter: properties.hasOwnProperty('genreStyleFilterTag') ? JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean) : [],
 			genreStyleTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
-			bAscii: properties.bAscii[1],
+			bAscii: properties.hasOwnProperty('bAscii') ? properties.bAscii[1] : true,
 			bPopup: true
 		});
 	}	
