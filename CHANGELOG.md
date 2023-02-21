@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.0.3](#403---2023-02-21)
 - [4.0.2](#402---2023-02-20)
 - [4.0.1](#401---2023-02-19)
 - [4.0.0](#400---2023-02-15)
@@ -30,6 +31,13 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.0.3] - 2023-02-21
+### Added
+### Changed
+### Removed
+### Fixed
+- Buttons: 'buttons_search_by_distance.js' crash when looking for missing genre/styles on Graph.
 
 ## [4.0.2] - 2023-02-20
 ### Added
@@ -481,7 +489,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.3...HEAD
+[4.0.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
