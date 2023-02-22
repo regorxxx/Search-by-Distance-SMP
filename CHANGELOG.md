@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.1.0](#410---2023-02-22)
 - [4.0.3](#403---2023-02-21)
 - [4.0.2](#402---2023-02-20)
 - [4.0.1](#401---2023-02-19)
@@ -31,6 +32,15 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.1.0] - 2023-02-22
+### Added
+- UI: default fonts (buttons, icons, toolbar text and tooltip) may now be changed at '[foobar profile]\js_data\presets\global\globFonts.json'.
+### Changed
+- UI: improved compatibility with some fonts under Unix systems (using Wine). Sometimes weird chars appeared on menu entries.
+### Removed
+### Fixed
+- Crash when using 'Other tools\Calculate same zone artists' experimental tool due to file path changes on [4.0.0](#400---2023-02-15).
 
 ## [4.0.3] - 2023-02-21
 ### Added
@@ -490,8 +500,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.3...HEAD
-[4.0.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...v4.0.3
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...v4.1.0
 [4.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v3.1.0...v4.0.0
