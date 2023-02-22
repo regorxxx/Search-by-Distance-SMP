@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/02/23
+//22/02/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -48,7 +48,7 @@ buttonsBar.propertiesPrefixes = new Set(); // Global properties names prefixes
 buttonsBar.buttons = {}; // Global list
 // Others (internal use)
 buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
-buttonsBar.tooltipButton = new _tt(null, 'Segoe UI', _scale(10), 600);  // Global tooltip
+buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600);  // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
 buttonsBar.useThemeManager = function useThemeManager() {
@@ -85,7 +85,20 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI', 12 * buttonsBar.config.scale), description, prefix = '', buttonsProperties = {}, icon = null, gFontIcon = _gdiFont('FontAwesome', 12 * buttonsBar.config.scale), variables = null, listener = null) {
+function themedButton(
+		coordinates, 
+		text, 
+		func, 
+		state,
+		gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale),
+		description,
+		prefix = '',
+		buttonsProperties = {},
+		icon = null,
+		gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
+		variables = null,
+		listener = null
+	) {
 	this.name = '';
 	this.state = state ? state : buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */
@@ -428,7 +441,7 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 	};
 	
 	this.adjustButtonWidth = function (newName, offset = 30) {
-		this.w = _gr.CalcTextWidth(newName, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + offset;
+		this.w = _gr.CalcTextWidth(newName, this.gFont) + offset;
 		this.w *= buttonsBar.config.scale;
 	};
 	
@@ -445,10 +458,10 @@ function themedButton(coordinates, text, func, state, gFont = _gdiFont('Segoe UI
 		this.h *= newScale;
 		this.currH *= newScale;
 		this.currW *= newScale;
-		this.gFont = _gdiFont(this.gFont.Name, 12 * scale);
+		this.gFont = _gdiFont(this.gFont.Name, this.gFont.Size * newScale);
 		this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.gFont);} : _gr.CalcTextWidth(this.text, this.gFont);
 		if (!this.iconImage) {
-			this.gFontIcon = _gdiFont(this.gFontIcon.Name, 12 * scale);
+			this.gFontIcon = _gdiFont(this.gFontIcon.Name, this.gFontIcon.Size * newScale);
 			this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon);} : _gr.CalcTextWidth(this.icon, this.gFontIcon);
 		}
 	};
