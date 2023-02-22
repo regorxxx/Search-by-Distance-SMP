@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/02/23
+//22/02/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -168,7 +168,7 @@ loadButtonsFile(true) && includeButtons();
 
 addEventListener('on_paint', (gr) => {
 	if (!buttonsPath.length) {
-		gr.GdiDrawText('L. Click to load a preset / R. Click to add buttons manually', _gdiFont('Segoe UI', _scale(10)), 0xFF000000, 0, 0, window.Width, window.Height, DT_VCENTER | DT_CENTER | DT_END_ELLIPSIS | DT_CALCRECT | DT_NOPREFIX); // Font is being cached, no problems here...
+		gr.GdiDrawText('L. Click to load a preset / R. Click to add buttons manually', _gdiFont(globFonts.standard.name, _scale(globFonts.standard.size)), 0xFF000000, 0, 0, window.Width, window.Height, DT_VCENTER | DT_CENTER | DT_END_ELLIPSIS | DT_CALCRECT | DT_NOPREFIX); // Font is being cached, no problems here...
 	}
 });
 

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/02/23
+//22/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -719,8 +719,6 @@ function createConfigMenu(parent) {
 				properties.customName[1] = input;
 				overwriteProperties(properties); // Force overwriting
 				parent.text = input;
-				parent.w = _gr.CalcTextWidth(input, _gdiFont('Segoe UI', 12 * buttonsBar.config.scale)) + 30;
-				parent.w *= buttonsBar.config.scale;
 				parent.changeScale(buttonsBar.config.scale);
 				window.Repaint();
 			}
