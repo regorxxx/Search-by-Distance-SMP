@@ -1,5 +1,5 @@
 ﻿'use strict'
-//21/02/23
+//23/02/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -22,7 +22,6 @@ function createButtonsMenu(name) {
 	function isAllowedV2(fileName) {return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js');}
 	{
 		const subMenu = menu.newMenu('Add buttons');
-		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
 			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
@@ -35,8 +34,8 @@ function createButtonsMenu(name) {
 						: subMenuFolder === '_device_'
 							? 'Output Devices'
 							: capitalizeAll(subMenuFolder.replace(/[_]/g,''))
-				) + invId;
-				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
+				);
+				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 			}
 			entryText = entryText.replace('buttons_', '').replace('others_', '');
 			menu.newEntry({menuName: subMenuFolder, entryText, func: () => {
@@ -336,7 +335,6 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'sep'});
 	{
 		const subMenu = menu.newMenu('Readmes...');
-		const invId =  nextId('invisible', true, false); // To avoid classes with other submenus
 		menu.newEntry({menuName: subMenu, entryText: 'Toolbar', func: () => {
 			const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';
 			const readme = _open(readmePath, utf8);
@@ -355,8 +353,8 @@ function createButtonsMenu(name) {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {return;}
 				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;}) || 'Others';
-				subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,' ').trim()) + invId;
-				if (!menu.hasMenu(subMenuFolder, subMenu)) {menu.newMenu(subMenuFolder, subMenu);}
+				subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,' ').trim());
+				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 				const entryText = fileName.replace('buttons_', '');
 				menu.newEntry({menuName: subMenuFolder, entryText, func: () => {
 					if (_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {
