@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/02/23
+//01/03/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -10,11 +10,11 @@ include('callbacks_xxx.js');
 /* 
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
 	as new buttons instances on the same toolbar. Coordinates get updated when loading multiple buttons, removing the need to manually set them.
-	Check '_buttons_blank.js' to see the universal buttons structure. It loads on foobar but does nothing, it's just empty.
+	Check '_buttons_blank.js' to see the universal buttons structure. It loads on foobar2000 but does nothing, it's just empty.
 	Check '_buttons_blank_merged.js' to see the universal structure for merging buttons, creating an entire bar
-	Check '_buttons_example.js' for a working example of buttons within foobar.
-	Check '_buttons_example_merged.js' for a working example of a buttons bar within foobar.
-	Check '_buttons_example_merged_double.js' for a working example of merging multiple buttons and bars within foobar.
+	Check '_buttons_example.js' for a working example of buttons within foobar2000.
+	Check '_buttons_example_merged.js' for a working example of a buttons bar within foobar2000.
+	Check '_buttons_example_merged_double.js' for a working example of merging multiple buttons and bars within foobar2000.
 */
 
 const buttonsBar = {};
@@ -36,11 +36,12 @@ buttonsBar.config = {
 	partAndStateID: 1, // 1 standard button, 6  bg/border button (+hover)
 	scale: _scale(0.7, false),
 	bIconMode: false,
-	bIconModeExpand: false
+	bIconModeExpand: false,
+	bUseCursors: true
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
-buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}};
+buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}, last: -1};
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at buttons obj)
@@ -520,7 +521,7 @@ addEventListener('on_paint', (gr) => {
 	}
 	drawAllButtons(gr);
 	// Drag n drop buttons
-	if (buttonsBar.move.bIsMoving) {
+	if (buttonsBar.move.bIsMoving && buttonsBar.move.toKey) {
 		gr.FillSolidRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
 		gr.DrawRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, 1, invert(buttonsBar.config.toolbarColor));
 	}
@@ -541,6 +542,19 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		old && old.changeState(buttonStates.normal);
 		window.Repaint();
 		return;
+	}
+	
+	// Cursors
+	if (buttonsBar.config.bUseCursors) {
+		if (buttonsBar.move.bIsMoving && buttonsBar.move.btn && buttonsBar.listKeys.length) {
+			const last = buttonsBar.buttons[buttonsBar.listKeys[buttonsBar.listKeys.length - 1].flat(Infinity).pop()];
+			const maxX = last.currX + last.currW + _scale(5);
+			const maxY = last.currY + last.currH + _scale(5);
+			const axis = buttonsBar.config.orientation;
+			if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {window.SetCursor(IDC_SIZEALL);}
+			else {window.SetCursor(IDC_NO);}
+		} else if (buttonsBar.curBtn) {window.SetCursor(IDC_HAND);}
+		else {window.SetCursor(IDC_ARROW);}
 	}
 	
 	//Tooltip fix
@@ -590,29 +604,39 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		buttonsBar.tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
 	}
 	// Move buttons
+	let bInvalidMove = false;
 	if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
 		if (mask === MK_RBUTTON) {
-			if (buttonsBar.move.bIsMoving) {
-				buttonsBar.move.toKey = curBtnKey;
-				if (buttonsBar.move.btn) {
-					buttonsBar.move.btn.moveX = x;
-					buttonsBar.move.btn.moveY = y;
+			const last = buttonsBar.buttons[buttonsBar.listKeys[buttonsBar.listKeys.length - 1].flat(Infinity).pop()];
+			const maxX = last.currX + last.currW + _scale(5);
+			const maxY = last.currY + last.currH + _scale(5);
+			const axis = buttonsBar.config.orientation;
+			if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {
+				if (buttonsBar.move.bIsMoving) {
+					buttonsBar.move.toKey = curBtnKey;
+					if (buttonsBar.move.btn) {
+						buttonsBar.move.btn.moveX = x;
+						buttonsBar.move.btn.moveY = y;
+					}
+					const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
+					const fKey = toBtn[0];
+					const lKey = toBtn[toBtn.length - 1];
+					buttonsBar.move.rec.x = buttons[fKey].currX;
+					buttonsBar.move.rec.y = buttons[fKey].currY;
+					buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].currX + buttons[lKey].currW - buttonsBar.move.rec.x : buttons[fKey].currW;
+					buttonsBar.move.rec.h = buttons[fKey].currH;
+				} else {
+					buttonsBar.move.bIsMoving = true;
+					buttonsBar.move.btn = buttonsBar.curBtn;
+					buttonsBar.move.fromKey = curBtnKey;
+					buttonsBar.move.toKey = curBtnKey;
 				}
-				const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
-				const fKey = toBtn[0];
-				const lKey = toBtn[toBtn.length - 1];
-				buttonsBar.move.rec.x = buttons[fKey].currX;
-				buttonsBar.move.rec.y = buttons[fKey].currY;
-				buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].currX + buttons[lKey].currW - buttonsBar.move.rec.x : buttons[fKey].currW;
-				buttonsBar.move.rec.h = buttons[fKey].currH;
-			} else {
-				buttonsBar.move.bIsMoving = true;
-				buttonsBar.move.btn = buttonsBar.curBtn;
-				buttonsBar.move.fromKey = curBtnKey;
-				buttonsBar.move.toKey = curBtnKey;
 			}
-		} else {
-			if (buttonsBar.move.bIsMoving) {moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey);} // Forces window reload on successful move
+		}
+		const bValidMove = !!buttonsBar.move.toKey;
+		if (mask !== MK_RBUTTON || !bValidMove) {
+			if (buttonsBar.move.bIsMoving && bValidMove) {moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey);} // Forces window reload on successful move
+			else {bInvalidMove = true;}
 			buttonsBar.move.bIsMoving = false;
 			if (buttonsBar.move.btn) {
 				buttonsBar.move.btn.moveX = null;
@@ -625,13 +649,42 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		}
 		for (let key in buttons) {
 			if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-				if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}}
+				if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}
 			}
+		}
 	} else {
 		for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
 		for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
+		if (mask !== MK_RBUTTON) {
+			buttonsBar.move.bIsMoving = false;
+			if (buttonsBar.move.btn) {
+				buttonsBar.move.btn.moveX = null;
+				buttonsBar.move.btn.moveY = null;
+				buttonsBar.move.btn = null;
+			}
+			buttonsBar.move.fromKey = null;
+		}
+		buttonsBar.move.toKey = null;
+		bInvalidMove = true;
 	}
-	if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn) {window.Repaint();}
+	if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn || bInvalidMove) {window.Repaint();}
+	if (buttonsBar.move.bIsMoving) { // Force drag n drop redraw even if mouse doesn't move
+		const checkMove = () => {
+			setTimeout(() => {
+				if (Date.now() - buttonsBar.move.last > 250) {
+					if (!utils.IsKeyPressed(0x02)) {
+						// Disable drag n drop
+						on_mouse_move(x, y); 
+						// Force state on current hovered button
+						buttonsBar.curBtn = null;
+						on_mouse_move(x, y);
+					} else {checkMove();} // Repeat if nothing has changed
+				}
+			}, 500)
+		};
+		checkMove();
+		buttonsBar.move.last = Date.now();
+	}
 });
 
 addEventListener('on_mouse_leave', () => {
@@ -655,6 +708,7 @@ addEventListener('on_mouse_leave', () => {
 			}, 200);
 		}
 	}
+	if (buttonsBar.config.bUseCursors) {window.SetCursor(IDC_ARROW);}
 });
 
 addEventListener('on_mouse_lbtn_down', (x, y, mask) => {
@@ -668,6 +722,7 @@ addEventListener('on_mouse_lbtn_down', (x, y, mask) => {
 addEventListener('on_mouse_rbtn_up', (x, y, mask) => {
 	// Must return true, if you want to suppress the default context menu.
 	// Note: left shift + left windows key will bypass this callback and will open default context menu.
+	buttonsBar.move.bIsMoving && on_mouse_move(x, y); // Force drag n drop redraw
 	return buttonsBar.hasOwnProperty('menu') ? buttonsBar.menu().btn_up(x, y) : false;
 });
 
@@ -795,7 +850,6 @@ function buttonSizeCheck () {
 
 function getButtonsMaxSize(bCurrent = true) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
-	// const bReflow = buttonsBar.config.bReflow;
 	let maxSize = {w: -1, h: -1, totalW: 0, totalH: 0};
 	for (let key in buttonsBar.buttons) {
 		const button = buttonsBar.buttons[key];
