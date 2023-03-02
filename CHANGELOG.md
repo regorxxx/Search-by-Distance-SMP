@@ -30,9 +30,16 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- UI: tweaked and unified buttons weight and margins, adjusted to scale set and DPI.
+- UI: minor improvements to readme sub-folders names.
+- UI: cursor now changes when over a button.
+- UI: cursor now changes while performing buttons drag n' drop. It now clearly indicates when a move is allowed or it's outside the allowed range.
+- UI: drag n' drop now only works when the mouse is over a button position. i.e. both the functionality and position rectangle are disabled if the mouse is not on a valid position. Previously moving the button to a blank part of the bar would have simply sent it to the first/last position for ex. This is disallowed now, which makes drag n' drop a bit more intuitive and offers an overall more cohesive experience. It also respects orientation and reflow settings.
 - Internal code cleanup of menus.
 ### Removed
 ### Fixed
+- UI: minor improvements to drag n drop behavior when mouse remains static and R. Click is released. Panel is redrawn immediately instead of waiting to move the mouse, current button remains hovered.
+- UI: minor improvements to drag n drop behavior when R. Click menu is called in rapid succession. Panel is redrawn on the background now.
 - Console: logging of null value not working properly (totally irrelevant except for debug purposes).
 
 ## [4.1.0] - 2023-02-22
