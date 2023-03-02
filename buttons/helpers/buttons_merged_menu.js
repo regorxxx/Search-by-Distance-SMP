@@ -1,5 +1,5 @@
 ﻿'use strict'
-//23/02/23
+//01/03/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -14,12 +14,24 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	if (!_isFolder(folders.data)) {_createFolder(folders.data);}
-	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_others_device_selector.js', 'buttons_playlist_history.js']);
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_others_device_selector.js', 'buttons_playlist_history.js', 'buttons_lastfm_list.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
-	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_device_', '_others_']; // By order of priority if it matches multiple strings
+	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_device_', '_lastfm_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
 	function isAllowed(fileName) {return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName);}
 	function isAllowedV2(fileName) {return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js');}
+	function parseSubMenuFolder(s) {
+		return (s === '_playlist_tools' 
+			? 'Playlist Tools' 
+			: s === '_search_by_distance' 
+				? 'Search by Distance'
+				: s === '_device_'
+					? 'Output Devices'
+					: s === '_lastfm_'
+						? 'Last.fm'
+						: capitalizeAll(s.replace(/[_]/g,'').trim())
+		);
+	}
 	{
 		const subMenu = menu.newMenu('Add buttons');
 		files.forEach((path) => {
@@ -27,14 +39,7 @@ function createButtonsMenu(name) {
 			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
 			let subMenuFolder = subCategories.find((folder) => {return entryText.indexOf(folder) !== -1;}) || 'Others';
 			if (subMenuFolder && subMenuFolder.length) {
-				subMenuFolder = (subMenuFolder === '_playlist_tools' 
-					? 'Playlist Tools' 
-					: subMenuFolder === '_search_by_distance' 
-						? 'Search by Distance'
-						: subMenuFolder === '_device_'
-							? 'Output Devices'
-							: capitalizeAll(subMenuFolder.replace(/[_]/g,''))
-				);
+				subMenuFolder = parseSubMenuFolder(subMenuFolder);
 				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 			}
 			entryText = entryText.replace('buttons_', '').replace('others_', '');
@@ -353,7 +358,7 @@ function createButtonsMenu(name) {
 				const readmeFile = readmeList.hasOwnProperty(fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) {return;}
 				let subMenuFolder = subCategories.find((folder) => {return fileName.indexOf(folder) !== -1;}) || 'Others';
-				subMenuFolder = capitalizeAll(subMenuFolder.replace(/[_]/g,' ').trim());
+				subMenuFolder = parseSubMenuFolder(subMenuFolder);
 				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 				const entryText = fileName.replace('buttons_', '');
 				menu.newEntry({menuName: subMenuFolder, entryText, func: () => {
