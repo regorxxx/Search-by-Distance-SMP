@@ -41,6 +41,7 @@
 - UI: minor improvements to drag n drop behavior when mouse remains static and R. Click is released. Panel is redrawn immediately instead of waiting to move the mouse, current button remains hovered.
 - UI: minor improvements to drag n drop behavior when R. Click menu is called in rapid succession. Panel is redrawn on the background now.
 - Console: logging of null value not working properly (totally irrelevant except for debug purposes).
+- Missing buttons' readme list.
 
 ## [4.1.0] - 2023-02-22
 ### Added
