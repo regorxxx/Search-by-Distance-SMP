@@ -183,13 +183,13 @@ if (!sbd.panelProperties.firstPopup[1]) {
 		doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(sbd.panelProperties);
 	}
 	// SMP Bug: https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205
-	// Force setting it to true at 30 secs after startup
+	// Force setting it to true at 10 secs after startup
 	setTimeout(() => {
 		if (!sbd.panelProperties.firstPopup[1]) {
 			sbd.panelProperties.firstPopup[1] = true;
 			overwriteProperties(sbd.panelProperties);
 		}
-	}, 60000);
+	}, 10000);
 }
 
 /* 

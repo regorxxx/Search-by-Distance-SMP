@@ -1,7 +1,7 @@
 'use strict';
 
 // Required since this script is loaded on browsers for drawing too!
-try { // On foobar
+try { // On foobar2000
 	include('defaultSettings.js');
 	include('heuristics.js');
 	include('makeNBASearchStatePool.js');

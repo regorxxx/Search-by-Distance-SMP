@@ -1,9 +1,9 @@
 ﻿'use strict';
-//08/01/23
+//01/03/23
 
 // Required since this script is loaded on browsers for drawing too!
 
-if (typeof include !== 'undefined') { // On foobar
+if (typeof include !== 'undefined') { // On foobar2000
 	include('..\\..\\helpers-external\\ngraph\\ngraph.graph.js');
 	include('music_graph_descriptors_xxx.js');
 	include('music_graph_descriptors_xxx_helper.js');
@@ -26,7 +26,7 @@ if (typeof include !== 'undefined') { // On foobar
 
 
 /*
-	Creates Music Map links for foobar 
+	Creates Music Map links for foobar2000 
 */
 function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		// Maps
@@ -246,7 +246,7 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 			mygraph = Viva.Graph.graph();
 		} catch (e) {
 			mygraph = createGraph();
-			console.log('Warning: musicGraphForDrawing() used within foobar. You should use musicGraph() instead!');
+			console.log('Warning: musicGraphForDrawing() used within foobar2000. You should use musicGraph() instead!');
 		}
 		
 		//Create and fill graph with links (and nodes)
@@ -619,7 +619,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	}
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
-		const mygraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void(0), bHtml); // Foobar graph, or HTML graph or a new one
+		const mygraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void(0), bHtml); // foobar2000 graph, or HTML graph or a new one
 		let pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
@@ -689,12 +689,12 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	
 	if (bWarning) {
 		const message = 'There are some errors on \'music_graph_descriptors_xxx.js\' or \'music_graph_descriptors_xxx_user.js\'';
-		try {fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_xxx');} // On foobar
+		try {fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_xxx');} // On foobar2000
 		catch (e) {alert('Check console \'Ctrl + Shift + K\'. ' + message);} // On browsers
 	} else {
 		if (bShowPopupOnPass) {
 			const message = 'All tests passed.\nChecked \'music_graph_descriptors_xxx.js\' and \'music_graph_descriptors_xxx_user.js\'';
-			try {fb.ShowPopupMessage(message, 'music_graph_descriptors_xxx');} // On foobar
+			try {fb.ShowPopupMessage(message, 'music_graph_descriptors_xxx');} // On foobar2000
 			catch (e) {alert(message);} // On browsers
 		}
 		console.log('music_graph_descriptors_xxx: All tests passed');

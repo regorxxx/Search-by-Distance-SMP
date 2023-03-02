@@ -1,8 +1,8 @@
 ﻿'use strict';
-//01/02/23
+//01/03/23
 
 // Required since this script is loaded on browsers for drawing too!
-try { // On foobar
+try { // On foobar2000
 	include('..\\..\\helpers-external\\ngraph\\ngraph.graph.js');
 	include('..\\..\\helpers-external\\ngraph\\a-star.js');
 	include('..\\..\\helpers-external\\ngraph\\a-greedy-star.js');

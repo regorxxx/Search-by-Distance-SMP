@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/22
+//01/03/23
 
 // FOR TESTING: compares genre/style A to Band computes distance (similar to the main function for individual links)
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
@@ -241,7 +241,7 @@ function testGraph(mygraph) {
 }
 
 // FOR TESTING: compares array of styles to other array and computes mean distance (similar to the main function)
-// Tip: Use Foobar component Text Tools with this as track pattern:
+// Tip: Use foobar2000 component Text Tools with this as track pattern:
 // 		'[' ''$meta_sep(genre,''',' '')'', ''$meta_sep(style,''',' '')''' '']'
 // It will output things like this, ready to use here:
 // 		[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]
