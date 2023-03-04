@@ -40,7 +40,7 @@
 ### Changed
 ### Removed
 ### Fixed
-- UI: icon now uses a dark-mode version or gets inverted according to the button text color.
+- UI: icon now uses a dark-mode version or get inverted according to the button text color.
 
 ## [4.2.0] - 2023-03-04
 ### Added
