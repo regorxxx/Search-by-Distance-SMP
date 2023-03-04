@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/02/23
+//04/03/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -40,7 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include('buttons\\' + file);});}
 }
 
-try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.20', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
+try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.21', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
 	name:				['Name of config json file', 'buttons_' + randomString(5)],
@@ -119,7 +119,7 @@ function loadButtonsFile(bStartup = false) {
 				? ['buttons_others_device_priority.js', 'buttons_others_device_selector.js']
 				: ['buttons_others_device_priority.js']
 			},
-			{name: 'ListenBrainz', files: ['buttons_listenbrainz_tools.js']},
+			{name: 'ListenBrainz & Last.fm', files: ['buttons_listenbrainz_tools.js', 'buttons_lastfm_tools.js']},
 			{name: 'Full (no Search by Distance)', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_playlist_tools_macros.js', 'buttons_search_by_tags_combinations.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js','buttons_search_quicksearch.js']},
 			{name: 'Full', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']},
 			{name: 'Blank', files: []}
@@ -133,8 +133,18 @@ function loadButtonsFile(bStartup = false) {
 		presetPopup();
 	} else {
 		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, utf8);
+		// Strip full path
 		if (data) {names = data.map((path) => {return path.split('\\').pop();});}
-		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions with full paths TODO
+		// Old buttons renamed
+		[
+			{from: 'buttons_lastfm_list.js', to: 'buttons_lastfm_tools.js'}
+		].forEach((rename) => {
+			const idx = names.indexOf(rename.from);
+			while (names.indexOf(rename.from) !== -1) {
+				names[idx] = rename.to;
+			}
+		});
+		if (!isArrayEqual(data, names)) {_save(file, JSON.stringify(names, null, '\t'));} // Rewrite file for older versions
 		if (!names.length) {presetPopup();}
 	}
 	buttonsPath = names.map((name) => {return folders.xxx + 'buttons\\' + name;});

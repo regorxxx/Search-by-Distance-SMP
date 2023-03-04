@@ -27,5 +27,5 @@
 	"buttons_tags_save_tags.js": "save_tags.txt",
 	"buttons_listenbrainz_tools.js": "listenbrainz_tools.txt",
 	"buttons_others_main_menu.js": "main_menu_shortcut.txt",
-	"buttons_lastfm_list.js": "lastfm_tools.txt"
+	"buttons_lastfm_tools.js": "lastfm_tools.txt"
 }
