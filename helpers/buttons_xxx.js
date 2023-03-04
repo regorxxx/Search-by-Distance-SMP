@@ -37,7 +37,8 @@ buttonsBar.config = {
 	scale: _scale(0.7, false),
 	bIconMode: false,
 	bIconModeExpand: false,
-	bUseCursors: true
+	bUseCursors: true,
+	bIconInvert: false
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
@@ -364,8 +365,11 @@ function themedButton(
 				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			if (this.iconImage) { // Icon image
 				if (iconCalculated.length) {
-					let icon = gdi.Image(iconCalculated);
+					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? this.icon.replace(/(\..*$)/i, '_dark$1') : null;
+					const iconDarkMode = gdi.Image(iconCalculatedDarkMode);
+					let icon = iconDarkMode || gdi.Image(iconCalculated);
 					if (icon) {
+						if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) {icon = icon.InvertColours();}
 						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
 						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
 							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2
