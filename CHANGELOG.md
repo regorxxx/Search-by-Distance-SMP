@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.2.0](#420---2023-03-04)
 - [4.1.0](#410---2023-02-22)
 - [4.0.3](#403---2023-02-21)
 - [4.0.2](#402---2023-02-20)
@@ -28,6 +29,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [4.2.0] - 2023-03-04
 ### Added
 ### Changed
 - UI: tweaked and unified buttons weight and margins, adjusted to scale set and DPI.
@@ -510,7 +517,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...v4.1.0
 [4.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.0...v4.0.1
