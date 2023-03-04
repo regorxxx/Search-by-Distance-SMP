@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.2.1](#421---2023-03-04)
 - [4.2.0](#420---2023-03-04)
 - [4.1.0](#410---2023-02-22)
 - [4.0.3](#403---2023-02-21)
@@ -33,6 +34,13 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.2.1] - 2023-03-04
+### Added
+### Changed
+### Removed
+### Fixed
+- UI: icon now uses a dark-mode version or gets inverted according to the button text color.
 
 ## [4.2.0] - 2023-03-04
 ### Added
@@ -517,7 +525,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.1...HEAD
+[4.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.2...v4.1.0
 [4.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.0.1...v4.0.2
