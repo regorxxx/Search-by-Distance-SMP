@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/02/23
+//04/03/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -65,7 +65,7 @@ addButton({
 	}, null, void(0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
 	{
 		'on_notify_data': (parent, name, info) => {
-			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev') {return;}
+			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') {return;}
 			if (!name.startsWith('Search by Distance')) {return;}
 			switch (name) {
 				case 'Search by Distance: share configuration': {

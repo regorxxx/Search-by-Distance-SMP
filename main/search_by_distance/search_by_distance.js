@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/02/23
+//04/03/23
 
 /*
 	Search by Distance
@@ -329,7 +329,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 }
 
 addEventListener('on_notify_data', (name, info) => {
-	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev') {return;}
+	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') {return;}
 	if (!name.startsWith('Search by Distance')) {return;}
 	switch (name) {
 		case 'Search by Distance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading

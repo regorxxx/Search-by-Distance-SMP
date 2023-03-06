@@ -365,8 +365,8 @@ function themedButton(
 				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			if (this.iconImage) { // Icon image
 				if (iconCalculated.length) {
-					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? this.icon.replace(/(\..*$)/i, '_dark$1') : null;
-					const iconDarkMode = gdi.Image(iconCalculatedDarkMode);
+					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? iconCalculated.replace(/(\..*$)/i, '_dark$1') : null;
+					const iconDarkMode = iconCalculatedDarkMode ? gdi.Image(iconCalculatedDarkMode) : null;
 					let icon = iconDarkMode || gdi.Image(iconCalculated);
 					if (icon) {
 						if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) {icon = icon.InvertColours();}
