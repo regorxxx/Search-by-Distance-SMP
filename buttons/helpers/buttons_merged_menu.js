@@ -240,7 +240,7 @@ function createButtonsMenu(name) {
 		}});
 		menu.newCheckMenu(menuName, 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), void(0), () => {return barProperties.bAlignSize[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
-	menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
+		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
 			const input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
 			if (input === null) {return;}
 			for (let key in buttonsBar.buttons) {
