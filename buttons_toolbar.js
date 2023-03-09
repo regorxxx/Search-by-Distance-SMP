@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/03/23
+//09/03/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -40,7 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include('buttons\\' + file);});}
 }
 
-try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.24', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
+try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.25', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
 	name:				['Name of config json file', 'buttons_' + randomString(5)],
@@ -109,19 +109,28 @@ function loadButtonsFile(bStartup = false) {
 		if (bStartup && !buttonsBar.firstPopup) {return false;}
 		// Show popup with presets
 		const presets = [
-			{name: 'Playlist Tools', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_playlist_tools_macros.js','buttons_playlist_tools_pool.js']},
-			{name: 'Search by Distance', files: ['buttons_search_by_distance.js']},
-			{name: 'Search by Distance (customizable)', files: ['buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_search_by_distance_customizable.js']},
-			{name: 'Top Tracks', files: ['buttons_search_top_tracks.js', 'buttons_search_top_tracks_from_date.js', 'buttons_search_top_tracks_from_date.js']},
-			{name: 'Library search', files: ['buttons_search_by_tags_combinations.js', 'buttons_search_by_tags_queries.js', 'buttons_search_quicksearch.js']},
-			{name: 'Playlist manipulation', files: ['buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_playlist_filter.js', 'buttons_playlist_history.js']},
+			{name: 'Playlist Tools', files: 
+				['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_playlist_tools_macros.js','buttons_playlist_tools_pool.js']},
+			{name: 'Search by Distance', files: 
+				['buttons_search_by_distance.js']},
+			{name: 'Search by Distance (customizable)', files: 
+				['buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_search_by_distance_customizable.js']},
+			{name: 'Top Tracks', files: 
+				['buttons_search_top_tracks.js', 'buttons_search_top_tracks_from_date.js', 'buttons_search_top_tracks_from_date.js']},
+			{name: 'Library search', files:
+				['buttons_search_by_tags_combinations.js', 'buttons_search_by_tags_queries.js', 'buttons_search_quicksearch.js']},
+			{name: 'Playlist manipulation', files: 
+				['buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_playlist_filter.js', 'buttons_playlist_history.js']},
 			{name: 'Device priority', files: _isFile(folders.xxx + 'buttons\\buttons_others_device_selector.js')
 				? ['buttons_others_device_priority.js', 'buttons_others_device_selector.js']
 				: ['buttons_others_device_priority.js']
 			},
-			{name: 'ListenBrainz & Last.fm', files: ['buttons_listenbrainz_tools.js', 'buttons_lastfm_tools.js']},
-			{name: 'Full (no Search by Distance)', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_playlist_tools_macros.js', 'buttons_search_by_tags_combinations.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js','buttons_search_quicksearch.js']},
-			{name: 'Full', files: ['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']},
+			{name: 'ListenBrainz & Last.fm', files: 
+				['buttons_listenbrainz_tools.js', 'buttons_lastfm_tools.js']},
+			{name: 'Full (no Search by Distance)', files: 
+				['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_playlist_tools_macros.js', 'buttons_search_by_tags_combinations.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js','buttons_search_quicksearch.js']},
+			{name: 'Full', files: 
+				['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js','buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js','buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']},
 			{name: 'Blank', files: []}
 		].map((preset) => {return (preset.files.every((file) => _isFile(folders.xxx + 'buttons\\' + file)) ? preset : void(0));}).filter(Boolean);
 		const input = Input.number('int positive', presets.length, 'Choose a preset (by number) from the following list, to load the toolbar with pre-defined buttons (they may be added/removed at any time later):\n' + presets.map((p, i) => '\t' + _b(i + 1) + ' ' + p.name).join('\n') + '\n\nCanceling will load a blank toolbar by default.', 'Toolbar: preset', 1, [(n) => n > 0 && n <= presets.length]);
