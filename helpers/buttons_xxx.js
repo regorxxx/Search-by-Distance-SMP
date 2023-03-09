@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/03/23
+//09/03/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -271,8 +271,8 @@ function themedButton(
 				case buttonStates.normal:
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
 						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
 					} else if (buttonsBar.config.buttonColor !== -1) {
@@ -290,8 +290,8 @@ function themedButton(
 					) , true); // ID or just description, according to string or func.
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
 						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
 					} else {
 						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(160,160,160));
@@ -308,8 +308,8 @@ function themedButton(
 				case buttonStates.down:
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235))
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207))
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
 					}
 					if (bDrawBackground) {
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
@@ -549,9 +549,10 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	}
 	
 	// Cursors
+	const toolbarKeysLen = buttonsBar.listKeys.length;
 	if (buttonsBar.config.bUseCursors) {
-		if (buttonsBar.move.bIsMoving && buttonsBar.move.btn && buttonsBar.listKeys.length) {
-			const last = buttonsBar.buttons[buttonsBar.listKeys[buttonsBar.listKeys.length - 1].flat(Infinity).pop()];
+		if (buttonsBar.move.bIsMoving && buttonsBar.move.btn && toolbarKeysLen) {
+			const last = buttonsBar.buttons[buttonsBar.listKeys[toolbarKeysLen - 1].flat(Infinity).pop()];
 			const maxX = last.currX + last.currW + _scale(5);
 			const maxY = last.currY + last.currH + _scale(5);
 			const axis = buttonsBar.config.orientation;
@@ -609,86 +610,89 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	}
 	// Move buttons
 	let bInvalidMove = false;
-	if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
-		if (mask === MK_RBUTTON) {
-			const last = buttonsBar.buttons[buttonsBar.listKeys[buttonsBar.listKeys.length - 1].flat(Infinity).pop()];
-			const maxX = last.currX + last.currW + _scale(5);
-			const maxY = last.currY + last.currH + _scale(5);
-			const axis = buttonsBar.config.orientation;
-			if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {
-				if (buttonsBar.move.bIsMoving) {
-					buttonsBar.move.toKey = curBtnKey;
-					if (buttonsBar.move.btn) {
-						buttonsBar.move.btn.moveX = x;
-						buttonsBar.move.btn.moveY = y;
+	if (toolbarKeysLen > 0) {
+		if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
+			if (mask === MK_RBUTTON) {
+				const key = buttonsBar.listKeys[toolbarKeysLen - 1].flat(Infinity).pop();
+				const last = buttonsBar.buttons[key];
+				const maxX = last.currX + last.currW + _scale(5);
+				const maxY = last.currY + last.currH + _scale(5);
+				const axis = buttonsBar.config.orientation;
+				if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {
+					if (buttonsBar.move.bIsMoving) {
+						buttonsBar.move.toKey = curBtnKey;
+						if (buttonsBar.move.btn) {
+							buttonsBar.move.btn.moveX = x;
+							buttonsBar.move.btn.moveY = y;
+						}
+						const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
+						const fKey = toBtn[0];
+						const lKey = toBtn[toBtn.length - 1];
+						buttonsBar.move.rec.x = buttons[fKey].currX;
+						buttonsBar.move.rec.y = buttons[fKey].currY;
+						buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].currX + buttons[lKey].currW - buttonsBar.move.rec.x : buttons[fKey].currW;
+						buttonsBar.move.rec.h = buttons[fKey].currH;
+					} else {
+						buttonsBar.move.bIsMoving = true;
+						buttonsBar.move.btn = buttonsBar.curBtn;
+						buttonsBar.move.fromKey = curBtnKey;
+						buttonsBar.move.toKey = curBtnKey;
 					}
-					const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
-					const fKey = toBtn[0];
-					const lKey = toBtn[toBtn.length - 1];
-					buttonsBar.move.rec.x = buttons[fKey].currX;
-					buttonsBar.move.rec.y = buttons[fKey].currY;
-					buttonsBar.move.rec.w = fKey !== lKey ? buttons[lKey].currX + buttons[lKey].currW - buttonsBar.move.rec.x : buttons[fKey].currW;
-					buttonsBar.move.rec.h = buttons[fKey].currH;
-				} else {
-					buttonsBar.move.bIsMoving = true;
-					buttonsBar.move.btn = buttonsBar.curBtn;
-					buttonsBar.move.fromKey = curBtnKey;
-					buttonsBar.move.toKey = curBtnKey;
 				}
 			}
-		}
-		const bValidMove = !!buttonsBar.move.toKey;
-		if (mask !== MK_RBUTTON || !bValidMove) {
-			if (buttonsBar.move.bIsMoving && bValidMove) {moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey);} // Forces window reload on successful move
-			else {bInvalidMove = true;}
-			buttonsBar.move.bIsMoving = false;
-			if (buttonsBar.move.btn) {
-				buttonsBar.move.btn.moveX = null;
-				buttonsBar.move.btn.moveY = null;
-				buttonsBar.move.btn = null;
+			const bValidMove = !!buttonsBar.move.toKey;
+			if (mask !== MK_RBUTTON || !bValidMove) {
+				if (buttonsBar.move.bIsMoving && bValidMove) {moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey);} // Forces window reload on successful move
+				else {bInvalidMove = true;}
+				buttonsBar.move.bIsMoving = false;
+				if (buttonsBar.move.btn) {
+					buttonsBar.move.btn.moveX = null;
+					buttonsBar.move.btn.moveY = null;
+					buttonsBar.move.btn = null;
+				}
+				buttonsBar.move.fromKey = null;
+				buttonsBar.move.toKey = null;
+				for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttonsBar.move.rec, key)) {buttonsBar.move.rec[key] = null;}}
 			}
-			buttonsBar.move.fromKey = null;
+			for (let key in buttons) {
+				if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+					if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}
+				}
+			}
+		} else {
+			for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
+			for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
+			if (mask !== MK_RBUTTON) {
+				buttonsBar.move.bIsMoving = false;
+				if (buttonsBar.move.btn) {
+					buttonsBar.move.btn.moveX = null;
+					buttonsBar.move.btn.moveY = null;
+					buttonsBar.move.btn = null;
+				}
+				buttonsBar.move.fromKey = null;
+			}
 			buttonsBar.move.toKey = null;
-			for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttonsBar.move.rec, key)) {buttonsBar.move.rec[key] = null;}}
+			bInvalidMove = true;
 		}
-		for (let key in buttons) {
-			if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-				if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}
-			}
+		if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn || bInvalidMove) {window.Repaint();}
+		if (buttonsBar.move.bIsMoving) { // Force drag n drop redraw even if mouse doesn't move
+			const checkMove = () => {
+				setTimeout(() => {
+					if (Date.now() - buttonsBar.move.last > 250) {
+						if (!utils.IsKeyPressed(0x02)) {
+							// Disable drag n drop
+							on_mouse_move(x, y); 
+							// Force state on current hovered button
+							buttonsBar.curBtn = null;
+							on_mouse_move(x, y);
+						} else {checkMove();} // Repeat if nothing has changed
+					}
+				}, 500)
+			};
+			checkMove();
+			buttonsBar.move.last = Date.now();
 		}
-	} else {
-		for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
-		for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
-		if (mask !== MK_RBUTTON) {
-			buttonsBar.move.bIsMoving = false;
-			if (buttonsBar.move.btn) {
-				buttonsBar.move.btn.moveX = null;
-				buttonsBar.move.btn.moveY = null;
-				buttonsBar.move.btn = null;
-			}
-			buttonsBar.move.fromKey = null;
-		}
-		buttonsBar.move.toKey = null;
-		bInvalidMove = true;
-	}
-	if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn || bInvalidMove) {window.Repaint();}
-	if (buttonsBar.move.bIsMoving) { // Force drag n drop redraw even if mouse doesn't move
-		const checkMove = () => {
-			setTimeout(() => {
-				if (Date.now() - buttonsBar.move.last > 250) {
-					if (!utils.IsKeyPressed(0x02)) {
-						// Disable drag n drop
-						on_mouse_move(x, y); 
-						// Force state on current hovered button
-						buttonsBar.curBtn = null;
-						on_mouse_move(x, y);
-					} else {checkMove();} // Repeat if nothing has changed
-				}
-			}, 500)
-		};
-		checkMove();
-		buttonsBar.move.last = Date.now();
-	}
+	} else if (old || buttonsBar.curBtn) {window.Repaint();}
 });
 
 addEventListener('on_mouse_leave', () => {
@@ -780,7 +784,7 @@ function getUniquePrefix(string, sep = '_') {
 }
 
 function moveButton(fromKey, toKey) {
-	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined') {console.log('Buttons: Can not move buttons in current script.'); return;}
+	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined' || !buttonsBar.listKeys.length) {console.log('Buttons: Can not move buttons in current script.'); return;}
 	if (fromKey === toKey) {return;}
 	const fromPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(fromKey) !== -1;});
 	const toPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(toKey) !== -1;});
