@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/03/23
+//09/03/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -718,9 +718,7 @@ function createConfigMenu(parent) {
 			if (properties.customName[1] !== input) {
 				properties.customName[1] = input;
 				overwriteProperties(properties); // Force overwriting
-				parent.text = input;
-				parent.changeScale(buttonsBar.config.scale);
-				window.Repaint();
+				parent.adjustNameWidth(input);
 			}
 		}});
 		menu.newEntry({menuName: subMenuName, entryText: 'Show shortcuts on tooltip', func: () => {

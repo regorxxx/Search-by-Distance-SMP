@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/03/23
+//09/03/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -36,7 +36,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
-	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, newButtonsProperties.customName[1], function (mask) {
+	'Search by Distance Customizable': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
@@ -52,7 +52,7 @@ addButton({
 				if (this.buttonsProperties.customName[1] !== input) {
 					this.buttonsProperties.customName[1] = input;
 					overwriteProperties(this.buttonsProperties); // Force overwriting
-					this.text = input;
+					this.adjustNameWidth(input);
 					const data = JSON.parse(this.buttonsProperties.data[1]);
 					if (data.recipe === 'none') {
 						window.ShowProperties();
