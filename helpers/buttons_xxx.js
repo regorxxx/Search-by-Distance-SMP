@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/03/23
+//15/03/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -99,7 +99,8 @@ function themedButton(
 		icon = null,
 		gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
 		variables = null,
-		listener = null
+		listener = null,
+		onInit = null
 	) {
 	this.name = '';
 	this.state = state ? state : buttonStates.normal;
@@ -134,22 +135,11 @@ function themedButton(
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
-	if (variables) {
-		for (let key in variables) {
-			this[key] = variables[key];
-		}
-	}
-	if (listener) {
-		for (let key in listener) {
-			const func = listener[key].bind(this, this);
-			addEventListener(key, func);
-		}
-	}
-
+	
 	this.containXY = function (x, y) {
 		return (this.currX <= x) && (x <= this.currX + this.currW) && (this.currY <= y) && (y <= this.currY + this.currH);
 	};
-
+	
 	this.changeState = function (state) {
 		let old = this.state;
 		this.state = state;
@@ -470,6 +460,33 @@ function themedButton(
 			this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon);} : _gr.CalcTextWidth(this.icon, this.gFontIcon);
 		}
 	};
+	
+	if (variables) {
+		if (typeof variables === 'object') {
+			for (let key in variables) {
+				if (isFunction(variables[key])) {
+					this[key] = variables[key].bind(this, this);
+				} else {
+					this[key] = variables[key];
+				}
+			}
+		} else {console.log('butttons_xxx: variables is not an object');}
+		variables = null;
+	}
+	if (listener) {
+		if (typeof listener === 'object') {
+			for (let key in listener) {
+				const func = listener[key].bind(this, this);
+				addEventListener(key, func);
+			}
+		} else {console.log('butttons_xxx: listener is not an object');}
+		listener = null;
+	}
+	if (onInit) {
+		if (isFunction(onInit)) {onInit.call(this, this);}
+		else {console.log('butttons_xxx: onInit is not a function');}
+		onInit = null;
+	}
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
 
