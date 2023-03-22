@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/02/23
+//21/03/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -17,7 +17,7 @@ function scatterByTags({
 							tagName = 'GENRE,STYLE',
 							tagValue = 'instrumental',
 							selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
-							bSendToActivePls = true,
+							bSendToActivePls = true
 							} = {}) {
 	// Safety checks
 	if (!tagName.length) {return;}
@@ -179,7 +179,9 @@ function shuffleByTags({
 		tagName = ['ARTIST'],
 		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 		bSendToActivePls = true,
-		data = {handleArray: [], dataArray: [], tagsArray: []} // Shallow copies are made
+		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made
+		bAdvancedShuffle = true, // Tries to scatter instrumental, live tracks, ...
+		bDebug = false
 	} = {}) {
 	// Safety checks
 	const dataHandleLen = data && data.handleArray ? data.handleArray.length : 0;
@@ -270,6 +272,122 @@ function shuffleByTags({
 			valMap.delete(key); 
 		}
 	});
+	// Swap items position when some specific conditions are met, applied over the previous pattern
+	if (bAdvancedShuffle) {
+		const selItemsList = new FbMetadbHandleList(selItemsArrayOut)
+		const conditions = {
+			instrumental: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY', 'LANGUAGE'], val: [['instrumental'], ['instrumental'], ['instrumental'], ['zxx']], bPrev: true},
+			live: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['live'], ['live'], ['live']], bPrev: false},
+			vocal: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['female vocal'], ['female vocal'], ['female vocal']], bPrev: false},
+		};
+		// Retrieve tags and reuse whenever it's possible
+		const types = Object.keys(conditions);
+		const tags = {};
+		for (let type of types) {
+			conditions[type].val = conditions[type].val
+				.map((tagArr) => new Set(tagArr.map((t) => t.toLowerCase())));
+			const missingTags = new Set(conditions[type].tags);
+			for (let tag of conditions[type].tags) {
+				if (tags.hasOwnProperty(tag)) {
+					missingTags.delete(tag);
+				}
+			}
+			const newTags = missingTags.size 
+				? getTagsValuesV4(selItemsList, [...missingTags])
+					.map((tagArr) => tagArr.map(
+						(tagVal) => new Set(tagVal.filter(Boolean).map((t) => t.toLowerCase()))
+					))
+					.reverse()
+				: null;
+			conditions[type].handleVal = [];
+			for (let tag of conditions[type].tags) {
+				if (missingTags.has(tag)) {
+					const newTag = newTags.pop();
+					conditions[type].handleVal.push(newTag);
+					tags[tag] = newTag;
+				} else {
+					conditions[type].handleVal.push(tags[tag]);
+				}
+			}
+		}
+		for (let i = 0; i < totalTracks; i++) {
+			const swap = Object.fromEntries(types.map((t) => [t, false]));
+			// Find which conditions require track swapping
+			for (let type of types) {
+				const condition = conditions[type];
+				const bIsTrue = condition.handleVal.some((tag, k) => tag[i].intersectionSize(condition.val[k]) !== 0);
+				if (condition.bPrev && bIsTrue) {
+					swap[type] = true;
+				} else {
+					swap[type] = false;
+					condition.bPrev = bIsTrue;
+				}
+			}
+			// Apply by priority
+			if (types.some((type) => swap[type])) {
+				let indexes = range(i + 1, totalTracks - 1, 1);
+				let bDone = false;
+				for (let type of types) {
+					const condition = conditions[type];
+					const bSwap = swap[type];
+					if (bSwap) {
+						const currKey = tagValuesOut[i];
+						const newIndexes = indexes.filter((j) => {
+							const newKey = tagValuesOut[j];
+							if (currKey === newKey || distMap.get(newKey).total === 1) { // Swap with tracks whose keys appear once or matching current one
+								if (condition.handleVal.every((tag, k) => tag[j].intersectionSize(condition.val[k]) === 0)) {
+									return true;
+								}
+							}
+							return false;
+						});
+						if (newIndexes.length) {indexes = newIndexes; bDone = true;}
+						else {break;}
+					}
+				}
+				// If there are matches, check conditions over nearest tracks
+				if (bDone && indexes.length) {
+					indexes.shuffle();
+					while (indexes.length) {
+						const j = indexes.pop();
+						// Previous and next track must not match any of the conditions of the current track
+						const currentConditions = {from: {}, to: {}};
+						const nextConditions = {from: {}, to: {}};
+						const prevConditions = {from: {}, to: {}};
+						for (let type of types) {
+							const condition = conditions[type];
+							currentConditions.from[type] = conditions[type].bPrev;
+							if (currentConditions.from[type]) {
+								nextConditions.to[type] = condition.handleVal.every((tag, k) => tag[j - 1].intersectionSize(condition.val[k]) === 0);
+								prevConditions.to[type] = j + 1 < totalTracks ? condition.handleVal.every((tag, k) => tag[j + 1].intersectionSize(condition.val[k]) === 0) : true;
+							}
+							currentConditions.to[type] = condition.handleVal.some((tag, k) => tag[j].intersectionSize(condition.val[k]) !== 0);
+							if (currentConditions.to[type]) {
+								nextConditions.from[type] = (i - 1) > 0 ? condition.handleVal.every((tag, k) => tag[i - 1].intersectionSize(condition.val[k]) === 0) : true;
+								prevConditions.from[type] = (i + 1) < j ? condition.handleVal.every((tag, k) => tag[i + 1].intersectionSize(condition.val[k]) === 0) : currentConditions.to[type];
+							}
+						}
+						const prevFrom = Object.values(prevConditions.from).every(Boolean);
+						const nextFrom = Object.values(nextConditions.from).every(Boolean);
+						const prevTo = Object.values(prevConditions.to).every(Boolean);
+						const nextTo = Object.values(nextConditions.to).every(Boolean);
+						if (prevFrom && nextFrom && prevTo && nextTo) {
+							[tagValuesOut[i], tagValuesOut[j]] = [tagValuesOut[j], tagValuesOut[i]];
+							[dataValuesOut[i], dataValuesOut[j]] = [dataValuesOut[j], dataValuesOut[i]];
+							[selItemsArrayOut[i], selItemsArrayOut[j]] = [selItemsArrayOut[j], selItemsArrayOut[i]];
+							for (let type of types) {
+								const condition = conditions[type];
+								condition.handleVal.forEach((tag) => [tag[i], tag[j]] = [tag[j], tag[i]]);
+								condition.bPrev = currentConditions.to[type];
+							}
+							if (bDebug) {console.log(swap, i + 1, '->', j + 1);}
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 	// And output
 	const selItemsList = new FbMetadbHandleList(selItemsArrayOut);
 	if (bSendToActivePls) {
