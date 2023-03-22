@@ -202,6 +202,7 @@ const music_graph_descriptors = {
 		['Modern Folk XL'					,	['Contemporary Folk','Folk Pop','Folk-Rock']],
 		['Neo Folk XL'						,	['Industrial Folk','Folk Metal','Pagan Folk']],
 		['Ambient XL'						,	['Ambient','Ambient Industrial','Nature Music','Ambient Rock','Ambient Folk','Ambient Electronic','Ambient Metal','Ambient New Age','Ambient Classical','Ambient Funk']],
+		['Chill Folk XL'					,	['Freak Folk', 'Ambient Folk', 'Dream Pop']],
 		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan']]
 	],
 	/*
@@ -311,7 +312,8 @@ const music_graph_descriptors = {
 		['Cool Jazz'						,	['Bebop']],
 		['Hard-Bop'							,	['Bebop']],
 		['Nuevo Flamenco'					,	['Latin-Jazz','Soul-Jazz','Country Blues','Rumba']],
-		['Boom Bap'							,	['Golden Age','East Coast']]
+		['Boom Bap'							,	['Golden Age','East Coast']],
+		['Chill Folk XL'					,	['New Acoustic']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -343,7 +345,7 @@ const music_graph_descriptors = {
 		['Folk Baroque'						,	['Americana','Country_supergenre','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
 		['Grunge'							,	['Indie','Britpop','Funk Metal','Beat Music','Roots Rock','Glam Rock','Pop Metal','Glam Metal','Hair Metal']],
 		['Post-Britpop'						,	['Garage Rock Revival','Post-Punk Revival','Garage Punk']],
-		['Garage Rock Revival'				,	['Dream Pop','Shoegaze']],		
+		['Garage Rock Revival'				,	['Dream Pop','Shoegaze']],
 		['Freak Folk'						,	['Electropop','Psychedelic Rock','Acid Rock']],
 		['Chill-Out Downtempo'				,	['Progressive Trance','New Age','New Age XL','Neo-Classical New Age','Healing Music','New Acoustic']],
 		['Future Jazz'						,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
