@@ -189,9 +189,9 @@ function shuffleByTags({
 	const dataTagsLen = data && data.tagsArray ? data.tagsArray.length : 0;
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
-	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items.'); return null;}
-	if (!Array.isArray(tagName) || !tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {console.log('shuffleByTags: wrong arguments.'); return null;}
-	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length does not match items count.'); return null;}
+	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items. -> ' + Math.max(itemsCount, dataHandleLen)); return null;}
+	if (!Array.isArray(tagName) || !tagName.length) {console.log('shuffleByTags: tagName is not an array of tags. -> ' + tagName); return null;}
+	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length ' + _p(dataLen) +' does not match items count ' + _p(itemsCount) + '.'); return null;}
 	sortBias = (sortBias || '').toLowerCase();
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
