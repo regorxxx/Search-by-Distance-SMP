@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/03/23
+//25/03/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -109,7 +109,7 @@ const music_graph_descriptors = {
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk']],
 		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno']],
 		['Country_supergenre'				,	['Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie']],
-		['R&B_supergenre'					,	['Funktronica','Contemporary R&B','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Soul Blues','Smooth Soul','Disco','Classic Funk','P-Funk','Funk Rock','Contemporary Funk','Psychedelic Funk','Psychedelic Soul','New Orleans R&B','Funk Blues','Deep Funk Revival','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B']],
+		['R&B_supergenre'					,	['Funktronica','Contemporary R&B','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Soul Blues','Smooth Soul','Classic Funk','P-Funk','Funk Rock','Contemporary Funk','Psychedelic Funk','Psychedelic Soul','New Orleans R&B','Funk Blues','Deep Funk Revival','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B']],
 		['Blues_supergenre'					,	['Contemporary Blues','Desert Blues','Hill Country Blues','Soul Blues','Modern Electric Blues','Psychedelic Blues','Blues Rock','Funk Blues','British Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Piano Blues','Vaudeville Blues','Country Blues','Delta Blues']],
 		['Gospel_supergenre'				,	['Contemporary Christian Music','Christian Rock','Modern Gospel','Ragtime','Stride','Traditional Gospel','Spirituals','Worksongs']],
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
@@ -119,14 +119,14 @@ const music_graph_descriptors = {
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
 		['Techno_supergenre'				,	['Ghetto House','Ghettotech','Juke','Hardtechno','Tech Trance','Tech House','Industrial Techno','Minimal Techno','Ambient Techno','IDM','Hardtek','Freetekno','Hardcore Techno','Hardcore Rave','New Beat','Detroit Techno']],
-		['House_supergenre'					,	['Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Chicago House','Garage House']],
+		['House_supergenre'					,	['Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
 		['Trance_supergenre'				,	['Neo Trance','Epic Trance','Hardtrance','NRG','Hard NRG','Hard House','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Classic Trance','Acid Trance']],
 		['Downtempo_supergenre'				,	['Synthwave','Vaporwave','Minimal Wave','Nu Jazz','Minimal Industrial','Digital Minimalism','Glitch','Ambient Breaks','Illbient','Chill-Out Downtempo','Ambient House','Ambient','Ambient Electronic','Ambient New Age','Nature Music','New Age','Neo-Classical New Age','Hang Music','Healing Music','New Age','New Acoustic','Dark Ambient','Dark Industrial','Bit Music','Synth','Muzak','Minimalism','Lounge','Exotica','Musique Concrete']],
 		['Classical Medieval Era_supergenre',	['Ballata','Estampie','Gregorian','Chant','Madrigal','Motet','Organum','Saltarero']],
 		['Classical Renaissance Era_supergenre',['Choral','Ballade','Canzona','Carol','Fantasia','Galliard','Intermedio','Lauda','Litany','Madrigal','Madrigal','Comedy','Madrigale Spirituale','Mass','Motet','Motet-Chanson','Opera','Pavane','Ricercar','Sequence','Tiento','Toccata']],
 		['Classical Baroque Era_supergenre',	['Allemande','Canon','Cantata','Chaconne','Concerto','Courante','Fugue','Classical Gavotte','Gigue','Mass','Minuet','Opera','Opera','Oratorio','Partita','Passacaglia','Passepied','Prelude','Sarabande','Sinfonia','Sonata','Suite','Sonatina']],
-		['Classical Classical Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
-		['Classical Romantic Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
+		['Classical Classical Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
+		['Classical Romantic Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
 		['Classical Modernist Era_supergenre',	['Avant-Garde Classical','Contemporary Classical','Neo-Classical','Third Stream','Ambient Classical']],
 		['Japanese Classical_supergenre',		['Kabuki']],
 		['Indian Classical_supergenre',			['Hindustani']]
@@ -314,6 +314,7 @@ const music_graph_descriptors = {
 		['Nuevo Flamenco'					,	['Latin-Jazz','Soul-Jazz','Country Blues','Rumba']],
 		['Boom Bap'							,	['Golden Age','East Coast']],
 		['Chill Folk XL'					,	['New Acoustic']],
+		['Nu-Disco'							,	['Electro','Disco XL','Post-Disco XL']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -435,7 +436,7 @@ const music_graph_descriptors = {
 		['Jazz_supergenre'					,	['Jazz','Jazz Vocal'				]],
 		['Rap_supergenre'					,	['Hip-Hop'							]],
 		['Hardcore Rap'						,	['Hardcore'							]],
-		['Electronic Music_supercluster'	,	['Electronic'						]],
+		['Electronic Music_supercluster'	,	['Electronic','Dance'				]],
 		['Techno_supergenre'				,	['Techno'							]],
 		['House_supergenre'					,	['House'							]],
 		['Trance_supergenre'				,	['Trance'							]],
