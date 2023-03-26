@@ -105,7 +105,7 @@ const music_graph_descriptors = {
 		['Nordic Folk_supergenre'			,	['Polka','Traditional European Folk','Pagan Folk','German Folk','Joik','Nordic Folk']],
 		['Celtic Folk_supergenre'			,	['Circle','Jig','Scottish','Celtic Folk','Traditional European Folk','Bal Folk','Irish','Scottish Folk','Celtic New Age']],
 		['African Folk_supergenre'			,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
-		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk']],
+		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk']],
 		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno']],
 		['Country_supergenre'				,	['Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie']],
@@ -193,7 +193,7 @@ const music_graph_descriptors = {
 		['Latin Folk XL'					,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Fado','Flamenco','Forró','Jota','Mexican Folk','Peruvian Folk','Spanish Folk','Traditional Folk','Rumba','Rumba Catalana','Rumba Fusión','Ranchera','Mariachi','Bolero','Samba','Nueva Gaita','Nuevo Flamenco']],
 		['Americana XL'						,	['Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk']],
 		['Traditional American Folk XL'		,	['American Primitive Guitar','Neo-Traditional Folk','Traditional American Folk','Appalachian']],
-		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk']],
+		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['African Folk XL'					,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
 		['Bal Folk XL'						,	['Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Jig','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals']],
 		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani']],
@@ -504,7 +504,7 @@ const music_graph_descriptors = {
 		'Spoken Word','Israeli Rock','Uruguayan Rock','Mexican Rock','Italian Rock',
 		'Asian Folk','Torch Songs','Dummy','Rock Opera','Musical','Tuareg Music','Tex-Mex',
 		'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock','Turkish',
-		'Film Score', 'Anime Music'
+		'Film Score', 'Anime Music', 'Worldbeat'
 	]),
 	/*
 		----------------------------------------------------------------------------------------------------
