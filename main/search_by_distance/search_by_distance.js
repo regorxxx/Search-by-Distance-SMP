@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/03/23
+//25/03/23
 
 /*
 	Search by Distance
@@ -104,7 +104,9 @@ const SearchByDistance_properties = {
 	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	bSmartShuffle			:	['Smart Shuffle by Artist', true],
-	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])]
+	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
+	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
+	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random']
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -395,7 +397,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -572,6 +574,8 @@ async function searchByDistance({
 								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
 								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
 								bSmartShuffle			= properties.hasOwnProperty('bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
+								bSmartShuffleAdvc		= properties.hasOwnProperty('bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false, // Spotify's smart shuffle by artist
+								smartShuffleSortBias	= properties.hasOwnProperty('smartShuffleSortBias') ? properties.smartShuffleSortBias[1] : 'random', // Spotify's smart shuffle bias
 								// --->Special Playlists
 								// Use previous playlist selection, but override playlist sorting, since they use their own logic
 								bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
@@ -1741,7 +1745,10 @@ async function searchByDistance({
 						tagName: smartShuffleTag, 
 						data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
 						selItems: null,
-						bSendToActivePls: false
+						bSendToActivePls: false,
+						bAdvancedShuffle: bSmartShuffleAdvc,
+						sortBias: smartShuffleSortBias,
+						bDebug: bSearchDebug
 					});
 					selectedHandlesArray = shuffle.handleArray;
 					selectedHandlesData = shuffle.dataArray;

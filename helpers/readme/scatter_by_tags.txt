@@ -1,0 +1,16 @@
+﻿Reorders selection to avoid consecutive tracks with the same configurable
+tag. Can be used to scatter instrumental tracks, an specific genre, mood,
+etc.
+
+Whenever the selection has so many tracks with that tag value, than
+scattering them would not allow having at least one different valued
+track between them, it's left as is.
+
+The intercalate option tries to avoid consecutive tags with same genre,
+style, artist, ... thus not tied to an specific tag value. It the list
+have 10 different artists, it tries to reorder the tracks to have those
+10 artists on every subset of 10 tracks.
+
+Whenever that's not possible, intercalation is still applied, having
+tracks with consecutive same tag at the end. 
+For ex (artist): A, B, C, A, B, C, A, B, A, A

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/03/23
+//25/03/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -250,8 +250,8 @@ function createConfigMenu(parent) {
 						properties.tags[1] = JSON.stringify(tags);
 						overwriteProperties(properties); // Updates panel
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
-					menu.newCheckMenu(subMenuName2, entryText, void(0), () => {return (tag.scoringDistribution === option);});
 				});
+				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => {return options.indexOf(tag.scoringDistribution);});
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 			{	// Base score
@@ -520,13 +520,51 @@ function createConfigMenu(parent) {
 		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '')
 		const menuName = menu.newMenu(menuText, void(0), menuFlags);
-		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle'], void(0), (key) => {
-			let toDisable = [];
-			if (key === 'bSortRandom') {toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];}
-			else if (key === 'bProgressiveListOrder') {toDisable = ['bSortRandom', 'bSmartShuffle'];}
-			else if (key === 'bSmartShuffle') {toDisable = ['bSortRandom', 'bProgressiveListOrder'];}
-			toDisable.forEach((noKey) => {if (properties[noKey][1]) {properties[noKey][1] = !properties[noKey][1];}});
-		});
+		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
+			[void(0), void(0), void(0), properties.bSmartShuffle[1], void(0), void(0), !properties.bSmartShuffle[1]],
+			(key) => {
+				let toDisable = [];
+				if (key === 'bSortRandom') {toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];}
+				else if (key === 'bProgressiveListOrder') {toDisable = ['bSortRandom', 'bSmartShuffle'];}
+				else if (key === 'bSmartShuffle') {toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals'];}
+				if (key === 'bSmartShuffleAdvc' && properties[key][1]) {
+					fb.ShowPopupMessage(
+						'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
+						'\n\t-Instrumental tracks.' + 
+						'\n\t-Live tracks.' + 
+						'\n\t-Female/male vocals tracks.' +
+						'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
+						'\nposition whenever possible without altering the main logic.'
+						, 'Search by distance'
+					);
+				}
+				toDisable.forEach((noKey) => {if (properties[noKey][1]) {properties[noKey][1] = !properties[noKey][1];}});
+			}
+		);
+		{
+			const subMenuName = menu.newMenu('Smart Shuffle sorting bias...', menuName, properties.bSmartShuffle[1] ? MF_STRING : MF_GRAYED);
+			const options = ['Random', 'Play count', 'Rating', 'Popularity', 'Last played'];
+			menu.newEntry({menuName: subMenuName, entryText: 'Prioritize tracks by:', flags: MF_GRAYED});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			options.forEach((key, i) => {
+				const tf = key.replace(/ /g, '').toLowerCase();
+				menu.newEntry({menuName: subMenuName, entryText: key, func: () => {
+					properties.smartShuffleSortBias[1] = tf;
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty(key) ? MF_GRAYED : MF_STRING});
+			});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			menu.newEntry({menuName: subMenuName, entryText: 'Custom TF...', func: () => {
+				const input = Input.string('string', properties.smartShuffleSortBias[1], 'Enter TF expression:', 'Search by distance', properties.smartShuffleSortBias[3]);
+				if (input === null) {return;}
+				properties.smartShuffleSortBias[1] = input;
+				overwriteProperties(properties); // Updates panel
+			}, flags: recipe.hasOwnProperty('smartShuffleSortBias') ? MF_GRAYED : MF_STRING});
+			menu.newCheckMenu(subMenuName, options[0], 'Custom TF...', () => {
+				const idx = options.findIndex((key) => key.replace(/ /g, '').toLowerCase() === properties.smartShuffleSortBias[1]);
+				return idx !== -1 ? idx : options.length;
+			});
+		}
 	}
 	{	// Special playlists:
 		const menuName = menu.newMenu('Special playlist rules');
@@ -768,10 +806,13 @@ function createConfigMenu(parent) {
 			'Scoring methods': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt',
 			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png',
 			sep3: 'sep',
+			'Sorting: smart shuffle': folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt',
+			'Sorting: harmonic mixing': folders.xxx + 'helpers\\readme\\harmonic_mixing.txt',
+			sep4: 'sep',
 			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt',
 			'Similar Artists': folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt',
 			'User descriptors': folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt',
-			sep4: 'sep',
+			sep5: 'sep',
 			'Tagging requisites': folders.xxx + 'helpers\\readme\\tags_structure.txt',
 			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
 			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'

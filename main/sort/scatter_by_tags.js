@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/03/23
+//25/03/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -180,7 +180,8 @@ function shuffleByTags({
 		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 		bSendToActivePls = true,
 		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made
-		bAdvancedShuffle = true, // Tries to scatter instrumental, live tracks, ...
+		bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
+		sortBias = 'random', // random | playcount | rating | popularity | TitleFormat expression || '' (none)
 		bDebug = false
 	} = {}) {
 	// Safety checks
@@ -191,25 +192,61 @@ function shuffleByTags({
 	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items.'); return null;}
 	if (!Array.isArray(tagName) || !tagName.length || (dataTagsLen !== dataHandleLen && dataTagsLen !== itemsCount)) {console.log('shuffleByTags: wrong arguments.'); return null;}
 	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length does not match items count.'); return null;}
+	sortBias = (sortBias || '').toLowerCase();
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
 	let dataArray = dataLen ? [...data.dataArray] : null;
-	let selItemsArray = dataHandleLen 
+	let tagsArray = dataTagsLen ? [...data.tagsArray] : null;
+	let selItemsArray;
+	let sortTF;
+	switch (sortBias) {
+		case 'playcount': sortTF = '$max(%PLAY_COUNT%,%LASTFM_PLAY_COUNT%,0)'; break;
+		case 'rating': sortTF = '$max(%RATING%,$meta(RATING),0)'; break;
+		case 'popularity': sortTF = '$max($meta(Track Statistics Last.fm,5[score]),0)'; break;
+		case 'lastplayed': sortTF = '%LAST_PLAYED%'; break;
+		case 'random': sortTF = null; break;
+		default: sortTF = sortBias; // Pass a TF expression or empty (don't sort)
+	}
+	if (sortTF !== null) { // If tags/data are already provided, sorting must be tracked...
+		selItemsArray = dataHandleLen ? [...data.handleArray] : selItems.Clone();
+		if (sortTF.length) { // Picking is reversed later, so sort ascending
+			const dataMap = dataLen & dataTagsLen
+				? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, [dataArray[i], tagsArray[i]]]))
+				: dataTagsLen
+					? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, tagsArray[i]]))
+					: dataLen 
+						? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, dataArray[i]]))
+						: null;
+			if (dataHandleLen) {selItemsArray = new FbMetadbHandleList(selItemsArray);}
+			selItemsArray.OrderByFormat(fb.TitleFormat(sortTF), 1);
+			selItemsArray = selItemsArray.Convert();
+			if (dataLen & dataTagsLen) {
+				[dataArray, tagsArray] = selItemsArray.map((handle) => dataMap.get(handle.RawPath + handle.SubSong));
+			} else if (dataTagsLen) {
+				tagsArray = selItemsArray.map((handle) => dataMap.get(handle.RawPath + handle.SubSong));
+			} else if (dataLen) {
+				dataArray = selItemsArray.map((handle) => dataMap.get(handle.RawPath + handle.SubSong));
+			}
+		} else if (!dataHandleLen) {
+			selItemsArray = selItemsArray.Convert();
+		} 
+	} else {
+		selItemsArray = dataHandleLen 
 			? [...data.handleArray]
 			: selItems.Convert();
-	if (dataArray) {Array.shuffle(selItemsArray, dataArray);} // Shuffle both at the same time
-	else {selItemsArray.shuffle();}
-	let selItemsClone = dataTagsLen 
-		? null 
-		: new FbMetadbHandleList(selItemsArray);
-	let selItemsArrayOut = [];
-	let tagValuesOut = [];
-	let dataValuesOut = [];
+		if (dataLen & dataTagsLen) {Array.shuffle(selItemsArray, dataArray, tagsArray);} // Shuffle all at the same time
+		else if (dataLen) {Array.shuffle(selItemsArray, dataArray);}
+		else if (dataTagsLen) {Array.shuffle(selItemsArray, tagsArray);}
+		else {selItemsArray.shuffle();}
+	}
 	// Get tag values and find tag value
 	// Split elements by equal value, by reverse order
+	const selItemsClone = dataTagsLen 
+		? null 
+		: new FbMetadbHandleList(selItemsArray);
 	const tagValues = (selItemsClone 
 			? getTagsValuesV3(selItemsClone, tagName, true)
-			: [...data.tagsArray]
+			: [...tagsArray]
 		).map((item) => {return item.filter(Boolean).sort().map((item) => {return item.toLowerCase();}).join(',');});
 	let valMap = new ReverseIterableMap();
 	for (let i = totalTracks - 1; i >= 0; i--) {
@@ -237,7 +274,7 @@ function shuffleByTags({
 	if (bSolved) {
 		const keys = [...tagValues].filter((key) => {return key !== solution;});
 		timeLine = Array(totalTracks).fill(null).map((val, i) => {
-			return {pos: i, key: i % 2 === 0 ? solution : keys.splice(Math.floor(Math.random() * keys.length), 1)[0]};
+			return {pos: i, key: i % 2 === 0 ? solution : keys.splice(sortTF ? 0 : Math.floor(Math.random() * keys.length), 1)[0]};
 		});
 	} else {
 		const timeLineMap = new ReverseIterableMap();
@@ -257,16 +294,18 @@ function shuffleByTags({
 			}
 		}
 	}
+	let selItemsArrayOut = [];
+	let tagValuesOut = [];
+	let dataValuesOut = [];
 	timeLine.forEach((track) => {
 		const key = track.key;
 		const tracks = valMap.get(key);
 		const tracksNum = tracks.length;
 		// Select a random track with chosen value
-		const n = Math.floor(Math.random() * tracksNum);
-		const index = tracks.splice(n, 1)[0];
+		const index = tracks.splice(sortTF ? 0 : Math.floor(Math.random() * tracksNum), 1)[0];
 		selItemsArrayOut.push(selItemsArray[index]);
 		tagValuesOut.push(tagValues[index]);
-		if (dataArray) {dataValuesOut.push(dataArray[index]);}
+		if (dataLen) {dataValuesOut.push(dataArray[index]);}
 		// Delete empty values
 		if ((tracksNum - 1) === 0) {
 			valMap.delete(key); 
