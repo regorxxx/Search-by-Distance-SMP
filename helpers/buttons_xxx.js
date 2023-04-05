@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/03/23
+//05/04/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -374,7 +374,7 @@ function themedButton(
 					if (this.active) { // Draw copy of icon in background blurred
 						let icon = gdi.CreateImage(this.gFontIcon.Size, this.gFontIcon.Size);
 						const g = icon.GetGraphics();
-						g.DrawString(iconCalculated, this.gFontIcon, tintColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+						g.DrawString(iconCalculated, this.gFontIcon, lightenColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
 						icon.ReleaseGraphics(g);
 						// Image gets shifted in x and y axis... since it's not using text flags
