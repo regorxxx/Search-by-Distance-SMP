@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/03/23
+//27/03/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -181,7 +181,8 @@ function shuffleByTags({
 		bSendToActivePls = true,
 		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made
 		bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
-		sortBias = 'random', // random | playcount | rating | popularity | TitleFormat expression || '' (none)
+		sortBias = 'random', // random | playcount | rating | popularity | lastplayed | TitleFormat expression || '' (none)
+		sortDir = 1,
 		bDebug = false
 	} = {}) {
 	// Safety checks
@@ -189,10 +190,14 @@ function shuffleByTags({
 	const dataTagsLen = data && data.tagsArray ? data.tagsArray.length : 0;
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
+	const bEnhPlayCount = typeof (isEnhPlayCount !== 'undefined' && isEnhPlayCount) || (isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	const bPlayCount = typeof (isPlayCount !== 'undefined' && isPlayCount) || (isPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	sortBias = (sortBias || '').toLowerCase();
 	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items. -> ' + Math.max(itemsCount, dataHandleLen)); return null;}
 	if (!Array.isArray(tagName) || !tagName.length) {console.log('shuffleByTags: tagName is not an array of tags. -> ' + tagName); return null;}
 	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length ' + _p(dataLen) +' does not match items count ' + _p(itemsCount) + '.'); return null;}
-	sortBias = (sortBias || '').toLowerCase();
+	if (/playcount|lastplayed/.test(sortBias) && !bPlayCount) {fb.ShowPopupMessage('shuffleByTags: foo_playcount is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return;}
+	if (/popularity/.test(sortBias) && !utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}')) {fb.ShowPopupMessage('shuffleByTags: Find & Play package is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return;}
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
 	let dataArray = dataLen ? [...data.dataArray] : null;
@@ -203,7 +208,7 @@ function shuffleByTags({
 		case 'playcount': sortTF = '$max(%PLAY_COUNT%,%LASTFM_PLAY_COUNT%,0)'; break;
 		case 'rating': sortTF = '$max(%RATING%,$meta(RATING),0)'; break;
 		case 'popularity': sortTF = '$max($meta(Track Statistics Last.fm,5[score]),0)'; break;
-		case 'lastplayed': sortTF = '%LAST_PLAYED%'; break;
+		case 'lastplayed': sortTF = bEnhPlayCount ? '%LAST_PLAYED_ENHANCED%' : '%LAST_PLAYED%'; break;
 		case 'random': sortTF = null; break;
 		default: sortTF = sortBias; // Pass a TF expression or empty (don't sort)
 	}
@@ -218,7 +223,7 @@ function shuffleByTags({
 						? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, dataArray[i]]))
 						: null;
 			if (dataHandleLen) {selItemsArray = new FbMetadbHandleList(selItemsArray);}
-			selItemsArray.OrderByFormat(fb.TitleFormat(sortTF), 1);
+			selItemsArray.OrderByFormat(fb.TitleFormat(sortTF), sortDir);
 			selItemsArray = selItemsArray.Convert();
 			if (dataLen & dataTagsLen) {
 				[dataArray, tagsArray] = selItemsArray.map((handle) => dataMap.get(handle.RawPath + handle.SubSong));
