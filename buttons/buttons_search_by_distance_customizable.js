@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/03/23
+//05/04/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -89,25 +89,45 @@ addButton({
 				}
 			}
 		}
+	},
+	(parent) => { // Update tooltip on init
+		const properties = parent.buttonsProperties;
+		parent.recipe = {
+			recipe: properties.recipe[1].length ? processRecipe(properties.recipe[1], JSON.parse(properties.tags[1])) : null, 
+			name: properties.recipe[1] || ''
+		};
 	})
 });
 
 // Helper
 function buttonTooltipSbdCustom(parent) {
-	const data = JSON.parse(parent.buttonsProperties.data[1]);
-	const bTooltipInfo = parent.buttonsProperties.bTooltipInfo[1];
+	const properties = parent.buttonsProperties;
+	const data = JSON.parse(properties.data[1]);
+	const bTooltipInfo = properties.bTooltipInfo[1];
+	const recipe = parent.recipe.recipe || {};
 	let info = 'Search similar tracks by acoustic-folksonomy models:';
 	info += '\nRecipe:\t' + data.recipe;
 	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
-	info += '\nMethod:\t' + parent.buttonsProperties.method[1];
+	info += '\nMethod:\t' + (recipe.hasOwnProperty('method') ? recipe.method : properties.method[1]);
 	const sort = (
-		(parent.buttonsProperties.bSmartShuffle[1] ? 'Smart Shuffle' : '') 
-		|| (parent.buttonsProperties.bInKeyMixingPlaylist[1] ? 'Harmonic Mix' : '')
-		|| (parent.buttonsProperties.bSortRandom[1] ? 'Random' : '')
-		|| (parent.buttonsProperties.bProgressiveListOrder[1] ? 'Score' : '')
-	);
+		((recipe.hasOwnProperty('bSmartShuffle') ? recipe.bSmartShuffle : properties.bSmartShuffle[1]) 
+			? 'Smart Shuffle' 
+			: ''
+		) || ((recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) 
+			? 'Harmonic Mix' 
+			: ''
+		) || ((recipe.hasOwnProperty('bSortRandom') ? recipe.bSortRandom : properties.bSortRandom[1]) 
+			? 'Random' 
+			: ''
+		) || ((recipe.hasOwnProperty('bProgressiveListOrder') ? recipe.bProgressiveListOrder : properties.bProgressiveListOrder[1]) 
+			? 'Score' 
+			: ''
+		)) + ((recipe.hasOwnProperty('bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1]) 
+			? ' - Progressive playlist' 
+			: ''
+		);
 	info += sort ? '   ' + _p(sort) : '';
-	info += '\nTracks:\t' + parent.buttonsProperties.playlistLength[1];
+	info += '\nTracks:\t' + properties.playlistLength[1];
 	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
@@ -116,4 +136,51 @@ function buttonTooltipSbdCustom(parent) {
 	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)'} 
 	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)'}
 	return info;
+}
+
+function processRecipe(recipeFile, tags) {
+	let recipe = {};
+	if (recipeFile.length) {
+		recipe = _isFile(recipeFile) 
+			? _jsonParseFileCheck(recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
+			: _jsonParseFileCheck(recipePath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {};
+		if (Object.keys(recipe).length !== 0) {
+			const result = testRecipe({json: recipe, baseTags: tags});
+			if (!result.valid) {console.popup(result.report.join('\n\t- '), 'Recipe error');}
+			// Process nested recipes
+			if (recipe.hasOwnProperty('recipe')) {
+				const toAdd = processRecipe(recipe.recipe);
+				delete toAdd.recipe;
+				Object.keys(toAdd).forEach((key) => {
+					if (!recipe.hasOwnProperty(key)) {
+						recipe[key] = toAdd[key];
+					} else if (key === 'tags') {
+						for (let key in toAdd.tags) {
+							if (!recipe.tags.hasOwnProperty(key)) {
+								recipe.tags[key] = toAdd.tags[key];
+							} else {
+								for (let subKey in toAdd.tags[key]) {
+									if (!recipe.tags[key].hasOwnProperty(subKey)) {
+										recipe.tags[key][subKey] = toAdd.tags[key][subKey];
+									}
+								}
+							}
+						}
+					}
+				});
+			}
+			// Process placeholders for tags
+			if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
+				for (let key in recipe.tags) { // Recipe's tags missing some property
+					for (let prop in recipe.tags['*']) {
+						if (!recipe.tags[key].hasOwnProperty(prop)) {recipe.tags[key][prop] = recipe.tags['*'][prop];}
+					}
+				}
+				for (let key in tags) { // Base tags not on recipe
+					if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
+				}
+			}
+		}
+	}
+	return recipe;
 }

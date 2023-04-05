@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/03/23
+//05/04/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -11,51 +11,12 @@ include('..\\..\\helpers\\helpers_xxx_input.js');
 function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
-	let recipe = {};
 	const tags = JSON.parse(properties.tags[1]);
-	// Recipe forced theme?
-	if (properties.recipe[1].length) {
-		recipe = _isFile(properties.recipe[1]) 
-			? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {}
-			: _jsonParseFileCheck(recipePath + properties.recipe[1], 'Recipe json', 'Search by distance', utf8) || {};
-		if (Object.keys(recipe).length !== 0) {
-			const result = testRecipe({json: recipe, baseTags: tags});
-			if (!result.valid) {console.popup(result.report.join('\n\t- '), 'Recipe error');}
-			// Process nested recipes
-			if (recipe.hasOwnProperty('recipe')) {
-				const toAdd = processRecipe(recipe.recipe);
-				delete toAdd.recipe;
-				Object.keys(toAdd).forEach((key) => {
-					if (!recipe.hasOwnProperty(key)) {
-						recipe[key] = toAdd[key];
-					} else if (key === 'tags') {
-						for (let key in toAdd.tags) {
-							if (!recipe.tags.hasOwnProperty(key)) {
-								recipe.tags[key] = toAdd.tags[key];
-							} else {
-								for (let subKey in toAdd.tags[key]) {
-									if (!recipe.tags[key].hasOwnProperty(subKey)) {
-										recipe.tags[key][subKey] = toAdd.tags[key][subKey];
-									}
-								}
-							}
-						}
-					}
-				});
-			}
-			// Process placeholders for tags
-			if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
-				for (let key in recipe.tags) { // Recipe's tags missing some property
-					for (let prop in recipe.tags['*']) {
-						if (!recipe.tags[key].hasOwnProperty(prop)) {recipe.tags[key][prop] = recipe.tags['*'][prop];}
-					}
-				}
-				for (let key in tags) { // Base tags not on recipe
-					if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
-				}
-			}
-		}
-	}
+	// Process recipe
+	let recipe = {};
+	if (properties.recipe[1].length) {recipe = processRecipe(properties.recipe[1], tags);}
+	// Update tooltip
+	parent.recipe = {recipe: properties.recipe[1].length ? recipe : null, name: properties.recipe[1] || ''};
 	// Recipe forced properties?
 	const bProperties = recipe.hasOwnProperty('properties');
 	// Recipe forced tags?

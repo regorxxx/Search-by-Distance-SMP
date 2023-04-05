@@ -36,11 +36,13 @@
 - Smart shuffle: additional option to scatter instrumental, live and other tracks while respecting the smart pattern by Artist. For ex. if it can swap tracks without altering the Artist proportion for a given range of tracks, thus moving an instrumental track to another position to soft-limit the appearance of consecutive instrumental tracks. Same rationale applies for live tracks or other special conditions. This somewhat ensures any cluster of tracks is as diverse as possible.
 - Smart shuffle: additional options to prioritize tracks by Rating, Play Count (original Spotify's behavior), Last played date, randomly...
 ### Changed
+- UI: additional info shown according to current settings on customizable button.
 - Helpers: updated helpers.
 - Console: multiple improvements when logging to file for FbMetadbHandle, FbMetadbHandleList, Error and unknown instances (totally irrelevant except for debug purposes).
 - Descriptors: updated descriptors with multiple additions.
 ### Removed
 ### Fixed
+- UI: tooltip was not showing some settings forced by the current recipe and using the properties instead. Only affected the 'Method' line.
 
 ## [4.3.1] - 2023-03-09
 ### Added

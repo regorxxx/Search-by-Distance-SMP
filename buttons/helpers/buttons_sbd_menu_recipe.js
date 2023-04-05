@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/01/23
+//05/04/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -142,6 +142,7 @@ function createRecipeMenu(parent) {
 					data.forcedTheme = '';
 					properties.data[1] = JSON.stringify(data);
 					overwriteProperties(properties);
+					parent.recipe = {recipe: null, name: ''}; // Update tooltip
 				}
 			} else if (!result.valid) { // Don't allow to use a recipe with errors, show report instead
 				console.popup(result.report.join('\n\t- '), 'Recipe error'); 
@@ -151,6 +152,7 @@ function createRecipeMenu(parent) {
 				data.forcedTheme = themeName;
 				properties.data[1] = JSON.stringify(data);
 				overwriteProperties(properties);
+				parent.recipe = {recipe: processRecipe(file, tags), name: file}; // Update tooltip
 			}
 		}});
 	});
