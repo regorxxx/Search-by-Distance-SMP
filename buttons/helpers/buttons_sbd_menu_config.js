@@ -228,6 +228,17 @@ function createConfigMenu(parent) {
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
+			{	// Edit
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && !tags.hasOwnProperty(key);
+				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
+				menu.newEntry({menuName: subMenuName, entryText: 'Edit tag...' + (bRecipe ? '\t(forced by recipe)' : ''), func: () => {
+					const input = Input.json('object', tag, 'Edit tag slot: (JSON)', 'Search by distance', JSON.stringify(tag));
+					if (input === null) {return;}
+					tags[key] = tag = input;
+					properties.tags[1] = JSON.stringify(tags);
+					overwriteProperties(properties); // Updates panel
+				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
+			}
 			{	// Delete
 				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && !tags.hasOwnProperty(key);
 				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
