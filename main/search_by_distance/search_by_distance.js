@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/03/23
+//05/04/23
 
 /*
 	Search by Distance
@@ -324,7 +324,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 		cacheLinkSet = newCacheLinkSet;
 	}
 	// Multiple Graph testing and logging of results using the existing cache
-	if (sbd.panelProperties.bSearchDebug[1]) {
+	if (sbd.panelProperties.bSearchDebug[1] && sbd.panelProperties.bStartLogging[1]) {
 		doOnce('Test 1',testGraph)(sbd.allMusicGraph);
 		doOnce('Test 2',testGraphV2)(sbd.allMusicGraph);
 	}
@@ -883,11 +883,13 @@ async function searchByDistance({
 		
 		let originalWeightValue = 0;
 		// Queries and ranges
+		const queryDebug = bSearchDebug ? [] : null;
 		const sortedByCombs = Object.keys(calcTags)
 			.sort((a, b) => (calcTags[a].type.includes('combinations') ? 1 : 0) - (calcTags[b].type.includes('combinations') ? 1 : 0));
 		for (let key of sortedByCombs) {
 			const tag = calcTags[key];
 			const type = tag.type;
+			if (bSearchDebug) {queryDebug.push({tag: key, query: ''});}
 			if (tag.weight === 0 || tag.tf.length === 0) {continue;}
 			if (type.includes('virtual')) {continue;}
 			if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
@@ -929,37 +931,39 @@ async function searchByDistance({
 						// Group as small as possible for query purposes
 						const tagCombSet = tagComb.map((a) => new Set(a));
 						let groups = [];
-						tagCombSet.forEach((s, i) => {
-							let bDone = false;
-							groups.forEach((sg, j) => {
-								const intersection = sg.base.intersection(s);
-								if (sg.base.size === s.size && intersection.size === sg.base.size - 1 || sg.base.size === s.size - 1 && intersection.size === sg.base.size) {
-									if (sg.base.size === s.size) {
-										sg.or.add(...sg.base.difference(intersection));
-										sg.base = intersection;
+						if (tagCombSet.length > 1) {
+							tagCombSet.forEach((s, i) => {
+								let bDone = false;
+								groups.forEach((sg, j) => {
+									const intersection = sg.base.intersection(s);
+									if (sg.base.size === s.size && intersection.size === sg.base.size - 1 || sg.base.size === s.size - 1 && intersection.size === sg.base.size) {
+										if (sg.base.size === s.size) {
+											sg.or.add(...sg.base.difference(intersection));
+											sg.base = intersection;
+										}
+										sg.or.add(...s.difference(intersection));
+										bDone = true;
 									}
-									sg.or.add(...s.difference(intersection));
-									bDone = true;
-								}
+								});
+								if (!bDone) {groups.push({base: s, or: new Set()});}
 							});
-							if (!bDone) {groups.push({base: s, or: new Set()});}
-						});
-						groups = groups.map((o) => {return {base: [...o.base], or: [...o.or]};});
-						groups = groups.map((o) => {
-							return (o.or.length 
-								? query_join(query_combinations(o.base, tagNameTF, 'AND').concat(query_combinations(o.or, tagNameTF, 'OR')), 'AND') 
-								: void(0)
-							);
-						}).filter(Boolean);
+							groups = groups.map((o) => {return {base: [...o.base], or: [...o.or]};});
+							groups = groups.map((o) => {
+								return (o.or.length 
+									? query_join(query_combinations(o.base, tagNameTF, 'AND', void(0), match).concat(query_combinations(o.or, tagNameTF, 'OR', void(0), match)), 'AND') 
+									: void(0)
+								);
+							}).filter(Boolean);
+						} else {  // For a single group just match all
+							groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match+ ' ' + val).join(' AND '));
+						}
 						query[queryl] = query_join(groups, 'OR');
-						// const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						// if (tagNameTF.length > 1) {query[queryl] = query_join(query_combinations(tagComb, tagNameTF, 'OR', 'AND', void(0), match), 'OR');}
-						// else {query[queryl] = query_combinations(tagComb, tagNameTF, 'OR', 'AND');}
 					} else {
 						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 						if (tagNameTF.length > 1) {query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');}
 						else {query[queryl] = query_combinations(tag.reference, tagNameTF, 'OR');}
 					}
+					if (bSearchDebug) {queryDebug[queryDebug.length -1].query = query[queryl];}
 				}
 			} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags');}
 		}
@@ -1100,7 +1104,16 @@ async function searchByDistance({
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
-		if (!handleList) {fb.ShowPopupMessage('Query not valid. Check query:\n' + query[querylength]); return;}
+		if (!handleList) {
+			fb.ShowPopupMessage(
+				'Query not valid. Check query:\n\n' +
+				query[querylength] +
+				(bSearchDebug 
+					? '\n\n' + JSON.stringify(queryDebug, (t, v) => (typeof v === 'undefined' ? 'undefined' : v), '\t') 
+					: ''
+			)); 
+			return;
+		}
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
