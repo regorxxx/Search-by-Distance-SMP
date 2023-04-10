@@ -183,7 +183,7 @@
 - Helpers: updated helpers.
 - HTML: removed unnecessary console warning on debugging.
 - HTML: internal changes for non-oriented links.
-- Logging: added some console warnings when specific sorting options override others.
+- Console: added some console warnings when specific sorting options override others.
 - Presets: updated all Picard scripts with comments, setting examples, new scripts (for folksonomy tags, performers, ...), code improvements, etc.
 - Minor performance improvement (aprox. 10%) breaking the calculations when the current track can not reach the minimum score.
 - Minor performance improvement (aprox. <3%, usually on subsequent calls) caching all TitleFormat expressions.
@@ -242,7 +242,7 @@
 ### Fixed
 - Descriptors: minor fix about 'Tuareg Music'.
 - Descriptors: fixed warnings about non ASCII values on the descriptors.
-- Logging: fixed console logging to file (lines were not being split properly).
+- Console: fixed console logging to file (lines were not being split properly).
 
 ## [2.3.0] - 2022-08-12
 ### Added
@@ -253,8 +253,8 @@
 - Similar artists: library tracks are now filtered by nearest genre/styles to tracks by selected artist for every track, instead of using only the first track as reference. This should better reflect the works of an artist without depending on the reference track at all. Previously, output score would be heavily dependent on the reference track.
 - Similar artists: scores are now weighted with genre/style appearance on all artist's tracks. i.e. if 'Mdour Moctar' has 1 Reggae track on your library and 99 Rock tracks, then if the Reggae track is chosen for the calcs, it's score is weighted as 1% of the total score (instead of averaging all N scores).
 - Similar artists: current method uses the 2 above changes, named 'weighted'. Using only the filter change is 'variable'. Previous method based on reference track is named 'reference'. This is an internal change, but functionality -based on names- can be seen on the diagrams. 'Weighted' will be the default method from now on, not meant to be changed (unless the script 'search_bydistance_extra.js' is edited). In resume, this change is aimed to better reflect the entire work of an artist, instead of specific tracks or being tied to random variations.
-- Logging: reworked console logging to group buttons loading info into one line.
-- Logging: reduced console logging at startup.
+- Console: reworked console logging to group buttons loading info into one line.
+- Console: reduced console logging at startup.
 - Helpers: switched all callbacks to [event listeners](https://github.com/regorxxx/Callbacks-Framework-SMP).
 ### Removed
 ### Fixed
@@ -296,7 +296,7 @@
 ## [2.2.1] - 2022-08-06
 ### Added
 ### Changed
-- Logging: minor improvements to console logging when reporting track li
+- Console: minor improvements to console logging when reporting track li
 ### Removed
 ### Fixed
 - Themes: fix to theme checking. Themes were being reported as non valid when they were fine
@@ -361,7 +361,7 @@
 - Debug: added accent checks (instead of single quotes) at debug.
 - Debug: added ASCII compatibility checks at debug.
 ### Changed
-- Logging: Greatly optimized console logging when sending selected tacks to console. It now outputs the entire list at once (instead of one entry per track). This reduces processing time by +2 secs for +50 tracks (the standard playlist size)... so total processing time has been reduced in most cases by half just with the logging optimization.
+- Console: Greatly optimized console logging when sending selected tacks to console. It now outputs the entire list at once (instead of one entry per track). This reduces processing time by +2 secs for +50 tracks (the standard playlist size)... so total processing time has been reduced in most cases by half just with the logging optimization.
 - HTML: Changed CSS layout to adjust sizes according to window.
 - Similar artists: Added new option to write similar artists tags only to previously non tagged files.
 - Helpers: improved sort and query expressions validity checks.
@@ -374,8 +374,8 @@
 - Helpers: avoid file reading crashing in any case (even if it's locked by another process).
 - Helpers: fixed query checking not working due to upper/lower case mixing in some cases, should now be pretty robust with RegEx.
 - Helpers: fixed UI slowdowns when required font is not found (due to excessive console logging). Now a warning popup is shown and logging is only done once per session.
-- Logging: Progress code in multiple tools have been fixed to display more accurately the percentage progress in the log.
-- Logging: non needed warning about 'name' variable not being recognized on recipes.
+- Console: Progress code in multiple tools have been fixed to display more accurately the percentage progress in the log.
+- Console: non needed warning about 'name' variable not being recognized on recipes.
 - Recipes: 'name' was not being excluded when trying to save a recipe from current properties.
 - Properties were not being properly renumbered on some cases when moving buttons.
 - Crash when using double pass on harmonic mixing.
@@ -420,6 +420,7 @@
 - Recipes: hidden files are now omitted on the menu list.
 - Themes: hidden files are now omitted on the menu list.
 - Tooltip: shortcuts info on customizable button is now configurable, i.e. can be hidden.
+- Console: menu entries are no longer logged to console after clicking.
 - Helpers: updated helpers.
 - General cleanup of code and json file formatting.
 - Removed all code and compatibility checks for SMP <1.4.0. 
@@ -483,7 +484,7 @@
 - Buttons: Fixed multiple button names while logging loading on console.
 - Cache: Fixed crash while trying to parse the cache file if it's being edited at the same time or corrupt.
 - Cache: crash when using the tools and link cache has not been built (on the 10 first secs on first startup or after cache resetting).
-- Logging: minor fixes at console logging.
+- Console: minor fixes at console logging.
 - Multiple minor improvements and fixes on path handling for portable installations.
 - Multiple minor improvements and fixes when saving files on non existing folder.
 - Evaluation of 'sbd_max_graph_distance' at recipes on multiple places is now rounded (just for cleaner logging purpose).
