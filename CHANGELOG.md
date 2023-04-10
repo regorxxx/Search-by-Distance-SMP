@@ -40,6 +40,7 @@
 - UI: additional info shown according to current settings on customizable button.
 - Helpers: updated helpers.
 - Console: multiple improvements when logging to file for FbMetadbHandle, FbMetadbHandleList, Error and unknown instances (totally irrelevant except for debug purposes).
+- Console: menu entries are no longer logged to console after clicking.
 - Descriptors: updated descriptors with multiple additions.
 ### Removed
 ### Fixed
