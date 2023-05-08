@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.4.0](#440---2023-05-08)
 - [4.3.1](#431---2023-03-09)
 - [4.3.0](#430---2023-03-08)
 - [4.2.1](#421---2023-03-04)
@@ -32,6 +33,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [4.4.0] - 2023-05-08
 ### Added
 - Smart shuffle: additional option to scatter instrumental, live and other tracks while respecting the smart pattern by Artist. For ex. if it can swap tracks without altering the Artist proportion for a given range of tracks, thus moving an instrumental track to another position to soft-limit the appearance of consecutive instrumental tracks. Same rationale applies for live tracks or other special conditions. This somewhat ensures any cluster of tracks is as diverse as possible.
 - Smart shuffle: additional options to prioritize tracks by Rating, Play Count (original Spotify's behavior), Last played date, randomly...
@@ -556,7 +563,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...HEAD
+[4.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.1...v4.3.0
 [4.2.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.0...v4.2.1
