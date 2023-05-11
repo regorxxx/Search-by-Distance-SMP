@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/04/23
+//11/05/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -342,22 +342,24 @@ function createConfigMenu(parent) {
 	{	// Pre-scoring filters:
 		const menuName = menu.newMenu('Set pre-scoring filters');
 		{	// Forced Query
-			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: () => {
+			menu.newEntry({menuName, entryText: 'Set Global Forced Query...' + (recipe.hasOwnProperty('forcedQuery') ? '\t(forced by recipe)' : ''), func: (cache) => {
 				let input = '';
-				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', properties['forcedQuery'][1], true);}
+				try {input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', cache || properties['forcedQuery'][1], true);}
 				catch(e) {return;}
-				if (properties['forcedQuery'][1] === input) {return;}
-				try {if (input.length && fb.GetQueryItems(new FbMetadbHandleList(), input).Count === 0) {throw new Error('No items');}} // Sanity check
+				if ((!cache || cache !== input) && properties['forcedQuery'][1] === input) {return;}
+				try {if (input.length && fb.GetQueryItems(fb.GetLibraryItems(), input).Count === 0) {throw new Error('No items');}} // Sanity check
 				catch (e) {
 					if (e.message === 'No items') {
 						fb.ShowPopupMessage('Query returns zero items on current library. Check it and add it again:\n' + input, 'Search by distance'); 
 					} else {
 						fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); 
 					}
+					menu.retry({pos: -1, args: input || properties['forcedQuery'][1]});
 					return;
 				}
 				properties['forcedQuery'][1] = input;
 				overwriteProperties(properties); // Updates panel
+				return;
 			}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 		}
 		{	// Additional filters

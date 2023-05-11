@@ -36,7 +36,9 @@
 ### Added
 ### Changed
 ### Removed
+- Buttons: after a query error, input box is shown again with last input to fix the error and retry.
 ### Fixed
+- Buttons: setting the forced query always returned  'Query returns zero items on current library.' error, for any query. Bug introduced on [4.0.0](#400---2023-02-15).
 
 ## [4.4.0] - 2023-05-08
 ### Added
