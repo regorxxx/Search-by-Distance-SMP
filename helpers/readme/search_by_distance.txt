@@ -1,6 +1,12 @@
 ﻿Creates intelligent "spotify-like" playlists using high-level data from 
 tracks similar to the currently selected one according to genre, style,
-key, etc.
+key, etc. For ex, given a reference track:
+
+- Explore similar music from the same era
+- Follow the evolution of a genre during some period
+- Create a playlist transitioning from one genre to another seamleslly
+- Create an harmonic mix which sounds great no matter the genres mixed
+- Just a random playlist with some coherence in its order and tracks
 
 When their score is over 'scoreFilter', then they are included in the 
 final pool.
