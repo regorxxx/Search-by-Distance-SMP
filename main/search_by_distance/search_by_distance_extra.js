@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/01/23
+//20/05/23
 
 include('search_by_distance.js');
 
@@ -10,7 +10,11 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
 	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
-	const selArtistTracks = removeDuplicatesV2({handleList: fb.GetQueryItems(fb.GetLibraryItems(), libQuery), bAdvTitle: true});
+	const sort = globQuery.remDuplBias;
+	const sortTF = sort.length ? fb.TitleFormat(sort) : null;
+	let selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
+	if (sortTF) {selArtistTracks.OrderByFormat(sortTF, -1);} // In case of duplicates, prefer high rating non-live tracks
+	selArtistTracks = removeDuplicatesV2({handleList: selArtistTracks, bAdvTitle: true});
 	// Use only X random tracks instead of all of them
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);

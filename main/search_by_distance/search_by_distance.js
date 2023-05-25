@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/04/23
+//20/05/23
 
 /*
 	Search by Distance
@@ -1118,6 +1118,9 @@ async function searchByDistance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (checkDuplicatesByTag && checkDuplicatesByTag.length) {
+			const sort = '%RATING%|$strstr($lower(' + genreStyleTag.concat([_t(globTags.folksonomy)]).join('\', \'') + '),live)';
+			const sortTF = sort.length ? fb.TitleFormat(sort) : null
+			if (sortTF) {handleList.OrderByFormat(sortTF, -1);} // + ~100 ms for 50k tracks
 			if (bTagsCache) {
 				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			} else {
@@ -1127,9 +1130,9 @@ async function searchByDistance({
 		const tracktotal = handleList.Count;
 		if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
 		if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
-        // Compute similarity distance by Weight and/or Graph
+		// Compute similarity distance by Weight and/or Graph
 		// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
-        let scoreData = [];
+		let scoreData = [];
 		
 		if (method === 'GRAPH') { // Sort by the things we will look for at the graph! -> Cache speedup
 			let tfo = fb.TitleFormat(genreStyleTag.join('|'));
@@ -1719,7 +1722,8 @@ async function searchByDistance({
 					const [language, speechness] = getTagsValuesV4(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS'], false);
 					for (let i = 0; i < finalPlaylistLength; i++) {
 						const index = selectedHandlesData[i].index;
-						const genreStyleTag = Object.values(calcTags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual') && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
+						const genreStyleTag = Object.values(calcTags)
+							.filter((t) => t.type.includes('graph') && !t.type.includes('virtual') && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
 							.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
 						const tagSet_i = new Set(genreStyleTag.map((item) => {return item.toLowerCase();}));
 						if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || speechness[i][0] === 0) { // Any match, then add to reorder list
