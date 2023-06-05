@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/05/23
+//01/06/23
 
 /* 
 	Objects
@@ -367,6 +367,11 @@ Array.prototype.shuffle = function() {
 	return this;
 };
 
+// [3, 4, 5, 1, 2].move(3, 0, 2) // => [1, 2, 3, 4, 5]
+Array.prototype.move = function(from, to, on) {
+	this.splice(to, 0, this.splice(from, on)[0]);
+};
+
 function zeroOrVal(e){
 	return (e === 0 || e);
 }
@@ -419,6 +424,31 @@ Array.prototype.multiIndexOf = function (el) {
 		if (this[i] === el) {idxs.unshift(i);}
 	}
 	return idxs;
+};
+
+Array.prototype.partialSort = function (order, bOptimze = true) {
+	if (bOptimize) {order = [...(new Set(order).intersection(new Set(this)))];}
+	const profiler = new FbProfiler('partialSort');
+	const orderIndex = [];
+	const orderLen = order.length;
+	for (let i = 0; i < orderLen; i++) {
+		const idx = this.indexOf(order[i]);
+		if (idx != -1) {orderIndex[i] = idx;}
+	}
+	const orderIdxLen = orderIndex.length;
+	for (let i = 0; i < orderIdxLen; i++) {
+		let indexI = orderIndex[i];
+		for (let j = i + 1; j < orderIdxLen; j++) {
+			const indexJ = orderIndex[j];
+			if (indexI > indexJ) {
+				[this[indexI], this[indexJ]] = [this[indexJ], this[indexI]];
+				[orderIndex[i], orderIndex[j]] = [indexJ, indexI];
+				indexI = indexJ;
+			}
+		}
+	}
+	profiler.Print();
+	return this;
 };
 
 /* 
