@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/05/23
+//06/06/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -234,7 +234,7 @@ function createConfigMenu(parent) {
 				menu.newEntry({menuName: subMenuName, entryText: 'Edit tag...' + (bRecipe ? '\t(forced by recipe)' : ''), func: () => {
 					const input = Input.json('object', tag, 'Edit tag slot: (JSON)', 'Search by distance', JSON.stringify(tag));
 					if (input === null) {return;}
-					tags[key] = tag = input;
+					tags[key] = input;
 					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties); // Updates panel
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING});

@@ -40,6 +40,7 @@
 - Remove duplicates: when removing duplicates, tracks left for comparison are now preferred by higher rating and not live tracks (if possible). This is apart from the forced query filtering (which may result on this feature being irrelevant in some use cases).
 ### Fixed
 - Buttons: setting the forced query always returned  'Query returns zero items on current library.' error, for any query. Bug introduced on [4.0.0](#400---2023-02-15).
+- Buttons: crash while editing a tag directly in JSON. Bug introduced on [4.4.0](#440---2023-08-08).
 
 ## [4.4.0] - 2023-05-08
 ### Added
