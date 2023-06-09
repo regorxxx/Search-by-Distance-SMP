@@ -35,12 +35,13 @@
 ## [Unreleased][]
 ### Added
 ### Changed
-### Removed
 - Buttons: after a query error, input box is shown again with last input to fix the error and retry.
-- Remove duplicates: when removing duplicates, tracks left for comparison are now preferred by higher rating and not live tracks (if possible). This is apart from the forced query filtering (which may result on this feature being irrelevant in some use cases).
+- Remove duplicates: when removing duplicates, tracks left for comparison are now preferred by a configurable TF expression. By default higher rating and not live tracks is preferred. This is apart from the forced query filtering (which may result on this feature being irrelevant in some use cases).
+### Removed
 ### Fixed
 - Buttons: setting the forced query always returned  'Query returns zero items on current library.' error, for any query. Bug introduced on [4.0.0](#400---2023-02-15).
 - Buttons: crash while editing a tag directly in JSON. Bug introduced on [4.4.0](#440---2023-08-08).
+- UI: tooltip flickering while pressing Shift/Ctrl over a button in icon-only mode.
 
 ## [4.4.0] - 2023-05-08
 ### Added
