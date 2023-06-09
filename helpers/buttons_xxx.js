@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/23
+//09/06/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -192,6 +192,15 @@ function themedButton(
 		return (this.isIconMode() ? name + '\n-----------------------------------------------------\n' : '');
 	};
 	
+	this.tooltipText = function () { // ID or just description, according to string or func.
+		return (this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID 
+			? this.descriptionWithID(this) 
+			: (isFunction(this.description) 
+				? this.description(this) 
+				: this.description)
+		));
+	}
+	
 	this.isIconMode = function () { // Either global or for current button
 		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
 	}
@@ -217,13 +226,7 @@ function themedButton(
 				}
 				case buttonStates.hover: {
 					if (!buttonsBar.move.bIsMoving) {
-						buttonsBar.tooltipButton.SetValue(
-							this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID 
-								? this.descriptionWithID(this) 
-								: (isFunction(this.description) 
-									? this.description(this) 
-									: this.description)
-						), true); // ID or just description, according to string or func.
+						buttonsBar.tooltipButton.SetValue(this.tooltipText(), true);
 					}
 					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
 					break;
@@ -271,13 +274,7 @@ function themedButton(
 					}
 					break;
 				case buttonStates.hover:
-					buttonsBar.tooltipButton.SetValue(
-						this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID
-							? this.descriptionWithID(this)
-							: (isFunction(this.description)
-								? this.description(this)
-								: this.description)
-					) , true); // ID or just description, according to string or func.
+					buttonsBar.tooltipButton.SetValue(this.tooltipText(), true);
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
 						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
@@ -770,7 +767,7 @@ addEventListener('on_key_down', (k) => { // Update tooltip with key mask if requ
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
 				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue(that.tooltipText(), true);
 			}
 		}
 	}
@@ -781,7 +778,7 @@ addEventListener('on_key_up', (k) => {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].state === buttonStates.hover) {
 				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue( (buttonsBar.config.bShowID ? that.descriptionWithID(that) : (isFunction(that.description) ? that.description(that) : that.description) ) , true); // ID or just description, according to string or func.
+				buttonsBar.tooltipButton.SetValue(that.tooltipText(), true);
 			}
 		}
 	}
