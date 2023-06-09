@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/02/23
+//09/06/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -35,6 +35,7 @@ delete newButtonsProperties.progressiveListCreationN;
 delete newButtonsProperties.bHarmonicMixDoublePass;
 delete newButtonsProperties.bAscii;
 delete newButtonsProperties.bAdvTitle;
+delete newButtonsProperties.sortBias;
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 {
 	const properties = getPropertiesPairs(newButtonsProperties, prefix, 0);
