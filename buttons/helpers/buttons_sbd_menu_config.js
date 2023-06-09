@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/06/23
+//09/06/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -608,6 +608,15 @@ function createConfigMenu(parent) {
 		{
 			{
 				createTagMenu(menuName, ['checkDuplicatesByTag']);
+			}
+			{
+				menu.newEntry({menuName, entryText: 'Duplicates selection bias...' + (recipe.hasOwnProperty('sortBias') ? '\t(forced by recipe)' : ''), func: () => {
+					const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\n\nHigher valued tracks will be preffered.', 'Search by distance', globQuery.remDuplBias, void(0), false);
+					if (input === null) {return;}
+					properties['sortBias'][1] = input;
+					overwriteProperties(properties); // Updates panel
+					return;
+				}, flags: recipe.hasOwnProperty('sortBias') ? MF_GRAYED : MF_STRING});
 			}
 			{
 				createBoolMenu(
