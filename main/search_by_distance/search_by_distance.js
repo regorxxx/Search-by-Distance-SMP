@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/05/23
+//09/06/23
 
 /*
 	Search by Distance
@@ -102,6 +102,7 @@ const SearchByDistance_properties = {
 	playlistName			:	['Playlist name (TF allowed)', 'Search...', {func: isString}, 'Search...'],
 	bAscii					:	['Asciify string values internally?', true],
 	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
+	sortBias:					['Duplicates track selection bias', globQuery.remDuplBias, {func: isStringWeak}, globQuery.remDuplBias],
 	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
 	bSmartShuffle			:	['Smart Shuffle by Artist', true],
 	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
@@ -397,7 +398,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -536,6 +537,7 @@ async function searchByDistance({
 								bTagsCache				= panelProperties.hasOwnProperty('bTagsCache') ? panelProperties.bTagsCache[1] : false, // Read from cache
 								bAdvTitle 				= properties.hasOwnProperty('bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
 								checkDuplicatesByTag 	= properties.hasOwnProperty('checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
+								sortBias				= properties.hasOwnProperty('sortBias') ? properties.sortBias[1] : globQuery.remDuplBias, // Track selection bias,
 								// --->Weights
 								tags					= properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null,
 								bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
@@ -1118,13 +1120,14 @@ async function searchByDistance({
 		if (bProfile) {test.Print('Task #2: Query', false);}
 		// Find and remove duplicates ~600 ms for 50k tracks
 		if (checkDuplicatesByTag && checkDuplicatesByTag.length) {
-			const sort = '%RATING%|$strstr($lower(' + genreStyleTag.concat([_t(globTags.folksonomy)]).join('\', \'') + '),live)';
-			const sortTF = sort.length ? fb.TitleFormat(sort) : null
-			if (sortTF) {handleList.OrderByFormat(sortTF, -1);} // + ~100 ms for 50k tracks
+			const biasGenTags = genreStyleTag.concat([_t(globTags.folksonomy)]);
+			if (sortBias) { // Replace hard-coded genre tags with new ones
+				sortBias = sortBias.replace(globTags.genreStyle.map((t) => '%' + t + '%').join('\', \''), biasGenTags.join('\', \''));
+			}
 			if (bTagsCache) {
 				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			} else {
-				handleList = removeDuplicatesV2({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
+				handleList = removeDuplicatesV2({handleList, sortBias, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			}
 		}
 		const tracktotal = handleList.Count;
