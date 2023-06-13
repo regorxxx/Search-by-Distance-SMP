@@ -59,6 +59,7 @@
 - Tags: incorrect query parsing of multi-value tags, with combinations, if number of available values was lower than required.
 - Tags: multi-value tags, with combinations (like MOOD), containing TF functions, were not using 'HAS' instead of 'IS' on queries to ensure multi-value tags are taken into consideration.
 - UI: tooltip was not showing some settings forced by the current recipe and using the properties instead. Only affected the 'Method' line.
+- UI: tooltip flickering while pressing Shift/Ctrl over a button in icon-only mode.
 
 ## [4.3.1] - 2023-03-09
 ### Added
