@@ -40,7 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include('buttons\\' + file);});}
 }
 
-try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.26', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
+try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.0-beta.27', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
 	name:				['Name of config json file', 'buttons_' + randomString(5)],

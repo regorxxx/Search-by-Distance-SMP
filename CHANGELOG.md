@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.4.1](#441---2023-06-27)
 - [4.4.0](#440---2023-05-08)
 - [4.3.1](#431---2023-03-09)
 - [4.3.0](#430---2023-03-08)
@@ -35,8 +36,14 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+### Removed
+### Fixed
+
+## [4.4.1] - 2023-06-27
+### Added
+### Changed
 - Buttons: after a query error, input box is shown again with last input to fix the error and retry.
-- Remove duplicates: when removing duplicates, tracks left for comparison are now preferred by a configurable TF expression. By default higher rating and not live tracks is preferred. This is apart from the forced query filtering (which may result on this feature being irrelevant in some use cases).
+- Remove duplicates: when removing duplicates, tracks left for comparison are now preferred by a configurable TF expression. By default higher rating and not live tracks is preferred. This is apart from the forced query filtering (which may result on this feature being irrelevant in some use cases). Delete '[foobar_profile]\js_data\presets\global\globQuery.json' and '[foobar_profile]\foobar2000\js_data\presets\global\globTags.json' files after installation.
 ### Removed
 ### Fixed
 - Buttons: setting the forced query always returned  'Query returns zero items on current library.' error, for any query. Bug introduced on [4.0.0](#400---2023-02-15).
@@ -569,7 +576,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...HEAD
+[4.4.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.2.1...v4.3.0
