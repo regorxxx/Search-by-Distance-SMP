@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/02/22
+//27/06/23
 
 /* 
 	World Map
@@ -96,9 +96,29 @@ const nameReplacers = new Map([
 	['british virgin islands','virgin islands, british'],
 	['virgin islands','virgin islands, u.s.'],
 	['us virgin islands','virgin islands, u.s.'],
-	['u.s. virgin islands','virgin islands, u.s.']
+	['u.s. virgin islands','virgin islands, u.s.'],
+	['u.s.','united states'],
 ]);
 const nameReplacersRev = new Map([...nameReplacers].map((arr) => {return arr.reverse();}));
+
+const nameShort = new Map([
+	['korea','korea, democratic people\'s republic of'],
+	['micronesia','micronesia, federated states of'],
+	['moldova','moldova, republic of'],
+	['saint helena','saint helena, ascension and tristan da cunha'],
+	['congo','congo, the democratic republic of the'],
+	['iran','iran, islamic republic of'],
+	['north korea','korea, democratic people\'s republic of'],
+	['macedonia','macedonia, the former yugoslav republic of'],
+	['micronesia','micronesia, federated states of'],
+	['moldova','moldova, republic of'],
+	['palestine','palestinian territory, occupied'],
+	['saint helena','saint helena, ascension and tristan da cunha'],
+	['tanzania','tanzania, united republic of'],
+	['virgin islands','virgin islands, british'],
+	['virgin islands','virgin islands, u.s.'],
+]);
+const nameShortRev = new Map([...nameShort].map((arr) => {return arr.reverse();}));
 
 // Debug when music_graph_descriptors_xxx_countries.js has been included before
 if (typeof music_graph_descriptors_countries !== 'undefined' && typeof music_graph_descriptors_culture !== 'undefined') {
