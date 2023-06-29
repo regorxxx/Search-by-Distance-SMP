@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.4.2](#442---2023-06-29)
 - [4.4.1](#441---2023-06-27)
 - [4.4.0](#440---2023-05-08)
 - [4.3.1](#431---2023-03-09)
@@ -38,6 +39,13 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.4.2] - 2023-06-29
+### Added
+### Changed
+### Removed
+### Fixed
+- Helpers: fixed incorrect warning about missing font.
 
 ## [4.4.1] - 2023-06-27
 ### Added
@@ -576,7 +584,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...HEAD
+[4.4.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.0...v4.3.1
