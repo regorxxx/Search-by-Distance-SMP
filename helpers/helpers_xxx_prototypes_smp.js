@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/06/23
+//29/06/23
 
 /* 
 	FbTitleFormat
@@ -57,6 +57,77 @@ Object.defineProperty(fb, 'tfCache', {
 		that.Expression = arguments[0];
 		if (!bCache) {fb.tfCache[arguments[0]] = that;}
 		return that;
+	}
+}
+
+/*
+	gr
+*/
+// Augment gr.DrawRoundRect() with error handling
+function extendGR (gr , options = {DrawRoundRect: true, FillRoundRect: true}) {
+	if (!gr.Extended) {gr.Extended = options;}
+	else {Object.keys(options).forEach((opt) => {if (options[opt]) {gr.Extended[opt] = true;}});}
+	if (options.DrawRoundRect) {
+		const old = gr.DrawRoundRect;
+		gr.DrawRoundRect = function DrawRoundRect() { // x, y, w, h, arc_width, arc_height, line_width, colour
+			let that;
+			try {
+				that = old.apply(gr, [...arguments]);
+			} catch (e) {
+				let bRetry = true;
+				const newArgs = [...arguments];
+				newArgs[4] = newArgs[3] / 2 - Number.EPSILON;
+				newArgs[5] = newArgs[5] / 2 - Number.EPSILON;
+				try {
+					that = old.apply(gr,[...arguments]);
+				} catch(e) {bRetry = false;}
+				if (typeof doOnce !== 'undefined') {
+					doOnce('Paint bug', fb.ShowPopupMessage.bind(fb))(
+						'SMP bug drawing: DrawRoundRect\n' +
+						e.message + '\n\n' + 
+						'x, y, w, h, arc: ' + [...arguments].join(', ') + '\n' +
+						(
+							bRetry 
+								? 'Bypassed on second retry: ' + '\n' + 'x, y, w, h, arc: ' + [...newArgs].join(', ') 
+								: ''
+						)
+						, window.Name
+					);
+				}
+			}
+			return that;
+		}
+	}
+	if (options.FillRoundRect) {
+		const old = gr.FillRoundRect;
+		gr.FillRoundRect = function FillRoundRect() { // x, y, w, h, arc_width, arc_height, colour
+			let that;
+			try {
+				that = old.apply(gr, [...arguments]);
+			} catch (e) {
+				let bRetry = true;
+				const newArgs = [...arguments];
+				newArgs[4] = newArgs[3] / 2 - Number.EPSILON;
+				newArgs[5] = newArgs[5] / 2 - Number.EPSILON;
+				try {
+					that = old.apply(gr,[...arguments]);
+				} catch(e) {bRetry = false;}
+				if (typeof doOnce !== 'undefined') {
+					doOnce('Paint bug', fb.ShowPopupMessage.bind(fb))(
+						'SMP bug drawing: FillRoundRect\n' +
+						e.message + '\n\n' + 
+						'x, y, w, h, arc: ' + [...arguments].join(', ') + '\n' +
+						(
+							bRetry 
+								? 'Bypassed on second retry: ' + '\n' + 'x, y, w, h, arc: ' + [...newArgs].join(', ') 
+								: ''
+						)
+						, window.Name
+					);
+				}
+			}
+			return that;
+		}
 	}
 }
 
