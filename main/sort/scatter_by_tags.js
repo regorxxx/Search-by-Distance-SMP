@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/03/23
+//21/07/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -91,7 +91,7 @@ function scatterByTags({
 			plman.SetPlaylistSelection(plman.ActivePlaylist, idx, true);
 			plman.SetPlaylistFocusItem(plman.ActivePlaylist, focusIdx);
 		}
-		console.log('Selection scattered by tag(s) \'' + tagValue.join(',') + '\' (' + tagName.join(', ') + ') on playlist: ' + plman.GetPlaylistName(plman.ActivePlaylist));
+		console.log('Selection scattered by tag(s) \'' + tagValue.join(', ') + '\' (' + tagName.join(', ') + ') on playlist: ' + plman.GetPlaylistName(plman.ActivePlaylist));
 	}
 	return selItemsArray;
 }
@@ -181,7 +181,7 @@ function shuffleByTags({
 		bSendToActivePls = true,
 		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made
 		bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
-		sortBias = 'random', // random | playcount | rating | popularity | lastplayed | TitleFormat expression || '' (none)
+		sortBias = 'random', // random | playcount | rating | popularity | lastplayed | key | TitleFormat expression || '' (none)
 		sortDir = 1,
 		bDebug = false
 	} = {}) {
@@ -209,6 +209,8 @@ function shuffleByTags({
 		case 'rating': sortTF = '$max(%RATING%,$meta(RATING),0)'; break;
 		case 'popularity': sortTF = '$max($meta(Track Statistics Last.fm,5[score]),0)'; break;
 		case 'lastplayed': sortTF = bEnhPlayCount ? '%LAST_PLAYED_ENHANCED%' : '%LAST_PLAYED%'; break;
+		case 'key': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,1B))$if($stricmp(%KEY%,Abm),$puts(kTrans,1B))$if($stricmp(%KEY%,D#m),$puts(kTrans,2B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,2B))$if($stricmp(%KEY%,A#m),$puts(kTrans,3B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,3B))$if($stricmp(%KEY%,Fm),$puts(kTrans,4B))$if($stricmp(%KEY%,Cm),$puts(kTrans,5B))$if($stricmp(%KEY%,Gm),$puts(kTrans,6B))$if($stricmp(%KEY%,Dm),$puts(kTrans,7B))$if($stricmp(%KEY%,Am),$puts(kTrans,8B))$if($stricmp(%KEY%,Em),$puts(kTrans,9B))$if($stricmp(%KEY%,Bm),$puts(kTrans,10B))$if($stricmp(%KEY%,F#m),$puts(kTrans,11B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,11B))$if($stricmp(%KEY%,C#m),$puts(kTrans,12B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,12B))$if($stricmp(%KEY%,6m),$puts(kTrans,1B))$if($stricmp(%KEY%,7m),$puts(kTrans,2B))$if($stricmp(%KEY%,8m),$puts(kTrans,3B))$if($stricmp(%KEY%,9m),$puts(kTrans,4B))$if($stricmp(%KEY%,10m),$puts(kTrans,5B))$if($stricmp(%KEY%,11m),$puts(kTrans,6B))$if($stricmp(%KEY%,12m),$puts(kTrans,7B))$if($stricmp(%KEY%,1m),$puts(kTrans,8B))$if($stricmp(%KEY%,2m),$puts(kTrans,9B))$if($stricmp(%KEY%,3m),$puts(kTrans,10B))$if($stricmp(%KEY%,4m),$puts(kTrans,11B))$if($stricmp(%KEY%,5m),$puts(kTrans,12B))$if($stricmp(%KEY%,B),$puts(kTrans,1A))$if($stricmp(%KEY%,F#),$puts(kTrans,2A))$if($stricmp(%KEY%,Gb),$puts(kTrans,2A))$if($stricmp(%KEY%,C#),$puts(kTrans,3A))$if($stricmp(%KEY%,Db),$puts(kTrans,3A))$if($stricmp(%KEY%,G#),$puts(kTrans,4A))$if($stricmp(%KEY%,Ab),$puts(kTrans,4A))$if($stricmp(%KEY%,D#),$puts(kTrans,5A))$if($stricmp(%KEY%,Eb),$puts(kTrans,5A))$if($stricmp(%KEY%,A#),$puts(kTrans,6A))$if($stricmp(%KEY%,Bb),$puts(kTrans,6A))$if($stricmp(%KEY%,F),$puts(kTrans,7A))$if($stricmp(%KEY%,C),$puts(kTrans,8A))$if($stricmp(%KEY%,G),$puts(kTrans,9A))$if($stricmp(%KEY%,D),$puts(kTrans,10A))$if($stricmp(%KEY%,A),$puts(kTrans,11A))$if($stricmp(%KEY%,E),$puts(kTrans,12A))$if($stricmp(%KEY%,6d),$puts(kTrans,1A))$if($stricmp(%KEY%,7d),$puts(kTrans,2A))$if($stricmp(%KEY%,8d),$puts(kTrans,3A))$if($stricmp(%KEY%,9d),$puts(kTrans,4A))$if($stricmp(%KEY%,10d),$puts(kTrans,5A))$if($stricmp(%KEY%,11d),$puts(kTrans,6A))$if($stricmp(%KEY%,12d),$puts(kTrans,7A))$if($stricmp(%KEY%,1d),$puts(kTrans,8A))$if($stricmp(%KEY%,2d),$puts(kTrans,9A))$if($stricmp(%KEY%,3d),$puts(kTrans,10A))$if($stricmp(%KEY%,4d),$puts(kTrans,11A))$if($stricmp(%KEY%,5d),$puts(kTrans,12A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)';break;
+		case 'key6acentered': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,7B))$if($stricmp(%KEY%,Abm),$puts(kTrans,7B))$if($stricmp(%KEY%,D#m),$puts(kTrans,8B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,8B))$if($stricmp(%KEY%,A#m),$puts(kTrans,9B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,9B))$if($stricmp(%KEY%,Fm),$puts(kTrans,10B))$if($stricmp(%KEY%,Cm),$puts(kTrans,11B))$if($stricmp(%KEY%,Gm),$puts(kTrans,12B))$if($stricmp(%KEY%,Dm),$puts(kTrans,1B))$if($stricmp(%KEY%,Am),$puts(kTrans,2B))$if($stricmp(%KEY%,Em),$puts(kTrans,3B))$if($stricmp(%KEY%,Bm),$puts(kTrans,4B))$if($stricmp(%KEY%,F#m),$puts(kTrans,5B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,5B))$if($stricmp(%KEY%,C#m),$puts(kTrans,6B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,6B))$if($stricmp(%KEY%,6m),$puts(kTrans,7B))$if($stricmp(%KEY%,7m),$puts(kTrans,8B))$if($stricmp(%KEY%,8m),$puts(kTrans,9B))$if($stricmp(%KEY%,9m),$puts(kTrans,10B))$if($stricmp(%KEY%,10m),$puts(kTrans,11B))$if($stricmp(%KEY%,11m),$puts(kTrans,12B))$if($stricmp(%KEY%,12m),$puts(kTrans,1B))$if($stricmp(%KEY%,1m),$puts(kTrans,2B))$if($stricmp(%KEY%,2m),$puts(kTrans,3B))$if($stricmp(%KEY%,3m),$puts(kTrans,4B))$if($stricmp(%KEY%,4m),$puts(kTrans,5B))$if($stricmp(%KEY%,5m),$puts(kTrans,6B))$if($stricmp(%KEY%,B),$puts(kTrans,7A))$if($stricmp(%KEY%,F#),$puts(kTrans,8A))$if($stricmp(%KEY%,Gb),$puts(kTrans,8A))$if($stricmp(%KEY%,C#),$puts(kTrans,9A))$if($stricmp(%KEY%,Db),$puts(kTrans,9A))$if($stricmp(%KEY%,G#),$puts(kTrans,10A))$if($stricmp(%KEY%,Ab),$puts(kTrans,10A))$if($stricmp(%KEY%,D#),$puts(kTrans,11A))$if($stricmp(%KEY%,Eb),$puts(kTrans,11A))$if($stricmp(%KEY%,A#),$puts(kTrans,12A))$if($stricmp(%KEY%,Bb),$puts(kTrans,12A))$if($stricmp(%KEY%,F),$puts(kTrans,1A))$if($stricmp(%KEY%,C),$puts(kTrans,2A))$if($stricmp(%KEY%,G),$puts(kTrans,3A))$if($stricmp(%KEY%,D),$puts(kTrans,4A))$if($stricmp(%KEY%,A),$puts(kTrans,5A))$if($stricmp(%KEY%,E),$puts(kTrans,6A))$if($stricmp(%KEY%,6d),$puts(kTrans,7A))$if($stricmp(%KEY%,7d),$puts(kTrans,8A))$if($stricmp(%KEY%,8d),$puts(kTrans,9A))$if($stricmp(%KEY%,9d),$puts(kTrans,10A))$if($stricmp(%KEY%,10d),$puts(kTrans,11A))$if($stricmp(%KEY%,11d),$puts(kTrans,12A))$if($stricmp(%KEY%,12d),$puts(kTrans,1A))$if($stricmp(%KEY%,1d),$puts(kTrans,2A))$if($stricmp(%KEY%,2d),$puts(kTrans,3A))$if($stricmp(%KEY%,3d),$puts(kTrans,4A))$if($stricmp(%KEY%,4d),$puts(kTrans,5A))$if($stricmp(%KEY%,5d),$puts(kTrans,6A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)';break;
 		case 'random': sortTF = null; break;
 		default: sortTF = sortBias; // Pass a TF expression or empty (don't sort)
 	}
