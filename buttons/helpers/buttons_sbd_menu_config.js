@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/06/23
+//04/07/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -424,7 +424,7 @@ function createConfigMenu(parent) {
 				}, flags: recipe.hasOwnProperty('forcedQuery') ? MF_GRAYED : MF_STRING});
 				menu.newCheckMenu(subMenuName, entryText, void(0), () => {
 					const prop = recipe.hasOwnProperty('forcedQuery') ? recipe.forcedQuery : properties['forcedQuery'][1];
-					return prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')','\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)'));
+					return !!(prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')','\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)')));
 				});
 			});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
@@ -523,6 +523,8 @@ function createConfigMenu(parent) {
 				{key: 'Rating', flags: MF_STRING},
 				{key: 'Popularity', flags: utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}') ? MF_STRING : MF_GRAYED, req: 'Find & Play'},
 				{key: 'Last played', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount'},
+				{key: 'Key', flags: MF_STRING},
+				{key: 'Key 6A centered', flags: MF_STRING},
 			];
 			menu.newEntry({menuName: subMenuName, entryText: 'Prioritize tracks by:', flags: MF_GRAYED});
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
