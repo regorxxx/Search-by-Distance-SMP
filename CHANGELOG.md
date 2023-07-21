@@ -36,9 +36,12 @@
 
 ## [Unreleased][]
 ### Added
+- Selection manipulation\Shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
 ### Changed
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
+- Fix for non [standard hyphen chars](https://jakubmarian.com/hyphen-minus-en-dash-and-em-dash-difference-and-usage-in-english/) on path names.
 
 ## [4.4.2] - 2023-06-29
 ### Added
