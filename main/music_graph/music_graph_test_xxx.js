@@ -1,243 +1,53 @@
 ﻿'use strict';
-//01/03/23
+//23/07/23
 
 // FOR TESTING: compares genre/style A to Band computes distance (similar to the main function for individual links)
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
-// Uses NBA pathFinder as default. Edit key_one and key_two as required.
+// Uses NBA pathFinder as default.
 function testGraph(mygraph) {
-		var test = new FbProfiler('testGraph');
-		let pathFinder = nba(mygraph, {
+		const test = new FbProfiler('Test nodes');
+		const pathFinder = nba(mygraph, {
 			distance(fromNode, toNode, link) {
 			return link.data.weight;
 			}
 		});
-		
 		let path = [];
 		let idpath = '';
 		let distanceGraph = Infinity;
-		let keyOne = '';
-		let keyTwo = '';
 		
-		keyOne = 'Baroque'; // here both keys...
-		keyTwo = 'Modernist';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
+		[ // here both keys...
+			{from: 'Baroque',		to: 'Modernist'},
+			{from: 'New Age',		to: 'Modernist'},
+			{from: 'Hard Rock',		to: 'Folk-Rock'},
+			{from: 'Jazz Vocal',	to: 'Heavy Metal'},
+			{from: 'Grunge',		to: 'House'},
+			{from: 'Electronic',	to: 'Alt. Rock'},
+			{from: 'Electronic',	to: 'Blues Rock'},
+			{from: 'Blues',			to: 'Hip-Hop'},
+			{from: 'Trance',		to: 'House'},
+			{from: 'Americana',		to: 'Folk-Rock'},
+			{from: 'Trip Hop',		to: 'Chill-Out Downtempo'},
+			{from: 'Shoegaze',		to: 'Indie'},
+			{from: 'Blues Rock',	to: 'Gangsta'},
+			{from: 'Blues Rock',	to: 'Hip-Hop'},
+			{from: 'Blues Rock',	to: 'Blues'},
+			{from: 'Blues',			to: 'Blues'},
+			{from: 'Blues',			to: 'Heavy Metal'},
+			{from: 'Blues',			to: 'Glam Metal'},
+			{from: 'Blues',			to: 'Pop Metal'},
+			{from: 'Blues Rock',	to: 'Pop Metal'},
+			{from: 'Tuvan',			to: 'Desert Blues'},
+			{from: 'Anatolian Rock',to: 'Desert Blues'},
+			{from: 'Pagan Folk',	to: 'Americana'},
+			{from: 'Pagan Folk',	to: 'Tulsa Sound'},
+		].forEach((o) => {
+			path = pathFinder.find(o.from, o.to);
+			distanceGraph = calcGraphDistance(mygraph, o.from, o.to, true);
+			idpath = getNodesFromPath(path);
+			console.log(idpath + '\t' + distanceGraph);
+		});
 		
-		keyOne = 'New Age';
-		keyTwo = 'Modernist';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Hard Rock';
-		keyTwo = 'Folk-Rock';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Jazz Vocal';
-		keyTwo = 'Heavy Metal';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Grunge';
-		keyTwo = 'House';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Electronic';
-		keyTwo = 'Alt. Rock';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Electronic';
-		keyTwo = 'Blues Rock';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues';
-		keyTwo = 'Hip-Hop';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Trance';
-		keyTwo = 'House';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Americana';
-		keyTwo = 'Folk-Rock';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Trip Hop';
-		keyTwo = 'Chill-Out Downtempo';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Shoegaze';
-		keyTwo = 'Indie';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues Rock';
-		keyTwo = 'Gangsta';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues Rock';
-		keyTwo = 'Hip-Hop';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues Rock';
-		keyTwo = 'Blues';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues';
-		keyTwo = 'Blues';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues';
-		keyTwo = 'Heavy Metal';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues';
-		keyTwo = 'Glam Metal';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues';
-		keyTwo = 'Pop Metal';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Blues Rock';
-		keyTwo = 'Pop Metal';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		
-		keyOne = 'Tuvan';
-		keyTwo = 'Desert Blues';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-	
-		keyOne = 'Anatolian Rock';
-		keyTwo = 'Desert Blues';
-		path = pathFinder.find(keyOne, keyTwo);
-		distanceGraph = getDistanceFromPath(mygraph, path);
-		idpath = getNodesFromPath(path);
-		console.log(keyOne + ' - ' + keyTwo + ': ' + distanceGraph);
-		console.log(idpath);
-		distanceGraph = calcGraphDistance(mygraph, keyOne, keyTwo, true);
-		console.log(distanceGraph);
-		test.Print('Task #1', false);
+		test.Print('', false);
 }
 
 // FOR TESTING: compares array of styles to other array and computes mean distance (similar to the main function)
@@ -246,145 +56,108 @@ function testGraph(mygraph) {
 // It will output things like this, ready to use here:
 // 		[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]
 function testGraphV2(mygraph) {
-		var test = new FbProfiler('testGraphV2');
-		let distanceGraph = Infinity;
-		let arrayOne = [];
-		let arrayTwo = [];
-		
- 		// EDIT HERE
-		arrayOne = [ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]; 
-		arrayTwo = [ 'Hip-Hop', 'Electronic', 'Indie', 'Ambiental', 'Female Vocal', 'Trip Hop', 'Alt. Rap' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-				
-		arrayOne = [ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]; 
-		arrayTwo = [ 'Pop', 'Electronic', 'Electropop', 'Trap', 'Female Vocal', 'Sadcore' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'World', 'African', 'Blues', 'Folk', 'Malian Folk', 'Desert Blues' ];
-		arrayTwo = [ 'Alt. Rock', 'New Wave' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Alt. Rock', 'Indie', 'Dream Pop', '90s Rock' ];
-		arrayTwo = [ 'Folk-Rock', 'Indie', 'Folk Pop', 'Contemporary Folk', 'Americana' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Rock', 'Blues', 'Classic Rock', 'Blues Rock', 'Beat Music', 'Electric Blues' ];
-		arrayTwo = [ 'Country', 'Country Boogie', 'Lo-Fi' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Blues', 'Chicago Blues', 'Electric Blues' ];
-		arrayTwo = [ 'Electronic', 'Pop', 'Experimental', 'Female Vocal' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Classical', 'Romantic' ];
-		arrayTwo = [ 'Alt. Rock', 'Electronic', 'Electropop', 'Baroque Pop', 'Female Vocal' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Alt. Rock', 'Electronic', 'Electropop', 'Baroque Pop', 'Female Vocal' ];
-		arrayTwo = [ 'Electronic', 'House' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Electronic', 'Heavy Metal', 'Nu Metal' ];
-		arrayTwo = [ 'World', 'African', 'Electronic', 'Jazz Vocal', 'Future Jazz' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'World', 'African', 'Electronic', 'Jazz Vocal', 'Future Jazz' ];
-		arrayTwo = [ 'Rock', 'Blues', 'Classic Rock', 'Blues Rock', 'Beat Music', 'Electric Blues' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Electronic', 'Pop', 'Electropop', 'Electro', 'Female Vocal' ];
-		arrayTwo = [ 'Rock', 'Funk', 'R&B', 'Lo-Fi', 'Garage Rock', 'Funk Rock', 'Jam' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Grunge', 'Grunge Metal', 'Classic Grunge' ];
-		arrayTwo = [ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ];
-		arrayTwo = [ 'Jazz Vocal', 'Traditional Pop' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Jazz Vocal', 'Traditional Pop' ];
-		arrayTwo = [ 'New Age', 'Soundtrack', 'Neo-Classical New Age', 'Healing Music' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Jazz Vocal', 'Traditional Pop' ];
-		arrayTwo = [ 'Electronic', 'Pop', 'Electropop', 'Electro', 'Female Vocal' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Jazz Vocal', 'Traditional Pop' ];
-		arrayTwo = [ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ];
-		arrayTwo = [ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Jazz Vocal', 'Traditional Pop' ];
-		arrayTwo = [ 'Reggae', 'Instrumental', 'Dub' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Rock', 'Surf Rock' ];
-		arrayTwo = [ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ];
-		arrayTwo = [ 'Hip-Hop', 'Gangsta', 'West Coast' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ];
-		arrayTwo = [ 'Hard Rock', 'Heavy Metal', 'Glam Metal', 'Pop Metal' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'World', 'African', 'Blues', 'Malian Folk', 'Desert Blues', 'Electric Blues' ];
-		arrayTwo = [ 'Blues', 'Hill Country Blues', 'Electric Blues', 'Harmonica Blues' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
-		arrayOne = [ 'Psychedelic Rock', 'Turkish', 'Anatolian Rock' ];
-		arrayTwo = [ 'World', 'African', 'Blues', 'Folk', 'Malian Folk', 'Desert Blues' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Tuvan' ];
-		arrayTwo = [ 'Desert Blues' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo, true);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Tuvan' ];
-		arrayTwo = [ 'Desert Blues', 'Tishoumaren' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo, true);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-
-		arrayOne = [ 'Desert Blues', 'Tishoumaren' ];
-		arrayTwo = [ 'Tuvan' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo, true);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		
- 		arrayOne = [ 'Blues' ];
-		arrayTwo = [ 'Blues' ];
-		distanceGraph = calcMeanDistanceV2(mygraph, arrayOne, arrayTwo);
-		console.log(arrayOne + ' <- ' + arrayTwo + ' = ' + distanceGraph);
-		test.Print('Task #1', false);
+	const test = new FbProfiler('Test node arrays');
+	// EDIT HERE
+	[
+		{
+			from:	[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ],
+			to:		[ 'Hip-Hop', 'Electronic', 'Indie', 'Ambiental', 'Female Vocal', 'Trip Hop', 'Alt. Rap' ]
+		},
+		{
+			from:	[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ],
+			to:		[ 'Pop', 'Electronic', 'Electropop', 'Trap', 'Female Vocal', 'Sadcore' ]
+		},
+		{
+			from:	[ 'World', 'African', 'Blues', 'Folk', 'Malian Folk', 'Desert Blues' ],
+			to:		[ 'Alt. Rock', 'New Wave' ]
+		},
+		{
+			from:	[ 'Alt. Rock', 'Indie', 'Dream Pop', '90s Rock' ],
+			to:		[ 'Folk-Rock', 'Indie', 'Folk Pop', 'Contemporary Folk', 'Americana' ]
+		},
+		{
+			from:	[ 'Rock', 'Blues', 'Classic Rock', 'Blues Rock', 'Beat Music', 'Electric Blues' ],
+			to:		[ 'Country', 'Country Boogie', 'Lo-Fi' ]
+		},
+		{
+			from:	[ 'Blues', 'Chicago Blues', 'Electric Blues' ],
+			to:		[ 'Electronic', 'Pop', 'Experimental', 'Female Vocal' ]
+		},
+		{
+			from:	[ 'Classical', 'Romantic' ],
+			to:		[ 'Alt. Rock', 'Electronic', 'Electropop', 'Baroque Pop', 'Female Vocal' ]
+		},
+		{
+			from:	[ 'Alt. Rock', 'Electronic', 'Electropop', 'Baroque Pop', 'Female Vocal' ],
+			to:		[ 'Electronic', 'House' ]
+		},
+		{
+			from:	[ 'Electronic', 'Heavy Metal', 'Nu Metal' ],
+			to:		[ 'World', 'African', 'Electronic', 'Jazz Vocal', 'Future Jazz' ]
+		},
+		{
+			from:	[ 'World', 'African', 'Electronic', 'Jazz Vocal', 'Future Jazz' ],
+			to:		[ 'Rock', 'Blues', 'Classic Rock', 'Blues Rock', 'Beat Music', 'Electric Blues' ]
+		},
+		{
+			from:	[ 'Alt. Rock', 'Electronic', 'Electropop', 'Baroque Pop', 'Female Vocal' ],
+			to:		[ 'Electronic', 'House' ]
+		},
+		{
+			from:	[ 'Electronic', 'Pop', 'Electropop', 'Electro', 'Female Vocal' ],
+			to:		[ 'Rock', 'Funk', 'R&B', 'Lo-Fi', 'Garage Rock', 'Funk Rock', 'Jam' ]
+		},
+		{
+			from:	[ 'Grunge', 'Grunge Metal', 'Classic Grunge' ],
+			to:		[ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ]
+		},
+		{
+			from:	[ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ],
+			to:		[ 'Jazz Vocal', 'Traditional Pop' ]
+		},
+		{
+			from:	[ 'Jazz Vocal', 'Traditional Pop' ],
+			to:		[ 'New Age', 'Soundtrack', 'Neo-Classical New Age', 'Healing Music' ]
+		},
+		{
+			from:	[ 'Jazz Vocal', 'Traditional Pop' ],
+			to:		[ 'Electronic', 'Pop', 'Electropop', 'Electro', 'Female Vocal' ]
+		},
+		{
+			from:	[ 'Jazz Vocal', 'Traditional Pop' ],
+			to:		[ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ]
+		},
+		{
+			from:	[ 'Hard Rock', 'Heavy Metal', 'Classic Rock', 'Doom Metal', 'Proto-Metal' ],
+			to:		[ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ]
+		},
+		{
+			from:	[ 'Jazz Vocal', 'Traditional Pop' ],
+			to:		[ 'Reggae', 'Instrumental', 'Dub' ]
+		},
+		{
+			from:	[ 'Rock', 'Surf Rock' ],
+			to:		[ 'Psychedelic Rock', 'Progressive Rock', 'British Psychedelia', 'Proto-Prog' ]
+		},
+		{
+			from:	[ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ],
+			to:		[ 'Hip-Hop', 'Gangsta', 'West Coast' ]
+		},
+		{
+			from:	[ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ],
+			to:		[ 'Hard Rock', 'Heavy Metal', 'Glam Metal', 'Pop Metal' ]
+		},
+		{
+			from:	[ 'World', 'African', 'Blues', 'Malian Folk', 'Desert Blues', 'Electric Blues' ],
+			to:		[ 'Blues', 'Hill Country Blues', 'Electric Blues', 'Harmonica Blues' ]
+		},
+		{
+			from:	[ 'Psychedelic Rock', 'Turkish', 'Anatolian Rock' ],
+			to:		[ 'World', 'African', 'Blues', 'Folk', 'Malian Folk', 'Desert Blues' ]
+		},
+	].forEach((o) => {
+		console.log(o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(mygraph, o.from, o.to));
+	});
+	
+	test.Print('', false);
 }

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/03/23
+//23/07/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -492,9 +492,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	});
 	// Check that all nodes on influences are present in other descriptors
 	music_graph_descriptors.style_anti_influence.concat(music_graph_descriptors.style_secondary_origin, music_graph_descriptors.style_primary_origin).forEach( (nodePair) => {
-		const nodeNumbers = nodePair[1].length;
-		for (let i = nodeNumbers; i--;) {
-			let node = nodePair[1][i];
+		[...nodePair[1], nodePair[0]].forEach((node) => {
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
 				if (music_graph_descriptors.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
@@ -528,7 +526,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 				console.log('music_graph_descriptors_xxx Warning: \'style_anti_influence\' or \'style_secondary_origin\' or \'style_primary_origin\' has nodes not found on any other descriptor. Check \'Graph nodes and links\' section\n' + '	' +  node);
 				bWarning = true;
 			}
-		}
+		});
 	});
 	// Check that all superGenres are present in other descriptors
 	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
