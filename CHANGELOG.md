@@ -38,6 +38,9 @@
 ### Added
 - Selection manipulation\Shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
 ### Changed
+- Configuration: ALBUM ARTIST is now used instead of ARTIST by default (on new installations). This ensures better compatibility with classical music, where the artist is the actual performer but the album artist is the original composer/artist. To apply the change on existing installations, delete '[foobar_profile]\js_data\presets\global\globQuery.json' and '[foobar_profile]\foobar2000\js_data\presets\global\globTags.json' files. Further configuration may be needed via menus.
+- Descriptors: updated descriptors with multiple additions and improvements for Folk and Progressive Rock music.
+- Descriptors: improved debug checks for the genre/style graph.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
