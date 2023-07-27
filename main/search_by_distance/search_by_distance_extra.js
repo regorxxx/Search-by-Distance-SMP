@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/06/23
+//27/07/23
 
 include('search_by_distance.js');
 
@@ -7,8 +7,8 @@ include('search_by_distance.js');
 async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('calculateSimilarArtists');}
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
-	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), ['ARTIST'], true).flat().filter(Boolean);
-	const libQuery = artist.map((tag) => {return _p('ARTIST IS ' + tag);}).join(' AND ');
+	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), [globTags.artist], true).flat().filter(Boolean);
+	const libQuery = artist.map((tag) => {return _p(globTags.artist + ' IS ' + tag);}).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
 	let selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
 	selArtistTracks = removeDuplicatesV2({handleList: selArtistTracks, sortBias: globQuery.remDuplBias, bPreserveSort: false, bAdvTitle: true});
@@ -25,7 +25,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
 		const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 		const allowedGenresQuery = query_combinations(allowedGenres, genreStyleTagQuery, 'OR', 'AND');
-		forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
+		forcedQuery = _p(artist.map((tag) => {return _p('NOT ' + globTags.artist + ' IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 	}
 	// Weight with all artist's tracks
 	const genreStyleWeight = new Map();
@@ -48,7 +48,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
 			const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 			const allowedGenresQuery = query_join(query_combinations(allowedGenres, genreStyleTagQuery, 'OR'), 'OR');
-			forcedQuery = _p(artist.map((tag) => {return _p('NOT ARTIST IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
+			forcedQuery = _p(artist.map((tag) => {return _p('NOT ' + globTags.artist + ' IS ' + tag);}).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 			if (method === 'weighted') { // Weight will be <= 1 according to how representative of the artist's works is
 				weight = [...new Set(genreStyle)].reduce((total, val) => {return total + (genreStyleWeight.has(val) ? genreStyleWeight.get(val) : 0);}, 0);
 			}
@@ -73,7 +73,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 		});
 		const [selectedHandlesArray, selectedHandlesData, ] = data ? data : [[], []];
 		// Group tracks per artist and sum their score
-		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), ['ARTIST'], true);
+		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), [globTags.artist], true);
 		const similArtistData = new Map();
 		let totalScore = 0;
 		const totalCount = selectedHandlesArray.length;
@@ -117,7 +117,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 }
 
 async function calculateSimilarArtistsFromPls({items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties} = {}) {
-	const handleList = removeDuplicatesV2({handleList: items, sortOutput: '%ARTIST%', checkKeys: ['%ARTIST%']});
+	const handleList = removeDuplicatesV2({handleList: items, sortOutput: _t(globTags.artist), checkKeys: [_t(globTags.artist)]});
 	const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
 	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) {return;}
 	let profiler = new FbProfiler('Calculate similar artists');
@@ -159,7 +159,7 @@ async function calculateSimilarArtistsFromPls({items = plman.GetPlaylistSelected
 			const artist = obj.artist.split(', ');
 			const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
 			if (!similarArtists.length) {return;}
-			const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ' ));
+			const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => {return globTags.artist + ' IS ' + a;}).join(' OR ' ));
 			const count = artistTracks.Count;
 			if (count) {
 				let arr = [];
@@ -188,7 +188,7 @@ function writeSimilarArtistsTags({file = folders.data + 'searchByDistance_artist
 				const artist = obj.artist.split(', ');
 				const similarArtists = obj.val.map((o) => {return o.artist;}).slice(0, iNum);
 				if (!similarArtists.length) {return;}
-				const queryArtists = artist.map((a) => {return 'ARTIST IS ' + a;}).join(' OR ');
+				const queryArtists = artist.map((a) => {return globTags.artist + ' IS ' + a;}).join(' OR ');
 				const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), (bRewrite ? queryArtists : _p(queryArtists) + queryNoRw));
 				const count = artistTracks.Count;
 				if (count) {

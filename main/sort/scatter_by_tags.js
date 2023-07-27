@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/07/23
+//22/07/23
 
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -98,7 +98,7 @@ function scatterByTags({
 
 // Does the same but for any value for a given tag
 function intercalateByTags({
-							tagName = 'ARTIST',
+							tagName = 'ALBUM ARTIST',
 							selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 							bSendToActivePls = true,
 							} = {}) {
@@ -176,7 +176,7 @@ function intercalateByTags({
 // Note for some proportions there is an exact solution, and that's used instead of relying on the random method
 // Beware it returns null when items are <= 2. Just reuse original list in such case
 function shuffleByTags({
-		tagName = ['ARTIST'],
+		tagName = ['ALBUM ARTIST'],
 		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 		bSendToActivePls = true,
 		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made

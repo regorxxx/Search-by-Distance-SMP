@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/07/23
+//22/07/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -585,7 +585,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (recipe.hasOwnProperty(key) ? '\t[' + recipe[key] + '] (forced by recipe)' :  '\t[' + properties[key][1] + ']');
 				menu.newEntry({menuName, entryText, func: () => {
-					const input = Input.string('string', properties[key][1], 'Enter TF expression for playlist name:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: %ARTIST%\'\'s Mix   ->   ACDC\'s Mix\n\nAs special tag, %SBD_THEME% is also available when using themes. When a theme is not being used, it\'s evaluated as usual.\nFor ex: $if2(%SBD_THEME%,%artist%)\'\'s Mix   ->   Test\'s Mix', 'Search by distance', '%ARTIST%\'\'s Mix', void(0), true);
+					const input = Input.string('string', properties[key][1], 'Enter TF expression for playlist name:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: ' + _t(globTags.artist) + '\'\'s Mix   ->   ACDC\'s Mix\n\nAs special tag, %SBD_THEME% is also available when using themes. When a theme is not being used, it\'s evaluated as usual.\nFor ex: $if2(%SBD_THEME%,' + _t(globTags.artist) + ')\'\'s Mix   ->   Test\'s Mix', 'Search by distance', _t(globTags.artist) + '\'\'s Mix', void(0), true);
 					if (input === null) {return;}
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
