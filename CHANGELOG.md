@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.5.0](#450---2023-07-28)
 - [4.4.2](#442---2023-06-29)
 - [4.4.1](#441---2023-06-27)
 - [4.4.0](#440---2023-05-08)
@@ -35,6 +36,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [4.5.0] - 2023-07-28
 ### Added
 - Selection manipulation\Shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
 ### Changed
@@ -590,7 +597,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...HEAD
+[4.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.3.1...v4.4.0
