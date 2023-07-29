@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/07/23
+//29/07/23
 
 include('search_by_distance.js');
 
@@ -117,7 +117,7 @@ async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), propertie
 }
 
 async function calculateSimilarArtistsFromPls({items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties} = {}) {
-	const handleList = removeDuplicatesV2({handleList: items, sortOutput: _t(globTags.artist), checkKeys: [_t(globTags.artist)]});
+	const handleList = removeDuplicatesV2({handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist]});
 	const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
 	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) {return;}
 	let profiler = new FbProfiler('Calculate similar artists');

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/06/23
+//29/07/23
 
 /*
 	Search by Distance
@@ -1044,7 +1044,7 @@ async function searchByDistance({
 			}
 		}
 		if (bSameArtistFilter && !bUseTheme) {
-			let tags = fb.TitleFormat('[%' + globTags.artist + '%]').EvalWithMetadb(sel).split(', ').filter(Boolean);
+			let tags = fb.TitleFormat('[' + globTags.artist + ']').EvalWithMetadb(sel).split(', ').filter(Boolean);
 			let queryArtist = '';
 			if (tags.length) {
 				queryArtist = tags.map((artist) => {return globTags.artist + ' IS ' + artist;});
@@ -1062,7 +1062,7 @@ async function searchByDistance({
 			let querySimil = '';
 			if (!similTags.length && _isFile(file)) {
 				const data = _jsonParseFile(file, utf8);
-				const artist = fb.TitleFormat('%' + globTags.artist + '%').EvalWithMetadb(sel);
+				const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
 				if (data) {
 					const dataArtist = data.find((obj) => {return obj.artist === artist;});
 					if (dataArtist) {dataArtist.val.forEach((artistObj) => {similTags.push(artistObj.artist);});}
@@ -1125,9 +1125,9 @@ async function searchByDistance({
 				sortBias = sortBias.replace(globTags.genreStyle.map((t) => '%' + t + '%').join('\', \''), biasGenTags.join('\', \''));
 			}
 			if (bTagsCache) {
-				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
+				handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			} else {
-				handleList = removeDuplicatesV2({handleList, sortBias, sortOutput: '%TITLE% - %' + globTags.artist + '% - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
+				handleList = removeDuplicatesV2({handleList, sortBias, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
 			}
 		}
 		const tracktotal = handleList.Count;
