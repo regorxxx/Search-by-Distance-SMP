@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.5.1](#451---2023-07-29)
 - [4.5.0](#450---2023-07-28)
 - [4.4.2](#442---2023-06-29)
 - [4.4.1](#441---2023-06-27)
@@ -40,6 +41,14 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [4.5.1] - 2023-07-29
+### Added
+### Changed
+### Removed
+### Fixed
+- Configuration: some fixes for ALBUM ARTIST usage instead of ARTIST. To apply the change on existing installations, delete '[foobar_profile]\js_data\presets\global\globQuery.json' and '[foobar_profile]\foobar2000\js_data\presets\global\globTags.json' files.
+- Dynamic Queries: some fixes for KEY usage with values containing '#'.
 
 ## [4.5.0] - 2023-07-28
 ### Added
@@ -597,7 +606,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...HEAD
+[4.5.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.0...v4.4.1
