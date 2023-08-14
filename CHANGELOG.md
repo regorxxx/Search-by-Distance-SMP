@@ -39,6 +39,7 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Descriptors: updated descriptors with addition of Electrorock.
 ### Removed
 ### Fixed
 
