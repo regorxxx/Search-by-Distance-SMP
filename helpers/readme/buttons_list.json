@@ -23,6 +23,7 @@
 	"buttons_search_top_tracks.js": "top_tracks.txt",
 	"buttons_search_top_tracks_from_date.js": "top_tracks_from_date.txt",
 	"buttons_search_quicksearch.js": "search_quicksearch.txt",
+	"buttons_search_quickmatch.js": "search_quickmatch.txt",
 	"buttons_tags_automation.js": "tags_automation.txt",
 	"buttons_tags_save_tags.js": "save_tags.txt",
 	"buttons_listenbrainz_tools.js": "listenbrainz_tools.txt",

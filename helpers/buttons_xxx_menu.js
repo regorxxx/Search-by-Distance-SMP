@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/02/23
+//14/08/23
 
 include('menu_xxx.js');
 include('helpers_xxx_properties.js')
@@ -9,7 +9,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 	/*
 		parent:			button context
 		bShowValues:	show value along the menu entry
-		readmeFiles:	list of files to show on radme submenu
+		readmeFiles:	list of files to show on readme submenu
 		popups:			{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, popup will appear.
 		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, callback will fire (after changing the setting).
 		extraEntries:	function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
