@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/23
+//18/08/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -104,7 +104,7 @@ const music_graph_descriptors = {
 		['North American Folk_supergenre'	,	['Folk-Rock','Freak Folk','Traditional Folk','Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk','Old-Timey','Appalachian']],
 		['Nordic Folk_supergenre'			,	['Polka','Traditional European Folk','Pagan Folk','German Folk','Joik','Nordic Folk']],
 		['Celtic Folk_supergenre'			,	['Circle','Jig','Scottish','Celtic Folk','Traditional European Folk','Bal Folk','Irish','Scottish Folk','Celtic New Age']],
-		['African Folk_supergenre'			,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
+		['African Folk_supergenre'			,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi']],
 		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk']],
 		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno']],
@@ -121,7 +121,7 @@ const music_graph_descriptors = {
 		['Techno_supergenre'				,	['Ghetto House','Ghettotech','Juke','Hardtechno','Tech Trance','Tech House','Industrial Techno','Minimal Techno','Ambient Techno','IDM','Hardtek','Freetekno','Hardcore Techno','Hardcore Rave','New Beat','Detroit Techno']],
 		['House_supergenre'					,	['Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
 		['Trance_supergenre'				,	['Neo Trance','Epic Trance','Hardtrance','NRG','Hard NRG','Hard House','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Classic Trance','Acid Trance']],
-		['Downtempo_supergenre'				,	['Synthwave','Vaporwave','Minimal Wave','Nu Jazz','Minimal Industrial','Digital Minimalism','Glitch','Ambient Breaks','Illbient','Chill-Out Downtempo','Ambient House','Ambient','Ambient Electronic','Ambient New Age','Nature Music','New Age','Neo-Classical New Age','Hang Music','Healing Music','New Age','New Acoustic','Dark Ambient','Dark Industrial','Bit Music','Synth','Muzak','Minimalism','Lounge','Exotica','Musique Concrete']],
+		['Downtempo_supergenre'				,	['Electronic Sufi','Synthwave','Vaporwave','Minimal Wave','Nu Jazz','Minimal Industrial','Digital Minimalism','Glitch','Ambient Breaks','Illbient','Chill-Out Downtempo','Ambient House','Ambient','Ambient Electronic','Ambient New Age','Nature Music','New Age','Neo-Classical New Age','Hang Music','Healing Music','New Age','New Acoustic','Dark Ambient','Dark Industrial','Bit Music','Synth','Muzak','Minimalism','Lounge','Exotica','Musique Concrete']],
 		['Classical Medieval Era_supergenre',	['Ballata','Estampie','Gregorian','Chant','Madrigal','Motet','Organum','Saltarero']],
 		['Classical Renaissance Era_supergenre',['Choral','Ballade','Canzona','Carol','Fantasia','Galliard','Intermedio','Lauda','Litany','Madrigal','Madrigal','Comedy','Madrigale Spirituale','Mass','Motet','Motet-Chanson','Opera','Pavane','Ricercar','Sequence','Tiento','Toccata']],
 		['Classical Baroque Era_supergenre',	['Allemande','Canon','Cantata','Chaconne','Concerto','Courante','Fugue','Classical Gavotte','Gigue','Mass','Minuet','Opera','Opera','Oratorio','Partita','Passacaglia','Passepied','Prelude','Sarabande','Sinfonia','Sonata','Suite','Sonatina']],
@@ -194,7 +194,7 @@ const music_graph_descriptors = {
 		['Americana XL'						,	['Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk']],
 		['Traditional American Folk XL'		,	['American Primitive Guitar','Neo-Traditional Folk','Traditional American Folk','Appalachian']],
 		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
-		['African Folk XL'					,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa']],
+		['African Folk XL'					,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi']],
 		['Bal Folk XL'						,	['Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Jig','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals']],
 		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani']],
 		['Celtic-Nordic Folk XL'			,	['Celtic Folk','Folk Metal','Pagan Folk','Joik','Nordic Folk']],
@@ -203,7 +203,7 @@ const music_graph_descriptors = {
 		['Neo Folk XL'						,	['Industrial Folk','Folk Metal','Pagan Folk']],
 		['Ambient XL'						,	['Ambient','Ambient Industrial','Nature Music','Ambient Rock','Ambient Folk','Ambient Electronic','Ambient Metal','Ambient New Age','Ambient Classical','Ambient Funk']],
 		['Chill Folk XL'					,	['Freak Folk', 'Ambient Folk', 'Dream Pop']],
-		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan']]
+		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan','Classical Sufi']]
 	],
 	/*
 		-> Influences: Special relations between genres and styles. Like origins, derivatives or things considered 'anti-influences'. 
@@ -317,7 +317,9 @@ const music_graph_descriptors = {
 		['Boom Bap'							,	['Golden Age','East Coast']],
 		['Chill Folk XL'					,	['New Acoustic']],
 		['Nu-Disco'							,	['Electro','Disco XL','Post-Disco XL']],
-		['Electrorock'						,	['Synth-Pop', 'Electroclash']]
+		['Electrorock'						,	['Synth-Pop', 'Electroclash']],
+		['Classical Sufi'					,	['Gnawa','Nubian Folk','Sahrawi Folk']],
+		['Electronic Sufi'					,	['Folktronica','Progressive Trance','Psytrance']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -339,7 +341,9 @@ const music_graph_descriptors = {
 		['Post-Bop'							,	['Mainstream Jazz','Free Jazz']],
 		['Nuevo Flamenco'					,	['Folk-Jazz','Flamenco Rock']],
 		['Freak Folk'						,	['Close Harmony']],
-		['Electrorock'						,	['Industrial Rock']]
+		['Electrorock'						,	['Industrial Rock']],
+		['Classical Sufi'					,	['Psychedelic Folk','Ambient Folk']],
+		['Electronic Sufi'					,	['Classical Sufi','Chill-Out Downtempo','Ambient House']],
 	],
 	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -373,7 +377,8 @@ const music_graph_descriptors = {
 		['Sophisti-Pop'						,	['Classic Rock XL','Metal_supergenre','Post-Britpop','Europop','Dance Pop','Disco Pop']],
 		['Cool Jazz'						,	['Hard-Bop']],
 		['Americana'						,	['Traditional European Folk','Nordic Folk_supergenre','African Folk_supergenre']],
-		['Electrorock'						,	['Neo-Traditional Folk','Classic Rock XL','Traditional Pop','Freak Folk','Garage Rock Revival','Garage Pop','Retro Rock']]
+		['Electrorock'						,	['Neo-Traditional Folk','Classic Rock XL','Traditional Pop','Freak Folk','Garage Rock Revival','Garage Pop','Retro Rock']],
+		['Classical Sufi'					,	['Folk Pop','Folk-Rock','Folktronica','Folk Punk','Contemporary Folk','Renaissance','South American Folk_supergenre','North American Folk_supergenre','European Folk_supergenre']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound 
