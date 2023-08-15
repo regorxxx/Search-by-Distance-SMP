@@ -43,6 +43,7 @@
 - Helpers: updated helpers
 ### Removed
 ### Fixed
+- HTML: fix broken rendering due to file path change.
 
 ## [4.5.1] - 2023-07-29
 ### Added
