@@ -39,7 +39,8 @@
 ## [Unreleased][]
 ### Added
 ### Changed
-- Descriptors: updated descriptors with addition of Electrorock.
+- Descriptors: updated descriptors with addition of Electrorock, Classical Sufi and Electronic Sufi.
+- Helpers: updated helpers
 ### Removed
 ### Fixed
 
