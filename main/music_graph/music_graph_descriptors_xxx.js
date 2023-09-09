@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/08/23
+//09/09/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -107,7 +107,7 @@ const music_graph_descriptors = {
 		['African Folk_supergenre'			,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi']],
 		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk']],
-		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno']],
+		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno','Sephardic']],
 		['Country_supergenre'				,	['Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie']],
 		['R&B_supergenre'					,	['Funktronica','Contemporary R&B','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Soul Blues','Smooth Soul','Classic Funk','P-Funk','Funk Rock','Contemporary Funk','Psychedelic Funk','Psychedelic Soul','New Orleans R&B','Funk Blues','Deep Funk Revival','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B']],
 		['Blues_supergenre'					,	['Contemporary Blues','Desert Blues','Hill Country Blues','Soul Blues','Modern Electric Blues','Psychedelic Blues','Blues Rock','Funk Blues','British Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Piano Blues','Vaudeville Blues','Country Blues','Delta Blues']],
@@ -197,7 +197,7 @@ const music_graph_descriptors = {
 		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['African Folk XL'					,	['Desert Blues','Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi']],
 		['Bal Folk XL'						,	['Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Jig','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals']],
-		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani']],
+		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani','Sephardic']],
 		['Celtic-Nordic Folk XL'			,	['Celtic Folk','Folk Metal','Pagan Folk','Joik','Nordic Folk']],
 		['European Pre-Modern Folk XL'		,	['Medieval','Renaissance']],
 		['Modern Folk XL'					,	['Contemporary Folk','Folk Pop','Folk-Rock']],
@@ -345,6 +345,7 @@ const music_graph_descriptors = {
 		['Electrorock'						,	['Industrial Rock']],
 		['Classical Sufi'					,	['Psychedelic Folk','Ambient Folk']],
 		['Electronic Sufi'					,	['Classical Sufi','Chill-Out Downtempo','Ambient House']],
+		['Sephardic'						,	['Flamenco','Israeli Folk','Anatolian Rock']],
 	],
 	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
