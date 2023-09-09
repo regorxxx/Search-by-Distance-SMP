@@ -39,7 +39,7 @@
 ## [Unreleased][]
 ### Added
 ### Changed
-- Descriptors: updated descriptors with addition of 'Electrorock', 'Classical Sufi' and 'Electronic Sufi'. New 'Progressive Psychedelic Fusion XL' cluster.
+- Descriptors: updated descriptors with addition of 'Electrorock', 'Sephardic', 'Classical Sufi' and 'Electronic Sufi'. New 'Progressive Psychedelic Fusion XL' cluster.
 - Helpers: updated helpers
 ### Removed
 ### Fixed
