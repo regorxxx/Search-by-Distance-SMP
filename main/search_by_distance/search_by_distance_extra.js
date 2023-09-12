@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/07/23
+//12/09/23
 
 include('search_by_distance.js');
 
@@ -265,7 +265,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #3: Retrieve current country', false);}
 	console.log(selCountry);
 	// Retrieve current region
-	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(isoMap.get(selCountry.toLowerCase()));
+	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(getCountryISO(selCountry));
 	console.log(selRegion);
 	const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
 	console.log(selMainRegion);

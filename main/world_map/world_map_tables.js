@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/06/23
+//12/09/23
 
 /* 
 	World Map
@@ -9,18 +9,10 @@
 // Helper
 function findCountryCoords(country, mapWidth, mapHeight, factorX, factorY) { // Mercator projection
 	let xy = [-1, -1];
-	if (country && country.length) {
-		let isoCode = '';
-		if (isoCoordinates.has(country)) {
-			isoCode = country;
-		} else {
-			if (isoMap.has(country.toLowerCase())) {isoCode = isoMap.get(country.toLowerCase());}
-			else if (nameReplacers.has(country.toLowerCase())) {isoCode = isoMap.get(nameReplacers.get(country.toLowerCase()));}
-		}
-		if (isoCode.length) {
-			let [latitude , longitude] = isoCoordinates.get(isoCode);
-			if (latitude != null) {xy = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);}
-		}
+	const isoCode = getCountryISO(country);
+	if (isoCode.length) {
+		let [latitude , longitude] = isoCoordinates.get(isoCode);
+		if (latitude != null) {xy = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);}
 	}
 	return xy;
 }
@@ -57,6 +49,19 @@ function findCountry(x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.
 	countries.forEach((country) => {country.key = isoMapRev.get(country.key);});
 	countries = countries.sort((a, b) => {return b.prox - a.prox;});
 	return countries;
+}
+
+function getCountryISO(country) {
+	let isoCode = '';
+	if (country && country.length) {
+		if (isoCoordinates.has(country)) {
+			isoCode = country;
+		} else {
+			if (isoMap.has(country.toLowerCase())) {isoCode = isoMap.get(country.toLowerCase());}
+			else if (nameReplacers.has(country.toLowerCase())) {isoCode = isoMap.get(nameReplacers.get(country.toLowerCase()));}
+		}
+	}
+	return isoCode;
 }
 
 // Country tables ISO 3166-1 Alpha-3 
@@ -98,6 +103,7 @@ const nameReplacers = new Map([
 	['us virgin islands','virgin islands, u.s.'],
 	['u.s. virgin islands','virgin islands, u.s.'],
 	['u.s.','united states'],
+	['russian federation','russia'],
 ]);
 const nameReplacersRev = new Map([...nameReplacers].map((arr) => {return arr.reverse();}));
 
