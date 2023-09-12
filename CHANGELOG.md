@@ -44,6 +44,7 @@
 ### Removed
 ### Fixed
 - HTML: fix broken rendering due to file path change.
+- Cultural Regions: name replacers not being used at some stages of the code.
 
 ## [4.5.1] - 2023-07-29
 ### Added
@@ -148,7 +149,7 @@
 - UI: improved compatibility with some fonts under Unix systems (using Wine). Sometimes weird chars appeared on menu entries.
 ### Removed
 ### Fixed
-- Crash when using 'Other tools\Calculate same zone artists' experimental tool due to file path changes on [4.0.0](#400---2023-02-15).
+- Cultural Regions: crash when using 'Other tools\Calculate same zone artists' experimental tool due to file path changes on [4.0.0](#400---2023-02-15).
 
 ## [4.0.3] - 2023-02-21
 ### Added
