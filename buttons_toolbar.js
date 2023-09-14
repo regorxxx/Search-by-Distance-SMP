@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/07/23
+//14/09/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -40,7 +40,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include('buttons\\' + file);});}
 }
 
-try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.0.1', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
+try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'XXX', version: '3.1.0', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
 	name:				['Name of config json file', 'buttons_' + randomString(5)],

@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.6.0](#460---2023-09-14)
 - [4.5.1](#451---2023-07-29)
 - [4.5.0](#450---2023-07-28)
 - [4.4.2](#442---2023-06-29)
@@ -37,6 +38,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [4.6.0] - 2023-09-14
 ### Added
 ### Changed
 - Descriptors: updated descriptors with addition of 'Electrorock', 'Sephardic', 'Classical Sufi' and 'Electronic Sufi'. New 'Progressive Psychedelic Fusion XL' cluster.
@@ -610,7 +617,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...HEAD
+[4.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.1...v4.4.2
