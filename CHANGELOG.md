@@ -39,6 +39,7 @@
 
 ## [Unreleased][]
 ### Added
+- Cultural Regions: new cultural filter -for the customizable button- which allows to only output tracks from same country, region, continent or worldwide. 'LOCALE LAST.FM' tag must be set on files, or [World-Map-SMP](https://github.com/regorxxx/World-Map-SMP) installed (its database is used).
 ### Changed
 ### Removed
 ### Fixed

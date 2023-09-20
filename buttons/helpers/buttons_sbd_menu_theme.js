@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/22
+//20/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -50,6 +50,19 @@ function createThemeMenu(parent) {
 		// Tags obj
 		const themeTags = {};
 		themeTagsKeys.forEach((key, i) => {themeTags[key] = themeTagsValues[i];});
+		// Iso
+		themeTags.iso = [];
+		const localeTags = getTagsValuesV3(selHandleList, ['LOCALE LAST.FM']).flat().map((tag) => tag.filter(Boolean).pop());
+		localeTags.forEach((localeTag) => {
+			if (localeTag) {themeTags.iso.push(getCountryISO(localeTag));}
+			else {
+				const artists = getTagsValuesV3(selHandleList, [globTags.artist], true).flat(Infinity);
+				const data = getLocaleFromId([...new Set(artists)]);
+				data.forEach((obj) => {
+					if (obj.iso.length) {themeTags.iso.push(obj.iso);}
+				});
+			}
+		});
 		// Theme obj
 		let input = '';
 		try {input = utils.InputBox(window.ID, 'Enter theme name', 'Search by distance', 'my theme', true);}

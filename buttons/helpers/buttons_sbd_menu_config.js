@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/07/23
+//20/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -451,6 +451,25 @@ function createConfigMenu(parent) {
 				menu.newCheckMenu(menuName, entryText, void(0), () => {return (recipe.hasOwnProperty(key) ? recipe[key] : properties[key][1]);});
 			});
 		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{	// Culture filters
+			const subMenuName = menu.newMenu('Cultural filter...', menuName);
+			const options = [
+				{name: 'All', val: -1},
+				{name: 'Same continent', val: 0},
+				{name: 'Same region', val: 1},
+				{name: 'Same country', val: 2}
+			];
+			options.forEach((opt) => {
+				if (opt.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
+				const entryText = opt.name + (recipe.hasOwnProperty('regionFilter') && recipe.regionFilter === opt.val ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					properties['regionFilter'][1] = opt.val;
+					overwriteProperties(properties); // Updates panel
+				}, flags: (recipe.hasOwnProperty('regionFilter') ? MF_GRAYED : MF_STRING)});
+			});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('regionFilter') ? recipe['regionFilter'] : properties['regionFilter'][1]));});
+		}
 	}
 	{	// Post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
@@ -664,6 +683,8 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
 				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
 				graphDebug(sbd.allMusicGraph, true); // Show popup on pass
+				include('..\\..\\main\\music_graph\\music_graph_descriptors_xxx_culture.js');
+				music_graph_descriptors_culture.debug(sbd.allMusicGraph);
 				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 			// Graph test

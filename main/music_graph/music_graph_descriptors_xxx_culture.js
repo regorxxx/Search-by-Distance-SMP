@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/09/23
+//20/09/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -196,12 +196,10 @@ music_graph_descriptors_culture.debug = function debug(graph = musicGraph()) {
 	});
 	console.log([...notFound]);
 	console.log(notFound.size);
-	// console.log(this.getNodeRegion('Ambient Classical'));
-	// console.log(music_graph_descriptors_culture.culturalRegion.Oceania.Micronesia);
+	
+	console.log('Deep House','Crossover Thrash', music_graph_descriptors_culture.getDistance('Deep House','Crossover Thrash')); // 0.3
+	console.log('Deep House','Deep House', music_graph_descriptors_culture.getDistance('Deep House','Deep House')); // 0
+	console.log('Tex-Mex','Deep House', music_graph_descriptors_culture.getDistance('Tex-Mex','Deep House')); // 0.6
+	console.log('Aussie Rock','New Wave', music_graph_descriptors_culture.getDistance('Aussie Rock','New Wave')); // 1
+	console.log('Disco','New Wave', music_graph_descriptors_culture.getDistance('Disco','New Wave')); // 0.3
 };
-
-console.log('Deep House','Crossover Thrash', music_graph_descriptors_culture.getDistance('Deep House','Crossover Thrash')); // 0.3
-console.log('Deep House','Deep House', music_graph_descriptors_culture.getDistance('Deep House','Deep House')); // 0
-console.log('Tex-Mex','Deep House', music_graph_descriptors_culture.getDistance('Tex-Mex','Deep House')); // 0.6
-console.log('Aussie Rock','New Wave', music_graph_descriptors_culture.getDistance('Aussie Rock','New Wave')); // 1
-console.log('Disco','New Wave', music_graph_descriptors_culture.getDistance('Disco','New Wave')); // 0.3

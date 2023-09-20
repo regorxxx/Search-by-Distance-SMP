@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/07/23
+//20/09/23
 
 /*
 	Search by Distance
@@ -107,7 +107,8 @@ const SearchByDistance_properties = {
 	bSmartShuffle			:	['Smart Shuffle by Artist', true],
 	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
-	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random']
+	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
+	regionFilter			:	['Region filter: none (-1), region (0), subregion (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -553,7 +554,8 @@ async function searchByDistance({
 								bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz) 
 								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
 								// Allows only influences by query, before any scoring/distance calc.
-								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false, 
+								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
+								regionFilter			= properties.hasOwnProperty('regionFilter') ? Number(properties.regionFilter [1]) : -1,
 								// --->Scoring Method
 								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
 								// --->Scoring filters
@@ -1076,6 +1078,28 @@ async function searchByDistance({
 			if (querySimil.length) {
 				if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(querySimil);}
 				else {query[querylength] += querySimil;}
+			}
+		}
+		if (regionFilter !== -1) {
+			console.log('regionFilter', regionFilter);
+			let iso;
+			if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
+			else {
+				const tagName = 'LOCALE LAST.FM';
+				const localeTag = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(sel).split(', ').filter(Boolean).pop() || '';
+				if (localeTag.length) {iso = getCountryISO(localeTag);}
+				else {
+					const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
+					const {iso: artistIso, worldMapData} = getLocaleFromId(artist);
+					if (artistIso.length) {iso = artistIso;}
+				}
+			}
+			if (iso.length) {
+				const {query: queryRegion} = getZoneFilter(iso);
+				if (queryRegion.length) {
+					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
+					else {query[querylength] += queryRegion;}
+				}
 			}
 		}
 		if (forcedQuery.length) { //Add user input query to the previous one

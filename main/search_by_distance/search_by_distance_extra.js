@@ -1,7 +1,10 @@
 ﻿'use strict';
-//12/09/23
+//20/09/23
 
 include('search_by_distance.js');
+include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
+include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
+include('..\\world_map\\world_map_tables.js');
 
 // Similar artists
 async function calculateSimilarArtists({selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted'} = {}) {
@@ -242,48 +245,93 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 }
 
 // Similar culture zone
+function getLocaleFromId(id, worldMapData = null) {
+	const dataId = 'artist';
+	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
+	if (!worldMapData && _isFile(path)) {
+		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
+		if (data) {worldMapData = data;}
+	}
+	// Retrieve current country
+	if (isArray(id)) {return id.map((_) => {return getLocaleFromId(_, worldMapData);});}
+	else {
+		const locale = (worldMapData.find((obj) => {return (obj[dataId] === id);}) || {}).val || [''];
+		const country = locale.slice(-1)[0] || '';
+		const iso = getCountryISO(country) || '';
+		return {locale, country, iso, worldMapData};
+	}
+}
+
+// Similar culture zone
 function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} = {}) {
-	include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
-	include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
-	include('..\\world_map\\world_map_tables.js');
 	if (sbd.panelProperties.bProfile[1]) {var test = new FbProfiler('getArtistsSameZone');}
 	// Retrieve artist
 	const dataId = 'artist';
 	const selId = fb.TitleFormat(_bt(dataId)).EvalWithMetadb(selHandle);
 	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #1: Retrieve artists\' track', false);}
 	// Retrieve world map data
+	const {iso: selIso, worldMapData} = getLocaleFromId(selId);
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #3: Retrieve current country', false);}
+	const allowCountryName = new Set();
+	if (selIso.length) {
+		// Retrieve current region
+		const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(selIso);
+		const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
+		if (sbd.panelProperties.bProfile[1]) {test.Print('Task #4: Retrieve current region', false);}
+		// Set allowed countries from current region
+		const allowCountryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+		allowCountryISO.forEach((iso) => {
+			const name = isoMapRev.get(iso);
+			if (name) {allowCountryName.add(name.toLowerCase());}
+		});
+		allowCountryName.forEach((name) => { // Add alternate names
+			if (nameReplacersRev.has(name)) {allowCountryName.add(nameReplacersRev.get(name));}
+		});
+		if (sbd.panelProperties.bProfile[1]) {test.Print('Task #5: Retrieve allowed countries from current region', false);}
+	}
+	// Compare and get list of allowed artists
+	const artists = [];
+	if (allowCountryName.size !== 0) {
+		worldMapData.forEach((item) => {
+			const country = item.val.length ? item.val.slice(-1)[0].toLowerCase() : null;
+			if (country && allowCountryName.has(country)) {artists.push(item[dataId]);}
+		});
+	}
+	console.log(artists);
+	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #6: Compare and get list of allowed artists', false);}
+	return artists ;
+}
+
+// Similar culture zone
+function getZoneFilter(ISO) {
+	// Retrieve artist
+	const dataId = 'artist';
+	// Retrieve world map data
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
-	const worldMapData = [];
+	let worldMapData = [];
 	if (_isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
-		if (data) {data.forEach((item) => {worldMapData.push(item);});}
+		if (data) {worldMapData = data;}
 	}
-	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #2: Retrieve world map data', false);}
-	// Retrieve current country
-	const selLocale = (worldMapData.find((obj) => {return (obj[dataId] === selId);}) || {}).val || [''];
-	const selCountry = selLocale.slice(-1)[0];
-	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #3: Retrieve current country', false);}
-	console.log(selCountry);
 	// Retrieve current region
-	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(getCountryISO(selCountry));
-	console.log(selRegion);
+	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(ISO);
 	const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
-	console.log(selMainRegion);
-	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #4: Retrieve current region', false);}
 	// Set allowed countries from current region
-	const allowCountryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion);
-	const allowCountryName = new Set(allowCountryISO.map((iso) => {return isoMapRev.get(iso);}));
-	allowCountryName.forEach((name) => {if (nameReplacersRev.has(name)) {allowCountryName.add(nameReplacersRev.get(name));}}); // Add alternate names
-	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #5: Retrieve allowed countries from current region', false);}
+	const countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+	const countryName = new Set(countryISO.map((iso) => {return isoMapRev.get(iso).toLowerCase();}));
+	countryName.forEach((name) => {if (nameReplacersRev.has(name)) {countryName.add(nameReplacersRev.get(name));}}); // Add alternate names
 	// Compare and get list of allowed artists
-	const jsonQuery = [];
+	const artists = [];
 	worldMapData.forEach((item) => {
 		const country = item.val.length ? item.val.slice(-1)[0].toLowerCase() : null;
-		if (country && allowCountryName.has(country)) {jsonQuery.push(item[dataId]);}
+		if (country && countryName.has(country)) {artists.push(item[dataId]);}
 	});
-	console.log(jsonQuery);
-	if (sbd.panelProperties.bProfile[1]) {test.Print('Task #6: Compare and get list of allowed artists', false);}
-	return jsonQuery ;
+	// Query
+	let query = [];
+	query.push(query_join(artists.map((artist) => globTags.artist + ' IS ' + artist), 'OR'));
+	query.push(query_join([...countryName].map((country) => 'LOCALE LAST.FM IS ' + country), 'OR'));
+	query = query_join(query, 'OR');
+	return {artists, countries: {iso: countryISO, name: countryName}, query};
 }
 
 // Utilities
