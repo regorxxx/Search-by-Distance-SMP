@@ -14,7 +14,7 @@ The button list is automatically built from this path: '.\buttons\*.js'
 
 Some buttons can be 'duplicated'. i.e. having multiple instances with
 different settings. Whenever that's not possible, menu entry will be
-greyed if there is already copy of the button on the toolbar.
+greyed if there is already copy of the same button on the toolbar.
 
 Finally, some buttons may require another one to be loaded first... it's
 also indicated in the related entry if the requirement is not met.
@@ -24,3 +24,7 @@ settings, mouse + key modifiers, etc. Buttons which are meant to be
 configured using the properties panel have their prefix added to the
 tooltip text ('sbd0', 'rd0', ...) to make it easier to find their
 associated properties.
+
+Note every button has its own configuration, they are NOT shared. i.e.
+if you add 3 buttons of the same tool, everyone must be configured
+separately (for ex. for tag remapping).
