@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/23
+//20/09/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -124,6 +124,9 @@ function buttonTooltipSbdCustom(parent) {
 			: ''
 		)) + ((recipe.hasOwnProperty('bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1]) 
 			? ' - Progressive playlist' 
+			: ''
+		) + ((recipe.hasOwnProperty('regionFilter') ? recipe.regionFilter : properties.regionFilter[1]) !== -1 
+			? ' - Cultural filter' 
 			: ''
 		);
 	info += sort ? '   ' + _p(sort) : '';
