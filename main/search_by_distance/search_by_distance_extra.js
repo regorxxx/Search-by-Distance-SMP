@@ -302,7 +302,6 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	return artists ;
 }
 
-// Similar culture zone
 function getZoneArtistFilter(iso, mode = 'region') {
 	// Retrieve artist
 	const dataId = 'artist';
@@ -322,7 +321,7 @@ function getZoneArtistFilter(iso, mode = 'region') {
 		case 0:
 		case 'continent': {
 			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
-			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
 			break;
 		}
 		case 1:

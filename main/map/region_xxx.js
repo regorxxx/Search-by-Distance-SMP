@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/09/22
+//20/09/22
 
 function regionMap({nodeName = 'node', intraSubRegionDist = 0.3, interSubRegionDist = 0.6, interRegionDist = 1, culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
@@ -96,9 +96,12 @@ regionMap.prototype.getNodeRegion = function getNodeRegion(node) {
 	const regionObj = {};
 	regions.forEach((key) => {
 		const mainKey = this.get(key);
-		if (mainKey === key) {regionObj[mainKey] = [mainKey];}
+		if (mainKey === key) {regionObj[mainKey] = [];}
 		else if (regionObj[mainKey]) {regionObj[mainKey].push(key);}
 		else {regionObj[mainKey] = [];}
+	});
+	Object.keys(regionObj).forEach((key) => { // Fix for main region equal to subregion
+		if (regionObj[key].length === 0) {regionObj[key].push(key);}
 	});
 	return regionObj;
 };
