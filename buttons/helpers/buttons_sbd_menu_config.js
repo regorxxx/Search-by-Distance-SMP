@@ -462,14 +462,14 @@ function createConfigMenu(parent) {
 			];
 			options.forEach((opt) => {
 				if (opt.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
-				const entryText = opt.name + (recipe.hasOwnProperty('regionFilter') && recipe.regionFilter === opt.val ? '\t(forced by recipe)' : '');
+				const entryText = opt.name + (recipe.hasOwnProperty('artistRegionFilter') && recipe.artistRegionFilter === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
 					if (opt.val !== -1) {fb.ShowPopupMessage('This filter allows only artists from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.');}
-					properties['regionFilter'][1] = opt.val;
+					properties['artistRegionFilter'][1] = opt.val;
 					overwriteProperties(properties); // Updates panel
-				}, flags: (recipe.hasOwnProperty('regionFilter') ? MF_GRAYED : MF_STRING)});
+				}, flags: (recipe.hasOwnProperty('artistRegionFilter') ? MF_GRAYED : MF_STRING)});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('regionFilter') ? recipe['regionFilter'] : properties['regionFilter'][1]));});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1]));});
 		}
 	}
 	{	// Post-scoring filters:

@@ -108,7 +108,7 @@ const SearchByDistance_properties = {
 	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
 	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
-	regionFilter			:	['Region filter: none (-1), region (0), subregion (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
+	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -555,7 +555,7 @@ async function searchByDistance({
 								bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
 								// Allows only influences by query, before any scoring/distance calc.
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
-								regionFilter			= properties.hasOwnProperty('regionFilter') ? Number(properties.regionFilter [1]) : -1,
+								artistRegionFilter		= properties.hasOwnProperty('artistRegionFilter') ? Number(properties.artistRegionFilter [1]) : -1,
 								// --->Scoring Method
 								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
 								// --->Scoring filters
@@ -1080,8 +1080,7 @@ async function searchByDistance({
 				else {query[querylength] += querySimil;}
 			}
 		}
-		if (regionFilter !== -1) {
-			console.log('regionFilter', regionFilter);
+		if (artistRegionFilter !== -1) {
 			let iso;
 			if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
 			else {
@@ -1095,7 +1094,7 @@ async function searchByDistance({
 				}
 			}
 			if (iso.length) {
-				const {query: queryRegion} = getZoneFilter(iso);
+				const {query: queryRegion} = getZoneArtistFilter(iso);
 				if (queryRegion.length) {
 					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
 					else {query[querylength] += queryRegion;}

@@ -303,7 +303,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 }
 
 // Similar culture zone
-function getZoneFilter(ISO) {
+function getZoneArtistFilter(ISO) {
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data

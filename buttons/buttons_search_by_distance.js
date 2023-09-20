@@ -36,7 +36,7 @@ delete newButtonsProperties.bHarmonicMixDoublePass;
 delete newButtonsProperties.bAscii;
 delete newButtonsProperties.bAdvTitle;
 delete newButtonsProperties.sortBias;
-delete newButtonsProperties.regionFilter;
+delete newButtonsProperties.artistRegionFilter;
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 {
 	const properties = getPropertiesPairs(newButtonsProperties, prefix, 0);
