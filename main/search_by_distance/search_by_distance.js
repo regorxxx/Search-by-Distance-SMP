@@ -1047,6 +1047,7 @@ async function searchByDistance({
 				else {query[querylength] = query_join(query, 'OR');} //join previous query's
 			}
 		}
+		const queryStages = []; // Currently unused
 		if (bSameArtistFilter && !bUseTheme) {
 			let tags = fb.TitleFormat('[' + globTags.artist + ']').EvalWithMetadb(sel).split(', ').filter(Boolean);
 			let queryArtist = '';
@@ -1143,15 +1144,24 @@ async function searchByDistance({
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
-		if (!handleList) {
-			fb.ShowPopupMessage(
-				'Query not valid. Check query:\n\n' +
-				query[querylength] +
-				(bSearchDebug 
-					? '\n\n' + JSON.stringify(queryDebug, (t, v) => (typeof v === 'undefined' ? 'undefined' : v), '\t') 
-					: ''
-			)); 
-			return;
+		const checkQuery = (queryItems, q) => {
+			if (!queryItems) {
+				fb.ShowPopupMessage(
+					'Query not valid. Check query:\n\n' +
+					q +
+					(bSearchDebug 
+						? '\n\n' + JSON.stringify(queryDebug, (t, v) => (typeof v === 'undefined' ? 'undefined' : v), '\t') 
+						: ''
+				)); 
+				return;
+			}
+		};
+		checkQuery(handleList, query[querylength]);
+		if (queryStages.length) {
+			queryStages.forEach((subQuery) => {
+				handleList = fb.GetQueryItemsCheck(handleList, subQuery);
+				checkQuery(handleList, subQuery);
+			});
 		}
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
 		if (bProfile) {test.Print('Task #2: Query', false);}
