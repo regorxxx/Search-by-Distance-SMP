@@ -1,7 +1,7 @@
 ﻿'use strict';
-//11/04/22
+//18/09/22
 
-function regionMap({nodeName = 'node', culturalRegion} = {}) {
+function regionMap({nodeName = 'node', intraSubRegionDist = 0.3, interSubRegionDist = 0.6, interRegionDist = 1, culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
 		'Antarctica': {'Antarctica': []},
 		'Africa': {'West Africa': [],'Maghreb': [],'Central Africa': [],'East Africa': [],'South Africa': []},
@@ -11,9 +11,10 @@ function regionMap({nodeName = 'node', culturalRegion} = {}) {
 		'America': {'Caribbean': [],'North America': [],'Central America': [],'South America': []},
 		'Oceania': {'Australasia': [],'Melanesia': [],'Micronesia': [],'Polynesia': []}
 	};
+	[this.intraSubRegionDist, this.interSubRegionDist, this.interRegionDist] = [intraSubRegionDist, interSubRegionDist, interRegionDist];
 	this.nodeName = nodeName;
 	this.regionList = {};
-	this.updateRegionList = function regionList() {
+	this.updateRegionList = function updateRegionList() {
 		const mainRegions = Object.keys(this.culturalRegion);
 		const regions = {};
 		const regionsMap = new Map();
@@ -95,7 +96,7 @@ regionMap.prototype.getNodeRegion = function getNodeRegion(node) {
 	const regionObj = {};
 	regions.forEach((key) => {
 		const mainKey = this.get(key);
-		if (mainKey === key) {regionObj[mainKey] = [];}
+		if (mainKey === key) {regionObj[mainKey] = [mainKey];}
 		else if (regionObj[mainKey]) {regionObj[mainKey].push(key);}
 		else {regionObj[mainKey] = [];}
 	});
@@ -106,9 +107,14 @@ regionMap.prototype.getFirstNodeRegion = function getFirstNodeRegion(node) {
 	return (Object.values(this.getNodeRegion(node))[0] || [''])[0];  // If nodes are unique per pair {key, subKey}, then there is only one value needed
 };
 
-regionMap.prototype.isSameRegionNodes = function isSameRegionNodes(nodeA, nodeB, bMain = false) {
+regionMap.prototype.isSameRegionNodes = function isSameRegionNodes(nodeA, nodeB, bMain = false) { // Be aware subregions being equal to the main region are excluded unless bMain is set to true
 	const regionA = Object.entries(this.getNodeRegion(nodeA));
-	return regionA.some((pair) => {return this.regionHasNode(bMain ? pair[0] : pair[1], nodeB);});
+	return regionA.some((pair) => {
+		const mainRegion = pair[0];
+		return bMain 
+			? this.regionHasNode(mainRegion, nodeB)
+			: pair[1].filter((subRegion) => subRegion !== mainRegion).some((subRegion) => this.regionHasNode(subRegion, nodeB));
+	});
 };
 
 regionMap.prototype.getNodesFromRegion = function getNodesFromRegion(region) {
@@ -121,4 +127,15 @@ regionMap.prototype.getNodesFromRegion = function getNodesFromRegion(region) {
 		}
 	}
 	return [...new Set(nodes)];
+};
+
+// Distance functions
+regionMap.prototype.getDistance = function getDistance(nodeA, nodeB) {
+	return this.capitalize(nodeA) === this.capitalize(nodeB)
+		? 0
+		: this.isSameRegionNodes(nodeA, nodeB)
+			? this.intraSubRegionDist
+			: this.isSameRegionNodes(nodeA, nodeB, true)
+				? this.interSubRegionDist
+				: this.interRegionDist;
 };

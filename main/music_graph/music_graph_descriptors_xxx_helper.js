@@ -57,13 +57,17 @@ music_graph_descriptors.getInfluences = function getInfluences(genreStyle) {
 };
 
 music_graph_descriptors.nodeList = null;
-music_graph_descriptors.getNodeList = function getNodeList() {
+music_graph_descriptors.getNodeList = function getNodeList(bExtensive = true) {
 	// Get node list (+ weak substitutions + substitutions + style cluster)
-	if (!this.nodeList) {
-		this.nodeList = new Set(this.style_supergenre.flat(Infinity))
-			.union(new Set(this.style_weak_substitutions.flat(Infinity)))
-			.union(new Set(this.style_substitutions.flat(Infinity)))
-			.union(new Set(this.style_cluster.flat(Infinity)));
+	if (bExtensive) {
+		if (!this.nodeList) {
+			this.nodeList = new Set(this.style_supergenre.flat(Infinity))
+				.union(new Set(this.style_weak_substitutions.flat(Infinity)))
+				.union(new Set(this.style_substitutions.flat(Infinity)))
+				.union(new Set(this.style_cluster.flat(Infinity)));
+		}
+	} else {
+		return new Set(this.style_supergenre.flat(Infinity).filter((sg) => !sg.endsWith('_supergenre')));
 	}
 	return this.nodeList;
 }
