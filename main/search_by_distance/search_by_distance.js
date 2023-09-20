@@ -109,6 +109,7 @@ const SearchByDistance_properties = {
 	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
 	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
 	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
+	genreStyleRegionFilter	:	['Genre region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -399,7 +400,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -556,6 +557,7 @@ async function searchByDistance({
 								// Allows only influences by query, before any scoring/distance calc.
 								bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
 								artistRegionFilter		= properties.hasOwnProperty('artistRegionFilter') ? Number(properties.artistRegionFilter [1]) : -1,
+								genreStyleRegionFilter	= properties.hasOwnProperty('genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter [1]) : -1,
 								// --->Scoring Method
 								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
 								// --->Scoring filters
@@ -775,7 +777,7 @@ async function searchByDistance({
 		if (bSearchDebug) {console.log(JSON.stringify(calcTags, void(0), '\t'));}
 		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
 		const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
-		const genreStyleTagQuery = genreStyleTag.map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
+		const genreStyleTagQuery = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
 		
 		// Check input
 		playlistLength = (playlistLength >= 0) ? playlistLength : 0;
@@ -1096,6 +1098,18 @@ async function searchByDistance({
 			if (iso.length) {
 				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter);
 				if (queryRegion.length) {
+					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
+					else {query[querylength] += queryRegion;}
+				}
+			}
+		}
+		if (genreStyleRegionFilter !== -1) {
+			if (calcTags.genreStyle.referenceSet.size) {
+				const styleGenreRegion = getZoneGraphFilter([...calcTags.genreStyle.referenceSet], genreStyleRegionFilter).map((sg) => sanitizeQueryVal(sg));
+				if (styleGenreRegion.length) {
+					const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+					let queryRegion = query_combinations(styleGenreRegion, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+					queryRegion = query_join(queryRegion, 'OR'); // flattens the array
 					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
 					else {query[querylength] += queryRegion;}
 				}
