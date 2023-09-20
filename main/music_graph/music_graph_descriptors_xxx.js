@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/09/23
+//18/09/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -321,6 +321,7 @@ const music_graph_descriptors = {
 		['Electrorock'						,	['Synth-Pop', 'Electroclash']],
 		['Classical Sufi'					,	['Gnawa','Nubian Folk','Sahrawi Folk']],
 		['Electronic Sufi'					,	['Folktronica','Progressive Trance','Psytrance']],
+		['Death Rock'						,	['Gothic Rock']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -346,6 +347,9 @@ const music_graph_descriptors = {
 		['Classical Sufi'					,	['Psychedelic Folk','Ambient Folk']],
 		['Electronic Sufi'					,	['Classical Sufi','Chill-Out Downtempo','Ambient House']],
 		['Sephardic'						,	['Flamenco','Israeli Folk','Anatolian Rock']],
+		['Death Rock'						,	['Darkwave','Coldwave','Post-Punk']],
+		['Gothic Rock'						,	['Darkwave','Coldwave','Post-Punk','Punk Rock']],
+		['Post-Rock'						,	['Avant-Garde Jazz']],
 	],
 	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
