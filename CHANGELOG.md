@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [4.6.0](#460---2023-09-14)
+- [4.6.0](#460---2023-09-20)
 - [4.5.1](#451---2023-07-29)
 - [4.5.0](#450---2023-07-28)
 - [4.4.2](#442---2023-06-29)
@@ -43,7 +43,7 @@
 ### Removed
 ### Fixed
 
-## [4.6.0] - 2023-09-14
+## [4.6.0] - 2023-09-20
 ### Added
 ### Changed
 - Descriptors: updated descriptors with addition of 'Electrorock', 'Sephardic', 'Classical Sufi' and 'Electronic Sufi'. New 'Progressive Psychedelic Fusion XL' cluster.
