@@ -1094,7 +1094,7 @@ async function searchByDistance({
 				}
 			}
 			if (iso.length) {
-				const {query: queryRegion} = getZoneArtistFilter(iso);
+				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter);
 				if (queryRegion.length) {
 					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
 					else {query[querylength] += queryRegion;}

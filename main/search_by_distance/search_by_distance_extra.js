@@ -303,7 +303,7 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 }
 
 // Similar culture zone
-function getZoneArtistFilter(ISO) {
+function getZoneArtistFilter(iso, mode = 'region') {
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data
@@ -314,10 +314,28 @@ function getZoneArtistFilter(ISO) {
 		if (data) {worldMapData = data;}
 	}
 	// Retrieve current region
-	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(ISO);
-	const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
+	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(iso);
+	
 	// Set allowed countries from current region
-	const countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+	let countryISO;
+	switch (isString(mode) ? mode.toLowerCase() : mode) {
+		case 0:
+		case 'continent': {
+			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
+			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+			break;
+		}
+		case 1:
+		case 'region': {
+			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+			break;
+		}
+		case 2:
+		case 'country': {
+			countryISO = [iso];
+			break;
+		}
+	}
 	const countryName = new Set(countryISO.map((iso) => {return isoMapRev.get(iso).toLowerCase();}));
 	countryName.forEach((name) => {if (nameReplacersRev.has(name)) {countryName.add(nameReplacersRev.get(name));}}); // Add alternate names
 	// Compare and get list of allowed artists
