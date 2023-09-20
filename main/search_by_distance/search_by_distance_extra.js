@@ -314,7 +314,6 @@ function getZoneArtistFilter(iso, mode = 'region') {
 	}
 	// Retrieve current region
 	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(iso);
-	
 	// Set allowed countries from current region
 	let countryISO;
 	switch (isString(mode) ? mode.toLowerCase() : mode) {
@@ -349,6 +348,31 @@ function getZoneArtistFilter(iso, mode = 'region') {
 	query.push(query_join([...countryName].map((country) => 'LOCALE LAST.FM IS ' + country), 'OR'));
 	query = query_join(query, 'OR');
 	return {artists, countries: {iso: countryISO, name: countryName}, query};
+}
+
+// Similar culture zone
+function getZoneGraphFilter(styleGenre, mode = 'region') {
+	if (isArray(styleGenre)) {return [...new Set(styleGenre.map((_) => {return getZoneGraphFilter(_, mode);}).flat(Infinity))];}
+	// Retrieve current region
+	const regions = music_graph_descriptors_culture.getStyleRegion(styleGenre); // multiple outputs!
+	// Set allowed genres from current region
+	let styleGenreRegion = new Set();
+	Object.keys(regions).forEach((key) => {
+		switch (isString(mode) ? mode.toLowerCase() : mode) {
+			case 0:
+			case 'continent': {
+				styleGenreRegion.add(...music_graph_descriptors_culture.getNodesFromRegion(key).flat(Infinity));
+				break;
+			}
+			case 1:
+			case 'region': {
+				regions[key].forEach((subKey) => styleGenreRegion.add(music_graph_descriptors_culture.getNodesFromRegion(subKey).flat(Infinity)));
+				break;
+			}
+		}
+	});
+	styleGenreRegion.forEach((sg) => styleGenreRegion.add(music_graph_descriptors.getSubstitution(sg))); // Add alternate names
+	return [...styleGenreRegion].filter(Boolean);
 }
 
 // Utilities

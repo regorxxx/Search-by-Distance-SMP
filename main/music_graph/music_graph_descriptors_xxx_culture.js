@@ -141,7 +141,14 @@ music_graph_descriptors_culture.regionHasStyle = function (style) {
 	return [style, music_graph_descriptors.getSubstitution(style)].some(this.regionHasNode);
 };
 music_graph_descriptors_culture.getStyleRegion = function (style) {
-	return [style, music_graph_descriptors.getSubstitution(style)].some(this.getNodeRegion);
+	const styles = [style, music_graph_descriptors.getSubstitution(style)];
+	const len = styles.length;
+	let regions = null;
+	for (let i = 0; i < len; i++) {
+		regions = this.getNodeRegion(styles[i]);
+		if (Object.keys(regions).length) {break;}
+	}
+	return regions;
 };
 
 // Populate with substitutions
@@ -149,15 +156,15 @@ music_graph_descriptors_culture.getStyleRegion = function (style) {
 	const ommit = ['Industrial_supergenre','Blues_supergenre','Metal_supergenre','Classic Rock_supergenre','Pop_supergenre','Contemporary_supergenre','Classical Modernist Era_supergenre','Modern Folk_supergenre','Punk Rock_supergenre','Alternative_supergenre','Hardcore Punk_supergenre','R&B_supergenre','Gospel_supergenre','Jazz_supergenre','Rap_supergenre','Breakbeat_supergenre','Drum & Bass_supergenre','Hardcore_supergenre','House_supergenre','Techno_supergenre','Trance_supergenre','Downtempo_supergenre','Punk XL','Classic Metal XL','Black Metal XL','Thrash Metal XL','Alt. Metal XL','Progressive Alt. Metal XL','Contemporary Alt. Metal XL','Stoner Metal XL','Grunge XL','Stoner XL','Doom XL','Extreme Metal XL','Mainstream Pop','Traditional Pop','Vocal Pop','Disco XL','Post-Disco XL','Soft Pop XL','Urban','Alt. Rap XL','Downtempo Rap XL','Funk','Soul','Deep Soul XL','Modern Blues XL','Synth & Wave XL','Lounge XL','Psy XL & Gaze','Chill Folk XL','New Age XL','New Age Folk XL','Modern Folk XL','Neo Folk XL','Ambient XL','Electro House XL','Electro XL','Progressive Rock XL','Classic Rock XL','Progressive Psychedelic Fusion XL','Classical Music_supercluster','Folk Music_supercluster','Electronic Music_supercluster','Progressive Electronic','Modern Jazz','Loungetronica','House'];
 	const _ALL_ = ['Minimal Industrial','Electro-Industrial','Industrial Folk','Industrial Rock','Industrial Punk','Industrial Metal','Ambient Industrial','Avant-Garde Industrial','Dark Ambient','Dark Industrial','Noise Music','Post-Metal','Psychedelic Rock','Psychedelic Pop','Avant-Prog','Hard Rock','Blues Rock','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock',,'Electropop','Indie','Contemporary R&B','Electronic','Folk','Industrial','Heavy Metal','Classic Rock','Progressive Rock','Rock_cluster','Rock','Avant-Garde Classical','Contemporary Classical','Pop Rock','Folk Pop','Contemporary Folk','Folk-Jazz','Folktronica','Pop','Ambient Classical','Contemporary Soul','Post-Jazz','Neo-Classical New Age','Modern Electric Blues','Psychedelic Blues','Psychedelic Soul','Psychedelic Folk','Electrorock','Baroque Pop','Folk-Pop','Chill-Out Downtempo','Neo Psychedelia','Nature Music','Ambient New Age','Healing Music','Spirituals','Worksongs','Ambient Metal','Crossover Prog','Piano Blues','Contemporary Blues','Contemporary Funk']
 	.concat(
-		[,'Neo-Prog','Funk Rock','Synth-Pop','No Wave','Post-Rock','Sadcore','Alt. Rock','Pop Punk','Rap Rock','Funk Metal','Noise Rock','Proto-Stoner Rock','Post-Hardcore','Hardcore Punk','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Ambient Rock','Hypersoul','Sophisti-Pop','Electroclash','Emo Pop','Dance-Rock','Dance Pop','Disco Pop','80s Rock','Soft Rock','Power Pop','Sunshine Pop','Progressive Folk','Folk Punk','Hang Music','Ambient Folk','Funktronica','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Smooth Soul','Classic Funk','P-Funk','Funk Blues','Deep Funk Revival','Psychedelic Rap','Broken Beats','Nu Skool Breaks','Chemical Breaks','Big Beat','Trip Hop','Breakdance','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Darkcore','Darkstep','Old School Jungle','New Beat','Hardcore Techno','','Breakbeat Hardcore','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Speedcore','Frenchcore','Terrorcore','Mainstream Hardcore','Hardstyle','Ghetto House','Ghettotech','Juke','Hardtechno','Tech Trance','Industrial Techno','Minimal Techno','Ambient Techno','Hardtek','Freetekno','Detroit Techno',,'NRG','Hard NRG','Ibiza Trance','Dream Trance','Eurodance','Nu-Disco','Neo Trance','Epic Trance','Hardtrance','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Classic Trance','Acid Trance','Synthwave','Vaporwave','Glitch','Ambient Breaks','Illbient','Ambient','Ambient Electronic','Bit Music','Synth','Neo-Classical','Punk','Hip-Hop','Hardcore','Dance','Techno','Trance','Breakbeat','Modernist','Classical','Techno-Pop','Emo-Pop']
+		[,'Neo-Prog','Funk Rock','Synth-Pop','No Wave','Post-Rock','Sadcore','Alt. Rock','Pop Punk','Rap Rock','Funk Metal','Noise Rock','Proto-Stoner Rock','Post-Hardcore','Hardcore Punk','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Ambient Rock','Hypersoul','Sophisti-Pop','Electroclash','Emo Pop','Dance-Rock','Dance Pop','Disco Pop','80s Rock','Soft Rock','Power Pop','Sunshine Pop','Progressive Folk','Folk Punk','Hang Music','Ambient Folk','Funktronica','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Smooth Soul','Classic Funk','P-Funk','Funk Blues','Deep Funk Revival','Psychedelic Rap','Broken Beats','Nu Skool Breaks','Chemical Breaks','Big Beat','Trip Hop','Breakdance','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Darkcore','Darkstep','Old School Jungle','New Beat','Hardcore Techno','Breakbeat Hardcore','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Speedcore','Frenchcore','Terrorcore','Mainstream Hardcore','Hardstyle','Ghetto House','Ghettotech','Juke','Hardtechno','Tech Trance','Industrial Techno','Minimal Techno','Ambient Techno','Hardtek','Freetekno','Detroit Techno',,'NRG','Hard NRG','Ibiza Trance','Dream Trance','Eurodance','Nu-Disco','Neo Trance','Epic Trance','Hardtrance','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Classic Trance','Acid Trance','Synthwave','Vaporwave','Glitch','Ambient Breaks','Illbient','Ambient','Ambient Electronic','Bit Music','Synth','Neo-Classical','Punk','Hip-Hop','Hardcore','Dance','Techno','Trance','Breakbeat','Modernist','Classical','Techno-Pop','Emo-Pop']
 	);
 	const parent = music_graph_descriptors_culture;
-	_ALL_.forEach((sg) => {
-		parent.getMainRegions().forEach((key) => {
-			const region = parent.culturalRegion[key];
-			region._ALL_.push(sg);
-		});
-	});
+	// _ALL_.forEach((sg) => {
+		// parent.getMainRegions().forEach((key) => {
+			// const region = parent.culturalRegion[key];
+			// region._ALL_.push(sg);
+		// });
+	// });
 	parent.getMainRegions().forEach((key) => {
 		const region = parent.culturalRegion[key];
 		const subRegions = Object.keys(region);

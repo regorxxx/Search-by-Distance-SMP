@@ -37,6 +37,7 @@ delete newButtonsProperties.bAscii;
 delete newButtonsProperties.bAdvTitle;
 delete newButtonsProperties.sortBias;
 delete newButtonsProperties.artistRegionFilter;
+delete newButtonsProperties.genreStyleRegionFilter;
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 {
 	const properties = getPropertiesPairs(newButtonsProperties, prefix, 0);

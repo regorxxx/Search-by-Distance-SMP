@@ -125,7 +125,7 @@ function buttonTooltipSbdCustom(parent) {
 		)) + ((recipe.hasOwnProperty('bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1]) 
 			? ' - Progressive playlist' 
 			: ''
-		) + ((recipe.hasOwnProperty('artistRegionFilter') ? recipe.artistRegionFilter : properties.artistRegionFilter[1]) !== -1 
+		) + ((recipe.hasOwnProperty('artistRegionFilter') ? recipe.artistRegionFilter : properties.artistRegionFilter[1]) !== -1 || (recipe.hasOwnProperty('genreStyleRegionFilter') ? recipe.genreStyleRegionFilter : properties.genreStyleRegionFilter[1]) !== -1
 			? ' - Cultural filter' 
 			: ''
 		);

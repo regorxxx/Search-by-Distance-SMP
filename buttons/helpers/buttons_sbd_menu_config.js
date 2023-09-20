@@ -453,7 +453,7 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{	// Culture filters
-			const subMenuName = menu.newMenu('Cultural filter...', menuName);
+			const subMenuName = menu.newMenu('Artist cultural filter...', menuName);
 			const options = [
 				{name: 'All', val: -1},
 				{name: 'Same continent', val: 0},
@@ -470,6 +470,24 @@ function createConfigMenu(parent) {
 				}, flags: (recipe.hasOwnProperty('artistRegionFilter') ? MF_GRAYED : MF_STRING)});
 			});
 			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1]));});
+		}
+		{	// Culture filters
+			const subMenuName = menu.newMenu('Genre cultural filter...', menuName);
+			const options = [
+				{name: 'All', val: -1},
+				{name: 'Same continent', val: 0},
+				{name: 'Same region', val: 1},
+			];
+			options.forEach((opt) => {
+				if (opt.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
+				const entryText = opt.name + (recipe.hasOwnProperty('genreStyleRegionFilter') && recipe.genreStyleRegionFilter === opt.val ? '\t(forced by recipe)' : '');
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					if (opt.val !== -1) {fb.ShowPopupMessage('This filter allows only genre/styles from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.');}
+					properties['genreStyleRegionFilter'][1] = opt.val;
+					overwriteProperties(properties); // Updates panel
+				}, flags: (recipe.hasOwnProperty('genreStyleRegionFilter') ? MF_GRAYED : MF_STRING)});
+			});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('genreStyleRegionFilter') ? recipe['genreStyleRegionFilter'] : properties['genreStyleRegionFilter'][1]));});
 		}
 	}
 	{	// Post-scoring filters:
