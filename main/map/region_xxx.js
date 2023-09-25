@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/22
+//25/09/22
 
 function regionMap({nodeName = 'node', intraSubRegionDist = 0.3, interSubRegionDist = 0.6, interRegionDist = 1, culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
@@ -58,6 +58,16 @@ regionMap.prototype.getMainRegions = function getMainRegions() {
 regionMap.prototype.getRegionNames = function getRegionNames() {
 	const {regionsList} =  this.regionList;
 	return [...regionsList];
+};
+
+regionMap.prototype.getNodes = function getNodes() {
+	const nodeList = new Set();
+	this.getMainRegions().forEach((mainRegion) => {
+		this.getSubRegions(mainRegion).forEach((subRegion) => {
+			this.culturalRegion[mainRegion][subRegion].forEach((node) => nodeList.add(node));
+		});
+	});
+	return [...nodeList];
 };
 
 regionMap.prototype.isMainRegion = function isMainRegion(region) {

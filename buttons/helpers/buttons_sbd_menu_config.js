@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//25/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -456,9 +456,14 @@ function createConfigMenu(parent) {
 			const subMenuName = menu.newMenu('Artist cultural filter...', menuName);
 			const options = [
 				{name: 'All', val: -1},
+				{name: 'sep'},
 				{name: 'Same continent', val: 0},
 				{name: 'Same region', val: 1},
-				{name: 'Same country', val: 2}
+				{name: 'Same country', val: 2},
+				{name: 'sep'},
+				{name: 'Different continent', val: 3},
+				{name: 'Different region', val: 4},
+				{name: 'Different country', val: 5}
 			];
 			options.forEach((opt) => {
 				if (opt.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
@@ -469,14 +474,18 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: (recipe.hasOwnProperty('artistRegionFilter') ? MF_GRAYED : MF_STRING)});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1]));});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (recipe.hasOwnProperty('artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1]));});
 		}
 		{	// Culture filters
 			const subMenuName = menu.newMenu('Genre cultural filter...', menuName);
 			const options = [
 				{name: 'All', val: -1},
+				{name: 'sep'},
 				{name: 'Same continent', val: 0},
 				{name: 'Same region', val: 1},
+				{name: 'sep'},
+				{name: 'Different continent', val: 2},
+				{name: 'Different region', val: 3}
 			];
 			options.forEach((opt) => {
 				if (opt.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
@@ -487,7 +496,7 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: (recipe.hasOwnProperty('genreStyleRegionFilter') ? MF_GRAYED : MF_STRING)});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.findIndex((opt) => opt.val === (recipe.hasOwnProperty('genreStyleRegionFilter') ? recipe['genreStyleRegionFilter'] : properties['genreStyleRegionFilter'][1]));});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => {return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (recipe.hasOwnProperty('genreStyleRegionFilter') ? recipe['genreStyleRegionFilter'] : properties['genreStyleRegionFilter'][1]));});
 		}
 	}
 	{	// Post-scoring filters:

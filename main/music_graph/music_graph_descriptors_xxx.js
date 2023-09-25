@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/09/23
+//21/09/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -322,6 +322,7 @@ const music_graph_descriptors = {
 		['Classical Sufi'					,	['Gnawa','Nubian Folk','Sahrawi Folk']],
 		['Electronic Sufi'					,	['Folktronica','Progressive Trance','Psytrance']],
 		['Death Rock'						,	['Gothic Rock']],
+		['NRG'								,	['Hard NRG']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -431,7 +432,8 @@ const music_graph_descriptors = {
 		['Ska Punk'							,	['Skacore'							]],
 		['Atmospheric Black Metal'			,	['Black Metal'						]],
 		['Glam Metal'						,	['Hair Metal'						]],
-		['British Folk-Jazz'				,	['Folk-Jazz'						]]
+		['British Folk-Jazz'				,	['Folk-Jazz'						]],
+		['Hardtek'							,	['Freetekno'						]]
 	],
 	// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 	// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
@@ -503,7 +505,9 @@ const music_graph_descriptors = {
 		['Pagan Folk'						,	['Dark Folk','Folk Noir'			]],
 		['Hard-Bop'							,	['East Coast Jazz'					]],
 		['Cool Jazz'						,	['West Coast Jazz'					]],
-		['Electrorock'						,	['Electro Rock','Electro-Rock'		]]
+		['Electrorock'						,	['Electro Rock','Electro-Rock'		]],
+		['Bit Music'						,	['Chiptune'							]],
+		['Neo Trance'						,	['Nu Trance'						]]
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
@@ -689,7 +693,7 @@ const music_graph_descriptors = {
 									// ('realDistance') uses the link's weight values at top to render real distances. Beware it will look really weird!
 };
 
-{	// Clean non ASCII values
+(function () {	// Clean non ASCII values
 	const asciiRegEx = [[/[\u0300-\u036f]/g, ''], [/\u0142/g, 'l']];
 	const asciify = (node) => {
 		let asciiNode = node.normalize('NFD');
@@ -720,4 +724,4 @@ const music_graph_descriptors = {
 		const asciiNode = asciify(node);
 		if (asciiNode !== node) {pair[0] = asciiNode;}
 	});
-}
+})();

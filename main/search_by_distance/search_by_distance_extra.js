@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//25/09/23
 
 include('search_by_distance.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
@@ -333,8 +333,29 @@ function getZoneArtistFilter(iso, mode = 'region') {
 			countryISO = [iso];
 			break;
 		}
+		case 3: // TODO Compare if negating previous nodes is smaller than the opposite list, which should be faster for queries
+		case 'no-continent': {
+			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
+			const filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
+			countryISO = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			break;
+		}
+		case 4:
+		case 'no-region': {
+			const filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+			countryISO = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			break;
+		}
+		case 5:
+		case 'no-country': {
+			countryISO = music_graph_descriptors_countries.getNodes().filter((node) => node !== iso);
+			break;
+		}
+		default: {
+			countryISO = music_graph_descriptors_countries.getNodes();
+		}
 	}
-	const countryName = new Set(countryISO.map((iso) => {return isoMapRev.get(iso).toLowerCase();}));
+	const countryName = new Set(countryISO.map((iso) => {return isoMapRev.get(iso).toLowerCase();}).filter(Boolean));
 	countryName.forEach((name) => {if (nameReplacersRev.has(name)) {countryName.add(nameReplacersRev.get(name));}}); // Add alternate names
 	// Compare and get list of allowed artists
 	const artists = [];
@@ -352,25 +373,50 @@ function getZoneArtistFilter(iso, mode = 'region') {
 
 // Similar culture zone
 function getZoneGraphFilter(styleGenre, mode = 'region') {
-	if (isArray(styleGenre)) {return [...new Set(styleGenre.map((_) => {return getZoneGraphFilter(_, mode);}).flat(Infinity))];}
+	if (isArray(styleGenre)) {return [...new Set(styleGenre.filter(Boolean).map((_) => {return getZoneGraphFilter(_, mode);}).flat(Infinity))];}
+	mode = isString(mode) ? mode.toLowerCase() : mode;
 	// Retrieve current region
 	const regions = music_graph_descriptors_culture.getStyleRegion(styleGenre); // multiple outputs!
 	// Set allowed genres from current region
 	let styleGenreRegion = new Set();
-	Object.keys(regions).forEach((key) => {
-		switch (isString(mode) ? mode.toLowerCase() : mode) {
-			case 0:
-			case 'continent': {
-				styleGenreRegion.add(...music_graph_descriptors_culture.getNodesFromRegion(key).flat(Infinity));
-				break;
-			}
-			case 1:
-			case 'region': {
-				regions[key].forEach((subKey) => styleGenreRegion.add(music_graph_descriptors_culture.getNodesFromRegion(subKey).flat(Infinity)));
-				break;
-			}
+	if (regions) {
+		switch (mode) {
+				case 0:
+				case 'continent':
+				case 1:
+				case 'region': break;
+				default: 
+					music_graph_descriptors_culture.getNodes().forEach((sg) => sg && styleGenreRegion.add(sg));
 		}
-	});
+		Object.keys(regions).forEach((key) => {
+			switch (mode) {
+				case 0:
+				case 'continent': {
+					music_graph_descriptors_culture.getNodesFromRegion(key).flat(Infinity).forEach((sg) => sg && styleGenreRegion.add(sg));
+					break;
+				}
+				case 1:
+				case 'region': {
+					regions[key].forEach((subKey) => {
+						music_graph_descriptors_culture.getNodesFromRegion(subKey).flat(Infinity).forEach((sg) => sg && styleGenreRegion.add(sg))
+					});
+					break;
+				}
+				case 2: // This implies a track with a forbidden genre is still valid as long as it has an allowed genre too
+				case 'no-continent': {
+					music_graph_descriptors_culture.getNodesFromRegion(key).flat(Infinity).forEach((sg) => styleGenreRegion.delete(sg));
+					break;
+				}
+				case 3:
+				case 'no-region': {
+					regions[key].forEach((subKey) => {
+						music_graph_descriptors_culture.getNodesFromRegion(subKey).flat(Infinity).forEach((sg) => styleGenreRegion.delete(sg))
+					});
+					break;
+				}
+			}
+		});
+	}
 	styleGenreRegion.forEach((sg) => styleGenreRegion.add(music_graph_descriptors.getSubstitution(sg))); // Add alternate names
 	return [...styleGenreRegion].filter(Boolean);
 }

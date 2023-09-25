@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//25/09/23
 
 /*
 	Search by Distance
@@ -108,8 +108,8 @@ const SearchByDistance_properties = {
 	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
 	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
-	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
-	genreStyleRegionFilter	:	['Genre region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,2]], func: isInt}, -1],
+	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,5]], func: isInt}, -1],
+	genreStyleRegionFilter	:	['Genre region filter: none (-1), continent (0), region (1)', -1, {range: [[-1,3]], func: isInt}, -1],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -1098,9 +1098,14 @@ async function searchByDistance({
 			}
 			if (iso.length) {
 				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter);
-				if (queryRegion.length) {
-					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
-					else {query[querylength] += queryRegion;}
+				const len = queryRegion.length;
+				if (len) {
+					if (len > 50000) { // Minor optimization for huge queries
+						queryStages.push(queryRegion);
+					} else {
+						if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
+						else {query[querylength] += queryRegion;}
+					}
 				}
 			}
 		}
@@ -1111,8 +1116,15 @@ async function searchByDistance({
 					const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 					let queryRegion = query_combinations(styleGenreRegion, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
 					queryRegion = query_join(queryRegion, 'OR'); // flattens the array
-					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
-					else {query[querylength] += queryRegion;}
+					const len = queryRegion.length;
+					if (len) {
+						if (len > 50000) { // Minor optimization for huge queries
+							queryStages.push(queryRegion);
+						} else {
+							if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
+							else {query[querylength] += queryRegion;}
+						}
+					}
 				}
 			}
 		}
@@ -1159,6 +1171,7 @@ async function searchByDistance({
 		checkQuery(handleList, query[querylength]);
 		if (queryStages.length) {
 			queryStages.forEach((subQuery) => {
+				if (bShowQuery) {console.log('Sub-Query created: ' + subQuery);}
 				handleList = fb.GetQueryItemsCheck(handleList, subQuery);
 				checkQuery(handleList, subQuery);
 			});

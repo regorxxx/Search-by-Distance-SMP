@@ -39,8 +39,8 @@
 
 ## [Unreleased][]
 ### Added
-- Cultural Regions: new artist cultural filter -for the customizable button- which allows to only output tracks by artists from same country, region, continent or worldwide. 'LOCALE LAST.FM' tag must be set on files, or [World-Map-SMP](https://github.com/regorxxx/World-Map-SMP) installed (its database is used).
-- Cultural Regions: new genre/style cultural filter -for the customizable button- which allows to only output tracks whose genres/styles originate from same region, continent or worldwide. No need for external scripts.
+- Cultural Regions: new artist cultural filter -for the customizable button- which allows to only output tracks by artists from same country, region, continent or worldwide. There is also an opposite version to output from different regions. 'LOCALE LAST.FM' tag must be set on files, or [World-Map-SMP](https://github.com/regorxxx/World-Map-SMP) installed (its database is used).
+- Cultural Regions: new genre/style cultural filter -for the customizable button- which allows to only output tracks whose genres/styles originate from same region, continent or worldwide. There is also an opposite version to output from different regions. No need for external scripts.
 ### Changed
 - Themes: now also save the ISO country code from selected track when created (to be used with the new cultural filter).
 ### Removed
