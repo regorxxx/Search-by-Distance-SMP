@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [4.7.0](#470---2023-09-25)
 - [4.6.0](#460---2023-09-20)
 - [4.5.1](#451---2023-07-29)
 - [4.5.0](#450---2023-07-28)
@@ -38,6 +39,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [4.7.0] - 2023-09-25
 ### Added
 - Cultural Regions: new artist cultural filter -for the customizable button- which allows to only output tracks by artists from same country, region, continent or worldwide. There is also an opposite version to output from different regions. 'LOCALE LAST.FM' tag must be set on files, or [World-Map-SMP](https://github.com/regorxxx/World-Map-SMP) installed (its database is used).
 - Cultural Regions: new genre/style cultural filter -for the customizable button- which allows to only output tracks whose genres/styles originate from same region, continent or worldwide. There is also an opposite version to output from different regions. No need for external scripts.
@@ -621,7 +628,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...HEAD
+[4.7.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.4.2...v4.5.0
