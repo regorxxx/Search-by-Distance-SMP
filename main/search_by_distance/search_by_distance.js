@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/23
+//26/09/23
 
 /*
 	Search by Distance
@@ -89,11 +89,13 @@ const SearchByDistance_properties = {
 	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music','?'])],
 	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
-	bRandomPick				:	['Take randomly from pool? (not sorted by weighting)', true],
-	probPick				:	['Probability of tracks being choosen for final mix (makes playlist a bit random!)', 100, {range: [[1,100]], func: isInt}, 100],
+	bRandomPick				:	['Random picking (not sorted by score)', true],
+	bInversePick			:	['Picking by inverted score', false],
+	probPick				:	['Probability of track picking for final mix', 100, {range: [[1,100]], func: isInt}, 100],
 	playlistLength			:	['Max Playlist Mix length', 50],
 	bSortRandom				:	['Sort final playlist randomly', false],
 	bProgressiveListOrder	:	['Sort final playlist by score', false],
+	bInverseListOrder		:	['Invert final sorting', false],
 	bScatterInstrumentals	:	['Intercalate instrumental tracks', false],
 	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
 	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
@@ -400,7 +402,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /* 
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -572,12 +574,14 @@ async function searchByDistance({
 								// --->Playlist selection
 								// How tracks are chosen from pool
 								bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties.bRandomPick[1] : false, // Get randomly
+								bInversePick			= properties.hasOwnProperty('bInversePick') ? properties.bInversePick[1] : false, // Get randomly
 								probPick				= properties.hasOwnProperty('probPick') ? Number(properties.probPick[1]) : 100, // Get by scoring order but with x probability of being chosen
 								playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties.playlistLength[1]) : 50, // Max playlist size
 								// --->Playlist sorting
 								// How playlist is sorted (independently of playlist selection)
 								bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting 
 								bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
+								bInverseListOrder		= properties.hasOwnProperty('bInverseListOrder') ? properties.bInverseListOrder[1] : false, // Invert any selected sorting
 								bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
 								bSmartShuffle			= properties.hasOwnProperty('bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
 								bSmartShuffleAdvc		= properties.hasOwnProperty('bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false, // Spotify's smart shuffle by artist
@@ -1572,7 +1576,7 @@ async function searchByDistance({
 				if (bScatterInstrumentals) {console.log('Warning: Harmonic mixing is overriding Instrumental track\'s Scattering.');}
 				if (bProgressiveListOrder) {console.log('Warning: Harmonic mixing is overriding sort by score.');}
 				if (bSmartShuffle) {console.log('Warning: Harmonic mixing is overriding Smart Shuffle.');}
-				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = false;
+				bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = bInverseListOrder = false;
 				if (calcTags.key.reference.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
@@ -1691,6 +1695,7 @@ async function searchByDistance({
 					}
 				} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
 			} else { // Standard methods
+				if (bInversePick) {scoreData.reverse();} // Note this changes the most distant track output at the end
 				if (poolLength > playlistLength) {
 					if (bRandomPick){	//Random from pool
 						const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
@@ -1866,6 +1871,11 @@ async function searchByDistance({
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
 					} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.');}
 				} else {console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).');}
+			}
+			// Invert any previous algorithm
+			if (bInverseListOrder) {
+				selectedHandlesArray.reverse();
+				selectedHandlesData.reverse();
 			}
 			// Logging
 			if (bProfile) {test.Print('Task #6: Final Selection', false);}

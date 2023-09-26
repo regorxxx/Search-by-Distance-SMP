@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//26/09/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -22,7 +22,9 @@ delete newButtonsProperties.scoreFilter;
 delete newButtonsProperties.graphDistance;
 delete newButtonsProperties.bSameArtistFilter;
 delete newButtonsProperties.bRandomPick;
+delete newButtonsProperties.bInversePick;
 delete newButtonsProperties.bSortRandom;
+delete newButtonsProperties.bInverseListOrder;
 delete newButtonsProperties.bProgressiveListOrder;
 delete newButtonsProperties.bUseAntiInfluencesFilter;
 delete newButtonsProperties.bConditionAntiInfluences;

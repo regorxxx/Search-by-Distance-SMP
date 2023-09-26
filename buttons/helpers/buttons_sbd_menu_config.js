@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/23
+//26/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -519,10 +519,20 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Pool picking:
-		const menuName = menu.newMenu('Set pool picking');
+		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
+		const menuText = 'Set pool picking' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
+		const menuName = menu.newMenu(menuText, void(0), menuFlags);
 		{
-			createBoolMenu(menuName, ['bRandomPick']);
+			createBoolMenu(menuName, ['bRandomPick','bInversePick'],void(0),
+				(key) => {
+					let toDisable = [];
+					if (key === 'bRandomPick') {toDisable = ['bInversePick'];}
+					else if (key === 'bInversePick') {toDisable = ['bRandomPick'];}
+					toDisable.forEach((noKey) => {if (properties[noKey][1]) {properties[noKey][1] = !properties[noKey][1];}});
+				}
+			);
 		}
+		menu.newEntry({menuName, entryText: 'sep', flags: MF_GRAYED});
 		{
 			const options = ['probPick'];
 			options.forEach((key) => {
@@ -541,8 +551,8 @@ function createConfigMenu(parent) {
 		const menuFlags = (recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '')
 		const menuName = menu.newMenu(menuText, void(0), menuFlags);
-		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
-			[void(0), void(0), void(0), properties.bSmartShuffle[1], void(0), void(0), !properties.bSmartShuffle[1]],
+		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bInverseListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
+			[void(0), void(0), void(0), void(0), void(0), properties.bSmartShuffle[1], void(0), void(0), !properties.bSmartShuffle[1]],
 			(key) => {
 				let toDisable = [];
 				if (key === 'bSortRandom') {toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];}
