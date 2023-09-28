@@ -523,7 +523,7 @@ function createConfigMenu(parent) {
 		const menuText = 'Set pool picking' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void(0), menuFlags);
 		{
-			createBoolMenu(menuName, ['bRandomPick','bInversePick'],void(0),
+			createBoolMenu(menuName, ['bRandomPick', 'sep', 'bInversePick'],void(0),
 				(key) => {
 					let toDisable = [];
 					if (key === 'bRandomPick') {toDisable = ['bInversePick'];}
