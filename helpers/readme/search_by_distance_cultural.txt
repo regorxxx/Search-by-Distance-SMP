@@ -1,0 +1,25 @@
+﻿Cultural similarity between artists and/or genres (or styles) maybe be
+added via query filters or special tags.
+
+Filters: (pre-scoring filters)
+--------
+	- Artist cultural filter: by same/different continent, region or 
+		country than the selected track's artist.
+	
+	- Genre cultural filter: by same/different continent or region than
+		the selected track's genre/styles. Note a genre may be 
+		associated to multiple regions, contrary to artists.
+
+Special Tags: (tags and weighting)
+-------------
+	- Artist Region: uses the selected track's artist as reference, and
+		compares it to every artist's country on library according
+		to an allowed range. Distance is calculated by same 
+		country (0), same region (1), same continent (2) or 
+		different continent(4).
+	
+	- Genre/Style Region: uses the selected track's genre/styles as 
+		reference, and compares it to every other track on library
+		according to an allowed range. Distance is calculated by 
+		same genre (0) or another genre from same region (1), same
+		continent (2) or different continent(4).

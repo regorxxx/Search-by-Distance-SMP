@@ -858,6 +858,7 @@ function createConfigMenu(parent) {
 			sep2: 'sep',
 			'Scoring methods': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt',
 			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png',
+			'Scoring methods: cultural': folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt',
 			sep3: 'sep',
 			'Sorting: smart shuffle': folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt',
 			'Sorting: harmonic mixing': folders.xxx + 'helpers\\readme\\harmonic_mixing.txt',
