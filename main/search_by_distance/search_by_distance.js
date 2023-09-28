@@ -66,14 +66,14 @@ const SearchByDistance_properties = {
 	tags					:	['Tags used for scoring', JSON.stringify({
 		genre:				{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
 		style:				{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		dynGenre:			{weight: 40, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
+		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
 		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
 		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
 		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
 		composer:			{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
-		artistRegion:		{weight: 0,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
-		genreStyleRegion:	{weight: 0, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
+		artistRegion:		{weight: 5,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
+		genreStyleRegion:	{weight: 7, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
@@ -876,7 +876,8 @@ async function searchByDistance({
 			const tag = calcTags[key];
 			tag.reference = [];
 			if (tag.type.includes('virtual')) {continue;}
-			if (tag.weight !== 0 || (tag.tf.length && (tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH')) || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+			const bGenreStyle = tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
+			if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 				 tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
 			}
 			if (tag.type.includes('single')) {
@@ -897,7 +898,7 @@ async function searchByDistance({
 			}
 		}
 		// Sets for later comparison
-		if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0) {
+		if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0 || calcTags.genreStyleRegion.weight !== 0) {
 			calcTags.genreStyle.referenceSet = new Set(calcTags.genre.reference.concat(calcTags.style.reference)).difference(graphExclusions); // Remove exclusions
 			calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 		}
@@ -999,7 +1000,7 @@ async function searchByDistance({
 				originalWeightValue += calcTags.dynGenre.weight;
 			}
 		} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) {console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags');}
-		// Dyngenre virtual tag is calculated with previous values
+		// Artist Cultural tag requires world map data
 		let worldMapData;
 		if (calcTags.artistRegion.weight !== 0 || artistRegionFilter !== -1) {
 			let iso;
@@ -1020,6 +1021,14 @@ async function searchByDistance({
 			} else {
 				calcTags.artistRegion.reference = '';
 				if (bBasicLogging && calcTags.artistRegion.weight !== 0) {console.log('\'artistRegion\' weight was not zero but selected track had no locale tags');}
+			}
+		}
+		// Genre Cultural tag is calculated with previous values
+		if (calcTags.genreStyle.referenceSize !== 0 && calcTags.genreStyleRegion.weight !== 0) {
+			calcTags.genreStyleRegion.reference.push(...calcTags.genreStyle.referenceSet);
+			calcTags.genreStyleRegion.referenceNumber = calcTags.genreStyleRegion.reference.length;
+			if (calcTags.genreStyleRegion.referenceNumber !== 0) {
+				originalWeightValue += calcTags.genreStyleRegion.weight;
 			}
 		}
 		// Total score
@@ -1265,9 +1274,9 @@ async function searchByDistance({
 			tag.bMultiple = tag.type.includes('multiple');
 			tag.bString = tag.type.includes('string');
 			tag.bGraph = tag.type.includes('graph');
-			tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH');
+			tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
 			if (tag.type.includes('virtual')) {continue;}
-			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
+			if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
 				tag.handle = tagsValByKey[z++];
 			} else {
 				tag.handle = null;
@@ -1484,18 +1493,68 @@ async function searchByDistance({
 				else {newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso;}
 				if (newTag.val.length) {
 					const weight = tag.weight;
+					const range = tag.range;
 					if (newTag.val === tag.reference) {
 						weightValue += weight;
-					} else {
-						const difference = tag.range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
+					} else if (range !== 0) {
+						const difference = range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
 						if ((difference < 0 && bNegativeWeighting) || difference > 0) {
 							const scoringDistr = tag.scoringDistribution;
-							const range = tag.range;
 							weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 								? weight * weightDistribution(scoringDistr, difference / range)
 								: weight * weightDistribution(scoringDistr, difference / range, range, Math.abs(difference));
 						}
 					}
+				} else if (calcTags.artistRegion.baseScore !== 0) {
+					weightValue += Math.min(calcTags.artistRegion.weight, calcTags.artistRegion.weight * calcTags.artistRegion.baseScore / 100); 
+				}
+			}
+			
+			if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber) {
+				const tag = calcTags.genreStyleRegion;
+				const newTag = handleTag.genreStyleRegion = {val: [], number: 0};
+				if (handleTag.genreStyle.set.size !== 0) {
+					handleTag.genreStyleRegion.val.push(...handleTag.genreStyle.set);
+				}
+				handleTag.genreStyleRegion.number = handleTag.genreStyleRegion.val.length;
+				console.log(handleTag.genreStyleRegion.val.length, handleTag.genreStyle.set.size);
+				if (handleTag.genreStyleRegion.number !== 0) {
+					const weight = tag.weight;
+					const range = tag.range;
+					let j = 0;
+					let score = 0;
+					while (j < calcTags.genreStyleRegion.referenceNumber) {
+						let h = 0;
+						let distances = [];
+						while (h < handleTag.genreStyleRegion.number) {
+							const newVal = handleTag.genreStyleRegion.val[h];
+							const refVal = calcTags.genreStyleRegion.reference[j];
+							if (newVal === refVal) {
+								distances.push(0);
+								break;
+							} else if (range !== 0) {
+								distances.push(music_graph_descriptors_culture.getDistance(refVal, newVal));
+							}
+							h++;
+						}
+						if (distances.length) {
+							const min = Math.min.apply(null, distances);
+							if (min === 0) {score += 1 / calcTags.genreStyleRegion.referenceNumber;}
+							else {
+								const difference = range - min;
+								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+									score += difference / range / calcTags.genreStyleRegion.referenceNumber;
+								}
+							}
+						}
+						j++;
+					}
+					const scoringDistr = calcTags.genreStyleRegion.scoringDistribution;
+					weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+						? calcTags.genreStyleRegion.weight * weightDistribution(scoringDistr, score)
+						: calcTags.genreStyleRegion.weight * weightDistribution(scoringDistr, score, calcTags.genreStyleRegion.referenceNumber, handleTag.genreStyleRegion.number);
+				} else if (calcTags.genreStyleRegion.baseScore !== 0) {
+					weightValue += Math.min(calcTags.genreStyleRegion.weight, calcTags.genreStyleRegion.weight * calcTags.genreStyleRegion.baseScore / 100); 
 				}
 			}
 			
