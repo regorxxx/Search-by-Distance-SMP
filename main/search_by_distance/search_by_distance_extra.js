@@ -246,7 +246,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 
 // Similar culture zone
 function getLocaleFromId(id, worldMapData = null) {
-	const output = {locale: [''], country; '', iso: '', worldMapData: null};
+	const output = {locale: [''], country: '', iso: '', worldMapData: null};
 	const dataId = 'artist';
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
 	if (!worldMapData && _isFile(path)) {
@@ -260,7 +260,7 @@ function getLocaleFromId(id, worldMapData = null) {
 		output.locale = (worldMapData.find((obj) => {return (obj[dataId] === id);}) || {}).val || [''];
 		output.country = locale.slice(-1)[0] || '';
 		output.iso = getCountryISO(country) || '';
-		output.worldMapData ) worldMapDataM
+		output.worldMapData = worldMapDataM
 		return output
 	}
 }
