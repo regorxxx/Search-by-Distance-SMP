@@ -23,3 +23,21 @@ Special Tags: (tags and weighting)
 		according to an allowed range. Distance is calculated by 
 		same genre (0) or another genre from same region (1), same
 		continent (2) or different continent(4).
+		
+	Note a range of 4 would make values found at a different continent
+	to give a score of zero for the given tag, so by default the ranges
+	are set to 5. In such case the score (in linear mode) gives a 20%.
+		- Same value:		(5 - 0) / 5 = 100%
+		- Same region:		(5 - 1) / 5 =  80%
+		- Same continent:	(5 - 2) / 5 =  60%
+		- Diff. continent:	(5 - 4) / 5 =  20%
+	
+	A lower range would completely discard farthest values in the map.
+	Negative scoring may also be enabled. For ex. range equal to 3:
+		- Same value:		(3 - 0) / 3 = 100%
+		- Same region:		(3 - 1) / 3 =  66%
+		- Same continent:	(3 - 2) / 3 =  33%
+		- Diff. continent:	(3 - 4) / 3 = -33% (or 0%)
+	
+	Note there is always a bias towards values within the same
+	continent.
