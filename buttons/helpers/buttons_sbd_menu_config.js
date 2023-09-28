@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/09/23
+//28/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -137,13 +137,16 @@ function createConfigMenu(parent) {
 		const options = [...new Set([...Object.keys(tags), ...recipeTags])];
 		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
 		options.forEach((key) => {
-			const subMenuName = menu.newMenu(capitalize(key), menuName);
+			const keyFormat = new Set(['dynGenre']).has(key)
+				? capitalize(key)
+				: capitalizeAll(key.replace(/(Genre|Style)/g,'/$1').replace(/(Region)/g,' $1'), [' ', '/', '\\']);
+			const subMenuName = menu.newMenu(keyFormat, menuName);
 			const baseTag = tags[key];
 			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
 				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('tf') || !baseTag);
 				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
-				if (!tag.type.includes('virtual')) {
+				if (!tag.type.includes('virtual') || tag.type.includes('tfRemap')) {
 					const value = tag.tf.join(',');
 					const entryText = 'Remap...' + '\t[' + (
 						typeof value === 'string' && value.length > 10 
