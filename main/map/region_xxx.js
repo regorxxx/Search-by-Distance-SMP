@@ -1,7 +1,7 @@
 ﻿'use strict';
-//25/09/22
+//28/09/22
 
-function regionMap({nodeName = 'node', intraSubRegionDist = 0.3, interSubRegionDist = 0.6, interRegionDist = 1, culturalRegion} = {}) {
+function regionMap({nodeName = 'node', intraSubRegionDist = 1, interSubRegionDist = 2, interRegionDist = 4, culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
 		'Antarctica': {'Antarctica': []},
 		'Africa': {'West Africa': [],'Maghreb': [],'Central Africa': [],'East Africa': [],'South Africa': []},
@@ -12,6 +12,7 @@ function regionMap({nodeName = 'node', intraSubRegionDist = 0.3, interSubRegionD
 		'Oceania': {'Australasia': [],'Melanesia': [],'Micronesia': [],'Polynesia': []}
 	};
 	[this.intraSubRegionDist, this.interSubRegionDist, this.interRegionDist] = [intraSubRegionDist, interSubRegionDist, interRegionDist];
+	this.cache = {getDistance: new Map()};
 	this.nodeName = nodeName;
 	this.regionList = {};
 	this.updateRegionList = function updateRegionList() {
@@ -144,11 +145,18 @@ regionMap.prototype.getNodesFromRegion = function getNodesFromRegion(region) {
 
 // Distance functions
 regionMap.prototype.getDistance = function getDistance(nodeA, nodeB) {
-	return this.capitalize(nodeA) === this.capitalize(nodeB)
-		? 0
-		: this.isSameRegionNodes(nodeA, nodeB)
-			? this.intraSubRegionDist
-			: this.isSameRegionNodes(nodeA, nodeB, true)
-				? this.interSubRegionDist
-				: this.interRegionDist;
+	let distance;
+	const id = [nodeA, nodeB].sort().join('-');
+	if (this.cache.getDistance.has(id)) {distance = this.cache.getDistance.get(id);}
+	else {
+		distance = this.capitalize(nodeA) === this.capitalize(nodeB)
+			? 0
+			: this.isSameRegionNodes(nodeA, nodeB)
+				? this.intraSubRegionDist
+				: this.isSameRegionNodes(nodeA, nodeB, true)
+					? this.interSubRegionDist
+					: this.interRegionDist;
+		this.cache.getDistance.set(id, distance);
+	}
+	return distance;
 };
