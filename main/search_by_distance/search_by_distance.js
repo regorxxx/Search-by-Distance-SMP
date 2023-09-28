@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/09/23
+//28/09/23
 
 /*
 	Search by Distance
@@ -778,6 +778,15 @@ async function searchByDistance({
 				return;
 			}
 		}
+		// Check default virtual tags are present or add them
+		const defaultTags = JSON.parse(SearchByDistance_properties.tags[3]);
+		Object.keys(defaultTags).forEach((key) => {
+			const tag = defaultTags[key];
+			if (tag.type.includes('virtual') && !calcTags.hasOwnProperty(key)) {
+				calcTags[key] =	tag;
+				calcTags[key].weight = 0;
+			}
+		});
 		if (bSearchDebug) {console.log(JSON.stringify(calcTags, void(0), '\t'));}
 		const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
 		const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
@@ -975,7 +984,7 @@ async function searchByDistance({
 					}
 					if (bSearchDebug) {queryDebug[queryDebug.length -1].query = query[queryl];}
 				}
-			} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags');}
+			} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf));}
 		}
 		// Dyngenre virtual tag is calculated with previous values
 		if (calcTags.genreStyle.referenceSize !== 0 && calcTags.dynGenre.weight !== 0) {
@@ -1088,7 +1097,7 @@ async function searchByDistance({
 			}
 		}
 		if (artistRegionFilter !== -1) {
-			let iso;
+			let iso, worldMapData;
 			if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
 			else {
 				const tagName = 'LOCALE LAST.FM';
@@ -1096,12 +1105,13 @@ async function searchByDistance({
 				if (localeTag.length) {iso = getCountryISO(localeTag);}
 				else {
 					const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
-					const {iso: artistIso, worldMapData} = getLocaleFromId(artist);
+					const {iso: artistIso, worldMapData: data} = getLocaleFromId(artist);
 					if (artistIso.length) {iso = artistIso;}
+					if (data) {worldMapData = data;}
 				}
 			}
 			if (iso.length) {
-				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter);
+				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter, worldMapData);
 				const len = queryRegion.length;
 				if (len) {
 					if (len > 50000) { // Minor optimization for huge queries
@@ -1111,6 +1121,8 @@ async function searchByDistance({
 						else {query[querylength] += queryRegion;}
 					}
 				}
+			} else if (bBasicLogging) {
+				console.log('Artist cultural filter was used but selected track had no region tags');
 			}
 		}
 		if (genreStyleRegionFilter !== -1) {

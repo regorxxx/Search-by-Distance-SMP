@@ -246,19 +246,22 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 
 // Similar culture zone
 function getLocaleFromId(id, worldMapData = null) {
+	const output = {locale: [''], country; '', iso: '', worldMapData: null};
 	const dataId = 'artist';
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
 	if (!worldMapData && _isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) {worldMapData = data;}
 	}
+	if (!worldMapData) {console.log('getZoneArtistFilter: no world map data available'); return output;}
 	// Retrieve current country
 	if (isArray(id)) {return id.map((_) => {return getLocaleFromId(_, worldMapData);});}
 	else {
-		const locale = (worldMapData.find((obj) => {return (obj[dataId] === id);}) || {}).val || [''];
-		const country = locale.slice(-1)[0] || '';
-		const iso = getCountryISO(country) || '';
-		return {locale, country, iso, worldMapData};
+		output.locale = (worldMapData.find((obj) => {return (obj[dataId] === id);}) || {}).val || [''];
+		output.country = locale.slice(-1)[0] || '';
+		output.iso = getCountryISO(country) || '';
+		output.worldMapData ) worldMapDataM
+		return output
 	}
 }
 
@@ -302,16 +305,16 @@ function getArtistsSameZone({selHandle = fb.GetFocusItem(), properties = null} =
 	return artists ;
 }
 
-function getZoneArtistFilter(iso, mode = 'region') {
+function getZoneArtistFilter(iso, mode = 'region', worldMapData = null) {
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
-	let worldMapData = [];
-	if (_isFile(path)) {
+	if (!worldMapData && _isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) {worldMapData = data;}
 	}
+	if (!worldMapData) {console.log('getZoneArtistFilter: no world map data available'); return;}
 	// Retrieve current region
 	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(iso);
 	// Set allowed countries from current region

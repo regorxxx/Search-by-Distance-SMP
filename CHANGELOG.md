@@ -44,6 +44,8 @@
 - Configuration: new setting to invert the sorting order for any method (independent to the picking method).
 ### Changed
 - Configuration: pool picking submenu on customizable button is now disabled when using harmonic mixing.
+- Tags: improved handling when some of the default tags are missing.
+- Tags: improved logging when reference track does not have a tag.
 ### Removed
 ### Fixed
 
