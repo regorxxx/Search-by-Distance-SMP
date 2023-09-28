@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/23
+//28/09/23
 
 include('search_by_distance.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
@@ -258,9 +258,9 @@ function getLocaleFromId(id, worldMapData = null) {
 	if (isArray(id)) {return id.map((_) => {return getLocaleFromId(_, worldMapData);});}
 	else {
 		output.locale = (worldMapData.find((obj) => {return (obj[dataId] === id);}) || {}).val || [''];
-		output.country = locale.slice(-1)[0] || '';
-		output.iso = getCountryISO(country) || '';
-		output.worldMapData = worldMapDataM
+		output.country = output.locale.length ? (output.locale.slice(-1)[0] || '') : '';
+		output.iso = output.country.length ? (getCountryISO(output.country) || '') : '';
+		output.worldMapData = worldMapData;
 		return output
 	}
 }
