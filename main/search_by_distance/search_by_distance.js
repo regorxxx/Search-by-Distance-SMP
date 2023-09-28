@@ -1517,7 +1517,6 @@ async function searchByDistance({
 					handleTag.genreStyleRegion.val.push(...handleTag.genreStyle.set);
 				}
 				handleTag.genreStyleRegion.number = handleTag.genreStyleRegion.val.length;
-				console.log(handleTag.genreStyleRegion.val.length, handleTag.genreStyle.set.size);
 				if (handleTag.genreStyleRegion.number !== 0) {
 					const weight = tag.weight;
 					const range = tag.range;
