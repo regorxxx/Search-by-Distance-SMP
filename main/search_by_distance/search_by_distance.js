@@ -64,18 +64,20 @@ checkCompatible('1.6.1', 'smp');
 */
 const SearchByDistance_properties = {
 	tags					:	['Tags used for scoring', JSON.stringify({
-		genre:		{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		style:		{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		dynGenre:	{weight: 40, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
-		mood:		{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
-		key:		{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
-		bpm:		{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
-		date:		{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
-		composer:	{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']}
+		genre:				{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		style:				{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
+		dynGenre:			{weight: 40, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
+		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'keyMix', 'keyRange'], range: 1},
+		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
+		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
+		composer:			{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
+		artistRegion:		{weight: 0,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
+		genreStyleRegion:	{weight: 0, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
-	graphDistance	:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
+	graphDistance			:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
 		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
 	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
@@ -997,6 +999,29 @@ async function searchByDistance({
 				originalWeightValue += calcTags.dynGenre.weight;
 			}
 		} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) {console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags');}
+		// Dyngenre virtual tag is calculated with previous values
+		let worldMapData;
+		if (calcTags.artistRegion.weight !== 0 || artistRegionFilter !== -1) {
+			let iso;
+			if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
+			else {
+				const localeTag = fb.TitleFormat(_bt(calcTags.artistRegion.tf)).EvalWithMetadb(sel).split(', ').filter(Boolean).pop() || '';
+				if (localeTag.length) {iso = getCountryISO(localeTag);}
+				else {
+					const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
+					const {iso: artistIso, worldMapData: data} = getLocaleFromId(artist);
+					if (artistIso.length) {iso = artistIso;}
+					if (data) {worldMapData = data;}
+				}
+			}
+			if (iso) {
+				calcTags.artistRegion.reference = _asciify(iso);
+				originalWeightValue += calcTags.artistRegion.weight;
+			} else {
+				calcTags.artistRegion.reference = '';
+				if (bBasicLogging && calcTags.artistRegion.weight !== 0) {console.log('\'artistRegion\' weight was not zero but selected track had no locale tags');}
+			}
+		}
 		// Total score
 		const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
 		if (bProfile) {test.Print('Task #1: Reference track / theme', false);}
@@ -1097,19 +1122,7 @@ async function searchByDistance({
 			}
 		}
 		if (artistRegionFilter !== -1) {
-			let iso, worldMapData;
-			if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
-			else {
-				const tagName = 'LOCALE LAST.FM';
-				const localeTag = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(sel).split(', ').filter(Boolean).pop() || '';
-				if (localeTag.length) {iso = getCountryISO(localeTag);}
-				else {
-					const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
-					const {iso: artistIso, worldMapData: data} = getLocaleFromId(artist);
-					if (artistIso.length) {iso = artistIso;}
-					if (data) {worldMapData = data;}
-				}
-			}
+			let iso = calcTags.artistRegion.reference;
 			if (iso.length) {
 				const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter, worldMapData);
 				const len = queryRegion.length;
@@ -1122,7 +1135,7 @@ async function searchByDistance({
 					}
 				}
 			} else if (bBasicLogging) {
-				console.log('Artist cultural filter was used but selected track had no region tags');
+				console.log('Artist cultural filter was used but selected track had no locale tags');
 			}
 		}
 		if (genreStyleRegionFilter !== -1) {
@@ -1232,6 +1245,10 @@ async function searchByDistance({
 			}
 		}
 		tagsArr.push(['TITLE']);
+		if (calcTags.artistRegion.weight !== 0) {
+			tagsArr.push([globTags.artist]);
+			if (calcTags.artistRegion.tf.length) {tagsArr.push(calcTags.artistRegion.tf);};
+		}
 		tagsArr = tagsArr.map((arr) => {return arr.map((tag) => {return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag);}).join(', ');});
 		const tagsValByKey = [];
 		let tagsVal = [];
@@ -1257,6 +1274,11 @@ async function searchByDistance({
 			}
 		}
 		const titleHandle = tagsValByKey[z++];
+		let artistHandle;
+		if (calcTags.artistRegion.weight !== 0) {
+			artistHandle = tagsValByKey[z++];
+			calcTags.artistRegion.handle = calcTags.artistRegion.tf.length ? tagsValByKey[z++] : null;
+		}
 		if (bProfile) {test.Print('Task #4: Library tags', false);}
 		const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 		let i = 0;
@@ -1451,6 +1473,29 @@ async function searchByDistance({
 						: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
 				} else if (calcTags.dynGenre.baseScore !== 0) {
 					weightValue += Math.min(calcTags.dynGenre.weight, calcTags.dynGenre.weight * calcTags.dynGenre.baseScore / 100); 
+				}
+			}
+			
+			if (calcTags.artistRegion.weight !== 0 && calcTags.artistRegion.reference.length) {
+				const tag = calcTags.artistRegion;
+				const newTag = handleTag.artistRegion = {val: ''};
+				const localeTag = tag.handle ? _asciify(tag.handle[i].pop() || '') : '';
+				if (localeTag.length) {newTag.val = getCountryISO(localeTag) || '';}
+				else {newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso;}
+				if (newTag.val.length) {
+					const weight = tag.weight;
+					if (newTag.val === tag.reference) {
+						weightValue += weight;
+					} else {
+						const difference = tag.range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
+						if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+							const scoringDistr = tag.scoringDistribution;
+							const range = tag.range;
+							weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+								? weight * weightDistribution(scoringDistr, difference / range)
+								: weight * weightDistribution(scoringDistr, difference / range, range, Math.abs(difference));
+						}
+					}
 				}
 			}
 			
