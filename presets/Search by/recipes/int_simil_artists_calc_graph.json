@@ -23,6 +23,12 @@
 			"scoringDistribution": "LINEAR",
 			"range": 20
 		},
+		"genreStyleRegion": {
+			"weight": 7,
+			"baseScore": 0,
+			"scoringDistribution": "LOGISTIC",
+			"range": 5
+		},
 		"*": {
 			"weight": 0
 		}

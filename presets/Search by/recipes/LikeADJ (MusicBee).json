@@ -25,6 +25,18 @@
 			],
 			"range": 2
 		},
+		"artistRegion": {
+			"weight": 5,
+			"baseScore": 40,
+			"scoringDistribution": "LOGISTIC",
+			"range": 5
+		},
+		"genreStyleRegion": {
+			"weight": 7,
+			"baseScore": 40,
+			"scoringDistribution": "LOGISTIC",
+			"range": 5
+		},
 		"*": {
 			"weight": 0
 		}

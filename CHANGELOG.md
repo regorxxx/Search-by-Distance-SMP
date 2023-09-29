@@ -46,10 +46,13 @@
 - Configuration: new setting to invert the sorting order for any method (independent to the picking method).
 ### Changed
 - Configuration: pool picking submenu on customizable button is now disabled when using harmonic mixing.
+- UI: menus to remap tags on customizable button now show the weight on the submenu name to easily have a general vision of all tag weights.
+- UI: global genre/style filter property has been renamed to 'Filter for genre/style' (old setting will be lost).
 - Tags: changed default weight values for tags. 'dynGenre' weight is now 15, 'artistRegion' weight is 5, 'genreStyleRegion' is 7, 'key' scoring distribution is LOGARITHMIC. To apply these changes, restore defaults at 'Set Tags and weighting...'.
 - Tags: improved handling when some of the default tags are missing.
 - Tags: improved logging when reference track does not have a tag.
 ### Removed
+- UI: tags cache menu entry on customizable button has been removed (the setting is still accessible via the properties panel).
 ### Fixed
 
 ## [4.7.0] - 2023-09-25

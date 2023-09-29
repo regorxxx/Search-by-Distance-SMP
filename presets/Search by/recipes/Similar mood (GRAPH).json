@@ -21,6 +21,18 @@
 		"date": {
 			"weight": 0,
 			"range": 100
+		},
+		"composer": {
+			"weight": 0
+		},
+		"artistRegion": {
+			"weight": 0
+		},
+		"genreStyleRegion": {
+			"weight": 5,
+			"baseScore": 0,
+			"scoringDistribution": "LOGISTIC",
+			"range": 5
 		}
 	},
 	"scoreFilter": 50,
