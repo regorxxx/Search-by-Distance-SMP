@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/09/23
+//29/09/23
 
 /*
 	Search by Distance
@@ -88,7 +88,7 @@ const SearchByDistance_properties = {
 	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
 	bUseInfluencesFilter	:	['Allow only influences by query', false],
 	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilterTag		:	['Filter these values globally for genre/style', JSON.stringify(['Children\'s Music','?'])],
+	genreStyleFilterTag		:	['Filter for genre/style', JSON.stringify(['Children\'s Music','?'])],
 	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
 	bRandomPick				:	['Random picking (not sorted by score)', true],
