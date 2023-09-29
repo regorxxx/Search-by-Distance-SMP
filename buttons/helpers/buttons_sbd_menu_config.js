@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/09/23
+//29/09/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -136,11 +136,30 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu('Set Tags and weighting');
 		const options = [...new Set([...Object.keys(tags), ...recipeTags])];
 		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
-		options.forEach((key) => {
+		const weights = options.map((key) => {
+			const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
+			const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
+			const baseTag = tags[key];
+			const obj = {
+				bIsDyngenreRecipe: (key === 'dynGenre' && bIsDyngenreMethodRecipe),
+				bIsDyngenreProp: (key === 'dynGenre' && bIsDyngenreMethodProp),
+				bRecipe: bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('weight') || !baseTag)
+			};
+			obj.tag = obj.bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
+			obj.entrySuffix = obj.bRecipe || obj.bIsDyngenreRecipe 
+				? '\t[' + (obj.bIsDyngenreRecipe ?  'disabled' : obj.tag.weight) + '] (forced by recipe)' 
+				: '\t[' + (obj.bIsDyngenreProp ?  'disabled' : obj.tag.weight) + ']';
+			const weight = obj.tag.weight.toString().padStart(2, 0);
+			obj.menuSuffix = obj.bRecipe || obj.bIsDyngenreRecipe 
+				? '\t[' + (obj.bIsDyngenreRecipe ?  '-disabled-' : 'weight: ' + weight) + '] (forced by recipe)' 
+				: '\t[' + (obj.bIsDyngenreProp ?  '-disabled-' : 'weight: ' + weight) + ']';
+			return obj;
+		});
+		options.forEach((key, i) => {
 			const keyFormat = new Set(['dynGenre']).has(key)
 				? capitalize(key)
 				: capitalizeAll(key.replace(/(Genre|Style)/g,'/$1').replace(/(Region)/g,' $1'), [' ', '/', '\\']);
-			const subMenuName = menu.newMenu(keyFormat, menuName);
+			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName);
 			const baseTag = tags[key];
 			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
@@ -187,13 +206,11 @@ function createConfigMenu(parent) {
 			}
 			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 			{	// Weights
-				const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
-				const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
-				const bIsDyngenreRecipe = (key === 'dynGenre' && bIsDyngenreMethodRecipe);
-				const bIsDyngenreProp = (key === 'dynGenre' && bIsDyngenreMethodProp);
-				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('weight') || !baseTag);
-				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
-				const entryText = 'Weight' + (bRecipe || bIsDyngenreRecipe ? '\t[' + (bIsDyngenreRecipe ?  '-1' : tag.weight) + '] (forced by recipe)' : '\t[' + (bIsDyngenreProp ?  '-1' : tag.weight) + ']');
+				const bIsDyngenreRecipe = weights[i].bIsDyngenreRecipe;
+				const bIsDyngenreProp = weights[i].bIsDyngenreProp;
+				const bRecipe = weights[i].bRecipe;
+				const tag = weights[i].tag;
+				const entryText = 'Weight' + weights[i].entrySuffix;
 				menu.newEntry({menuName: subMenuName, entryText, func: () => {
 					const input = Input.number('int positive', tag.weight, 'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 15);
 					if (input === null) {return;}
@@ -288,6 +305,7 @@ function createConfigMenu(parent) {
 		{	// Cache
 			const options = ['bAscii', 'bTagsCache'];
 			options.forEach((key, i) => {
+				if (key === 'bTagsCache') {return;}
 				const propObj = key === 'bTagsCache' ? sbd.panelProperties : properties;
 				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isFoobarV2 ? '\t-only Fb >= 2.0-' : '');
 				menu.newEntry({menuName, entryText, func: () => {
