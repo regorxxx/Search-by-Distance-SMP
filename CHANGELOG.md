@@ -44,8 +44,11 @@
 - Cultural Regions: new virtual tag named 'genreStyleRegion' which uses internal genre mapping to cultural regions for comparison with a weight according to distance between cultural groups. i.e. instead of using the artist's origin, it uses the track genre's origin; therefore a blues track is considered similar -at least for this weight- no matter if it's played by a Japanese or American artist. This is the "tag scoring" version of the cultural filters [4.7.0](#470---2023-09-25). Check 'Tags & Weights: cultural' in the customizable button for more info.
 - Configuration: new setting to invert the picking order for any method (i.e. taking tracks by lowest score first).
 - Configuration: new setting to invert the sorting order for any method (independent to the picking method).
+- Descriptors: updated descriptors with multiple additions: Kuduro, Semba, Kizomba, African Ritual-Tribal, Afro-Latin Ritual-Tribal, Asian Ritual-Tribal, Aboriginal Folk, Pre-Columbian Ritual-Tribal, Mbalax.
 ### Changed
 - Configuration: pool picking submenu on customizable button is now disabled when using harmonic mixing.
+- Configuration: expanded user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' with new queries. File will be automatically updated with new values (maintaining the user settings).
+- Configuration: improved the user configurable files update check for missing keys.
 - UI: menus to remap tags on customizable button now show the weight on the submenu name to easily have a general vision of all tag weights.
 - UI: global genre/style filter property has been renamed to 'Filter for genre/style' (old setting will be lost).
 - Tags: changed default weight values for tags. 'dynGenre' weight is now 15, 'artistRegion' weight is 5, 'genreStyleRegion' is 7, 'key' scoring distribution is LOGARITHMIC. To apply these changes, restore defaults at 'Set Tags and weighting...'.
@@ -67,8 +70,8 @@
 
 ## [4.6.0] - 2023-09-20
 ### Added
-### Changed
 - Descriptors: updated descriptors with addition of 'Electrorock', 'Sephardic', 'Classical Sufi' and 'Electronic Sufi'. New 'Progressive Psychedelic Fusion XL' cluster.
+### Changed
 - Helpers: updated helpers
 ### Removed
 ### Fixed
@@ -86,9 +89,9 @@
 ## [4.5.0] - 2023-07-28
 ### Added
 - Selection manipulation\Shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
+- Descriptors: updated descriptors with multiple additions and improvements for Folk and Progressive Rock music.
 ### Changed
 - Configuration: ALBUM ARTIST is now used instead of ARTIST by default (on new installations). This ensures better compatibility with classical music, where the artist is the actual performer but the album artist is the original composer/artist. To apply the change on existing installations, delete '[foobar_profile]\js_data\presets\global\globQuery.json' and '[foobar_profile]\foobar2000\js_data\presets\global\globTags.json' files. Further configuration may be needed via menus.
-- Descriptors: updated descriptors with multiple additions and improvements for Folk and Progressive Rock music.
 - Descriptors: improved debug checks for the genre/style graph.
 - Helpers: updated helpers.
 ### Removed
@@ -118,12 +121,12 @@
 - Smart shuffle: additional option to scatter instrumental, live and other tracks while respecting the smart pattern by Artist. For ex. if it can swap tracks without altering the Artist proportion for a given range of tracks, thus moving an instrumental track to another position to soft-limit the appearance of consecutive instrumental tracks. Same rationale applies for live tracks or other special conditions. This somewhat ensures any cluster of tracks is as diverse as possible.
 - Smart shuffle: additional options to prioritize tracks by Rating, Play Count (original Spotify's behavior), Last played date, randomly...
 - Tags: new menu entry on customizable button to edit raw JSON entry for every tag (in case advanced flags want to be edited, like combinations).
+- Descriptors: updated descriptors with multiple additions.
 ### Changed
 - UI: additional info shown according to current settings on customizable button.
 - Helpers: updated helpers.
 - Console: multiple improvements when logging to file for FbMetadbHandle, FbMetadbHandleList, Error and unknown instances (totally irrelevant except for debug purposes).
 - Console: menu entries are no longer logged to console after clicking.
-- Descriptors: updated descriptors with multiple additions.
 ### Removed
 ### Fixed
 - Tags: incorrect query parsing of multi-value tags, with combinations, if number of available values was lower than required.
@@ -225,13 +228,13 @@
 - Scoring Method: new options to set scoring method ('LOGARITHMIC', 'LOGISTIC', 'LINEAR', 'NORMAL'). Default behavior is 'LINEAR' (working the same as before). 'LOGARITHMIC' and 'LOGISTIC' scoring methods take into account that some tracks having a lot of values for some tags don't return so many matches because it's almost impossible to match all of them. Therefore it applies a logarithmic curve, giving an extra weight to lower matches, specially for high tag values counts (n). For ex. when 50% of the tags are matched, that equals to 50% weight applied on 'LINEAR' method but ~70% weight for 'LOGARITHMIC' method and 64%(n<=1) to 85%(n=3) for 'LOGISTIC' method. 'LOGISTIC' method is much more sensitive to the tag value count (n). Configurable per tag. Added related readme to this feature along a chart comparison.
 - Base Score: new option to added base score for tags, in case tag is missing for the analyzed tracks. For ex. if BPM is set with a non-zero weight, and the reference track has such tag, usually the script would scan the entire library and check for tracks within a range compatible; in case a track has non BPM tag it would score zero for that tag, which may be undesirable in some situations (when not all tracks on a library contain the same tags or have not been tagged yet). In such case, that track would always get a lower scoring than any other, since the others have a BPM tag to compare against. Base score option allows to give a default score to such tracks, associated to the tag, to minimize the impact of track missing a tag (in relation to other tracks). Value is zero by default (previous behavior), but may be changed selectively for every tag. Value is also sensible to the scoring method set (see above).
 - UI: added icons-only mode for toolbar buttons at the toolbar configuration menu ('Other UI configuration'). Tooltip is adjusted to show the button's name there instead. Handy when creating a compact toolbar and icons are good enough to recognize the tools.
+- Descriptors: updated descriptors with multiple additions.
 ### Changed
 - GRAPH: changed distance logic to be invariant to inversion (A->BC = BC -> A) and equivalent tag values (A->B1B2B3 = A-> B1B2) addition; both were lowering the total distance 'for free' in some cases. This will provide better results for tracks with lower tag counts, not so heavily weighted by the number of genre/style values. Distance values have changed for many use-cases so presets have been reworked to account for that.
 - GRAPH: minor performance improvement using non-oriented links.
 - GRAPH: variable performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
 - DYNGENRE: variable performance improvement using dynamically created pre-filter queries (the same used on WEIGHT method).
 - Descriptors: changed style cluster distance. Presets have been reworked to account for that.
-- Descriptors: updated descriptors with multiple additions.
 - Descriptors: updated and improved descriptors documentation (present on .js files).
 - Tags: reverted default string tags to raw tags instead of using '$ascii(%TAG%)' in favor of internally converting values to ASCII. Works better for multi-value tags in queries. It's recommended to reset tag remapping to default for most users (or manually removing the TF functions if using other tags).
 - Tags: when using TF functions on tags, queries now use 'HAS' instead of 'IS' to ensure multi-value tags are taken into consideration (otherwise only single-value tags match). Note this has the side-effect of partial matching being allowed (i.e. 'Rock' matches 'Progressive Rock' too, but not the opposite).
