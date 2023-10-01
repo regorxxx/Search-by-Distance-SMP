@@ -44,7 +44,7 @@
 - Cultural Regions: new virtual tag named 'genreStyleRegion' which uses internal genre mapping to cultural regions for comparison with a weight according to distance between cultural groups. i.e. instead of using the artist's origin, it uses the track genre's origin; therefore a blues track is considered similar -at least for this weight- no matter if it's played by a Japanese or American artist. This is the "tag scoring" version of the cultural filters [4.7.0](#470---2023-09-25). Check 'Tags & Weights: cultural' in the customizable button for more info.
 - Configuration: new setting to invert the picking order for any method (i.e. taking tracks by lowest score first).
 - Configuration: new setting to invert the sorting order for any method (independent to the picking method).
-- Descriptors: updated descriptors with multiple additions: Kuduro, Semba, Kizomba, African Ritual-Tribal, Afro-Latin Ritual-Tribal, Asian Ritual-Tribal, Aboriginal Folk, Pre-Columbian Ritual-Tribal, Mbalax.
+- Descriptors: updated descriptors with multiple additions: Kuduro, Semba, Kizomba, African Ritual-Tribal, Afro-Latin Ritual-Tribal, Asian Ritual-Tribal, Aboriginal Folk, Pre-Columbian Ritual-Tribal, Mbalax, Melodic Techno-House.
 ### Changed
 - Configuration: pool picking submenu on customizable button is now disabled when using harmonic mixing.
 - Configuration: expanded user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' with new queries. File will be automatically updated with new values (maintaining the user settings).
