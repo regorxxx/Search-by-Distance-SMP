@@ -51,7 +51,7 @@
 - Configuration: improved the user configurable files update check for missing keys.
 - UI: menus to remap tags on customizable button now show the weight on the submenu name to easily have a general vision of all tag weights.
 - UI: global genre/style filter property has been renamed to 'Filter for genre/style' (old setting will be lost).
-- Tags: changed default weight values for tags. 'dynGenre' weight is now 15, 'artistRegion' weight is 5, 'genreStyleRegion' is 7, 'key' scoring distribution is LOGARITHMIC. To apply these changes, restore defaults at 'Set Tags and weighting...'.
+- Tags: changed default weight values for tags. 'dynGenre' weight is now 15, 'artistRegion' weight is 5, 'genreStyleRegion' is 7, 'key' scoring distribution is LOGARITHMIC and range set to 3. To apply these changes, restore defaults at 'Set Tags and weighting...'.
 - Tags: improved handling when some of the default tags are missing.
 - Tags: improved logging when reference track does not have a tag.
 ### Removed

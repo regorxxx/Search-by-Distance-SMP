@@ -12,7 +12,7 @@
 		},
 		"key": {
 			"weight": 10,
-			"range": 1
+			"range": 2
 		},
 		"bpm": {
 			"weight": 5,
