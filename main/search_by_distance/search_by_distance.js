@@ -69,8 +69,8 @@ const SearchByDistance_properties = {
 		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
 		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3},
-		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'percentRange'], range: 25},
-		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'absRange'], range: 15},
+		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50},
+		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30},
 		composer:			{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
 		artistRegion:		{weight: 5,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
 		genreStyleRegion:	{weight: 7, tf: [],					baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5},

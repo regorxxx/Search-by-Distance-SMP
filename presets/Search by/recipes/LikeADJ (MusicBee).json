@@ -9,7 +9,8 @@
 		},
 		"bpm": {
 			"weight": 25,
-			"range": 25
+			"range": 50,
+			"scoringDistribution": "NORMAL"
 		},
 		"energy": {
 			"weight": 25,

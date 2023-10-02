@@ -20,8 +20,8 @@
 		},
 		"date": {
 			"weight": 25,
-			"scoringDistribution": "LINEAR",
-			"range": 20
+			"scoringDistribution": "NORMAL",
+			"range": 40
 		},
 		"genreStyleRegion": {
 			"weight": 7,

@@ -20,7 +20,8 @@
 		},
 		"bpm": {
 			"weight": 5,
-			"range": 25
+			"range": 50,
+			"scoringDistribution": "NORMAL"
 		},
 		"date": {
 			"weight": 0,
