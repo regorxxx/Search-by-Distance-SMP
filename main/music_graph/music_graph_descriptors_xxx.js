@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/10/23
+//03/10/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -19,7 +19,7 @@
 		- Optional:
 			- style_primary_origin: connects styles which are direct derivatives or origins. Farther than in the same style cluster.
 			- style_secondary_origin: connects styles which are secondary derivatives or origins. Farther than previous one.
-			- style_anti_influence: greatly distances two genres. It would be the opposite to bein in the same style cluster.
+			- style_anti_influence: greatly distances two genres. It would be the opposite to being in the same style cluster.
 	
 	Now, let's say you have a group of related styles not present on the graph. For ex. Grunge Rock, Classic Grunge, etc. They are all 'grunge',
 	so you should not put them into style_supergenre matrix, where grunge already exists. We would want to add even smaller nodes than that
@@ -86,7 +86,7 @@ const music_graph_descriptors = {
 	*/
 	// Here genres and styles are put into their main category. Like 'Progressive Rock' and 'Hard Rock' into 'Rock&Roll Supergenre'
 	// This points to genre and styles which are considered to belong to the same parent musical genre, while not necessarily being
-	// considered 'similar' in an 'listening session' sense. For ex. 'Space Rock' and 'Sourthern Rock' can be considered Rock but pretty
+	// considered 'similar' in an 'listening session' sense. For ex. 'Space Rock' and 'Southern Rock' can be considered Rock but pretty
 	// different when looking for Rock tracks. On the other hand, they are similar if you compare them to Jazz.
 	style_supergenre: [
 		['Industrial_supergenre'			,	['Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Folk','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
@@ -358,9 +358,10 @@ const music_graph_descriptors = {
 		['Post-Rock'						,	['Avant-Garde Jazz']],
 		['Kuduro'							,	['Semba']],
 		['Asian Ritual-Tribal'				,	['Tuvan']],
-		['Melodic Techno-House'				,	['Deep House','Progressive Trance']]
+		['Melodic Techno-House'				,	['Deep House','Progressive Trance']],
+		['Loungetronica'					,	['Deep House','Melodic Techno-House']]
 	],
-	// Anti-influeces. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
+	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
 	style_anti_influence: [
 		['Classical Music_supercluster'		,	['Heavy Music_supercluster','Pop & Rock Music_supercluster','Rythm Music_supercluster','Electronic Music_supercluster','Breakbeat Dance_cluster','Four-to-the-floor Dance_cluster','Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre','Rap_cluster','Hardcore Punk_supergenre','Electronic Music_supercluster','Techno_supergenre','House_supergenre','Trance_supergenre','Folk-Rock','Alt. Rock']],
@@ -411,9 +412,9 @@ const music_graph_descriptors = {
 		'Pagan Folk'
 	],
 	/*
-		-> Subsittutions: for genres and styles considered to be almost equal or even strict substitutions. 
+		-> Substitutions: for genres and styles considered to be almost equal or even strict substitutions. 
 		Users may want to edit these at the user's descriptor file, specially to add their own substitutions
-		to avoid retagging their files.
+		to avoid re-tagging their files.
 	*/
 	// Genres or styles that are pretty similar but not exactly the same. Combinations must be added as multiple entries.
 	// {A->[B,C]} EQUAL TO {A->B, A->C} BUT NOT INCLUDED {B->C}
@@ -557,7 +558,7 @@ const music_graph_descriptors = {
 	/* 
 		Indirect: A ->( Clusters )-> B (weight applied x2 or more)
 		Note the weight is accumulative, so bigger clusters' weights add to the previous path cost
-		Ej: Style A -> Supergenre -> Supergenre Cluster -> Supergenre -> Style B
+		Ex: Style A -> Supergenre -> Supergenre Cluster -> Supergenre -> Style B
 	*/
 	cluster: 42, //Related style / genre: Southern Rock(S) -> Heartland Rock(S)
 	intra_supergenre: 100, //Traverse between the same supergenre(SG): Southern Rock(G) -> Classic Rock(SG) -> Hard Rock(G)
@@ -676,7 +677,7 @@ const music_graph_descriptors = {
 		['Classical Music_supercluster'	 		,'#adadad'],
 	],
 	
-	// Attributtes for every node type
+	// Attributes for every node type
 	nodeSize: 10,
 	nodeShape: 'rect', //'circle','rect','star' or 'image'. 'Image' requires 'imageLink' data for every node on drawing function
 	nodeImageLink: 'helpers-external/ngraph/html/images/Starv2.png',
