@@ -45,6 +45,7 @@
 - Configuration: new setting to invert the picking order for any method (i.e. taking tracks by lowest score first).
 - Configuration: new setting to invert the sorting order for any method (independent to the picking method).
 - Descriptors: updated descriptors with multiple additions: Kuduro, Semba, Kizomba, African Ritual-Tribal, Afro-Latin Ritual-Tribal, Asian Ritual-Tribal, Aboriginal Folk, Pre-Columbian Ritual-Tribal, Mbalax, Melodic Techno-House.
+- Debug: cultural regions are now also checked to ensure every item on the graph is also included.
 ### Changed
 - Configuration: pool picking submenu on customizable button is now disabled when using harmonic mixing.
 - Configuration: expanded user configurable files at '[FOOBAR PROFILE FOLDER]\js_data\presets\global' with new queries. File will be automatically updated with new values (maintaining the user settings).
