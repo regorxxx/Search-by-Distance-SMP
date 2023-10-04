@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/09/23
+//04/10/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -27,7 +27,7 @@ const music_graph_descriptors_culture =  new regionMap ({
 				'Afro-Rock','Afrobeat','African','African Folk XL','African Folk_supergenre'
 			],
 			'West Africa': [
-				'Malian Folk'
+				'Malian Folk','Kuduro'
 			],
 			'Maghreb': [ // North Africa
 				'Desert Blues','Tuareg Music','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Gnawa','Electronic Sufi'
@@ -36,7 +36,7 @@ const music_graph_descriptors_culture =  new regionMap ({
 				
 			],
 			'East Africa': [
-				'Griot','Nubian Folk','Nubian'
+				'Griot','Nubian Folk','Nubian','Melodic Techno-House'
 			],
 			'South Africa': [
 				'Isicathamiya'
@@ -64,7 +64,7 @@ const music_graph_descriptors_culture =  new regionMap ({
 		},
 		'Europe': {
 			'_ALL_': [
-				'European Pre-Modern Folk_supergenre','European Folk_supergenre','Classical Medieval Era_supergenre','Classical Renaissance Era_supergenre','Classical Baroque Era_supergenre','Classical Classical Era_supergenre','Classical Romantic Era_supergenre','Bal Folk XL','European Folk XL','European Pre-Modern Folk XL','Eurodisco','Europop','Contemporary Christian Music','Christian Rock','Deep House','Microhouse','Minimal House','Folk-Metal','Ambient Black Metal','Third Stream','Extreme Metal','Speed Metal','Power Metal','Renaissance Rock','Glitch Hop','Post-Bop','Trancecore','Tech Trance','Dance','Eurodance','Eurotrance','Hardtek','Freetekno','Vocal Trance','Progressive Trance','Acid Trance','Modernist','Neo-Classical','Post-Punk Revival'
+				'European Pre-Modern Folk_supergenre','European Folk_supergenre','Classical Medieval Era_supergenre','Classical Renaissance Era_supergenre','Classical Baroque Era_supergenre','Classical Classical Era_supergenre','Classical Romantic Era_supergenre','Bal Folk XL','European Folk XL','European Pre-Modern Folk XL','Eurodisco','Europop','Contemporary Christian Music','Christian Rock','Deep House','Microhouse','Minimal House','Folk-Metal','Ambient Black Metal','Third Stream','Extreme Metal','Speed Metal','Power Metal','Renaissance Rock','Glitch Hop','Post-Bop','Trancecore','Tech Trance','Dance','Eurodance','Eurotrance','Hardtek','Freetekno','Vocal Trance','Progressive Trance','Acid Trance','Modernist','Neo-Classical','Post-Punk Revival','Melodic Techno-House'
 			],
 			'Eastern Europe': [
 				'Darkwave','Coldwave','Pagan Folk','Speedcore'
@@ -108,13 +108,13 @@ const music_graph_descriptors_culture =  new regionMap ({
 				'Jamaican_supergenre','Reggae','Afro-Cuban XL','Afro-Cuban','Ska','Latin-Jazz','Trap','Ambient Folk','Ambient'
 			],
 			'North America': [
-				'Rock & Roll_supergenre','Country_supergenre','Classic Blues XL','Traditional Blues XL','Traditional Country','Americana XL','Traditional American Folk XL','Classic Jazz','Mainstream Jazz XL','Roots Rock','Americana','American Primitive Guitar','Country Folk','Traditional American Folk','Old-Timey','Appalachian','Southern Rock','Detroit Rock','Acid Rock','Raga Rock','Tulsa Sound','Heartland Rock','Cowpunk','Hill Country Blues','Soul Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Vaudeville Blues','Country Blues','Delta Blues','South Coast','Midwest','East Coast','Gangsta','West Coast','Miami Bass','Instrumental Country','Skiffle','Hillbilly','Country Boogie','East Coast Jazz','West Coast Jazz','Moombahton','Florida Breaks','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B','New Orleans R&B','North American Folk_supergenre','Brill Building Sound','Close Harmony','Minimal Wave','Futurepop','Darkwave','Coldwave','Death Rock','Groove Metal','Stoner Doom','Stoner Sludge','Metalcore','Boogie Rock','Doom Metal','Stoner Rock','Blues','Jazz','Jazz Vocal','New Age','Electro Swing','Nu Jazz','Future Jazz','Grunge','Grunge Rock','Psychedelic Grunge','Classic Grunge','Grunge Punk','Grunge Metal','Psychedelic Funk','Post-Grunge','Acid House','Deep House','Chicago House','Fidget House','Electro House','Funky House','Garage House','Hip House','Tech House','Easy Listening','Folk-Punk','Jazz-Rap','Hard-Bop','Cool Jazz','Bebop','Modal Jazz','Acid Jazz','Smooth Jazz','Jazz-Pop','Jazz-Rock','Fusion','Free Jazz','Avant-Garde Jazz','Jazz-Funk','Jazz-Blues','New Acoustic','Digital Minimalism','Minimalism','Lounge','Exotica','Muzak','Modern Gospel','Gospel','Ragtime','Stride','Traditional Gospel','Third Stream','Nu Metal','Rap Metal','Stoner Metal','Sludge Metal','Death Metal','Thrash Metal','Crossover Thrash','Extreme Metal','Speed Metal','Glam Metal','Hair Metal','Pop Metal','Power Metal','Progressive Metal','Classic Metal','Proto-Metal','Arena Rock','Proto-Prog','Symphonic Rock','Eclectic Prog','Heavy Prog','Punk Pop','Math Rock','Glitch Hop','Post-Bop','Trap','Urban Breaks','Hip-Hop Soul','Pop Rap','Conscious','Horrorcore','Progressive Rap','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','EDM Trap','Neo-Classical Metal','Geek Rock','Psychobilly','Riot Grrrl','New Wave','Punk Rock','Funk Rock','No Wave','Post-Rock','Sadcore','Pop Punk','Rap Rock','Funk Metal','Noise Rock','Proto-Stoner Rock','Post-Hardcore','Hardcore Punk','Dance-Punk','Chillwave','Garage Punk','Garage Rock','Garage Rock Revival','Emo Rock','Ambient Rock','Hypersoul','Electroclash','Emo Pop','Dance Pop','Disco Pop','Sunshine Pop','Power Pop','Folk Punk','Ambient Funk','Urban Soul','Electrofunk','Disco','Deep Funk','Smooth Soul','Classic Funk','P-Funk','Funk Blues','Deep Funk Revival','Neo Soul','Breakdance','Darkcore','Trancecore','Ghetto House','Ghettotech','Juke','Minimal Techno','Hip-Hop','Punk','Illbient','Ambient Breaks','Breakbeat','Techno','Detroit Techno','Ambient Techno','Psychedelic Rap','Modernist','Progressive Folk','Post-Punk Revival','Alt. Rock','Funk','Soul'
+				'Rock & Roll_supergenre','Country_supergenre','Classic Blues XL','Traditional Blues XL','Traditional Country','Americana XL','Traditional American Folk XL','Classic Jazz','Mainstream Jazz XL','Roots Rock','Americana','American Primitive Guitar','Country Folk','Traditional American Folk','Old-Timey','Appalachian','Southern Rock','Detroit Rock','Acid Rock','Raga Rock','Tulsa Sound','Heartland Rock','Cowpunk','Hill Country Blues','Soul Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Vaudeville Blues','Country Blues','Delta Blues','South Coast','Midwest','East Coast','Gangsta','West Coast','Miami Bass','Instrumental Country','Skiffle','Hillbilly','Country Boogie','East Coast Jazz','West Coast Jazz','Moombahton','Florida Breaks','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B','New Orleans R&B','North American Folk_supergenre','Brill Building Sound','Close Harmony','Minimal Wave','Futurepop','Darkwave','Coldwave','Death Rock','Groove Metal','Stoner Doom','Stoner Sludge','Metalcore','Boogie Rock','Doom Metal','Stoner Rock','Blues','Jazz','Jazz Vocal','New Age','Electro Swing','Nu Jazz','Future Jazz','Grunge','Grunge Rock','Psychedelic Grunge','Classic Grunge','Grunge Punk','Grunge Metal','Psychedelic Funk','Post-Grunge','Acid House','Deep House','Chicago House','Fidget House','Electro House','Funky House','Garage House','Hip House','Tech House','Easy Listening','Folk-Punk','Jazz-Rap','Hard-Bop','Cool Jazz','Bebop','Modal Jazz','Acid Jazz','Smooth Jazz','Jazz-Pop','Jazz-Rock','Fusion','Free Jazz','Avant-Garde Jazz','Jazz-Funk','Jazz-Blues','New Acoustic','Digital Minimalism','Minimalism','Lounge','Exotica','Muzak','Modern Gospel','Gospel','Ragtime','Stride','Traditional Gospel','Third Stream','Nu Metal','Rap Metal','Stoner Metal','Sludge Metal','Death Metal','Thrash Metal','Crossover Thrash','Extreme Metal','Speed Metal','Glam Metal','Hair Metal','Pop Metal','Power Metal','Progressive Metal','Classic Metal','Proto-Metal','Arena Rock','Proto-Prog','Symphonic Rock','Eclectic Prog','Heavy Prog','Punk Pop','Math Rock','Glitch Hop','Post-Bop','Trap','Urban Breaks','Hip-Hop Soul','Pop Rap','Conscious','Horrorcore','Progressive Rap','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','EDM Trap','Neo-Classical Metal','Geek Rock','Psychobilly','Riot Grrrl','New Wave','Punk Rock','Funk Rock','No Wave','Post-Rock','Sadcore','Pop Punk','Rap Rock','Funk Metal','Noise Rock','Proto-Stoner Rock','Post-Hardcore','Hardcore Punk','Dance-Punk','Chillwave','Garage Punk','Garage Rock','Garage Rock Revival','Emo Rock','Ambient Rock','Hypersoul','Electroclash','Emo Pop','Dance Pop','Disco Pop','Sunshine Pop','Power Pop','Folk Punk','Ambient Funk','Urban Soul','Electrofunk','Disco','Deep Funk','Smooth Soul','Classic Funk','P-Funk','Funk Blues','Deep Funk Revival','Neo Soul','Breakdance','Darkcore','Trancecore','Ghetto House','Ghettotech','Juke','Minimal Techno','Hip-Hop','Punk','Illbient','Ambient Breaks','Breakbeat','Techno','Detroit Techno','Ambient Techno','Psychedelic Rap','Modernist','Progressive Folk','Post-Punk Revival','Alt. Rock','Funk','Soul','Melodic Techno-House'
 			],
 			'Central America': [
 				'South American Folk_supergenre','Latin Rock XL','Latin Folk XL','Chicano Rock','Latin Rock','Mexican Rock','Tex-Mex','Latin-Jazz','Nu Jazz','Future Jazz'
 			],
 			'South America': [
-				'South American Folk_supergenre','Latin Rock XL','Latin Folk XL','Argentinian Rock','Uruguayan Rock','Música Popular Brasileira','Latin-Jazz','Bossa Nova','Nu Jazz','Future Jazz','Deep House','Thrash Metal','Power Metal','Alt. Rap','Underground Rap','Hardcore Punk','Garage Rock'
+				'South American Folk_supergenre','Latin Rock XL','Latin Folk XL','Argentinian Rock','Uruguayan Rock','Música Popular Brasileira','Latin-Jazz','Bossa Nova','Nu Jazz','Future Jazz','Deep House','Thrash Metal','Power Metal','Alt. Rap','Underground Rap','Hardcore Punk','Garage Rock','Melodic Techno-House'
 			]
 		},
 		'Oceania': {
@@ -146,7 +146,7 @@ music_graph_descriptors_culture.getStyleRegion = function (style) {
 	let regions = null;
 	for (let i = 0; i < len; i++) {
 		if (this.ommit.has(styles[i])) {break;}
-		regions = this.getNodeRegion(styles[i]);
+		regions = this.nodeList.get(styles[i]) || this.getNodeRegion(styles[i]);
 		if (Object.keys(regions).length) {break;}
 	}
 	return regions;
@@ -192,6 +192,7 @@ music_graph_descriptors_culture.ommit = new Set(['Industrial_supergenre','Blues_
 		// And discard duplicates
 		subRegions.forEach((subKey) => {if (subKey === '_ALL_') {delete region._ALL_;} else {region[subKey] = [...new Set(region[subKey])];}});
 	});
+	parent.updateRegionList({bNodeList: true}); // Update cached values
 })();
 
 // Debug
@@ -200,12 +201,23 @@ music_graph_descriptors_culture.debug = function debug(graph = musicGraph()) {
 	music_graph_descriptors.getNodeList(false).forEach((node) => {
 		if (!this.getFirstNodeRegion(node)) {notFound.add(node);}
 	});
-	console.log([...notFound]);
-	console.log(notFound.size);
-	
-	console.log('Deep House','Crossover Thrash', music_graph_descriptors_culture.getDistance('Deep House','Crossover Thrash')); // 0.3
-	console.log('Deep House','Deep House', music_graph_descriptors_culture.getDistance('Deep House','Deep House')); // 0
-	console.log('Tex-Mex','Deep House', music_graph_descriptors_culture.getDistance('Tex-Mex','Deep House')); // 0.6
-	console.log('Aussie Rock','New Wave', music_graph_descriptors_culture.getDistance('Aussie Rock','New Wave')); // 1
-	console.log('Disco','New Wave', music_graph_descriptors_culture.getDistance('Disco','New Wave')); // 0.3
+	const notFoundNum = notFound.size;
+	if (notFoundNum) {
+		console.log('music_graph_descriptors_culture: not found ' + notFoundNum + ' items\n\t' + [...notFound]);
+	} else {
+		console.log('music_graph_descriptors_culture: All tests passed');
+	}
+};
+
+music_graph_descriptors_culture.distanceDebug = function distanceDebug(graph = musicGraph()) {
+	console.log('music_graph_descriptors_culture: distance');
+	[
+		['Deep House','Crossover Thrash'],	// 1
+		['Deep House','Deep House'],		// 0
+		['Tex-Mex','Deep House'],			// 2
+		['Aussie Rock','New Wave'],			// 1
+		['Disco','New Wave'],				// 0.3
+	].forEach((pair) => {
+		console.log(pair.join(' <-> ') + ' = ',  music_graph_descriptors_culture.getDistance(...pair));
+	});
 };
