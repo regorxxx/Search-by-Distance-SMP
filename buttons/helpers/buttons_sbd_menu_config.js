@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/09/23
+//04/10/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -751,6 +751,7 @@ function createConfigMenu(parent) {
 				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
 				testGraph(sbd.allMusicGraph);
 				testGraphV2(sbd.allMusicGraph);
+				music_graph_descriptors_culture.distanceDebug();
 				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 		}

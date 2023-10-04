@@ -5,49 +5,49 @@
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
 // Uses NBA pathFinder as default.
 function testGraph(mygraph) {
-		const test = new FbProfiler('Test nodes');
-		const pathFinder = nba(mygraph, {
-			distance(fromNode, toNode, link) {
-			return link.data.weight;
-			}
-		});
-		let path = [];
-		let idpath = '';
-		let distanceGraph = Infinity;
-		
-		[ // here both keys...
-			{from: 'Baroque',		to: 'Modernist'},
-			{from: 'New Age',		to: 'Modernist'},
-			{from: 'Hard Rock',		to: 'Folk-Rock'},
-			{from: 'Jazz Vocal',	to: 'Heavy Metal'},
-			{from: 'Grunge',		to: 'House'},
-			{from: 'Electronic',	to: 'Alt. Rock'},
-			{from: 'Electronic',	to: 'Blues Rock'},
-			{from: 'Blues',			to: 'Hip-Hop'},
-			{from: 'Trance',		to: 'House'},
-			{from: 'Americana',		to: 'Folk-Rock'},
-			{from: 'Trip Hop',		to: 'Chill-Out Downtempo'},
-			{from: 'Shoegaze',		to: 'Indie'},
-			{from: 'Blues Rock',	to: 'Gangsta'},
-			{from: 'Blues Rock',	to: 'Hip-Hop'},
-			{from: 'Blues Rock',	to: 'Blues'},
-			{from: 'Blues',			to: 'Blues'},
-			{from: 'Blues',			to: 'Heavy Metal'},
-			{from: 'Blues',			to: 'Glam Metal'},
-			{from: 'Blues',			to: 'Pop Metal'},
-			{from: 'Blues Rock',	to: 'Pop Metal'},
-			{from: 'Tuvan',			to: 'Desert Blues'},
-			{from: 'Anatolian Rock',to: 'Desert Blues'},
-			{from: 'Pagan Folk',	to: 'Americana'},
-			{from: 'Pagan Folk',	to: 'Tulsa Sound'},
-		].forEach((o) => {
-			path = pathFinder.find(o.from, o.to);
-			distanceGraph = calcGraphDistance(mygraph, o.from, o.to, true);
-			idpath = getNodesFromPath(path);
-			console.log(idpath + '\t' + distanceGraph);
-		});
-		
-		test.Print('', false);
+	const test = new FbProfiler('Test nodes');
+	const pathFinder = nba(mygraph, {
+		distance(fromNode, toNode, link) {
+		return link.data.weight;
+		}
+	});
+	let path = [];
+	let idpath = '';
+	let distanceGraph = Infinity;
+	
+	[ // here both keys...
+		{from: 'Baroque',		to: 'Modernist'},
+		{from: 'New Age',		to: 'Modernist'},
+		{from: 'Hard Rock',		to: 'Folk-Rock'},
+		{from: 'Jazz Vocal',	to: 'Heavy Metal'},
+		{from: 'Grunge',		to: 'House'},
+		{from: 'Electronic',	to: 'Alt. Rock'},
+		{from: 'Electronic',	to: 'Blues Rock'},
+		{from: 'Blues',			to: 'Hip-Hop'},
+		{from: 'Trance',		to: 'House'},
+		{from: 'Americana',		to: 'Folk-Rock'},
+		{from: 'Trip Hop',		to: 'Chill-Out Downtempo'},
+		{from: 'Shoegaze',		to: 'Indie'},
+		{from: 'Blues Rock',	to: 'Gangsta'},
+		{from: 'Blues Rock',	to: 'Hip-Hop'},
+		{from: 'Blues Rock',	to: 'Blues'},
+		{from: 'Blues',			to: 'Blues'},
+		{from: 'Blues',			to: 'Heavy Metal'},
+		{from: 'Blues',			to: 'Glam Metal'},
+		{from: 'Blues',			to: 'Pop Metal'},
+		{from: 'Blues Rock',	to: 'Pop Metal'},
+		{from: 'Tuvan',			to: 'Desert Blues'},
+		{from: 'Anatolian Rock',to: 'Desert Blues'},
+		{from: 'Pagan Folk',	to: 'Americana'},
+		{from: 'Pagan Folk',	to: 'Tulsa Sound'},
+	].forEach((o) => {
+		path = pathFinder.find(o.from, o.to);
+		distanceGraph = calcGraphDistance(mygraph, o.from, o.to, true);
+		idpath = getNodesFromPath(path);
+		console.log(idpath + '\t' + distanceGraph);
+	});
+	
+	test.Print('', false);
 }
 
 // FOR TESTING: compares array of styles to other array and computes mean distance (similar to the main function)
