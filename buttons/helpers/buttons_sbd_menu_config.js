@@ -187,8 +187,7 @@ function createConfigMenu(parent) {
 						}
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING});
 				} else {
-					const entryText = 'Remap...\t[virtual]';
-					menu.newEntry({menuName: subMenuName, entryText, flags: MF_GRAYED});
+					menu.newEntry({menuName: subMenuName, entryText: 'Remap...\t[virtual]', flags: MF_GRAYED});
 				}
 			}
 			{	// Ranges
@@ -742,7 +741,6 @@ function createConfigMenu(parent) {
 			menu.newEntry({menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
 				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('graphDebug');}
 				graphDebug(sbd.allMusicGraph, true); // Show popup on pass
-				include('..\\..\\main\\music_graph\\music_graph_descriptors_xxx_culture.js');
 				music_graph_descriptors_culture.debug(sbd.allMusicGraph);
 				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
@@ -768,17 +766,6 @@ function createConfigMenu(parent) {
 				cacheLinkSet = void(0);
 				updateCache({bForce: true, properties}); // Creates new one and also notifies other panels to discard their cache
 			}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED});
-			// Tags cache reset Async
-			menu.newEntry({menuName: submenu, entryText: 'Reset tags cache' + (!isFoobarV2 ? '\t-only Fb >= 2.0-' : (sbd.panelProperties.bTagsCache[1] ?  '' : '\t -disabled-')), func: () => {
-				const keys = Object.values(tags).filter(t => !t.type.includes('virtual')).map(t => t.tf.filter(Boolean));
-				const cacheTags = keys.concat([['TITLE'], [globTags.title]])
-					.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
-					.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
-					.filter((tagName) => {return tagsCache.cache.has(tagName);});
-				tagsCache.clear(cacheTags);
-				tagsCache.save();
-				tagsCache.cacheTags(cacheTags, iStepsLibrary, iDelayLibrary, fb.GetLibraryItems().Convert(), true).then(() => {tagsCache.save();});
-			}, flags: sbd.panelProperties.bTagsCache[1] ? MF_STRING : MF_GRAYED});
 		}
 		menu.newEntry({menuName: submenu, entryText: 'sep'});
 		{
