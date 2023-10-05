@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [5.0.0](#500---2023-10-05)
 - [4.7.0](#470---2023-09-25)
 - [4.6.0](#460---2023-09-20)
 - [4.5.1](#451---2023-07-29)
@@ -39,6 +40,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [5.0.0] - 2023-10-05
 ### Added
 - Cultural Regions: new virtual tag named 'artistRegion' which uses artist's country data from 'locale last.fm' file tag or [World-Map-SMP](https://github.com/regorxxx/World-Map-SMP)'s database for comparison with a weight according to distance between cultural groups. i.e. a Spanish artist would be considered more similar to French than American artists. It can currently differentiate by country, region or continent. Note this is obviously not mean to be used along, since the genre similarities between different cultural groups/continents (i.e. Spanish rock vs American rock) are already managed by using the 'GRAPH' method or the new tag below, but it may come handy to prioritize tracks from the same region. This is the "tag scoring" version of the cultural filters [4.7.0](#470---2023-09-25). Check 'Tags & Weights: cultural' in the customizable button for more info.
 - Cultural Regions: new virtual tag named 'genreStyleRegion' which uses internal genre mapping to cultural regions for comparison with a weight according to distance between cultural groups. i.e. instead of using the artist's origin, it uses the track genre's origin; therefore a blues track is considered similar -at least for this weight- no matter if it's played by a Japanese or American artist. This is the "tag scoring" version of the cultural filters [4.7.0](#470---2023-09-25). Check 'Tags & Weights: cultural' in the customizable button for more info.
@@ -644,7 +651,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...v5.0.0
 [4.7.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.0...v4.5.1
