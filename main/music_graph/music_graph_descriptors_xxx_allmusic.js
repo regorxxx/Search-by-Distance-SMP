@@ -1,403 +1,385 @@
-﻿'use strict';
-//09/03/22
+﻿	'use strict';
+	//09/10/23
 
-/*
-	All Music genre/styles replacer
-	* Already included items on the graph
-	- Items which don't have an alternative term
-	0 Items which are meant to be filtered
-	
-Classical subgenres and styles
+	/*
+		All Music genre/styles replacer
+		* Already included items on the graph
+		- Items which don't have an alternative term
+		0 Items which are meant to be filtered
+		
+	Classical subgenres and styles
 
-        Avant-Garde Music
-        Ballet
-        Band Music
-        Chamber Music
-        Choral
-        Classical Crossover
-        Concerto
-        Electronic/Computer Music
-        Fight Songs
-        Film Score
-        Keyboard
-        Marches
-        Military
-        Miscellaneous (Classical)
-        Opera
-        Orchestral
-        Show/Musical
-        Symphony
-        Vocal Music
+			Avant-Garde Music
+			Ballet
+			Band Music
+			Chamber Music
+			Choral
+			Classical Crossover
+			Concerto
+			Electronic/Computer Music
+			Fight Songs
+			Film Score
+			Keyboard
+			Marches
+			Military
+			Miscellaneous (Classical)
+			Opera
+			Orchestral
+			Show/Musical
+			Symphony
+			Vocal Music
 
-Country subgenres and styles [-]
-
-
-        Alternative Country
-            Alt-Country
-            Americana
-
-        Contemporary Country
-            Bro-Country
-            Contemporary Bluegrass
-            Contemporary Country
-            Country Rap
-            Neo-Traditionalist Country
-            New Traditionalist
-            Red Dirt
-
-        Country-Pop
-            Country-Pop
-            Nashville Sound / Countrypolitan
-            Urban Cowboy
-
-        Honky Tonk
-            Bakersfield Sound
-            Honky Tonk
-            Truck Driving Country
-
-        Progressive Country
-            Country-Folk
-            Outlaw Country
-            Progressive Bluegrass
-            Progressive Country
-            Rodeo
-
-        Traditional Country
-            Bluegrass
-            Bluegrass-Gospel
-            Close Harmony
-            Country Boogie
-            Country Gospel
-            Cowboy
-            Early Country
-            Instrumental Country
-            Jug Band
-            Old-Timey
-            Square Dance
-            String Bands
-            Traditional Bluegrass
-            Traditional Country
-            Yodeling
-
-        Western Swing
-            Western Swing
-            Western Swing Revival
-
-Electronic subgenres and styles [-]
+	Country subgenres and styles [-]
 
 
-        Downtempo
-            Ambient Dub
-            Dark Ambient
-            Downbeat
-            Experimental Ambient
-            Illbient
-            Synthwave
-            Trip-Hop
-            Vaporware
+			Alternative Country
+				Alt-Country
+				Americana
 
-        Electronica
-            Baile Funk
-            Big Beat
-            Breakcore
-            Clubjazz
-            EDM
-            Electronica
-            Funky Breaks
-            Hi-NRG
-            Newbeat
-            Nu Breaks
-            Trap (EDM)
+			Contemporary Country
+				Bro-Country
+				Contemporary Bluegrass
+				Contemporary Country
+				Country Rap
+				Neo-Traditionalist Country
+				New Traditionalist
+				Red Dirt
 
-        Experimental Electronic
-            Baseline
-            Chiptunes
-            Electro-Acoustic
-            Experimental Club
-            Experimental Dub
-            Glitch
-            IDM
-            Microsound
+			Country-Pop
+				Country-Pop
+				Nashville Sound / Countrypolitan
+				Urban Cowboy
 
-        House
-            Acid House
-            Ambient House
-            Chicago House
-            Deep House
-            French House
-            Garage
-            Gqom
-            Jazz-House
-            Juke / Footwork
-            Left-Field House
-            Microhouse
-            Progressive House
-            Tech-House
-            Tribal House
-            UK Garage
+			Honky Tonk
+				Bakersfield Sound
+				Honky Tonk
+				Truck Driving Country
 
-        Jungle / Drum'n'Bass
-            Acid Jazz
-            Ambient Breakbeat
-            Broken Beat
-            Drill'n'bass
-            Dubstep
-            Experimental Jungle
-            Industrial Drum'n'Bass
+			Progressive Country
+				Country-Folk
+				Outlaw Country
+				Progressive Bluegrass
+				Progressive Country
+				Rodeo
 
-        Techno
-            Acid Techno
-            Ambient Techno
-            Detroit Techno
-            Electro
-            Electro-Jazz
-            Electro-Techno
-            Experimental Electro
-            Experimental Techno
-            Gabba
-            Happy Hardcore
-            Hardcore Techno
-            Minimal Techno
-            Neo-Electro
-            Rave
-            Techno Bass
-            Techno-Dub
+			Traditional Country
+				Bluegrass
+				Bluegrass-Gospel
+				Close Harmony
+				Country Boogie
+				Country Gospel
+				Cowboy
+				Early Country
+				Instrumental Country
+				Jug Band
+				Old-Timey
+				Square Dance
+				String Bands
+				Traditional Bluegrass
+				Traditional Country
+				Yodeling
 
-        Trance
-            Goa Trance
-            Progressive Trance
-            Psytrance
+			Western Swing
+				Western Swing
+				Western Swing Revival
+
+	Electronic subgenres and styles [-]
 
 
-Folk subgenres and styles [-]
+			Downtempo
+				Ambient Dub
+				Dark Ambient
+				Downbeat
+				Experimental Ambient
+				Illbient
+				Synthwave
+				Trip-Hop
+				Vaporware
 
+			Electronica
+				Baile Funk
+				Big Beat
+				Breakcore
+				Clubjazz
+				EDM
+				Electronica
+				Funky Breaks
+				Hi-NRG
+				Newbeat
+				Nu Breaks
+				Trap (EDM)
 
-        Contemporary Folk
-            Alternative Folk
-            Anti-Folk
-            Contemporary Folk
-            Folk Jazz
-            Folk-Pop
-            Neo-Traditional Folk
-            New Acoustic
-            Political Folk
-            Progressive Folk
-            Urban Folk
+			Experimental Electronic
+				Baseline
+				Chiptunes
+				Electro-Acoustic
+				Experimental Club
+				Experimental Dub
+				Glitch
+				IDM
+				Microsound
 
-        Traditional Folk
-            Appalachian
-            British Folk
-            Field Recordings
-            Folk Revival
-            Folksongs
-            Irish Folk
-            Minstrel
-            Protest Songs
-            Sea Shanties
-            Traditional Folk
-            Work Song
+			House
+				Acid House
+				Ambient House
+				Chicago House
+				Deep House
+				French House
+				Garage
+				Gqom
+				Jazz-House
+				Juke / Footwork
+				Left-Field House
+				Microhouse
+				Progressive House
+				Tech-House
+				Tribal House
+				UK Garage
 
-// [0									,	['Big Band / Swing'					]],
-// [0									,	['    Ballroom Dance'					]],
-// [0									,	['    Big Band'					]],
-// [0									,	['    British Dance Bands'					]],
-// [0									,	['    Continental Jazz'					]],
-// [0									,	['    Dance Bands'					]],
-// [0									,	['    Experimental Big Band'					]],
-// [0									,	['    Jive'					]],
-// [0									,	['    Modern Big Band'					]],
-// [0									,	['    Orchestral Jazz'					]],
-// [0									,	['    Progressive Big Band'					]],
-// [0									,	['    Progressive Jazz'					]],
-// [0									,	['    Society Dance Band'					]],
-// [0									,	['    Sweet Bands'					]],
-// [0									,	['    Swing'					]],
-// [0									,	[''					]],
-// [0									,	['Bop'					]],
-// [0									,	['    Bop'					]],
-// [0									,	['    Bop Vocals'					]],
-// [0									,	[''					]],
-// [0									,	['Contemporary Jazz'					]],
-// [0									,	['    Contemporary Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['Cool'					]],
-// [0									,	['    Chamber Jazz'					]],
-// [0									,	['    Cool'					]],
-// [0									,	['    West Coast Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['Free Jazz'					]],
-// [0									,	['    Avant-Garde Jazz'					]],
-// [0									,	['    Early Creative'					]],
-// [0									,	['    Free Jazz'					]],
-// [0									,	['    M-Base'					]],
-// [0									,	['    Modern Creative'					]],
-// [0									,	['    Modern Free'					]],
-// [0									,	['    Third Stream'					]],
-// [0									,	[''					]],
-// [0									,	['Fusion'					]],
-// [0									,	['    Crossover Jazz'					]],
-// [0									,	['    Electric Jazz'					]],
-// [0									,	['    Free Funk'					]],
-// [0									,	['    Fusion'					]],
-// [0									,	['    Jazz-Pop'					]],
-// [0									,	['    Jazz-Rock'					]],
-// [0									,	['    Modern Jazz'					]],
-// [0									,	['    Smooth Jazz'					]],
-// [0									,	['    Straight-Ahead Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['Global Jazz'					]],
-// [0									,	['    African Jazz'					]],
-// [0									,	['    Afro-Cuban Jazz'					]],
-// [0									,	['    Brazilian Jazz'					]],
-// [0									,	['    Cuban Jazz'					]],
-// [0									,	['    Israeli Jazz'					]],
-// [0									,	['    Latin Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['Hard Bop'					]],
-// [0									,	['    Hard Bop'					]],
-// [0									,	['    Modal Music'					]],
-// [0									,	['    Neo-Bop'					]],
-// [0									,	['    Post-Bop'					]],
-// [0									,	[''					]],
-// [0									,	['Jazz Instrument'					]],
-// [0									,	['    Guitar Jazz'					]],
-// [0									,	['    Piano Jazz'					]],
-// [0									,	['    Saxophone Jazz'					]],
-// [0									,	['    Trombone Jazz'					]],
-// [0									,	['    Trumpet Jazz'					]],
-// [0									,	['    Vibraphone / Marimba Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['New Orleans / Classic Jazz'					]],
-// [0									,	['    Boogie-Woogie'					]],
-// [0									,	['    Chicago Jazz'					]],
-// [0									,	['    Dixieland'					]],
-// [0									,	['    Early Jazz'					]],
-// [0									,	['    Hot Jazz'					]],
-// [0									,	['    Mainstream Jazz'					]],
-// [0									,	['    New Orleans Brass Bands'					]],
-// [0									,	['    New Orleans Jazz'					]],
-// [0									,	['    New Orleans Jazz Revival'					]],
-// [0									,	['    Novelty Ragtime'					]],
-// [0									,	['    Ragtime'					]],
-// [0									,	['    Stride'					]],
-// [0									,	['    Trad Jazz'					]],
-// [0									,	[''					]],
-// [0									,	['Soul Jazz / Groove'					]],
-// [0									,	['    Jazz-Funk'					]],
-// [0									,	['    Jump Blues'					]],
-// [0									,	['    Soul Jazz'					]],
-// [0									,	['    Spiritual Jazz'					]],
-'					]],
-Latin subgenres and styles [-]'					]],
-'					]],
-'					]],
-// [0									,	['Cuban Traditions'					]],
-// [0									,	['    Afro-Cuban'					]],
-// [0									,	['    Changui'					]],
-// [0									,	['    Charanga'					]],
-// [0									,	['    Danzon'					]],
-// [0									,	['    Grupero'					]],
-// [0									,	['    Guaguancó'					]],
-// [0									,	['    Mambo'					]],
-// [0									,	['    Modern Son'					]],
-// [0									,	['    Nueva Trova'					]],
-// [0									,	['    Rumba'					]],
-// [0									,	['    Son'					]],
-// [0									,	['    Timba'					]],
-// [0									,	[''					]],
-// [0									,	['Latin America'					]],
-// [0									,	['    Afro-Colombian'					]],
-// [0									,	['    Alternative Latin'					]],
-// [0									,	['    Bolero'					]],
-// [0									,	['    Boogaloo'					]],
-// [0									,	['    Cha-Cha'					]],
-// [0									,	['    Choro'					]],
-// [0									,	['    Colombian'					]],
-// [0									,	['    Cuatro'					]],
-// [0									,	['    Latin Big Band'					]],
-// [0									,	['    Latin Dance'					]],
-// [0									,	['    Latin Folk'					]],
-// [0									,	['    Latin Pop'					]],
-// [0									,	['    Latin Soul'					]],
-// [0									,	['    New York Salsa'					]],
-// [0									,	['    Nueva Cancion'					]],
-// [0									,	['    Pachanga'					]],
-// [0									,	['    Plena'					]],
-// [0									,	['    Puerto Rican Traditions'					]],
-// [0									,	['    Trova'					]],
-// [0									,	[''					]],
-// [0									,	['Mexican Traditions'					]],
-// [0									,	['    Alterna Movimiento'					]],
-// [0									,	['    Alternative Corridos'					]],
-// [0									,	['    Banda'					]],
-// [0									,	['    Bomba'					]],
-// [0									,	['    Conjunto'					]],
-// [0									,	['    Corrido'					]],
-// [0									,	['    Cumbia'					]],
-// [0									,	['    Duranguense'					]],
-// [0									,	['    Electro-Cumbia'					]],
-// [0									,	['    Mariachi'					]],
-// [0									,	['    Mexican-Cumbia'					]],
-// [0									,	['    Narcocorridos'					]],
-// [0									,	['    New Mexcio'					]],
-// [0									,	['    Norteno'					]],
-// [0									,	['    Onda Grupera'					]],
-// [0									,	['    Ranchera'					]],
-// [0									,	['    Sonidero'					]],
-// [0									,	['    Tejano'					]],
-// [0									,	[''					]],
-// [0									,	['Tropical'					]],
-// [0									,	['    Bachata'					]],
-// [0									,	['    Beguine'					]],
-// [0									,	['    Beguine Moderne'					]],
-// [0									,	['    Beguine Vide'					]],
-// [0									,	['    Compas'					]],
-// [0									,	['    Cuban Pop'					]],
-// [0									,	['    Dominican Traditions'					]],
-// [0									,	['    Lambada'					]],
-// [0									,	['    Merengue'					]],
-// [0									,	['    Merenhouse'					]],
-// [0									,	['    Mini Jazz'					]],
-// [0									,	['    Salsa'					]],
-// [0									,	['    Sonero'					]],
-// [0									,	['    Tropical'					]],
-'					]],
-'					]],
-New Age subgenres and styles'					]],
-'					]],
-// [0									,	['Adult Alternative'					]],
-// [0									,	['Ambient'					]],
-// [0									,	['Contemporary Instrumental'					]],
-// [0									,	['Environmental'					]],
-// [0									,	['Ethnic Fusion'					]],
-// [0									,	['Flute/New Age'					]],
-// [0									,	['Guitar/New Age'					]],
-// [0									,	['Harp/New Age'					]],
-// [0									,	['Healing'					]],
-// [0									,	['Keyboard/Synthesizer/New Age'					]],
-// [0									,	['Meditation/Relaxation'					]],
-// [0									,	['Mystical Minimalism'					]],
-// [0									,	['Nature'					]],
-// [0									,	['Neo-Classical'					]],
-// [0									,	['New Age Tone Poems'					]],
-// [0									,	['Piano/New Age'					]],
-// [0									,	['Progressive Alternative'					]],
-// [0									,	['Progressive Electronic'					]],
-// [0									,	['Relaxation'					]],
-// [0									,	['Self-Help & Development'					]],
-// [0									,	['Solo Instrumental'					]],
-// [0									,	['Space'					]],
-// [0									,	['Spiritual'					]],
-// [0									,	['Techno-Tribal'					]],
-'					]],
-*/
+			Jungle / Drum'n'Bass
+				Acid Jazz
+				Ambient Breakbeat
+				Broken Beat
+				Drill'n'bass
+				Dubstep
+				Experimental Jungle
+				Industrial Drum'n'Bass
 
-const music_graph_descriptors_allmusic = {
-	style_substitutions: [
+			Techno
+				Acid Techno
+				Ambient Techno
+				Detroit Techno
+				Electro
+				Electro-Jazz
+				Electro-Techno
+				Experimental Electro
+				Experimental Techno
+				Gabba
+				Happy Hardcore
+				Hardcore Techno
+				Minimal Techno
+				Neo-Electro
+				Rave
+				Techno Bass
+				Techno-Dub
+
+			Trance
+				Goa Trance
+				Progressive Trance
+				Psytrance
+	*/
+
+	const music_graph_descriptors_allmusic = {
+		style_substitutions: [
+		/* Folk */
+			/* Contemporary Folk */
+			// [0									,	['Alternative Folk'					]],
+			// [-									,	['Anti-Folk'						]],
+			// [*									,	['Contemporary Folk'				]],
+			['Folk-Jazz'						,	['Folk Jazz'						]],
+			['Folk Pop'							,	['Folk-Pop'							]],
+			// [0									,	['Neo-Traditional Folk'				]],
+			// [*									,	['New Acoustic'						]],
+			// [0									,	['Political Folk'					]],
+			// [*									,	['Progressive Folk'					]],
+			// [0									,	['Urban Folk'						]],
+			/* Traditional Folk */
+			// [*									,	['Appalachian'						]],
+			['British Folk-Rock'				,	['British Folk'						]],
+			// [0									,	['Field Recordings'					]],
+			// [0									,	['Folk Revival'						]],
+			// [0									,	['Folksongs'						]],
+			['Irish'							,	['Irish Folk'						]],
+			// [-									,	['Minstrel'							]],
+			// [0									,	['Protest Songs'					]],
+			// [-									,	['Sea Shanties'						]],
+			// [*									,	['Traditional Folk'					]],
+			['Worksongs'						,	['Work Song'						]],
+	/* Jazz */
+		/* Big Band / Swing */
+			// [-									,	['Ballroom Dance'					]],
+			// [*									,	['Big Band'							]],
+			// [0									,	['British Dance Bands'				]],
+			// [-									,	['Continental Jazz'					]],
+			// [-									,	['Dance Bands'						]],
+			['Big Band'							,	['Experimental Big Band'			]],
+			// [0									,	['Jive'								]],
+			['Big Band'							,	['Modern Big Band'					]],
+			// [-									,	['Orchestral Jazz'					]],
+			['Big Band'							,	['Progressive Big Band'				]],
+			// [-									,	['Progressive Jazz'					]],
+			// [-									,	['Society Dance Band'				]],
+			// [-									,	['Sweet Bands'						]],
+			// [*									,	['Swing'							]],
+		/* Bop */
+			['Bebop'							,	['Bop'								]],
+			// [0									,	['Bop Vocals'						]],
+		/* Contemporary Jazz */
+			// [*									,	['Contemporary Jazz'				]],
+		/* Cool */
+			// [-									,	['Chamber Jazz'						]],
+			['Cool Jazz'						,	['Cool'								]],
+			// [0									,	['West Coast Jazz'					]],
+		/* Free Jazz */
+			// [*									,	['Avant-Garde Jazz'					]],
+			// [-									,	['Early Creative'					]],
+			// [*									,	['Free Jazz'						]],
+			// [-									,	['M-Base'							]],
+			// [-									,	['Modern Creative'					]],
+			// [-									,	['Modern Free'						]],
+			// [*									,	['Third Stream'						]],
+		/* Fusion */
+			// [0									,	['Crossover Jazz'					]],
+			// [0									,	['Electric Jazz'					]],
+			// [-									,	['Free Funk'						]],
+			// [*									,	['Fusion'							]],
+			['Vocal Pop'						,	['Jazz-Pop'							]],
+			// [*									,	['Jazz-Rock'						]],
+			// [0									,	['Modern Jazz'						]],
+			// [*									,	['Smooth Jazz'						]],
+			// [-									,	['Straight-Ahead Jazz'				]],
+		/* Global Jazz */
+			// [0									,	['Global Jazz'						]],
+			// [0									,	['African Jazz'						]],
+			// [0									,	['Afro-Cuban Jazz'					]],
+			// [0									,	['Brazilian Jazz'					]],
+			// [0									,	['Cuban Jazz'						]],
+			// [0									,	['Israeli Jazz'						]],
+			['Latin-Jazz'						,	['    Latin Jazz'					]],
+		/* Hard Bop */
+			['Hard-Bop'							,	['Hard Bop'							]],
+			['Modal Jazz'						,	['Modal Music'						]],
+			// [-									,	['Neo-Bop'							]],
+			// [*									,	['Post-Bop'							]],
+		/* Jazz Instrument */
+			// [0									,	['Jazz Instrument'					]],
+			// [0									,	['Guitar Jazz'						]],
+			// [0									,	['Piano Jazz'						]],
+			// [0									,	['Saxophone Jazz'					]],
+			// [0									,	['Trombone Jazz'					]],
+			// [0									,	['Trumpet Jazz'						]],
+			// [0									,	['Vibraphone / Marimba Jazz'		]],
+		/* New Orleans / Classic Jazz */
+			['Classic Jazz'						,	['New Orleans / Classic Jazz'		]],
+			// [0									,	['Boogie-Woogie'					]],
+			// [*									,	['Chicago Jazz'						]],
+			// [*									,	['Dixieland'						]],
+			// [-									,	['Early Jazz'						]],
+			// [-									,	['Hot Jazz'							]],
+			// [*									,	['Mainstream Jazz'					]],
+			['New Orleans Jazz'					,	['New Orleans Brass Bands'			]],
+			// [0									,	['New Orleans Jazz'					]],
+			['New Orleans Jazz'					,	['New Orleans Jazz Revival'			]],
+			// [0									,	['Novelty Ragtime'					]],
+			// [*									,	['Ragtime'							]],
+			// [*									,	['Stride'							]],
+			// [0									,	['Trad Jazz'						]],
+		/*Soul Jazz / Groove */
+			// [*									,	['Jazz-Funk'						]],
+			// [*									,	['Jump Blues'						]],
+			['Soul-Jazz'						,	['Soul Jazz'						]],
+			// [-									,	['Spiritual Jazz'					]],
+	/* Latin */
+		/* Cuban Traditions */
+			// [0									,	['Cuban Traditions'					]],
+			// [*									,	['Afro-Cuban'						]],
+			// [-									,	['Changui'							]],
+			// [-									,	['Charanga'							]],
+			// [-									,	['Danzon'							]],
+			// [-									,	['Grupero'							]],
+			// [-									,	['Guaguancó'						]],
+			// [*									,	['Mambo'							]],
+			['Son'								,	['Modern Son'						]],
+			// [-									,	['Nueva Trova'						]],
+			// [*									,	['Rumba'							]],
+			// [*									,	['Son'								]],
+			// [-									,	['Timba'							]],
+		/* Latin America */
+			// [0									,	['Latin America'					]],
+			// [0									,	['Afro-Colombian'					]],
+			// [0									,	['Alternative Latin'				]],
+			// [*									,	['Bolero'							]],
+			// [0									,	['Boogaloo'							]],
+			// [0									,	['Cha-Cha'							]],
+			// [0									,	['Choro'							]],
+			// [0									,	['Colombian'						]],
+			// [0									,	['Cuatro'							]],
+			// [0									,	['Latin Big Band'					]],
+			// [0									,	['Latin Dance'						]],
+			// [0									,	['Latin Folk'						]],
+			['Latin Rock'						,	['Latin Pop'						]],
+			// [0									,	['Latin Soul'						]],
+			// [0									,	['New York Salsa'					]],
+			// [0									,	['Nueva Cancion'					]],
+			// [0									,	['Pachanga'							]],
+			// [0									,	['Plena'							]],
+			// [0									,	['Puerto Rican Traditions'			]],
+			// [-									,	['Trova'							]],
+		/* Mexican Traditions */
+			// [0									,	['Mexican Traditions'				]],
+			// [0									,	['Alterna Movimiento'				]],
+			// [0									,	['Alternative Corridos'				]],
+			// [0									,	['Banda'							]],
+			// [-									,	['Bomba'							]],
+			// [-									,	['Conjunto'							]],
+			// [-									,	['Corrido'							]],
+			// [*									,	['Cumbia'							]],
+			// [-									,	['Duranguense'						]],
+			['Cumbia'							,	['Electro-Cumbia'					]],
+			// [*									,	['Mariachi'							]],
+			['Cumbia'							,	['Mexican-Cumbia'					]],
+			// [-									,	['Narcocorridos'					]],
+			// [0									,	['New Mexcio'						]],
+			// [0									,	['Norteno'							]],
+			// [-									,	['Onda Grupera'						]],
+			// [*									,	['Ranchera'							]],
+			// [-									,	['Sonidero'							]],
+		/* Tropical */
+			['Afro-Cuban'						,	['Tropical'							]],
+			// [0									,	['Bachata'							]],
+			// [0									,	['Beguine'							]],
+			// [0									,	['Beguine Moderne'					]],
+			// [0									,	['Beguine Vide'						]],
+			// [0									,	['Compas'							]],
+			// [0									,	['Cuban Pop'						]],
+			// [0									,	['Dominican Traditions'				]],
+			// [0									,	['Lambada'							]],
+			// [0									,	['Merengue'							]],
+			// [0									,	['Merenhouse'						]],
+			// [0									,	['Mini Jazz'						]],
+			// [0									,	['Salsa'							]],
+			// [0									,	['Sonero'							]],
+			// [0									,	['Tropical'							]],
+	/* New Age subgenres and styles */
+			// [*									,	['New Age'							]],
+			// [0									,	['Adult Alternative'				]],
+			['Ambient New Age'					,	['Ambient'							]],
+			['New Acoustic'						,	['Contemporary Instrumental'		]],
+			['Ambient'							,	['Environmental'					]],
+		// [0										,	['Ethnic Fusion'					]],
+		// [0										,	['Flute/New Age'					]],
+		// [0										,	['Guitar/New Age'					]],
+		// [0										,	['Harp/New Age'						]],
+			['Healing Music'					,	['Healing'							]],
+		// [0										,	['Keyboard/Synthesizer/New Age'		]],
+			['Healing Music'					,	['Meditation/Relaxation'			]],
+			['Minimalism'						,	['Mystical Minimalism'				]],
+			['Nature Music'						,	['Nature'							]],
+			['Neo-Classical New Age'			,	['Neo-Classical'					]],
+		// [0										,	['New Age Tone Poems'				]],
+		// [0										,	['Piano/New Age'					]],
+		// [0										,	['Progressive Alternative'			]],
+		// [0										,	['Progressive Electronic'			]],
+			['Healing Music'					,	['Relaxation'						]],
+			['Healing Music'					,	['Self-Help & Development'			]],
+		// [0										,	['Solo Instrumental'				]],
+		// [0										,	['Space'							]],
+		// [-										,	['Spiritual'						]],
+		// [-										,	['Techno-Tribal'					]],
 	/* Rap */
 			['Hip-Hop'							,	['Rap'								]],
 		/* Alternative Rap */
-			['Alt. Rap'						,	['Alternative Rap'					]],
+			['Alt. Rap'							,	['Alternative Rap'					]],
 			// [0									,	['Afroswing'						]],
 			// [0									,	['Cloud Rap'						]],
 			// [0									,	['Grime'							]],
@@ -410,7 +392,7 @@ const music_graph_descriptors_allmusic = {
 		/* Hip-Hop/Urban */
 			// [0									,	['Hip-Hop/Urban'					]],
 			// [-									,	['Dirty Rap'						]],
-			['East Coast'					,	['East Coast Rap'					]],
+			['East Coast'						,	['East Coast Rap'					]],
 			// [*									,	['Golden Age'						]],
 			['Hardcore'							,	['Hardcore Rap'						]],
 			['Midwest'							,	['Midwest Rap'						]],
@@ -464,19 +446,19 @@ const music_graph_descriptors_allmusic = {
 		/* Asian Traditions */
 			// [0									,	['Asian Traditions'					]],
 			['Asian Folk_supergenre'			,	['Asian Folk'						]],
-			// [0									,	['Throat Singing'					]],
+			['Tuvan'							,	['Throat Singing'					]],
 		/* Brazilian Traditions */
 			// [0									,	['Brazilian Traditions'				]],
 			// [0									,	['Afoxe'							]],
 			// [0									,	['Afro-Brazilian'					]],
 			// [0									,	['Axe'								]],
-			// [0									,	['Bossa Nova'						]],
+			// [*									,	['Bossa Nova'						]],
 			// [0									,	['Brazilian Folk'					]],
 			// [0									,	['Brazilian Pop'					]],
 			// [0									,	['Carnival'							]],
-			// [0									,	['Forro'							]],
+			// [*									,	['Forro'							]],
 			// [0									,	['MPB'								]],
-			// [0									,	['Samba'							]],
+			// [*									,	['Samba'							]],
 			// [0									,	['Tropicalia'						]],
 		/* Caribbean Traditions */
 			// [0									,	['Caribbean Traditions'				]],
@@ -492,7 +474,7 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['Jamaican'							]],
 			// [0									,	['Junkanoo'							]],
 			// [0									,	['Martinique'						]],
-			// [0									,	['Mento'							]],
+			// [*									,	['Mento'							]],
 			// [0									,	['Party Soca'						]],
 			// [0									,	['Rapso'							]],
 			// [0									,	['Soca'								]],
@@ -511,7 +493,7 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['Celtic Gospel'					]],
 			// [*									,	['Celtic New Age'					]],
 			// [0									,	['Celtic Pop'						]],
-			// [0									,	['Celtic Rock'						]],
+			// [*									,	['Celtic Rock'						]],
 			// [0									,	['Contemporary Celtic'				]],
 			['Irish'							,	['Country & Irish'					]],
 			// [0									,	['Drinking Songs'					]],
@@ -562,7 +544,7 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['Kazakhstani'						]],
 			// [0									,	['Tajik'							]],
 			// [0									,	['Tibetan'							]],
-			// [0									,	['Tuvan'							]],
+			// [*									,	['Tuvan'							]],
 			// [0									,	['Uzbekistani'						]],
 		/* Chinese Traditions */
 			// [0									,	['Chinese Traditions'				]],
@@ -733,9 +715,9 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['Native South American'			]],
 			// [0									,	['Paraguayan'						]],
 			// [0									,	['Peruvian'							]],
-			// [0									,	['Peruvian Folk'					]],
+			// [*									,	['Peruvian Folk'					]],
 			// [0									,	['Quechua'							]],
-			// [0									,	['Tango'							]],
+			// [*									,	['Tango'							]],
 			// [0									,	['Uruguayan'						]],
 			// [0									,	['Vallenato'						]],
 			// [0									,	['Venezuelan'						]],
@@ -819,7 +801,7 @@ const music_graph_descriptors_allmusic = {
 			// [0									,	['Kora'								]],
 			// [0									,	['Makossa'							]],
 			// [0									,	['Malian Music'						]],
-			// [0									,	['Mbalax'							]],
+			// [*									,	['Mbalax'							]],
 			// [0									,	['Morna'							]],
 			// [0									,	['Nigerian'							]],
 			// [0									,	['Palm-Wine'						]],

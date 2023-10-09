@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/10/23
+//09/10/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -302,35 +302,68 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
 		{	// Cache
-			const options = ['bAscii', 'bTagsCache'];
+			const options = ['bAscii', 'bTagsCache','bAllMusicDescriptors'];
 			options.forEach((key, i) => {
 				if (key === 'bTagsCache') {return;}
-				const propObj = key === 'bTagsCache' ? sbd.panelProperties : properties;
+				const panelKeys = new Set(['bTagsCache', 'bAllMusicDescriptors', 'bLastfmDescriptors'])
+				const propObj = panelKeys.has(key) ? sbd.panelProperties : properties;
 				const entryText = propObj[key][0].substr(propObj[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '') + (key === 'bTagsCache' && !isFoobarV2 ? '\t-only Fb >= 2.0-' : '');
 				menu.newEntry({menuName, entryText, func: () => {
 					propObj[key][1] = !propObj[key][1];
 					overwriteProperties(propObj); // Updates panel
-					if (key === 'bAscii') {
+					let bLink = false;
+					let bReload = false;
+					switch (key) {
+						case 'bAscii': {
+							bLink = true;
+							break;
+						}
+						case 'bTagsCache': {
+							if (propObj.bTagsCache[1]) {
+								fb.ShowPopupMessage(
+									'This feature should only be enabled on foobar2000 versions >= 2.0 32 bit.' +
+									'\n\nPrevious versions already cached tags values, thus not requiring it. Only enable it in case low memory mode is used, if better performance is desired. See:\n' +
+									'https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Version_2.0_Beta_Change_Log#Beta_20' +
+									'\n\nWarning: it may behave badly on really big libraries (+100K tracks) or if thousands of tracks are tagged/edited at the same time.\nIf you experience crashes or RAM allocation failures, disable it.'
+								, 'Tags cache');
+								const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+								if (answer === popup.yes) {
+									menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
+								} else {
+									tagsCache.load();
+								}
+							} else {
+								tagsCache.unload();
+							}
+							break;
+						}
+						case 'bAllMusicDescriptors': {
+							bReload = true;
+							fb.ShowPopupMessage(
+								'Load substitutions and remap for All Music genres and styles.' +
+								'\n\nIn case tagging has not been done using Bio Panel or All Music sources, disable it.'
+							, 'All Music');
+							break;
+						}
+						case 'bLastfmDescriptors': {
+							bReload = true;
+							fb.ShowPopupMessage(
+								'Load substitutions and remap for Last.fm genres and styles.' +
+								'\n\nIn case tagging has not been done using Bio Panel or Last.fm sources, disable it.'
+							, 'Last.fm');
+							
+							break;
+						}
+					}
+					if (bLink || bReload) {
 						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
 						if (answer === popup.yes) {
-							menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
-						}
-					} else if (key === 'bTagsCache') {
-						if (propObj.bTagsCache[1]) {
-							fb.ShowPopupMessage(
-								'This feature should only be enabled on foobar2000 versions >= 2.0 32 bit.' +
-								'\n\nPrevious versions already cached tags values, thus not requiring it. Only enable it in case low memory mode is used, if better performance is desired. See:\n' +
-								'https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Version_2.0_Beta_Change_Log#Beta_20' +
-								'\n\nWarning: it may behave badly on really big libraries (+100K tracks) or if thousands of tracks are tagged/edited at the same time.\nIf you experience crashes or RAM allocation failures, disable it.'
-							, 'Tags cache');
-							const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
-							if (answer === popup.yes) {
-								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset tags cache');
-							} else {
-								tagsCache.load();
+							if (bLink) {
+								menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 							}
-						} else {
-							tagsCache.unload();
+							if (bReload) {
+								window.Reload();
+							}
 						}
 					}
 				}, flags: recipe.hasOwnProperty(key) || (key === 'bTagsCache' && !isFoobarV2) ? MF_GRAYED : MF_STRING});
