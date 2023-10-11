@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/10/23
+//10/10/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -122,9 +122,9 @@ const music_graph_descriptors = {
 		['House_supergenre'					,	['Melodic Techno-House','Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
 		['Trance_supergenre'				,	['Neo Trance','Epic Trance','Hardtrance','NRG','Hard NRG','Hard House','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Classic Trance','Acid Trance']],
 		['Downtempo_supergenre'				,	['Electronic Sufi','Synthwave','Vaporwave','Minimal Wave','Nu Jazz','Minimal Industrial','Digital Minimalism','Glitch','Ambient Breaks','Illbient','Chill-Out Downtempo','Ambient House','Ambient','Ambient Electronic','Ambient New Age','Nature Music','New Age','Neo-Classical New Age','Hang Music','Healing Music','New Age','New Acoustic','Dark Ambient','Dark Industrial','Bit Music','Synth','Muzak','Minimalism','Lounge','Exotica','Musique Concrete']],
-		['Classical Medieval Era_supergenre',	['Ballata','Estampie','Gregorian','Chant','Madrigal','Motet','Organum','Saltarero']],
-		['Classical Renaissance Era_supergenre',['Choral','Ballade','Canzona','Carol','Fantasia','Galliard','Intermedio','Lauda','Litany','Madrigal','Madrigal','Comedy','Madrigale Spirituale','Mass','Motet','Motet-Chanson','Opera','Pavane','Ricercar','Sequence','Tiento','Toccata']],
-		['Classical Baroque Era_supergenre',	['Allemande','Canon','Cantata','Chaconne','Concerto','Courante','Fugue','Classical Gavotte','Gigue','Mass','Minuet','Opera','Opera','Oratorio','Partita','Passacaglia','Passepied','Prelude','Sarabande','Sinfonia','Sonata','Suite','Sonatina']],
+		['Classical Medieval Era_supergenre',	['Ballata','Estampie','Gregorian','Chant','Madrigal','Motet','Organum','Saltarello']],
+		['Classical Renaissance Era_supergenre',['Choral','Ballade','Canzona','Carol','Fantasia','Galliard','Intermedio','Lauda','Litany','Madrigal','Comedy','Madrigale Spirituale','Mass','Motet','Motet-Chanson','Opera','Pavane','Ricercar','Sequence','Tiento','Toccata']],
+		['Classical Baroque Era_supergenre',	['Allemande','Canon','Cantata','Chaconne','Concerto','Courante','Fugue','Classical Gavotte','Gigue','Mass','Minuet','Opera','Oratorio','Partita','Passacaglia','Passepied','Prelude','Sarabande','Sinfonia','Sonata','Suite','Sonatina']],
 		['Classical Classical Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
 		['Classical Romantic Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
 		['Classical Modernist Era_supergenre',	['Avant-Garde Classical','Contemporary Classical','Neo-Classical','Third Stream','Ambient Classical']],
@@ -204,7 +204,13 @@ const music_graph_descriptors = {
 		['Neo Folk XL'						,	['Industrial Folk','Folk Metal','Pagan Folk']],
 		['Ambient XL'						,	['Ambient','Ambient Industrial','Nature Music','Ambient Rock','Ambient Folk','Ambient Electronic','Ambient Metal','Ambient New Age','Ambient Classical','Ambient Funk']],
 		['Chill Folk XL'					,	['Freak Folk', 'Ambient Folk', 'Dream Pop']],
-		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan','Classical Sufi']]
+		['Arabian Folk-Rock XL'				,	['Anatolian Rock','Desert Blues','Mauritanian Folk','Niger Folk','Sahrawi Folk','Tishoumaren','Tuvan','Classical Sufi']],
+		['Chamber Music XL'					,	['Bagatelle','Divertimento','Étude','Fantasy','Fantasia','Impromptu','Intermezzo','Classical Mazurka','Nocturne','Octet','Prelude','Quartet','Quintet','Rondo','Scherzo','Sonata','Suite','Canon','Fugue','Partita','Sonatina','Ricercar','Tiento','Toccata']],
+		['Orchestral Music XL'				,	['Sinfonia','Concerto','Music Hall','Requiem','Sinfonia Concertante','Symphony','Contemporary Classical']],
+		['Ballroom Music XL'				,	['Waltz','Allemande','Chaconne','Courante','Classical Gavotte','Gigue','Minuet','Galliard','Passacaglia','Passepied','Pavane','Saltarello','Classical Dance','Polonaise']],
+		['Poetry-Secular Music XL'			,	['Lied','Rhapsody','Serenade','Madrigal','Estampie','Ballata','Ballade','Canzona']],
+		['Choral-Spiritual Music XL'		,	['Mass','Gregorian','Chant','Motet','Organum','Choral','Lauda','Litany','Madrigale Spirituale','Motet-Chanson','Sequence']],
+		['Choral-Orchestral Music XL'		,	['Oratorio','Opera']]
 	],
 	/*
 		-> Influences: Special relations between genres and styles. Like origins, derivatives or things considered 'anti-influences'. 
@@ -327,7 +333,10 @@ const music_graph_descriptors = {
 		['Kuduro'							,	['Techno_supergenre']],
 		['Afro-Latin Ritual-Tribal'			,	['African Ritual-Tribal']],
 		['African Ritual-Tribal'			,	['Gnawa','Mbalax']],
-		['Melodic Techno-House'				,	['Progressive House']]
+		['Melodic Techno-House'				,	['Progressive House']],
+		['Fantasy'							,	['Ricercar','Tiento','Fantasia']],
+		['Tiento'							,	['Ricercar', 'Fantasia']],
+		['Fantasia'							,	['Ricercar']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
