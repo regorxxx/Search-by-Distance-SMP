@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//10/10/23
 
 /*
 	Helpers for the descriptors
@@ -56,12 +56,12 @@ music_graph_descriptors.getInfluences = function getInfluences(genreStyle) {
 	return idx !== -1 ? this.style_primary_origin[idx][1] : [];
 };
 
-music_graph_descriptors.nodeList = null;
-music_graph_descriptors.getNodeList = function getNodeList(bExtensive = true) {
+music_graph_descriptors.nodeSet = null;
+music_graph_descriptors.getNodeSet = function getNodeSet(bExtensive = true) {
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	if (bExtensive) {
-		if (!this.nodeList) {
-			this.nodeList = new Set(this.style_supergenre.flat(Infinity))
+		if (!this.nodeSet) {
+			this.nodeSet = new Set(this.style_supergenre.flat(Infinity))
 				.union(new Set(this.style_weak_substitutions.flat(Infinity)))
 				.union(new Set(this.style_substitutions.flat(Infinity)))
 				.union(new Set(this.style_cluster.flat(Infinity)));
@@ -69,23 +69,23 @@ music_graph_descriptors.getNodeList = function getNodeList(bExtensive = true) {
 	} else {
 		return new Set(this.style_supergenre.flat(Infinity).filter((sg) => !sg.endsWith('_supergenre')));
 	}
-	return this.nodeList;
+	return this.nodeSet;
 }
 
 music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
 	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
 	// Compare (- user exclusions - graph exclusions)
-	const missing = tags.difference(this.getNodeList());
+	const missing = tags.difference(this.getNodeSet());
 	return missing.size === 0;
 };
 
 music_graph_descriptors.filterArrWithGraph = function filterWithGraph(genreStyleArr) {
 	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
-	const present = tags.intersection(this.getNodeList());
+	const present = tags.intersection(this.getNodeSet());
 	return [...present];
 };
 
 // Skips set conversion and asciify
 music_graph_descriptors.filterSetWithGraph = function filterWithGraph(genreStyleSet) {
-	return genreStyleSet.intersection(this.getNodeList());
+	return genreStyleSet.intersection(this.getNodeSet());
 };

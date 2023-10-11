@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/10/23
+//10/10/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -198,7 +198,7 @@ music_graph_descriptors_culture.ommit = new Set(['Industrial_supergenre','Blues_
 // Debug
 music_graph_descriptors_culture.debug = function debug(graph = musicGraph()) {
 	const notFound = new Set();
-	music_graph_descriptors.getNodeList(false).forEach((node) => {
+	music_graph_descriptors.getNodeSet(false).forEach((node) => {
 		if (!this.getFirstNodeRegion(node)) {notFound.add(node);}
 	});
 	const notFoundNum = notFound.size;

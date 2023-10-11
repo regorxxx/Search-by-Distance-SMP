@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/10/23
+//10/10/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -340,9 +340,9 @@ function createConfigMenu(parent) {
 						case 'bAllMusicDescriptors': {
 							bReload = true;
 							fb.ShowPopupMessage(
-								'Load substitutions and remap for All Music genres and styles.' +
-								'\n\nIn case tagging has not been done using Bio Panel or All Music sources, disable it.'
-							, 'All Music');
+								'Load substitutions and remap for AllMusic genres and styles.' +
+								'\n\nIn case tagging has not been done using Bio Panel or AllMusic sources, disable it.'
+							, 'AllMusic');
 							break;
 						}
 						case 'bLastfmDescriptors': {

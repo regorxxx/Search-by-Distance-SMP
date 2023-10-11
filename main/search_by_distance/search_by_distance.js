@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/09/23
+//10/10/23
 
 /*
 	Search by Distance
@@ -141,7 +141,7 @@ const SearchByDistance_panelProperties = {
 	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
 	firstPopup				:	['Search by distance: Fired once', false],
 	descriptorCRC			:	['Graph Descriptors CRC', -1], // Calculated later on first time
-	bAllMusicDescriptors	:	['Load All Music descriptors?', false],
+	bAllMusicDescriptors	:	['Load AllMusic descriptors?', false],
 	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
 	bStartLogging 			:	['Startup logging', false],
 	bTagsCache				:	['Read tags from cache instead of files?', false]
@@ -202,14 +202,14 @@ if (!sbd.panelProperties.firstPopup[1]) {
 }
 
 /* 
-	Load additional descriptors: All Music, Last.fm, ...
+	Load additional descriptors: AllMusic, Last.fm, ...
 */
 [
-	{name: 'All Music', file: 'helpers\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors'},
-	{name: 'Last.fm', file: 'helpers\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors'}
+	{name: 'AllMusic', file: 'music_graph\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors'},
+	{name: 'Last.fm', file: 'music_graph\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors'}
 ].forEach((descr) => {
 	if (sbd.panelProperties[descr.prop][1]) {
-		if (_isFile(folders.xxx + descr.file)) {
+		if (_isFile(folders.xxx + 'main\\' + descr.file)) {
 			if (sbd.panelProperties.bStartLogging[1]) {console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);}
 			include('..\\' + descr.file);
 		}
@@ -217,7 +217,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 });
 
 /* 
-	Load additional descriptors: All Music, Last.fm, ...
+	Tags cache V2
 */
 if (sbd.panelProperties.bTagsCache[1]) {
 	if (typeof tagsCache === 'undefined') {
@@ -1329,7 +1329,7 @@ async function searchByDistance({
 					if (tag.bGraphDyn && valLen) {
 						if (bFilterWithGraph) {
 							handleTag[key].val.forEach((val) => {
-								if (!graphExclusions.has(val) && descr.getNodeList().has(val)) {handleTag.genreStyle.set.add(val);}
+								if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) {handleTag.genreStyle.set.add(val);}
 							});
 						} else {
 							handleTag[key].val.forEach((val) => {
