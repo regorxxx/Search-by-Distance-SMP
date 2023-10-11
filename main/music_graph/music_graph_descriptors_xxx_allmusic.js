@@ -1,75 +1,6 @@
 ﻿'use strict';
 //10/10/23
 
-/* TODO
-	Classical
-			Avant-Garde Music
-			Ballet
-			Band Music
-			Chamber Music
-			Choral
-			Classical Crossover
-			Concerto
-			Electronic/Computer Music
-			Fight Songs
-			Film Score
-			Keyboard
-			Marches
-			Military
-			Miscellaneous (Classical)
-			Opera
-			Orchestral
-			Show/Musical
-			Symphony
-			Vocal Music
-
-	Country
-			Alternative Country
-				Alt-Country
-				Americana
-			Contemporary Country
-				Bro-Country
-				Contemporary Bluegrass
-				Contemporary Country
-				Country Rap
-				Neo-Traditionalist Country
-				New Traditionalist
-				Red Dirt
-			Country-Pop
-				Country-Pop
-				Nashville Sound / Countrypolitan
-				Urban Cowboy
-			Honky Tonk
-				Bakersfield Sound
-				Honky Tonk
-				Truck Driving Country
-			Progressive Country
-				Country-Folk
-				Outlaw Country
-				Progressive Bluegrass
-				Progressive Country
-				Rodeo
-			Traditional Country
-				Bluegrass
-				Bluegrass-Gospel
-				Close Harmony
-				Country Boogie
-				Country Gospel
-				Cowboy
-				Early Country
-				Instrumental Country
-				Jug Band
-				Old-Timey
-				Square Dance
-				String Bands
-				Traditional Bluegrass
-				Traditional Country
-				Yodeling
-			Western Swing
-				Western Swing
-				Western Swing Revival
-*/
-
 const music_graph_descriptors_allmusic = {
 	style_substitutions: [
 	/* 	CODES:
@@ -77,39 +8,105 @@ const music_graph_descriptors_allmusic = {
 		-	->	Items which don't have an alternative term (reported as missing)
 		0	->	Items which are meant to be filtered (added to the exclusions s: [filter) 
 	*/
+	/* Classical */
+			['Avant-Garde Classical'			,	['Avant-Garde Music'				]],
+			['*'								,	['Ballet'							]],
+			['Orchestral Music XL'				,	['Band Music'						]],
+			['Chamber Music XL'					,	['Chamber Music'					]],
+			['*'								,	['Choral'							]],
+			['0'								,	['Classical Crossover'				]],
+			['*'								,	['Concerto'							]],
+			['0'								,	['Electronic/Computer Music'		]],
+			['0'								,	['Fight Songs'						]],
+			['0'								,	['Film Score'						]],
+			['0'								,	['Keyboard'							]],
+			['March'							,	['Marches'							]],
+			['Orchestral Music XL'				,	['Military'							]],
+			['0'								,	['Miscellaneous (Classical)'		]],
+			['*'								,	['Opera'							]],
+			['Orchestral Music XL'				,	['Orchestral'						]],
+			['0'								,	['Show/Musical'						]],
+			['*'								,	['Symphony'							]],
+			['Poetry-Secular Music XL'			,	['Vocal Music'						]],
+	/* Country */
+		/* Alternative Country */
+			['Alt. Country'						,	['Alternative Country'				]],
+			['Alt. Country'						,	['Alt-Country'						]],
+			['*'								,	['Americana'						]],
+		/* Contemporary Country */
+			['0'								,	['Bro-Country'						]],
+			['Bluegrass'						,	['Contemporary Bluegrass'			]],
+			['*'								,	['Contemporary Country'				]],
+			['-'								,	['Country Rap'						]], // https://www.allmusic.com/style/country-rap-ma0000013521
+			['Neo-Traditional Country'			,	['Neo-Traditionalist Country'		]],
+			['Neo-Traditional Country'			,	['New Traditionalist'				]],
+			['-'								,	['Red Dirt'							]], // https://www.allmusic.com/style/red-dirt-ma0000013522
+		/* Country-Pop */
+			['Country Pop'						,	['Country-Pop'						]],
+			['Nashville Sound'					,	['Nashville Sound / Countrypolitan'	]],
+			['Country Pop'						,	['Urban Cowboy'						]],
+		/* Honky Tonk */
+			['*'								,	['Bakersfield Sound'				]],
+			['*'								,	['Honky Tonk'						]],
+			['Country Rock'						,	['Truck Driving Country'			]],
+		/* Progressive Country */
+			['Country Folk'						,	['Country-Folk'						]],
+			['*'								,	['Outlaw Country'					]],
+			['*'								,	['Progressive Bluegrass'			]],
+			['-'								,	['Progressive Country'				]], // https://www.allmusic.com/style/progressive-country-ma0000002796
+			['-'								,	['Rodeo'							]], // https://www.allmusic.com/style/rodeo-ma0000012323
+		/* Traditional Country */
+			['*'								,	['Bluegrass'						]],
+			['Bluegrass'						,	['Bluegrass-Gospel'					]],
+			['*'								,	['Close Harmony'					]],
+			['*'								,	['Country Boogie'					]],
+			['Traditional Country'				,	['Country Gospel'					]],
+			['0'								,	['Cowboy'							]],
+			['Traditional Country'				,	['Early Country'					]],
+			['Traditional Country'				,	['Instrumental Country'				]],
+			['-'								,	['Jug Band'							]], // https://www.allmusic.com/style/jug-band-ma0000012351
+			['*'								,	['Old-Timey'						]],
+			['-'								,	['Square Dance'						]], // https://www.allmusic.com/style/square-dance-ma0000011873
+			['-'								,	['String Bands'						]], // https://www.allmusic.com/style/string-bands-ma0000002880
+			['Bluegrass'						,	['Traditional Bluegrass'			]],
+			['*'								,	['Traditional Country'				]],
+			['-'								,	['Yodeling'							]], // https://www.allmusic.com/style/yodeling-ma0000012228
+		/* Western Swing */
+			['-'								,	['Western Swing'					]], // https://www.allmusic.com/style/western-swing-ma0000002935
+			['-'								,	['Western Swing Revival'			]],
 	/* Electronic */
 		/* Downtempo */
-			['0'								,	['Downtempo'						]],
-			['0'								,	['Ambient Dub'						]],
+			['Chill-Out Downtempo'				,	['Downtempo'						]],
+			['Ambient Electronic'				,	['Ambient Dub'						]],
 			['*'								,	['Dark Ambient'						]],
-			['0'								,	['Downbeat'							]],
-			['0'								,	['Experimental Ambient'				]],
+			['-'								,	['Downbeat'							]],
+			['Ambient'							,	['Experimental Ambient'				]],
 			['*'								,	['Illbient'							]],
 			['*'								,	['Synthwave'						]],
-			['0'								,	['Trip-Hop'							]],
-			['0'								,	['Vaporware'						]],
+			['Trip Hop'							,	['Trip-Hop'							]],
+			['Vaporwave'						,	['Vaporware'						]],
 		/* Electronica */
-			['0'								,	['Baile Funk'						]],
+			['-'								,	['Baile Funk'						]],
 			['*'								,	['Big Beat'							]],
-			['0'								,	['Breakcore'						]],
-			['0'								,	['Clubjazz'							]],
+			['-'								,	['Breakcore'						]],
+			['-'								,	['Clubjazz'							]],
 			['0'								,	['EDM'								]],
 			['0'								,	['Electronica'						]],
-			['0'								,	['Funky Breaks'						]],
-			['0'								,	['Hi-NRG'							]],
-			['0'								,	['Newbeat'							]],
-			['0'								,	['Nu Breaks'						]],
-			['0'								,	['Trap (EDM)'						]],
+			['-'								,	['Funky Breaks'						]],
+			['-'								,	['Hi-NRG'							]],
+			['New Beat'							,	['Newbeat'							]],
+			['Nu Skool Breaks'					,	['Nu Breaks'						]],
+			['EDM Trap'							,	['Trap (EDM)'						]],
 		/* Experimental Electronic */
-			['0'								,	['Experimental Electronic'			]],
-			['0'								,	['Baseline'							]],
-			['0'								,	['Chiptunes'						]],
-			['0'								,	['Electro-Acoustic'					]],
-			['0'								,	['Experimental Club'				]],
-			['0'								,	['Experimental Dub'					]],
+			['-'								,	['Experimental Electronic'			]],
+			['-'								,	['Baseline'							]],
+			['Bit Music'						,	['Chiptunes'						]],
+			['-'								,	['Electro-Acoustic'					]],
+			['-'								,	['Experimental Club'				]],
+			['-'								,	['Experimental Dub'					]],
 			['*'								,	['Glitch'							]],
 			['*'								,	['IDM'								]],
-			['0'								,	['Microsound'						]],
+			['-'								,	['Microsound'						]],
 		/* House */
 			['*'								,	['House'							]],
 			['*'								,	['Acid House'						]],
@@ -117,15 +114,15 @@ const music_graph_descriptors_allmusic = {
 			['*'								,	['Ambient House'					]],
 			['*'								,	['Deep House'						]],
 			['*'								,	['French House'						]],
-			['0'								,	['Garage'							]],
-			['0'								,	['Gqom'								]],
-			['0'								,	['Jazz-House'						]],
-			['0'								,	['Juke / Footwork'					]],
-			['0'								,	['Left-Field House'					]],
+			['Garage House'						,	['Garage'							]],
+			['-'								,	['Gqom'								]],
+			['-'								,	['Jazz-House'						]],
+			['Juke'								,	['Juke / Footwork'					]],
+			['-'								,	['Left-Field House'					]],
 			['*'								,	['Microhouse'						]],
 			['*'								,	['Progressive House'				]],
-			['0'								,	['Tech-House'						]],
-			['0'								,	['Tribal House'						]],
+			['Tech House'								,	['Tech-House'						]],
+			['-'								,	['Tribal House'						]],
 			['*'								,	['UK Garage'						]],
 		/* Jungle / Drum'n'Bass */
 			['Drum & Bass_supergenre'			,	['Jungle / Drum\'n\'Bass'			]],
@@ -379,7 +376,7 @@ const music_graph_descriptors_allmusic = {
 			['*'								,	['Underground Rap'					]],
 		/* Hip-Hop/Urban */
 			['0'								,	['Hip-Hop/Urban'					]],
-			['-'								,	['Dirty Rap'						]],
+			['0'								,	['Dirty Rap'						]],
 			['East Coast'						,	['East Coast Rap'					]],
 			['*'								,	['Golden Age'						]],
 			['Hardcore'							,	['Hardcore Rap'						]],
@@ -404,7 +401,7 @@ const music_graph_descriptors_allmusic = {
 			['Miami Bass'						,	['Bass Music'						]],
 			['0'								,	['Bay Area Rap'						]],
 			['0'								,	['Contemporary Rap'					]],
-			['Dirty Rap'						,	['Dirty South'						]],
+			['South Coast'						,	['Dirty South'						]],
 			['-'								,	['Drill'							]],
 			['Psychedelic Rap'					,	['G-Funk'							]],
 			['Gangsta'							,	['Gangsta Rap'						]],
@@ -1092,7 +1089,7 @@ const music_graph_descriptors_allmusic = {
 			['*'								,	['Dance'							]],
 			['0'								,	['Club/Dance'						]],
 			['Dance Pop'						,	['Dance-Pop'						]],
-			['DanceRock'						,	['Dance-Rock'						]],
+			['*'								,	['Dance-Rock'						]],
 			['Eurodance'						,	['Euro-Dance'						]],
 			['0'								,	['Exercise'							]],
 			['0'								,	['Latin Freestyle'					]],
@@ -1264,6 +1261,7 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 		const bDebug = typeof SearchByDistance_panelProperties !== 'undefined' && !SearchByDistance_panelProperties.bGraphDebug[1];
 		const noAlt = bDebug ? new Set() : null;
 		const present = bDebug ? new Set() : null;
+		const subs = bDebug ? new Set() : null;
 		allm.style_substitutions.forEach((pair, i, thisArr) => {
 			const node = parent.asciify(pair[1][0]);
 			switch (pair[0]) {
@@ -1279,6 +1277,9 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 					allm.map_distance_exclusions.add(node);
 					thisArr[i] = null;
 					break;
+				default:
+					if (bDebug) {subs.add(pair[0]);}
+					break;
 			}
 		});
 		// Check all new additions are consistent with the existing values
@@ -1287,6 +1288,12 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 				const missing = present.difference(parent.filterSetWithGraph(present));
 				if (missing.size) {
 					console.log('Missing items on graph:\n\t' + [...missing].join(', '));
+				}
+			}
+			if (subs.size) {
+				const error = subs.difference(parent.filterSetWithGraph(subs));
+				if (error.size) {
+					console.log('Items flagged as substitution but missing on graph:\n\t' + [...error].join(', '));
 				}
 			}
 			if (noAlt.size) {
