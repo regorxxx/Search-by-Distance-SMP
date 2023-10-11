@@ -41,7 +41,8 @@
 
 ## [Unreleased][]
 ### Added
-- Descriptors: All Music support linking their genre/styles to the graph with substitutions. These tags are usually added by [Biography](https://github.com/Wil-B/Biography/) script. It may be enabled at the tags remap submenu of the customizable button. Setting is applied per panel (i.e. shared between different buttons on the same bar).
+- Descriptors: AllMusic support linking their genre/styles to the graph with substitutions. These tags are usually added by [Biography](https://github.com/Wil-B/Biography/) script. It may be enabled at the tags remap submenu of the customizable button. Setting is applied per panel (i.e. shared between different buttons on the same bar).
+-Descriptors: added 'Chamber Music XL', Orchestral Music XL', 'Ballroom Music XL', 'Poetry-Secular Music XL', 'Choral-Spiritual Music XL' and 'Choral-Orchestral Music XL' classical music style clusters.
 ### Changed
 ### Removed
 ### Fixed
@@ -445,7 +446,7 @@
 
 ## [2.1.2] - 2022-04-13
 ### Added
-- Descriptors: preliminary All Music and Last.fm support by linking their genre/styles to the graph with substitutions (wip).
+- Descriptors: preliminary AllMusic and Last.fm support by linking their genre/styles to the graph with substitutions (wip).
 - HTML: Changed CSS layout to adjust sizes according to window.
 - HTML: Added statistics calculation. To run it, use the associated button, results will be shown on a popup and cached for the current session. Statistics button is now animated while processing
 - HTML: Added reset view button.
