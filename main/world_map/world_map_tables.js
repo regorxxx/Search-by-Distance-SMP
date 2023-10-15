@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/09/23
+//15/10/23
 
 /* 
 	World Map
@@ -62,6 +62,19 @@ function getCountryISO(country) {
 		}
 	}
 	return isoCode;
+}
+
+function getCountryName(iso) {
+	let country = '';
+	if (iso && iso.length) {
+		if (isoMapRev.has(iso.toUpperCase())) {
+			country = isoMapRev.get(iso.toUpperCase());
+		} else {
+			if (isoMap.has(iso.toLowerCase())) {country = iso;}
+			else if (nameReplacers.has(iso.toLowerCase())) {country = nameReplacers.get(iso.toLowerCase());}
+		} 
+	}
+	return country;
 }
 
 // Country tables ISO 3166-1 Alpha-3 

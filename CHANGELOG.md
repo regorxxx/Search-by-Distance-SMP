@@ -42,8 +42,9 @@
 ## [Unreleased][]
 ### Added
 - Descriptors: AllMusic support linking their genre/styles to the graph with substitutions. These tags are usually added by [Biography](https://github.com/Wil-B/Biography/) script. It may be enabled at the tags remap submenu of the customizable button. Setting is applied per panel (i.e. shared between different buttons on the same bar).
--Descriptors: added 'Chamber Music XL', Orchestral Music XL', 'Ballroom Music XL', 'Poetry-Secular Music XL', 'Choral-Spiritual Music XL' and 'Choral-Orchestral Music XL' classical music style clusters.
+- Descriptors: added 'Chamber Music XL', Orchestral Music XL', 'Ballroom Music XL', 'Poetry-Secular Music XL', 'Choral-Spiritual Music XL' and 'Choral-Orchestral Music XL' classical music style clusters.
 ### Changed
+- Helpers: updated helpers
 ### Removed
 ### Fixed
 
