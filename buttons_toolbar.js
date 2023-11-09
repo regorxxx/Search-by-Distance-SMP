@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/10/23
+//09/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -43,23 +43,24 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'regorxxx', version: '3.2.0', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
-	name:				['Name of config json file', 'buttons_' + randomString(5)],
-	toolbarColor: 		['Toolbar color', -1],
-	textColor:	 		['Buttons\' text color', buttonsBar.config.textColor],
-	firstPopup:			['Toolbar: Fired once', false],
-	bShowId:			['Show Ids on tooltip', false],
-	bBgButtons:			['Buttons with background', true],
-	orientation:		['Toolbar orientation', 'x'],
-	bReflow:			['Reflow according to width / height', false],
-	bAlignSize:			['Align buttons according to size', true],
-	scale:				['UI scale', _scale(0.7, false)],
-	activeColor:		['Buttons\' active icon color', buttonsBar.config.activeColor],
-	animationColors:	['Buttons\' animation colors', JSON.stringify(buttonsBar.config.animationColors)],
-	bIconMode:			['Show only button\'s icons', false],
-	bIconModeExpand:	['Expand to full button on hover', false],
-	buttonColor:		['Buttons\' color', -1],
-	transparency:		['Buttons\' transparency', 0]
+	name:				['Name of config json file', 'buttons_' + randomString(5), {func: isString}],
+	toolbarColor: 		['Toolbar color', -1, {func: isInt}],
+	textColor:	 		['Buttons\' text color', buttonsBar.config.textColor, {func: isInt}],
+	firstPopup:			['Toolbar: Fired once', false, {func: isBoolean}],
+	bShowId:			['Show Ids on tooltip', false, {func: isBoolean}],
+	bBgButtons:			['Buttons with background', true, {func: isBoolean}],
+	orientation:		['Toolbar orientation', 'x', {func: isString}],
+	bReflow:			['Reflow according to width / height', false, {func: isBoolean}],
+	bAlignSize:			['Align buttons according to size', true, {func: isBoolean}],
+	scale:				['UI scale', _scale(0.7, false), {func: (v) => isFloat(v) || isInt(v)}],
+	activeColor:		['Buttons\' active icon color', buttonsBar.config.activeColor, {func: isInt}],
+	animationColors:	['Buttons\' animation colors', JSON.stringify(buttonsBar.config.animationColors), {func: isJSON}],
+	bIconMode:			['Show only button\'s icons', false, {func: isBoolean}],
+	bIconModeExpand:	['Expand to full button on hover', false, {func: isBoolean}],
+	buttonColor:		['Buttons\' color', -1, {func: isInt}],
+	transparency:		['Buttons\' transparency', 0, {func: isInt, range: [[0, 100]]}]
 };
+Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
 barProperties = getPropertiesPairs(barProperties);
 
