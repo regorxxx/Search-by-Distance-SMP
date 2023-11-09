@@ -1,9 +1,11 @@
 ﻿'use strict'
-//04/03/23
+//09/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_file.js');
+include('..\\..\\helpers-external\\namethatcolor\\ntc.js');
+const Chroma = require('..\\helpers-external\\chroma.js\\chroma-ultra-light.min'); // Relative to helpers folder
 
 function createButtonsMenu(name) {
 	const menu = new _menu();
@@ -127,9 +129,10 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'sep'});
 	{
 		const menuName = menu.newMenu('Colors...');
-		menu.newEntry({menuName, entryText: 'Pressing Ctrl resets selected setting:', flags: MF_GRAYED});
+		const getColorName = (val) => {return (val !== -1 ? ntc.name(Chroma(val).hex())[1] : '-none-');}
+		menu.newEntry({menuName, entryText: 'UI colors: (Ctrl + Click to reset)', flags: MF_GRAYED});
 		menu.newEntry({menuName, entryText: 'sep'});
-		menu.newEntry({menuName, entryText: 'Set custom bar color...', func: () => {
+		menu.newEntry({menuName, entryText: 'Set custom bar color...' + '\t[' + getColorName(barProperties.toolbarColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
 				barProperties.toolbarColor[1] = -1;
 				buttonsBar.config.bToolbar = false; // buttons_xxx.js
@@ -142,7 +145,7 @@ function createButtonsMenu(name) {
 			overwriteProperties(barProperties);
 			window.Repaint();
 		}});
-		menu.newEntry({menuName, entryText: 'Set custom button color...', func: () => {
+		menu.newEntry({menuName, entryText: 'Set custom button color...' + '\t[' + getColorName(barProperties.buttonColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
 				barProperties.buttonColor[1] = -1;
 				buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
@@ -153,7 +156,7 @@ function createButtonsMenu(name) {
 			overwriteProperties(barProperties);
 			window.Repaint();
 		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
-		menu.newEntry({menuName, entryText: 'Set custom text color...', func: () => {
+		menu.newEntry({menuName, entryText: 'Set custom text color...' + '\t[' + getColorName(barProperties.textColor[1]) + ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
 				barProperties.textColor[1] = buttonsBar.config.textColor = buttonsBar.config.default.buttonColor;
 			} else {
@@ -164,7 +167,7 @@ function createButtonsMenu(name) {
 			window.Repaint();
 		}});
 		menu.newEntry({menuName, entryText: 'sep'});
-		menu.newEntry({menuName, entryText: 'Set active button color...', func: () => {
+		menu.newEntry({menuName, entryText: 'Set active button color...' + '\t[' + getColorName(barProperties.activeColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
 				barProperties.activeColor[1] = buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
 			} else {
