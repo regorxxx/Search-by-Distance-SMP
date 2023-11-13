@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/11/23
+//13/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -58,7 +58,13 @@ let barProperties = {
 	bIconMode:			['Show only button\'s icons', false, {func: isBoolean}],
 	bIconModeExpand:	['Expand to full button on hover', false, {func: isBoolean}],
 	buttonColor:		['Buttons\' color', -1, {func: isInt}],
-	transparency:		['Buttons\' transparency', 0, {func: isInt, range: [[0, 100]]}]
+	transparency:		['Buttons\' transparency', 0, {func: isInt, range: [[0, 100]]}],
+	offset:				['Buttons\' offset', JSON.stringify({button: {x: 0, y: 0}, text: {x: 0, y: 0}, icon: {x: 0, y: 0}}), {func: isJSON}],
+	bFullSize:			['Full size buttons', false, {func: isBoolean}],
+	hoverColor:			['Buttons\' hover color', buttonsBar.config.hoverColor, {func: isInt}],
+	bDynHoverColor:		['Buttons\' hover dynamic color', true, {func: isBoolean}],
+	bHoverGrad:			['Buttons\' hover gradient', true, {func: isBoolean}],
+	bBorders:			['Buttons\' borders', true, {func: isBoolean}],
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
@@ -73,9 +79,13 @@ buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1 ? true : fals
 buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6;
 buttonsBar.config.textColor = barProperties.textColor[1];
 buttonsBar.config.buttonColor = barProperties.buttonColor[1];
+buttonsBar.config.hoverColor = barProperties.hoverColor[1];
+buttonsBar.config.bDynHoverColor = barProperties.bDynHoverColor[1];
+buttonsBar.config.bHoverGrad = barProperties.bHoverGrad[1];
 buttonsBar.config.toolbarTransparency = barProperties.transparency[1];
 buttonsBar.config.activeColor = barProperties.activeColor[1];
 buttonsBar.config.animationColors = JSON.parse(barProperties.animationColors[1]);
+buttonsBar.config.bBorders = barProperties.bBorders[1];
 // Show Id on tooltips
 buttonsBar.config.bShowID = barProperties.bShowId[1];
 // Orientation
@@ -89,8 +99,10 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
 buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons';
-// Assign size
-buttonsBar.config.scale =  barProperties.scale[1];
+// Assign size and pos
+buttonsBar.config.scale = barProperties.scale[1];
+buttonsBar.config.offset = JSON.parse(barProperties.offset[1]);
+buttonsBar.config.bFullSize = barProperties.bFullSize[1];
 
 // First popup
 if (!barProperties.firstPopup[1]) {

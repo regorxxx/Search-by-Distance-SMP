@@ -1,5 +1,5 @@
 ﻿'use strict'
-//09/11/23
+//13/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -134,9 +134,8 @@ function createButtonsMenu(name) {
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set custom bar color...' + '\t[' + getColorName(barProperties.toolbarColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
-				barProperties.toolbarColor[1] = -1;
 				buttonsBar.config.bToolbar = false; // buttons_xxx.js
-				buttonsBar.config.toolbarColor = buttonsBar.config.default.toolbarColor;
+				barProperties.toolbarColor[1] = buttonsBar.config.toolbarColor = barProperties.toolbarColor[3];
 			} else {
 				barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
 				buttonsBar.config.bToolbar = true; // buttons_xxx.js
@@ -147,8 +146,7 @@ function createButtonsMenu(name) {
 		}});
 		menu.newEntry({menuName, entryText: 'Set custom button color...' + '\t[' + getColorName(barProperties.buttonColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
-				barProperties.buttonColor[1] = -1;
-				buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
+				barProperties.buttonColor[1] = buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
 			} else {
 				barProperties.buttonColor[1] = utils.ColourPicker(window.ID, barProperties.buttonColor[1]);
 				buttonsBar.config.buttonColor = barProperties.buttonColor[1]; // buttons_xxx.js
@@ -166,6 +164,37 @@ function createButtonsMenu(name) {
 			overwriteProperties(barProperties);
 			window.Repaint();
 		}});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Set custom hover color...' + '\t[' + getColorName(barProperties.hoverColor[1]) + ']', func: () => {
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				barProperties.hoverColor[1] = buttonsBar.config.hoverColor = buttonsBar.config.default.hoverColor;
+			} else if (utils.IsKeyPressed(VK_SHIFT)) {
+				barProperties.hoverColor[1] = buttonsBar.config.hoverColor = -1;
+			} else {
+				barProperties.hoverColor[1] = utils.ColourPicker(window.ID, barProperties.hoverColor[1]);
+				buttonsBar.config.hoverColor = barProperties.hoverColor[1]; // buttons_xxx.js
+			}
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] && !barProperties.bDynHoverColor[1] ? MF_STRING : MF_GRAYED});
+		menu.newEntry({menuName, entryText: 'Use dynamic hover color', func: () => {
+			buttonsBar.config.bDynHoverColor = barProperties.bDynHoverColor[1] = !barProperties.bDynHoverColor[1]; // buttons_xxx.js
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
+		menu.newCheckMenu(menuName, 'Use dynamic hover color', void(0), () => {return barProperties.bDynHoverColor[1];});
+		menu.newEntry({menuName, entryText: 'Use hover color gradient', func: () => {
+			buttonsBar.config.bHoverGrad = barProperties.bHoverGrad[1] = !barProperties.bHoverGrad[1]; // buttons_xxx.js
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] && (barProperties.hoverColor[1] !== -1 || barProperties.bDynHoverColor[1]) ? MF_STRING : MF_GRAYED});
+		menu.newCheckMenu(menuName, 'Use hover color gradient', void(0), () => {return barProperties.bHoverGrad[1];});
+		menu.newEntry({menuName, entryText: 'Use buttons\' borders on hover', func: () => {
+			buttonsBar.config.bBorders = barProperties.bBorders[1] = !barProperties.bBorders[1];
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}, flags: !barProperties.bBgButtons[1] && barProperties.buttonColor[1] === -1 ? MF_STRING : MF_GRAYED});
+		menu.newCheckMenu(menuName, 'Use buttons\' borders on hover', void(0), () => {return barProperties.bBorders[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set active button color...' + '\t[' + getColorName(barProperties.activeColor[1])+ ']', func: () => {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -202,13 +231,22 @@ function createButtonsMenu(name) {
 			overwriteProperties(barProperties);
 			window.Repaint();
 		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
-		menu.newEntry({menuName, entryText: 'No background buttons', func: () => {
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Use themed buttons', func: () => {
 			barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
+			if (buttonsBar.useThemeManager) {
+				let gTheme;
+				try {gTheme = window.CreateThemeManager('Button');} catch(e){gTheme = null;}
+				if (!gTheme) {
+					buttonsBar.config.bUseThemeManager = false; 
+					console.popup('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons', 'Toolbar');
+				}
+			}
 			overwriteProperties(barProperties);
 			buttonsBar.config.partAndStateID = barProperties.bBgButtons[1] ? 1 : 6; // buttons_xxx.js
 			window.Repaint();
 		}});
-		menu.newCheckMenu(menuName, 'No background buttons', void(0), () => {return !barProperties.bBgButtons[1];});
+		menu.newCheckMenu(menuName, 'Use themed buttons', void(0), () => {return barProperties.bBgButtons[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reset all configuration...', func: () => {
 			barProperties.toolbarColor[1] = -1;
@@ -228,6 +266,67 @@ function createButtonsMenu(name) {
 	{
 		const menuName = menu.newMenu('Size and placement...');
 		const orientation = barProperties.orientation[1].toLowerCase();
+		menu.newEntry({menuName, entryText: 'UI placement: (Ctrl + Click to reset)', flags: MF_GRAYED});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
+			let input;
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				input = buttonsBar.config.default.scale;
+			} else {
+				input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
+				if (input === null) {return;}
+				for (let key in buttonsBar.buttons) {
+					if (!Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {continue;}
+					buttonsBar.buttons[key].changeScale(input);
+				}
+			}
+			buttonsBar.config.scale = input; // buttons_xxx.js
+			barProperties.scale[1] = buttonsBar.config.scale;
+			overwriteProperties(barProperties);
+			window.Repaint();
+			buttonSizeCheck();
+		}});
+		menu.newEntry({menuName, entryText: 'sep'});
+		menu.newEntry({menuName, entryText: 'Set button offset...' + '\t[' + Object.values(buttonsBar.config.offset.button) + ']', func: () => {
+			let input;
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				input = buttonsBar.config.default.offset.button;
+			} else {
+				input = Input.json('object', buttonsBar.config.offset.button, 'Enter values:\n(integer finite numbers)', 'Buttons bar', '{"x": 4, "y" : 6}', [v => Number.isFinite(v) && Number.isInteger(v)]);
+				if (input === null) {return;}
+			}
+			buttonsBar.config.offset.button = input; // buttons_xxx.js
+			barProperties.offset[1] = JSON.stringify(buttonsBar.config.offset);
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'Set text offset...' + '\t[' + Object.values(buttonsBar.config.offset.text) + ']', func: () => {
+			let input;
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				input = buttonsBar.config.default.offset.text;
+			} else {
+				input = Input.json('object', buttonsBar.config.offset.text, 'Enter values:\n(integer finite numbers)', 'Buttons bar', '{"x": 4, "y" : 6}', [v => Number.isFinite(v) && Number.isInteger(v)]);
+				if (input === null) {return;}
+			}
+			buttonsBar.config.offset.text = input; // buttons_xxx.js
+			barProperties.offset[1] = JSON.stringify(buttonsBar.config.offset);
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'Set icon offset...' + '\t[' + Object.values(buttonsBar.config.offset.icon) + ']', func: () => {
+			let input;
+			if (utils.IsKeyPressed(VK_CONTROL)) {
+				input = buttonsBar.config.default.offset.icon;
+			} else {
+				input = Input.json('object', buttonsBar.config.offset.icon, 'Enter values:\n(integer finite numbers)', 'Buttons bar', '{"x": 4, "y" : 6}', [v => Number.isFinite(v) && Number.isInteger(v)]);
+				if (input === null) {return;}
+			}
+			buttonsBar.config.offset.icon = input; // buttons_xxx.js
+			barProperties.offset[1] = JSON.stringify(buttonsBar.config.offset);
+			overwriteProperties(barProperties);
+			window.Repaint();
+		}});
+		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
 			barProperties.bReflow[1] = !barProperties.bReflow[1];
 			overwriteProperties(barProperties);
@@ -240,23 +339,15 @@ function createButtonsMenu(name) {
 			overwriteProperties(barProperties);
 			buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
 			window.Repaint();
-		}});
+		}, flags: barProperties.bFullSize[1] ? MF_GRAYED: MF_STRING});
 		menu.newCheckMenu(menuName, 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), void(0), () => {return barProperties.bAlignSize[1];});
-		menu.newEntry({menuName, entryText: 'sep'});
-		menu.newEntry({menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
-			const input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
-			if (input === null) {return;}
-			for (let key in buttonsBar.buttons) {
-				if (!Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {continue;}
-				buttonsBar.buttons[key].changeScale(input);
-			}
-			buttonsBar.config.scale = input; // buttons_xxx.js
-			barProperties.scale[1] = buttonsBar.config.scale;
+		menu.newEntry({menuName, entryText: 'Full size buttons', func: () => {
+			barProperties.bFullSize[1] = !barProperties.bFullSize[1];
 			overwriteProperties(barProperties);
+			buttonsBar.config.bFullSize = barProperties.bFullSize[1]; // buttons_xxx.js
 			window.Repaint();
-			buttonSizeCheck();
 		}});
-		menu.newCheckMenu(menuName, 'Normalize buttons ' + (orientation === 'x' ? 'height' : 'width'), void(0), () => {return barProperties.bAlignSize[1];});
+		menu.newCheckMenu(menuName, 'Full size buttons', void(0), () => {return barProperties.bFullSize[1];});
 	}
 	{
 		const menuName = menu.newMenu('Other UI configuration...');
