@@ -48,7 +48,7 @@
 - Buttons bar: added custom button hover color and customization.
 - Buttons bar: added custom offset for buttons along X/Y axis.
 - Buttons bar: added full size mode for buttons, which will use full Width/Height according to Y/X orientation.
-- Added setting to disable popups about feature not being supported by the OS. Found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json', by changing 'bPopupOnCheckSOFeatures'. By default popups are always shown. This setting will never be exposed within foobar, only at this file.
+- Added setting to disable popups related to features not being supported by the OS (at startup). Found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json', by changing 'bPopupOnCheckSOFeatures'. By default popups are always shown. This setting will never be exposed within foobar, only at this file.
 ### Changed
 - UI: toolbar's color menu entries now show the color name along the menu entry. 'none' equals to no color.
 - Buttons bar: renamed background buttons to 'Use themed buttons', which depends on the windows theme.
