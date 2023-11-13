@@ -45,8 +45,13 @@
 - Descriptors: AllMusic support linking their genre/styles to the graph with substitutions. These tags are usually added by [Biography](https://github.com/Wil-B/Biography/) script. It may be enabled at the tags remap submenu of the customizable button. Setting is applied per panel (i.e. shared between different buttons on the same bar).
 - Descriptors: added 'Chamber Music XL', Orchestral Music XL', 'Ballroom Music XL', 'Poetry-Secular Music XL', 'Choral-Spiritual Music XL' and 'Choral-Orchestral Music XL' classical music style clusters.
 - Buttons bar: added some safe-checks to panel properties.
+- Buttons bar: added custom button hover color and customization.
+- Buttons bar: added custom offset for buttons along X/Y axis.
+- Buttons bar: added full size mode for buttons, which will use full Width/Height according to Y/X orientation.
+- Added setting to disable popups about feature not being supported by the OS. Found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json', by changing 'bPopupOnCheckSOFeatures'. By default popups are always shown. This setting will never be exposed within foobar, only at this file.
 ### Changed
 - UI: toolbar's color menu entries now show the color name along the menu entry. 'none' equals to no color.
+- Buttons bar: renamed background buttons to 'Use themed buttons', which depends on the windows theme.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
