@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/11/23
+//15/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -14,6 +14,7 @@
 */
 
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
+var version = '3.2.0';
 
 {
 	const dependencies = [
@@ -40,7 +41,7 @@ var bLoadTags = true; // Note this must be added before loading helpers! See but
 	else {dependencies.forEach((file) => {include('buttons\\' + file);});}
 }
 
-try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'regorxxx', version: '3.2.0', features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
+try {window.DefineScript('Playlist Tools: Buttons Bar', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {} //May be loaded along other buttons
 
 let barProperties = {
 	name:				['Name of config json file', 'buttons_' + randomString(5), {func: isString}],
@@ -65,6 +66,7 @@ let barProperties = {
 	bDynHoverColor:		['Buttons\' hover dynamic color', true, {func: isBoolean}],
 	bHoverGrad:			['Buttons\' hover gradient', true, {func: isBoolean}],
 	bBorders:			['Buttons\' borders', true, {func: isBoolean}],
+	bAutoUpdateCheck:	['Automatically check updates?', globSettings.bAutoUpdateCheck, {func: isBoolean}, globSettings.bAutoUpdateCheck],
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
@@ -208,3 +210,16 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 	!buttonsPath.length && loadButtonsFile() && includeButtons();
 	window.Repaint();
 });
+
+// Update check
+if (barProperties.bAutoUpdateCheck[1]) {
+	include('helpers\\helpers_xxx_web_update.js');
+	buttonsBar.getUpdateList().forEach((btn, i) => {
+		setTimeout(checkUpdate, 120000 + 60000 * i, {
+			...(btn.scriptName	? {scriptName:	btn.scriptName} : {}),
+			...(btn.repository	? {repository:	btn.repository} : {}),
+			...(btn.version		? {version:		btn.version} : {}), // If there is no version, it's retrieved from the toolbar version
+			bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb
+		});
+	})
+}

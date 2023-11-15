@@ -1,11 +1,12 @@
 ﻿'use strict';
-//26/09/23
+//15/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\buttons_xxx_menu.js');
+var version = '5.0.0';
 
-try {window.DefineScript('Search by Distance Buttons', {author:'xxx', features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
+try {window.DefineScript('Search by Distance Buttons', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
 
 include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -113,7 +114,7 @@ addButton({
 			const args = {...defArgs, minScoreFilter: 45, scoreFilter: 50, graphDistance: music_graph_descriptors.intra_supergenre * 4};
 			searchByDistance(args);
 		}
-	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix with different genres but same mood from any date'}),
+	}, null, void(0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void(0), {descriptionText: 'Random mix with different genres but same mood from any date'}, void(0), void(0), {scriptName: 'Search-by-Distance-SMP', version}),
 });
 
 // Helper

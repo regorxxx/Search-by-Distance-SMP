@@ -1,5 +1,5 @@
 ﻿'use strict'
-//13/11/23
+//15/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -430,6 +430,42 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
 		}
+	}
+	menu.newEntry({entryText: 'sep'});
+	{
+		const subMenu = menu.newMenu('Updates...');
+		menu.newEntry({menuName: subMenu, entryText: 'Automatically check for updates', func: () => {
+			barProperties.bAutoUpdateCheck[1] = !barProperties.bAutoUpdateCheck[1];
+			overwriteProperties(barProperties);
+			if (barProperties.bAutoUpdateCheck[1]) {
+				if (typeof checkUpdate === 'undefined') {include('helpers\\helpers_xxx_web_update.js');}
+				const args = buttonsBar.getUpdateList().map((btn) => {
+					return {
+						...(btn.scriptName	? {scriptName:	btn.scriptName} : {}),
+						...(btn.repository	? {repository:	btn.repository} : {}),
+						...(btn.version		? {version:		btn.version} : {}), // If there is no version, it's retrieved from the toolbar version
+						bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb, bDisableWarning: false
+					};
+				});
+				Promise.serial(args, checkUpdate);
+			}
+		}});
+		menu.newCheckMenu(subMenu, 'Automatically check for updates', void(0),  () => barProperties.bAutoUpdateCheck[1]);
+		menu.newEntry({menuName: subMenu, entryText: 'sep'});
+		menu.newEntry({menuName: subMenu, entryText: 'Check for updates...',  func: () => {
+			if (typeof checkUpdate === 'undefined') {include('helpers\\helpers_xxx_web_update.js');}
+			const args = buttonsBar.getUpdateList().map((btn) => {
+				return {
+					...(btn.scriptName	? {scriptName:	btn.scriptName} : {}),
+					...(btn.repository	? {repository:	btn.repository} : {}),
+					...(btn.version		? {version:		btn.version} : {}), // If there is no version, it's retrieved from the toolbar version
+					bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb, bDisableWarning: false
+				};
+			});
+			Promise.serial(args, checkUpdate).then((results) => {
+				if (results.every((result) => !result)) {fb.ShowPopupMessage('No updates found.', window.Name);}
+			});
+		}});
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

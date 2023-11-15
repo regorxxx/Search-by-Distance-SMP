@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/11/23
+//15/11/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -51,16 +51,20 @@ buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config)
 buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}, last: -1};
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
-buttonsBar.listKeys = []; // Button names grouped per script (and found at buttons obj)
+buttonsBar.listKeys = []; // Button names grouped per script (and found at this.buttons)
 buttonsBar.propertiesPrefixes = new Set(); // Global properties names prefixes
 buttonsBar.buttons = {}; // Global list
 // Others (internal use)
 buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
-buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600);  // Global tooltip
+buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600); // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
 buttonsBar.useThemeManager = function useThemeManager() {
 	return (this.config.bUseThemeManager && this.config.partAndStateID === 1);
+};
+buttonsBar.getUpdateList = function getUpdateList() {
+	const links = new Set();
+	return Object.values(this.buttons).map((btn) => btn.update).filter((btn) => (btn.scriptName && !links.has(btn.scriptName) && links.add(btn.scriptName)) || (btn.repository && !links.has(btn.repository) && links.add(btn.repository)));
 }
 
 function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.orientation, recalc = true) {
@@ -106,7 +110,8 @@ function themedButton(
 		gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
 		variables = null,
 		listener = null,
-		onInit = null
+		onInit = null,
+		update = {scriptName: '', repository: ''}
 	) {
 	this.name = '';
 	this.state = state ? state : buttonStates.normal;
@@ -141,6 +146,11 @@ function themedButton(
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
+	this.update = {
+		scriptName: update && update.hasOwnProperty('scriptName') ? update.scriptName : '', 
+		repository: update && update.hasOwnProperty('repository') ? update.repository : '',
+		version: update && update.hasOwnProperty('version') ? update.version : ''
+	};
 	
 	this.containXY = function (x, y) {
 		return (this.currX <= x) && (x <= this.currX + this.currW) && (this.currY <= y) && (y <= this.currY + this.currH);
