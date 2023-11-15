@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/11/23
+//15/11/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -530,7 +530,7 @@ const music_graph_descriptors = {
 		['Electrorock'						,	['Electro Rock','Electro-Rock'		]],
 		['Bit Music'						,	['Chiptune'							]],
 		['Neo Trance'						,	['Nu Trance'						]],
-		['Kurudo'							,	['Kurudu'							]],
+		['Kuduro'							,	['Kurudu'							]],
 		['Melodic Techno-House'				,	['Melodic Techno','Melodic House'	]],
 		['Branle'							,	['Branle d\'Ossau','Branle de Noirmoutier']]
 	],
