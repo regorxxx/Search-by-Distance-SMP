@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [5.1.1](#511---2023-11-16)
 - [5.1.0](#510---2023-11-15)
 - [5.0.0](#500---2023-10-05)
 - [4.7.0](#470---2023-09-25)
@@ -45,6 +46,17 @@
 ### Changed
 ### Removed
 ### Fixed
+
+## [5.1.1] - 2023-11-16
+### Added
+### Changed
+- Buttons bar: transparency input popup now has a description for the values.
+- Descriptors: improved debug routines to avoid situations where a susbstitution term doesn't exist in the graph (see below).
+- Descriptors: improved pathfinder routines to throw -with a descriptive error- when a path is not found due to some genre not being connected to the graph (see below).
+### Removed
+### Fixed
+- Descriptors: added 'Kawaii Metal' and 'Darksynth' styles to cultural map.
+- Descriptors: crash in some cases due to malformed descriptor. 'Kuduro' genre was not added properly as substitution. 
 
 ## [5.1.0] - 2023-11-15
 ### Added
@@ -670,7 +682,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...HEAD
+[5.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...v5.0.0
 [4.7.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...v4.7.0
