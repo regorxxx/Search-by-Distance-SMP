@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/03/23
+//15/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar2000
@@ -38,7 +38,7 @@ function getDistanceFromPath(mygraph, path) {
 
 // Finds distance between two nodes, Path is calculated on the fly.
 // O(0.55 * ln(n))
-function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influenceMethod = 'adjacentNodes' /* direct, zeroNodes, adjacentNodes, fullPath */) {
+function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influenceMethod = 'adjacentNodes' /* direct, zeroNodes, adjacentNodes, fullPath */, bJointGraph = true) {
 	const method = 'NBA'; // Minimal speed differences found for our weighted graph...
 	let distanceGraph = Infinity;
 	let influenceDistanceGraph = 0;
@@ -80,6 +80,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 	path = pathFinder.find(keyOne, keyTwo);
 	distanceGraph = getDistanceFromPath(mygraph, path);
 	
+	if (bJointGraph && (!path || !path.length)) {throw new Error('calcGraphDistance: no path found for keys ' + keyOne + ' ' + keyTwo + '\tExecute graph debugging to find the error');}
 	if (bUseInfluence) { 
 		// Checks links between pairs of nodes to find if they are (anti)influences
 		// For ex: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues
