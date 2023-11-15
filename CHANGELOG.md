@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [5.1.0](#510---2023-11-15)
 - [5.0.0](#500---2023-10-05)
 - [4.7.0](#470---2023-09-25)
 - [4.6.0](#460---2023-09-20)
@@ -40,6 +41,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [5.1.0] - 2023-11-15
 ### Added
 - Auto-update: added -optional- automatic checks for updates on script load; enabled by default. Compares version of current file against GitHub repository. Manual checking can also be found at the settings menu. For buttons within the toolbar every button will check for updates independently (although the toolbar menu has an entry for batch checking). Setting may also be globally switched at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json', by changing 'bAutoUpdateCheck'. It will apply by default to any new installed script (previous scripts will still need to be manually configured to change them).
 - Descriptors: AllMusic support linking their genre/styles to the graph with substitutions. These tags are usually added by [Biography](https://github.com/Wil-B/Biography/) script. It may be enabled at the tags remap submenu of the customizable button. Setting is applied per panel (i.e. shared between different buttons on the same bar).
@@ -663,7 +670,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...HEAD
+[5.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...v5.0.0
 [4.7.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.5.1...v4.6.0
