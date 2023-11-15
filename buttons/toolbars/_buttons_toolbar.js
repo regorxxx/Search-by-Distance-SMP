@@ -14,7 +14,7 @@
 */
 
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
-var version = '3.2.0';
+var version = '3.3.0';
 
 {
 	const dependencies = [
