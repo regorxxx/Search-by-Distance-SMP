@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/07/23
+//15/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -438,7 +438,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	// Check that all weak substitutions terms are also on any superGenre (otherwise we are creating another layer of nodes)
 	let bFound;
 	const superGenreNumbers = music_graph_descriptors.style_supergenre.length;
-	music_graph_descriptors.style_weak_substitutions.forEach( (nodePair) => {
+	music_graph_descriptors.style_weak_substitutions.forEach((nodePair) => {
 		{	
 			let node = nodePair[0];
 			bFound = false;
@@ -465,11 +465,36 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			}
 		}
 	});
-	// Check that all nodes on style clusters are also on any superGenre (otherwise we are creating another layer of nodes)
+	// Check that all substitutions terms are also on any superGenre (otherwise we are creating a false node)
 	const styleClusterNumbers = music_graph_descriptors.style_cluster.length;
 	const superGenreClusterNumbers = music_graph_descriptors.style_supergenre_cluster.length;
 	const superGenreSuperClusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length;
-	music_graph_descriptors.style_cluster.forEach( (nodePair) => {
+	music_graph_descriptors.style_substitutions.forEach((nodePair) => {
+		let node = nodePair[0];
+		bFound = false;
+		for (let i = superGenreNumbers; i--;) {
+			if (bFound) {break;}
+			if (music_graph_descriptors.style_supergenre[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+		}
+		for (let i = styleClusterNumbers; i--;) {
+			if (bFound) {break;}
+			if (music_graph_descriptors.style_cluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+		}
+		for (let i = superGenreClusterNumbers; i--;) {
+			if (bFound) {break;}
+			if (music_graph_descriptors.style_supergenre_cluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+		}
+		for (let i = superGenreSuperClusterNumbers; i--;) {
+			if (bFound) {break;}
+			if (music_graph_descriptors.style_supergenre_supercluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+		}
+		if (!bFound) {
+			console.log('music_graph_descriptors_xxx Warning: \'style_substitutions\' has nodes not found on \'style_supergenre\'. Check \'Graph nodes and links\' section\n' + '	' +  node);
+			bWarning = true;
+		}
+	});
+	// Check that all nodes on style clusters are also on any superGenre (otherwise we are creating another layer of nodes)
+	music_graph_descriptors.style_cluster.forEach((nodePair) => {
 		const nodeNumbers = nodePair[1].length;
 		for (let i = nodeNumbers; i--;) {
 			let node = nodePair[1][i];
