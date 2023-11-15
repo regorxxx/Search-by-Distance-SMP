@@ -213,7 +213,15 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 
 // Update check
 if (barProperties.bAutoUpdateCheck[1]) {
-	include('helpers\\helpers_xxx_web_update.js');
+	{
+		const dependencies = [
+			'helpers\\helpers_xxx_web_update.js',
+		];
+		let bIncludeRel = true;
+		try {include('..\\..\\helpers\\helpers_xxx_dummy.js');} catch(e) {bIncludeRel = false;}
+		if (bIncludeRel) {dependencies.forEach((file) => {include('..\\..\\' + file);});}
+		else {dependencies.forEach((file) => {include(file);});}
+	}
 	buttonsBar.getUpdateList().forEach((btn, i) => {
 		setTimeout(checkUpdate, 120000 + 60000 * i, {
 			...(btn.scriptName	? {scriptName:	btn.scriptName} : {}),
