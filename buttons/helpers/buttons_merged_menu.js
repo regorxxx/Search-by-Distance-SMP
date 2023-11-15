@@ -1,5 +1,5 @@
 ﻿'use strict'
-//15/11/23
+//16/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -224,7 +224,7 @@ function createButtonsMenu(name) {
 			if (utils.IsKeyPressed(VK_CONTROL)) {
 				barProperties.transparency[1] = buttonsBar.config.toolbarTransparency = buttonsBar.config.default.toolbarTransparency;
 			} else {
-				const input = Input.number('int positive', buttonsBar.config.toolbarTransparency, 'Enter value:\n(0 to 100)', 'Buttons bar', 50, [n => n <= 100]);
+				const input = Input.number('int positive', buttonsBar.config.toolbarTransparency, 'Enter value:\n0 is transparent, 100 is opaque.\n(0 to 100)', 'Buttons bar', 50, [n => n <= 100]);
 				if (input === null) {return;}
 				barProperties.transparency[1] = buttonsBar.config.toolbarTransparency = input;
 			}
