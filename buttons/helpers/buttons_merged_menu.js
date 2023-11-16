@@ -193,7 +193,7 @@ function createButtonsMenu(name) {
 			buttonsBar.config.bBorders = barProperties.bBorders[1] = !barProperties.bBorders[1];
 			overwriteProperties(barProperties);
 			window.Repaint();
-		}, flags: !barProperties.bBgButtons[1] && barProperties.buttonColor[1] === -1 ? MF_STRING : MF_GRAYED});
+		}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED});
 		menu.newCheckMenu(menuName, 'Use buttons\' borders on hover', void(0), () => {return barProperties.bBorders[1];});
 		menu.newEntry({menuName, entryText: 'sep'});
 		menu.newEntry({menuName, entryText: 'Set active button color...' + '\t[' + getColorName(barProperties.activeColor[1])+ ']', func: () => {
