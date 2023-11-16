@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/23
+//16/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -12,6 +12,7 @@ function createConfigMenu(parent) {
 	const menu = new _menu(); // To avoid collisions with other buttons and check menu
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
+	const defTags = JSON.parse(properties.tags[3]);
 	// Process recipe
 	let recipe = {};
 	if (properties.recipe[1].length) {recipe = processRecipe(properties.recipe[1], tags);}
@@ -140,6 +141,7 @@ function createConfigMenu(parent) {
 			const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
 			const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
 			const baseTag = tags[key];
+			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
 			const obj = {
 				bIsDyngenreRecipe: (key === 'dynGenre' && bIsDyngenreMethodRecipe),
 				bIsDyngenreProp: (key === 'dynGenre' && bIsDyngenreMethodProp),
@@ -256,8 +258,22 @@ function createConfigMenu(parent) {
 					tags[key] = input;
 					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties); // Updates panel
+					testBaseTags(tags);
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
 			}
+			{	// Restore
+				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && !tags.hasOwnProperty(key);
+				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
+				menu.newEntry({menuName: subMenuName, entryText: 'Restore defaults...' + (bRecipe ? '\t(forced by recipe)' : ''), func: () => {
+					if (WshShell.Popup('Restore tag\'s settings to default?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+						tags[key] = defTags[key];
+						properties.tags[1] = JSON.stringify(tags);
+						overwriteProperties(properties); // Updates panel
+						testBaseTags(tags);
+					}
+				}, flags: bRecipe ? MF_GRAYED : MF_STRING});
+			}
+			menu.newEntry({menuName: subMenuName, entryText: 'sep'});
 			{	// Delete
 				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && !tags.hasOwnProperty(key);
 				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
@@ -265,6 +281,7 @@ function createConfigMenu(parent) {
 					delete tags[key];
 					properties.tags[1] = JSON.stringify(tags);
 					overwriteProperties(properties); // Updates panel
+					testBaseTags(tags);
 				}, flags: bRecipe || bDefTag ? MF_GRAYED : MF_STRING});
 			}
 		});
@@ -293,6 +310,7 @@ function createConfigMenu(parent) {
 				tags[name] = nTag;
 				properties.tags[1] = JSON.stringify(tags);
 				overwriteProperties(properties); // Updates panel
+				testBaseTags(tags);
 			}});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
@@ -389,6 +407,7 @@ function createConfigMenu(parent) {
 						menu.btn_up(void(0), void(0), void(0), 'Debug and testing\\Reset link cache');
 					}
 				}
+				testBaseTags(newTags);
 			}});
 		}
 	}
