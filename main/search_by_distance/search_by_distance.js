@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//17/11/23
 
 /*
 	Search by Distance
@@ -541,6 +541,7 @@ function testBaseTags(baseTags) {
 	return result.valid;
 }
 
+// Test default tags
 testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
 
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
@@ -627,7 +628,7 @@ async function searchByDistance({
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Tags check
 		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
-		// Test default tags
+		// Test tags
 		if (!testBaseTags(tags)) {return;}
 		// Recipe check
 		const bUseRecipe = !!(recipe && (typeof recipe === 'string' && recipe.length || Object.keys(recipe).length));

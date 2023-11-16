@@ -52,6 +52,8 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 	if (!sbd.panelProperties.firstPopup[1]) {
 		doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(properties);
 	}
+	// Test tags
+	testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 }
 
 /*

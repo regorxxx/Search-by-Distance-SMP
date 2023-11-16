@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//17/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -32,6 +32,9 @@ doOnce('Update SBD cache', debounce(updateCache, 3000))({properties: newButtonsP
 if (!sbd.panelProperties.firstPopup[1]) {
 	doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(newButtonsProperties);
 }
+
+// Test tags
+testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 
 /*
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
