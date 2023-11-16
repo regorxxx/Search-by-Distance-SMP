@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [5.1.2](#512---2023-11-16)
 - [5.1.1](#511---2023-11-16)
 - [5.1.0](#510---2023-11-15)
 - [5.0.0](#500---2023-10-05)
@@ -42,6 +43,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [5.1.2] - 2023-11-16
 ### Added
 - Configuration: 'Restore defaults' menu entry at tag configuration.
 - Configuration: base tags checking at init, when running the tool or editing tags in some way. A descriptive popup will show instructions about what to do if an error is found (see below).
@@ -686,7 +693,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...HEAD
+[5.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v4.7.0...v5.0.0
