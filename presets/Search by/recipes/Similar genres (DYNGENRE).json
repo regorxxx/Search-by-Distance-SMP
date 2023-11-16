@@ -42,7 +42,5 @@
 		}
 	},
 	"scoreFilter": 70,
-	"method": "DYNGENRE",
-	"dyngenreWeight": 10,
-	"dyngenreRange": 1
+	"method": "DYNGENRE"
 }
