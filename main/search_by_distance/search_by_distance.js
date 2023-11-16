@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/23
+//16/11/23
 
 /*
 	Search by Distance
@@ -66,7 +66,7 @@ const SearchByDistance_properties = {
 	tags					:	['Tags used for scoring', JSON.stringify({
 		genre:				{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
 		style:				{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'virtual', 'absRange'], range: 1},
+		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'virtual', 'absRange'], range: 1},
 		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3},
 		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50},
@@ -468,9 +468,12 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 	if (tags) {
 		if (recipe.tags.hasOwnProperty('*')) {
 			for (let key in tags) {
-				for (let prop in tags['*']) {
+				for (let prop in tags['*']) { // Recipe's tags missing some property
 					if (!tags[key].hasOwnProperty(prop)) {tags[key][prop] = tags['*'][prop];}
 				}
+			}
+			for (let key in baseTags) { // Base tags not on recipe
+				if (!tags.hasOwnProperty(key)) {tags[key] = tags['*'];}
 			}
 		}
 	}
@@ -528,6 +531,17 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 	if (!result.valid) {result.report.splice(0, 0, 'Recipe non valid: ' + recipe.name + (path ? '\n' + path : '') + '\n');}
 	return result;
 }
+
+function testBaseTags(baseTags) {
+	const result = testRecipe({json: {tags: {'*': {}}}, baseTags});
+	if (!result.valid) {
+		result.report[0] = 'Error on tags settings.\nTo fix it, restore defaults on affected tags (customizable button).\nIf the error continues, report it as a bug.\n------------------------------------------------------------------------';
+		console.popup(result.report.join('\n'), 'Search by distance');
+	}
+	return result.valid;
+}
+
+testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
 
 // 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
@@ -613,6 +627,8 @@ async function searchByDistance({
 		const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 		// Tags check
 		if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
+		// Test default tags
+		if (!testBaseTags(tags)) {return;}
 		// Recipe check
 		const bUseRecipe = !!(recipe && (typeof recipe === 'string' && recipe.length || Object.keys(recipe).length));
 		const recipeProperties = {};
