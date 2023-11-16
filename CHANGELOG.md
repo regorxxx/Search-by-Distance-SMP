@@ -46,6 +46,7 @@
 ### Added
 ### Changed
 ### Removed
+- Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
 
 ## [5.1.2] - 2023-11-16
