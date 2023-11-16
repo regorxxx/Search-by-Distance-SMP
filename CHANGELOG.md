@@ -45,9 +45,11 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
 ### Removed
 - Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
+- Presets: non valid keys error on 'Similar genres (DYNGENRE)' recipe. Issue #16
 
 ## [5.1.2] - 2023-11-16
 ### Added
