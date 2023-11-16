@@ -43,9 +43,13 @@
 
 ## [Unreleased][]
 ### Added
+- Configuration: 'Restore defaults' menu entry at tag configuration.
+- Configuration: base tags checking at init, when running the tool or editing tags in some way. A descriptive popup will show instructions about what to do if an error is found (see below).
 ### Changed
 ### Removed
 ### Fixed
+- Buttons bar: border setting was grayed out when the buttons color had been set.
+- "Tag missing multi-value type (multiple, single): dynGenre" warnings with dynGenre recipes, due to missing key at the base tags at properties. Use the 'Restore defaults' menu entry above for dynGenre tag to fix it on previous installations, new installations will use the right values automatically.
 
 ## [5.1.1] - 2023-11-16
 ### Added
