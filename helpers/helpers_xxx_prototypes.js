@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/10/23
+//17/11/23
 
 /* 
 	Objects
@@ -296,7 +296,7 @@ if (!Promise.allSettled) {
 	});
 }
 
-// Promise.serial(['arg1', 'arg2',...], asyncFunc).then(...)
+// Promise.serial(['arg1', 'arg2',...], asyncFunc, timeout).then(...)
 // Process in chunks with [...].chunk(1000) for low latency non-blocking async processing
 Object.defineProperty(Promise, 'serial', {
 	enumerable: false,
@@ -314,7 +314,7 @@ Object.defineProperty(Promise, 'serial', {
 	}
 });
 
-// Promise.parallel(['arg1', 'arg2',...], asyncFunc).then(...)
+// Promise.parallel(['arg1', 'arg2',...], asyncFunc, timeout).then(...)
 Object.defineProperty(Promise, 'parallel', {
 	enumerable: false,
 	configurable: false,
@@ -431,7 +431,7 @@ function _b(value) {
 }
 
 function _t(tag) {
-	return tag.indexOf('%') !== -1 ? tag : '%' + tag + '%';
+	return tag.indexOf('%') !== -1 || tag.indexOf('$') !== -1 ? tag : '%' + tag + '%';
 }
 
 function _bt(tag) {
