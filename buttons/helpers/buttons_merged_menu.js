@@ -1,5 +1,5 @@
 ﻿'use strict'
-//16/11/23
+//19/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -350,7 +350,7 @@ function createButtonsMenu(name) {
 		menu.newCheckMenu(menuName, 'Full size buttons', void(0), () => {return barProperties.bFullSize[1];});
 	}
 	{
-		const menuName = menu.newMenu('Other UI configuration...');
+		const menuName = menu.newMenu('Other UI settings...');
 		menu.newEntry({menuName, entryText: 'Show properties IDs on tooltip', func: () => {
 			barProperties.bShowId[1] = !barProperties.bShowId[1];
 			overwriteProperties(barProperties);
@@ -430,6 +430,15 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
 		}
+	}
+	menu.newEntry({entryText: 'sep'});
+	{
+		const subMenu = menu.newMenu('Other settings...');
+		menu.newEntry({menuName: subMenu, entryText: 'Asynchronous loading (startup)', func: () => {
+			barProperties.bLoadAsync[1] = !barProperties.bLoadAsync[1];
+			overwriteProperties(barProperties);
+		}});
+		menu.newCheckMenu(subMenu, 'Asynchronous loading (startup)', void(0),  () => barProperties.bLoadAsync[1]);
 	}
 	menu.newEntry({entryText: 'sep'});
 	{

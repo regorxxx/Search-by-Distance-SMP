@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//19/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -67,6 +67,7 @@ let barProperties = {
 	bHoverGrad:			['Buttons\' hover gradient', true, {func: isBoolean}],
 	bBorders:			['Buttons\' borders', true, {func: isBoolean}],
 	bAutoUpdateCheck:	['Automatically check updates?', globSettings.bAutoUpdateCheck, {func: isBoolean}, globSettings.bAutoUpdateCheck],
+	bLoadAsync:			['Asynchronous loading?', true, {func: isBoolean}],
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
@@ -175,30 +176,46 @@ function loadButtonsFile(bStartup = false) {
 	return buttonsPath.length;
 }
 
+const includeButton = (() => {
+	const bProcessed = new Set();
+	return function includeButton(buttonPath) {
+		if (_isFile(buttonPath)) {
+			include(buttonPath, {always_evaluate: true});
+			const newKeys = [];
+			Object.keys(buttonsBar.buttons).forEach((key) => {
+				if (!bProcessed.has(key)) {
+					bProcessed.add(key);
+					newKeys.push(key);
+				}
+			});
+			buttonsBar.listKeys.push(newKeys);
+			window.Repaint();
+		} else {
+			console.log(buttonPath + ' not loaded');
+		}
+	}
+})()
+
 function includeButtons() {
 	if (buttonsPath.length) {
-		const bProcessed = new Set();
-		for (let i = 0; i < buttonsPath.length; i++) {
-			if (_isFile(buttonsPath[i])) {
-				include(buttonsPath[i], {always_evaluate: true});
-				const newKeys = [];
-				Object.keys(buttonsBar.buttons).forEach((key) => {
-					if (!bProcessed.has(key)) {
-						bProcessed.add(key);
-						newKeys.push(key);
-					}
-				});
-				buttonsBar.listKeys.push(newKeys);
-			} else {
-				console.log(buttonsPath[i] + ' not loaded');
-			}
-		}
+		for (let i = 0; i < buttonsPath.length; i++) {includeButton(buttonsPath[i]);}
 		console.log('Buttons loaded: ' + buttonsBar.listKeys.flat(Infinity).join(', '));
+		return true;
 	}
+	return false;
+}
+
+function includeButtonsAsync(timeout = 100) {
+	if (buttonsPath.length) {
+		return Promise.serial(buttonsPath, includeButton, timeout)
+			.then(() => {console.log('Buttons loaded: ' + buttonsBar.listKeys.flat(Infinity).join(', '));})
+	}
+	return Promise.resolve(false);
 }
 
 let buttonsPath = [];
-loadButtonsFile(true) && includeButtons();
+if (barProperties.bLoadAsync[1]) {loadButtonsFile(true) && includeButtonsAsync();}
+else {loadButtonsFile(true) && includeButtons()}
 
 addEventListener('on_paint', (gr) => {
 	if (!buttonsPath.length) {
