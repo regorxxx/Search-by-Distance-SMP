@@ -44,6 +44,7 @@
 
 ## [Unreleased][]
 ### Added
+- Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
 ### Changed
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
 ### Removed

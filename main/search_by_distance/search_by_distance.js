@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/11/23
+//19/11/23
 
 /*
 	Search by Distance
@@ -55,7 +55,6 @@ include('..\\filter_and_query\\remove_duplicates.js');
 include('..\\sort\\scatter_by_tags.js');
 include('..\\..\\helpers\\callbacks_xxx.js');
 include('search_by_distance_extra.js');
-
 
 checkCompatible('1.6.1', 'smp');
 
@@ -136,7 +135,7 @@ const SearchByDistance_panelProperties = {
 	bGraphDebug 			:	['Warnings about links/nodes set wrong', false],
 	bSearchDebug			:	['Enables debugging console logs', false],
 	bProfile 				:	['Enables profiling console logs', false],
-	bShowQuery 				:	['Enables query console logs', false],	
+	bShowQuery 				:	['Enables query console logs', false],
 	bBasicLogging 			:	['Enables basic console logs', true],
 	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
 	firstPopup				:	['Search by distance: Fired once', false],
@@ -232,7 +231,7 @@ if (sbd.panelProperties.bTagsCache[1]) {
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
-// if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
+if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMissmatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
@@ -244,7 +243,7 @@ if (bMissmatchCRC) {
 	sbd.panelProperties.descriptorCRC[1] = descriptorCRC;
 	overwriteProperties(sbd.panelProperties); // Updates panel
 }
-// if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
+if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 // Start cache
 var cacheLinkSet;
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
@@ -2035,7 +2034,7 @@ async function searchByDistance({
 			let playlistNameEval;
 			const bIsTF =  /(%.*%)|(\$.*\(.*\))/.test(playlistName);
 			if (bUseTheme) {
-				const themeRegexp = /%sbd_theme%/gi;
+				const themeRegexp = /%SBD_THEME%/gi;
 				if (bIsTF && themeRegexp.test(playlistName)) {
 					playlistNameEval = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + theme.name +')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
 				} else {
@@ -2140,7 +2139,7 @@ function saveCache(cacheMap, path) {
 }
 
 function loadCache(path) {
-	let cacheMap = new Map();
+	let cacheMap;
 	if (_isFile(path)) {
 		if (utils.GetFileSize(path) > 400000000) {console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
 		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  utf8);
@@ -2153,7 +2152,7 @@ function loadCache(path) {
 			cacheMap = new Map(obj);
 		}
 	}
-	return cacheMap;
+	return (cacheMap || new Map());
 }
 
 // Process nested recipes
