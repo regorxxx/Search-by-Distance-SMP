@@ -49,6 +49,8 @@
 ### Changed
 - Descriptors: extended debug tests for accents, ASCII compatibility and capitalization for all entries (including AllMusic).
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
+- Helpers: updated helpers.
+- Console: reduced max log file size to 1 MB.
 ### Removed
 - Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
