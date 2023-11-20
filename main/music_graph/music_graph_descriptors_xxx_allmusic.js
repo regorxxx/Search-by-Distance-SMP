@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/23
+//20/11/23
 
 const music_graph_descriptors_allmusic = {
 	style_substitutions: [
@@ -362,7 +362,7 @@ const music_graph_descriptors_allmusic = {
 			['-'								,	['Spiritual'						]],
 			['-'								,	['Techno-Tribal'					]],
 	/* Rap */
-			['Hip-Hop'							,	['Rap'								]],
+			['*'								,	['Rap'								]],
 		/* Alternative Rap */
 			['Alt. Rap'							,	['Alternative Rap'					]],
 			['0'								,	['Afroswing'						]],
@@ -379,7 +379,7 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Dirty Rap'						]],
 			['East Coast'						,	['East Coast Rap'					]],
 			['*'								,	['Golden Age'						]],
-			['Hardcore'							,	['Hardcore Rap'						]],
+			['*'								,	['Hardcore Rap'						]],
 			['Midwest'							,	['Midwest Rap'						]],
 			['Old-School'						,	['Old-School Rap'					]],
 			['West Coast'						,	['West Coast Rap'					]],
@@ -875,7 +875,7 @@ const music_graph_descriptors_allmusic = {
 			['-'								,	['Lovers Rock'						]],
 			['-'								,	['Nyahbinghi'						]],
 			['0'								,	['Political Reggae'					]],
-			['Ragga Hip-Hop'						,	['Ragga'							]],
+			['Ragga Hip-Hop'					,	['Ragga'							]],
 			['-'								,	['Reggae-Pop'						]],
 			['*'								,	['Rocksteady'						]],
 			['*'								,	['Roots Reggae'						]],
@@ -1059,7 +1059,7 @@ const music_graph_descriptors_allmusic = {
 			['Krautrock'						,	['Kraut Rock'						]],
 			['*'								,	['Neo-Prog'							]],
 			['Noise Rock'						,	['Noise-Rock'						]],
-			['Progressive Rock'					,	['Prog-Rock'						]],
+			['Progressive Rock XL'				,	['Prog-Rock'						]],
 		/* Asian Pop */
 			['-'								,	['Asian Pop'						]],
 			['-'								,	['C-Pop'							]],
@@ -1153,8 +1153,8 @@ const music_graph_descriptors_allmusic = {
 			['Industrial Metal'					,	['Industrial Alternative Metal'		]],
 			['Metalcore'						,	['Alternative Metalcore'			]],
 			['Neo-Classical Metal'				,	['Neo-Classical Alternative Metal'	]],
-			['British Metal'					,	['New Wave of British Heavy Alternative Metal']],
-			['Nu Metal'							,	['Nü Alternative Metal'				]],
+			['British Metal'					,	['New Wave of British Heavy Alternative Metal','New Wave Of British Heavy Alternative Metal']], // Add proper capitalization
+			['Nu Metal'							,	['Nü Alternative Metal','Nu Alternative Metal']], // Add asciified version
 			['Pop Metal'						,	['Pop-Alternative Metal'			]],
 			['Post-Metal'						,	['Post-Alternative Metal'			]],
 			['Power Metal'						,	['Power Alternative Metal'			]],
