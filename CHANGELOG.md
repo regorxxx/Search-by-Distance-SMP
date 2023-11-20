@@ -45,12 +45,15 @@
 ## [Unreleased][]
 ### Added
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
+- Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
 ### Changed
+- Descriptors: extended debug tests for accents, ASCII compatibility and capitalization for all entries (including AllMusic).
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
 ### Removed
 - Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
 - Presets: non valid keys error on 'Similar genres (DYNGENRE)' recipe. Issue #16
+- Descriptors: cleanup of duplicates entries and other minor errors in substitutions, influences, etc.
 
 ## [5.1.2] - 2023-11-16
 ### Added
