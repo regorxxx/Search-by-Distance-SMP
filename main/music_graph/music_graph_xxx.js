@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/23
+//20/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -573,7 +573,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		}
 	});
 	// Check that all superGenre Clusters are present in other descriptors
-	music_graph_descriptors.style_supergenre_cluster.forEach( (nodePair) => {
+	music_graph_descriptors.style_supergenre_cluster.forEach((nodePair) => {
 		let node = nodePair[0];
 		if (node === 'SKIP') {return;}
 		bFound = false;
@@ -586,40 +586,68 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			bWarning = true;
 		}
 	});
-	// Check letter case
-	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
-		const nodeList = nodePair[1];
-		const sep = /([ \-&])/g; // Added parentheses so they are also included on the split array
-		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar']];
-		nodeList.forEach( (node) => {
-			let capNode = node.split(sep).map( (subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join('');
-			otherRegEx.forEach((rgex) => {capNode = capNode.replace(rgex[0], rgex[1]);});
-			if (capNode !== node) {
-				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not following standard letter case. Check \'Graph nodes and links\' section\n' + '	' +  node);
-				bWarning = true;
-			}
+	const _ALL_ = ['style_supergenre_supercluster', 'style_supergenre_cluster', 'style_supergenre', 'style_cluster', 'style_primary_origin', 'style_secondary_origin', 'style_anti_influence', 'style_weak_substitutions', 'style_substitutions'];
+	{ // Check letter case
+		const sep = /([ \-&\/()]|'n'|\bD')/g; // Added parentheses so they are also included on the split array
+		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM']];
+		const ommit = [/_cluster$/i];
+		const allmusic = new Set(['New Wave of British Heavy Alternative Metal']);
+		_ALL_.forEach((key) => {
+			music_graph_descriptors[key].forEach((nodePair) => {
+				if (!nodePair || !Array.isArray(nodePair) || nodePair.length !== 2) {return;}
+				const nodeList = nodePair[1];
+				nodeList.forEach((node) => {
+					let capNode = node.split(sep).map((subS) => {return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase();}).join('');
+					otherRegEx.forEach((rgex) => {capNode = capNode.replace(rgex[0], rgex[1]);});
+					if (capNode !== node) {
+						if (ommit.some((r) => r.test(node)) || allmusic.has(node)) {return;}
+						console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has nodes not following standard letter case. Check \'Graph nodes and links\' section\n' + '	' +  nodePair[0] + ' -> ' + node);
+						bWarning = true;
+					}
+				});
+			});
 		});
-	});
-	// Check ASCII compatibility
-	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
-		const nodeList = nodePair[1];
+	}
+	{ // Check ASCII compatibility
+		const allmusic = new Set(['Nü Alternative Metal']);
 		const asciiRegEx = [[/[\u0300-\u036f]/g, ''], [/\u0142/g, 'l']];
-		nodeList.forEach( (node) => {
-			let asciiNode = node.normalize('NFD');
-			asciiRegEx.forEach((rgex) => {asciiNode = asciiNode.replace(rgex[0], rgex[1]);});
-			if (asciiNode !== node) {
-				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not compatible with ASCII. Check \'Graph nodes and links\' section\n' + '	' +  node);
-				bWarning = true;
-			}
+		_ALL_.forEach((key) => {
+			music_graph_descriptors[key].forEach((nodePair) => {
+				if (!nodePair || !Array.isArray(nodePair) || nodePair.length !== 2) {return;}
+				const nodeList = nodePair[1];
+				nodeList.forEach((node) => {
+					let asciiNode = node.normalize('NFD');
+					asciiRegEx.forEach((rgex) => {asciiNode = asciiNode.replace(rgex[0], rgex[1]);});
+					if (asciiNode !== node) {
+						if (allmusic.has(node)) {return;}
+						console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has nodes not compatible with ASCII. Check \'Graph nodes and links\' section\n' + '	' +  nodePair[0] + ' -> ' + node);
+						bWarning = true;
+					}
+				});
+			});
 		});
-	});
-	// Check accents instead of single quotes
-	music_graph_descriptors.style_supergenre.forEach( (nodePair) => {
-		const nodeList = nodePair[1];
+	}
+	{ // Check accents instead of single quotes
 		const regEx = /[`´]/g;
-		nodeList.forEach( (node) => {
-			if (node.search(regEx) !== -1) {
-				console.log('music_graph_descriptors_xxx Warning: \'style_supergenre\' has nodes not following single quote usage (\'). Check \'Graph nodes and links\' section\n' + '	' +  node);
+		_ALL_.forEach((key) => {
+			music_graph_descriptors[key].forEach((nodePair) => {
+				if (!nodePair || !Array.isArray(nodePair) || nodePair.length !== 2) {return;}
+				const nodeList = nodePair[1];
+				nodeList.forEach((node) => {
+					if (node.search(regEx) !== -1) {
+						console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has nodes not following single quote usage (\'). Check \'Graph nodes and links\' section\n' + '	' +  nodePair[0] + ' -> ' + node);
+						bWarning = true;
+					}
+				});
+			});
+		});
+	}
+	// Check there are no duplicates
+	_ALL_.forEach((key) => {
+		music_graph_descriptors[key].forEach((nodePair) => {
+			if (!nodePair || !Array.isArray(nodePair) || nodePair.length !== 2) {return;}
+			if (new Set(nodePair[1]).size !== nodePair[1].length) {
+				console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has duplicated nodes. Check \'Graph nodes and links\' section\n' + '	' +  nodePair[0]);
 				bWarning = true;
 			}
 		});
@@ -710,13 +738,18 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		}
 	}
 	
+	const files = [
+		'music_graph_descriptors_xxx.js',
+		typeof music_graph_descriptors_user !== 'undefined' ? 'music_graph_descriptors_xxx_user.js' : '',
+		typeof music_graph_descriptors_allmusic !== 'undefined' ? 'music_graph_descriptors_xxx_allmusic.js' : ''
+	].filter(Boolean);
 	if (bWarning) {
-		const message = 'There are some errors on \'music_graph_descriptors_xxx.js\' or \'music_graph_descriptors_xxx_user.js\'';
+		const message = 'There are some errors on:\n\n' + files.map((s) => '\'' + s + '\'').join('\n');
 		try {fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_xxx');} // On foobar2000
 		catch (e) {alert('Check console \'Ctrl + Shift + K\'. ' + message);} // On browsers
 	} else {
 		if (bShowPopupOnPass) {
-			const message = 'All tests passed.\nChecked \'music_graph_descriptors_xxx.js\' and \'music_graph_descriptors_xxx_user.js\'';
+			const message = 'All tests passed.\nChecked:\n\n' + files.map((s) => '\'' + s + '\'').join('\n');
 			try {fb.ShowPopupMessage(message, 'music_graph_descriptors_xxx');} // On foobar2000
 			catch (e) {alert(message);} // On browsers
 		}
