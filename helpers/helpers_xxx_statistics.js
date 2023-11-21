@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/11/22
+//21/11/22
 
 /*  The following JavaScript functions for calculating normal and
 	chi-square probabilities and critical values were adapted by
@@ -132,4 +132,86 @@ function cdfz(z, bSym = true) {
 		0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49998, 0.49998, 0.49998, 0.49998  /* 4.0 */
 	]
 	return bSym ? cdfs[i] * 2 : cdfs[i];
+}
+
+function calcStatistics(dataArr, options = {bClampRange: true}) {
+	options = {bClampRange: true, ...options};
+	const statistics = {
+		max: -Infinity,
+		min: +Infinity,
+		maxCount: 0,
+		minCount: 0,
+		count: 0,
+		sum: 0,
+		mean: null,
+		median: null,
+		mode: null,
+		sigma: 0,
+		range: 0,
+		popRange: {
+			normal:		{'50%': [], '75%': [], '89%': [], '95%': []}, 
+			universal:	{'50%': [], '75%': [], '89%': [], '95%': []}
+		},
+		
+	};
+	statistics.count = dataArr.length;
+	dataArr.forEach((val, i) => {
+		if (val > statistics.max) {statistics.max = val; statistics.maxCount = 1;}
+		else if (val === statistics.max) {statistics.maxCount++;}
+		if (val < statistics.min) {statistics.min = val; statistics.minCount = 1;}
+		else if (val === statistics.min) {statistics.minCount++;}
+		statistics.sum += val;
+		statistics.sigma += val**2;
+	});
+	statistics.range = statistics.max - statistics.min;
+	statistics.mean = statistics.sum / statistics.count;
+	statistics.sigma = Math.sqrt((statistics.sigma - statistics.sum**2 / statistics.count) / (statistics.count - 1));
+	statistics.popRange.universal['50%'].push(statistics.mean - Math.sqrt(2) * statistics.sigma, statistics.mean + Math.sqrt(2) * statistics.sigma);
+	statistics.popRange.universal['75%'].push(statistics.mean - 2 * statistics.sigma, statistics.mean + 2 * statistics.sigma);
+	statistics.popRange.universal['89%'].push(statistics.mean - 3 * statistics.sigma, statistics.mean + 3 * statistics.sigma);
+	statistics.popRange.universal['95%'].push(statistics.mean - 4 * statistics.sigma, statistics.mean + 4 * statistics.sigma);
+	statistics.popRange.normal['50%'].push(statistics.mean - 0.674490 * statistics.sigma, statistics.mean + 0.674490 * statistics.sigma);
+	statistics.popRange.normal['75%'].push(statistics.mean - 1.149954 * statistics.sigma, statistics.mean + 1.149954 * statistics.sigma);
+	statistics.popRange.normal['89%'].push(statistics.mean - 1.644854 * statistics.sigma, statistics.mean + 1.644854 * statistics.sigma);
+	statistics.popRange.normal['95%'].push(statistics.mean - 2 * statistics.sigma, statistics.mean + 2 * statistics.sigma);
+	if (options.bClamppopRange) {
+		for (let key in statistics.popRange) {
+			for (let subKey in statistics.popRange[key]) {
+				statistics.popRange[key][subKey][0] = Math.max(statistics.min, statistics.popRange[key][subKey][0]);
+				statistics.popRange[key][subKey][1] = Math.min(statistics.max, statistics.popRange[key][subKey][1]);
+			}
+		}
+	}
+	const binSize = 1;
+	const histogram = calcHistogram(dataArr, binSize, statistics.max, statistics.min);
+	const masxFreq = Math.max(...histogram);
+	statistics.mode = {value: statistics.min + histogram.indexOf(masxFreq) * binSize, frequency: masxFreq};
+	{
+		let i = 0, acumFreq = statistics.count / 2;
+		while (true) {
+			acumFreq -= histogram[i];
+			if (acumFreq <= 0) {break;} else {i++;}
+		}
+		statistics.median = statistics.min + (i > 0 ? (2 * i - 1) * binSize / 2 : 0);
+	}
+	return statistics;
+}
+
+function calcHistogram(data, size, max, min) {
+	if (typeof max === 'undefined' || typeof min === 'undefined') {
+		min = Infinity;
+		max = -Infinity;
+		for (const item of data) {
+			if (item < min) {min = item;}
+			if (item > max) {max = item;}
+		}
+	}
+	if (min === Infinity) {min = 0;}
+	if (max === -Infinity) {max = 0;}
+	let bins = Math.ceil((max - min + 1) / size);
+	const histogram = new Array(bins).fill(0);
+	for (const item of data) {
+		histogram[Math.floor((item - min) / size)]++;
+	}
+	return histogram;
 }
