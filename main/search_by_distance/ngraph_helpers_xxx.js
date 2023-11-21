@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/23
+//21/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 try { // On foobar2000
@@ -258,7 +258,7 @@ function calcCacheLinkSG(mygraph, nodeList = [...new Set(music_graph_descriptors
 }
 
 // Finds distance between all SuperGenres present on given set of style/genres. Returns a map with {distance, influenceDistance} and keys 'nodeA-nodeB'.
-function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...])*/, limit = -1, influenceMethod = 'adjacentNodes') {
+function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...])*/, limit = -1, influenceMethod = 'adjacentNodes', statusCallback = null) {
 	// Filter SGs with those on library
 	const descr = music_graph_descriptors;
 	const nodeList = [
@@ -287,7 +287,11 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 						}
 						k++;
 						const progress = Math.floor(k / total * 4) * 25;
-						if (progress > prevProgress) {prevProgress = progress; console.log('Calculating graph links ' + progress + '%.');}
+						if (progress > prevProgress) {
+							console.log('Calculating graph links ' + progress + '%.');
+							if (statusCallback) {statusCallback(progress, prevProgress);}
+							prevProgress = progress; 
+						}
 						resolve('done');
 					}, initDelay + iterDelay * h);
 				}));

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/11/23
+//21/11/23
 
 /*
 	Search by Distance
@@ -269,11 +269,14 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 		if (sbd.panelProperties.bCacheOnStartup[1] || bForce) {
 			if (sbd.isCalculatingCache) {return;}
 			sbd.isCalculatingCache = true;
-			if (typeof buttonsBar !== 'undefined') {
-				buttonsBar.listKeys.flat(Infinity).filter((key) => {return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i);})
-					.forEach((key) => {
-						buttonsBar.buttons[key].switchAnimation('Link cache', true, () =>  !sbd.isCalculatingCache);
-					});
+			const bBar = typeof buttonsBar !== 'undefined';
+			const sbdButtons = bBar 
+				? buttonsBar.listKeys.flat(Infinity).filter((key) => {return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i);}) 
+				: [];
+			if (bBar) {
+				sbdButtons.forEach((key) => {
+					buttonsBar.buttons[key].switchAnimation('Link cache (tags)', true, () => !sbd.isCalculatingCache);
+				});
 			}
 			const tags = properties && properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null;
 			const genreStyleTags = tags
@@ -297,12 +300,30 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 						setTimeout((step) => {
 							tagValues.push(...new Set(tfo.EvalWithMetadbs(items).join('|').split(/\| *|, */g)));
 							const progress = Math.floor(step / num * 4) * 25;
-							if (progress > prevProgress) {prevProgress = progress; console.log('Calculating tags ' + (progress <= 100 ? progress : 100) + '%.');}
+							if (progress > prevProgress) {
+								console.log('Calculating tags ' + (progress <= 100 ? progress : 100) + '%.');
+								if (bBar) {
+									sbdButtons.forEach((key) => {
+										buttonsBar.buttons[key].switchAnimation('Link cache (tags)', false);
+										buttonsBar.buttons[key].switchAnimation('Link cache (tags) ' + prevProgress + '%', false);
+										buttonsBar.buttons[key].cleanAnimation();
+										buttonsBar.buttons[key].switchAnimation('Link cache (tags) ' + progress + '%', true, () => !sbd.isCalculatingCache);
+									});
+								}
+								prevProgress = progress; 
+							}
 							resolve('done');
 						}, iDelayLibrary * 6 * i, step);
 					}));
 				}
 				Promise.all(promises).then(() => {
+					if (bBar) {
+						sbdButtons.forEach((key) => {
+							buttonsBar.buttons[key].switchAnimation('Link cache (tags) 100%', false);
+							buttonsBar.buttons[key].cleanAnimation();
+							buttonsBar.buttons[key].switchAnimation('Link cache (links)', true, () => !sbd.isCalculatingCache);
+						});
+					}
 					if (properties && properties.hasOwnProperty('bAscii') && properties.bAscii[1]) {
 						setTimeout(() => {resolve(new Set([...new Set(tagValues)].map((tag) => {return _asciify(tag);})));}, 500);
 					} else {
@@ -310,7 +331,17 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 					}
 				});
 			});
-			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void(0), sbd.influenceMethod);
+			const statusCallback = (progress, prevProgress) => {
+				if (bBar) {
+					sbdButtons.forEach((key) => {
+						buttonsBar.buttons[key].switchAnimation('Link cache (links)', false);
+						buttonsBar.buttons[key].switchAnimation('Link cache (links) ' + prevProgress + '%', false);
+						buttonsBar.buttons[key].cleanAnimation();
+						buttonsBar.buttons[key].switchAnimation('Link cache (links) ' + progress + '%', true, () => !sbd.isCalculatingCache);
+					});
+				}
+			};
+			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void(0), sbd.influenceMethod, statusCallback);
 			sbd.isCalculatingCache = false;
 		} else {
 			cacheLink = new Map();
@@ -534,7 +565,7 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 function testBaseTags(baseTags) {
 	const result = testRecipe({json: {tags: {'*': {}}}, baseTags});
 	if (!result.valid) {
-		result.report[0] = 'Error on tags settings.\nTo fix it, restore defaults on affected tags (customizable button).\nIf the error continues, report it as a bug.\n------------------------------------------------------------------------';
+		result.report[0] = 'Error on tags settings.\nTo fix it, restore defaults on affected tags (customizable button) or globally (non-customizable buttons). These options are usually found by Shift + L. Clicking on the button. Then reload the panel.\nIf the error continues, report it as a bug.\n------------------------------------------------------------------------';
 		console.popup(result.report.join('\n'), 'Search by distance');
 	}
 	return result.valid;

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/11/23
+//21/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -783,7 +783,8 @@ async function graphStatistics({
 		bFoobar = false, 
 		properties = null, 
 		graph = musicGraph(descriptor, bHtml), 
-		influenceMethod // Must be provided
+		statusCallback = null,
+		influenceMethod, // Must be provided
 		} = {}) {
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
@@ -799,7 +800,7 @@ async function graphStatistics({
 	} else { // or the entire graph
 		styleGenres = new Set([...descriptor.style_supergenre, ...descriptor.style_weak_substitutions, ...descriptor.style_substitutions, ...descriptor.style_cluster].flat(Infinity));
 	}
-	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres, void(0), influenceMethod);
+	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres, void(0), influenceMethod, statusCallback);
 	// Calc basic statistics
 	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1};
 	const distances = [];
