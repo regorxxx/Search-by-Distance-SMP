@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+<!DOCTYPE html> <!-- 21/11/23 -->
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>Music Graph</title>
-		<link rel="icon" href="helpers-external/ngraph/html/images/icon.png">
-		<script type="text/javascript" src="helpers-external/ngraph/html/vivagraph.min.js"></script>
-		<script type="text/javascript" src="helpers-external/ngraph/html/jquery.min.jsm.js"></script>
-		<script type="text/javascript" src="helpers-external/ngraph/html/invert.js"></script>
-		<script type="text/javascript" src="helpers-external/ngraph/html/starpoints.js"></script>
+		<link rel="icon" href="helpers-external/ngraph-html/images/icon.png">
+		<script type="text/javascript" src="helpers-external/ngraph-html/vivagraph.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph-html/jquery.js"></script> <!-- slim -->
+		<script type="text/javascript" src="helpers-external/ngraph-html/invert.js"></script>
+		<script type="text/javascript" src="helpers-external/ngraph-html/starpoints.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/defaultSettings.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/heuristics.js"></script>
 		<script type="text/javascript" src="helpers-external/ngraph/makeNBASearchStatePool.js"></script>
@@ -45,6 +45,7 @@
 		<script type="text/javascript" src="main/world_map/world_map_tables.js"></script>
 		<script type="text/javascript" src="helpers-external/xelection-js/xelection.js"></script>
 		<script type="text/javascript">
+			const influenceMethod = 'adjacentNodes';
 			function onLoad() {
 				const idealLength = music_graph_descriptors.cluster; //Uses default cluster weighting
 				const bGraphDebug = true; // Change this to omit warnings about links/nodes set wrong
@@ -61,7 +62,6 @@
 				
 				// Create the graph from foobar scripts:
 				var graph = musicGraphForDrawing();
-				const influenceMethod = 'adjacentNodes';
 				if (bGraphDebug) {graphDebug(graph, false, true);}
 								
 				/* 
@@ -489,12 +489,15 @@
 			// Popup
 			let data = null;
 			let bRunning = false;
+			let progress = 0;
 			function showStatistics() {
 				showPopup();
 				const popup = document.getElementById('popup');
 				const popupContent = document.getElementById('popupcontent');
 				const overlay = document.getElementById('overlay');
-				popupContent.innerHTML = '<br>Calculating... please wait.<br><br>Don\'t change to another tab nor minimize the window, otherwise script will be halted and sent to background (\'alt-tab\' is ok though).<br><br>Popup may be closed and reopened at any time while the calculation is being done, results are cached.';
+				popupContent.innerHTML = '<br><label for="statsProgress">Calculating... please wait: ' + progress + '%</label>' +
+				'<br><progress id="statsProgress" max="100" value="' + progress + '" style="accent-color: #91168f;width: 100%;">' + progress + '%</progress>' +
+				'<br>Don\'t change to another tab nor minimize the window, otherwise script will be halted and sent to background (\'alt-tab\' is ok though).<br><br>Popup may be closed and reopened at any time while the calculation is being done, results are cached.';
 				if (!bRunning) {
 					if (!data) {
 						bRunning = true;
@@ -502,7 +505,14 @@
 						document.getElementById('statisticsButton').innerHTML = 'Calculating...';
 						document.getElementById("statisticsButton").className = 'animation roy';
 						setTimeout(() => {
-								graphStatistics({bHtml: true, influenceMethod}).then((resolve) => {
+								graphStatistics({bHtml: true, influenceMethod, statusCallback: (p) => {
+									const popupContent = document.getElementById('popupcontent');
+									const popupBar = document.getElementById('statsProgress');
+									popupBar.value = progress = p;
+									popupBar.textContent = p + '%';
+									popupContent.innerHTML = popupContent.innerHTML.replace(/(: )([0-9]{1,2})(%)/, '$1' + p + '$3');
+									<!-- console.log(popupContent.textContent.replace(/(: )([0-9]{1,2})(%)/, '$1' + p + '$3')); -->
+								}}).then((resolve) => {
 									data = resolve; 
 									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>'); 
 									popupContent.innerHTML = '<br>' + data.text;
@@ -528,7 +538,6 @@
 				overlay.style.display = 'block';
 				popup.style.display = 'block';
 			}
-			
 			function resetView() {
 				document.body.dispatchEvent(new KeyboardEvent('keydown', {which: 32}));
 			}
@@ -560,6 +569,7 @@
               font-size: 2vmin;
               left: 0.75rem;
               font-family: Verdana;
+			  text-align: justify;
 			}
 			#nodehighlight {
               font-size: 1.8vmin;
@@ -571,6 +581,10 @@
               font-size: 2vmin;
               right: 0.75rem;
               font-family: Verdana;
+			}
+			button {
+              border-radius: 0.5em;
+			  margin-bottom: 0.1em;
 			}
             .bottomleft {
               position: fixed;
@@ -627,6 +641,7 @@
 			  overflow-y: auto;
 			  scrollbar-color: rebeccapurple #3C050C;
 			  scrollbar-width: thin;
+			  border-radius: 1em;
 			}
 			#popupclose {
 			  float: right;
@@ -638,6 +653,7 @@
 			  padding: 1.5rem;
 			  overflow-wrap: anywhere;
 			  color: white;
+			  text-align: justify;
 			}
 			#button {
 			  cursor: pointer;
@@ -664,7 +680,7 @@
 		<div id="overlay"></div>
 		<div id="popup">
 			<div class="popupcontrols">
-				<span id="popupclose" onclick="closePopup()">X</span>
+				<span id="popupclose" onclick="closePopup()">&#10006;</span>
 			</div>
 			<div id="popupcontent" class="popupcontent">
 				<h1>Some Popup Content.</h1>
@@ -692,6 +708,10 @@
 			<button id="statisticsButton" onclick="showStatistics()" style="width: 8.2rem">Calculate statistics</button>
 			<br>
 			<button id="resetButton" onclick="resetView()" style="width: 8.2rem">Reset view</button>
+			<br>
+			<button id="liveButton" onclick="location.href='https://regorxxx.github.io/Music-Graph/';" style="width: 8.2rem">Live version</button>
+			<br>
+			<button id="resetButton" onclick="location.href='https://github.com/regorxxx/Music-Graph';" style="width: 8.2rem">Open GitHub</button>
 		</span>
 		<div id='label'>
 			Labels...
