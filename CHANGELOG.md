@@ -46,11 +46,16 @@
 ### Added
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
+- HTML: added buttons to graph html page to directly go to live version or open the GitHub repository.
 ### Changed
 - Descriptors: extended debug tests for accents, ASCII compatibility and capitalization for all entries (including AllMusic).
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
+- UI: tooltip while calculating the link cache (the button is animated) now shows the remaining percentage for every step.
 - Helpers: updated helpers.
 - Console: reduced max log file size to 1 MB.
+- HTML: minor UI tweaks to graph html page.
+- HTML: moved HTML related scripts to its own folder.
+- HTML: updated jquery dependency of graph html page.
 ### Removed
 - Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
