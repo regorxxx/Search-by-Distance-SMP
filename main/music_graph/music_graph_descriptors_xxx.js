@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/11/23
+//22/11/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -108,13 +108,13 @@ const music_graph_descriptors = {
 		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana','Asian Ritual-Tribal']],
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk','Branle']],
 		['South European Folk_supergenre'	,	['Cantautor','Rumba','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno','Sephardic','Branle']],
-		['Country_supergenre'				,	['Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie']],
+		['Country_supergenre'				,	['Country Rap','Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie','Square Dance','Rodeo','Jug Band']],
 		['R&B_supergenre'					,	['Funktronica','Contemporary R&B','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Soul Blues','Smooth Soul','Classic Funk','P-Funk','Funk Rock','Contemporary Funk','Psychedelic Funk','Psychedelic Soul','New Orleans R&B','Funk Blues','Deep Funk Revival','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B']],
 		['Blues_supergenre'					,	['Contemporary Blues','Desert Blues','Hill Country Blues','Soul Blues','Modern Electric Blues','Psychedelic Blues','Blues Rock','Funk Blues','British Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Piano Blues','Vaudeville Blues','Country Blues','Delta Blues']],
 		['Gospel_supergenre'				,	['Contemporary Christian Music','Christian Rock','Modern Gospel','Ragtime','Stride','Traditional Gospel','Spirituals','Worksongs']],
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
-		['Rap_supergenre'					,	['Glitch Hop','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
+		['Rap_supergenre'					,	['Glitch Hop','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
 		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
@@ -172,7 +172,7 @@ const music_graph_descriptors = {
 		['Modern Blues XL'					,	['Contemporary Blues','Soul Blues','Modern Electric Blues','Blues Rock','Funk Blues','British Blues','Texas Blues','Psychedelic Blues']],
 		['Classic Blues XL'					,	['Detroit Blues','Memphis Blues','Texas Blues','Chicago Blues']],
 		['Traditional Blues XL'				,	['Vaudeville Blues','Country Blues','Delta Blues']],
-		['Traditional Country'				,	['Neo-Traditional Country','Nashville Sound','Bakersfield Sound','Bluegrass','Honky Tonk','Hillbilly','Country Boogie']],
+		['Traditional Country'				,	['Neo-Traditional Country','Nashville Sound','Bakersfield Sound','Bluegrass','Honky Tonk','Hillbilly','Country Boogie','Jug Band','Square Dance']],
 		['Post-Jazz'						,	['Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion']],
 		['Modern Jazz'						,	['Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop']],
 		['Classic Jazz'						,	['Gypsy-Jazz','New Orleans Jazz','Dixieland','Chicago Jazz','Mainstream Jazz','Swing','Big Band','New Orleans Jazz Revival','Dixieland Revival']],
@@ -250,7 +250,7 @@ const music_graph_descriptors = {
 		['Bakersfield Sound'				,	['Outlaw Country','Honky Tonk']],
 		['Country Rock'						,	['Folk-Rock','Southern Rock','Heartland Rock','Nashville Sound']],
 		['Country Pop'						,	['Folk-Rock','Soft Rock','Nashville Sound']],
-		['Outlaw Country'					,	['Bakersfield Sound','Alt. Country']],
+		['Outlaw Country'					,	['Alt. Country']],
 		['Country Boogie'					,	['Rockabilly','Country Pop']],
 		['R&B'								,	['Jump Blues','Doo Wop','Southern Soul','Motown Sound','Beat Music','Rock & Roll','Modern Gospel','Soul-Jazz','Ska']],
 		['Doo Wop'							,	['R&B','Philadelphia Soul']],
@@ -258,7 +258,7 @@ const music_graph_descriptors = {
 		['Motown Sound'						,	['R&B','Philadelphia Soul','Modern Gospel','Neo Soul','Rocksteady']],
 		['Philadelphia Soul'				,	['Doo Wop','Motown Sound','UK Reggae']],
 		['Classic Funk'						,	['P-Funk','Deep Funk','Electrofunk']],
-		['P-Funk'							,	['Classic Funk','Deep Funk','Electrofunk','Psychedelic Rock','Old-School']],
+		['P-Funk'							,	['Classic Funk','Deep Funk','Electrofunk','Old-School']],
 		['Bossa Nova'						,	['Latin-Jazz','Swing','Lounge','Samba']],
 		['Fado'								,	['Latin-Jazz','Flamenco','Bossa Nova']],
 		['Lounge'							,	['Bossa Nova','Swing','Nu Jazz','Future Jazz']],
@@ -370,7 +370,8 @@ const music_graph_descriptors = {
 		['Kuduro'							,	['Semba']],
 		['Asian Ritual-Tribal'				,	['Tuvan']],
 		['Melodic Techno-House'				,	['Deep House','Progressive Trance']],
-		['Loungetronica'					,	['Deep House','Melodic Techno-House']]
+		['Loungetronica'					,	['Deep House','Melodic Techno-House']],
+		['Rodeo'							,	['Outlaw Country','Square Dance']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -406,7 +407,8 @@ const music_graph_descriptors = {
 		['Americana'						,	['Traditional European Folk','Nordic Folk_supergenre','African Folk_supergenre']],
 		['Electrorock'						,	['Neo-Traditional Folk','Classic Rock XL','Traditional Pop','Freak Folk','Garage Rock Revival','Garage Pop','Retro Rock']],
 		['Classical Sufi'					,	['Folk Pop','Folk-Rock','Folktronica','Folk Punk','Contemporary Folk','Renaissance','South American Folk_supergenre','North American Folk_supergenre','European Folk_supergenre']],
-		['Pre-Columbian Ritual-Tribal'		,	['Afro-Latin Ritual-Tribal']]
+		['Pre-Columbian Ritual-Tribal'		,	['Afro-Latin Ritual-Tribal']],
+		['Rap_supergenre'					,	['Traditional Country','Americana XL','Roots Rock']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound 
@@ -595,18 +597,20 @@ const music_graph_descriptors = {
 		Use that value as the 'basic' distance value for similar genre/styles: x3/2, x2, etc.
 		Having in mind that the max distance between 2 points on the graph will probably be ~ x4-x5 that value.
 		A lower value (cluster or 1/2) would only output the nearest or almost same genre/styles.
+		-------------------------
 		Note on anti_influence:
 		-------------------------
 		It applies to anything listed on style_anti_influence. Same logic than the rest.
 		The value is added to the total distance calculated between 2 nodes. i.e. if Rock to Jazz had a distance of 300,
 		if they had an anti-influence link, then the total distance would be 300 + 100 = 400. Being farther than before...
+		-------------------------
 		Note on primary_origin_influence (same applies to secondary_origin_influence):
 		-------------------------
 		It only applies to those nodes which have a primary origin link AND are in the same Supergenre (SG).
 		Contrary to anti_influence which applies globally and only on nodes listed in its associated array.
 		This is done to account for genres/styles which are nearer than others on the same Supergenre, 
 		while not using a style cluster or weak substitution approach.
-		Also beware of setting to high (absolute) values, the value is directly applied to the final total path distance...
+		Also beware of setting too high (absolute) values, the value is directly applied to the final total path distance...
 		the idea is that cluster related nodes (85) should be nearer than intra-Supergenre related nodes (100). When adding a
 		primary_origin link, then it would be omitted (being greater than the other two) but the influence applies.
 		The total distance would be 85 - 10 = 75 for cluster related nodes and 100 - 10 = 90 for intra-Supergenre related nodes.

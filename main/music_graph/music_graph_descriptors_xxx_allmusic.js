@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/11/23
+//22/11/23
 
 const music_graph_descriptors_allmusic = {
 	style_substitutions: [
@@ -37,10 +37,10 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Bro-Country'						]],
 			['Bluegrass'						,	['Contemporary Bluegrass'			]],
 			['*'								,	['Contemporary Country'				]],
-			['-'								,	['Country Rap'						]], // https://www.allmusic.com/style/country-rap-ma0000013521
+			['*'								,	['Country Rap'						]], // https://www.allmusic.com/style/country-rap-ma0000013521
 			['Neo-Traditional Country'			,	['Neo-Traditionalist Country'		]],
 			['Neo-Traditional Country'			,	['New Traditionalist'				]],
-			['-'								,	['Red Dirt'							]], // https://www.allmusic.com/style/red-dirt-ma0000013522
+			['Outlaw Country'					,	['Red Dirt'							]], // https://www.allmusic.com/style/red-dirt-ma0000013522
 		/* Country-Pop */
 			['Country Pop'						,	['Country-Pop'						]],
 			['Nashville Sound'					,	['Nashville Sound / Countrypolitan'	]],
@@ -53,8 +53,8 @@ const music_graph_descriptors_allmusic = {
 			['Country Folk'						,	['Country-Folk'						]],
 			['*'								,	['Outlaw Country'					]],
 			['*'								,	['Progressive Bluegrass'			]],
-			['-'								,	['Progressive Country'				]], // https://www.allmusic.com/style/progressive-country-ma0000002796
-			['-'								,	['Rodeo'							]], // https://www.allmusic.com/style/rodeo-ma0000012323
+			['Outlaw Country'					,	['Progressive Country'				]], // https://www.allmusic.com/style/progressive-country-ma0000002796
+			['*'								,	['Rodeo'							]], // https://www.allmusic.com/style/rodeo-ma0000012323
 		/* Traditional Country */
 			['*'								,	['Bluegrass'						]],
 			['Bluegrass'						,	['Bluegrass-Gospel'					]],
@@ -64,9 +64,9 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Cowboy'							]],
 			['Traditional Country'				,	['Early Country'					]],
 			['Traditional Country'				,	['Instrumental Country'				]],
-			['-'								,	['Jug Band'							]], // https://www.allmusic.com/style/jug-band-ma0000012351
+			['*'								,	['Jug Band'							]], // https://www.allmusic.com/style/jug-band-ma0000012351
 			['*'								,	['Old-Timey'						]],
-			['-'								,	['Square Dance'						]], // https://www.allmusic.com/style/square-dance-ma0000011873
+			['*'								,	['Square Dance'						]], // https://www.allmusic.com/style/square-dance-ma0000011873
 			['-'								,	['String Bands'						]], // https://www.allmusic.com/style/string-bands-ma0000002880
 			['Bluegrass'						,	['Traditional Bluegrass'			]],
 			['*'								,	['Traditional Country'				]],
