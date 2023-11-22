@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//22/11/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -210,13 +210,13 @@ music_graph_descriptors_culture.debug = function debug(graph = musicGraph()) {
 };
 
 music_graph_descriptors_culture.distanceDebug = function distanceDebug(graph = musicGraph()) {
-	console.log('music_graph_descriptors_culture: distance');
+	console.log('<------------------- Culture node distance tests ------------------->');
 	[
 		['Deep House','Crossover Thrash'],	// 1
 		['Deep House','Deep House'],		// 0
 		['Tex-Mex','Deep House'],			// 2
-		['Aussie Rock','New Wave'],			// 1
-		['Disco','New Wave'],				// 0.3
+		['Aussie Rock','New Wave'],			// 4
+		['Disco','New Wave'],				// 1
 	].forEach((pair) => {
 		console.log(pair.join(' <-> ') + ' = ',  music_graph_descriptors_culture.getDistance(...pair));
 	});
