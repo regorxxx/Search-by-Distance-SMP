@@ -45,20 +45,25 @@
 ## [Unreleased][]
 ### Added
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
+- Descriptors: added 'Country Rap', 'Square Dance','Rodeo','Jug Band' styles.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
 - HTML: added buttons to graph html page to directly go to live version or open the GitHub repository.
 ### Changed
 - Descriptors: extended debug tests for accents, ASCII compatibility and capitalization for all entries (including AllMusic).
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
 - UI: tooltip while calculating the link cache (the button is animated) now shows the remaining percentage for every step.
-- Helpers: updated helpers.
-- Console: reduced max log file size to 1 MB.
 - HTML: minor UI tweaks to graph html page.
 - HTML: moved HTML related scripts to its own folder.
 - HTML: updated jquery dependency of graph html page.
+- Debug: cleanup of debug routines, added comments about symmetries for distance calculation and better logging.
+- Helpers: updated helpers.
+- Console: reduced max log file size to 1 MB.
+- Minor speed optimizations when looking for similar tracks using 'GRAPH' method.
 ### Removed
 - Buttons bar: 'buttons\examples' folder, for file examples check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/).
 ### Fixed
+- Pathfinder: fix long time bug on A* pathfinder which made it unusable. NBA* was used anyway so it doesn't affect at all current functionality.
+- Pathfinder: fix distances output by getDistanceFromPath() due to incorrect handling of multi-edge graphs on [ngraph.graph](https://github.com/anvaka/ngraph.graph), where only the first link found was used. As result new distance values could be lower in some cases.
 - Presets: non valid keys error on 'Similar genres (DYNGENRE)' recipe. Issue #16
 - Descriptors: cleanup of duplicates entries and other minor errors in substitutions, influences, etc.
 
