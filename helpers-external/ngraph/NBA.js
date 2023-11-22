@@ -1,3 +1,4 @@
+//22/11/23
 'use strict';
 
 // Required since this script is loaded on browsers for drawing too!
@@ -234,24 +235,24 @@ function nba(graph, options) {
       if (link.fromId === cameFrom.node.id) return visitN1(otherNode, link);
     }
   }
-}
-
-function reconstructPath(searchState) {
-  if (!searchState) return NO_PATH;
-
-  var path = [searchState.node];
-  var parent = searchState.p1;
-
-  while (parent) {
-    path.push(parent.node);
-    parent = parent.p1;
+  
+  function reconstructPath(searchState) {
+    if (!searchState) return NO_PATH;
+  
+    var path = [searchState.node];
+    var parent = searchState.p1;
+  
+    while (parent) {
+      path.push(parent.node);
+      parent = parent.p1;
+    }
+  
+    var child = searchState.p2;
+  
+    while (child) {
+      path.unshift(child.node);
+      child = child.p2;
+    }
+    return path;
   }
-
-  var child = searchState.p2;
-
-  while (child) {
-    path.unshift(child.node);
-    child = child.p2;
-  }
-  return path;
 }

@@ -1,3 +1,4 @@
+//22/11/23
 'use strict';
 
 // We reuse instance of array, but we trie to freeze it as well,
@@ -9,6 +10,7 @@ var defaultSettings = {
   // Path search settings
   heuristic: blindHeuristic,
   distance: constantDistance,
+  blocked: neverBlocked,
   compareFScore: compareFScore,
   NO_PATH: NO_PATH,
 
@@ -29,6 +31,10 @@ function blindHeuristic(/* a, b */) {
 
 function constantDistance(/* a, b */) {
   return 1;
+}
+
+function neverBlocked(/* a, b, c */) {
+  return false;
 }
 
 function compareFScore(a, b) {

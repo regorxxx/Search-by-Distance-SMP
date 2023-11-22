@@ -1,3 +1,4 @@
+//22/11/23
 'use strict';
 
 /**
@@ -8,7 +9,7 @@
  * h(n) is heuristic distance from `n` to target node.
  */
  
-// Required since this script is loaded on browsers for drawing too!
+ // Required since this script is loaded on browsers for drawing too!
 try { // On foobar2000
 	include('defaultSettings.js');
 	include('heuristics.js');
@@ -24,6 +25,9 @@ var NO_PATH = defaultSettings.NO_PATH;
  * 
  * @param {ngraph.graph} graph instance. See https://github.com/anvaka/ngraph.graph
  * @param {Object} options that configures search
+ * @param {Function(a, b, link)} options.blocked - a function that returns `true` if the link between 
+ * nodes `a` and `b` are blocked paths. This function is useful for temporarily blocking routes 
+ * while allowing the graph to be reused without rebuilding.
  * @param {Function(a, b)} options.heuristic - a function that returns estimated distance between
  * nodes `a` and `b`. This function should never overestimate actual distance between two
  * nodes (otherwise the found path will not be the shortest). Defaults function returns 0,
@@ -38,6 +42,9 @@ function aStarPathSearch(graph, options) {
   options = options || {};
   // whether traversal should be considered over oriented graph.
   var oriented = options.oriented;
+
+  var blocked = options.blocked;
+  if (!blocked) blocked = defaultSettings.blocked;
 
   var heuristic = options.heuristic;
   if (!heuristic) heuristic = defaultSettings.heuristic;
@@ -113,6 +120,11 @@ function aStarPathSearch(graph, options) {
         otherSearchState.open = 1;
       }
 
+      if (blocked(otherNode, cameFrom.node, link)) {
+        // Path is blocked. Ignore this route
+        return;
+      }
+
       var tentativeDistance = cameFrom.distanceToSource + distance(otherNode, cameFrom.node, link);
       if (tentativeDistance >= otherSearchState.distanceToSource) {
         // This would only make our path longer. Ignore this route.
@@ -127,20 +139,20 @@ function aStarPathSearch(graph, options) {
       openSet.updateItem(otherSearchState.heapIndex);
     }
   }
-}
-
-function goalReached(searchState, targetNode) {
-  return searchState.node === targetNode;
-}
-
-function reconstructPath(searchState) {
-  var path = [searchState.node];
-  var parent = searchState.parent;
-
-  while (parent) {
-    path.push(parent.node);
-    parent = parent.parent;
+  
+  function goalReached(searchState, targetNode) {
+    return searchState.node === targetNode;
   }
-
-  return path;
+  
+  function reconstructPath(searchState) {
+    var path = [searchState.node];
+    var parent = searchState.parent;
+  
+    while (parent) {
+      path.push(parent.node);
+      parent = parent.parent;
+    }
+  
+    return path;
+  }
 }
