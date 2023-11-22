@@ -1,3 +1,4 @@
+//22/11/23
 'use strict';
 
 /**
@@ -236,7 +237,7 @@ function createGraph(options) {
      * @returns link if there is one. null otherwise.
      */
     getLink: getLink,
-	
+    
     /**
      * Gets an edge between two nodes.
      * Operation complexity is O(n) where n - number of links of a node.
@@ -245,9 +246,9 @@ function createGraph(options) {
      * @param {string} toId link end identifier
      *
      * @returns link if there is one. null otherwise.
-	 */
+     */
     getNonOrientedLink: getNonOrientedLink
-	
+    
   };
 
   // this will add `on()` and `fire()` methods.
@@ -448,22 +449,31 @@ function createGraph(options) {
     return null; // no link.
   }
   
-    function getNonOrientedLink(aNodeId, bNodeId) {
+  function getNonOrientedLink(aNodeId, bNodeId, minimizer) {
     // TODO: Use sorted links to speed this up
     var node = getNode(aNodeId),
       i;
     if (!node || !node.links) {
       return null;
     }
-
+    let link = null;
+    let iLink;
+    let min = Infinity;
     for (i = 0; i < node.links.length; ++i) {
-      var link = node.links[i];
-      if (link.fromId === aNodeId && link.toId === bNodeId || link.fromId === bNodeId && link.toId === aNodeId) {
-        return link;
+      iLink = node.links[i];
+      if (iLink.fromId === aNodeId && iLink.toId === bNodeId || iLink.fromId === bNodeId && iLink.toId === aNodeId) {
+        if (minimizer) {
+            const newMin = minimizer(iLink);
+            if (newMin < min) {
+               min = newMin;
+               link = iLink;
+            } else if (!link && newMin === min ) {
+				link = iLink;
+			}
+        } else {link = iLink; break;}
       }
     }
-
-    return null; // no link.
+    return link;
   }
 
   function clear() {
