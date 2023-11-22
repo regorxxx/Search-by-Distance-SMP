@@ -799,9 +799,11 @@ function createConfigMenu(parent) {
 			// Graph test
 			menu.newEntry({menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
 				if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('testGraph');}
-				testGraph(sbd.allMusicGraph);
-				testGraphV2(sbd.allMusicGraph);
-				music_graph_descriptors_culture.distanceDebug();
+				[testGraph, testGraphV2, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
+					console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
+					f(sbd.allMusicGraph);
+					
+				});
 				if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 			}});
 		}

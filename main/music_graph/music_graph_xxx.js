@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/11/23
+//22/11/23
 
 // Required since this script is loaded on browsers for drawing too!
 
@@ -671,30 +671,24 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
 		const mygraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void(0), bHtml); // foobar2000 graph, or HTML graph or a new one
-		let pathFinder = nba(mygraph, {
-			distance(fromNode, toNode, link) {
-			return link.data.weight;
-			}
-		});
-		let distanceGraph = Infinity;
-		let key_one = '';
-		let key_two = '';
+		let distance = Infinity;
+		let keyOne = '';
+		let keyTwo = '';
 		let nextIndex = 1;
+		let path = [];
 		const superGenreNumbers = music_graph_descriptors.style_supergenre.length; // SuperGenres
 		for (let i = 0; i < superGenreNumbers; i++, nextIndex++) {
 			if (i + 1 === superGenreNumbers) {nextIndex = 0;}
-			key_one = music_graph_descriptors.style_supergenre[i][0];
-			key_two = music_graph_descriptors.style_supergenre[nextIndex][0];
-			distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
-			if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
-				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-				console.log('Path: ' + idpath);
+			keyOne = music_graph_descriptors.style_supergenre[i][0];
+			keyTwo = music_graph_descriptors.style_supergenre[nextIndex][0];
+			({distance, path} = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+			if (!Number.isFinite(distance) || !distance) {
+				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
+				console.log('Path: ' + getNodesFromPath(path));
 				bWarning = true;
-			} else if (distanceGraph[0] < music_graph_descriptors.intra_supergenre) {
-				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-				console.log('Path: ' + idpath);
+			} else if (distance < music_graph_descriptors.intra_supergenre) {
+				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has distance (' + distance + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
+				console.log('Path: ' + getNodesFromPath(path));
 				bWarning = true;
 			}
 		}
@@ -702,18 +696,16 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		for (let i = 0; i < style_supergenre_clusterNumbers; i++, nextIndex++) {
 			if (i + 1 === style_supergenre_clusterNumbers) {nextIndex = 0;}
 			if(music_graph_descriptors.style_supergenre_cluster[i][0] !== 'SKIP' && music_graph_descriptors.style_supergenre_cluster[nextIndex][0] !== 'SKIP' ) {
-				key_one = music_graph_descriptors.style_supergenre_cluster[i][0];
-				key_two = music_graph_descriptors.style_supergenre_cluster[nextIndex][0];
-				distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
-				if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
-					console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-					let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-					console.log('Path: ' + idpath);
+				keyOne = music_graph_descriptors.style_supergenre_cluster[i][0];
+				keyTwo = music_graph_descriptors.style_supergenre_cluster[nextIndex][0];
+				({distance, path} = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+				if (!Number.isFinite(distance) || !distance) {
+					console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
+					console.log('Path: ' + getNodesFromPath(path));
 					bWarning = true;
-				} else if (distanceGraph[0] < music_graph_descriptors.intra_supergenre) {
-					console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-					let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-					console.log('Path: ' + idpath);
+				} else if (distance < music_graph_descriptors.intra_supergenre) {
+					console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has distance (' + distance + ') lower than \'intra_supergenre\' (' + music_graph_descriptors.intra_supergenre + '). Check \'Weighting, for Foobar2000\' section');
+					console.log('Path: ' + getNodesFromPath(path));
 					bWarning = true;
 				}
 			}
@@ -721,18 +713,16 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		const style_supergenre_superclusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length; // style_supergenre_superclusters
 		for (let i = 0; i < style_supergenre_superclusterNumbers; i++, nextIndex++) {
 			if (i + 1 === style_supergenre_superclusterNumbers) {nextIndex = 0;}
-			key_one = music_graph_descriptors.style_supergenre_supercluster[i][0];
-			key_two = music_graph_descriptors.style_supergenre_supercluster[nextIndex][0];
-			distanceGraph = calcGraphDistance(mygraph, key_one, key_two, true);
-			if (!Number.isFinite(distanceGraph[0]) || !distanceGraph[0]) {
-				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
-				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-				console.log('Path: ' + idpath);
+			keyOne = music_graph_descriptors.style_supergenre_supercluster[i][0];
+			keyTwo = music_graph_descriptors.style_supergenre_supercluster[nextIndex][0];
+			({distance, path} = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+			if (!Number.isFinite(distance) || !distance) {
+				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
+				console.log('Path: ' + getNodesFromPath(path));
 				bWarning = true;
-			} else if (distanceGraph[0] < music_graph_descriptors.inter_supergenre) {
-				console.log('music_graph_descriptors_xxx Warning: Path from ' + key_one + ' to ' + key_two + ' has distance (' + distanceGraph + ') lower than \'inter_supergenre\' (' + music_graph_descriptors.inter_supergenre + '). Check \'Weighting, for Foobar2000\' section');
-				let idpath = getNodesFromPath(pathFinder.find(key_one, key_two));
-				console.log('Path: ' + idpath);
+			} else if (distance < music_graph_descriptors.inter_supergenre) {
+				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has distance (' + distance + ') lower than \'inter_supergenre\' (' + music_graph_descriptors.inter_supergenre + '). Check \'Weighting, for Foobar2000\' section');
+				console.log('Path: ' + getNodesFromPath(path));
 				bWarning = true;
 			}
 		}
