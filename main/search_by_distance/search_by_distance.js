@@ -1620,14 +1620,17 @@ async function searchByDistance({
 					const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
 					const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
 					const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
-					const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
-					let mapKey = [[...difference].sort(),[...toGenreStyle].sort()].join(' -> ');
-					if (cacheLinkSet.has(mapKey)) { // Mean distance from entire set (A,B,C) to (X,Y,Z)
-						mapDistance = cacheLinkSet.get(mapKey);
-					} else { // Calculate it if not found
-						mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
-						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
-					}
+					if (difference.size) {
+						const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
+						const mapKey = [...[[...difference].sort(),[...toGenreStyle].sort()].sort()].join(' -> ');
+						const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
+						if (typeof mapValue !== 'undefined') {
+							mapDistance = mapValue;
+						} else { // Calculate it if not found
+							mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
+							cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
+						}
+					} else {mapDistance = 0;} // One is superset of the other
 				}
 			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 			if (method === 'GRAPH') {
