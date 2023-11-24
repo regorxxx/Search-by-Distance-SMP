@@ -45,13 +45,18 @@
 ## [Unreleased][]
 ### Added
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
-- Descriptors: added 'Country Rap', 'Square Dance','Rodeo','Jug Band' styles.
+- Descriptors: added Country Rap, Square Dance, Rodeo, Jug Band, K-Pop, J-Pop, Kayokyoku styles.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
+- Dynamic queries: added dynamic queries (like those found at [Playlist Tools]()) for tracks and themes. Dynamic queries are like standard queries but with placeholders (#DATE#) which are evaluated on-the-fly, before running the query, using the selected reference track (or theme).  These queries are then used to filter the library at pre-scoring stage, changing the filter according to the reference For ex. for a Bob Dylan's track: COMPOSER IS #ARTIST# -> COMPOSER IS Bob Dylan. Full documentation can be found on the associated readme.
+- Readmes: added readmes for dynamic queries, cultural filters and influence filters.
 - HTML: added buttons to graph html page to directly go to live version or open the GitHub repository.
 ### Changed
+- Descriptors: improved AllMusic support.
 - Descriptors: extended debug tests for accents, ASCII compatibility and capitalization for all entries (including AllMusic).
 - Configuration: extended tag checking at init also for user settings (and not only default values). They were already tagged with actual values at runtime and after editing tags.
 - UI: tooltip while calculating the link cache (the button is animated) now shows the remaining percentage for every step.
+- UI: minor cleanup of menus. Negative scoring for out of range tags setting may be reset after installation.
+- Readmes: improved cultural and tags readme.
 - HTML: minor UI tweaks to graph html page.
 - HTML: moved HTML related scripts to its own folder.
 - HTML: updated jquery dependency of graph html page.
