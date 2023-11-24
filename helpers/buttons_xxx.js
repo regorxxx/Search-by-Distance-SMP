@@ -937,3 +937,16 @@ function getButtonsMaxSize(bCurrent = true) {
 	if (orientation === 'y') {maxSize.totalW = maxSize.w;}
 	return maxSize;
 }
+
+function getButtonVersion(source = 'Playlist-Tools-SMP') {
+	let ver = (buttonsBar.getUpdateList().find((btn) => btn.scriptName === source) || {}).version;
+	if (!ver) {
+		switch (source.toLowerCase()) {
+			case 'playlist-tools-smp': 
+				try {ver = utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001).match(/var version = '(.*)'/mi)[1]}
+				catch (e) {}
+				break;
+		}
+	}
+	return ver || 'x.x.x';
+}

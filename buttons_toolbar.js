@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/11/23
+//24/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -14,7 +14,6 @@
 */
 
 var bLoadTags = true; // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
-var version = '3.3.1';
 
 {
 	const dependencies = [
@@ -243,7 +242,7 @@ if (barProperties.bAutoUpdateCheck[1]) {
 		setTimeout(checkUpdate, 120000 + 60000 * i, {
 			...(btn.scriptName	? {scriptName:	btn.scriptName} : {}),
 			...(btn.repository	? {repository:	btn.repository} : {}),
-			...(btn.version		? {version:		btn.version} : {}), // If there is no version, it's retrieved from the toolbar version
+			...(btn.version		? {version:		btn.version} : {}),
 			bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb
 		});
 	})
