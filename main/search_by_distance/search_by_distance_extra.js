@@ -1,9 +1,10 @@
 ﻿'use strict';
-//28/09/23
+//24/11/23
 
 include('search_by_distance.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
+include('..\\music_graph\\music_graph_descriptors_xxx_node.js');
 include('..\\world_map\\world_map_tables.js');
 
 // Similar artists
@@ -243,6 +244,18 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 	genreStyles = [...(new Set(genreStyles.filter((node) => {return !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi);})))];
 	return genreStyles;
 }
+
+// function getIsoFromHandle (handle, worldMapData = null) {
+	// let iso = '';
+	// const tagName = 'LOCALE LAST.FM';
+	// const localeTag = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(handle).split(', ').filter(Boolean).pop() || '';
+	// if (localeTag.length) {iso = getCountryISO(localeTag) || '';}
+	// else {
+		// const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(handle);
+		// {iso, worldMapData} = getLocaleFromId(artist, worldMapData);
+	// }
+	// return {iso, worldMapData};
+// }
 
 // Similar culture zone
 function getLocaleFromId(id, worldMapData = null) {
