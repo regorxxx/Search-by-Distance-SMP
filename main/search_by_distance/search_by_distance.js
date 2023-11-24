@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/11/23
+//24/11/23
 
 /*
 	Search by Distance
@@ -79,7 +79,7 @@ const SearchByDistance_properties = {
 	graphDistance			:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre', 
 		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
 	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
-	bNegativeWeighting		:	['Assign negative score when tags fall outside their range', true],
+	bNegativeWeighting		:	['Negative score for tags out of range', true],
 	bFilterWithGraph		:	['Filter values not present on the graph', true],
 	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter		:	['Exclude tracks by same artist', false],
@@ -113,6 +113,7 @@ const SearchByDistance_properties = {
 	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
 	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,5]], func: isInt}, -1],
 	genreStyleRegionFilter	:	['Genre region filter: none (-1), continent (0), region (1)', -1, {range: [[-1,3]], func: isInt}, -1],
+	dynQueries				:	['Dynamic query filtering', JSON.stringify([]), {func: isJSON}, JSON.stringify([])],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -596,6 +597,7 @@ async function searchByDistance({
 								// --->Pre-Scoring Filters
 								// Query to filter library
 								forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties.forcedQuery[1] : '',
+								dynQueries				= properties.hasOwnProperty('dynQueries') ? JSON.parse(properties.dynQueries[1]) : [],
 								// Exclude same artist
 								bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties.bSameArtistFilter[1] : false,
 								// Similar artists
@@ -823,7 +825,7 @@ async function searchByDistance({
 			calcTags[key] = calcTag;
 			// Safety Check. Warn users if they try wrong settings
 			if (type.includes('single') && calcTag.tf.length > 1) {
-				console.popup('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.');
+				console.popup('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.', 'Search by distance');
 				return;
 			}
 		}
@@ -1213,6 +1215,73 @@ async function searchByDistance({
 				}
 			}
 		}
+		if (dynQueries.length) {
+			const getRemap = (key) => {
+				const remap = calcTags[key].tf;
+				if (!remap.length && calcTags[key].weight === 0 && tags[key].tf.length) {remap.push(...tags[key].tf);}
+				return remap;
+			}
+			const validTags = Object.keys(calcTags)
+				.filter((tag) => !calcTags[tag].type.includes('virtual') || calcTags[tag].type.includes('tfRemap'));
+			const regTag = new RegExp('([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'gi');
+			const regNot = new RegExp('NOT([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'i');
+			const regFunc = /(.*\()("\$)(.*)(\)"[\),])/g;
+			// Process every query on array and join
+			let selQuery = dynQueries.map((dynQuery, i) => {
+				if (!dynQuery || !dynQuery.length || dynQuery === 'ALL') {dynQuery = '';}
+				else {
+					// Replace with tags set
+					let key = '';
+					if (new RegExp('\\b(' + validTags.join('|') + ')\\b', 'i').test(dynQuery)) {
+						const match = dynQuery.match(new RegExp(regTag.source, 'i'))[2];
+						if (match) {
+							key = validTags.find((tag) => tag.toLowerCase() === match.toLowerCase());
+							const expanded = getRemap(key).map((tag) => {
+								return dynQuery.replace(regTag, function(match, g1, g2, g3) {
+									return tag.indexOf('$') !== -1 
+										? (g1.replace('%', '') + _qCond(tag) + g3.replace('%', ''))
+										: (g1 + tag + g3);
+								}).replace(/(.*\()("\$)(.*)(\)"[\),])/g, function(match, g1, g2, g3, g4) {
+									return g1 + '$' + g3 + g4.replace('"', '');
+								});
+							});
+							dynQuery = query_join(expanded, regNot.test(dynQuery) ? 'AND' : 'OR');
+						} else {dynQuery = ''; key = '';}
+					} else {key = '';}
+					// Execute
+					if (dynQuery) {
+						if (bUseTheme) {
+							const tag = key && calcTags.hasOwnProperty(key) ? {[key.toLowerCase()]: calcTags[key].reference} : {};
+							dynQuery = queryReplaceWithCurrent(dynQuery, null, tag);
+						} else {dynQuery = queryReplaceWithCurrent(dynQuery, sel);}
+					} else {dynQuery = '';}
+				}
+				// Check
+				if (checkQuery(dynQuery)) {return dynQuery;}
+				else {
+					console.popup(
+						'Non valid Dynamic query or wrong parsing:\n\n' + dynQueries[i] + 
+						'\n\nConverted to:\n\n' + dynQuery +
+						(bUseTheme 
+							? '\n\n\nCheck the theme has the requrired tags:\n' +  validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
+							: ''
+						)
+					, 'Search by distance');
+					return null;
+				}
+			}).filter(Boolean);
+			selQuery = query_join(selQuery, 'AND') || '';
+			// Add to list
+			const len = selQuery.length;
+			if (len) {
+				if (len > 50000) { // Minor optimization for huge queries
+					queryStages.push(selQuery);
+				} else {
+					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(selQuery);}
+					else {query[querylength] += selQuery;}
+				}
+			}
+		}
 		if (forcedQuery.length) { //Add user input query to the previous one
 			// Swap order to improve performance, since the forced query always short circuits the search
 			if (query[querylength].length) {query[querylength] = _p(forcedQuery) + ' AND ' + _p(query[querylength]);}
@@ -1241,7 +1310,7 @@ async function searchByDistance({
 		// Load query
 		if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
 		let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
-		const checkQuery = (queryItems, q) => {
+		const debugQuery = (queryItems, q) => {
 			if (!queryItems) {
 				fb.ShowPopupMessage(
 					'Query not valid. Check query:\n\n' +
@@ -1253,12 +1322,12 @@ async function searchByDistance({
 				return;
 			}
 		};
-		checkQuery(handleList, query[querylength]);
+		debugQuery(handleList, query[querylength]);
 		if (queryStages.length) {
 			queryStages.forEach((subQuery) => {
 				if (bShowQuery) {console.log('Sub-Query created: ' + subQuery);}
 				handleList = fb.GetQueryItemsCheck(handleList, subQuery);
-				checkQuery(handleList, subQuery);
+				debugQuery(handleList, subQuery);
 			});
 		}
 		if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
@@ -2035,7 +2104,7 @@ async function searchByDistance({
 							}
 						} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
 					} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.');}
-				} else {console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).');}
+				} else {console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance');}
 			}
 			// Invert any previous algorithm
 			if (bInverseListOrder) {

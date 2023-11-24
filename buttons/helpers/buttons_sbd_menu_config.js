@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//24/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -126,7 +126,7 @@ function createConfigMenu(parent) {
 			});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
-		createBoolMenu(menuName, ['bNegativeWeighting', 'bFilterWithGraph'], 
+		createBoolMenu(menuName, ['bFilterWithGraph'], 
 			[
 				void(0), 
 				recipe.hasOwnProperty('method') && recipe.method  !== 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] !== 'GRAPH'
@@ -319,6 +319,14 @@ function createConfigMenu(parent) {
 			createTagMenu(menuName, options);
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			createBoolMenu(menuName, ['bNegativeWeighting'], 
+				[
+					void(0), 
+					recipe.hasOwnProperty('method') && recipe.method  !== 'GRAPH' || !recipe.hasOwnProperty('method') && properties.method[1] !== 'GRAPH'
+				]
+			);
+		}
 		{	// Cache
 			const options = ['bAscii', 'bTagsCache','bAllMusicDescriptors'];
 			options.forEach((key, i) => {
@@ -506,6 +514,56 @@ function createConfigMenu(parent) {
 			}});
 		}
 		menu.newEntry({menuName, entryText: 'sep'});
+		{	// Dynamic queries
+			const subMenuName = menu.newMenu('Dynamic query filters...', menuName);
+			let options = [];
+			const currentFilters = JSON.parse(properties['dynQueries'][1]);
+			const data = JSON.parse(properties.data[1]);
+			const isTheme = (data.forcedTheme.length ? data.forcedTheme : data.theme) !== 'None';
+			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_dynamic_filters.json';
+			const bFile = _isFile(file);
+			if (bFile) {
+				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
+			} else {
+				options = [
+					{title: 'Same Artist',				query: globTags.artist + ' IS #' + globTags.artistRaw + '#'}, 
+					{title: 'sep'},
+					{title: 'Different Genre',			query: 'NOT GENRE IS #GENRE#'},
+					{title: 'Different Style',			query: 'NOT STYLE IS #STYLE#'},
+					{title: 'sep'},
+					{title: 'Date greater (+15)',		query: 'DATE GREATER #$add(%DATE%,15)#'},
+					{title: 'Date lower (-15)',			query: 'DATE LESS #$sub(%DATE%,15)#'},
+					{title: 'sep'},
+					{title: 'From last 30 years',		query: 'DATE GREATER #$sub(#YEAR#,30)#'},
+					{title: 'From last 20 years',		query: 'DATE GREATER #$sub(#YEAR#,20)#'},
+					{title: 'From last 10 years',		query: 'DATE GREATER #$sub(#YEAR#,10)#'},
+				];
+			}
+			menu.newEntry({menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
+			options.forEach((obj) => {
+				if (obj.title === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED}); return;}
+				const entryText = obj.title + (recipe.hasOwnProperty('dynQueries') ? '\t(forced by recipe)' : '');
+				let input = '';
+				menu.newEntry({menuName: subMenuName, entryText, func: () => {
+					const idx = currentFilters.indexOf(obj.query);
+					if (idx !== -1) {currentFilters.splice(idx, 1);}
+					else {currentFilters.push(obj.query)}
+					properties['dynQueries'][1] = JSON.stringify(currentFilters);
+					overwriteProperties(properties); // Updates panel
+				}, flags: recipe.hasOwnProperty('dynQueries') ? MF_GRAYED : MF_STRING});
+				menu.newCheckMenu(subMenuName, entryText, void(0), () => {
+					const prop = recipe.hasOwnProperty('dynQueries') ? recipe.dynQueries : properties['dynQueries'][1];
+					return prop.includes(obj.query);
+				});
+			});
+			menu.newEntry({menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED});
+			menu.newEntry({menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
+				if (!bFile) {_save(file, JSON.stringify(options, null, '\t'));}
+				_explorer(file);
+			}});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
 		{	// Influences filter
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
 			const bConditionAntiInfluences = recipe.hasOwnProperty('bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
@@ -513,7 +571,7 @@ function createConfigMenu(parent) {
 			options.forEach((key) => {
 				if (key === 'sep') {menu.newEntry({menuName, entryText: 'sep'}); return;}
 				const bGraphCondition = !bIsGraph && (key === 'bUseAntiInfluencesFilter' || key === 'bConditionAntiInfluences' || key === 'bUseInfluencesFilter');
-				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : '');
+				const entryText = properties[key][0].substr(properties[key][0].indexOf('.') + 1) + (recipe.hasOwnProperty(key) ? '\t(forced by recipe)' : (bGraphCondition ? '\t(Only GRAPH)' : ''));
 				menu.newEntry({menuName, entryText, func: () => {
 					if (key === 'bConditionAntiInfluences') {fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');}
 					if (key === 'bSameArtistFilter') {fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance');}
@@ -908,50 +966,53 @@ function createConfigMenu(parent) {
 		const subMenuName = menu.newMenu('Readmes...');
 		menu.newEntry({menuName: subMenuName, entryText: 'Open popup with readme:', func: null, flags: MF_GRAYED});
 		menu.newEntry({menuName: subMenuName, entryText: 'sep'});
-		let iCount = 0;
-		const readmes = {
-			Main: folders.xxx + 'helpers\\readme\\search_by_distance.txt',
-			sep1: 'sep',
-			'Method: DYNGENRE': folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt',
-			'Method: GRAPH': folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt',
-			'Method: WEIGHT': folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt',
-			sep2: 'sep',
-			'Tags & Weights: cultural': folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt',
-			sep3: 'sep',
-			'Scoring methods': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt',
-			'Scoring methods: chart': folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png',
-			sep4: 'sep',
-			'Sorting: smart shuffle': folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt',
-			'Sorting: harmonic mixing': folders.xxx + 'helpers\\readme\\harmonic_mixing.txt',
-			sep5: 'sep',
-			'Recipes & Themes': folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt',
-			'Similar Artists': folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt',
-			'User descriptors': folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt',
-			sep6: 'sep',
-			'Tagging requisites': folders.xxx + 'helpers\\readme\\tags_structure.txt',
-			'Tags sources': folders.xxx + 'helpers\\readme\\tags_sources.txt',
-			'Other tags notes': folders.xxx + 'helpers\\readme\\tags_notes.txt'
-		};
-		if (Object.keys(readmes).length) {
-			const rgex = /^sep$|^separator$/i;
-			Object.entries(readmes).forEach(([key, value]) => { // Only show non empty files
-				if (rgex.test(value)) {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
-				else if (_isFile(value)) {
-					const readme = _open(value, utf8); // Executed on script load
+		let iCount = 0, j = 0;
+		const readmes = [
+			{name: 'Main', file: folders.xxx + 'helpers\\readme\\search_by_distance.txt'},
+			{name: 'sep'},
+			{name: 'Method: DYNGENRE', file: folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt'},
+			{name: 'Method: GRAPH', file: folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt'},
+			{name: 'Method: WEIGHT', file: folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt'},
+			{name: 'sep'},
+			{name: 'Filter: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural_filter.txt'},
+			{name: 'Filter: dynamic query', file: folders.xxx + 'helpers\\readme\\search_by_distance_dynamic_query.txt'},
+			{name: 'Filter: influences', file: folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt'},
+			{name: 'sep'},
+			{name: 'Tags & Weights: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt'},
+			{name: 'sep'},
+			{name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt'},
+			{name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png'},
+			{name: 'sep'},
+			{name: 'Sorting: smart shuffle', file: folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt'},
+			{name: 'Sorting: harmonic mixing', file: folders.xxx + 'helpers\\readme\\harmonic_mixing.txt'},
+			{name: 'sep'},
+			{name: 'Recipes & Themes', file: folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt'},
+			{name: 'Similar Artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt'},
+			{name: 'User descriptors', file: folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt'},
+			{name: 'sep'},
+			{name: 'Tagging requisites', file: folders.xxx + 'helpers\\readme\\tags_structure.txt'},
+			{name: 'Tags sources', file: folders.xxx + 'helpers\\readme\\tags_sources.txt'},
+			{name: 'Other tags notes', file: folders.xxx + 'helpers\\readme\\tags_notes.txt'},
+		].filter(Boolean);
+		if (readmes.length) {
+			readmes.forEach((entry) => { // Only show non empty files
+				if (entry.name === 'sep') {menu.newEntry({menuName: subMenuName, entryText: 'sep'}); return;}
+				else if (_isFile(entry.file)) {
+					const readme = _open(entry.file, utf8); // Executed on script load
 					if (readme.length) {
-						menu.newEntry({menuName: subMenuName, entryText: key, func: () => { // Executed on menu click
-							if (_isFile(value)) {
-								if (value.endsWith('.png')) {
-									_run(value);
+						menu.newEntry({menuName: subMenuName, entryText: entry.name, func: () => { // Executed on menu click
+							if (_isFile(entry.file)) {
+								if (entry.file.endsWith('.png')) {
+									_run(entry.file);
 								} else {
-									const readme = _open(value, utf8);
-									if (readme.length) {fb.ShowPopupMessage(readme, key);}
+									const readme = _open(entry.file, utf8);
+									if (readme.length) {fb.ShowPopupMessage(readme, entry.name);}
 								}
-							} else {console.log('Readme not found: ' + value);}
+							} else {console.log('Readme not found: ' + entry.file);}
 						}});
 						iCount++;
 					}
-				} else {console.log('Readme not found: ' + value);}
+				} else {console.log('Readme not found: ' + entry.file);}
 			});
 		} 
 		if (!iCount) {menu.newEntry({menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED});}

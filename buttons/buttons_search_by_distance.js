@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/11/23
+//23/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -41,6 +41,7 @@ delete newButtonsProperties.bAdvTitle;
 delete newButtonsProperties.sortBias;
 delete newButtonsProperties.artistRegionFilter;
 delete newButtonsProperties.genreStyleRegionFilter;
+delete newButtonsProperties.dynQueries;
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 {
 	const properties = getPropertiesPairs(newButtonsProperties, prefix, 0);
