@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/11/23
+//24/11/23
 
  // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -53,7 +53,7 @@ const music_graph_descriptors_culture =  new regionMap ({
 				'Modernist'
 			],
 			'East Asia': [
-				'Japanese Classical_supergenre','Japanese Prog. Rock','Japanese','Minimal Wave','New Age','Nu Jazz','Future Jazz','Ambient House','Glam Metal','Hair Metal','Pop Metal','Eclectic Prog','Math Rock','Garage Punk','Garage Rock','Electrofunk','Ambient Folk','Trancecore','Speedcore','Glitch','Bit Music','Ambient','Kawaii Metal'
+				'Japanese Classical_supergenre','Japanese Prog. Rock','Japanese','Minimal Wave','New Age','Nu Jazz','Future Jazz','Ambient House','Glam Metal','Hair Metal','Pop Metal','Eclectic Prog','Math Rock','Garage Punk','Garage Rock','Electrofunk','Ambient Folk','Trancecore','Speedcore','Glitch','Bit Music','Ambient','Kawaii Metal','J-Pop','K-Pop','Kayokyoku'
 			],
 			'South Asia': [
 				'Indian Classical_supergenre','Indian','Garage Rock','Disco','Goa Trance','Psytrance'

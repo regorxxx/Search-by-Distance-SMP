@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/11/23
+//24/11/23
 
 const music_graph_descriptors_allmusic = {
 	style_substitutions: [
@@ -1061,16 +1061,16 @@ const music_graph_descriptors_allmusic = {
 			['Noise Rock'						,	['Noise-Rock'						]],
 			['Progressive Rock XL'				,	['Prog-Rock'						]],
 		/* Asian Pop */
-			['-'								,	['Asian Pop'						]],
-			['-'								,	['C-Pop'							]],
-			['-'								,	['Cantopop'							]],
-			['-'								,	['City Pop'							]],
-			['-'								,	['J-Pop'							]],
-			['-'								,	['K-Pop'							]],
-			['-'								,	['Kayokyoku'						]],
-			['-'								,	['Mandopop'							]],
-			['-'								,	['Okinawan Pop'						]],
-			['-'								,	['Thai Pop'							]],
+			['*'								,	['Asian Pop'						]],
+			['Asian Pop'						,	['C-Pop'							]],
+			['Asian Pop'						,	['Cantopop'							]],
+			['Asian Pop'						,	['City Pop'							]],
+			['*'								,	['J-Pop'							]],
+			['*'								,	['K-Pop'							]],
+			['*'								,	['Kayokyoku'						]],
+			['Asian Pop'						,	['Mandopop'							]],
+			['Asian Pop'						,	['Okinawan Pop'						]],
+			['Asian Pop'						,	['Thai Pop'							]],
 		/* Asian Rock */
 			['0'								,	['Asian Rock'						]],
 			['0'								,	['Chinese Rock'						]],
@@ -1135,16 +1135,16 @@ const music_graph_descriptors_allmusic = {
 		/* Heavy Metal */
 			['*'								,	['Heavy Metal'						]],
 			['Alt. Metal XL'					,	['Alternative Metal'				]],
-			['-'								,	['Avant-Garde Metal'				]],
+			['Alt. Metal XL'					,	['Avant-Garde Metal'				]],
 			['*'								,	['Black Metal'						]],
-			['-'								,	['Blackgaze'						]],
+			['Post-Metal'						,	['Blackgaze'						]],
 			['British Metal'					,	['British Alternative Metal'		]],
 			['Death Metal'						,	['Death Alternative Metal'			]],
 			['-'								,	['Deathcore'						]],
 			['Doom Metal'						,	['Doom Alternative Metal'			]],
-			['-'								,	['Drone Alternative Metal'			]],
-			['-'								,	['Electronicore'					]],
-			['Folk Metal'						,	['Folk-Alternative Metal'			]],
+			['Doom Metal'						,	['Drone Alternative Metal','Drone Metal']],
+			['Trancecore'						,	['Electronicore'					]],
+			['Folk Metal'						,	['Folk-Alternative Metal','Folk-Metal']],
 			['Funk Metal'						,	['Funk Alternative Metal'			]],
 			['Gothic Metal'						,	['Goth Alternative Metal'			]],
 			['*'								,	['Grindcore'						]],
@@ -1153,28 +1153,28 @@ const music_graph_descriptors_allmusic = {
 			['Industrial Metal'					,	['Industrial Alternative Metal'		]],
 			['Metalcore'						,	['Alternative Metalcore'			]],
 			['Neo-Classical Metal'				,	['Neo-Classical Alternative Metal'	]],
-			['British Metal'					,	['New Wave of British Heavy Alternative Metal','New Wave Of British Heavy Alternative Metal']], // Add proper capitalization
+			['British Metal'					,	['New Wave of British Heavy Alternative Metal','New Wave Of British Heavy Alternative Metal','New Wave Of British Heavy Metal']], // Add proper capitalization
 			['Nu Metal'							,	['Nü Alternative Metal','Nu Alternative Metal']], // Add asciified version
-			['Pop Metal'						,	['Pop-Alternative Metal'			]],
+			['Pop Metal'						,	['Pop-Alternative Metal','Pop-Metal']],
 			['Post-Metal'						,	['Post-Alternative Metal'			]],
 			['Power Metal'						,	['Power Alternative Metal'			]],
 			['Progressive Metal'				,	['Progressive Alternative Metal'	]],
-			['-'								,	['Punk Alternative Metal'			]],
-			['Rap Metal'						,	['Rap-Alternative Metal'			]],
-			['-'								,	['Scandinavian Alternative Metal'	]],
+			['Crossover Thrash'					,	['Punk Alternative Metal'			]],
+			['Rap Metal'						,	['Rap-Alternative Metal','Rap-Metal']],
+			['Black Metal'						,	['Scandinavian Alternative Metal','Scandinavian Metal']],
 			['Sludge Metal'						,	['Sludge Alternative Metal'			]],
-			['Speed Metal'						,	['Speed / Thrash Alternative Metal'	]],
+			['Speed Metal'						,	['Speed / Thrash Alternative Metal','Speed/Thrash Metal']],
 			['Stoner Metal'						,	['Stoner Alternative Metal'			]],
-			['Symphonic Metal'					,	['Symphonic Black Alternative Metal']],
-			['Symphonic Metal'					,	['Symphonic Alternative Metal'		]],
-			['Death Metal'						,	['Technical Death Alternative Metal']],
+			['Symphonic Metal'					,	['Symphonic Black Alternative Metal','Symphonic Black Metal']],
+			['Symphonic Metal'					,	['Symphonic Alternative Metal']],
+			['Death Metal'						,	['Technical Death Alternative Metal','Technical Death Metal']],
 		/* Pop/Rock */
 			['Pop Rock'							,	['Pop/Rock'							]],
 			['Pop Rock'							,	['AM Pop'							]],
 			['*'								,	['Baroque Pop'						]],
 			['Brill Building Sound'				,	['Brill Building Pop'				]],
-			['-'								,	['Bubblegum'						]],
-			['-'								,	['Celebrity'						]],
+			['Vocal Pop'						,	['Bubblegum'						]],
+			['0'								,	['Celebrity'						]],
 			['Contemporary Rock'				,	['Contemporary Pop/Rock'			]],
 			['Pop Rock'							,	['Early Pop/Rock'					]],
 			['0'								,	['Girl Groups'						]],
@@ -1193,24 +1193,24 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['European Psychedelia'				]],
 			['*'								,	['Garage Rock'						]],
 			['0'								,	['Latin Psychedelia'				]],
-			['-'								,	['Obscuro'							]],
+			['0'								,	['Obscuro'							]],
 			['Psy XL & Gaze'					,	['Psychedelic'						]],
 			['*'								,	['Psychedelic Pop'					]],
 			['Psychedelic Rock'					,	['Psychedelic/Garage'				]],
 			['0'								,	['Turkish Psychedelia'				]],
 		/*  Punk/New Wave */
 			['Punk Rock_supergenre'				,	['Punk/New Wave'					]],
-			['-'								,	['American Punk'					]],
-			['-'								,	['Anarchist Punk'					]],
-			['-'								,	['British Punk'						]],
+			['Punk Rock_supergenre'				,	['American Punk'					]],
+			['Anarcho-Punk'						,	['Anarchist Punk'					]],
+			['Punk Rock_supergenre'				,	['British Punk'						]],
 			['*'								,	['Hardcore Punk'					]],
-			['-'								,	['L.A. Punk'						]],
+			['Punk Rock_supergenre'				,	['L.A. Punk'						]],
 			['-'								,	['Mod Revival'						]],
-			['-'								,	['New Romantic'						]],
+			['New Wave'							,	['New Romantic'						]],
 			['*'								,	['New Wave'							]],
-			['-'								,	['New York Punk'					]],
+			['Punk Rock_supergenre'				,	['New York Punk'					]],
 			['*'								,	['No Wave'							]],
-			['-'								,	['Oi!'								]],
+			['Punk Rock'						,	['Oi!'								]],
 			['*'								,	['Post-Punk'						]],
 			['*'								,	['Power Pop'						]],
 			['*'								,	['Proto-Punk'						]],
@@ -1222,10 +1222,10 @@ const music_graph_descriptors_allmusic = {
 			['-'								,	['American Trad Rock'				]],
 			['Pub Rock'							,	['Bar Band'							]],
 			['Blues Rock'						,	['Blues-Rock'						]],
-			['-'								,	['Frat Rock'						]],
+			['Garage Rock'						,	['Frat Rock'						]],
 			['*'								,	['Heartland Rock'					]],
-			['-'								,	['Hot Rod'							]],
-			['-'								,	['Hot Rod Revival'					]],
+			['Surf Rock'						,	['Hot Rod'							]],
+			['Surf Rock'						,	['Hot Rod Revival'					]],
 			['0'								,	['Instrumental Rock'				]],
 			['0'								,	['Jam Bands'						]],
 			['*'								,	['Latin Rock'						]],
@@ -1287,26 +1287,26 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 			if (present.size) {
 				const missing = present.difference(parent.filterSetWithGraph(present));
 				if (missing.size) {
-					console.log('Missing items on graph:\n\t' + [...missing].join(', '));
+					console.log('Missing items on graph: ' + missing.size + '\n\t' + [...missing].join(', '));
 				}
 			}
 			if (subs.size) {
 				const error = subs.difference(parent.filterSetWithGraph(subs));
 				if (error.size) {
-					console.log('Items flagged as substitution but missing on graph:\n\t' + [...error].join(', '));
+					console.log('Items flagged as substitution but missing on graph: ' + error.size + '\n\t' + [...error].join(', '));
 				}
 			}
 			if (noAlt.size) {
-				console.log('No alternative items on graph:\n\t' + [...noAlt].join(', '));
+				console.log('No alternative items on graph: ' + noAlt.size + '\n\t' + [...noAlt].join(', '));
 				const noAltPresent = noAlt.intersection(parent.filterSetWithGraph(noAlt));
 				if (noAltPresent.size) {
-					console.log('Items flagged with no alternative but present on graph:\n\t' + [...noAltPresent].join(', '));
+					console.log('Items flagged with no alternative but present on graph: ' + noAltPresent.size + '\\n\t' + [...noAltPresent].join(', '));
 				}
 			}
 			if (allm.map_distance_exclusions.size) {
 				const exclusions = allm.map_distance_exclusions.intersection(parent.filterSetWithGraph(allm.map_distance_exclusions));
 				if (exclusions.size) {
-					console.log('Items flagged to filter but present on graph:\n\t' + [...exclusions].join(', '));
+					console.log('Items flagged to filter but present on graph: ' + exclusions.size + '\n\t' + [...exclusions].join(', '));
 				}
 			}
 		}

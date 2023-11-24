@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/11/23
+//24/11/23
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -97,7 +97,7 @@ const music_graph_descriptors = {
 		['Alternative_supergenre'			,	['Electrorock','Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Celtic Rock','Pop Punk','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
 		['Hardcore Punk_supergenre'			,	['Metalcore','Post-Hardcore','Math Rock','Grindcore','Crossover Thrash','Hardcore Punk','Anarcho-Punk','Stoner Rock','Stoner Sludge','Proto-Stoner Rock']],
 		['Contemporary_supergenre'			,	['Indie','Freak Folk','Neo-Prog','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Post-Britpop','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock']],
-		['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
+		['Pop_supergenre'					,	['Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','K-Pop','J-Pop','Kayokyoku','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
 		['Modern Folk_supergenre'			,	['Folk-Rock','Folk Pop','Folk Baroque','Folk Metal','Psychedelic Folk','Contemporary Folk','Folk-Jazz','Folktronica','Progressive Folk','Folk Punk','Hang Music','Ambient Folk']],
 		['European Pre-Modern Folk_supergenre',	['Medieval','Renaissance']],
 		['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango','Samba','Nueva Gaita','Mambo','Afro-Latin Ritual-Tribal','Pre-Columbian Ritual-Tribal']],
@@ -156,7 +156,8 @@ const music_graph_descriptors = {
 		['Extreme Metal XL'					,	['Extreme Metal','Black Metal','Death Metal','Doom Metal','Thrash Metal','Speed Metal']],
 		['British Folk-Rock XL'				,	['British Folk-Rock','British Folk-Jazz','Folk Baroque']],
 		['Roots Rock'						,	['Country Pop','Country Rock','Heartland Rock','Southern Rock','Pub Rock','Folk-Rock','Celtic Rock']],
-		['Mainstream Pop'					,	['Urban Soul','Electropop','Dance Pop','Disco Pop','Hypersoul','Contemporary R&B','Sophisti-Pop']],
+		['Mainstream Pop'					,	['Urban Soul','Electropop','Dance Pop','Disco Pop','Hypersoul','Contemporary R&B','Sophisti-Pop','J-Pop','K-Pop']],
+		['Asian Pop'						,	['J-Pop','K-Pop', 'Kayokyoku']],
 		['Traditional Pop'					,	['Vaudeville Blues','Doo Wop','Vocal Pop']],
 		['Vocal Pop'						,	['R&B','Doo Wop','Rockabilly','Brill Building Sound','Close Harmony','Jazz-Pop']],
 		['Disco XL'							,	['Funktronica','Electrofunk','Disco','Eurodisco','Disco Pop']],
@@ -337,8 +338,10 @@ const music_graph_descriptors = {
 		['Fantasy'							,	['Ricercar','Tiento','Fantasia']],
 		['Tiento'							,	['Ricercar', 'Fantasia']],
 		['Fantasia'							,	['Ricercar']],
-		['Kawaii Metal'						,	['Pop Metal']],
-		['Darksynth'						,	['Darkwave','Synthwave']]
+		['Kawaii Metal'						,	['Pop Metal','J-Pop']],
+		['Darksynth'						,	['Darkwave','Synthwave']],
+		['Kayokyoku'						,	['J-Pop']],
+		['K-Pop'							,	['Contemporary R&B', 'Urban Soul','Electropop']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -371,7 +374,9 @@ const music_graph_descriptors = {
 		['Asian Ritual-Tribal'				,	['Tuvan']],
 		['Melodic Techno-House'				,	['Deep House','Progressive Trance']],
 		['Loungetronica'					,	['Deep House','Melodic Techno-House']],
-		['Rodeo'							,	['Outlaw Country','Square Dance']]
+		['Rodeo'							,	['Outlaw Country','Square Dance']],
+		['Kayokyoku'						,	['Rock & Roll','Vocal Pop']],
+		['K-Pop'							,	['Europop']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -534,7 +539,9 @@ const music_graph_descriptors = {
 		['Neo Trance'						,	['Nu Trance'						]],
 		['Kuduro'							,	['Kurudu'							]],
 		['Melodic Techno-House'				,	['Melodic Techno','Melodic House'	]],
-		['Branle'							,	['Branle D\'Ossau','Branle De Noirmoutier']]
+		['Branle'							,	['Branle D\'Ossau','Branle De Noirmoutier']],
+		['J-Pop'							,	['Japanese Pop'						]],
+		['K-Pop'							,	['Korean Pop'						]],
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present 
