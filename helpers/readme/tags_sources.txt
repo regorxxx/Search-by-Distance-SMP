@@ -27,7 +27,7 @@
 |          | Foobar -   Foo_BPM Plugin                               |
 |          |      https://www.foobar2000.org/components/view/foo_bpm |
 +----------+---------------------------------------------------------+
-|          | Picard - AcousticBrainz Tags   plugin                   |
+|          | Picard - AcousticBrainz Tags plugin                     |
 |          |      https://picard.musicbrainz.org/plugins/            |
 |   MOOD   +---------------------------------------------------------+
 |          | Foobar -   Biography script (*)                         |
@@ -38,6 +38,12 @@
 +----------+---------------------------------------------------------+
 |          | Picard                                                  |
 | COMPOSER |      https://picard.musicbrainz.org/downloads/          |
++----------+---------------------------------------------------------+
+|          | Foobar - World Map script                               |
+|          |      https://github.com/regorxxx/World-Map-SMP          |
+|  LOCALE  +---------------------------------------------------------+
+|          | Foobar -   Biography script (*)                         |
+|          |      https://github.com/Wil-B/Biography                 |
 +----------+---------------------------------------------------------+
 
 (*) May require additional configuration or steps to either set a 
