@@ -1,0 +1,17 @@
+﻿Cultural similarity between artists and/or genres (or styles) maybe be
+taken into account via query filters, which are applied before scoring
+and comparing tracks.
+
+Source:
+--------
+Country tags (aka LOCALE) are retrieved from 'LOCALE LAST.FM' file tag
+or [World-Map-SMP database](https://github.com/regorxxx/World-Map-SMP).
+
+Filters: (pre-scoring filters)
+--------
+	- Artist cultural filter: by same/different continent, region or 
+		country than the selected track's artist.
+	
+	- Genre cultural filter: by same/different continent or region than
+		the selected track's genre/styles. Note a genre may be 
+		associated to multiple regions, contrary to artists.

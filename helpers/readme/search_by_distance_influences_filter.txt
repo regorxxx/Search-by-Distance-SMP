@@ -1,0 +1,43 @@
+﻿Filters the library by a query built according to the genre/styles of the
+reference track or theme. This query is built on-the-fly taking into 
+consideration which other genres/styles are influences or anti-influences
+according to the genre/style graph.
+
+Note distance scoring usually filter anti-influences by design, since they
+are further away than other genre/styles. But applying a query ensures 
+there are zero tracks with those, no matter the other settings... or that
+only influences are retrieved (rock tracks would never output rock tracks
+-which are naturally similar-  but their influences!).
+
+Rules:
+-------------
+- Only works on 'GRAPH' mode.
+
+Filters: (pre-scoring filters)
+--------
+	- Anti-influences filter: removes any track considered to be
+		an anti-influence to the genre/styles of the reference
+		track (or theme).
+		
+	- Conditional anti-influences filter: applies the previous
+		filter for specific genre/styles only (found at 
+		'style_anti_influences_conditional' on the descriptors).
+		For any other genre, the filter is not applied.
+		
+		For ex. a Jazz track as reference will use it, but a
+		Rock track will skip it. Some genres are more sensitive
+		to style changes than others; it may be tolerable to get
+		a grunge track on a rock playlist, but that situation 
+		should be absolutely avoided for Jazz playlists.
+	
+	- Influences filter: only uses tracks considered to be
+		an influence/derivative to the genre/styles of the
+		reference track (or theme).
+		
+		Note there is no distinction between influences (past)
+		and derivatives (future), that's taken into account
+		with the 'DATE' scoring and/or other query filters.
+		For ex., to get influences from the past, use a dynamic
+		query to only retrieve influences with a date lower 
+		than the current one. There are some filters specific
+		for this by default on the settings.
