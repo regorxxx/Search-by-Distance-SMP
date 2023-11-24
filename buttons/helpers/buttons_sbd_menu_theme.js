@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/23
+//23/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -28,6 +28,11 @@ function createThemeMenu(parent) {
 				forcedThemePath = folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme;
 				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
 			} else {console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance');}
+		}
+		if (forcedThemePath !== data.forcedTheme) {
+			data.forcedTheme = recipe.theme;
+			properties.data[1] = JSON.stringify(data);
+			overwriteProperties(properties);
 		}
 	}
 	// Header
