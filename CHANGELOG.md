@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.0.0](#600---2023-11-24)
 - [5.1.2](#512---2023-11-16)
 - [5.1.1](#511---2023-11-16)
 - [5.1.0](#510---2023-11-15)
@@ -44,6 +45,13 @@
 
 ## [Unreleased][]
 ### Added
+### Changed
+### Removed
+### Fixed
+
+## [6.0.0] - 2023-11-24
+### Added
+- Buttons: added new button 'search_by_distance_info', which pretty basic functionality right now, to display general statistics for a genre/style from the selected track. That data may come handy in creating new playlists (for tuning settings or filters), or to be used along [Timeline-SMP](https://regorxxx.github.io/foobar2000-SMP.github.io/scripts/timeline-smp/) or [World-Map-SMP](https://regorxxx.github.io/foobar2000-SMP.github.io/scripts/world-map-smp/) statistics.
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
 - Descriptors: added Country Rap, Square Dance, Rodeo, Jug Band, K-Pop, J-Pop, Kayokyoku styles.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
@@ -71,6 +79,7 @@
 - Pathfinder: fix distances output by getDistanceFromPath() due to incorrect handling of multi-edge graphs on [ngraph.graph](https://github.com/anvaka/ngraph.graph), where only the first link found was used. As result new distance values could be lower in some cases.
 - Presets: non valid keys error on 'Similar genres (DYNGENRE)' recipe. Issue #16
 - Descriptors: cleanup of duplicates entries and other minor errors in substitutions, influences, etc.
+- Auto-update: changed logic to check [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/)'s buttons updates independently to the toolbar version, so mixed scripts versions no longer produce false negatives.
 
 ## [5.1.2] - 2023-11-16
 ### Added
@@ -717,7 +726,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...v6.0.0
 [5.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.0.0...v5.1.0

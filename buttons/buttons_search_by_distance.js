@@ -1,10 +1,10 @@
 ﻿'use strict';
-//23/11/23
+//24/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\buttons_xxx_menu.js');
-var version = '5.1.2';
+var version = '6.0.0';
 
 try {window.DefineScript('Search by Distance Buttons', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
 
