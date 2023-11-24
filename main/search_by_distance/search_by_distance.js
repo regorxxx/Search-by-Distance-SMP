@@ -1242,7 +1242,7 @@ async function searchByDistance({
 										? (g1.replace('%', '') + _qCond(tag) + g3.replace('%', ''))
 										: (g1 + tag + g3);
 								}).replace(/(.*\()("\$)(.*)(\)"[\),])/g, function(match, g1, g2, g3, g4) {
-									return g1 + '$' + g3 + g4.replace('"', '');
+									return g1 + '$' + g3 + g4.replace(/"/g, '');
 								});
 							});
 							dynQuery = query_join(expanded, regNot.test(dynQuery) ? 'AND' : 'OR');
