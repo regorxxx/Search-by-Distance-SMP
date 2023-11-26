@@ -56,7 +56,7 @@
 ### Changed
 ### Removed
 ### Fixed
-HTML: errors displaying node distances on HTML file. [Issue](https://github.com/regorxxx/Music-Graph/issues/3)
+- HTML: errors displaying node distances on HTML file. [Issue](https://github.com/regorxxx/Music-Graph/issues/3)
 
 ## [6.0.0] - 2023-11-24
 ### Added
