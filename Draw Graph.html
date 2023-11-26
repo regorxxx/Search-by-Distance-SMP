@@ -71,7 +71,7 @@
 				var layout;
 				var renderer;
 				var graphics;
-				if (renderMethod == 'realDistance') { //Uses omly link's weight
+				if (renderMethod == 'realDistance') { //Uses only link's weight
 					layout = Viva.Graph.Layout.forceDirected(graph, {
 						// We are telling force directed layout, that we want to change length of each physical spring by overriding `springTransform` method:
 						springTransform: function (link, spring) {spring.length = link.data.weight * lengthMultiplier;}
@@ -357,7 +357,7 @@
 								}
 								if (link.data.weight !== undefined && link.data.weight !== null) {
 									<!-- linkDistance = link.data.weight; -->
-									const [distance, influence] = calcGraphDistance(graph, link.fromId, link.toId, true, influenceMethod);
+									const {distance, influence} = calcGraphDistance(graph, link.fromId, link.toId, true, influenceMethod);
 									linkDistance = Math.round(distance - influence);
 								}
 								count++;
