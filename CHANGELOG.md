@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.0.1](#601---2023-11-26)
 - [6.0.0](#600---2023-11-24)
 - [5.1.2](#512---2023-11-16)
 - [5.1.1](#511---2023-11-16)
@@ -44,6 +45,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [6.0.1] - 2023-11-26
 ### Added
 - UI: added setting to disable tooltip on all scripts. Found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json', by changing 'bTooltip'. By default tooltip is always shown. This setting will never be exposed within foobar, only at this file.
 ### Changed
@@ -728,7 +735,8 @@ HTML: errors displaying node distances on HTML file. [Issue](https://github.com/
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...HEAD
+[6.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...v6.0.0
 [5.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.0...v5.1.1
