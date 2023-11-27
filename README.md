@@ -63,14 +63,17 @@ There are 3 methods to calculate similarity between tracks: WEIGHT, GRAPH (see a
 ## Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file
 Graph behavior, new genres or substitutions may be tweaked by the use. Changes to the descriptors may be added to an user file instead of editing the original descriptor: 'helpers/music_graph_descriptors_xxx_user.js'. Check sample for more info.
 
-## Also integrates
+### Also integrates
  1. [Music-Graph](https://github.com/regorxxx/Music-Graph): An open source graph representation of most genres and styles found on popular, classical and folk music.
  2. [Camelot-Wheel-Notation](https://github.com/regorxxx/Camelot-Wheel-Notation): Javascript implementation of the Camelot Wheel, ready to use "harmonic mixing" rules and translations for standard key notations.
 
 ![Draw Graph_05](https://user-images.githubusercontent.com/83307074/116759506-fcecd200-aa01-11eb-8d2c-8a48ebcc73c0.gif)
 
-## Other implementations
+### Compatible with (toolbar)
  1. [Playlist-Tools-SMP](https://github.com/regorxxx/Playlist-Tools-SMP): Offers different pre-defefined examples for intelligent playlist creation.
+ 2. [Device-Priority-SMP](https://github.com/regorxxx/Device-Priority-SMP): Automatic output device selection.
+ 3. [ListenBrainz-SMP](https://github.com/regorxxx/ListenBrainz-SMP): Integrates Listenbrainz's feedback and recommendations.
+ 4. [Autobackup-SMP](https://github.com/regorxxx/Autobackup-SMP): Automatic saving and backup of configuration and other data in foobar2000.
 
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
