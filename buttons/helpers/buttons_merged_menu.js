@@ -1,5 +1,5 @@
 ﻿'use strict'
-//19/11/23
+//28/11/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -16,7 +16,7 @@ function createButtonsMenu(name) {
 	menu.newEntry({entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	if (!_isFolder(folders.data)) {_createFolder(folders.data);}
-	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_others_device_selector.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js']);
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_others_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_others_device_selector.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js','buttons_others_autobackup.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
 	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_device_', '_lastfm_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => {return path.split('\\').pop();}));
@@ -389,8 +389,9 @@ function createButtonsMenu(name) {
 			menu.newCheckMenu(subMenu, 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), void(0), () => {return buttonsBar.config.bIconModeExpand;});
 			menu.newEntry({menuName: subMenu, entryText: 'sep'});
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
-				const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
 				if (arrKeys.some((key) => buttonsBar.buttons[key].hasOwnProperty('bIconMode'))) {
+					const bHeadless = arrKeys.every((key) => buttonsBar.buttons[key].state === buttonStates.hide);
+					const entryText = buttonsPath[idx].split('\\').pop() + '\t' + (bHeadless ? ' [headless] ' : '') + _p(idx + 1);
 					menu.newEntry({menuName: subMenu, entryText, func: () => {
 						let cache;
 						for (let key of arrKeys) {
@@ -407,7 +408,7 @@ function createButtonsMenu(name) {
 							}
 						}
 						window.Repaint();
-					}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
+					}, flags: buttonsBar.config.bIconMode || bHeadless ? MF_GRAYED : MF_STRING});
 					menu.newCheckMenu(subMenu, entryText, void(0), () => {return arrKeys.some((key) => buttonsBar.buttons[key].bIconMode);});
 				}
 			});
@@ -428,6 +429,70 @@ function createButtonsMenu(name) {
 					}
 				});
 				window.Repaint();
+			}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
+		}
+		menu.newEntry({menuName, entryText: 'sep'});
+		{
+			const keys = buttonsBar.listKeys.map((arr) => arr.filter((key) => buttonsBar.buttons[key].buttonsProperties.hasOwnProperty('bHeadlessMode'))).flat(Infinity).filter(Boolean);
+			const checkHeadless = () => keys.every((key) => !buttonsBar.buttons[key].hasOwnProperty('bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());
+			const subMenu = menu.newMenu('Headless mode...' + (keys.length ? '' : '\t[none]'), menuName, keys.length ? MF_STRING : MF_GRAYED);
+			menu.newEntry({menuName: subMenu, entryText: 'Enable for all buttons', func: () => {
+				buttonsBar.listKeys.forEach((arrKeys, idx) => {
+					if (arrKeys.some((key) => buttonsBar.buttons[key].buttonsProperties.hasOwnProperty('bHeadlessMode'))) {
+						let cache;
+						for (let key of arrKeys) {
+							const button = buttonsBar.buttons[key];
+							const properties = button.buttonsProperties;
+							if (properties.hasOwnProperty('bHeadlessMode')) {
+								button.bHeadlessMode = properties.bHeadlessMode[1] = true;
+								overwriteProperties(properties);
+							}
+						}
+					}
+				});
+				window.Repaint(true);
+			}, flags: checkHeadless() ? MF_GRAYED : MF_STRING});
+			menu.newCheckMenu(subMenu, 'Enable for all buttons', void(0), checkHeadless);
+			menu.newEntry({menuName: subMenu, entryText: 'sep'});
+			buttonsBar.listKeys.forEach((arrKeys, idx) => {
+				if (arrKeys.some((key) => buttonsBar.buttons[key].buttonsProperties.hasOwnProperty('bHeadlessMode'))) {
+					const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
+					menu.newEntry({menuName: subMenu, entryText, func: () => {
+						let cache;
+						for (let key of arrKeys) {
+							const button = buttonsBar.buttons[key];
+							const properties = button.buttonsProperties;
+							if (properties.hasOwnProperty('bHeadlessMode')) {
+								// A single button file may have multiple buttons sharing the same properties or not
+								if (JSON.stringify(cache) !== JSON.stringify(properties)) { 
+									properties.bHeadlessMode[1] = !properties.bHeadlessMode[1];
+									overwriteProperties(properties);
+									cache = properties;
+								}
+								button.bHeadlessMode = properties.bHeadlessMode[1];
+							}
+						}
+						window.Repaint(true);
+					}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
+					menu.newCheckMenu(subMenu, entryText, void(0), () => {return arrKeys.every((key) => !buttonsBar.buttons[key].hasOwnProperty('bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());});
+				}
+			});
+			menu.newEntry({menuName: subMenu, entryText: 'sep'});
+			menu.newEntry({menuName: subMenu, entryText: 'Restore every button', func: () => {
+				buttonsBar.listKeys.forEach((arrKeys, idx) => {
+					if (arrKeys.some((key) => buttonsBar.buttons[key].buttonsProperties.hasOwnProperty('bHeadlessMode'))) {
+						let cache;
+						for (let key of arrKeys) {
+							const button = buttonsBar.buttons[key];
+							const properties = button.buttonsProperties;
+							if (properties.hasOwnProperty('bHeadlessMode')) {
+								button.bHeadlessMode = properties.bHeadlessMode[1] = false;
+								overwriteProperties(properties);
+							}
+						}
+					}
+				});
+				window.Repaint(true);
 			}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING});
 		}
 	}

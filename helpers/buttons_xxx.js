@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -45,10 +45,12 @@ buttonsBar.config = {
 	bHoverGrad: true,
 	bDynHoverColor: true,
 	bBorders: true,
+	hiddenTimeout: 2000,
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
 buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}, last: -1};
+buttonsBar.hidden = {bShow: false, id: null};
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at this.buttons)
@@ -146,6 +148,7 @@ function themedButton(
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
+	this.bHeadlessMode = false;
 	this.update = {
 		scriptName: update && update.hasOwnProperty('scriptName') ? update.scriptName : '', 
 		repository: update && update.hasOwnProperty('repository') ? update.repository : '',
@@ -221,6 +224,11 @@ function themedButton(
 		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
 	};
 	
+	this.headlessModeTempShow = false;
+	this.isHeadlessMode = function () { // For current button
+		return this.bHeadlessMode && !this.headlessModeTempShow;
+	};
+	
 	this.getHoverColor = function () {
 		return buttonsBar.config.bDynHoverColor 
 			? buttonsBar.config.buttonColor !== -1
@@ -233,7 +241,14 @@ function themedButton(
 	
 	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false, bLast = false) {
 		// Draw?
-		if (this.state === buttonStates.hide) {return;}
+		if (this.state === buttonStates.hide) {
+			let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w: 0, h: 0});
+			this.currX = xCalc + buttonsBar.config.offset.button.x; 
+			this.currY = yCalc + buttonsBar.config.offset.button.y; 
+			this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc; 
+			this.currH = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? window.Height : hCalc;
+			return;
+		}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 		// Check SO allows button theme
 		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
@@ -533,6 +548,7 @@ function themedButton(
 		else {console.log('butttons_xxx: onInit is not a function');}
 		onInit = null;
 	}
+	if (this.isHeadlessMode()) {this.state = buttonStates.hide;}
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
 
@@ -549,6 +565,8 @@ function drawAllButtons(gr) {
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
+			if (button.isHeadlessMode()) {button.state = buttonStates.hide;}
+			else if (button.state === buttonStates.hide && button.buttonsProperties.hasOwnProperty('bHeadlessMode')) {button.state = buttonStates.normal;}
 			// Don't normalize size in certain axis if not needed
 			if (bAlignSize && orientation === 'x') {
 				const bNormalize = maxSize.totalW > window.Width && maxSizeNoReflow.totalW > window.Width;
@@ -597,6 +615,8 @@ addEventListener('on_paint', (gr) => {
 addEventListener('on_mouse_move', (x, y, mask) => {
 	let old = buttonsBar.curBtn;
 	const buttons = buttonsBar.buttons;
+	const buttonsKeys = buttonsBar.listKeys.map((arr) => arr.filter((key) => buttons[key].state !== buttonStates.hide)).filter((arr) => arr.length);
+	const buttonsKeysAll = buttonsBar.listKeys;
 	let curBtnKey = '';
 	[buttonsBar.curBtn, curBtnKey, ] = chooseButton(x, y);
 	
@@ -612,10 +632,10 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	}
 	
 	// Cursors
-	const toolbarKeysLen = buttonsBar.listKeys.length;
+	const toolbarKeysLen = buttonsKeys.length;
 	if (buttonsBar.config.bUseCursors) {
 		if (buttonsBar.move.bIsMoving && buttonsBar.move.btn && toolbarKeysLen) {
-			const last = buttonsBar.buttons[buttonsBar.listKeys[toolbarKeysLen - 1].flat(Infinity).pop()];
+			const last = buttons[buttonsKeys[toolbarKeysLen - 1].flat(Infinity).pop()];
 			const maxX = last.currX + last.currW + _scale(5);
 			const maxY = last.currY + last.currH + _scale(5);
 			const axis = buttonsBar.config.orientation;
@@ -648,8 +668,9 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 						curBtn.bIconModeExpand = true;
 						if (oldBtn) { // In case mouse is moved fast, multiple buttons may be 'old'
 							let bContract = false;
-							for (let key in buttonsBar.buttons) {
-								oldBtn = buttonsBar.buttons[key];
+							for (let key in buttons) {
+								oldBtn = buttons[key];
+								if (oldBtn.state === buttonStates.hide){continue;}
 								if (oldBtn !== curBtn) {
 									if (!bContract) {continue;}
 									oldBtn.bIconModeExpand = false;
@@ -676,8 +697,8 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	if (toolbarKeysLen > 0) {
 		if (buttonsBar.curBtn && Object.keys(buttons).length > 1) {
 			if (mask === MK_RBUTTON) {
-				const key = buttonsBar.listKeys[toolbarKeysLen - 1].flat(Infinity).pop();
-				const last = buttonsBar.buttons[key];
+				const key = buttonsKeys[toolbarKeysLen - 1].flat(Infinity).pop();
+				const last = buttons[key];
 				const maxX = last.currX + last.currW + _scale(5);
 				const maxY = last.currY + last.currH + _scale(5);
 				const axis = buttonsBar.config.orientation;
@@ -811,12 +832,30 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 	}
 });
 
+addEventListener('on_mouse_mbtn_up', (x, y, mask) => { // Show hidden buttons
+	let bRepaint = false;
+	const buttons = buttonsBar.buttons;
+	const oldState = buttonsBar.hidden.bShow;
+	for (let key in buttons) {
+		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+			const button = buttons[key];
+			if (button.state === buttonStates.hide && button.isHeadlessMode()) {button.headlessModeTempShow = true; bRepaint = true; buttonsBar.hidden.bShow = true;}
+			else if (button.headlessModeTempShow) {button.headlessModeTempShow = false; bRepaint = true; buttonsBar.hidden.bShow = false}
+		}
+	}
+	if (bRepaint) {
+		window.Repaint(true);
+		if (!oldState && buttonsBar.hidden.bShow) {buttonsBar.hidden.id = setTimeout(on_mouse_mbtn_up, buttonsBar.config.hiddenTimeout);}
+		else if (oldState && !buttonsBar.hidden.bShow) {clearTimeout(buttonsBar.hidden.id);}
+	}
+});
+
 addEventListener('on_key_down', (k) => { // Update tooltip with key mask if required
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
-			if (buttonsBar.buttons[key].state === buttonStates.hover) {
-				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue(that.tooltipText(), true);
+			const button = buttonsBar.buttons[key];
+			if (button.state === buttonStates.hover) {
+				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
 			}
 		}
 	}
@@ -825,9 +864,9 @@ addEventListener('on_key_down', (k) => { // Update tooltip with key mask if requ
 addEventListener('on_key_up', (k) => {
 	for (let key in buttonsBar.buttons) {
 		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
-			if (buttonsBar.buttons[key].state === buttonStates.hover) {
-				const that = buttonsBar.buttons[key];
-				buttonsBar.tooltipButton.SetValue(that.tooltipText(), true);
+			const button = buttonsBar.buttons[key];
+			if (button.state === buttonStates.hover) {
+				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
 			}
 		}
 	}

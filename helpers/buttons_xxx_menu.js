@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
 
 include('menu_xxx.js');
 include('helpers_xxx_properties.js')
@@ -27,7 +27,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		options.forEach((key) => {
 			const value = properties[key][1];
 			const type = typeof value;
-			const entryText = properties[key][0].replace(/[a-zA-Z]*[0-9]*_*[0-9]*\./,'') + (bShowValues && type !== 'boolean' ? '\t[' + (typeof value === 'string' && value.length > 10 ? value.slice(0,10) + '...' : value) + ']' : '');
+			const entryText = properties[key][0].replace(/[a-zA-Z]*[0-9]*_*[0-9]*\./,'') + (bShowValues && type !== 'boolean' ? '\t[' + (type === 'string' && value.length > 10 ? value.slice(0,10) + '...' : value) + ']' : '');
 			const desc = popups && popups.hasOwnProperty(key) ? popups[key].input || '' : '';
 			menu.newEntry({entryText, func: () => {
 				let input;
@@ -64,8 +64,16 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 						fb.ShowPopupMessage(popups[key].popup, parentName);
 					}
 				}
-				if (callbacks && callbacks.hasOwnProperty(key)) {
-					callbacks[key](input);
+				if (key === 'bIconMode') {
+					parent.bIconMode = input;
+					window.Repaint();
+				}
+				if (callbacks) {
+					if (callbacks.hasOwnProperty(key)) {
+						callbacks[key](input, key);
+					} else if (callbacks.hasOwnProperty('*')) {
+						callbacks['*'](input, key);
+					}
 				}
 			}});
 			if (type === 'boolean') {
