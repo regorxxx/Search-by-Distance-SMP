@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -100,7 +100,7 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Align all widths and heights according to orientation
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
-buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons';
+buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)';
 // Assign size and pos
 buttonsBar.config.scale = barProperties.scale[1];
 buttonsBar.config.offset = JSON.parse(barProperties.offset[1]);
