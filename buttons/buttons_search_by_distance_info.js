@@ -1,17 +1,18 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\buttons_xxx_menu.js');
 include('..\\helpers\\menu_xxx_extras.js');
 include('..\\helpers\\helpers_xxx_statistics.js');
-var version = '6.0.0';
+include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance\\search_by_distance_extra.js'); // Load after buttons_xxx.js so properties are only set once
+var version = sbd.version;
 
 try {window.DefineScript('Search by Distance Info Button', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Info Button loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
-include('..\\main\\search_by_distance\\search_by_distance_extra.js'); // Load after buttons_xxx.js so properties are only set once
+
 var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
@@ -35,7 +36,7 @@ addButton({
 	'Search by Distance Info': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, 'Graph Info', function (mask) {
 		if (mask === MK_SHIFT) {
 				const menu = settingsMenu(
-					this, true, ['buttons_search_by_distance_info.js.js'], void(0), void(0),
+					this, true, ['buttons_search_by_distance_info.js'], void(0), void(0),
 					(menu) => {
 						menu.newEntry({entryText: 'sep'});
 						_createSubMenuEditEntries(menu, void(0), {

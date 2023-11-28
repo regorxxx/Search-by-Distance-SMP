@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.1.0](#610---2023-11-28)
 - [6.0.1](#601---2023-11-26)
 - [6.0.0](#600---2023-11-24)
 - [5.1.2](#512---2023-11-16)
@@ -47,6 +48,15 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+### Removed
+### Fixed
+
+## [6.1.0] - 2023-11-28
+### Added
+- Buttons bar: added compatibility with headless mode (for other buttons).
+### Changed
+- Helpers: updated helpers.
+- Improved error messages about features not working related to OS checks (at startup) with tips and warnings.
 ### Removed
 ### Fixed
 
@@ -735,7 +745,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...v6.0.0
 [5.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.1...v5.1.2

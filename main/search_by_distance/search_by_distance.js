@@ -1,5 +1,6 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
+var version = '6.1.0';
 
 /*
 	Search by Distance
@@ -174,6 +175,7 @@ const sbd = {
 	genreStyleMap: [],
 	isCalculatingCache: false,
 	panelProperties: (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
+	version
 };
 [sbd.genreMap , sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 

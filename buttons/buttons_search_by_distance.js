@@ -1,15 +1,15 @@
 ﻿'use strict';
-//24/11/23
+//28/11/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\buttons_xxx_menu.js');
-var version = '6.0.0';
+include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\helpers\\helpers_xxx_properties.js');
+var version = sbd.version;
 
 try {window.DefineScript('Search by Distance Buttons', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Buttons loaded.'); */} //May be loaded along other buttons
 
-include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
-include('..\\helpers\\helpers_xxx_properties.js');
 var prefix = 'sbd';
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
