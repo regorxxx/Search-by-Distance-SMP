@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/11/23
+//30/11/23
 var version = '6.1.0';
 
 /*
@@ -67,7 +67,7 @@ const SearchByDistance_properties = {
 		genre:				{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
 		style:				{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
 		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'virtual', 'absRange'], range: 1},
-		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6},  // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6}, // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
 		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3},
 		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50},
 		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30},
@@ -614,8 +614,8 @@ async function searchByDistance({
 								// --->Scoring Method
 								method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
 								// --->Scoring filters
-								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) :  75,
-								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) :  scoreFilter - 10,
+								scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) : 75,
+								minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) : scoreFilter - 10,
 								graphDistance			= properties.hasOwnProperty('graphDistance') ? (isString(properties.graphDistance[1]) ? properties.graphDistance[1] : Number(properties.graphDistance[1])) : Infinity,
 								// --->Post-Scoring Filters
 								// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
@@ -729,7 +729,7 @@ async function searchByDistance({
 							eval(key + ' = [' + newVal + ']');
 						} else if (typeof value === 'object') {
 							const newVal = JSON.stringify(value);
-							eval(key + ' = ' +  newVal );
+							eval(key + ' = ' + newVal );
 						} else {
 							eval(key + ' = ' + value);
 						}
@@ -881,7 +881,7 @@ async function searchByDistance({
 			}
 		}
 		
-		if (method === 'DYNGENRE') {  // Warn users if they try wrong settings
+		if (method === 'DYNGENRE') { // Warn users if they try wrong settings
 			if (calcTags.dynGenre.weight === 0) {
 				if (bBasicLogging) {console.log('Check \'dynGenre\' weight value (' + calcTags.dynGenre.weight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
 				return;
@@ -893,7 +893,7 @@ async function searchByDistance({
 		
 		if (!playlistLength) {
 			if (bBasicLogging) {console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.');}
-            return;
+			return;
 		}
 		if (!totalWeight && method === 'WEIGHT') {
 			if (bBasicLogging) {
@@ -1027,7 +1027,7 @@ async function searchByDistance({
 									: void(0)
 								);
 							}).filter(Boolean);
-						} else {  // For a single group just match all
+						} else { // For a single group just match all
 							groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match+ ' ' + val).join(' AND '));
 						}
 						query[queryl] = query_join(groups, 'OR');
@@ -1265,7 +1265,7 @@ async function searchByDistance({
 						'Non valid Dynamic query or wrong parsing:\n\n' + dynQueries[i] + 
 						'\n\nConverted to:\n\n' + dynQuery +
 						(bUseTheme 
-							? '\n\n\nCheck the theme has the requrired tags:\n' +  validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
+							? '\n\n\nCheck the theme has the requrired tags:\n' + validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
 							: ''
 						)
 					, 'Search by distance');
@@ -1367,7 +1367,7 @@ async function searchByDistance({
 		for (let key in calcTags) {
 			const tag = calcTags[key];
 			if (tag.type.includes('virtual')) {continue;}
-			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
+			if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 				tagsArr.push(tag.tf);
 			}
 		}
@@ -1394,7 +1394,7 @@ async function searchByDistance({
 			tag.bGraph = tag.type.includes('graph');
 			tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
 			if (tag.type.includes('virtual')) {continue;}
-			if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist)))  {
+			if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 				tag.handle = tagsValByKey[z++];
 			} else {
 				tag.handle = null;
@@ -1501,7 +1501,7 @@ async function searchByDistance({
 										const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
 										// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
 										if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
-											const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range);  //becomes negative outside the allowed range!
+											const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range); //becomes negative outside the allowed range!
 											weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 												? tag.weight * weightDistribution(scoringDistr, score)
 												: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
@@ -1521,14 +1521,14 @@ async function searchByDistance({
 									weightValue += tag.weight;
 								} else if (type.includes('percentRange') && tag.range !== 0) {
 									const range = tag.reference * tag.range / 100;
-									const difference = range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+									const difference = range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 									if ((difference < 0 && bNegativeWeighting) || difference > 0) {
 										weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 											? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
 											: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
 									}
 								} else if (type.includes('absRange') && tag.range !== 0) {
-									const difference = tag.range - Math.abs(tag.reference -  newTag); //becomes negative outside the allowed range!
+									const difference = tag.range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 									if ((difference < 0 && bNegativeWeighting) || difference > 0) {
 										weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 											? tag.weight * weightDistribution(scoringDistr, difference / tag.range)
@@ -1572,11 +1572,11 @@ async function searchByDistance({
 									const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](refVal, calcTags.dynGenre.range, true);
 									if (valueLower !== -1) { //All or none are -1
 										if (valueLower > refVal) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
-											if (lowerLimit <= newVal && newVal <= valueLower) {  // (lowerLimit , x)
+											if (lowerLimit <= newVal && newVal <= valueLower) { // (lowerLimit , x)
 												score += 1 / calcTags.dynGenre.referenceNumber;
 												break;
 											}
-											else if (valueLower <= newVal && newVal <= refVal) {  // (x, x + y)
+											else if (valueLower <= newVal && newVal <= refVal) { // (x, x + y)
 												score += 1 / calcTags.dynGenre.referenceNumber;
 												break;
 											}
@@ -1738,7 +1738,7 @@ async function searchByDistance({
 			}
 			poolLength = scoreData.length;
 			if (bBasicLogging) {
-				if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' +  scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
+				if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
 				console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks');
 			}
 		} 
@@ -1765,7 +1765,7 @@ async function searchByDistance({
 			}
 			scoreData.sort(function (a, b) {return a.mapDistance - b.mapDistance;}); // First sorted by graph distance, then by weight
 			poolLength = scoreData.length;
-			if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' +  scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
+			if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
 			if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance +': ' + poolLength + ' tracks');}
 		}
 		
@@ -1816,7 +1816,7 @@ async function searchByDistance({
 				if (calcTags.key.reference.length) {
 					// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 					const size = poolLength < playlistLength ? poolLength : playlistLength;
-					const pattern = camelotWheel.createHarmonicMixingPattern(size);  // On camelot_wheel_xxx.js
+					const pattern = camelotWheel.createHarmonicMixingPattern(size); // On camelot_wheel_xxx.js
 					if (bSearchDebug) {console.log(pattern);}
 					let nextKeyObj;
 					let keyCache = new Map();
@@ -1865,7 +1865,7 @@ async function searchByDistance({
 							}
 							if (!bFound) { // If nothing is found, then continue next movement with current track
 								camelotKeyNew = camelotKeyCurrent; // For debug console on last item
-								if (j === 1) {j = 0; continue;}  // try once retrying this step with default movement
+								if (j === 1) {j = 0; continue;} // try once retrying this step with default movement
 								else {
 									pattern[i] = 'perfectMatch';
 									i--;
@@ -1889,7 +1889,7 @@ async function searchByDistance({
 							const toAddData = {};
 							const keyMap = new Map();
 							// Find positions where the remainder tracks could be placed as long as they have the same key than other track
-							for (let i = 0;  i < poolLength; i++) {
+							for (let i = 0; i < poolLength; i++) {
 								const currTrackData = scoreData[i];
 								if (selectedHandlesData.indexOf(currTrackData) === -1) {
 									const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
@@ -2118,7 +2118,7 @@ async function searchByDistance({
 			if (bShowFinalSelection && !bProgressiveListCreation) {
 				let i = finalPlaylistLength;
 				let conText = 'List of selected tracks:';
-				while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance  + ' Graph' : '');}
+				while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : '');}
 				console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 			}
 		} else {
@@ -2137,7 +2137,7 @@ async function searchByDistance({
 		if (bCreatePlaylist) {
 			// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
 			let playlistNameEval;
-			const bIsTF =  /(%.*%)|(\$.*\(.*\))/.test(playlistName);
+			const bIsTF = /(%.*%)|(\$.*\(.*\))/.test(playlistName);
 			if (bUseTheme) {
 				const themeRegexp = /%SBD_THEME%/gi;
 				if (bIsTF && themeRegexp.test(playlistName)) {
@@ -2247,7 +2247,7 @@ function loadCache(path) {
 	let cacheMap;
 	if (_isFile(path)) {
 		if (utils.GetFileSize(path) > 400000000) {console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
-		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance',  utf8);
+		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance', utf8);
 		if (obj) { 
 			obj = Object.entries(obj);
 			obj.forEach((pair) => {

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/11/23
+//30/11/23
 
 include('search_by_distance.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
@@ -449,7 +449,7 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreStyleTag = ['G
 	}
 	// Get tags
 	let tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
-	if (bAscii) {tags =  new Set([...tags].map((tag) => {return _asciify(tag);}));}
+	if (bAscii) {tags = new Set([...tags].map((tag) => {return _asciify(tag);}));}
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
 	// Compare (- user exclusions - graph exclusions)
@@ -463,7 +463,7 @@ function findStyleGenresMissingGraph({genreStyleFilter = [], genreStyleTag = ['G
 					(missing.length 
 						? 	'In case you find a genre/style which is missing, check is not a misspelling\n' + 
 							'or alternate term for an existing entry (otherwise tag properly your files\n' + 
-							'or add the substitution to your file), and then if  you think it should be\n' + 
+							'or add the substitution to your file), and then if you think it should be\n' + 
 							'added to the Graph, let me know at: (but do your work first!)\n' +
 							'https://github.com/regorxxx/Music-Graph/issues\n\n' +
 							'An example of a good report of missing genre/style would be:\n' + 
