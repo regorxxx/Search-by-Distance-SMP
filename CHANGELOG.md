@@ -47,9 +47,11 @@
 
 ## [Unreleased][]
 ### Added
+- Toolbar: now supports color for image icons (which are not drawn using fonts).
 ### Changed
 ### Removed
 ### Fixed
+- HTML: errors displaying node icons.
 
 ## [6.1.0] - 2023-11-28
 ### Added
