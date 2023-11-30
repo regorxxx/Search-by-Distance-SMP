@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/11/23
+//29/11/23
 
 include('helpers_xxx_basic_js.js');
 include('helpers_xxx_prototypes.js');
@@ -415,14 +415,28 @@ function themedButton(
 			if (this.iconImage) { // Icon image
 				if (iconCalculated.length) {
 					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? iconCalculated.replace(/(\..*$)/i, '_dark$1') : null;
-					const iconDarkMode = iconCalculatedDarkMode ? gdi.Image(iconCalculatedDarkMode) : null;
-					let icon = iconDarkMode || gdi.Image(iconCalculated);
+					const iconColor = this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor;
+					const bMask = ![RGB(255,255,255), -1, RGB(0,0,0)].includes(iconColor);
+					const iconDarkMode = iconCalculatedDarkMode && !bMask ? gdi.Image(iconCalculatedDarkMode) : null;
+					let icon = bMask ? gdi.CreateImage(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale) : iconDarkMode || gdi.Image(iconCalculated);
 					if (icon) {
-						if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) {icon = icon.InvertColours();}
-						icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
+						if (!bMask) {
+							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) {icon = icon.InvertColours();}
+							icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
+						}
 						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
 							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2
 							: xCalc + icon.Width / 2;
+						if (bMask) {
+							const iconGr = icon.GetGraphics();
+							iconGr.FillSolidRect(0, 0, icon.Width, icon.Height, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor);
+							icon.ReleaseGraphics(iconGr);
+							let iconMask = gdi.Image(iconCalculated.replace(/(\..*$)/i, '_mask$1'));
+							if (iconMask) {
+								iconMask = iconMask.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
+								icon.ApplyMask(iconMask);
+							}
+						}
 						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - icon.Height * 1/2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 						textOffsetX = icon.Width * 7/10;
 					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
@@ -445,7 +459,7 @@ function themedButton(
 					const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
 							? xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2
 							: xCalc - wCalc / 2 + iconWidthCalculated * 5/4;
-					gr.GdiDrawText(iconCalculated, this.gFontIcon,  this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconX + buttonsBar.config.offset.icon.x, yCalc + buttonsBar.config.offset.icon.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					gr.GdiDrawText(iconCalculated, this.gFontIcon, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconX + buttonsBar.config.offset.icon.x, yCalc + buttonsBar.config.offset.icon.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
 				textOffsetX = iconWidthCalculated;
 			}
