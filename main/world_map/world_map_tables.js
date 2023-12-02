@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/10/23
+//01/12/23
 
 /* 
 	World Map
@@ -7,9 +7,9 @@
  */
 
 // Helper
-function findCountryCoords(country, mapWidth, mapHeight, factorX, factorY) { // Mercator projection
+function findCountryCoords({id /* country */, mapWidth, mapHeight, factorX, factorY} = {}) { // Mercator projection
 	let xy = [-1, -1];
-	const isoCode = getCountryISO(country);
+	const isoCode = getCountryISO(id);
 	if (isoCode.length) {
 		let [latitude , longitude] = isoCoordinates.get(isoCode);
 		if (latitude != null) {xy = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);}
@@ -33,10 +33,11 @@ function calcProximity(coord, x, y, precision, mapWidth, mapHeight, factorX, fac
 	return [xProx, yProx];
 }
 
-function findCountry(x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.94, bForceOutput = true) { // Mercator projection
+function findCountry({x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.94, bForceOutput = true, bSingle = false} = {}) { // Mercator projection
+	if (bSingle) {bForceOutput = true;}
 	let countries = [];
 	// Force at least a country by lowering the precision. Note some countries are really big (compared to the point)! So this is needed
-	while (countries.length === 0) {
+	while (countries.length === 0 && precision >= 0.75) {
 		isoCoordinates.forEach((coord, key) => {
 			const [xProx, yProx] = calcProximity(coord, x, y, precision, mapWidth, mapHeight, factorX, factorY);
 			if (xProx >= precision && yProx >= precision) {countries.push({key, prox: round((xProx + yProx) / 2 * 100, 0)});}
@@ -47,8 +48,12 @@ function findCountry(x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.
 	// Replace ISO codes with names and sort by proximity
 	// Note: don't forget to capitalize words later!
 	countries.forEach((country) => {country.key = isoMapRev.get(country.key);});
-	countries = countries.sort((a, b) => {return b.prox - a.prox;});
-	return countries;
+	countries.sort((a, b) => {return b.prox - a.prox;});
+	if (bSingle) {
+		return (countries[0] || {key: ''}).key;
+	} else {
+		return countries;
+	}
 }
 
 function getCountryISO(country) {
