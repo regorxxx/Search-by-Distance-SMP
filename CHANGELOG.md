@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.1.1](#611---2023-12-08)
 - [6.1.0](#610---2023-11-28)
 - [6.0.1](#601---2023-11-26)
 - [6.0.0](#600---2023-11-24)
@@ -46,6 +47,13 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+- HTML: errors displaying node icons.
+
+## [6.1.1] - 2023-12-08
 ### Added
 - Toolbar: now supports color for image icons (which are not drawn using fonts).
 ### Changed
@@ -747,7 +755,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.1...HEAD
+[6.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...v6.1.1
 [6.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v5.1.2...v6.0.0
