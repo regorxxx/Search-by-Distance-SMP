@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/11/23
+//09/12/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -141,7 +141,7 @@ function createConfigMenu(parent) {
 			const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
 			const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
 			const baseTag = tags[key];
-			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
+			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
 			const obj = {
 				bIsDyngenreRecipe: (key === 'dynGenre' && bIsDyngenreMethodRecipe),
 				bIsDyngenreProp: (key === 'dynGenre' && bIsDyngenreMethodProp),
@@ -163,7 +163,7 @@ function createConfigMenu(parent) {
 				: capitalizeAll(key.replace(/(Genre|Style)/g,'/$1').replace(/(Region)/g,' $1'), [' ', '/', '\\']);
 			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName);
 			const baseTag = tags[key];
-			const defTag = {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: []}; // Used in case a recipe add new tags but miss some keys...
+			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
 				const bRecipe = bRecipeTags && recipe.tags.hasOwnProperty(key) && (recipe.tags[key].hasOwnProperty('tf') || !baseTag);
 				const tag = bRecipe ? {...defTag, ...baseTag, ...recipe.tags[key]} : baseTag;
@@ -287,7 +287,7 @@ function createConfigMenu(parent) {
 		});
 		{	// New tag
 			menu.newEntry({menuName, entryText: 'New tag...', func: () => {
-				const nTag = {weight: 0, tf: [], scoringDistribution: 'LINEAR', type: []};
+				const nTag = sbd.tagSchema;
 				const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values will be filled later.', 'Search by distance', 'myTag');
 				if (name === null) {return;}
 				'string', 'multiple', 'graph'

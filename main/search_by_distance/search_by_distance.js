@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/12/23
+//09/12/23
 var version = '6.1.1';
 
 /*
@@ -73,7 +73,7 @@ const SearchByDistance_properties = {
 		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30},
 		composer:			{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
 		artistRegion:		{weight: 5,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
-		genreStyleRegion:	{weight: 7, tf: [],					baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
+		genreStyleRegion:	{weight: 7,	 tf: [],				baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
 	})],
 	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
 	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
@@ -175,7 +175,21 @@ const sbd = {
 	genreStyleMap: [],
 	isCalculatingCache: false,
 	panelProperties: (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
-	version
+	version,
+	get tagSchema() {return {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */};},
+	get tagTypeSchema() {return [
+			{type: 'Variable type',		val: ['string', 'number']},
+			{type: 'Multi-value tag',	val: ['single', 'multiple']},
+			{type: 'Range comparison', 	val: ['keyRange', 'absRange', 'percentRange']}, // Requires range property (see above)
+			// Virtual: tag is handled internally (for ex. from other scripts, calculated, etc.)
+			// keyMix: used for harmonic mixing, 
+			// graph: considered a genre/style for DYNGENRE and GRAPH methods
+			// tfRemap: allows tag remapping even if tag is handled internally (virtual)
+			{type: 'Special',			val: ['virtual', 'keyMix', 'graph', 'tfRemap']}, 
+			{type: 'Query filtering',	val: ['combinations']},  // Requires combs property (see above)
+			{type: '', val: []}
+		];
+	},
 };
 [sbd.genreMap , sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 
@@ -807,7 +821,7 @@ async function searchByDistance({
 		// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 		// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 		// We check if weights are zero first
-		const calcTags = {genreStyle: {weight: 0, tf: [], baseScore: 0, type: ['virtual']}};
+		const calcTags = {genreStyle: {...sbd.tagSchema, ...{type: ['virtual']}}};
 		for (let key in tags) {
 			const tag = tags[key];
 			// Set base values
