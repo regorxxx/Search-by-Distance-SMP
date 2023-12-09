@@ -287,7 +287,7 @@ function createConfigMenu(parent) {
 		});
 		{	// New tag
 			menu.newEntry({menuName, entryText: 'New tag...', func: () => {
-				const nTag = {weight: 0, tf: [], scoringDistribution: 'LINEAR', type: []};
+				const nTag = {weight: 0, tf: [], scoringDistribution: 'LINEAR', type: [], baseScore: 0};
 				const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values will be filled later.', 'Search by distance', 'myTag');
 				if (name === null) {return;}
 				'string', 'multiple', 'graph'
