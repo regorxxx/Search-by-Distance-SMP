@@ -1,0 +1,52 @@
+﻿Shuffles tracks according to tags (for ex. artist) in a semi-random
+pattern, ensuring no 2 consecutive tracks have the same tag and
+also that they are distributed in an homogeneous way.
+
+Differs from intercalation in the way tracks are ordered (without 
+strict alternation), i.e. it doesn't follow a pattern (ABCABCAA) 
+when it's possible to ensure no A tracks are together (CABACABA).
+ 
+Follows [Spotify design]
+(https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/).
+
+Contrary to [Spotify's preferences to recently played/loved tracks]
+(https://thetab.com/uk/2021/11/17/spotify-shuffle-explained-228639),
+this algorithm is truly "random", by default, in the sense that 
+there is no preference for any track, it just ensures artists are
+distributed evenly with some randomness (so they don't appear in
+clusters).
+
+The sorting bias may be configured to prioritize tracks by play
+count, rating, popularity, last payed or a custom TitleFormat
+expression:
+	- Play count: requires foo_playcount or foo_enhanced_playcount.
+		TF: $max(%PLAY_COUNT%,%LASTFM_PLAY_COUNT%,0)
+	
+	- Rating: requires foo_playcount.
+		TF: $max(%RATING%,$meta(RATING),0)
+	
+	- Popularity: requires Find & Play SMP package and library
+		tagged with Last.fm statistics (for more support check
+		Find & Play's hydrogenaud.io forum thread).
+		TF: $max($meta(Track Statistics Last.fm,5[score]),0)
+	
+	- Last played: requires foo_playcount or foo_enhanced_playcount.
+		TF: %LAST_PLAYED_ENHANCED% | %LAST_PLAYED%
+	
+	- Custom TF: requirements associated to expression/tags.
+
+There is an additional option to also try to avoid consecutive
+tracks with these conditions:
+	- Instrumental tracks: (any of both)
+		GENRE|STYLE|FOLKSONOMY = instrumental
+		LANGUAGE = zxx
+		
+	- Live tracks:
+		GENRE|STYLE|FOLKSONOMY = live
+		
+	- Female/male vocals tracks:
+		GENRE|STYLE|FOLKSONOMY = female vocal
+
+These rules apply in addition to the main smart shuffle,
+swapping tracks position whenever possible without altering
+the main logic.

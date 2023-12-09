@@ -52,6 +52,7 @@
 ### Changed
 ### Removed
 ### Fixed
+- Readmes: missing 'shuffle_by_tags.txt' file.
 
 ## [6.1.2] - 2023-12-09
 ### Added
