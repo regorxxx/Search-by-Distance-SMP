@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.1.2](#611---2023-12-09)
 - [6.1.1](#611---2023-12-08)
 - [6.1.0](#610---2023-11-28)
 - [6.0.1](#601---2023-11-26)
@@ -51,7 +52,13 @@
 ### Changed
 ### Removed
 ### Fixed
-- HTML: errors displaying node icons.
+
+## [6.1.2] - 2023-12-09
+### Added
+### Changed
+### Removed
+### Fixed
+- Tags: missing property (baseScore) for new tags. Issue #19
 
 ## [6.1.1] - 2023-12-08
 ### Added
@@ -755,7 +762,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.2...HEAD
+[6.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.1...v6.1.2
 [6.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...v6.1.1
 [6.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.0...v6.0.1
