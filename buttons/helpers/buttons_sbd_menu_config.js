@@ -141,7 +141,7 @@ function createConfigMenu(parent) {
 			const bIsDyngenreMethodRecipe = recipe.hasOwnProperty('method') && recipe.method  !== 'DYNGENRE';
 			const bIsDyngenreMethodProp = !recipe.hasOwnProperty('method') && properties.method[1] !== 'DYNGENRE';
 			const baseTag = tags[key];
-			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
+			const defTag = sbd.tagSchema; // Used in case a recipe adds new tags but misses some keys...
 			const obj = {
 				bIsDyngenreRecipe: (key === 'dynGenre' && bIsDyngenreMethodRecipe),
 				bIsDyngenreProp: (key === 'dynGenre' && bIsDyngenreMethodProp),
