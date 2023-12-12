@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/12/23
+//12/12/23
 
 /* 
 	World Map
@@ -25,7 +25,7 @@ function mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY) {
 	return [x, y];
 }
 
-function calcProximity(coord, x, y, precision, mapWidth, mapHeight, factorX, factorY) {
+function calcProximity(coord, x, y, mapWidth, mapHeight, factorX, factorY) {
 	const [latitude , longitude] = coord;
 	const [xCoord, yCoord] = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);
 	const xProx = x < xCoord ? x / xCoord : xCoord / x;
@@ -33,17 +33,24 @@ function calcProximity(coord, x, y, precision, mapWidth, mapHeight, factorX, fac
 	return [xProx, yProx];
 }
 
-function findCountry({x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.94, bForceOutput = true, bSingle = false} = {}) { // Mercator projection
+function isNearCountry({id, x, y, mapWidth, mapHeight, factorX, factorY, precision} = {}) {
+	const coords = isoCoordinates.get(getCountryISO(id));
+	return calcProximity(coords, x, y, mapWidth, mapHeight, factorX, factorY)
+		.every((coordProx) => coordProx >= precision);
+}
+
+function findCountry({x, y, mapWidth, mapHeight, factorX, factorY, precision = 0.94, minPrecision = 0.75, bForceOutput = true, bSingle = false} = {}) { // Mercator projection
 	if (bSingle) {bForceOutput = true;}
 	let countries = [];
 	// Force at least a country by lowering the precision. Note some countries are really big (compared to the point)! So this is needed
-	while (countries.length === 0 && precision >= 0.75) {
-		isoCoordinates.forEach((coord, key) => {
-			const [xProx, yProx] = calcProximity(coord, x, y, precision, mapWidth, mapHeight, factorX, factorY);
+	while (countries.length === 0 && precision >= minPrecision) {
+		for (let [key, coord] of isoCoordinates) {
+			const [xProx, yProx] = calcProximity(coord, x, y, mapWidth, mapHeight, factorX, factorY);
 			if (xProx >= precision && yProx >= precision) {countries.push({key, prox: round((xProx + yProx) / 2 * 100, 0)});}
-		});
+		};
 		if (!bForceOutput) {break;}
 		precision -= 0.03;
+		if (precision < 0) {break;}
 	}
 	// Replace ISO codes with names and sort by proximity
 	// Note: don't forget to capitalize words later!
