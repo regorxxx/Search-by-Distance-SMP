@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/23
+//17/12/23
 var version = '6.1.2';
 
 /*
@@ -1046,9 +1046,14 @@ async function searchByDistance({
 						}
 						query[queryl] = query_join(groups, 'OR');
 					} else {
-						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						if (tagNameTF.length > 1) {query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');}
-						else {query[queryl] = query_combinations(tag.reference, tagNameTF, 'OR');}
+						if (Array.isArray(tagNameTF)) {
+							const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+							query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');
+						} else {
+							const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
+							query[queryl] = query_combinations(tag.reference, tagNameTF, 'OR', void(0), match);
+						} 
+						
 					}
 					if (bSearchDebug) {queryDebug[queryDebug.length -1].query = query[queryl];}
 				}
