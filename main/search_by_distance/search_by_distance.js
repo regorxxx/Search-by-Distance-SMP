@@ -1073,7 +1073,7 @@ async function searchByDistance({
 						query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');
 					} else {
 						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
-						query[queryl] = query_combinations(tag.reference, tagNameTF, 'OR', void(0), match);
+						query[queryl] = query_combinations([tag.reference], tagNameTF, 'OR', void(0), match);
 					}
 
 				}
