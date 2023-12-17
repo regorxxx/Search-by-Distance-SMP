@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [6.1.2](#611---2023-12-09)
+- [6.1.2](#612---2023-12-09)
 - [6.1.1](#611---2023-12-08)
 - [6.1.0](#610---2023-11-28)
 - [6.0.1](#601---2023-11-26)
@@ -54,6 +54,7 @@
 ### Removed
 ### Fixed
 - Readmes: missing 'shuffle_by_tags.txt' file.
+- Tags: crash in some cases using custom single-valued tags. Issue #22
 
 ## [6.1.2] - 2023-12-09
 ### Added
