@@ -1,6 +1,6 @@
 ﻿'use strict';
 //17/12/23
-var version = '6.1.2';
+var version = '6.1.3';
 
 /*
 	Search by Distance

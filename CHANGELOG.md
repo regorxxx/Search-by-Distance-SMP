@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [6.1.3](#613---2023-12-17)
 - [6.1.2](#612---2023-12-09)
 - [6.1.1](#611---2023-12-08)
 - [6.1.0](#610---2023-11-28)
@@ -48,6 +49,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [6.1.3] - 2023-12-17
 ### Added
 ### Changed
 - Helpers: updated helpers.
@@ -765,7 +772,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.2...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.3...HEAD
+[6.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.2...v6.1.3
 [6.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.1...v6.1.2
 [6.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...v6.1.1
 [6.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.0.1...v6.1.0
