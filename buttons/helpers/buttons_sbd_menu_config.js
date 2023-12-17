@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/23
+//17/12/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -288,7 +288,7 @@ function createConfigMenu(parent) {
 		{	// New tag
 			menu.newEntry({menuName, entryText: 'New tag...', func: () => {
 				const nTag = sbd.tagSchema;
-				const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values will be filled later.', 'Search by distance', 'myTag');
+				const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values have to be filled later (using \'Remap...\').', 'Search by distance', 'myTag');
 				if (name === null) {return;}
 				'string', 'multiple', 'graph'
 				if (WshShell.Popup('Is multi-valued?\n\nTag may make use of multiple or single values. For ex. GENRE usually have more than one value, while DATE is meant to store a single value.\nSingle-valued configured tags will skip any value past the first one.\nMulti-valued tags can only be of \'string\' type.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {nTag.type.push('multiple', 'string');}
