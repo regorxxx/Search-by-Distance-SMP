@@ -1991,7 +1991,7 @@ async function searchByDistance({
 						let randomseed = 0;
 						let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
 						let i = 0;
-						while (indexSelectionArray.length < playlistLength) {
+						while (indexSelected.size < playlistLength) {
 							randomseed = Math.floor((Math.random() * 100) + 1);
 							if (randomseed < probPick) {
 								if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
