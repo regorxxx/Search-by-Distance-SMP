@@ -1,5 +1,7 @@
 ﻿'use strict';
-//24/08/22
+//19/12/23
+
+/* exported secondsToTime */
 
 function secondsToTime(secs){
 	const h = Math.floor(secs / (60 * 60));

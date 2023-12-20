@@ -1,28 +1,35 @@
 ﻿'use strict';
-//22/07/23
+//20/12/23
 
+/* exported scatterByTags, intercalateByTags, shuffleByTags */
+
+include('..\\..\\helpers\\helpers_xxx.js');
+/* global isEnhPlayCount:readable, isPlayCount:readable */
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
+/* global range:readable, _p:readable, ReverseIterableMap:readable */
+include('..\\..\\helpers\\helpers_xxx_tags.js');
+/* global getTagsValuesV3:readable, getTagsValuesV4:readable */
 
-/*	
+/*
 	Scatter by tags
 	-----------------------------------
 	Reorders selection to avoid consecutive tracks with the same 'tagValue' on tags ('tagName').
 	Can be used to scatter instrumental tracks, an specific genre, etc.
 	Output is sent to active playlist or as a handle list by setting 'bSendToActivePls'.
-*/ 
+*/
 
 // For an specific value (tagValue) for a given tag (tagName)
 function scatterByTags({
-							tagName = 'GENRE,STYLE',
-							tagValue = 'instrumental',
-							selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
-							bSendToActivePls = true
-							} = {}) {
+	tagName = 'GENRE,STYLE',
+	tagValue = 'instrumental',
+	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
+	bSendToActivePls = true
+} = {}) {
 	// Safety checks
-	if (!tagName.length) {return;}
-	if (!tagValue.length) {return;}
-	if (!selItems || selItems.Count <= 2) {return;}
+	if (!tagName.length) { return; }
+	if (!tagValue.length) { return; }
+	if (!selItems || selItems.Count <= 2) { return; }
 	// Convert input
 	const totalTracks = selItems.Count;
 	tagName = tagName.split(/;|,/g);
@@ -33,7 +40,7 @@ function scatterByTags({
 	const tagValues = getTagsValuesV3(selItems, tagName, true);
 	let newOrder = [];
 	for (let i = 0; i < totalTracks; i++) {
-		const tagValue_i = tagValues[i].filter(Boolean).map((item) => {return item.toLowerCase();});
+		const tagValue_i = tagValues[i].filter(Boolean).map((item) => { return item.toLowerCase(); });
 		const tagSet_i = new Set(tagValue_i);
 		if (tagSet_i.intersectionSize(tagValueSet)) { // Any match, then add to reorder list
 			newOrder.push(i);
@@ -52,19 +59,19 @@ function scatterByTags({
 		removed.forEach((handle, index) => {
 			const i_scatterInterval = index * scatterInterval;
 			let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
-			if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
+			if (j === 0 && scatterInterval > 2) { j = 1; } // Don't put first track as instrumental if possible
 			selItemsArray.splice(j, 0, handle); // (at, 0, item)
 		});
-	} else {return selItems;}
+	} else { return selItems; }
 	// And output
 	selItemsArray = new FbMetadbHandleList(selItemsArray);
 	if (bSendToActivePls) {
-		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection, 
+		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection,
 		// so inserted tracks get sent to the right position. Only works for contiguous selections!
 		const focusIdx = plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist);
 		plman.UndoBackup(plman.ActivePlaylist);
 		plman.InsertPlaylistItems(plman.ActivePlaylist, plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist), selItemsArray);
-		plman.RemovePlaylistSelection(plman.ActivePlaylist); 
+		plman.RemovePlaylistSelection(plman.ActivePlaylist);
 		// Try to restore prev. selection
 		let idx = [];
 		if (focusIdx === 0) {
@@ -78,13 +85,13 @@ function scatterByTags({
 				const plsItemsBelow = new FbMetadbHandleList(plsItems.slice(end, end + totalTracks));
 				plsItemsBelow.Sort();
 				plsItemsBelow.MakeIntersection(clone);
-				if	(plsItemsBelow.Count === totalTracks) {idx = range(end, focusIdx, 1);}
+				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
 			if (end < 0 || !idx.lenth) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
-				if	(plsItemsOver.Count === totalTracks) {idx = range(focusIdx, focusIdx + totalTracks - 1, 1);}
+				if (plsItemsOver.Count === totalTracks) { idx = range(focusIdx, focusIdx + totalTracks - 1, 1); }
 			}
 		}
 		if (idx.length === totalTracks) {
@@ -98,13 +105,13 @@ function scatterByTags({
 
 // Does the same but for any value for a given tag
 function intercalateByTags({
-							tagName = 'ALBUM ARTIST',
-							selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
-							bSendToActivePls = true,
-							} = {}) {
+	tagName = 'ALBUM ARTIST',
+	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
+	bSendToActivePls = true,
+} = {}) {
 	// Safety checks
-	if (!tagName.length) {return;}
-	if (!selItems || selItems.Count <= 2) {return;}
+	if (!tagName.length) { return; }
+	if (!selItems || selItems.Count <= 2) { return; }
 	// Convert input
 	const totalTracks = selItems.Count;
 	tagName = tagName.split(/;|,/g);
@@ -112,7 +119,7 @@ function intercalateByTags({
 	let selItemsArrayOut = [];
 	// Get tag values and find tag value
 	// Split elements by equal value, by reverse order
-	const tagValues = getTagsValuesV3(selItems, tagName, true).map((item) => {return item.filter(Boolean).sort().map((item) => {return item.toLowerCase();}).join(',');});
+	const tagValues = getTagsValuesV3(selItems, tagName, true).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
 	let valMap = new ReverseIterableMap();
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
@@ -127,19 +134,19 @@ function intercalateByTags({
 		let toDelete = [];
 		valMap.forEachReverse((value, key) => {
 			selItemsArrayOut.push(selItemsArray[value.pop()]);
-			if (!value.length) {toDelete.push(key);}
+			if (!value.length) { toDelete.push(key); }
 		});
-		toDelete.forEach((key) => {valMap.delete(key);});
+		toDelete.forEach((key) => { valMap.delete(key); });
 	}
 	// And output
 	selItemsArray = new FbMetadbHandleList(selItemsArrayOut);
 	if (bSendToActivePls) {
-		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection, 
+		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection,
 		// so inserted tracks get sent to the right position. Only works for contiguous selections!
 		const focusIdx = plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist);
 		plman.UndoBackup(plman.ActivePlaylist);
 		plman.InsertPlaylistItems(plman.ActivePlaylist, plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist), selItemsArray);
-		plman.RemovePlaylistSelection(plman.ActivePlaylist); 
+		plman.RemovePlaylistSelection(plman.ActivePlaylist);
 		// Try to restore prev. selection
 		let idx = [];
 		if (focusIdx === 0) {
@@ -153,13 +160,13 @@ function intercalateByTags({
 				const plsItemsBelow = new FbMetadbHandleList(plsItems.slice(end, end + totalTracks));
 				plsItemsBelow.Sort();
 				plsItemsBelow.MakeIntersection(clone);
-				if	(plsItemsBelow.Count === totalTracks) {idx = range(end, focusIdx, 1);}
+				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
 			if (end < 0 || !idx.lenth) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
-				if	(plsItemsOver.Count === totalTracks) {idx = range(focusIdx, focusIdx + totalTracks - 1, 1);}
+				if (plsItemsOver.Count === totalTracks) { idx = range(focusIdx, focusIdx + totalTracks - 1, 1); }
 			}
 		}
 		if (idx.length === totalTracks) {
@@ -176,28 +183,28 @@ function intercalateByTags({
 // Note for some proportions there is an exact solution, and that's used instead of relying on the random method
 // Beware it returns null when items are <= 2. Just reuse original list in such case
 function shuffleByTags({
-		tagName = ['ALBUM ARTIST'],
-		selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
-		bSendToActivePls = true,
-		data = {handleArray: [], dataArray: [], tagsArray: []}, // Shallow copies are made
-		bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
-		sortBias = 'random', // random | playcount | rating | popularity | lastplayed | key | TitleFormat expression || '' (none)
-		sortDir = 1,
-		bDebug = false
-	} = {}) {
+	tagName = ['ALBUM ARTIST'],
+	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
+	bSendToActivePls = true,
+	data = { handleArray: [], dataArray: [], tagsArray: [] }, // Shallow copies are made
+	bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
+	sortBias = 'random', // random | playcount | rating | popularity | lastplayed | key | TitleFormat expression || '' (none)
+	sortDir = 1,
+	bDebug = false
+} = {}) {
 	// Safety checks
 	const dataHandleLen = data && data.handleArray ? data.handleArray.length : 0;
 	const dataTagsLen = data && data.tagsArray ? data.tagsArray.length : 0;
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
-	const bEnhPlayCount = typeof (isEnhPlayCount !== 'undefined' && isEnhPlayCount) || (isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
-	const bPlayCount = typeof (isPlayCount !== 'undefined' && isPlayCount) || (isPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	const bEnhPlayCount = (typeof isEnhPlayCount !== 'undefined' && isEnhPlayCount) || (isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	const bPlayCount = (typeof isPlayCount !== 'undefined' && isPlayCount) || (isPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
 	sortBias = (sortBias || '').toLowerCase();
-	if (dataHandleLen <= 2 && itemsCount <= 2) {console.log('shuffleByTags: not enough items. -> ' + Math.max(itemsCount, dataHandleLen)); return null;}
-	if (!Array.isArray(tagName) || !tagName.length) {console.log('shuffleByTags: tagName is not an array of tags. -> ' + tagName); return null;}
-	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) {console.log('shuffleByTags: data length ' + _p(dataLen) +' does not match items count ' + _p(itemsCount) + '.'); return null;}
-	if (/playcount|lastplayed/.test(sortBias) && !bPlayCount) {fb.ShowPopupMessage('shuffleByTags: foo_playcount is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return;}
-	if (/popularity/.test(sortBias) && !utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}')) {fb.ShowPopupMessage('shuffleByTags: Find & Play package is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return;}
+	if (dataHandleLen <= 2 && itemsCount <= 2) { console.log('shuffleByTags: not enough items. -> ' + Math.max(itemsCount, dataHandleLen)); return null; }
+	if (!Array.isArray(tagName) || !tagName.length) { console.log('shuffleByTags: tagName is not an array of tags. -> ' + tagName); return null; }
+	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) { console.log('shuffleByTags: data length ' + _p(dataLen) + ' does not match items count ' + _p(itemsCount) + '.'); return null; }
+	if (/playcount|lastplayed/.test(sortBias) && !bPlayCount) { fb.ShowPopupMessage('shuffleByTags: foo_playcount is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return; }
+	if (/popularity/.test(sortBias) && !utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}')) { fb.ShowPopupMessage('shuffleByTags: Find & Play package is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return; }
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
 	let dataArray = dataLen ? [...data.dataArray] : null;
@@ -209,8 +216,8 @@ function shuffleByTags({
 		case 'rating': sortTF = '$max(%RATING%,$meta(RATING),0)'; break;
 		case 'popularity': sortTF = '$max($meta(Track Statistics Last.fm,5[score]),0)'; break;
 		case 'lastplayed': sortTF = bEnhPlayCount ? '%LAST_PLAYED_ENHANCED%' : '%LAST_PLAYED%'; break;
-		case 'key': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,1B))$if($stricmp(%KEY%,Abm),$puts(kTrans,1B))$if($stricmp(%KEY%,D#m),$puts(kTrans,2B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,2B))$if($stricmp(%KEY%,A#m),$puts(kTrans,3B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,3B))$if($stricmp(%KEY%,Fm),$puts(kTrans,4B))$if($stricmp(%KEY%,Cm),$puts(kTrans,5B))$if($stricmp(%KEY%,Gm),$puts(kTrans,6B))$if($stricmp(%KEY%,Dm),$puts(kTrans,7B))$if($stricmp(%KEY%,Am),$puts(kTrans,8B))$if($stricmp(%KEY%,Em),$puts(kTrans,9B))$if($stricmp(%KEY%,Bm),$puts(kTrans,10B))$if($stricmp(%KEY%,F#m),$puts(kTrans,11B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,11B))$if($stricmp(%KEY%,C#m),$puts(kTrans,12B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,12B))$if($stricmp(%KEY%,6m),$puts(kTrans,1B))$if($stricmp(%KEY%,7m),$puts(kTrans,2B))$if($stricmp(%KEY%,8m),$puts(kTrans,3B))$if($stricmp(%KEY%,9m),$puts(kTrans,4B))$if($stricmp(%KEY%,10m),$puts(kTrans,5B))$if($stricmp(%KEY%,11m),$puts(kTrans,6B))$if($stricmp(%KEY%,12m),$puts(kTrans,7B))$if($stricmp(%KEY%,1m),$puts(kTrans,8B))$if($stricmp(%KEY%,2m),$puts(kTrans,9B))$if($stricmp(%KEY%,3m),$puts(kTrans,10B))$if($stricmp(%KEY%,4m),$puts(kTrans,11B))$if($stricmp(%KEY%,5m),$puts(kTrans,12B))$if($stricmp(%KEY%,B),$puts(kTrans,1A))$if($stricmp(%KEY%,F#),$puts(kTrans,2A))$if($stricmp(%KEY%,Gb),$puts(kTrans,2A))$if($stricmp(%KEY%,C#),$puts(kTrans,3A))$if($stricmp(%KEY%,Db),$puts(kTrans,3A))$if($stricmp(%KEY%,G#),$puts(kTrans,4A))$if($stricmp(%KEY%,Ab),$puts(kTrans,4A))$if($stricmp(%KEY%,D#),$puts(kTrans,5A))$if($stricmp(%KEY%,Eb),$puts(kTrans,5A))$if($stricmp(%KEY%,A#),$puts(kTrans,6A))$if($stricmp(%KEY%,Bb),$puts(kTrans,6A))$if($stricmp(%KEY%,F),$puts(kTrans,7A))$if($stricmp(%KEY%,C),$puts(kTrans,8A))$if($stricmp(%KEY%,G),$puts(kTrans,9A))$if($stricmp(%KEY%,D),$puts(kTrans,10A))$if($stricmp(%KEY%,A),$puts(kTrans,11A))$if($stricmp(%KEY%,E),$puts(kTrans,12A))$if($stricmp(%KEY%,6d),$puts(kTrans,1A))$if($stricmp(%KEY%,7d),$puts(kTrans,2A))$if($stricmp(%KEY%,8d),$puts(kTrans,3A))$if($stricmp(%KEY%,9d),$puts(kTrans,4A))$if($stricmp(%KEY%,10d),$puts(kTrans,5A))$if($stricmp(%KEY%,11d),$puts(kTrans,6A))$if($stricmp(%KEY%,12d),$puts(kTrans,7A))$if($stricmp(%KEY%,1d),$puts(kTrans,8A))$if($stricmp(%KEY%,2d),$puts(kTrans,9A))$if($stricmp(%KEY%,3d),$puts(kTrans,10A))$if($stricmp(%KEY%,4d),$puts(kTrans,11A))$if($stricmp(%KEY%,5d),$puts(kTrans,12A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)';break;
-		case 'key6acentered': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,7B))$if($stricmp(%KEY%,Abm),$puts(kTrans,7B))$if($stricmp(%KEY%,D#m),$puts(kTrans,8B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,8B))$if($stricmp(%KEY%,A#m),$puts(kTrans,9B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,9B))$if($stricmp(%KEY%,Fm),$puts(kTrans,10B))$if($stricmp(%KEY%,Cm),$puts(kTrans,11B))$if($stricmp(%KEY%,Gm),$puts(kTrans,12B))$if($stricmp(%KEY%,Dm),$puts(kTrans,1B))$if($stricmp(%KEY%,Am),$puts(kTrans,2B))$if($stricmp(%KEY%,Em),$puts(kTrans,3B))$if($stricmp(%KEY%,Bm),$puts(kTrans,4B))$if($stricmp(%KEY%,F#m),$puts(kTrans,5B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,5B))$if($stricmp(%KEY%,C#m),$puts(kTrans,6B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,6B))$if($stricmp(%KEY%,6m),$puts(kTrans,7B))$if($stricmp(%KEY%,7m),$puts(kTrans,8B))$if($stricmp(%KEY%,8m),$puts(kTrans,9B))$if($stricmp(%KEY%,9m),$puts(kTrans,10B))$if($stricmp(%KEY%,10m),$puts(kTrans,11B))$if($stricmp(%KEY%,11m),$puts(kTrans,12B))$if($stricmp(%KEY%,12m),$puts(kTrans,1B))$if($stricmp(%KEY%,1m),$puts(kTrans,2B))$if($stricmp(%KEY%,2m),$puts(kTrans,3B))$if($stricmp(%KEY%,3m),$puts(kTrans,4B))$if($stricmp(%KEY%,4m),$puts(kTrans,5B))$if($stricmp(%KEY%,5m),$puts(kTrans,6B))$if($stricmp(%KEY%,B),$puts(kTrans,7A))$if($stricmp(%KEY%,F#),$puts(kTrans,8A))$if($stricmp(%KEY%,Gb),$puts(kTrans,8A))$if($stricmp(%KEY%,C#),$puts(kTrans,9A))$if($stricmp(%KEY%,Db),$puts(kTrans,9A))$if($stricmp(%KEY%,G#),$puts(kTrans,10A))$if($stricmp(%KEY%,Ab),$puts(kTrans,10A))$if($stricmp(%KEY%,D#),$puts(kTrans,11A))$if($stricmp(%KEY%,Eb),$puts(kTrans,11A))$if($stricmp(%KEY%,A#),$puts(kTrans,12A))$if($stricmp(%KEY%,Bb),$puts(kTrans,12A))$if($stricmp(%KEY%,F),$puts(kTrans,1A))$if($stricmp(%KEY%,C),$puts(kTrans,2A))$if($stricmp(%KEY%,G),$puts(kTrans,3A))$if($stricmp(%KEY%,D),$puts(kTrans,4A))$if($stricmp(%KEY%,A),$puts(kTrans,5A))$if($stricmp(%KEY%,E),$puts(kTrans,6A))$if($stricmp(%KEY%,6d),$puts(kTrans,7A))$if($stricmp(%KEY%,7d),$puts(kTrans,8A))$if($stricmp(%KEY%,8d),$puts(kTrans,9A))$if($stricmp(%KEY%,9d),$puts(kTrans,10A))$if($stricmp(%KEY%,10d),$puts(kTrans,11A))$if($stricmp(%KEY%,11d),$puts(kTrans,12A))$if($stricmp(%KEY%,12d),$puts(kTrans,1A))$if($stricmp(%KEY%,1d),$puts(kTrans,2A))$if($stricmp(%KEY%,2d),$puts(kTrans,3A))$if($stricmp(%KEY%,3d),$puts(kTrans,4A))$if($stricmp(%KEY%,4d),$puts(kTrans,5A))$if($stricmp(%KEY%,5d),$puts(kTrans,6A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)';break;
+		case 'key': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,1B))$if($stricmp(%KEY%,Abm),$puts(kTrans,1B))$if($stricmp(%KEY%,D#m),$puts(kTrans,2B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,2B))$if($stricmp(%KEY%,A#m),$puts(kTrans,3B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,3B))$if($stricmp(%KEY%,Fm),$puts(kTrans,4B))$if($stricmp(%KEY%,Cm),$puts(kTrans,5B))$if($stricmp(%KEY%,Gm),$puts(kTrans,6B))$if($stricmp(%KEY%,Dm),$puts(kTrans,7B))$if($stricmp(%KEY%,Am),$puts(kTrans,8B))$if($stricmp(%KEY%,Em),$puts(kTrans,9B))$if($stricmp(%KEY%,Bm),$puts(kTrans,10B))$if($stricmp(%KEY%,F#m),$puts(kTrans,11B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,11B))$if($stricmp(%KEY%,C#m),$puts(kTrans,12B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,12B))$if($stricmp(%KEY%,6m),$puts(kTrans,1B))$if($stricmp(%KEY%,7m),$puts(kTrans,2B))$if($stricmp(%KEY%,8m),$puts(kTrans,3B))$if($stricmp(%KEY%,9m),$puts(kTrans,4B))$if($stricmp(%KEY%,10m),$puts(kTrans,5B))$if($stricmp(%KEY%,11m),$puts(kTrans,6B))$if($stricmp(%KEY%,12m),$puts(kTrans,7B))$if($stricmp(%KEY%,1m),$puts(kTrans,8B))$if($stricmp(%KEY%,2m),$puts(kTrans,9B))$if($stricmp(%KEY%,3m),$puts(kTrans,10B))$if($stricmp(%KEY%,4m),$puts(kTrans,11B))$if($stricmp(%KEY%,5m),$puts(kTrans,12B))$if($stricmp(%KEY%,B),$puts(kTrans,1A))$if($stricmp(%KEY%,F#),$puts(kTrans,2A))$if($stricmp(%KEY%,Gb),$puts(kTrans,2A))$if($stricmp(%KEY%,C#),$puts(kTrans,3A))$if($stricmp(%KEY%,Db),$puts(kTrans,3A))$if($stricmp(%KEY%,G#),$puts(kTrans,4A))$if($stricmp(%KEY%,Ab),$puts(kTrans,4A))$if($stricmp(%KEY%,D#),$puts(kTrans,5A))$if($stricmp(%KEY%,Eb),$puts(kTrans,5A))$if($stricmp(%KEY%,A#),$puts(kTrans,6A))$if($stricmp(%KEY%,Bb),$puts(kTrans,6A))$if($stricmp(%KEY%,F),$puts(kTrans,7A))$if($stricmp(%KEY%,C),$puts(kTrans,8A))$if($stricmp(%KEY%,G),$puts(kTrans,9A))$if($stricmp(%KEY%,D),$puts(kTrans,10A))$if($stricmp(%KEY%,A),$puts(kTrans,11A))$if($stricmp(%KEY%,E),$puts(kTrans,12A))$if($stricmp(%KEY%,6d),$puts(kTrans,1A))$if($stricmp(%KEY%,7d),$puts(kTrans,2A))$if($stricmp(%KEY%,8d),$puts(kTrans,3A))$if($stricmp(%KEY%,9d),$puts(kTrans,4A))$if($stricmp(%KEY%,10d),$puts(kTrans,5A))$if($stricmp(%KEY%,11d),$puts(kTrans,6A))$if($stricmp(%KEY%,12d),$puts(kTrans,7A))$if($stricmp(%KEY%,1d),$puts(kTrans,8A))$if($stricmp(%KEY%,2d),$puts(kTrans,9A))$if($stricmp(%KEY%,3d),$puts(kTrans,10A))$if($stricmp(%KEY%,4d),$puts(kTrans,11A))$if($stricmp(%KEY%,5d),$puts(kTrans,12A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)'; break;
+		case 'key6acentered': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,7B))$if($stricmp(%KEY%,Abm),$puts(kTrans,7B))$if($stricmp(%KEY%,D#m),$puts(kTrans,8B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,8B))$if($stricmp(%KEY%,A#m),$puts(kTrans,9B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,9B))$if($stricmp(%KEY%,Fm),$puts(kTrans,10B))$if($stricmp(%KEY%,Cm),$puts(kTrans,11B))$if($stricmp(%KEY%,Gm),$puts(kTrans,12B))$if($stricmp(%KEY%,Dm),$puts(kTrans,1B))$if($stricmp(%KEY%,Am),$puts(kTrans,2B))$if($stricmp(%KEY%,Em),$puts(kTrans,3B))$if($stricmp(%KEY%,Bm),$puts(kTrans,4B))$if($stricmp(%KEY%,F#m),$puts(kTrans,5B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,5B))$if($stricmp(%KEY%,C#m),$puts(kTrans,6B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,6B))$if($stricmp(%KEY%,6m),$puts(kTrans,7B))$if($stricmp(%KEY%,7m),$puts(kTrans,8B))$if($stricmp(%KEY%,8m),$puts(kTrans,9B))$if($stricmp(%KEY%,9m),$puts(kTrans,10B))$if($stricmp(%KEY%,10m),$puts(kTrans,11B))$if($stricmp(%KEY%,11m),$puts(kTrans,12B))$if($stricmp(%KEY%,12m),$puts(kTrans,1B))$if($stricmp(%KEY%,1m),$puts(kTrans,2B))$if($stricmp(%KEY%,2m),$puts(kTrans,3B))$if($stricmp(%KEY%,3m),$puts(kTrans,4B))$if($stricmp(%KEY%,4m),$puts(kTrans,5B))$if($stricmp(%KEY%,5m),$puts(kTrans,6B))$if($stricmp(%KEY%,B),$puts(kTrans,7A))$if($stricmp(%KEY%,F#),$puts(kTrans,8A))$if($stricmp(%KEY%,Gb),$puts(kTrans,8A))$if($stricmp(%KEY%,C#),$puts(kTrans,9A))$if($stricmp(%KEY%,Db),$puts(kTrans,9A))$if($stricmp(%KEY%,G#),$puts(kTrans,10A))$if($stricmp(%KEY%,Ab),$puts(kTrans,10A))$if($stricmp(%KEY%,D#),$puts(kTrans,11A))$if($stricmp(%KEY%,Eb),$puts(kTrans,11A))$if($stricmp(%KEY%,A#),$puts(kTrans,12A))$if($stricmp(%KEY%,Bb),$puts(kTrans,12A))$if($stricmp(%KEY%,F),$puts(kTrans,1A))$if($stricmp(%KEY%,C),$puts(kTrans,2A))$if($stricmp(%KEY%,G),$puts(kTrans,3A))$if($stricmp(%KEY%,D),$puts(kTrans,4A))$if($stricmp(%KEY%,A),$puts(kTrans,5A))$if($stricmp(%KEY%,E),$puts(kTrans,6A))$if($stricmp(%KEY%,6d),$puts(kTrans,7A))$if($stricmp(%KEY%,7d),$puts(kTrans,8A))$if($stricmp(%KEY%,8d),$puts(kTrans,9A))$if($stricmp(%KEY%,9d),$puts(kTrans,10A))$if($stricmp(%KEY%,10d),$puts(kTrans,11A))$if($stricmp(%KEY%,11d),$puts(kTrans,12A))$if($stricmp(%KEY%,12d),$puts(kTrans,1A))$if($stricmp(%KEY%,1d),$puts(kTrans,2A))$if($stricmp(%KEY%,2d),$puts(kTrans,3A))$if($stricmp(%KEY%,3d),$puts(kTrans,4A))$if($stricmp(%KEY%,4d),$puts(kTrans,5A))$if($stricmp(%KEY%,5d),$puts(kTrans,6A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)'; break;
 		case 'random': sortTF = null; break;
 		default: sortTF = sortBias; // Pass a TF expression or empty (don't sort)
 	}
@@ -221,10 +228,10 @@ function shuffleByTags({
 				? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, [dataArray[i], tagsArray[i]]]))
 				: dataTagsLen
 					? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, tagsArray[i]]))
-					: dataLen 
+					: dataLen
 						? new Map(selItemsArray.map((handle, i) => [handle.RawPath + handle.SubSong, dataArray[i]]))
 						: null;
-			if (dataHandleLen) {selItemsArray = new FbMetadbHandleList(selItemsArray);}
+			if (dataHandleLen) { selItemsArray = new FbMetadbHandleList(selItemsArray); }
 			selItemsArray.OrderByFormat(fb.TitleFormat(sortTF), sortDir);
 			selItemsArray = selItemsArray.Convert();
 			if (dataLen & dataTagsLen) {
@@ -236,25 +243,25 @@ function shuffleByTags({
 			}
 		} else if (!dataHandleLen) {
 			selItemsArray = selItemsArray.Convert();
-		} 
+		}
 	} else {
-		selItemsArray = dataHandleLen 
+		selItemsArray = dataHandleLen
 			? [...data.handleArray]
 			: selItems.Convert();
-		if (dataLen & dataTagsLen) {Array.shuffle(selItemsArray, dataArray, tagsArray);} // Shuffle all at the same time
-		else if (dataLen) {Array.shuffle(selItemsArray, dataArray);}
-		else if (dataTagsLen) {Array.shuffle(selItemsArray, tagsArray);}
-		else {selItemsArray.shuffle();}
+		if (dataLen & dataTagsLen) { Array.shuffle(selItemsArray, dataArray, tagsArray); } // Shuffle all at the same time
+		else if (dataLen) { Array.shuffle(selItemsArray, dataArray); }
+		else if (dataTagsLen) { Array.shuffle(selItemsArray, tagsArray); }
+		else { selItemsArray.shuffle(); }
 	}
 	// Get tag values and find tag value
 	// Split elements by equal value, by reverse order
-	const selItemsClone = dataTagsLen 
-		? null 
+	const selItemsClone = dataTagsLen
+		? null
 		: new FbMetadbHandleList(selItemsArray);
-	const tagValues = (selItemsClone 
-			? getTagsValuesV3(selItemsClone, tagName, true)
-			: [...tagsArray]
-		).map((item) => {return item.filter(Boolean).sort().map((item) => {return item.toLowerCase();}).join(',');});
+	const tagValues = (selItemsClone
+		? getTagsValuesV3(selItemsClone, tagName, true)
+		: [...tagsArray]
+	).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
 	let valMap = new ReverseIterableMap();
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
@@ -265,35 +272,34 @@ function shuffleByTags({
 		}
 	}
 	// Calculate distribution
-	const size = valMap.size;
 	const distMap = new ReverseIterableMap();
 	let bSolved = false, solution = '';
 	valMap.forEach((value, key) => {
 		const total = value.length;
-		if ((totalTracks - total) === (total - 1)) {bSolved = true; solution = key;} // Only 1 exact solution intercalating tracks
-		if (bSolved) {return;}
+		if ((totalTracks - total) === (total - 1)) { bSolved = true; solution = key; } // Only 1 exact solution intercalating tracks
+		if (bSolved) { return; }
 		const dist = totalTracks / total;
-		const offset = bSolved ? 0: Math.random() * (totalTracks - total) / total;
-		distMap.set(key, {dist, total, offset});
-	})
+		const offset = bSolved ? 0 : Math.random() * (totalTracks - total) / total;
+		distMap.set(key, { dist, total, offset });
+	});
 	// Calculate timeline
 	let timeLine = [];
 	if (bSolved) {
-		const keys = [...tagValues].filter((key) => {return key !== solution;});
+		const keys = [...tagValues].filter((key) => { return key !== solution; });
 		timeLine = Array(totalTracks).fill(null).map((val, i) => {
-			return {pos: i, key: i % 2 === 0 ? solution : keys.splice(sortTF ? 0 : Math.floor(Math.random() * keys.length), 1)[0]};
+			return { pos: i, key: i % 2 === 0 ? solution : keys.splice(sortTF ? 0 : Math.floor(Math.random() * keys.length), 1)[0] };
 		});
 	} else {
 		const timeLineMap = new ReverseIterableMap();
 		distMap.forEach((value, key) => {
 			const line = [];
-			line.push({pos: value.offset, key});
+			line.push({ pos: value.offset, key });
 			for (let i = 1; i < value.total; i++) { // Apply a random shift by only a 33% of the space between consecutive artist's tracks
-				line.push({pos: value.offset + value.dist * i + (value.total > 1 ? ((Math.random() * 2 - 1) * Math.random() * (value.dist - 1) * 0.33) : 0), key});
+				line.push({ pos: value.offset + value.dist * i + (value.total > 1 ? ((Math.random() * 2 - 1) * Math.random() * (value.dist - 1) * 0.33) : 0), key });
 			}
 			timeLineMap.set(key, line);
-		})
-		timeLine = [...timeLineMap.values()].flat(Infinity).sort((a,b) => {return a.pos - b.pos;});
+		});
+		timeLine = [...timeLineMap.values()].flat(Infinity).sort((a, b) => { return a.pos - b.pos; });
 		// Double check there are no consecutive artist's tracks due to random shifting (mostly for value.dist ~ 3)
 		for (let i = 1; i < totalTracks - 2; i++) {
 			if (timeLine[i].key === timeLine[i + 1].key) { // This ensures previous values did not match
@@ -312,19 +318,19 @@ function shuffleByTags({
 		const index = tracks.splice(sortTF ? 0 : Math.floor(Math.random() * tracksNum), 1)[0];
 		selItemsArrayOut.push(selItemsArray[index]);
 		tagValuesOut.push(tagValues[index]);
-		if (dataLen) {dataValuesOut.push(dataArray[index]);}
+		if (dataLen) { dataValuesOut.push(dataArray[index]); }
 		// Delete empty values
 		if ((tracksNum - 1) === 0) {
-			valMap.delete(key); 
+			valMap.delete(key);
 		}
 	});
 	// Swap items position when some specific conditions are met, applied over the previous pattern
 	if (bAdvancedShuffle) {
-		const selItemsList = new FbMetadbHandleList(selItemsArrayOut)
+		const selItemsList = new FbMetadbHandleList(selItemsArrayOut);
 		const conditions = {
-			instrumental: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY', 'LANGUAGE'], val: [['instrumental'], ['instrumental'], ['instrumental'], ['zxx']], bPrev: true},
-			live: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['live'], ['live'], ['live']], bPrev: false},
-			vocal: {tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['female vocal'], ['female vocal'], ['female vocal']], bPrev: false},
+			instrumental: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY', 'LANGUAGE'], val: [['instrumental'], ['instrumental'], ['instrumental'], ['zxx']], bPrev: true },
+			live: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['live'], ['live'], ['live']], bPrev: false },
+			vocal: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['female vocal'], ['female vocal'], ['female vocal']], bPrev: false },
 		};
 		// Retrieve tags and reuse whenever it's possible
 		const types = Object.keys(conditions);
@@ -334,11 +340,11 @@ function shuffleByTags({
 				.map((tagArr) => new Set(tagArr.map((t) => t.toLowerCase())));
 			const missingTags = new Set(conditions[type].tags);
 			for (let tag of conditions[type].tags) {
-				if (tags.hasOwnProperty(tag)) {
+				if (Object.hasOwn(tags, tag)) {
 					missingTags.delete(tag);
 				}
 			}
-			const newTags = missingTags.size 
+			const newTags = missingTags.size
 				? getTagsValuesV4(selItemsList, [...missingTags])
 					.map((tagArr) => tagArr.map(
 						(tagVal) => new Set(tagVal.filter(Boolean).map((t) => t.toLowerCase()))
@@ -387,8 +393,8 @@ function shuffleByTags({
 							}
 							return false;
 						});
-						if (newIndexes.length) {indexes = newIndexes; bDone = true;}
-						else {break;}
+						if (newIndexes.length) { indexes = newIndexes; bDone = true; }
+						else { break; }
 					}
 				}
 				// If there are matches, check conditions over nearest tracks
@@ -397,9 +403,9 @@ function shuffleByTags({
 					while (indexes.length) {
 						const j = indexes.pop();
 						// Previous and next track must not match any of the conditions of the current track
-						const currentConditions = {from: {}, to: {}};
-						const nextConditions = {from: {}, to: {}};
-						const prevConditions = {from: {}, to: {}};
+						const currentConditions = { from: {}, to: {} };
+						const nextConditions = { from: {}, to: {} };
+						const prevConditions = { from: {}, to: {} };
 						for (let type of types) {
 							const condition = conditions[type];
 							currentConditions.from[type] = conditions[type].bPrev;
@@ -426,7 +432,7 @@ function shuffleByTags({
 								condition.handleVal.forEach((tag) => [tag[i], tag[j]] = [tag[j], tag[i]]);
 								condition.bPrev = currentConditions.to[type];
 							}
-							if (bDebug) {console.log(swap, i + 1, '->', j + 1);}
+							if (bDebug) { console.log(swap, i + 1, '->', j + 1); }
 							break;
 						}
 					}
@@ -437,7 +443,7 @@ function shuffleByTags({
 	// And output
 	const selItemsList = new FbMetadbHandleList(selItemsArrayOut);
 	if (bSendToActivePls) {
-		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection, 
+		// 'Hack' Inserts on focus (may be at any place of selection), but then removes the original selection,
 		// so inserted tracks get sent to the right position. Only works for contiguous selections!
 		const focusIdx = plman.GetPlaylistFocusItemIndex(plman.ActivePlaylist);
 		plman.UndoBackup(plman.ActivePlaylist);
@@ -456,13 +462,13 @@ function shuffleByTags({
 				const plsItemsBelow = new FbMetadbHandleList(plsItems.slice(end, end + totalTracks));
 				plsItemsBelow.Sort();
 				plsItemsBelow.MakeIntersection(clone);
-				if	(plsItemsBelow.Count === totalTracks) {idx = range(end, focusIdx, 1);}
+				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
 			if (end < 0 || !idx.lenth) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
-				if	(plsItemsOver.Count === totalTracks) {idx = range(focusIdx, focusIdx + totalTracks - 1, 1);}
+				if (plsItemsOver.Count === totalTracks) { idx = range(focusIdx, focusIdx + totalTracks - 1, 1); }
 			}
 		}
 		if (idx.length === totalTracks) {
@@ -471,5 +477,5 @@ function shuffleByTags({
 		}
 		console.log('Selection scattered by tag(s) \'' + tagName.join(',') + '\' on playlist: ' + plman.GetPlaylistName(plman.ActivePlaylist));
 	}
-	return {handleList: selItemsList, handleArray: selItemsArrayOut, dataArray: dataValuesOut, tagsArray: tagValuesOut};
+	return { handleList: selItemsList, handleArray: selItemsArrayOut, dataArray: dataValuesOut, tagsArray: tagValuesOut };
 }
