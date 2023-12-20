@@ -1,13 +1,24 @@
 ﻿'use strict';
-//29/11/23
+//20/12/23
 
+/* exported themedButton, getUniquePrefix, addButton, getButtonVersion */
+
+/* global buttonsPath:readable, barProperties:readable, */
+include('helpers_xxx.js');
+/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable */
 include('helpers_xxx_basic_js.js');
+/* global doOnce:readable, throttle:readable,  */
 include('helpers_xxx_prototypes.js');
+/* global isFunction:readable */
+include('helpers_xxx_properties.js');
+/* global getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable,  */
 include('helpers_xxx_UI.js');
+/* global RGB:readable, RGBA:readable, _tt:readable, _scale:readable, _gdiFont:readable, _gr:readable, invert:readable, isDark:readable, opaqueColor:readable, toRGB:readable, blendColors:readable, lightenColor:readable */
 include('helpers_xxx_flags.js');
+/* global buttonStates:readable */
 include('callbacks_xxx.js');
 
-/* 
+/*
 	This is the framework to create buttons as new objects with its own properties and tooltips. They can be merged and loaded multiple times
 	as new buttons instances on the same toolbar. Coordinates get updated when loading multiple buttons, removing the need to manually set them.
 	Check '_buttons_blank.js' to see the universal buttons structure. It loads on foobar2000 but does nothing, it's just empty.
@@ -25,7 +36,7 @@ buttonsBar.config = {
 	toolbarColor: utils.GetSysColour(15),
 	toolbarTransparency: 0,
 	bToolbar: false, // Change this on buttons bars files to set the background color
-	textColor: RGB(0,0,0),
+	textColor: RGB(0, 0, 0),
 	buttonColor: -1,
 	activeColor: RGB(0, 163, 240),
 	animationColors: [RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30)],
@@ -40,7 +51,7 @@ buttonsBar.config = {
 	bUseCursors: true,
 	bIconInvert: false,
 	bFullSize: false,
-	offset: {button: {x: 0, y: 0}, text: {x: 0, y: 0}, icon: {x: 0, y: 0}},
+	offset: { button: { x: 0, y: 0 }, text: { x: 0, y: 0 }, icon: { x: 0, y: 0 } },
 	hoverColor: 4294967295, // RGB(255, 255, 255) but not -1
 	bHoverGrad: true,
 	bDynHoverColor: true,
@@ -49,15 +60,15 @@ buttonsBar.config = {
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
-buttonsBar.move = {bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: {x: null, y: null, w: null, h: null}, last: -1};
-buttonsBar.hidden = {bShow: false, id: null};
+buttonsBar.move = { bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: { x: null, y: null, w: null, h: null }, last: -1 };
+buttonsBar.hidden = { bShow: false, id: null };
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
 buttonsBar.listKeys = []; // Button names grouped per script (and found at this.buttons)
 buttonsBar.propertiesPrefixes = new Set(); // Global properties names prefixes
 buttonsBar.buttons = {}; // Global list
 // Others (internal use)
-buttonsBar.oldButtonCoordinates = {x: 0, y: 0, w: 0, h: 0}; // To store coordinates of previous buttons when drawing
+buttonsBar.oldButtonCoordinates = { x: 0, y: 0, w: 0, h: 0 }; // To store coordinates of previous buttons when drawing
 buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600); // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
@@ -67,29 +78,29 @@ buttonsBar.useThemeManager = function useThemeManager() {
 buttonsBar.getUpdateList = function getUpdateList() {
 	const links = new Set();
 	return Object.values(this.buttons).map((btn) => btn.update).filter((btn) => (btn.scriptName && !links.has(btn.scriptName) && links.add(btn.scriptName)) || (btn.repository && !links.has(btn.repository) && links.add(btn.repository)));
-}
+};
 
 function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.orientation, recalc = true) {
 	let newCoordinates;
 	const orientation = buttonOrientation.toLowerCase();
 	const old = buttonsBar.oldButtonCoordinates;
 	const bFirstButton = !old[orientation] ? true : false;
-	const keys = ['x','y','w','h'];
-	const bFuncCoord = Object.fromEntries(keys.map((c) => {return [c, isFunction(coord[c])];}));
-	const iCoord = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? coord[c]() : coord[c]];}));
-	newCoordinates = Object.fromEntries(keys.map((c) => {return [c, bFuncCoord[c] ? () => {return old[c] + coord[c]();} : (c !== 'h' && c !== 'w'? old[c] : 0) + iCoord[c]];}));
-	let cache = {w: old.w, h: old.h};
+	const keys = ['x', 'y', 'w', 'h'];
+	const bFuncCoord = Object.fromEntries(keys.map((c) => { return [c, isFunction(coord[c])]; }));
+	const iCoord = Object.fromEntries(keys.map((c) => { return [c, bFuncCoord[c] ? coord[c]() : coord[c]]; }));
+	newCoordinates = Object.fromEntries(keys.map((c) => { return [c, bFuncCoord[c] ? () => { return old[c] + coord[c](); } : (c !== 'h' && c !== 'w' ? old[c] : 0) + iCoord[c]]; }));
+	let cache = { w: old.w, h: old.h };
 	if (recalc) {
-		if (orientation === 'x') {old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h);}
-		else if (orientation === 'y') {old.y += iCoord.y + iCoord.h; old.w = Math.max(old.w, iCoord.w);}
+		if (orientation === 'x') { old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h); }
+		else if (orientation === 'y') { old.y += iCoord.y + iCoord.h; old.w = Math.max(old.w, iCoord.w); }
 	}
 	if (buttonsBar.config.bReflow && !bFirstButton) {
-		if (orientation === 'x' && old.x  > window.Width) {
+		if (orientation === 'x' && old.x > window.Width) {
 			newCoordinates.x = coord.x;
 			newCoordinates.y = old.y + cache.h;
 			old.x = iCoord.x + iCoord.w;
 			old.y = newCoordinates.y;
-		} else if (orientation === 'y' && old.y  > window.Height) {
+		} else if (orientation === 'y' && old.y > window.Height) {
 			newCoordinates.y = coord.y;
 			newCoordinates.x = old.x + cache.w;
 			old.y = iCoord.y + iCoord.h;
@@ -100,21 +111,21 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 }
 
 function themedButton(
-		coordinates, 
-		text, 
-		func, 
-		state,
-		gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale),
-		description,
-		prefix = '',
-		buttonsProperties = {},
-		icon = null,
-		gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
-		variables = null,
-		listener = null,
-		onInit = null,
-		update = {scriptName: '', repository: ''}
-	) {
+	coordinates,
+	text,
+	func,
+	state,
+	gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale),
+	description,
+	prefix = '',
+	buttonsProperties = {},
+	icon = null,
+	gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
+	variables = null,
+	listener = null,
+	onInit = null,
+	update = { scriptName: '', repository: '' }
+) {
 	this.name = '';
 	this.state = state ? state : buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */
@@ -132,46 +143,46 @@ function themedButton(
 	this.gFontIcon = gFontIcon;
 	this.description = description;
 	this.text = text;
-	this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), gFont);} : _gr.CalcTextWidth(this.text, gFont);
+	this.textWidth = isFunction(this.text) ? (parent) => { return _gr.CalcTextWidth(this.text(parent), gFont); } : _gr.CalcTextWidth(this.text, gFont);
 	this.iconImage = this.gFontIcon === null;
 	if (this.iconImage) {
-		this.icon = icon; 
+		this.icon = icon;
 		this.iconWidth = null;
 	} else {
 		// if using the default font, then it has probably failed to load the right one, skip icon
-		this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null; 
-		this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), gFontIcon);} : _gr.CalcTextWidth(this.icon, gFontIcon);
+		this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null;
+		this.iconWidth = isFunction(this.icon) ? (parent) => { return _gr.CalcTextWidth(this.icon(parent), gFontIcon); } : _gr.CalcTextWidth(this.icon, gFontIcon);
 	}
 	this.func = func;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = isFunction(this.description) ? (parent) => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description(parent) : this.description(parent));} : () => {return (this.prefix ? this.prefix.replace('_','') + ': ' + this.description : this.description);}; // Adds prefix to description, whether it's a func or a string
+	this.descriptionWithID = isFunction(this.description) ? (parent) => { return (this.prefix ? this.prefix.replace('_', '') + ': ' + this.description(parent) : this.description(parent)); } : () => { return (this.prefix ? this.prefix.replace('_', '') + ': ' + this.description : this.description); }; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
 	this.bHeadlessMode = false;
 	this.update = {
-		scriptName: update && update.hasOwnProperty('scriptName') ? update.scriptName : '', 
-		repository: update && update.hasOwnProperty('repository') ? update.repository : '',
-		version: update && update.hasOwnProperty('version') ? update.version : ''
+		scriptName: update && Object.hasOwn(update, 'scriptName') ? update.scriptName : '',
+		repository: update && Object.hasOwn(update, 'repository') ? update.repository : '',
+		version: update && Object.hasOwn(update, 'version') ? update.version : ''
 	};
-	
+
 	this.containXY = function (x, y) {
 		return (this.currX <= x) && (x <= this.currX + this.currW) && (this.currY <= y) && (y <= this.currY + this.currH);
 	};
-	
+
 	this.changeState = function (state) {
 		let old = this.state;
 		this.state = state;
 		return old;
 	};
-	
+
 	this.switchActive = function (bActive = null) {
 		this.active = bActive !== null ? bActive : !this.active;
 		window.Repaint();
 	};
-	
+
 	this.switchAnimation = function (name, bActive, condition = null, animationColors = buttonsBar.config.animationColors) {
-		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
+		const idx = this.animation.findIndex((obj) => { return obj.name === name; });
 		if (idx !== -1) { // Deactivated ones must be removed using this.cleanAnimation() afterwards
 			this.animation[idx].bActive = bActive;
 			this.animation[idx].condition = bActive ? condition : null;
@@ -179,58 +190,58 @@ function themedButton(
 			this.animation[idx].date = bActive ? Date.now() : -1;
 			this.animation[idx].colors = animationColors;
 		} else {
-			this.animation.push({name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors});
+			this.animation.push({ name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors });
 		}
 		throttledRepaint();
 	};
-	
+
 	this.switcHighlight = function (bActive = null) {
-		this.highlight =  bActive !== null ? bActive : !this.highlight;
+		this.highlight = bActive !== null ? bActive : !this.highlight;
 		window.Repaint();
 	};
-	
+
 	this.cleanAnimation = function () {
-		if (this.animation.length) {this.animation = this.animation.filter((animation) => {return animation.bActive;});}
+		if (this.animation.length) { this.animation = this.animation.filter((animation) => { return animation.bActive; }); }
 	};
-	
+
 	this.isAnimationActive = function (name) {
-		const idx = this.animation.findIndex((obj) => {return obj.name === name;});
+		const idx = this.animation.findIndex((obj) => { return obj.name === name; });
 		return (idx !== -1 && this.animation[idx].bActive);
 	};
-	
+
 	this.isAnyAnimationActive = function () {
-		return this.animation.some((obj) => {return obj.bActive;});
+		return this.animation.some((obj) => { return obj.bActive; });
 	};
-	
+
 	this.getAnimationText = function () {
 		return (this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '');
 	};
-	
+
 	this.headerText = function () {
-		const name = (isFunction(this.text) ? this.text(this) : this.text) || (this.defText && isFunction(this.defText) ? this.defText(this) : this.defText || '')
+		const name = (isFunction(this.text) ? this.text(this) : this.text) || (this.defText && isFunction(this.defText) ? this.defText(this) : this.defText || '');
 		return (this.isIconMode() ? name + '\n-----------------------------------------------------\n' : '');
 	};
-	
+
 	this.tooltipText = function () { // ID or just description, according to string or func.
-		return (this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID 
-			? this.descriptionWithID(this) 
-			: (isFunction(this.description) 
-				? this.description(this) 
+		return (this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID
+			? this.descriptionWithID(this)
+			: (isFunction(this.description)
+				? this.description(this)
 				: this.description)
 		));
 	};
-	
+
 	this.isIconMode = function () { // Either global or for current button
 		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
 	};
-	
+
 	this.headlessModeTempShow = false;
 	this.isHeadlessMode = function () { // For current button
 		return this.bHeadlessMode && !this.headlessModeTempShow;
 	};
-	
+
 	this.getHoverColor = function () {
-		return buttonsBar.config.bDynHoverColor 
+		return buttonsBar.config.bDynHoverColor
 			? buttonsBar.config.buttonColor !== -1
 				? invert(buttonsBar.config.buttonColor, true)
 				: buttonsBar.config.bToolbar
@@ -238,23 +249,23 @@ function themedButton(
 					: RGB(255, 255, 255)
 			: buttonsBar.config.hoverColor;
 	};
-	
-	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false, bLast = false) {
+
+	this.draw = function (gr, x = this.x, y = this.y, w = this.w, h = this.h, bAlign = false) {
 		// Draw?
 		if (this.state === buttonStates.hide) {
-			let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w: 0, h: 0});
-			this.currX = xCalc + buttonsBar.config.offset.button.x; 
-			this.currY = yCalc + buttonsBar.config.offset.button.y; 
-			this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc; 
+			let { x: xCalc, y: yCalc, w: wCalc, h: hCalc } = calcNextButtonCoordinates({ x, y, w: 0, h: 0 });
+			this.currX = xCalc + buttonsBar.config.offset.button.x;
+			this.currY = yCalc + buttonsBar.config.offset.button.y;
+			this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc;
 			this.currH = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? window.Height : hCalc;
 			return;
 		}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 		// Check SO allows button theme
 		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
-			try {this.g_theme = window.CreateThemeManager('Button');} catch(e){this.g_theme = null;}
+			try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; }
 			if (!this.g_theme) {
-				buttonsBar.config.bUseThemeManager = false; 
+				buttonsBar.config.bUseThemeManager = false;
 				console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons');
 			}
 		}
@@ -290,54 +301,54 @@ function themedButton(
 			w *= buttonsBar.config.scale;
 		}
 		// New coordinates must be calculated and stored to interact with UI
-		let {x: xCalc, y: yCalc, w: wCalc, h: hCalc} = calcNextButtonCoordinates({x, y, w, h});
-		this.currX = xCalc + buttonsBar.config.offset.button.x; 
-		this.currY = yCalc + buttonsBar.config.offset.button.y; 
-		this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc; 
+		let { x: xCalc, y: yCalc, w: wCalc, h: hCalc } = calcNextButtonCoordinates({ x, y, w, h });
+		this.currX = xCalc + buttonsBar.config.offset.button.x;
+		this.currY = yCalc + buttonsBar.config.offset.button.y;
+		this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc;
 		this.currH = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? window.Height : hCalc;
 		// When moving buttons, the button may be drawn at another position though
-		if (this.moveX) {xCalc = this.moveX;}
-		if (this.moveY) {yCalc = this.moveY;}
+		if (this.moveX) { xCalc = this.moveX; }
+		if (this.moveY) { yCalc = this.moveY; }
 		// Draw button
-		if (buttonsBar.useThemeManager()) {this.g_theme.DrawThemeBackground(gr, this.currX, this.currY, this.currW, this.currH);}
+		if (buttonsBar.useThemeManager()) { this.g_theme.DrawThemeBackground(gr, this.currX, this.currY, this.currW, this.currH); }
 		else {
-			const x = this.currX + 1; 
+			const x = this.currX + 1;
 			const y = this.currY + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? -2 : 0);
-			const w = this.currW - 4; 
-			const h = this.currH + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? +2 : -2); 
+			const w = this.currW - 4;
+			const h = this.currH + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? +2 : -2);
 			const arc = 3;
 			gr.SetSmoothingMode(2); // Antialias for lines
 			const toolbarAlpha = Math.max(0, Math.min(buttonsBar.config.toolbarTransparency, 100));
 			switch (this.state) {
 				case buttonStates.normal:
 					if (bDrawBackground) {
-						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
-						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
-						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240, 240, 240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241, 241, 241), RGB(235, 235, 235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219, 219, 219), RGB(207, 207, 207));
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0, 0, 0));
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243, 243, 243));
 					} else if (buttonsBar.config.buttonColor !== -1) {
-						if (toolbarAlpha) {gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, toolbarAlpha));}
+						if (toolbarAlpha) { gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, toolbarAlpha)); }
 						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, opaqueColor(buttonsBar.config.buttonColor, 50));
 					}
 					break;
 				case buttonStates.hover:
 					buttonsBar.tooltipButton.SetValue(this.tooltipText(), true);
 					if (bDrawBackground) {
-						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
-						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240, 240, 240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241, 241, 241), RGB(235, 235, 235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219, 219, 219), RGB(207, 207, 207));
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0, 0, 0));
 					} else if (buttonsBar.config.bBorders) {
-						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(160,160,160));
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(160, 160, 160));
 					}
-					if (buttonsBar.config.bBorders || bDrawBackground) {gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));}
+					if (buttonsBar.config.bBorders || bDrawBackground) { gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243, 243, 243)); }
 					if (bDrawBackground) {
-						gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, RGBA(225,243,252,255));
-						gr.FillRoundRect(x, y + h / 2, w, h / 2, arc, arc, RGBA(17,166,248,50));
+						gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, RGBA(225, 243, 252, 255));
+						gr.FillRoundRect(x, y + h / 2, w, h / 2, arc, arc, RGBA(17, 166, 248, 50));
 					} else if (buttonsBar.config.hoverColor !== -1 || buttonsBar.config.bDynHoverColor) {
 						const hoverColor = this.getHoverColor();
-						if (toolbarAlpha) {gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, Math.max(1, toolbarAlpha / 5)));}
+						if (toolbarAlpha) { gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, Math.max(1, toolbarAlpha / 5))); }
 						if (buttonsBar.config.bHoverGrad) {
 							const alpha = buttonsBar.config.bToolbar ? (isDark(...toRGB(hoverColor)) ? 5 : 20) : 20;
 							gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, opaqueColor(hoverColor, alpha));
@@ -349,19 +360,19 @@ function themedButton(
 					break;
 				case buttonStates.down:
 					if (bDrawBackground) {
-						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240,240,240));
-						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241,241,241), RGB(235,235,235));
-						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219,219,219), RGB(207,207,207));
+						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240, 240, 240));
+						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241, 241, 241), RGB(235, 235, 235));
+						gr.FillGradRect(x, y + h / 2, w, h - 10, 180, RGB(219, 219, 219), RGB(207, 207, 207));
 					}
 					if (bDrawBackground) {
-						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243,243,243));
-						gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225,243,252,255));
-						gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(37,196,255,80));
-						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 3, RGBA(0,0,0,50));
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 1, RGB(243, 243, 243));
+						gr.FillRoundRect(x, y, w, h / 2, arc, arc, RGBA(225, 243, 252, 255));
+						gr.FillRoundRect(x, y + h / 2, w, h, arc, arc, RGBA(37, 196, 255, 80));
+						gr.DrawRoundRect(x + 1, y + 1, w - 2, h - 2, arc, arc, 3, RGBA(0, 0, 0, 50));
 					} else if (buttonsBar.config.hoverColor !== -1 || buttonsBar.config.bDynHoverColor) {
 						const hoverColor = this.getHoverColor();
 						if (buttonsBar.config.buttonColor !== -1) {
-							if (toolbarAlpha) {gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, Math.max(25, toolbarAlpha / 5)));}
+							if (toolbarAlpha) { gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, Math.max(25, toolbarAlpha / 5))); }
 							gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(invert(hoverColor), 5));
 							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, opaqueColor(hoverColor, 25));
 							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, opaqueColor(hoverColor, 25));
@@ -380,23 +391,23 @@ function themedButton(
 								gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(hoverColor, 10));
 							}
 						} else {
-							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(0,0,0,20));
-							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,20));
-							gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(0,0,0,10));
-							gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(0,0,0,10));
+							gr.FillRoundRect(x, y, w, h / 8, arc / 4, arc / 4, RGBA(0, 0, 0, 20));
+							gr.FillRoundRect(x, y, w, h / 6, arc / 4, arc / 4, RGBA(0, 0, 0, 20));
+							gr.FillRoundRect(x, y + h / 6, w, h / 6, arc / 4, arc / 4, RGBA(0, 0, 0, 10));
+							gr.FillRoundRect(x, y, w, h, arc / 2, arc / 2, RGBA(0, 0, 0, 10));
 						}
 					}
 					if (buttonsBar.config.bBorders || bDrawBackground) {
 						if (buttonsBar.config.buttonColor !== -1) {
 							if (buttonsBar.config.bToolbar) {
-								gr.DrawRoundRect(x, y, w, h, arc, arc, 1, blendColors(invert(buttonsBar.config.toolbarColor,  true), buttonsBar.config.buttonColor, 0.4));
+								gr.DrawRoundRect(x, y, w, h, arc, arc, 1, blendColors(invert(buttonsBar.config.toolbarColor, true), buttonsBar.config.buttonColor, 0.4));
 							} else {
-								gr.DrawRoundRect(x, y, w, h, arc, arc, 1, invert(invert(buttonsBar.config.buttonColor,  true)));
+								gr.DrawRoundRect(x, y, w, h, arc, arc, 1, invert(invert(buttonsBar.config.buttonColor, true)));
 							}
 						} else if (buttonsBar.config.bToolbar) {
 							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, invert(buttonsBar.config.toolbarColor, true));
 						} else {
-							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0,0,0));
+							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, RGB(0, 0, 0));
 						}
 					}
 					break;
@@ -409,23 +420,23 @@ function themedButton(
 		if (this.icon !== null) {
 			let textOffsetX = 0;
 			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
-			const textWidthCalculated = bIconMode 
+			const textWidthCalculated = bIconMode
 				? 0
 				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
 			if (this.iconImage) { // Icon image
 				if (iconCalculated.length) {
 					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? iconCalculated.replace(/(\..*$)/i, '_dark$1') : null;
 					const iconColor = this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor;
-					const bMask = ![RGB(255,255,255), -1, RGB(0,0,0)].includes(iconColor);
+					const bMask = ![RGB(255, 255, 255), -1, RGB(0, 0, 0)].includes(iconColor);
 					const iconDarkMode = iconCalculatedDarkMode && !bMask ? gdi.Image(iconCalculatedDarkMode) : null;
 					let icon = bMask ? gdi.CreateImage(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale) : iconDarkMode || gdi.Image(iconCalculated);
 					if (icon) {
 						if (!bMask) {
-							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) {icon = icon.InvertColours();}
+							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) { icon = icon.InvertColours(); }
 							icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
 						}
 						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1/2 : icon.Width * 7/10) - textWidthCalculated / 2
+							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1 / 2 : icon.Width * 7 / 10) - textWidthCalculated / 2
 							: xCalc + icon.Width / 2;
 						if (bMask) {
 							const iconGr = icon.GetGraphics();
@@ -437,9 +448,9 @@ function themedButton(
 								icon.ApplyMask(iconMask);
 							}
 						}
-						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - icon.Height * 1/2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
-						textOffsetX = icon.Width * 7/10;
-					} else {textOffsetX = 16 * buttonsBar.config.scale * 7/10;}
+						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - icon.Height * 1 / 2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+						textOffsetX = icon.Width * 7 / 10;
+					} else { textOffsetX = 16 * buttonsBar.config.scale * 7 / 10; }
 				}
 			} else { // Icon text
 				const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
@@ -452,13 +463,13 @@ function themedButton(
 						icon.ReleaseGraphics(g);
 						// Image gets shifted in x and y axis... since it's not using text flags
 						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-							? xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13/20 : iconWidthCalculated * 9/10) - textWidthCalculated / 2
-							: xCalc + icon.Width * 3/5;
-						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - iconWidthCalculated * 1/2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+							? xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13 / 20 : iconWidthCalculated * 9 / 10) - textWidthCalculated / 2
+							: xCalc + icon.Width * 3 / 5;
+						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - iconWidthCalculated * 1 / 2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
 					}
 					const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-							? xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2
-							: xCalc - wCalc / 2 + iconWidthCalculated * 5/4;
+						? xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2
+						: xCalc - wCalc / 2 + iconWidthCalculated * 5 / 4;
 					gr.GdiDrawText(iconCalculated, this.gFontIcon, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconX + buttonsBar.config.offset.icon.x, yCalc + buttonsBar.config.offset.icon.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
 				textOffsetX = iconWidthCalculated;
@@ -472,13 +483,13 @@ function themedButton(
 		let bDone = false;
 		this.animation.forEach((animation) => {
 			if (animation.bActive) {
-				if (animation.condition && Object.prototype.toString.call(animation.condition) === '[object Promise]') {animation.condition.then((bEnd) => {if (bEnd) {this.switchAnimation(animation.name, false);}});}
-				if (animation.condition && isFunction(animation.condition) && animation.condition()) {this.switchAnimation(animation.name, false);}
+				if (animation.condition && Object.prototype.toString.call(animation.condition) === '[object Promise]') { animation.condition.then((bEnd) => { if (bEnd) { this.switchAnimation(animation.name, false); } }); }
+				if (animation.condition && isFunction(animation.condition) && animation.condition()) { this.switchAnimation(animation.name, false); }
 				else {
 					if (!bDone) {
 						bDone = true;
-						const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y; 
-						const w = wCalc - 4; const h = hCalc - 2;	const arc = 3;
+						const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y;
+						const w = wCalc - 4; const h = hCalc - 2; const arc = 3;
 						if (bDrawBackground) { // 90 degrees produces a glitch on the left at step = 2 XD so lets put 88...
 							gr.FillGradRect(x, y + 1, w + 2, h, animation.animStep * 88, animation.colors[0], animation.colors[1], 1);
 						} else {
@@ -490,7 +501,7 @@ function themedButton(
 							animation.animStep++;
 							animation.date = now;
 						}
-						
+
 					}
 				}
 				throttledRepaint();
@@ -499,7 +510,7 @@ function themedButton(
 		this.cleanAnimation(); // Remove finished ones
 		// Process button highlighting
 		if (this.highlight) {
-			const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y; 
+			const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y;
 			const w = wCalc - 4; const h = hCalc - 2;
 			gr.FillSolidRect(x, y, w, h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
 			gr.DrawRect(x, y, w, h, 1, invert(buttonsBar.config.toolbarColor));
@@ -509,12 +520,12 @@ function themedButton(
 	this.onClick = function (mask) {
 		this.func && this.func(mask);
 	};
-	
+
 	this.adjustButtonWidth = function (newName, offset = 30) {
 		this.w = _gr.CalcTextWidth(newName, this.gFont) + offset;
 		this.w *= buttonsBar.config.scale;
 	};
-	
+
 	this.adjustNameWidth = function (newName, offset = 30) {
 		this.text = newName;
 		this.adjustButtonWidth(newName, offset);
@@ -529,13 +540,13 @@ function themedButton(
 		this.currH *= newScale;
 		this.currW *= newScale;
 		this.gFont = _gdiFont(this.gFont.Name, this.gFont.Size * newScale);
-		this.textWidth  = isFunction(this.text) ? (parent) => {return _gr.CalcTextWidth(this.text(parent), this.gFont);} : _gr.CalcTextWidth(this.text, this.gFont);
+		this.textWidth = isFunction(this.text) ? (parent) => { return _gr.CalcTextWidth(this.text(parent), this.gFont); } : _gr.CalcTextWidth(this.text, this.gFont);
 		if (!this.iconImage) {
 			this.gFontIcon = _gdiFont(this.gFontIcon.Name, this.gFontIcon.Size * newScale);
-			this.iconWidth = isFunction(this.icon) ? (parent) => {return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon);} : _gr.CalcTextWidth(this.icon, this.gFontIcon);
+			this.iconWidth = isFunction(this.icon) ? (parent) => { return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon); } : _gr.CalcTextWidth(this.icon, this.gFontIcon);
 		}
 	};
-	
+
 	if (variables) {
 		if (typeof variables === 'object') {
 			for (let key in variables) {
@@ -545,7 +556,7 @@ function themedButton(
 					this[key] = variables[key];
 				}
 			}
-		} else {console.log('butttons_xxx: variables is not an object');}
+		} else { console.log('butttons_xxx: variables is not an object'); }
 		variables = null;
 	}
 	if (listener) {
@@ -554,15 +565,15 @@ function themedButton(
 				const func = listener[key].bind(this, this);
 				addEventListener(key, func);
 			}
-		} else {console.log('butttons_xxx: listener is not an object');}
+		} else { console.log('butttons_xxx: listener is not an object'); }
 		listener = null;
 	}
 	if (onInit) {
-		if (isFunction(onInit)) {onInit.call(this, this);}
-		else {console.log('butttons_xxx: onInit is not a function');}
+		if (isFunction(onInit)) { onInit.call(this, this); }
+		else { console.log('butttons_xxx: onInit is not a function'); }
 		onInit = null;
 	}
-	if (this.isHeadlessMode()) {this.state = buttonStates.hide;}
+	if (this.isHeadlessMode()) { this.state = buttonStates.hide; }
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
 
@@ -571,23 +582,23 @@ function drawAllButtons(gr) {
 	const bAlignSize = buttonsBar.config.bAlignSize;
 	const bReflow = buttonsBar.config.bReflow;
 	// First calculate the max width or height so all buttons get aligned
-	const maxSize = bAlignSize ? getButtonsMaxSize() : {w: -1, h: -1, totalW: 0, totalH: 0};
+	const maxSize = bAlignSize ? getButtonsMaxSize() : { w: -1, h: -1, totalW: 0, totalH: 0 };
 	const maxSizeNoReflow = getButtonsMaxSize(false);
 	// Size check
 	doOnce('Buttons Size Check', buttonSizeCheck)();
 	// Then draw
 	for (let key in buttonsBar.buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
-			if (button.isHeadlessMode()) {button.state = buttonStates.hide;}
-			else if (button.state === buttonStates.hide && button.buttonsProperties.hasOwnProperty('bHeadlessMode')) {button.state = buttonStates.normal;}
+			if (button.isHeadlessMode()) { button.state = buttonStates.hide; }
+			else if (button.state === buttonStates.hide && Object.hasOwn(button.buttonsProperties, 'bHeadlessMode')) { button.state = buttonStates.normal; }
 			// Don't normalize size in certain axis if not needed
 			if (bAlignSize && orientation === 'x') {
 				const bNormalize = maxSize.totalW > window.Width && maxSizeNoReflow.totalW > window.Width;
-				button.draw(gr, void(0), void(0), bReflow && bNormalize ? maxSize.w : void(0), maxSize.h, bReflow && bNormalize);
+				button.draw(gr, void (0), void (0), bReflow && bNormalize ? maxSize.w : void (0), maxSize.h, bReflow && bNormalize);
 			} else if (bAlignSize && orientation === 'y') {
 				const bNormalize = maxSize.totalH > window.Height && maxSizeNoReflow.totalH > window.Height;
-				button.draw(gr, void(0), void(0), maxSize.w, bReflow && bNormalize ? maxSize.h : void(0), true);
+				button.draw(gr, void (0), void (0), maxSize.w, bReflow && bNormalize ? maxSize.h : void (0), true);
 			} else {
 				button.draw(gr);
 			}
@@ -598,7 +609,7 @@ function drawAllButtons(gr) {
 function chooseButton(x, y) {
 	let i = 0;
 	for (let key in buttonsBar.buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			if (buttonsBar.buttons[key].containXY(x, y) && buttonsBar.buttons[key].state !== buttonStates.hide) {
 				return [buttonsBar.buttons[key], key, i];
 			}
@@ -610,12 +621,12 @@ function chooseButton(x, y) {
 
 addEventListener('on_paint', (gr) => {
 	// Toolbar
-	if (buttonsBar.config.bToolbar){
+	if (buttonsBar.config.bToolbar) {
 		gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);
 	}
 	// Buttons
 	for (let key in buttonsBar.oldButtonCoordinates) {
-		if (!Object.prototype.hasOwnProperty.call(buttonsBar.oldButtonCoordinates, key)) {continue;}
+		if (!Object.hasOwn(buttonsBar.oldButtonCoordinates, key)) { continue; }
 		buttonsBar.oldButtonCoordinates[key] = 0;
 	}
 	drawAllButtons(gr);
@@ -630,10 +641,9 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	let old = buttonsBar.curBtn;
 	const buttons = buttonsBar.buttons;
 	const buttonsKeys = buttonsBar.listKeys.map((arr) => arr.filter((key) => buttons[key].state !== buttonStates.hide)).filter((arr) => arr.length);
-	const buttonsKeysAll = buttonsBar.listKeys;
 	let curBtnKey = '';
-	[buttonsBar.curBtn, curBtnKey, ] = chooseButton(x, y);
-	
+	[buttonsBar.curBtn, curBtnKey,] = chooseButton(x, y);
+
 	if (old === buttonsBar.curBtn) {
 		if (buttonsBar.gDown) {
 			return;
@@ -644,7 +654,7 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		window.Repaint();
 		return;
 	}
-	
+
 	// Cursors
 	const toolbarKeysLen = buttonsKeys.length;
 	if (buttonsBar.config.bUseCursors) {
@@ -653,21 +663,21 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 			const maxX = last.currX + last.currW + _scale(5);
 			const maxY = last.currY + last.currH + _scale(5);
 			const axis = buttonsBar.config.orientation;
-			if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {window.SetCursor(IDC_SIZEALL);}
-			else {window.SetCursor(IDC_NO);}
-		} else if (buttonsBar.curBtn) {window.SetCursor(IDC_HAND);}
-		else {window.SetCursor(IDC_ARROW);}
+			if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) { window.SetCursor(IDC_SIZEALL); }
+			else { window.SetCursor(IDC_NO); }
+		} else if (buttonsBar.curBtn) { window.SetCursor(IDC_HAND); }
+		else { window.SetCursor(IDC_ARROW); }
 	}
-	
+
 	//Tooltip fix
 	if (old !== null) {
 		// Needed because tooltip is only activated/deactivated on redrawing... otherwise it shows on empty spaces after leaving a button.
-		if (buttonsBar.curBtn === null) {buttonsBar.tooltipButton.Deactivate();}
+		if (buttonsBar.curBtn === null) { buttonsBar.tooltipButton.Deactivate(); }
 		// This forces redraw even if buttons have the same text! Updates position but tooltip becomes slower since it sets delay time to initial...
 		else if (old !== buttonsBar.curBtn && old.description === buttonsBar.curBtn.description) {
 			buttonsBar.tooltipButton.Deactivate();
 			buttonsBar.tooltipButton.SetDelayTime(3, 0); //TTDT_INITIAL
-		} else {buttonsBar.tooltipButton.SetDelayTime(3, buttonsBar.tooltipButton.oldDelay);} 
+		} else { buttonsBar.tooltipButton.SetDelayTime(3, buttonsBar.tooltipButton.oldDelay); }
 	}
 	// Change button states when not moving them
 	old && old.changeState(buttonStates.normal);
@@ -684,11 +694,11 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 							let bContract = false;
 							for (let key in buttons) {
 								oldBtn = buttons[key];
-								if (oldBtn.state === buttonStates.hide){continue;}
+								if (oldBtn.state === buttonStates.hide) { continue; }
 								if (oldBtn !== curBtn) {
-									if (!bContract) {continue;}
+									if (!bContract) { continue; }
 									oldBtn.bIconModeExpand = false;
-								} else {bContract = true;}
+								} else { bContract = true; }
 							}
 						}
 						window.Repaint();
@@ -699,7 +709,7 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 	}
 	// Toolbar Tooltip
 	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length && !buttonsBar.move.bIsMoving) {
-		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip , true);
+		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip, true);
 	}
 	// Disable on drag n drop
 	if (buttonsBar.tooltipButton.bActive && buttonsBar.move.bIsMoving) {
@@ -723,7 +733,7 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 							buttonsBar.move.btn.moveX = x;
 							buttonsBar.move.btn.moveY = y;
 						}
-						const toBtn = buttonsBar.listKeys.find((arr) => {return arr.indexOf(curBtnKey) !== -1;});
+						const toBtn = buttonsBar.listKeys.find((arr) => { return arr.indexOf(curBtnKey) !== -1; });
 						const fKey = toBtn[0];
 						const lKey = toBtn[toBtn.length - 1];
 						buttonsBar.move.rec.x = buttons[fKey].currX;
@@ -740,8 +750,8 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 			}
 			const bValidMove = !!buttonsBar.move.toKey;
 			if (mask !== MK_RBUTTON || !bValidMove) {
-				if (buttonsBar.move.bIsMoving && bValidMove) {moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey);} // Forces window reload on successful move
-				else {bInvalidMove = true;}
+				if (buttonsBar.move.bIsMoving && bValidMove) { moveButton(buttonsBar.move.fromKey, buttonsBar.move.toKey); } // Forces window reload on successful move
+				else { bInvalidMove = true; }
 				buttonsBar.move.bIsMoving = false;
 				if (buttonsBar.move.btn) {
 					buttonsBar.move.btn.moveX = null;
@@ -750,16 +760,16 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 				}
 				buttonsBar.move.fromKey = null;
 				buttonsBar.move.toKey = null;
-				for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttonsBar.move.rec, key)) {buttonsBar.move.rec[key] = null;}}
+				for (let key in buttonsBar.move.rec) { if (Object.hasOwn(buttonsBar.move.rec, key)) { buttonsBar.move.rec[key] = null; } }
 			}
 			for (let key in buttons) {
-				if (Object.prototype.hasOwnProperty.call(buttons, key)) {
-					if (buttons[key] !== buttonsBar.move.btn) {buttons[key].moveX = null; buttons[key].moveY = null;}
+				if (Object.hasOwn(buttons, key)) {
+					if (buttons[key] !== buttonsBar.move.btn) { buttons[key].moveX = null; buttons[key].moveY = null; }
 				}
 			}
 		} else {
-			for (let key in buttons) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttons[key].moveX = null; buttons[key].moveY = null;}}
-			for (let key in buttonsBar.move.rec) {if (Object.prototype.hasOwnProperty.call(buttons, key)) {buttonsBar.move.rec[key] = null;}}
+			for (let key in buttons) { if (Object.hasOwn(buttons, key)) { buttons[key].moveX = null; buttons[key].moveY = null; } }
+			for (let key in buttonsBar.move.rec) { if (Object.hasOwn(buttons, key)) { buttonsBar.move.rec[key] = null; } }
 			if (mask !== MK_RBUTTON) {
 				buttonsBar.move.bIsMoving = false;
 				if (buttonsBar.move.btn) {
@@ -772,25 +782,25 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 			buttonsBar.move.toKey = null;
 			bInvalidMove = true;
 		}
-		if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn || bInvalidMove) {window.Repaint();}
+		if (buttonsBar.move.bIsMoving || old || buttonsBar.curBtn || bInvalidMove) { window.Repaint(); }
 		if (buttonsBar.move.bIsMoving) { // Force drag n drop redraw even if mouse doesn't move
 			const checkMove = () => {
 				setTimeout(() => {
 					if (Date.now() - buttonsBar.move.last > 250) {
 						if (!utils.IsKeyPressed(0x02)) {
 							// Disable drag n drop
-							on_mouse_move(x, y); 
+							on_mouse_move(x, y);
 							// Force state on current hovered button
 							buttonsBar.curBtn = null;
 							on_mouse_move(x, y);
-						} else {checkMove();} // Repeat if nothing has changed
+						} else { checkMove(); } // Repeat if nothing has changed
 					}
-				}, 500)
+				}, 500);
 			};
 			checkMove();
 			buttonsBar.move.last = Date.now();
 		}
-	} else if (old || buttonsBar.curBtn) {window.Repaint();}
+	} else if (old || buttonsBar.curBtn) { window.Repaint(); }
 });
 
 addEventListener('on_mouse_leave', () => {
@@ -803,7 +813,7 @@ addEventListener('on_mouse_leave', () => {
 	if (buttonsBar.config.bIconModeExpand) {
 		let bDone = false;
 		for (let key in buttonsBar.buttons) {
-			if (buttonsBar.buttons[key].bIconModeExpand) {bDone = true; break;}
+			if (buttonsBar.buttons[key].bIconModeExpand) { bDone = true; break; }
 		}
 		if (bDone) {
 			setTimeout(() => {
@@ -814,10 +824,10 @@ addEventListener('on_mouse_leave', () => {
 			}, 200);
 		}
 	}
-	if (buttonsBar.config.bUseCursors) {window.SetCursor(IDC_ARROW);}
+	if (buttonsBar.config.bUseCursors) { window.SetCursor(IDC_ARROW); }
 });
 
-addEventListener('on_mouse_lbtn_down', (x, y, mask) => {
+addEventListener('on_mouse_lbtn_down', (x, y, mask) => { // eslint-disable-line no-unused-vars
 	buttonsBar.gDown = true;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
@@ -825,11 +835,11 @@ addEventListener('on_mouse_lbtn_down', (x, y, mask) => {
 	}
 });
 
-addEventListener('on_mouse_rbtn_up', (x, y, mask) => {
+addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
 	// Must return true, if you want to suppress the default context menu.
 	// Note: left shift + left windows key will bypass this callback and will open default context menu.
 	buttonsBar.move.bIsMoving && on_mouse_move(x, y); // Force drag n drop redraw
-	return buttonsBar.hasOwnProperty('menu') ? buttonsBar.menu().btn_up(x, y) : false;
+	return Object.hasOwn(buttonsBar, 'menu') ? buttonsBar.menu().btn_up(x, y) : false;
 });
 
 addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
@@ -842,31 +852,33 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 			window.Repaint();
 		}
 	} else if (mask === MK_SHIFT) {
-		if (buttonsBar.hasOwnProperty('shiftMenu')) {buttonsBar.shiftMenu().btn_up(x, this.y + this.h);}
+		if (Object.hasOwn(buttonsBar, 'shiftMenu')) { buttonsBar.shiftMenu().btn_up(x, this.y + this.h); }
 	}
 });
 
-addEventListener('on_mouse_mbtn_up', (x, y, mask) => { // Show hidden buttons
+// Show hidden buttons
+addEventListener('on_mouse_mbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars, no-unused-vars, no-unused-vars
 	let bRepaint = false;
 	const buttons = buttonsBar.buttons;
 	const oldState = buttonsBar.hidden.bShow;
 	for (let key in buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttons, key)) {
+		if (Object.hasOwn(buttons, key)) {
 			const button = buttons[key];
-			if (button.state === buttonStates.hide && button.isHeadlessMode()) {button.headlessModeTempShow = true; bRepaint = true; buttonsBar.hidden.bShow = true;}
-			else if (button.headlessModeTempShow) {button.headlessModeTempShow = false; bRepaint = true; buttonsBar.hidden.bShow = false}
+			if (button.state === buttonStates.hide && button.isHeadlessMode()) { button.headlessModeTempShow = true; bRepaint = true; buttonsBar.hidden.bShow = true; }
+			else if (button.headlessModeTempShow) { button.headlessModeTempShow = false; bRepaint = true; buttonsBar.hidden.bShow = false; }
 		}
 	}
 	if (bRepaint) {
 		window.Repaint(true);
-		if (!oldState && buttonsBar.hidden.bShow) {buttonsBar.hidden.id = setTimeout(on_mouse_mbtn_up, buttonsBar.config.hiddenTimeout);}
-		else if (oldState && !buttonsBar.hidden.bShow) {clearTimeout(buttonsBar.hidden.id);}
+		if (!oldState && buttonsBar.hidden.bShow) { buttonsBar.hidden.id = setTimeout(on_mouse_mbtn_up, buttonsBar.config.hiddenTimeout); }
+		else if (oldState && !buttonsBar.hidden.bShow) { clearTimeout(buttonsBar.hidden.id); }
 	}
 });
 
-addEventListener('on_key_down', (k) => { // Update tooltip with key mask if required
+// Update tooltip with key mask if required
+addEventListener('on_key_down', (k) => { // eslint-disable-line no-unused-vars
 	for (let key in buttonsBar.buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
 			if (button.state === buttonStates.hover) {
 				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
@@ -875,9 +887,9 @@ addEventListener('on_key_down', (k) => { // Update tooltip with key mask if requ
 	}
 });
 
-addEventListener('on_key_up', (k) => {
+addEventListener('on_key_up', (k) => { // eslint-disable-line no-unused-vars
 	for (let key in buttonsBar.buttons) {
-		if (Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) {
+		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
 			if (button.state === buttonStates.hover) {
 				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
@@ -887,11 +899,11 @@ addEventListener('on_key_up', (k) => {
 });
 
 function getUniquePrefix(string, sep = '_') {
-	if (string === null || !string.length) {return '';}
-	let newPrefix = string.replace(sep,'') + 0;  // First ID
+	if (string === null || !string.length) { return ''; }
+	let newPrefix = string.replace(sep, '') + 0;  // First ID
 	let i = 1;
 	while (buttonsBar.propertiesPrefixes.has(newPrefix)) { // The rest
-		newPrefix = string.replace(sep,'') + i;
+		newPrefix = string.replace(sep, '') + i;
 		i++;
 	}
 	buttonsBar.propertiesPrefixes.add(newPrefix);
@@ -900,13 +912,13 @@ function getUniquePrefix(string, sep = '_') {
 }
 
 function moveButton(fromKey, toKey) {
-	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined' || !buttonsBar.listKeys.length) {console.log('Buttons: Can not move buttons in current script.'); return;}
-	if (fromKey === toKey) {return;}
-	const fromPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(fromKey) !== -1;});
-	const toPos = buttonsBar.listKeys.findIndex((arr) => {return arr.indexOf(toKey) !== -1;});
+	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined' || !buttonsBar.listKeys.length) { console.log('Buttons: Can not move buttons in current script.'); return; }
+	if (fromKey === toKey) { return; }
+	const fromPos = buttonsBar.listKeys.findIndex((arr) => { return arr.indexOf(fromKey) !== -1; });
+	const toPos = buttonsBar.listKeys.findIndex((arr) => { return arr.indexOf(toKey) !== -1; });
 	buttonsPath.splice(toPos, 0, buttonsPath.splice(fromPos, 1)[0]);
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
-	const fileNames = buttonsPath.map((path) => {return path.split('\\').pop();});
+	const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
 	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t'));
 	// Since properties have a prefix according to their loading order, when there are multiple instances of the same
 	// script, moving a button when there are other 'clones' means the other buttons may get their properties names
@@ -914,21 +926,21 @@ function moveButton(fromKey, toKey) {
 	const properties = buttonsBar.list[toPos];
 	const keys = properties ? Object.keys(properties) : [];
 	if (keys.length) {
-		const prefix = properties[Object.keys(properties)[0]][0].match(/([a-zA-Z]*[0-9]*)(_*[0-9]*\.)/)[1]; // plto3_01. or plt3. -> plto3
-		const currentId = prefix.match(/([a-zA-Z]*)(?:[0-9]*)/)[1]; // plto
+		const prefix = properties[Object.keys(properties)[0]][0].match(/([A-z]*\d*)(_*\d*\.)/)[1]; // plto3_01. or plt3. -> plto3
+		const currentId = prefix.match(/([A-z]*)(?:\d*)/)[1]; // plto
 		let currentIdNumber = 0;
 		// Backup all properties
-		const propertiesBack = buttonsBar.list.map((oldProperties) => {return getPropertiesPairs(oldProperties, '', 0, false);});
+		const propertiesBack = buttonsBar.list.map((oldProperties) => { return getPropertiesPairs(oldProperties, '', 0, false); });
 		// Just rewrite all Ids with same prefix
 		buttonsBar.list.forEach((oldProperties, newIdx) => {
 			const oldKeys = oldProperties ? Object.keys(oldProperties) : [];
 			if (oldKeys.length) {
-				const oldPrefix = oldProperties[oldKeys[0]][0].match(/([a-zA-Z]*[0-9]*)(_*[0-9]*\.)/)[1];
-				const oldId = oldPrefix.match(/([a-zA-Z]*)(?:[0-9]*)/)[1];
+				const oldPrefix = oldProperties[oldKeys[0]][0].match(/([A-z]*\d*)(_*\d*\.)/)[1];
+				const oldId = oldPrefix.match(/([a-zA-Z]*)(?:\d*)/)[1];
 				if (oldId === currentId) {
 					const backup = propertiesBack[newIdx];
 					for (const key in backup) { // Update Id
-						if (!backup.hasOwnProperty(key)) {continue;}
+						if (!Object.hasOwn(backup, key)) { continue; }
 						backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 					}
 					overwriteProperties(backup); // And restore at new position
@@ -943,7 +955,7 @@ function moveButton(fromKey, toKey) {
 function addButton(newButtons) {
 	// Check if the button list already has the same button ID
 	for (let buttonName in newButtons) {
-		if (buttonsBar.buttons.hasOwnProperty(buttonName)) {
+		if (Object.hasOwn(buttonsBar.buttons, buttonName)) {
 			Object.defineProperty(newButtons, buttonName + Object.keys(buttonsBar.buttons).length, Object.getOwnPropertyDescriptor(newButtons, buttonName));
 			delete newButtons[buttonName];
 		}
@@ -954,15 +966,15 @@ function addButton(newButtons) {
 		// Add names to objects
 		button.name = buttonName;
 		// Add icons mode
-		if (button.buttonsProperties.hasOwnProperty('bIconMode')) {
+		if (Object.hasOwn(button.buttonsProperties, 'bIconMode')) {
 			button.bIconMode = button.buttonsProperties.bIconMode[1];
 		}
 	}
-	buttonsBar.buttons = {...buttonsBar.buttons, ...newButtons};
+	buttonsBar.buttons = { ...buttonsBar.buttons, ...newButtons };
 	return newButtons;
 }
 
-function buttonSizeCheck () {
+function buttonSizeCheck() {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
 	const maxSize = getButtonsMaxSize();
 	if (buttonsBar.config.scale > 1 && maxSize.x > -1) {
@@ -974,30 +986,30 @@ function buttonSizeCheck () {
 
 function getButtonsMaxSize(bCurrent = true) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
-	let maxSize = {w: -1, h: -1, totalW: 0, totalH: 0};
+	let maxSize = { w: -1, h: -1, totalW: 0, totalH: 0 };
 	for (let key in buttonsBar.buttons) {
 		const button = buttonsBar.buttons[key];
-		maxSize.h = Math.max(bCurrent ? button.currH : button.h, maxSize.h) ;
+		maxSize.h = Math.max(bCurrent ? button.currH : button.h, maxSize.h);
 		if (button.isIconMode()) {
 			maxSize.w = Math.max(30, maxSize.w);
 		} else {
 			maxSize.w = Math.max(bCurrent ? button.currW : button.w, maxSize.w);
 		}
-		if (orientation === 'x') {maxSize.totalW += (bCurrent ? button.currW : button.w);}
-		if (orientation === 'y') {maxSize.totalH += (bCurrent ? button.currH : button.h);}
+		if (orientation === 'x') { maxSize.totalW += (bCurrent ? button.currW : button.w); }
+		if (orientation === 'y') { maxSize.totalH += (bCurrent ? button.currH : button.h); }
 	}
-	if (orientation === 'x') {maxSize.totalH = maxSize.h;}
-	if (orientation === 'y') {maxSize.totalW = maxSize.w;}
+	if (orientation === 'x') { maxSize.totalH = maxSize.h; }
+	if (orientation === 'y') { maxSize.totalW = maxSize.w; }
 	return maxSize;
 }
 
 function getButtonVersion(source = 'Playlist-Tools-SMP') {
 	let ver = (buttonsBar.getUpdateList().find((btn) => btn.scriptName === source) || {}).version;
 	if (!ver) {
-		switch (source.toLowerCase()) {
-			case 'playlist-tools-smp': 
-				try {ver = utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001).match(/var version = '(.*)'/mi)[1]}
-				catch (e) {}
+		switch (source.toLowerCase()) { // NOSONAR [to add more options]
+			case 'playlist-tools-smp':
+				try { ver = utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001).match(/var version = '(.*)'/mi)[1]; }
+				catch (e) { /* empty */ }
 				break;
 		}
 	}

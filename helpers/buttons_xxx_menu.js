@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/23
+//20/12/23
 
 /* exported settingsMenu */
 
@@ -36,8 +36,8 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		options.forEach((key) => {
 			const value = properties[key][1];
 			const type = typeof value;
-			const entryText = properties[key][0].replace(/[a-zA-Z]*[0-9]*_*[0-9]*\./,'') + (bShowValues && type !== 'boolean' ? '\t[' + (type === 'string' && value.length > 10 ? value.slice(0,10) + '...' : value) + ']' : '');
-			const desc = popups && Object.prototype.hasOwnProperty.call(popups, key) ? popups[key].input || '' : '';
+			const entryText = properties[key][0].replace(/[A-z]*\d*_*\d*\./,'') + (bShowValues && type !== 'boolean' ? '\t[' + (type === 'string' && value.length > 10 ? value.slice(0,10) + '...' : value) + ']' : '');
+			const desc = popups && Object.hasOwn(popups, key) ? popups[key].input || '' : '';
 			menu.newEntry({entryText, func: () => {
 				let input;
 				switch (type) {
@@ -54,7 +54,6 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 						break;
 					}
 					case 'string': {
-						input = '';
 						try {input = utils.InputBox(window.ID, desc || 'Enter value:', parentName, value, true);}
 						catch(e) {return;}
 						break;
@@ -68,7 +67,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 				if (!checkProperty(properties[key], input)) {return;} // Apply properties check which should be personalized for input value
 				properties[key][1] = (type === 'object' ? JSON.stringify(input) : input);
 				overwriteProperties(properties); // Updates panel
-				if (popups && Object.prototype.hasOwnProperty.call(popups, key)) {
+				if (popups && Object.hasOwn(popups, key)) {
 					if (type !== 'boolean' || (type === 'boolean' && input)) {
 						fb.ShowPopupMessage(popups[key].popup, parentName);
 					}
@@ -78,9 +77,9 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 					window.Repaint();
 				}
 				if (callbacks) {
-					if (Object.prototype.hasOwnProperty.call(callbacks, key)) {
+					if (Object.hasOwn(callbacks, key)) {
 						callbacks[key](input, key);
-					} else if (Object.prototype.hasOwnProperty.call(callbacks, '*')) {
+					} else if (Object.hasOwn(callbacks, '*')) {
 						callbacks['*'](input, key);
 					}
 				}
@@ -101,7 +100,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		menu.newEntry({entryText: 'sep'});
 		if (readmeFiles.length > 1) {
 			readmeFiles.forEach((name) => {
-				const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, name) ? readmeList[name] : '';
+				const readmeFile = Object.hasOwn(readmeList, name) ? readmeList[name] : '';
 				if (readmeFile.length) {
 					menu.newEntry({entryText: readmeFile, func: () => {
 						const readme = _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8);
@@ -112,7 +111,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			});
 		} else {
 			menu.newEntry({entryText: 'Readme...', func: () => {
-				const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, readmeFiles[0]) ? readmeList[readmeFiles[0]] : '';
+				const readmeFile = Object.hasOwn(readmeList, readmeFiles[0]) ? readmeList[readmeFiles[0]] : '';
 				const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
 				if (readme.length) {fb.ShowPopupMessage(readme, readmeFile);}
 				else {console.log(readmeFile + ' not found.');}

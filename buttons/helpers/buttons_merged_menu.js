@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/23
+//20/12/23
 
 /* exported createButtonsMenu */
 
@@ -47,7 +47,7 @@ function createButtonsMenu(name) {
 					? 'Output Devices'
 					: s === '_lastfm_'
 						? 'Last.fm'
-						: capitalizeAll(s.replace(/[_]/g, '').trim())
+						: capitalizeAll(s.replace(/_/g, '').trim())
 		);
 	}
 	{
@@ -67,7 +67,7 @@ function createButtonsMenu(name) {
 					const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
 					_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
 					if (readmeList) {
-						const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, fileName) ? readmeList[fileName] : '';
+						const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
 						const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
 						if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
 					}
@@ -107,7 +107,7 @@ function createButtonsMenu(name) {
 										const backup = getPropertiesPairs(oldProperties, '', 0, false); // First refresh from panel
 										deleteProperties(oldProperties); // Delete it at panel
 										for (const key in backup) { // Update Id
-											if (!Object.prototype.hasOwnProperty.call(backup, key)) { continue; }
+											if (!Object.hasOwn(backup, key)) { continue; }
 											backup[key][0] = backup[key][0].replace(oldPrefix, oldId + currentIdNumber);
 										}
 										setProperties(backup, '', 0, false, true); // And restore at new position
@@ -325,7 +325,7 @@ function createButtonsMenu(name) {
 					input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
 					if (input === null) { return; }
 					for (let key in buttonsBar.buttons) {
-						if (!Object.prototype.hasOwnProperty.call(buttonsBar.buttons, key)) { continue; }
+						if (!Object.hasOwn(buttonsBar.buttons, key)) { continue; }
 						buttonsBar.buttons[key].changeScale(input);
 					}
 				}
@@ -459,7 +459,7 @@ function createButtonsMenu(name) {
 			menu.newCheckMenu(subMenu, 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), void (0), () => { return buttonsBar.config.bIconModeExpand; });
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
-				if (arrKeys.some((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key], 'bIconMode'))) {
+				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key], 'bIconMode'))) {
 					const bHeadless = arrKeys.every((key) => buttonsBar.buttons[key].state === buttonStates.hide);
 					const entryText = buttonsPath[idx].split('\\').pop() + '\t' + (bHeadless ? ' [headless] ' : '') + _p(idx + 1);
 					menu.newEntry({
@@ -468,7 +468,7 @@ function createButtonsMenu(name) {
 							for (let key of arrKeys) {
 								const button = buttonsBar.buttons[key];
 								const properties = button.buttonsProperties;
-								if (Object.prototype.hasOwnProperty.call(properties, 'bIconMode')) {
+								if (Object.hasOwn(properties, 'bIconMode')) {
 									// A single button file may have multiple buttons sharing the same properties or not
 									if (JSON.stringify(cache) !== JSON.stringify(properties)) {
 										properties.bIconMode[1] = !properties.bIconMode[1];
@@ -488,11 +488,11 @@ function createButtonsMenu(name) {
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Restore every button', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
-						if (arrKeys.some((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key], 'bIconMode'))) {
+						if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key], 'bIconMode'))) {
 							for (let key of arrKeys) {
 								const button = buttonsBar.buttons[key];
 								const properties = button.buttonsProperties;
-								if (Object.prototype.hasOwnProperty.call(properties, 'bIconMode')) {
+								if (Object.hasOwn(properties, 'bIconMode')) {
 									properties.bIconMode[1] = false;
 									overwriteProperties(properties);
 									button.bIconMode = false;
@@ -506,17 +506,17 @@ function createButtonsMenu(name) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{
-			const keys = buttonsBar.listKeys.map((arr) => arr.filter((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))).flat(Infinity).filter(Boolean);
-			const checkHeadless = () => keys.every((key) => !Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());
+			const keys = buttonsBar.listKeys.map((arr) => arr.filter((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))).flat(Infinity).filter(Boolean);
+			const checkHeadless = () => keys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());
 			const subMenu = menu.newMenu('Headless mode...' + (keys.length ? '' : '\t[none]'), menuName, keys.length ? MF_STRING : MF_GRAYED);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Enable for all buttons', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
-						if (arrKeys.some((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
+						if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
 							for (let key of arrKeys) {
 								const button = buttonsBar.buttons[key];
 								const properties = button.buttonsProperties;
-								if (Object.prototype.hasOwnProperty.call(properties, 'bHeadlessMode')) {
+								if (Object.hasOwn(properties, 'bHeadlessMode')) {
 									button.bHeadlessMode = properties.bHeadlessMode[1] = true;
 									overwriteProperties(properties);
 								}
@@ -529,7 +529,7 @@ function createButtonsMenu(name) {
 			menu.newCheckMenu(subMenu, 'Enable for all buttons', void (0), checkHeadless);
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
-				if (arrKeys.some((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
+				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
 					const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
 					menu.newEntry({
 						menuName: subMenu, entryText, func: () => {
@@ -537,7 +537,7 @@ function createButtonsMenu(name) {
 							for (let key of arrKeys) {
 								const button = buttonsBar.buttons[key];
 								const properties = button.buttonsProperties;
-								if (Object.prototype.hasOwnProperty.call(properties, 'bHeadlessMode')) {
+								if (Object.hasOwn(properties, 'bHeadlessMode')) {
 									// A single button file may have multiple buttons sharing the same properties or not
 									if (JSON.stringify(cache) !== JSON.stringify(properties)) {
 										properties.bHeadlessMode[1] = !properties.bHeadlessMode[1];
@@ -550,18 +550,18 @@ function createButtonsMenu(name) {
 							window.Repaint(true);
 						}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING
 					});
-					menu.newCheckMenu(subMenu, entryText, void (0), () => { return arrKeys.every((key) => !Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode()); });
+					menu.newCheckMenu(subMenu, entryText, void (0), () => { return arrKeys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode()); });
 				}
 			});
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Restore every button', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
-						if (arrKeys.some((key) => Object.prototype.hasOwnProperty.call(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
+						if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
 							for (let key of arrKeys) {
 								const button = buttonsBar.buttons[key];
 								const properties = button.buttonsProperties;
-								if (Object.prototype.hasOwnProperty.call(properties, 'bHeadlessMode')) {
+								if (Object.hasOwn(properties, 'bHeadlessMode')) {
 									button.bHeadlessMode = properties.bHeadlessMode[1] = false;
 									overwriteProperties(properties);
 								}
@@ -640,11 +640,11 @@ function createButtonsMenu(name) {
 			readmeList['Tags sources'] = 'tags_sources.txt';
 			readmeList['Other tags notes'] = 'tags_notes.txt';
 			readmeList['Global tag remapping'] = 'tags_global_remap.txt';
-			if (Object.prototype.hasOwnProperty.call(readmeList, 'buttons_search_quicksearch.js')) { readmeList['Dynamic queries'] = 'dynamic_query.txt'; }
+			if (Object.hasOwn(readmeList, 'buttons_search_quicksearch.js')) { readmeList['Dynamic queries'] = 'dynamic_query.txt'; }
 			// Process
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			Object.keys(readmeList).forEach((fileName) => {
-				const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, fileName) ? readmeList[fileName] : '';
+				const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) { return; }
 				let subMenuFolder = subCategories.find((folder) => { return fileName.indexOf(folder) !== -1; }) || 'Others';
 				subMenuFolder = parseSubMenuFolder(subMenuFolder);
