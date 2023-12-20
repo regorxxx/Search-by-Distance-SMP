@@ -1,5 +1,7 @@
 ﻿'use strict';
-//10/10/23
+//18/12/23
+
+/* global music_graph_descriptors:readable */
 
 /*
 	Helpers for the descriptors
@@ -70,7 +72,7 @@ music_graph_descriptors.getNodeSet = function getNodeSet(bExtensive = true) {
 		return new Set(this.style_supergenre.flat(Infinity).filter((sg) => !sg.endsWith('_supergenre')));
 	}
 	return this.nodeSet;
-}
+};
 
 music_graph_descriptors.isOnGraph = function isOnGraph(genreStyleArr) {
 	const tags = new Set(genreStyleArr.flat(Infinity).map((tag) => {return this.asciify(tag);}));
