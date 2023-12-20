@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//21/12/23
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -1731,8 +1731,8 @@ async function searchByDistance({
 					const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
 					const mapKey = [
 						...[
-							[...difference].sort((a, b) => a.localeCompare(b)),
-							[...toGenreStyle].sort((a, b) => a.localeCompare(b))
+							[...difference].sort((a, b) => a.localeCompare(b)).join(','),
+							[...toGenreStyle].sort((a, b) => a.localeCompare(b)).join(','),
 						].sort((a, b) => a.localeCompare(b))
 					].join(' -> ');
 					const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
