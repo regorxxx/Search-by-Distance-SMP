@@ -1,5 +1,7 @@
 ﻿'use strict';
-//21/11/22
+//18/12/23
+
+/* exported zScoreToProbability, probabilityToZscore, zScoreToCDF, calcStatistics */
 
 /*  The following JavaScript functions for calculating normal and
 	chi-square probabilities and critical values were adapted by
@@ -17,7 +19,7 @@
 			z values <= 6.  For z values > to 6.0, poz() returns 0.0.
 */
 
-function poz(z) {
+function zScoreToProbability(z) {
 	const Z_MAX = 6;
 	let y, x, w;
 	if (z === 0) {
@@ -54,7 +56,7 @@ function poz(z) {
 			   search for a value within CHI_EPSILON,
 			   relying on the monotonicity of pochisq().  */
 
-function critz(p) {
+function probabilityToZscore(p) {
 	const Z_MAX = 6;
 	const Z_EPSILON = 1e-6;     /* Accuracy of z approximation */
 	let minz = -Z_MAX;
@@ -64,7 +66,7 @@ function critz(p) {
 	if (p < 0) {p = 0.0;}
 	if (p > 1) {p = 1.0;}
 	while ((maxz - minz) > Z_EPSILON) {
-		pval = poz(zval);
+		pval = zScoreToProbability(zval);
 		if (pval > p) {
 			maxz = zval;
 		} else {
@@ -75,19 +77,15 @@ function critz(p) {
 	return(zval);
 }
 
-const zScoreToProbability = poz;
-const probabilityToZscore = critz;
-const zScoreToCDF = cdfz;
-
 /*  cdfz  --   Compute Cumulative Distribution Function
 			   of the Standard Normal Distribution for
 			   a given Z. Values from table. */
 
-function cdfz(z, bSym = true) {
+function zScoreToCDF(z, bSym = true) {
 	const Z_MAX = 4.09;
 	if (z > Z_MAX) {z = Z_MAX;}
 	const i = Math.round(z / 0.01);
-	const cdfs = [                   
+	const cdfs = [
 		/* 0.00		0.01	 0.02	  0.03	   0.04		0.05	 0.06	  0.07	   0.08		0.09 */
 		0.00000, 0.00399, 0.00798, 0.01197, 0.01595, 0.01994, 0.02392, 0.02790, 0.03188, 0.03586, /* 0.0 */
 		0.03983, 0.04380, 0.04776, 0.05172, 0.05567, 0.05962, 0.06356, 0.06749, 0.07142, 0.07535, /* 0.1 */
@@ -130,7 +128,7 @@ function cdfz(z, bSym = true) {
 		0.49993, 0.49993, 0.49993, 0.49994, 0.49994, 0.49994, 0.49994, 0.49995, 0.49995, 0.49995, /* 3.8 */
 		0.49995, 0.49995, 0.49996, 0.49996, 0.49996, 0.49996, 0.49996, 0.49996, 0.49997, 0.49997, /* 3.9 */
 		0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49998, 0.49998, 0.49998, 0.49998  /* 4.0 */
-	]
+	];
 	return bSym ? cdfs[i] * 2 : cdfs[i];
 }
 
@@ -149,13 +147,13 @@ function calcStatistics(dataArr, options = {bClampRange: true}) {
 		sigma: 0,
 		range: 0,
 		popRange: {
-			normal:		{'50%': [], '75%': [], '89%': [], '95%': []}, 
+			normal:		{'50%': [], '75%': [], '89%': [], '95%': []},
 			universal:	{'50%': [], '75%': [], '89%': [], '95%': []}
 		},
-		
+
 	};
 	statistics.count = dataArr.length;
-	dataArr.forEach((val, i) => {
+	dataArr.forEach((val) => {
 		if (val > statistics.max) {statistics.max = val; statistics.maxCount = 1;}
 		else if (val === statistics.max) {statistics.maxCount++;}
 		if (val < statistics.min) {statistics.min = val; statistics.minCount = 1;}
@@ -188,7 +186,7 @@ function calcStatistics(dataArr, options = {bClampRange: true}) {
 	statistics.mode = {value: statistics.min + histogram.indexOf(masxFreq) * binSize, frequency: masxFreq};
 	{
 		let i = 0, acumFreq = statistics.count / 2;
-		while (true) {
+		while (true) { // eslint-disable-line no-constant-condition
 			acumFreq -= histogram[i];
 			if (acumFreq <= 0) {break;} else {i++;}
 		}
