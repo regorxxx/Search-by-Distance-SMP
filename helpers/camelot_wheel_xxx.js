@@ -1,15 +1,15 @@
 ﻿'use strict';
 //10/10/22
-/* 
-	The Camelot Wheel lists musical keys that are displayed as 'hours' on a clock. For example, 4 o'clock 
+/*
+	The Camelot Wheel lists musical keys that are displayed as 'hours' on a clock. For example, 4 o'clock
 	corresponds to 4B or 4A. The 'B' letter represents major keys, and the ‘A’ letter represents the minor
-	keys. Two songs probably sound good together because they are “in key” with one another. 
+	keys. Two songs probably sound good together because they are “in key” with one another.
 	The wheel can be used to easily mix songs following these rules:
-		-Perfect Match (nX -> nX): staying in the same 'hour' and letter. 
+		-Perfect Match (nX -> nX): staying in the same 'hour' and letter.
 		-Energy Changes:
 			- Energy Boost (nX -> n+1X): adding one 'hour' (+1), equivalent to going up a fifth.
 			- Energy Drop (nX -> n-1X): subtracting one 'hour' (-1), equivalent to going down a fifth.
-			- Energy Switch (nA -> nB): staying in he same 'hour' but changing the letter, equivalent to 
+			- Energy Switch (nA -> nB): staying in he same 'hour' but changing the letter, equivalent to
 				going from relative minor to major (and viceversa).
 		-Mood Changes:
 			- Mood Boost (nA -> n+3B): adding three 'hours' (+3), equivalent to going from minor to major.
@@ -249,7 +249,7 @@ const camelotWheel = function () {
 		['5d'	, '12B'	]
 	]);
 	// Public methods
-	/* 
+	/*
 		Methods to retrieve Key Objects (x) from Key Strings (y)
 		x: Camelot Key or Open Key -> {hour, letter}
 		y: Standard Notation Key (flat and sharp), Camelot Key or Open Key -> string
@@ -263,10 +263,10 @@ const camelotWheel = function () {
 			return bMap ? new Map(entries) : entries;
 		},
 		hasKey(xy) {
-			return (typeof xy === 'object' 
-				? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter') 
-					? keyNotation.has(xy.hour + xy.letter) 
-					: false) 	
+			return (typeof xy === 'object'
+				? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter')
+					? keyNotation.has(xy.hour + xy.letter)
+					: false)
 				: keyNotation.has(xy)
 			);
 		},
@@ -276,18 +276,18 @@ const camelotWheel = function () {
 		},
 		getKeyNotationObjectOpen(xy) { // Retrieves open key object
 			if (typeof xy === 'object') {return this.getKeyNotationObjectOpen(xy.hour + xy.letter);}
-			const x = this.getKeyNotationObjectCamelot(xy); 
-			if (x) {this.translateObjectCamelotToOpen(x);} 
+			const x = this.getKeyNotationObjectCamelot(xy);
+			if (x) {this.translateObjectCamelotToOpen(x);}
 			return x;
 		},
 		translateObjectCamelotToOpen(x) { // {Camelot} -> {Open Key}
 			x.hour += (x.hour >= 8 ? -7 : 5);
-			x.letter = (x.letter === 'A' ? 'm' : 'd'); 
+			x.letter = (x.letter === 'A' ? 'm' : 'd');
 			return x;
 		},
 		translateObjectOpenToCamelot(x) { // {Open Key} -> {Camelot}
 			x.hour += (x.hour <= 5 ? 7 : -5);
-			x.letter = (x.letter === 'm' ? 'A' : 'B'); 
+			x.letter = (x.letter === 'm' ? 'A' : 'B');
 			return x;
 		},
 		translateToNotation(x, notation = ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ ) {
@@ -319,8 +319,8 @@ const camelotWheel = function () {
 		clone(x) {
 			return {...x};
 		},
-		/* 	
-			Methods to retrieve Key Strings (y) from Key Objects (x) 
+		/*
+			Methods to retrieve Key Strings (y) from Key Objects (x)
 		*/
 		getKeyNotationFlat(x) {
 			return (this.hasKey(x) ? wheelNotationFlat.get(x.hour)[x.letter] : null);
@@ -334,9 +334,9 @@ const camelotWheel = function () {
 		getKeyNotationCamelot(x) {
 			return (this.hasKey(x) ? wheelNotationCamelot.get(x.hour)[x.letter] : null);
 		},
-		/* 	
+		/*
 			Methods to work with Key Objects (x)
-			Beware to pass a copy of the object if you want a new key object, 
+			Beware to pass a copy of the object if you want a new key object,
 			otherwise the original will be modified!
 			Works for Camelot or Open key objects, no need to translate
 		*/
@@ -346,54 +346,54 @@ const camelotWheel = function () {
 			return x;
 		},
 		energyDrop(x) {
-			x.hour = this.cyclicOffset(x.hour, -1, [1,12]); 
+			x.hour = this.cyclicOffset(x.hour, -1, [1,12]);
 			return x;
 		},
 		energySwitch(x) {
-			x.letter = (x.letter === 'A' || x.letter === 'B' 
-				? (x.letter === 'A' 
-						? 'B' 
-						: 'A') 
-				: (x.letter === 'm' 
-					? 'd' 
+			x.letter = (x.letter === 'A' || x.letter === 'B'
+				? (x.letter === 'A'
+						? 'B'
+						: 'A')
+				: (x.letter === 'm'
+					? 'd'
 					: 'm')
-			); 
+			);
 			return x;
 		},
 		moodBoost(x) {
-			x.hour = this.cyclicOffset(x.hour, 3, [1,12]); 
+			x.hour = this.cyclicOffset(x.hour, 3, [1,12]);
 			return x;
 		},
 		moodDrop(x) {
-			x.hour = this.cyclicOffset(x.hour, -3, [1,12]); 
+			x.hour = this.cyclicOffset(x.hour, -3, [1,12]);
 			return x;
 		},
 		domKey(x) {
-			this.energySwitch(x); 
-			this.energyBoost(x); 
+			this.energySwitch(x);
+			this.energyBoost(x);
 			return x;
 		},
 		subDomKey(x) {
-			this.energySwitch(x); 
-			this.energyDrop(x); 
+			this.energySwitch(x);
+			this.energyDrop(x);
 			return x;
 		},
 		energyRaise(x) {
-			x.hour = this.cyclicOffset(x.hour, 7, [1,12]); 
+			x.hour = this.cyclicOffset(x.hour, 7, [1,12]);
 			return x;
 		},
-		/* 	
+		/*
 			Methods to compare Key Objects (x1, x2)
 		*/
 		getHourDistance(xy1, xy2, bConvert = true) {
-			const diff = (bConvert 
+			const diff = (bConvert
 				? Math.abs(this.getKeyNotationObjectCamelot(xy1).hour - this.getKeyNotationObjectCamelot(xy2).hour)
 				: Math.abs(xy1.hour - xy2.hour)
 			);
 			return diff > 6 ? 12 - diff : diff;
 		},
 		getLetterDistance(xy1, xy2, bConvert = true) {
-			return (bConvert 
+			return (bConvert
 				? this.getKeyNotationObjectCamelot(xy1).letter === this.getKeyNotationObjectCamelot(xy2).letter ? 0 : 1
 				: xy1.letter === xy2.letter ? 0 : 1
 			);
@@ -406,7 +406,7 @@ const camelotWheel = function () {
 			}
 			return null;
 		},
-		/* 
+		/*
 			Methods to create and apply patterns
 		*/
 		createRange(x, keyRange, notation = {name: ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ , bFlat: true}) {
@@ -426,7 +426,7 @@ const camelotWheel = function () {
 					}
 				});
 				// Same letter and number or different letter
-				nextKeyObj = {...keyObj};		
+				nextKeyObj = {...keyObj};
 				const subKeyComb = this.translateToNotation(nextKeyObj, notation.name);
 				notation.bFlat ? keyComb.push(...subKeyComb) : keyComb.push(subKeyComb);
 			});
@@ -458,7 +458,7 @@ const camelotWheel = function () {
 				--last;
 				[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
 			}
-			
+
 			// Cut to desired length and output
 			if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
 			return pattern;

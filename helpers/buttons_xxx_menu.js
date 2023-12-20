@@ -1,9 +1,18 @@
 ﻿'use strict';
-//28/11/23
+//19/12/23
 
+/* exported settingsMenu */
+
+include('helpers_xxx.js');
+/* global folders:readable, MF_GRAYED:readable */
 include('menu_xxx.js');
-include('helpers_xxx_properties.js')
+/* global _menu:readable */
+include('helpers_xxx_prototypes.js');
+/* global isFunction:readable */
+include('helpers_xxx_properties.js');
+/* global overwriteProperties:readable, checkProperty:readable, */
 include('helpers_xxx_file.js');
+/* global _open:readable, _isFile:readable, utf8:readable, _jsonParseFileCheck:readable */
 
 function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}, extraEntries = null) {
 	/*
@@ -28,7 +37,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			const value = properties[key][1];
 			const type = typeof value;
 			const entryText = properties[key][0].replace(/[a-zA-Z]*[0-9]*_*[0-9]*\./,'') + (bShowValues && type !== 'boolean' ? '\t[' + (type === 'string' && value.length > 10 ? value.slice(0,10) + '...' : value) + ']' : '');
-			const desc = popups && popups.hasOwnProperty(key) ? popups[key].input || '' : '';
+			const desc = popups && Object.prototype.hasOwnProperty.call(popups, key) ? popups[key].input || '' : '';
 			menu.newEntry({entryText, func: () => {
 				let input;
 				switch (type) {
@@ -59,7 +68,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 				if (!checkProperty(properties[key], input)) {return;} // Apply properties check which should be personalized for input value
 				properties[key][1] = (type === 'object' ? JSON.stringify(input) : input);
 				overwriteProperties(properties); // Updates panel
-				if (popups && popups.hasOwnProperty(key)) {
+				if (popups && Object.prototype.hasOwnProperty.call(popups, key)) {
 					if (type !== 'boolean' || (type === 'boolean' && input)) {
 						fb.ShowPopupMessage(popups[key].popup, parentName);
 					}
@@ -69,9 +78,9 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 					window.Repaint();
 				}
 				if (callbacks) {
-					if (callbacks.hasOwnProperty(key)) {
+					if (Object.prototype.hasOwnProperty.call(callbacks, key)) {
 						callbacks[key](input, key);
-					} else if (callbacks.hasOwnProperty('*')) {
+					} else if (Object.prototype.hasOwnProperty.call(callbacks, '*')) {
 						callbacks['*'](input, key);
 					}
 				}
@@ -92,7 +101,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		menu.newEntry({entryText: 'sep'});
 		if (readmeFiles.length > 1) {
 			readmeFiles.forEach((name) => {
-				const readmeFile = readmeList.hasOwnProperty(name) ? readmeList[name] : '';
+				const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, name) ? readmeList[name] : '';
 				if (readmeFile.length) {
 					menu.newEntry({entryText: readmeFile, func: () => {
 						const readme = _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8);
@@ -103,7 +112,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			});
 		} else {
 			menu.newEntry({entryText: 'Readme...', func: () => {
-				const readmeFile = readmeList.hasOwnProperty(readmeFiles[0]) ? readmeList[readmeFiles[0]] : '';
+				const readmeFile = Object.prototype.hasOwnProperty.call(readmeList, readmeFiles[0]) ? readmeList[readmeFiles[0]] : '';
 				const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
 				if (readme.length) {fb.ShowPopupMessage(readme, readmeFile);}
 				else {console.log(readmeFile + ' not found.');}
