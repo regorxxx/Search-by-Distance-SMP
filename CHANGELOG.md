@@ -51,10 +51,12 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Code cleanup.
 ### Removed
 ### Fixed
-- Tags: incorrect handling of single-value tags in some cases. Issue #22
+- Tags: incorrect handling of single-value tags in some cases. Issue #22.
 - Crash when using a probability of picking lower than 100 in some cases.
+- Minor fixes.
 
 ## [6.1.3] - 2023-12-17
 ### Added
