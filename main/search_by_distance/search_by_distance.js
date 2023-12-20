@@ -1,6 +1,6 @@
 ﻿'use strict';
-//17/12/23
-var version = '6.1.3';
+//20/12/23
+var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
 
@@ -45,7 +45,8 @@ include('..\\..\\helpers-external\\ngraph\\NBA.js');
 include('ngraph_helpers_xxx.js');
 /* global calcGraphDistance:readable, calcMeanDistance:readable, cacheLink:writable, calcCacheLinkSGV2:readable */
 // This tells the helper to load tags descriptors extra files
-var bLoadTags = true; // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+var bLoadTags = true; // NOSONAR [shared on files]
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global isFoobarV2:readable, checkCompatible:readable, globTags:readable, folders:readable, globQuery:readable, iDelayLibrary:readable */
 /* global debounce:readable, doOnce:readable, clone:readable , memoize:readable */
@@ -58,12 +59,12 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
 /* global checkQuery:readable, getTagsValuesV4:readable, query_join:readable, getTagsValuesV3:readable, query_combinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
-if (isFoobarV2) {include('..\\..\\helpers\\helpers_xxx_tags_cache.js');}
+if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
 /* global k_combinations:readable */
 include('..\\..\\helpers\\helpers_xxx_statistics.js');
-/* global cdfz:readable */
+/* global zScoreToCDF:readable */
 include('..\\..\\helpers\\camelot_wheel_xxx.js');
 /* global camelotWheel:readable */
 include('..\\..\\helpers\\dyngenre_map_xxx.js');
@@ -86,101 +87,101 @@ checkCompatible('1.6.1', 'smp');
 	Properties
 */
 const SearchByDistance_properties = {
-	tags					:	['Tags used for scoring', JSON.stringify({
-		genre:				{weight: 15, tf: [globTags.genre],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		style:				{weight: 15, tf: [globTags.style],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph']},
-		dynGenre:			{weight: 15, tf: [],				baseScore: 0,	scoringDistribution: 'LINEAR', type: ['number', 'single', 'virtual', 'absRange'], range: 1},
-		mood:				{weight: 10, tf: [globTags.mood],	baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6}, // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
-		key:				{weight: 5,	 tf: [globTags.key],	baseScore: 0,	scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3},
-		bpm:				{weight: 5,	 tf: [globTags.bpm],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50},
-		date:				{weight: 10, tf: [globTags.date],	baseScore: 0,	scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30},
-		composer:			{weight: 0,	 tf: ['COMPOSER'],		baseScore: 0,	scoringDistribution: 'LINEAR', type: ['string', 'multiple']},
-		artistRegion:		{weight: 5,	 tf: ['LOCALE LAST.FM'],baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5},
-		genreStyleRegion:	{weight: 7,	 tf: [],				baseScore: 0,	scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5},
+	tags: ['Tags used for scoring', JSON.stringify({
+		genre: { weight: 15, tf: [globTags.genre], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph'] },
+		style: { weight: 15, tf: [globTags.style], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'graph'] },
+		dynGenre: { weight: 15, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: ['number', 'single', 'virtual', 'absRange'], range: 1 },
+		mood: { weight: 10, tf: [globTags.mood], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'combinations'], combs: 6 }, // Used for query filtering, combinations of K moods for queries. Greater values will pre-filter better the library...
+		key: { weight: 5, tf: [globTags.key], baseScore: 0, scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3 },
+		bpm: { weight: 5, tf: [globTags.bpm], baseScore: 0, scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50 },
+		date: { weight: 10, tf: [globTags.date], baseScore: 0, scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30 },
+		composer: { weight: 0, tf: ['COMPOSER'], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple'] },
+		artistRegion: { weight: 5, tf: ['LOCALE LAST.FM'], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5 },
+		genreStyleRegion: { weight: 7, tf: [], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5 },
 	})],
-	scoreFilter				:	['Exclude any track with similarity lower than (in %)', 70, {range: [[0,100]], func: isInt}, 70],
-	minScoreFilter			:	['Minimum in case there are not enough tracks (in %)', 65, {range: [[0,100]], func: isInt}, 65],
-	graphDistance			:	['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre',
-		{func: (x) => {return (isString(x) && music_graph_descriptors.hasOwnProperty(x.split('.').pop())) || isInt(x) || x === Infinity;}}, 'music_graph_descriptors.intra_supergenre'],
-	method					:	['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', {func: checkMethod}, 'GRAPH'],
-	bNegativeWeighting		:	['Negative score for tags out of range', true],
-	bFilterWithGraph		:	['Filter values not present on the graph', true],
-	forcedQuery				:	['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
-	bSameArtistFilter		:	['Exclude tracks by same artist', false],
-	bUseAntiInfluencesFilter:	['Exclude anti-influences by query', false],
-	bConditionAntiInfluences:	['Conditional anti-influences filter', false],
-	bUseInfluencesFilter	:	['Allow only influences by query', false],
-	bSimilArtistsFilter		:	['Allow only similar artists', false],
-	genreStyleFilterTag		:	['Filter for genre/style', JSON.stringify(['Children\'s Music','?'])],
-	poolFilteringTag		:	['Filter pool by tag', JSON.stringify([globTags.artist])],
-	poolFilteringN			:	['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, {greaterEq: -1, func: isInt}, -1],
-	bRandomPick				:	['Random picking (not sorted by score)', true],
-	bInversePick			:	['Picking by inverted score', false],
-	probPick				:	['Probability of track picking for final mix', 100, {range: [[1,100]], func: isInt}, 100],
-	playlistLength			:	['Max Playlist Mix length', 50],
-	bSortRandom				:	['Sort final playlist randomly', false],
-	bProgressiveListOrder	:	['Sort final playlist by score', false],
-	bInverseListOrder		:	['Invert final sorting', false],
-	bScatterInstrumentals	:	['Intercalate instrumental tracks', false],
-	bInKeyMixingPlaylist	:	['DJ-like playlist creation, following harmonic mixing rules', false],
-	bHarmonicMixDoublePass	:	['Harmonic mixing double pass to match more tracks', true],
-	bProgressiveListCreation:	['Recursive playlist creation, uses output as new references', false],
-	progressiveListCreationN:	['Steps when using recursive playlist creation (>1 and <=100)', 4, {range: [[2,100]], func: isInt}, 4],
-	playlistName			:	['Playlist name (TF allowed)', 'Search...', {func: isString}, 'Search...'],
-	bAscii					:	['Asciify string values internally?', true],
-	checkDuplicatesByTag	:	['Remove duplicates by', JSON.stringify(globTags.remDupl)],
-	sortBias:					['Duplicates track selection bias', globQuery.remDuplBias, {func: isStringWeak}, globQuery.remDuplBias],
-	bAdvTitle				:	['Duplicates advanced RegExp title matching?', true],
-	bSmartShuffle			:	['Smart Shuffle by Artist', true],
-	smartShuffleTag			:	['Smart Shuffle tag', JSON.stringify([globTags.artist])],
-	bSmartShuffleAdvc		:	['Smart Shuffle extra conditions', true],
-	smartShuffleSortBias	:	['Smart Shuffle sorting bias', 'random', {func: isStringWeak}, 'random'],
-	artistRegionFilter		:	['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, {range: [[-1,5]], func: isInt}, -1],
-	genreStyleRegionFilter	:	['Genre region filter: none (-1), continent (0), region (1)', -1, {range: [[-1,3]], func: isInt}, -1],
-	dynQueries				:	['Dynamic query filtering', JSON.stringify([]), {func: isJSON}, JSON.stringify([])],
+	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
+	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
+	graphDistance: ['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre',
+		{ func: (x) => { return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || isInt(x) || x === Infinity; } }, 'music_graph_descriptors.intra_supergenre'],
+	method: ['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', { func: checkMethod }, 'GRAPH'],
+	bNegativeWeighting: ['Negative score for tags out of range', true],
+	bFilterWithGraph: ['Filter values not present on the graph', true],
+	forcedQuery: ['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
+	bSameArtistFilter: ['Exclude tracks by same artist', false],
+	bUseAntiInfluencesFilter: ['Exclude anti-influences by query', false],
+	bConditionAntiInfluences: ['Conditional anti-influences filter', false],
+	bUseInfluencesFilter: ['Allow only influences by query', false],
+	bSimilArtistsFilter: ['Allow only similar artists', false],
+	genreStyleFilterTag: ['Filter for genre/style', JSON.stringify(['Children\'s Music', '?'])],
+	poolFilteringTag: ['Filter pool by tag', JSON.stringify([globTags.artist])],
+	poolFilteringN: ['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, { greaterEq: -1, func: isInt }, -1],
+	bRandomPick: ['Random picking (not sorted by score)', true],
+	bInversePick: ['Picking by inverted score', false],
+	probPick: ['Probability of track picking for final mix', 100, { range: [[1, 100]], func: isInt }, 100],
+	playlistLength: ['Max Playlist Mix length', 50],
+	bSortRandom: ['Sort final playlist randomly', false],
+	bProgressiveListOrder: ['Sort final playlist by score', false],
+	bInverseListOrder: ['Invert final sorting', false],
+	bScatterInstrumentals: ['Intercalate instrumental tracks', false],
+	bInKeyMixingPlaylist: ['DJ-like playlist creation, following harmonic mixing rules', false],
+	bHarmonicMixDoublePass: ['Harmonic mixing double pass to match more tracks', true],
+	bProgressiveListCreation: ['Recursive playlist creation, uses output as new references', false],
+	progressiveListCreationN: ['Steps when using recursive playlist creation (>1 and <=100)', 4, { range: [[2, 100]], func: isInt }, 4],
+	playlistName: ['Playlist name (TF allowed)', 'Search...', { func: isString }, 'Search...'],
+	bAscii: ['Asciify string values internally?', true],
+	checkDuplicatesByTag: ['Remove duplicates by', JSON.stringify(globTags.remDupl)],
+	sortBias: ['Duplicates track selection bias', globQuery.remDuplBias, { func: isStringWeak }, globQuery.remDuplBias],
+	bAdvTitle: ['Duplicates advanced RegExp title matching?', true],
+	bSmartShuffle: ['Smart Shuffle by Artist', true],
+	smartShuffleTag: ['Smart Shuffle tag', JSON.stringify([globTags.artist])],
+	bSmartShuffleAdvc: ['Smart Shuffle extra conditions', true],
+	smartShuffleSortBias: ['Smart Shuffle sorting bias', 'random', { func: isStringWeak }, 'random'],
+	artistRegionFilter: ['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, { range: [[-1, 5]], func: isInt }, -1],
+	genreStyleRegionFilter: ['Genre region filter: none (-1), continent (0), region (1)', -1, { range: [[-1, 3]], func: isInt }, -1],
+	dynQueries: ['Dynamic query filtering', JSON.stringify([]), { func: isJSON }, JSON.stringify([])],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 	const k = key.toLowerCase();
 	if (k.endsWith('weight')) {
-		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('length')) {
-		SearchByDistance_properties[key].push({greaterEq: 0, func: Number.isSafeInteger}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
-		SearchByDistance_properties[key].push({func: (query) => {return checkQuery(query, true);}}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('tag') || k.endsWith('tags')) {
-		SearchByDistance_properties[key].push({func: isJSON}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ func: isJSON }, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
-		SearchByDistance_properties[key].push({func: isBoolean}, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ func: isBoolean }, SearchByDistance_properties[key][1]);
 	}
 });
 
 const SearchByDistance_panelProperties = {
-	bCacheOnStartup 		:	['Calculates link cache on script startup (instead of on demand)', true],
-	bGraphDebug 			:	['Warnings about links/nodes set wrong', false],
-	bSearchDebug			:	['Enables debugging console logs', false],
-	bProfile 				:	['Enables profiling console logs', false],
-	bShowQuery 				:	['Enables query console logs', false],
-	bBasicLogging 			:	['Enables basic console logs', true],
-	bShowFinalSelection 	:	['Enables selection\'s final scoring console logs', true],
-	firstPopup				:	['Search by distance: Fired once', false],
-	descriptorCRC			:	['Graph Descriptors CRC', -1], // Calculated later on first time
-	bAllMusicDescriptors	:	['Load AllMusic descriptors?', false],
-	bLastfmDescriptors		:	['Load Last.fm descriptors?', false],
-	bStartLogging 			:	['Startup logging', false],
-	bTagsCache				:	['Read tags from cache instead of files?', false]
+	bCacheOnStartup: ['Calculates link cache on script startup (instead of on demand)', true],
+	bGraphDebug: ['Warnings about links/nodes set wrong', false],
+	bSearchDebug: ['Enables debugging console logs', false],
+	bProfile: ['Enables profiling console logs', false],
+	bShowQuery: ['Enables query console logs', false],
+	bBasicLogging: ['Enables basic console logs', true],
+	bShowFinalSelection: ['Enables selection\'s final scoring console logs', true],
+	firstPopup: ['Search by distance: Fired once', false],
+	descriptorCRC: ['Graph Descriptors CRC', -1], // Calculated later on first time
+	bAllMusicDescriptors: ['Load AllMusic descriptors?', false],
+	bLastfmDescriptors: ['Load Last.fm descriptors?', false],
+	bStartLogging: ['Startup logging', false],
+	bTagsCache: ['Read tags from cache instead of files?', false]
 };
 // Checks
-Object.keys(SearchByDistance_panelProperties).forEach( (key) => { // Checks
+Object.keys(SearchByDistance_panelProperties).forEach((key) => { // Checks
 	if (regExBool.test(key)) {
-		SearchByDistance_panelProperties[key].push({func: isBoolean}, SearchByDistance_panelProperties[key][1]);
+		SearchByDistance_panelProperties[key].push({ func: isBoolean }, SearchByDistance_panelProperties[key][1]);
 	}
 });
 
-var sbd_prefix = 'sbd_';
+var sbd_prefix = 'sbd_'; // NOSONAR [shared on files]
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { // Merge all properties when not loaded along buttons
 	// With const var creating new properties is needed, instead of reassigning using A = {...A,...B}
-	Object.entries(SearchByDistance_panelProperties).forEach(([key, value]) => {SearchByDistance_properties[key] = value;});
+	Object.entries(SearchByDistance_panelProperties).forEach(([key, value]) => { SearchByDistance_properties[key] = value; });
 	setProperties(SearchByDistance_properties, sbd_prefix);
 } else { // With buttons, set these properties only once per panel
 	setProperties(SearchByDistance_panelProperties, sbd_prefix);
@@ -199,33 +200,33 @@ const sbd = {
 	isCalculatingCache: false,
 	panelProperties: (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	version,
-	get tagSchema() {return {weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */};},
+	get tagSchema() { return { weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */ }; },
 	get tagTypeSchema() {
 		return [
-			{type: 'Variable type',		val: ['string', 'number']},
-			{type: 'Multi-value tag',	val: ['single', 'multiple']},
-			{type: 'Range comparison', 	val: ['keyRange', 'absRange', 'percentRange']}, // Requires range property (see above)
+			{ type: 'Variable type', val: ['string', 'number'] },
+			{ type: 'Multi-value tag', val: ['single', 'multiple'] },
+			{ type: 'Range comparison', val: ['keyRange', 'absRange', 'percentRange'] }, // Requires range property (see above)
 			// Virtual: tag is handled internally (for ex. from other scripts, calculated, etc.)
 			// keyMix: used for harmonic mixing,
 			// graph: considered a genre/style for DYNGENRE and GRAPH methods
 			// tfRemap: allows tag remapping even if tag is handled internally (virtual)
-			{type: 'Special',			val: ['virtual', 'keyMix', 'graph', 'tfRemap']},
-			{type: 'Query filtering',	val: ['combinations']},  // Requires combs property (see above)
-			{type: '', val: []}
+			{ type: 'Special', val: ['virtual', 'keyMix', 'graph', 'tfRemap'] },
+			{ type: 'Query filtering', val: ['combinations'] },  // Requires combs property (see above)
+			{ type: '', val: [] }
 		];
 	},
 };
-[sbd.genreMap , sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
+[sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 
 // Info Popup
 if (!sbd.panelProperties.firstPopup[1]) {
 	// sbd.panelProperties.firstPopup[1] = true; // Do it on script unloading the first time it successfully closed, so it can be reused somewhere if needed
 	overwriteProperties(sbd.panelProperties); // Updates panel
-	const readmeKeys = [{name: 'search_by_distance', title: 'Search by Distance'}, {name: 'tags_structure', title: 'Tagging requisites'}]; // Must read files on first execution
+	const readmeKeys = [{ name: 'search_by_distance', title: 'Search by Distance' }, { name: 'tags_structure', title: 'Tagging requisites' }]; // Must read files on first execution
 	readmeKeys.forEach((objRead) => {
 		const readmePath = folders.xxx + 'helpers\\readme\\' + objRead.name + '.txt';
 		const readme = _open(readmePath, utf8);
-		if (readme.length) {fb.ShowPopupMessage(readme, objRead.title);}
+		if (readme.length) { fb.ShowPopupMessage(readme, objRead.title); }
 	});
 	// Make the user check their tags before use...
 	if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {
@@ -245,12 +246,12 @@ if (!sbd.panelProperties.firstPopup[1]) {
 	Load additional descriptors: AllMusic, Last.fm, ...
 */
 [
-	{name: 'AllMusic', file: 'music_graph\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors'},
-	{name: 'Last.fm', file: 'music_graph\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors'}
+	{ name: 'AllMusic', file: 'music_graph\\music_graph_descriptors_xxx_allmusic.js', prop: 'bAllMusicDescriptors' },
+	{ name: 'Last.fm', file: 'music_graph\\music_graph_descriptors_xxx_lastfm.js', prop: 'bLastfmDescriptors' }
 ].forEach((descr) => {
 	if (sbd.panelProperties[descr.prop][1]) {
 		if (_isFile(folders.xxx + 'main\\' + descr.file)) {
-			if (sbd.panelProperties.bStartLogging[1]) {console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file);}
+			if (sbd.panelProperties.bStartLogging[1]) { console.log(descr.name + '\'s music_graph_descriptors - File loaded: ' + folders.xxx + descr.file); }
 			include('..\\' + descr.file);
 		}
 	}
@@ -272,7 +273,7 @@ if (sbd.panelProperties.bTagsCache[1]) {
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
-if (sbd.panelProperties.bProfile[1]) {var profiler = new FbProfiler('descriptorCRC');}
+const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('descriptorCRC') : null;
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMissmatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMissmatchCRC) {
@@ -284,45 +285,45 @@ if (bMissmatchCRC) {
 	sbd.panelProperties.descriptorCRC[1] = descriptorCRC;
 	overwriteProperties(sbd.panelProperties); // Updates panel
 }
-if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
+if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 // Start cache
-var cacheLinkSet;
+var cacheLinkSet; // NOSONAR [shared on files]
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLink.json');
-	if (data.size) {cacheLink = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Used Cache - cacheLink from file.');}}
+	if (data.size) { cacheLink = data; if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from file.'); } } // NOSONAR [shared on files]
 }
 if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
-	if (data.size) {cacheLinkSet = data; if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Used Cache - cacheLinkSet from file.');}}
+	if (data.size) { cacheLinkSet = data; if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from file.'); } }
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
-if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') {debounce(updateCache, 3000)({properties: sbd.panelProperties});}
+if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { debounce(updateCache, 3000)({ properties: sbd.panelProperties }); }
 // Ask others instances to share cache on startup
 if (typeof cacheLink === 'undefined') {
-	setTimeout(() => {window.NotifyOthers('Search by Distance: requires cacheLink map', true);}, 1000);
+	setTimeout(() => { window.NotifyOthers('Search by Distance: requires cacheLink map', true); }, 1000);
 }
 if (typeof cacheLinkSet === 'undefined') {
-	setTimeout(() => {window.NotifyOthers('Search by Distance: requires cacheLinkSet map', true);}, 1000);
+	setTimeout(() => { window.NotifyOthers('Search by Distance: requires cacheLinkSet map', true); }, 1000);
 }
-async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, properties = null} = {}) {
+async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, properties = null } = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
 		const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('updateCache') : null;
 		if (sbd.panelProperties.bCacheOnStartup[1] || bForce) {
-			if (sbd.isCalculatingCache) {return;}
+			if (sbd.isCalculatingCache) { return; }
 			sbd.isCalculatingCache = true;
 			const bBar = typeof buttonsBar !== 'undefined';
 			const sbdButtons = bBar
-				? buttonsBar.listKeys.flat(Infinity).filter((key) => {return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i);})
+				? buttonsBar.listKeys.flat(Infinity).filter((key) => { return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i); })
 				: [];
 			if (bBar) {
 				sbdButtons.forEach((key) => {
 					buttonsBar.buttons[key].switchAnimation('Link cache (tags)', true, () => !sbd.isCalculatingCache);
 				});
 			}
-			const tags = properties && properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null;
+			const tags = properties && Object.hasOwn(properties, 'tags') ? JSON.parse(properties.tags[1]) : null;
 			const genreStyleTags = tags
 				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity)
-					.map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|')
+					.map((tag) => { return tag.indexOf('$') === -1 ? _t(tag) : tag; }).join('|')
 				: _t(globTags.genre) + '|' + _t(globTags.style);
 			console.log('Search by Distance: tags used for cache - ' + genreStyleTags);
 			const tfo = fb.TitleFormat(genreStyleTags);
@@ -334,7 +335,7 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 				let step = 0;
 				let prevProgress = -1;
 				// All styles/genres from library without duplicates
-				for (let i = 0; step < num; i ++) {
+				for (let i = 0; step < num; i++) { // NOSONAR [iterate over step]
 					promises.push(new Promise((resolve) => {
 						step += 300;
 						const items = new FbMetadbHandleList(libItems.slice(i, step));
@@ -365,10 +366,10 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 							buttonsBar.buttons[key].switchAnimation('Link cache (links)', true, () => !sbd.isCalculatingCache);
 						});
 					}
-					if (properties && properties.hasOwnProperty('bAscii') && properties.bAscii[1]) {
-						setTimeout(() => {resolve(new Set([...new Set(tagValues)].map((tag) => {return _asciify(tag);})));}, 500);
+					if (properties && Object.hasOwn(properties, 'bAscii') && properties.bAscii[1]) {
+						setTimeout(() => { resolve(new Set([...new Set(tagValues)].map((tag) => { return _asciify(tag); }))); }, 500);
 					} else {
-						setTimeout(() => {resolve(new Set(tagValues));}, 500);
+						setTimeout(() => { resolve(new Set(tagValues)); }, 500);
 					}
 				});
 			});
@@ -382,13 +383,13 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 					});
 				}
 			};
-			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void(0), sbd.influenceMethod, statusCallback);
+			cacheLink = await calcCacheLinkSGV2(sbd.allMusicGraph, styleGenres, void (0), sbd.influenceMethod, statusCallback);
 			sbd.isCalculatingCache = false;
 		} else {
 			cacheLink = new Map();
 		}
 		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
-		if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
+		if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 		console.log('Search by Distance: New Cache - cacheLink');
 		window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);
 	} else if (newCacheLink) {
@@ -403,25 +404,25 @@ async function updateCache({newCacheLink, newCacheLinkSet, bForce = false, prope
 	}
 	// Multiple Graph testing and logging of results using the existing cache
 	if (sbd.panelProperties.bSearchDebug[1] && sbd.panelProperties.bStartLogging[1]) {
-		doOnce('Test 1',testGraph)(sbd.allMusicGraph);
-		doOnce('Test 2',testGraphV2)(sbd.allMusicGraph);
+		doOnce('Test 1', testGraph)(sbd.allMusicGraph);
+		doOnce('Test 2', testGraphV2)(sbd.allMusicGraph);
 	}
 }
 
 addEventListener('on_notify_data', (name, info) => {
-	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') {return;}
-	if (!name.startsWith('Search by Distance')) {return;}
+	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
+	if (!name.startsWith('Search by Distance')) { return; }
 	switch (name) {
 		case 'Search by Distance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLink !== 'undefined' && cacheLink.size) {
-				debounce(() => {if (typeof cacheLink !== 'undefined') {window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);}}, 1000)();
+				debounce(() => { if (typeof cacheLink !== 'undefined') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); } }, 1000)();
 				console.log('Search by Distance: Requested Cache - cacheLink.');
 			}
 			break;
 		}
 		case 'Search by Distance: requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) {
-				debounce(() => {if (typeof cacheLinkSet !== 'undefined') {window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);}}, 1000)();
+				debounce(() => { if (typeof cacheLinkSet !== 'undefined') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); } }, 1000)();
 				console.log('Search by Distance: Requested Cache - cacheLinkSet.');
 			}
 			break;
@@ -430,8 +431,8 @@ addEventListener('on_notify_data', (name, info) => {
 			if (info) {
 				console.log('Search by Distance: Used Cache - cacheLink from other panel.');
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-				data.forEach((pair) => {if (pair[1].distance === null) {pair[1].distance = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-				updateCache({newCacheLink: new Map(data)});
+				data.forEach((pair) => { if (pair[1].distance === null) { pair[1].distance = Infinity; } }); // stringify converts Infinity to null, this reverts the change
+				updateCache({ newCacheLink: new Map(data) });
 			}
 			break;
 		}
@@ -439,8 +440,8 @@ addEventListener('on_notify_data', (name, info) => {
 			if (info) {
 				console.log('Search by Distance: Used Cache - cacheLinkSet from other panel.');
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
-				data.forEach((pair) => {if (pair[1] === null) {pair[1] = Infinity;}}); // stringify converts Infinity to null, this reverts the change
-				updateCache({newCacheLinkSet: new Map(data)});
+				data.forEach((pair) => { if (pair[1] === null) { pair[1] = Infinity; } }); // stringify converts Infinity to null, this reverts the change
+				updateCache({ newCacheLinkSet: new Map(data) });
 			}
 			break;
 		}
@@ -448,9 +449,9 @@ addEventListener('on_notify_data', (name, info) => {
 });
 
 addEventListener('on_script_unload', () => {
-	if (sbd.panelProperties.bStartLogging[1]) {console.log('Search by Distance: Saving Cache.');}
-	if (cacheLink) {saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');}
-	if (cacheLinkSet) {saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json');}
+	if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Saving Cache.'); }
+	if (cacheLink) { saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json'); }
+	if (cacheLinkSet) { saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json'); }
 	// SMP Bug: https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205
 	/*
 	if (!sbd.panelProperties.firstPopup[1]) {
@@ -467,7 +468,7 @@ addEventListener('on_script_unload', () => {
 if (sbd.panelProperties.bGraphDebug[1]) {
 	const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
 	graphDebug(sbd.allMusicGraph);
-	if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
+	if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 }
 
 /*
@@ -483,47 +484,48 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 		let descr = propDescr ? propDescr[0] : '';
 		if (!descr.length) {
 			if (key.toLowerCase().indexOf('properties') !== -1) {
-				descr = {'Object properties to pass other arguments':
-					Object.fromEntries([...recipePropertiesAllowedKeys].map((key) => {return [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]];}))
+				descr = {
+					'Object properties to pass other arguments':
+						Object.fromEntries([...recipePropertiesAllowedKeys].map((key) => { return [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]]; }))
 				};
 			}
-			if (key === 'name') {descr = 'Preset name (instead of filename)';}
-			if (key === 'theme') {descr = 'Load additional theme by file name or path';}
-			if (key === 'recipe') {descr = 'Load additional recipe(s) by file name or path. Nesting and multiple values (array) allowed';}
-			if (key === 'bPoolFiltering') {descr = 'Global enable/disable switch. Equivalent to setting poolFilteringN to >0 or -1';}
-			if (key === 'bCreatePlaylist') {descr = 'Output results to a playlist or only for internal use';}
+			if (key === 'name') { descr = 'Preset name (instead of filename)'; }
+			if (key === 'theme') { descr = 'Load additional theme by file name or path'; }
+			if (key === 'recipe') { descr = 'Load additional recipe(s) by file name or path. Nesting and multiple values (array) allowed'; }
+			if (key === 'bPoolFiltering') { descr = 'Global enable/disable switch. Equivalent to setting poolFilteringN to >0 or -1'; }
+			if (key === 'bCreatePlaylist') { descr = 'Output results to a playlist or only for internal use'; }
 		}
 		return [key, descr];
 	});
-	if (sbd.panelProperties.bStartLogging[1]) {console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt');}
+	if (sbd.panelProperties.bStartLogging[1]) { console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt'); }
 	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t'));
 }
 
-function testRecipe({path = null, json = null, baseTags = null} = {}) {
-	const result = {valid: true , report: []};
+function testRecipe({ path = null, json = null, baseTags = null } = {}) {
+	const result = { valid: true, report: [] };
 	let recipe;
-	if (!path && !json) {result.valid = false; result.report.push('No recipe provided.'); return result;}
-	if (!baseTags) {result.valid = false; result.report.push('No tags provided.'); return result;}
+	if (!path && !json) { result.valid = false; result.report.push('No recipe provided.'); return result; }
+	if (!baseTags) { result.valid = false; result.report.push('No tags provided.'); return result; }
 	else if (path) {
 		if (_isFile(path)) {
 			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
-		} else {result.valid = false; result.report.push('Recipe file not found.'); return result;}
-	} else {recipe = clone(json);}
-	if (Object.keys(recipe).length === 0) {result.valid = false; result.report.push('Recipe is empty.'); return result;}
+		} else { result.valid = false; result.report.push('Recipe file not found.'); return result; }
+	} else { recipe = clone(json); }
+	if (Object.keys(recipe).length === 0) { result.valid = false; result.report.push('Recipe is empty.'); return result; }
 	// Process nested recipes
-	if (recipe.hasOwnProperty('recipe')) {
+	if (Object.hasOwn(recipe, 'recipe')) {
 		const toAdd = processRecipe(recipe.recipe);
 		delete toAdd.recipe;
 		Object.keys(toAdd).forEach((key) => {
-			if (!recipe.hasOwnProperty(key)) {
+			if (!Object.hasOwn(recipe, key)) {
 				recipe[key] = toAdd[key];
 			} else if (key === 'tags') {
 				for (let key in toAdd.tags) {
-					if (!recipe.tags.hasOwnProperty(key)) {
+					if (!Object.hasOwn(recipe.tags, key)) {
 						recipe.tags[key] = toAdd.tags[key];
 					} else {
 						for (let subKey in toAdd.tags[key]) {
-							if (!recipe.tags[key].hasOwnProperty(subKey)) {
+							if (!Object.hasOwn(recipe.tags[key], subKey)) {
 								recipe.tags[key][subKey] = toAdd.tags[key][subKey];
 							}
 						}
@@ -532,17 +534,17 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 			}
 		});
 	}
-	const tags = recipe.hasOwnProperty('tags') ? recipe.tags : null;
+	const tags = Object.hasOwn(recipe, 'tags') ? recipe.tags : null;
 	// Process placeholders for tags
 	if (tags) {
-		if (recipe.tags.hasOwnProperty('*')) {
+		if (Object.hasOwn(recipe.tags, '*')) {
 			for (let key in tags) {
 				for (let prop in tags['*']) { // Recipe's tags missing some property
-					if (!tags[key].hasOwnProperty(prop)) {tags[key][prop] = tags['*'][prop];}
+					if (!Object.hasOwn(tags[key], prop)) { tags[key][prop] = tags['*'][prop]; }
 				}
 			}
 			for (let key in baseTags) { // Base tags not on recipe
-				if (!tags.hasOwnProperty(key)) {tags[key] = tags['*'];}
+				if (!Object.hasOwn(tags, key)) { tags[key] = tags['*']; }
 			}
 		}
 	}
@@ -558,10 +560,10 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 	const checkKeys = ['weight', 'tf', 'baseScore', 'scoringDistribution'];
 	const validTagKeys = ['range', 'type', 'combs', ...checkKeys];
 	for (let key in tags) {
-		if (key === '*') {continue;}
-		const tag = baseTags.hasOwnProperty(key) ? {...clone(baseTags[key]), ...tags[key]} : tags[key];
+		if (key === '*') { continue; }
+		const tag = Object.hasOwn(baseTags, key) ? { ...clone(baseTags[key]), ...tags[key] } : tags[key];
 		// Type
-		if (!tag.hasOwnProperty('type') || tag.type.length === 0) {
+		if (!Object.hasOwn(tag, 'type') || tag.type.length === 0) {
 			result.valid = false;
 			result.report.push('Tag missing type declaration: ' + key);
 		} else {
@@ -575,17 +577,17 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 			}
 			// Range
 			const rangeRegx = /-*range/i;
-			if (tag.hasOwnProperty('range') && !tag.type.some((t) => rangeRegx.test(t))) {
+			if (Object.hasOwn(tag, 'range') && !tag.type.some((t) => rangeRegx.test(t))) {
 				result.valid = false;
 				result.report.push('Tag missing range type: ' + key);
-			} else if (tag.type.some((t) => rangeRegx.test(t)) && !tag.hasOwnProperty('range')) {
+			} else if (tag.type.some((t) => rangeRegx.test(t)) && !Object.hasOwn(tag, 'range')) {
 				result.valid = false;
 				result.report.push('Tag missing range property: ' + key);
 			}
 		}
 		// General keys
 		for (let check of checkKeys) {
-			if (!tag.hasOwnProperty(check)) {
+			if (!Object.hasOwn(tag, check)) {
 				result.valid = false;
 				result.report.push('Tag missing property ' + _p(check) + ': ' + key);
 			}
@@ -597,12 +599,12 @@ function testRecipe({path = null, json = null, baseTags = null} = {}) {
 			}
 		}
 	}
-	if (!result.valid) {result.report.splice(0, 0, 'Recipe non valid: ' + recipe.name + (path ? '\n' + path : '') + '\n');}
+	if (!result.valid) { result.report.splice(0, 0, 'Recipe non valid: ' + recipe.name + (path ? '\n' + path : '') + '\n'); }
 	return result;
 }
 
 function testBaseTags(baseTags) {
-	const result = testRecipe({json: {tags: {'*': {}}}, baseTags});
+	const result = testRecipe({ json: { tags: { '*': {} } }, baseTags });
 	if (!result.valid) {
 		result.report[0] = 'Error on tags settings.\nTo fix it, restore defaults on affected tags (customizable button) or globally (non-customizable buttons). These options are usually found by Shift + L. Clicking on the button. Then reload the panel.\nIf the error continues, report it as a bug.\n------------------------------------------------------------------------';
 		console.popup(result.report.join('\n'), 'Search by distance');
@@ -617,120 +619,120 @@ testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
 // 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
 async function searchByDistance({
 	// --->Default args (aka properties from the panel and input)
-	properties	 			= getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
-	panelProperties			= (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
-	sel 					= fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
-	theme					= {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
-	recipe 					= {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+	properties = getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
+	panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
+	sel = fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
+	theme = {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
+	recipe = {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
 	// --->Args modifiers
-	bAscii					= properties.hasOwnProperty('bAscii') ? properties.bAscii[1] : true, // Sanitize all tag values with ASCII equivalent chars
-	bTagsCache				= panelProperties.hasOwnProperty('bTagsCache') ? panelProperties.bTagsCache[1] : false, // Read from cache
-	bAdvTitle 				= properties.hasOwnProperty('bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
-	checkDuplicatesByTag 	= properties.hasOwnProperty('checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
-	sortBias				= properties.hasOwnProperty('sortBias') ? properties.sortBias[1] : globQuery.remDuplBias, // Track selection bias,
+	bAscii = Object.hasOwn(properties, 'bAscii') ? properties.bAscii[1] : true, // Sanitize all tag values with ASCII equivalent chars
+	bTagsCache = Object.hasOwn(panelProperties, 'bTagsCache') ? panelProperties.bTagsCache[1] : false, // Read from cache
+	bAdvTitle = Object.hasOwn(properties, 'bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
+	checkDuplicatesByTag = Object.hasOwn(properties, 'checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
+	sortBias = Object.hasOwn(properties, 'sortBias') ? properties.sortBias[1] : globQuery.remDuplBias, // Track selection bias,
 	// --->Weights
-	tags					= properties.hasOwnProperty('tags') ? JSON.parse(properties.tags[1]) : null,
-	bNegativeWeighting		= properties.hasOwnProperty('bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
-	bFilterWithGraph		= properties.hasOwnProperty('bFilterWithGraph') ? properties.bFilterWithGraph[1] : false, // Filter graph search with valid values (slow)
+	tags = Object.hasOwn(properties, 'tags') ? JSON.parse(properties.tags[1]) : null,
+	bNegativeWeighting = Object.hasOwn(properties, 'bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
+	bFilterWithGraph = Object.hasOwn(properties, 'bFilterWithGraph') ? properties.bFilterWithGraph[1] : false, // Filter graph search with valid values (slow)
 	// --->Pre-Scoring Filters
 	// Query to filter library
-	forcedQuery				= properties.hasOwnProperty('forcedQuery') ? properties.forcedQuery[1] : '',
-	dynQueries				= properties.hasOwnProperty('dynQueries') ? JSON.parse(properties.dynQueries[1]) : [],
+	forcedQuery = Object.hasOwn(properties, 'forcedQuery') ? properties.forcedQuery[1] : '',
+	dynQueries = Object.hasOwn(properties, 'dynQueries') ? JSON.parse(properties.dynQueries[1]) : [],
 	// Exclude same artist
-	bSameArtistFilter		= properties.hasOwnProperty('bSameArtistFilter') ? properties.bSameArtistFilter[1] : false,
+	bSameArtistFilter = Object.hasOwn(properties, 'bSameArtistFilter') ? properties.bSameArtistFilter[1] : false,
 	// Similar artists
-	bSimilArtistsFilter		= properties.hasOwnProperty('bSimilArtistsFilter') ? properties.bSimilArtistsFilter[1] : false,
+	bSimilArtistsFilter = Object.hasOwn(properties, 'bSimilArtistsFilter') ? properties.bSimilArtistsFilter[1] : false,
 	// Filter anti-influences by query, before any scoring/distance calc.
-	bConditionAntiInfluences= properties.hasOwnProperty('bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz)
-	bUseAntiInfluencesFilter= !bConditionAntiInfluences && properties.hasOwnProperty('bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
+	bConditionAntiInfluences = Object.hasOwn(properties, 'bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz)
+	bUseAntiInfluencesFilter = !bConditionAntiInfluences && Object.hasOwn(properties, 'bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
 	// Allows only influences by query, before any scoring/distance calc.
-	bUseInfluencesFilter	= properties.hasOwnProperty('bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
-	artistRegionFilter		= properties.hasOwnProperty('artistRegionFilter') ? Number(properties.artistRegionFilter [1]) : -1,
-	genreStyleRegionFilter	= properties.hasOwnProperty('genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter [1]) : -1,
+	bUseInfluencesFilter = Object.hasOwn(properties, 'bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
+	artistRegionFilter = Object.hasOwn(properties, 'artistRegionFilter') ? Number(properties.artistRegionFilter[1]) : -1,
+	genreStyleRegionFilter = Object.hasOwn(properties, 'genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter[1]) : -1,
 	// --->Scoring Method
-	method					= properties.hasOwnProperty('method') ? properties.method[1] : 'GRAPH',
+	method = Object.hasOwn(properties, 'method') ? properties.method[1] : 'GRAPH',
 	// --->Scoring filters
-	scoreFilter				= properties.hasOwnProperty('scoreFilter') ? Number(properties.scoreFilter[1]) : 75,
-	minScoreFilter			= properties.hasOwnProperty('minScoreFilter') ? Number(properties.minScoreFilter[1]) : scoreFilter - 10,
-	graphDistance			= properties.hasOwnProperty('graphDistance') ? (isString(properties.graphDistance[1]) ? properties.graphDistance[1] : Number(properties.graphDistance[1])) : Infinity,
+	scoreFilter = Object.hasOwn(properties, 'scoreFilter') ? Number(properties.scoreFilter[1]) : 75,
+	minScoreFilter = Object.hasOwn(properties, 'minScoreFilter') ? Number(properties.minScoreFilter[1]) : scoreFilter - 10,
+	graphDistance = Object.hasOwn(properties, 'graphDistance') ? (isString(properties.graphDistance[1]) ? properties.graphDistance[1] : Number(properties.graphDistance[1])) : Infinity,
 	// --->Post-Scoring Filters
 	// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
-	poolFilteringTag 		= properties.hasOwnProperty('poolFilteringTag') ? JSON.parse(properties.poolFilteringTag[1]).filter(Boolean) : [],
-	poolFilteringN			= properties.hasOwnProperty('poolFilteringN') ? Number(properties.poolFilteringN[1]) : -1,
-	bPoolFiltering 			= poolFilteringN >= 0 && poolFilteringN < Infinity ? true : false,
+	poolFilteringTag = Object.hasOwn(properties, 'poolFilteringTag') ? JSON.parse(properties.poolFilteringTag[1]).filter(Boolean) : [],
+	poolFilteringN = Object.hasOwn(properties, 'poolFilteringN') ? Number(properties.poolFilteringN[1]) : -1,
+	bPoolFiltering = poolFilteringN >= 0 && poolFilteringN < Infinity,
 	// --->Playlist selection
 	// How tracks are chosen from pool
-	bRandomPick				= properties.hasOwnProperty('bRandomPick') ? properties.bRandomPick[1] : false, // Get randomly
-	bInversePick			= properties.hasOwnProperty('bInversePick') ? properties.bInversePick[1] : false, // Get randomly
-	probPick				= properties.hasOwnProperty('probPick') ? Number(properties.probPick[1]) : 100, // Get by scoring order but with x probability of being chosen
-	playlistLength			= properties.hasOwnProperty('playlistLength') ? Number(properties.playlistLength[1]) : 50, // Max playlist size
+	bRandomPick = Object.hasOwn(properties, 'bRandomPick') ? properties.bRandomPick[1] : false, // Get randomly
+	bInversePick = Object.hasOwn(properties, 'bInversePick') ? properties.bInversePick[1] : false, // Get randomly
+	probPick = Object.hasOwn(properties, 'probPick') ? Number(properties.probPick[1]) : 100, // Get by scoring order but with x probability of being chosen
+	playlistLength = Object.hasOwn(properties, 'playlistLength') ? Number(properties.playlistLength[1]) : 50, // Max playlist size
 	// --->Playlist sorting
 	// How playlist is sorted (independently of playlist selection)
-	bSortRandom				= properties.hasOwnProperty('bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting
-	bProgressiveListOrder	= properties.hasOwnProperty('bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
-	bInverseListOrder		= properties.hasOwnProperty('bInverseListOrder') ? properties.bInverseListOrder[1] : false, // Invert any selected sorting
-	bScatterInstrumentals	= properties.hasOwnProperty('bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
-	bSmartShuffle			= properties.hasOwnProperty('bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
-	bSmartShuffleAdvc		= properties.hasOwnProperty('bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false, // Spotify's smart shuffle by artist
-	smartShuffleSortBias	= properties.hasOwnProperty('smartShuffleSortBias') ? properties.smartShuffleSortBias[1] : 'random', // Spotify's smart shuffle bias
+	bSortRandom = Object.hasOwn(properties, 'bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting
+	bProgressiveListOrder = Object.hasOwn(properties, 'bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
+	bInverseListOrder = Object.hasOwn(properties, 'bInverseListOrder') ? properties.bInverseListOrder[1] : false, // Invert any selected sorting
+	bScatterInstrumentals = Object.hasOwn(properties, 'bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
+	bSmartShuffle = Object.hasOwn(properties, 'bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
+	bSmartShuffleAdvc = Object.hasOwn(properties, 'bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false, // Spotify's smart shuffle by artist
+	smartShuffleSortBias = Object.hasOwn(properties, 'smartShuffleSortBias') ? properties.smartShuffleSortBias[1] : 'random', // Spotify's smart shuffle bias
 	// --->Special Playlists
 	// Use previous playlist selection, but override playlist sorting, since they use their own logic
-	bInKeyMixingPlaylist	= properties.hasOwnProperty('bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
-	bHarmonicMixDoublePass	= properties.hasOwnProperty('bHarmonicMixDoublePass') ? properties.bHarmonicMixDoublePass[1] : false, // Usually outputs more tracks in harmonic mixing
-	bProgressiveListCreation= properties.hasOwnProperty('bProgressiveListCreation') ? properties.bProgressiveListCreation[1] : false, // Uses output tracks as new references, and so on...
-	progressiveListCreationN= bProgressiveListCreation ? Number(properties.progressiveListCreationN[1]) : 1, // > 1 and < 100
+	bInKeyMixingPlaylist = Object.hasOwn(properties, 'bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
+	bHarmonicMixDoublePass = Object.hasOwn(properties, 'bHarmonicMixDoublePass') ? properties.bHarmonicMixDoublePass[1] : false, // Usually outputs more tracks in harmonic mixing
+	bProgressiveListCreation = Object.hasOwn(properties, 'bProgressiveListCreation') ? properties.bProgressiveListCreation[1] : false, // Uses output tracks as new references, and so on...
+	progressiveListCreationN = bProgressiveListCreation ? Number(properties.progressiveListCreationN[1]) : 1, // > 1 and < 100
 	// --->Console logging
 	// Uses panelProperties instead of properties, so it always points to the right properties... used along buttons or not.
 	// They are the same for all instances within the same panel
-	bProfile 				= panelProperties.hasOwnProperty('bProfile') ? panelProperties.bProfile[1] : false,
-	bShowQuery 				= panelProperties.hasOwnProperty('bShowQuery') ? panelProperties.bShowQuery[1] : true,
-	bShowFinalSelection 	= panelProperties.hasOwnProperty('bShowFinalSelection') ? panelProperties.bShowFinalSelection[1] : true,
-	bBasicLogging			= panelProperties.hasOwnProperty('bBasicLogging') ? panelProperties.bBasicLogging[1] : false,
-	bSearchDebug 			= panelProperties.hasOwnProperty('bSearchDebug') ? panelProperties.bSearchDebug[1] : false,
+	bProfile = Object.hasOwn(panelProperties, 'bProfile') ? panelProperties.bProfile[1] : false,
+	bShowQuery = Object.hasOwn(panelProperties, 'bShowQuery') ? panelProperties.bShowQuery[1] : true,
+	bShowFinalSelection = Object.hasOwn(panelProperties, 'bShowFinalSelection') ? panelProperties.bShowFinalSelection[1] : true,
+	bBasicLogging = Object.hasOwn(panelProperties, 'bBasicLogging') ? panelProperties.bBasicLogging[1] : false,
+	bSearchDebug = Object.hasOwn(panelProperties, 'bSearchDebug') ? panelProperties.bSearchDebug[1] : false,
 	// --->Output
-	playlistName			= properties.hasOwnProperty('playlistName') ? properties.playlistName[1] : 'Search...',
-	bCreatePlaylist			= true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
+	playlistName = Object.hasOwn(properties, 'playlistName') ? properties.playlistName[1] : 'Search...',
+	bCreatePlaylist = true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
 	// --->Misc
-	parent					= null
+	parent = null
 } = {}) {
 	const descr = music_graph_descriptors;
 	const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 	const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 	// Tags check
-	if (!tags || Object.keys(tags).length === 0) {console.popup('No tags provided: ' + tags +'\nRestore defaults to fix it.', 'Search by distance'); return;}
+	if (!tags || Object.keys(tags).length === 0) { console.popup('No tags provided: ' + tags + '\nRestore defaults to fix it.', 'Search by distance'); return; }
 	// Test tags
-	if (!testBaseTags(tags)) {return;}
+	if (!testBaseTags(tags)) { return; }
 	// Recipe check
 	const bUseRecipe = !!(recipe && (typeof recipe === 'string' && recipe.length || Object.keys(recipe).length));
 	const recipeProperties = {};
 	if (bUseRecipe) {
 		let path;
 		if (isString(recipe)) { // File path
-			path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe;
+			path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe; // NOSONAR [is always a string]
 			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
-			if (!recipe) {console.popup('Recipe not found: ' + path, 'Search by distance'); return;}
+			if (!recipe) { console.popup('Recipe not found: ' + path, 'Search by distance'); return; } // NOSONAR [is always a string]
 		}
 		// Check recipe but don't crash
-		const result = testRecipe({json: recipe, baseTags: tags});
-		if (!result.valid) {console.popup(result.report.join('\n\t- '), 'Recipe error');}
+		const result = testRecipe({ json: recipe, baseTags: tags });
+		if (!result.valid) { console.popup(result.report.join('\n\t- '), 'Recipe error'); }
 		// Rewrite args or use destruct when passing args
 		// Sel is omitted since it's a function or a handle
 		// Note a theme may be set within a recipe too, overwriting any other theme set
 		// Changes null to infinity and not found theme filenames into full paths
 		let bOverwriteTheme = false;
-		if (recipe.hasOwnProperty('recipe')) { // Process nested recipes
+		if (Object.hasOwn(recipe, 'recipe')) { // Process nested recipes
 			let toAdd = processRecipe(recipe.recipe);
 			delete toAdd.recipe;
 			Object.keys(toAdd).forEach((key) => {
-				if (!recipe.hasOwnProperty(key)) {
+				if (!Object.hasOwn(recipe, key)) {
 					recipe[key] = toAdd[key];
 				} else if (key === 'tags') {
 					for (let key in toAdd.tags) {
-						if (!recipe.tags.hasOwnProperty(key)) {
+						if (!Object.hasOwn(recipe.tags, key)) {
 							recipe.tags[key] = toAdd.tags[key];
 						} else {
 							for (let subKey in toAdd.tags[key]) {
-								if (!recipe.tags[key].hasOwnProperty(subKey)) {
+								if (!Object.hasOwn(recipe.tags[key], subKey)) {
 									recipe.tags[key][subKey] = toAdd.tags[key][subKey];
 								}
 							}
@@ -739,7 +741,7 @@ async function searchByDistance({
 				}
 			});
 		}
-		if (bSearchDebug) {console.log(recipe);}
+		if (bSearchDebug) { console.log(recipe); }
 		Object.keys(recipe).forEach((key) => { // Process current recipe
 			const value = recipe[key] !== null ? recipe[key] : Infinity;
 			if (recipeAllowedKeys.has(key)) {
@@ -751,7 +753,7 @@ async function searchByDistance({
 					const newProperties = recipe[key];
 					if (newProperties) {
 						Object.keys(newProperties).forEach((rKey) => {
-							if (!properties.hasOwnProperty(rKey)) {console.log('Recipe has a property key not recognized: ' + rKey); return;}
+							if (!Object.hasOwn(properties, rKey)) { console.log('Recipe has a property key not recognized: ' + rKey); return; }
 							recipeProperties[rKey] = newProperties[rKey];
 						});
 					}
@@ -765,56 +767,56 @@ async function searchByDistance({
 						eval(key + ' = [' + newVal + ']');
 					} else if (typeof value === 'object') {
 						const newVal = JSON.stringify(value);
-						eval(key + ' = ' + newVal );
+						eval(key + ' = ' + newVal);
 					} else {
 						eval(key + ' = ' + value);
 					}
-					if (key === 'theme') {bOverwriteTheme = true;}
-					if (bSearchDebug) {console.log(key, value, eval(key));}
+					if (key === 'theme') { bOverwriteTheme = true; }
+					if (bSearchDebug) { console.log(key, value, eval(key)); }
 				}
-			} else {console.log('Recipe has a variable not recognized: ' + key);}
+			} else { console.log('Recipe has a variable not recognized: ' + key); }
 		});
 		// Process placeholders for tags
-		if (recipe.hasOwnProperty('tags') && recipe.tags.hasOwnProperty('*')) {
+		if (Object.hasOwn(recipe, 'tags') && Object.hasOwn(recipe.tags, '*')) {
 			for (let key in recipe.tags) { // Recipe's tags missing some property
 				for (let prop in recipe.tags['*']) {
-					if (!recipe.tags[key].hasOwnProperty(prop)) {recipe.tags[key][prop] = recipe.tags['*'][prop];}
+					if (!Object.hasOwn(recipe.tags[key], prop)) { recipe.tags[key][prop] = recipe.tags['*'][prop]; }
 				}
 			}
 			for (let key in tags) { // Base tags not on recipe
-				if (!recipe.tags.hasOwnProperty(key)) {recipe.tags[key] = recipe.tags['*'];}
+				if (!Object.hasOwn(recipe.tags, key)) { recipe.tags[key] = recipe.tags['*']; }
 			}
 		}
 		if (bBasicLogging) {
-			const name = recipe.hasOwnProperty('name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
-			console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : ''));
-			if (bOverwriteTheme) {console.log('Recipe forces its own theme.');}
+			const name = Object.hasOwn(recipe, 'name') ? recipe.name : (path ? utils.SplitFilePath(path)[1] : '-no name-');
+			console.log('Using recipe as config: ' + name + (path ? ' (' + path + ')' : '')); // NOSONAR [is always a string]
+			if (bOverwriteTheme) { console.log('Recipe forces its own theme.'); }
 		}
 	}
-	const bUseRecipeTags = !!(bUseRecipe && recipeProperties.hasOwnProperty('tags'));
+	const bUseRecipeTags = !!(bUseRecipe && Object.hasOwn(recipeProperties, 'tags'));
 	// Parse args
 	graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging);
-	if (graphDistance === null) {return;}
+	if (graphDistance === null) { return; }
 	// Theme check
 	const bUseTheme = !!(theme && (typeof recipe === 'string' && theme.length || Object.keys(theme).length));
 	if (bUseTheme) {
 		let path;
 		if (isString(theme)) { // File path: try to use plain path or themes folder + filename
-			path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme;
+			path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme; // NOSONAR [is always a string]
 			theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', utf8);
-			if (!theme) {return;}
+			if (!theme) { return; }
 		}
 		// Array of objects
 		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
 		// Theme tags must contain at least all the user tags
-		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck));}) : 0;
-		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
+		const tagCheck = Object.hasOwn(theme, 'tags') ? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); }) : 0;
+		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
-			console.log('Theme selected for mix is missing some keys: ' + (theme.hasOwnProperty('name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
+			console.log('Theme selected for mix is missing some keys: ' + (Object.hasOwn(theme, 'name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
 			return;
 		}
 		if (bBasicLogging) {
-			console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : ''));
+			console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : '')); // NOSONAR [is always a string]
 			console.log(theme);
 		}
 	}
@@ -829,13 +831,13 @@ async function searchByDistance({
 		}
 	}
 	// Method check
-	if (!checkMethod(method)) {console.popup('Method not recognized: ' + method +'\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return;}
+	if (!checkMethod(method)) { console.popup('Method not recognized: ' + method + '\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return; }
 	// Start calcs
 	const test = bProfile ? new FbProfiler('Search by Distance') : null;
 	// Copy recipe tags
 	if (bUseRecipeTags) {
 		for (let key in recipeProperties.tags) {
-			if (!tags.hasOwnProperty(key) && key !== '*') {
+			if (!Object.hasOwn(tags, key) && key !== '*') {
 				tags[key] = recipeProperties.tags[key];
 			}
 		}
@@ -843,13 +845,13 @@ async function searchByDistance({
 	// May be more than one tag so we use split(). Use filter() to remove '' values. For ex:
 	// styleTag: 'tagName,, ,tagName2' => ['tagName','Tagname2']
 	// We check if weights are zero first
-	const calcTags = {genreStyle: {...sbd.tagSchema, ...{type: ['virtual']}}};
+	const calcTags = { genreStyle: { ...sbd.tagSchema, ...{ type: ['virtual'] } } };
 	for (let key in tags) {
 		const tag = tags[key];
 		// Set base values
-		const calcTag = {weight: tag.weight || 0, tf: [], scoringDistribution: tag.scoringDistribution || 'LINEAR', baseScore: tag.baseScore || 0, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0};
+		const calcTag = { weight: tag.weight || 0, tf: [], scoringDistribution: tag.scoringDistribution || 'LINEAR', baseScore: tag.baseScore || 0, type: [...tag.type], range: tag.range || 0, combs: tag.combs || 0 };
 		// Overwrite with properties
-		if (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key)) {
+		if (bUseRecipeTags && Object.hasOwn(recipeProperties.tags, key)) {
 			Object.keys(recipeProperties.tags[key]).filter((k) => k !== 'tf').forEach((k) => {
 				calcTag[k] = recipeProperties.tags[key][k];
 			});
@@ -857,8 +859,8 @@ async function searchByDistance({
 		// Get proper TF
 		const type = tag.type;
 		if (tag.weight !== 0 || (type.includes('graph') && (method === 'DYNGENRE' || method === 'GRAPH')) || (type.includes('keyMix') && bInKeyMixingPlaylist)) {
-			calcTag.tf = (bUseRecipeTags && recipeProperties.tags.hasOwnProperty(key) ? (recipeProperties.tags[key].tf || tag.tf) : tag.tf).filter(Boolean);
-			if (type.includes('graph')) {calcTags.genreStyle.tf.push(...calcTag.tf);}
+			calcTag.tf = (bUseRecipeTags && Object.hasOwn(recipeProperties.tags, key) ? (recipeProperties.tags[key].tf || tag.tf) : tag.tf).filter(Boolean);
+			if (type.includes('graph')) { calcTags.genreStyle.tf.push(...calcTag.tf); }
 		}
 		calcTags[key] = calcTag;
 		// Safety Check. Warn users if they try wrong settings
@@ -871,22 +873,22 @@ async function searchByDistance({
 	const defaultTags = JSON.parse(SearchByDistance_properties.tags[3]);
 	Object.keys(defaultTags).forEach((key) => {
 		const tag = defaultTags[key];
-		if (tag.type.includes('virtual') && !calcTags.hasOwnProperty(key)) {
-			calcTags[key] =	tag;
+		if (tag.type.includes('virtual') && !Object.hasOwn(calcTags, key)) {
+			calcTags[key] = tag;
 			calcTags[key].weight = 0;
 		}
 	});
-	if (bSearchDebug) {console.log(JSON.stringify(calcTags, void(0), '\t'));}
+	if (bSearchDebug) { console.log(JSON.stringify(calcTags, void (0), '\t')); }
 	const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
-	const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? _t(tag) : tag);});
-	const genreStyleTagQuery = [...new Set(calcTags.genreStyle.tf)].map((tag) => {return (tag.indexOf('$') === -1 ? tag : _q(tag));});
+	const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? _t(tag) : tag); });
+	const genreStyleTagQuery = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? tag : _q(tag)); });
 
 	// Check input
 	playlistLength = (playlistLength >= 0) ? playlistLength : 0;
 	probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 	scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 	minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
-	bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity) ? true : false;
+	bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity);
 	if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {
 		console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, 'Search by distance');
 		return;
@@ -910,37 +912,37 @@ async function searchByDistance({
 	// Zero weights if there are no tag names to look for
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.type.includes('virtual')) {continue;}
+		if (tag.type.includes('virtual')) { continue; }
 		if (tag.tf.length === 0) {
 			tag.weight = 0;
-			if (tag.type.includes('keyMix')) {bInKeyMixingPlaylist = false;}
+			if (tag.type.includes('keyMix')) { bInKeyMixingPlaylist = false; }
 		}
 	}
 
 	if (method === 'DYNGENRE') { // Warn users if they try wrong settings
 		if (calcTags.dynGenre.weight === 0) {
-			if (bBasicLogging) {console.log('Check \'dynGenre\' weight value (' + calcTags.dynGenre.weight + '). Must be greater than zero if you want to use DYNGENRE method!.');}
+			if (bBasicLogging) { console.log('Check \'dynGenre\' weight value (' + calcTags.dynGenre.weight + '). Must be greater than zero if you want to use DYNGENRE method!.'); }
 			return;
-		} else {method = 'WEIGHT';} // For calcs they are the same!
-	} else {calcTags.dynGenre.weight = 0;}
+		} else { method = 'WEIGHT'; } // For calcs they are the same!
+	} else { calcTags.dynGenre.weight = 0; }
 
-	const totalWeight = Object.keys(calcTags).reduce((total, key) => {return total + calcTags[key].weight;}, 0); //100%
-	const countWeights = Object.keys(calcTags).reduce((total, key) => {return (total + (calcTags[key].weight !== 0 ? 1 : 0));}, 0);
+	const totalWeight = Object.keys(calcTags).reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
+	const countWeights = Object.keys(calcTags).reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
 
 	if (!playlistLength) {
-		if (bBasicLogging) {console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.');}
+		if (bBasicLogging) { console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.'); }
 		return;
 	}
 	if (!totalWeight && method === 'WEIGHT') {
 		if (bBasicLogging) {
-			if (calcTags.dynGenre.weight !== 0) {console.log('Check weight values, all are set to zero and \'dynGenre\' weight is not used for WEIGHT method.');}
-			else {console.log('Check weight values, all are set to zero.');}
+			if (calcTags.dynGenre.weight !== 0) { console.log('Check weight values, all are set to zero and \'dynGenre\' weight is not used for WEIGHT method.'); }
+			else { console.log('Check weight values, all are set to zero.'); }
 		}
 		return;
 	}
 
-	try {fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery);} // Sanity check
-	catch (e) {fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return;}
+	try { fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery); } // Sanity check
+	catch (e) { fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return; }
 	// Query
 	let query = [];
 	let queryl = 0;
@@ -952,7 +954,7 @@ async function searchByDistance({
 	// Add '' value to set so we also apply a ~boolean filter when evaluating. Since we are using the filter on string tags, it's good enough.
 	// It's faster than applying array.filter(Boolean).filter(genreStyleFilterTag)
 	const genreStyleFilter = new Set(JSON.parse(properties['genreStyleFilterTag'][1]).concat(''));
-	const bTagFilter = !genreStyleFilter.isEqual(new Set([''])) ? true : false; // Only use filter when required
+	const bTagFilter = !genreStyleFilter.isEqual(new Set([''])); // Only use filter when required
 
 	// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)
 	// We use flat since it's only 1 track: genre[0][i] === genre.flat()[i]
@@ -962,7 +964,7 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		tag.reference = [];
-		if (tag.type.includes('virtual')) {continue;}
+		if (tag.type.includes('virtual')) { continue; }
 		const bGenreStyle = tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
 		if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
@@ -976,12 +978,10 @@ async function searchByDistance({
 		}
 		if (tag.type.includes('string')) {
 			if (tag.type.includes('multiple')) {
-				if (tag.reference.length && bAscii) {tag.reference.forEach((val, i) => {tag.reference[i] = _asciify(val);});}
+				if (tag.reference.length && bAscii) { tag.reference.forEach((val, i) => { tag.reference[i] = _asciify(val); }); }
 				tag.referenceSet = new Set(tag.reference);
 				tag.referenceNumber = tag.referenceSet.size;
-			} else {
-				if (tag.reference.length && bAscii) {tag.reference = _asciify(tag.reference);}
-			}
+			} else if (tag.reference.length && bAscii) { tag.reference = _asciify(tag.reference); }
 		}
 	}
 	// Sets for later comparison
@@ -998,21 +998,21 @@ async function searchByDistance({
 	for (let key of sortedByCombs) {
 		const tag = calcTags[key];
 		const type = tag.type;
-		if (bSearchDebug) {queryDebug.push({tag: key, query: ''});}
-		if (tag.weight === 0 || tag.tf.length === 0) {continue;}
-		if (type.includes('virtual')) {continue;}
+		if (bSearchDebug) { queryDebug.push({ tag: key, query: '' }); }
+		if (tag.weight === 0 || tag.tf.length === 0) { continue; }
+		if (type.includes('virtual')) { continue; }
 		if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
 			originalWeightValue += tag.weight;
 			if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 				queryl = query.length;
 				const tagNameTF = type.includes('multiple') // May be a tag or a function...
-					? tag.tf.map((t) => {return ((t.indexOf('$') === -1) ? t : _q(t));})
+					? tag.tf.map((t) => { return ((t.indexOf('$') === -1) ? t : _q(t)); })
 					: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
 				if (type.includes('keyRange')) {
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 					if (camelotKey) {
 						let keyComb = [];
-						const keysInRange = camelotWheel.createRange(camelotKey, tag.range, {name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false});
+						const keysInRange = camelotWheel.createRange(camelotKey, tag.range, { name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false });
 						keysInRange.forEach((keyArr) => {
 							let subKeyComb = [];
 							keyArr.forEach((keyVal) => {
@@ -1021,22 +1021,22 @@ async function searchByDistance({
 							keyComb.push(query_join(subKeyComb, 'OR'));
 						});
 						// And combinate queries
-						if (keyComb.length !== 0) {query[queryl] = query_join(keyComb, 'OR');}
-					} else {query[queryl] = tagNameTF + ' IS ' + tag.reference;} // For non-standard notations just use simple matching
+						if (keyComb.length !== 0) { query[queryl] = query_join(keyComb, 'OR'); }
+					} else { query[queryl] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
 				} else if (type.includes('percentRange')) {
 					const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
 					const rangeLower = round(tag.reference * (100 - tag.range) / 100, 0);
-					if (rangeUpper !== rangeLower) {query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;}
-					else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
+					if (rangeUpper !== rangeLower) { query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[queryl] += tagNameTF + ' EQUAL ' + tag.reference; }
 				} else if (type.includes('absRange')) {
 					const rangeUpper = tag.reference + tag.range;
 					const rangeLower = tag.reference - tag.range;
-					if (rangeUpper !== rangeLower) {query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper;}
-					else {query[queryl] += tagNameTF + ' EQUAL ' + tag.reference;}
+					if (rangeUpper !== rangeLower) { query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[queryl] += tagNameTF + ' EQUAL ' + tag.reference; }
 				} else if (type.includes('combinations')) {
 					const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
 					const tagComb = k_combinations(tag.reference, k);
-					const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1;}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+					const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 					// Group as small as possible for query purposes
 					const tagCombSet = tagComb.map((a) => new Set(a));
 					let groups = [];
@@ -1054,57 +1054,57 @@ async function searchByDistance({
 									bDone = true;
 								}
 							});
-							if (!bDone) {groups.push({base: s, or: new Set()});}
+							if (!bDone) { groups.push({ base: s, or: new Set() }); }
 						});
-						groups = groups.map((o) => {return {base: [...o.base], or: [...o.or]};});
+						groups = groups.map((o) => { return { base: [...o.base], or: [...o.or] }; });
 						groups = groups.map((o) => {
 							return (o.or.length
-								? query_join(query_combinations(o.base, tagNameTF, 'AND', void(0), match).concat(query_combinations(o.or, tagNameTF, 'OR', void(0), match)), 'AND')
-								: void(0)
+								? query_join(query_combinations(o.base, tagNameTF, 'AND', void (0), match).concat(query_combinations(o.or, tagNameTF, 'OR', void (0), match)), 'AND')
+								: void (0)
 							);
 						}).filter(Boolean);
 					} else { // For a single group just match all
-						groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match+ ' ' + val).join(' AND '));
+						groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match + ' ' + val).join(' AND '));
 					}
 					query[queryl] = query_join(groups, 'OR');
 				} else {
 					if (Array.isArray(tagNameTF)) {
-						const match = tagNameTF.some((tag) => {return tag.indexOf('$') !== -1;}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void(0), match), 'OR');
+						const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+						query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
 					} else {
 						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
-						query[queryl] = query_combinations([tag.reference], tagNameTF, 'OR', void(0), match);
+						query[queryl] = query_combinations([tag.reference], tagNameTF, 'OR', void (0), match);
 					}
 
 				}
-				if (bSearchDebug) {queryDebug[queryDebug.length -1].query = query[queryl];}
+				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[queryl]; }
 			}
-		} else if (tag.weight !== 0 && bBasicLogging) {console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf));}
+		} else if (tag.weight !== 0 && bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
 	}
 	// Dyngenre virtual tag is calculated with previous values
 	if (calcTags.genreStyle.referenceSize !== 0 && calcTags.dynGenre.weight !== 0) {
 		for (const genreStyle in calcTags.genreStyle.referenceSet) {
 			const dynGenre = sbd.genreStyleMap.get(genreStyle);
-			if (dynGenre) {calcTags.dynGenre.reference.push(...dynGenre);}
+			if (dynGenre) { calcTags.dynGenre.reference.push(...dynGenre); }
 		}
 		calcTags.dynGenre.referenceNumber = calcTags.dynGenre.reference.length;
 		if (calcTags.dynGenre.referenceNumber !== 0) {
 			originalWeightValue += calcTags.dynGenre.weight;
 		}
-	} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) {console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags');}
+	} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) { console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags'); }
 	// Artist Cultural tag requires world map data
 	let worldMapData;
 	if (calcTags.artistRegion.weight !== 0 || artistRegionFilter !== -1) {
 		let iso;
-		if (bUseTheme) {iso = (theme.tags[0].hasOwnProperty('iso') ? theme.tags[0].iso[0] : '') || '';}
+		if (bUseTheme) { iso = (Object.hasOwn(theme.tags[0], 'iso') ? theme.tags[0].iso[0] : '') || ''; }
 		else {
 			const localeTag = fb.TitleFormat(_bt(calcTags.artistRegion.tf)).EvalWithMetadb(sel).split(', ').filter(Boolean).pop() || '';
-			if (localeTag.length) {iso = getCountryISO(localeTag);}
+			if (localeTag.length) { iso = getCountryISO(localeTag); }
 			else {
 				const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
-				const {iso: artistIso, worldMapData: data} = getLocaleFromId(artist);
-				if (artistIso.length) {iso = artistIso;}
-				if (data) {worldMapData = data;}
+				const { iso: artistIso, worldMapData: data } = getLocaleFromId(artist);
+				if (artistIso.length) { iso = artistIso; }
+				if (data) { worldMapData = data; }
 			}
 		}
 		if (iso) {
@@ -1112,7 +1112,7 @@ async function searchByDistance({
 			originalWeightValue += calcTags.artistRegion.weight;
 		} else {
 			calcTags.artistRegion.reference = '';
-			if (bBasicLogging && calcTags.artistRegion.weight !== 0) {console.log('\'artistRegion\' weight was not zero but selected track had no locale tags');}
+			if (bBasicLogging && calcTags.artistRegion.weight !== 0) { console.log('\'artistRegion\' weight was not zero but selected track had no locale tags'); }
 		}
 	}
 	// Genre Cultural tag is calculated with previous values
@@ -1125,7 +1125,7 @@ async function searchByDistance({
 	}
 	// Total score
 	const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
-	if (bProfile) {test.Print('Task #1: Reference track / theme', false);}
+	if (bProfile) { test.Print('Task #1: Reference track / theme', false); }
 
 	// Create final query
 	// Pre filtering by query greatly speeds up the next part (weight and graph distance calcs), but it requires variable queries according to the weights.
@@ -1138,28 +1138,25 @@ async function searchByDistance({
 		if (!originalScore) {
 			console.log('No query available for selected track. Probably missing tags!');
 			return;
-		} else {query[queryl] = '';} // Pre-Filter may not be relevant according to weights...
+		} else { query[queryl] = ''; } // Pre-Filter may not be relevant according to weights...
 	}
 	const querylength = query.length;
-	if (method === 'WEIGHT' && calcTags.dynGenre.weight === 0) { // Weight method. Pre-filtering is really simple...
-		if (querylength === 1 && !query[0].length) {query[querylength] = '';}
-		else {query[querylength] = query_join(query, 'OR');} //join previous query's
-	} else if (method === 'WEIGHT' && calcTags.dynGenre.weight !== 0) { //Dyngenre method.
-		if (querylength === 1 && !query[0].length) {query[querylength] = '';}
-		else {query[querylength] = query_join(query, 'OR');} //join previous query's
+	if (method === 'WEIGHT') { // Weight or Dyngenre method. Pre-filtering is really simple...
+		if (querylength === 1 && !query[0].length) { query[querylength] = ''; }
+		else { query[querylength] = query_join(query, 'OR'); } //join previous queries
 	} else { // Graph Method
 		let influencesQuery = [];
 		if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
 			let influences = [];
 			calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
 				let anti = bConditionAntiInfluences ? descr.getConditionalAntiInfluences(genreStyle) : descr.getAntiInfluences(genreStyle);
-				if (anti.length) {influences.push(...descr.replaceWithSubstitutionsReverse(anti));}
+				if (anti.length) { influences.push(...descr.replaceWithSubstitutionsReverse(anti)); }
 			});
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 			if (influences.length) {
 				influences = [...new Set(influences)];
-				const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1;}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
 				influencesQuery.push(temp);
 			}
@@ -1168,13 +1165,13 @@ async function searchByDistance({
 			let influences = [];
 			calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
 				let infl = descr.getInfluences(genreStyle);
-				if (infl.length) {influences.push(...descr.replaceWithSubstitutionsReverse(infl));}
+				if (infl.length) { influences.push(...descr.replaceWithSubstitutionsReverse(infl)); }
 			});
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 			if (influences.length) {
 				influences = [...new Set(influences)];
-				const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1;}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
 				influencesQuery.push(temp);
 			}
@@ -1182,8 +1179,8 @@ async function searchByDistance({
 		if (influencesQuery.length) {
 			query[querylength] = query_join(influencesQuery, 'AND');
 		} else {
-			if (querylength === 1 && !query[0].length) {query[querylength] = '';}
-			else {query[querylength] = query_join(query, 'OR');} //join previous query's
+			if (querylength === 1 && !query[0].length) { query[querylength] = ''; }
+			else { query[querylength] = query_join(query, 'OR'); } //join previous query's
 		}
 	}
 	const queryStages = []; // Currently unused
@@ -1191,12 +1188,12 @@ async function searchByDistance({
 		let tags = fb.TitleFormat('[' + globTags.artist + ']').EvalWithMetadb(sel).split(', ').filter(Boolean);
 		let queryArtist = '';
 		if (tags.length) {
-			queryArtist = tags.map((artist) => {return globTags.artist + ' IS ' + artist;});
+			queryArtist = tags.map((artist) => { return globTags.artist + ' IS ' + artist; });
 			queryArtist = 'NOT ' + _p(query_join(queryArtist, 'OR'));
 		}
 		if (queryArtist.length) {
-			if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryArtist);}
-			else {query[querylength] += queryArtist;}
+			if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryArtist); }
+			else { query[querylength] += queryArtist; }
 		}
 	}
 	if (bSimilArtistsFilter && !bUseTheme) {
@@ -1208,31 +1205,31 @@ async function searchByDistance({
 			const data = _jsonParseFile(file, utf8);
 			const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
 			if (data) {
-				const dataArtist = data.find((obj) => {return obj.artist === artist;});
-				if (dataArtist) {dataArtist.val.forEach((artistObj) => {similTags.push(artistObj.artist);});}
+				const dataArtist = data.find((obj) => { return obj.artist === artist; });
+				if (dataArtist) { dataArtist.val.forEach((artistObj) => { similTags.push(artistObj.artist); }); }
 			}
-			if (!bSameArtistFilter) {similTags.push(artist);} // Always add the original artist as a valid value
+			if (!bSameArtistFilter) { similTags.push(artist); } // Always add the original artist as a valid value
 		}
 		if (similTags.length) {
-			querySimil = similTags.map((artist) => {return globTags.artist + ' IS ' + artist;});
+			querySimil = similTags.map((artist) => { return globTags.artist + ' IS ' + artist; });
 			querySimil = query_join(querySimil, 'OR');
 		}
 		if (querySimil.length) {
-			if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(querySimil);}
-			else {query[querylength] += querySimil;}
+			if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(querySimil); }
+			else { query[querylength] += querySimil; }
 		}
 	}
 	if (artistRegionFilter !== -1) {
 		let iso = calcTags.artistRegion.reference;
 		if (iso.length) {
-			const {query: queryRegion} = getZoneArtistFilter(iso, artistRegionFilter, worldMapData);
+			const { query: queryRegion } = getZoneArtistFilter(iso, artistRegionFilter, worldMapData);
 			const len = queryRegion.length;
 			if (len) {
 				if (len > 50000) { // Minor optimization for huge queries
 					queryStages.push(queryRegion);
 				} else {
-					if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
-					else {query[querylength] += queryRegion;}
+					if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion); }
+					else { query[querylength] += queryRegion; }
 				}
 			}
 		} else if (bBasicLogging) {
@@ -1243,16 +1240,16 @@ async function searchByDistance({
 		if (calcTags.genreStyle.referenceSet.size) {
 			const styleGenreRegion = getZoneGraphFilter([...calcTags.genreStyle.referenceSet], genreStyleRegionFilter).map((sg) => sanitizeQueryVal(sg));
 			if (styleGenreRegion.length) {
-				const match = genreStyleTagQuery.some((tag) => {return tag.indexOf('$') !== -1;}) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let queryRegion = query_combinations(styleGenreRegion, genreStyleTagQuery, 'OR', void(0), match); // min. array with 2 values or more if tags are remapped
+				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				let queryRegion = query_combinations(styleGenreRegion, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				queryRegion = query_join(queryRegion, 'OR'); // flattens the array
 				const len = queryRegion.length;
 				if (len) {
 					if (len > 50000) { // Minor optimization for huge queries
 						queryStages.push(queryRegion);
 					} else {
-						if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion);}
-						else {query[querylength] += queryRegion;}
+						if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion); }
+						else { query[querylength] += queryRegion; }
 					}
 				}
 			}
@@ -1261,17 +1258,16 @@ async function searchByDistance({
 	if (dynQueries.length) {
 		const getRemap = (key) => {
 			const remap = calcTags[key].tf;
-			if (!remap.length && calcTags[key].weight === 0 && tags[key].tf.length) {remap.push(...tags[key].tf);}
+			if (!remap.length && calcTags[key].weight === 0 && tags[key].tf.length) { remap.push(...tags[key].tf); }
 			return remap;
 		};
 		const validTags = Object.keys(calcTags)
 			.filter((tag) => !calcTags[tag].type.includes('virtual') || calcTags[tag].type.includes('tfRemap'));
 		const regTag = new RegExp('([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'gi');
 		const regNot = new RegExp('NOT([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'i');
-		const regFunc = /(.*\()("\$)(.*)(\)"[\),])/g; // eslint-disable-line no-useless-escape
 		// Process every query on array and join
 		let selQuery = dynQueries.map((dynQuery, i) => {
-			if (!dynQuery || !dynQuery.length || dynQuery === 'ALL') {dynQuery = '';}
+			if (!dynQuery || !dynQuery.length || dynQuery === 'ALL') { dynQuery = ''; }
 			else {
 				// Replace with tags set
 				let key = '';
@@ -1280,27 +1276,27 @@ async function searchByDistance({
 					if (match) {
 						key = validTags.find((tag) => tag.toLowerCase() === match.toLowerCase());
 						const expanded = getRemap(key).map((tag) => {
-							return dynQuery.replace(regTag, function(match, g1, g2, g3) {
+							return dynQuery.replace(regTag, function (match, g1, g2, g3) {
 								return tag.indexOf('$') !== -1
 									? (g1.replace('%', '') + _qCond(tag) + g3.replace('%', ''))
 									: (g1 + tag + g3);
-							}).replace(/(.*\()("\$)(.*)(\)"[\),])/g, function(match, g1, g2, g3, g4) { // eslint-disable-line no-useless-escape
+							}).replace(/(.*\()("\$)(.*)(\)"[\),])/g, function (match, g1, g2, g3, g4) { // eslint-disable-line no-useless-escape
 								return g1 + '$' + g3 + g4.replace(/"/g, '');
 							});
 						});
 						dynQuery = query_join(expanded, regNot.test(dynQuery) ? 'AND' : 'OR');
-					} else {dynQuery = ''; key = '';}
-				} else {key = '';}
+					} else { dynQuery = ''; }
+				}
 				// Execute
 				if (dynQuery) {
 					if (bUseTheme) {
-						const tag = key && calcTags.hasOwnProperty(key) ? {[key.toLowerCase()]: calcTags[key].reference} : {};
+						const tag = key && Object.hasOwn(calcTags, key) ? { [key.toLowerCase()]: calcTags[key].reference } : {};
 						dynQuery = queryReplaceWithCurrent(dynQuery, null, tag);
-					} else {dynQuery = queryReplaceWithCurrent(dynQuery, sel);}
-				} else {dynQuery = '';}
+					} else { dynQuery = queryReplaceWithCurrent(dynQuery, sel); }
+				} else { dynQuery = ''; }
 			}
 			// Check
-			if (checkQuery(dynQuery)) {return dynQuery;}
+			if (checkQuery(dynQuery)) { return dynQuery; }
 			else {
 				console.popup(
 					'Non valid Dynamic query or wrong parsing:\n\n' + dynQueries[i] +
@@ -1321,17 +1317,17 @@ async function searchByDistance({
 			if (len > 50000) { // Minor optimization for huge queries
 				queryStages.push(selQuery);
 			} else {
-				if (query[querylength].length) {query[querylength] = _p(query[querylength]) + ' AND ' + _p(selQuery);}
-				else {query[querylength] += selQuery;}
+				if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(selQuery); }
+				else { query[querylength] += selQuery; }
 			}
 		}
 	}
 	if (forcedQuery.length) { //Add user input query to the previous one
 		// Swap order to improve performance, since the forced query always short circuits the search
-		if (query[querylength].length) {query[querylength] = _p(forcedQuery) + ' AND ' + _p(query[querylength]);}
-		else {query[querylength] += forcedQuery;}
+		if (query[querylength].length) { query[querylength] = _p(forcedQuery) + ' AND ' + _p(query[querylength]); }
+		else { query[querylength] += forcedQuery; }
 	}
-	if (!query[querylength].length) {query[querylength] = 'ALL';}
+	if (!query[querylength].length) { query[querylength] = 'ALL'; }
 
 	// Preload lib items
 	const libraryItems = fb.GetLibraryItems();
@@ -1339,20 +1335,20 @@ async function searchByDistance({
 	// Prefill tag Cache
 	if (bTagsCache) {
 		const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf.filter(Boolean)).concat([['TITLE'], [globTags.title]])
-			.map((tagName) => {return tagName.map((subTagName) => {return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName);});})
-			.map((tagName) => {return tagName.join(', ');}).filter(Boolean)
-			.filter((tagName) => {return !tagsCache.cache.has(tagName);});
+			.map((tagName) => { return tagName.map((subTagName) => { return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName); }); })
+			.map((tagName) => { return tagName.join(', '); }).filter(Boolean)
+			.filter((tagName) => { return !tagsCache.cache.has(tagName); });
 		if (missingOnCache.length) {
 			console.log('Caching missing tags...');
-			if (parent) {parent.switchAnimation('Tag cache', true);}
+			if (parent) { parent.switchAnimation('Tag cache', true); }
 			await tagsCache.cacheTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
-			if (parent) {parent.switchAnimation('Tag cache', false);}
+			if (parent) { parent.switchAnimation('Tag cache', false); }
 			tagsCache.save();
 		}
 	}
 
 	// Load query
-	if (bShowQuery) {console.log('Query created: ' + query[querylength]);}
+	if (bShowQuery) { console.log('Query created: ' + query[querylength]); }
 	let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
 	const debugQuery = (queryItems, q) => {
 		if (!queryItems) {
@@ -1364,19 +1360,18 @@ async function searchByDistance({
 					: ''
 				)
 			);
-			return;
 		}
 	};
 	debugQuery(handleList, query[querylength]);
 	if (queryStages.length) {
 		queryStages.forEach((subQuery) => {
-			if (bShowQuery) {console.log('Sub-Query created: ' + subQuery);}
+			if (bShowQuery) { console.log('Sub-Query created: ' + subQuery); }
 			handleList = fb.GetQueryItemsCheck(handleList, subQuery);
 			debugQuery(handleList, subQuery);
 		});
 	}
-	if (bBasicLogging) {console.log('Items retrieved by query: ' + handleList.Count + ' tracks');}
-	if (bProfile) {test.Print('Task #2: Query', false);}
+	if (bBasicLogging) { console.log('Items retrieved by query: ' + handleList.Count + ' tracks'); }
+	if (bProfile) { test.Print('Task #2: Query', false); }
 	// Find and remove duplicates ~600 ms for 50k tracks
 	if (checkDuplicatesByTag && checkDuplicatesByTag.length) {
 		const biasGenTags = genreStyleTag.concat([_t(globTags.folksonomy)]);
@@ -1384,14 +1379,14 @@ async function searchByDistance({
 			sortBias = sortBias.replace(globTags.genreStyle.map((t) => '%' + t + '%').join('\', \''), biasGenTags.join('\', \''));
 		}
 		if (bTagsCache) {
-			handleList = await removeDuplicatesV3({handleList, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle});
+			handleList = await removeDuplicatesV3({ handleList, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, bTagsCache, checkKeys: checkDuplicatesByTag, bAdvTitle });
 		} else {
-			handleList = removeDuplicatesV2({handleList, sortBias, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle});
+			handleList = removeDuplicatesV2({ handleList, sortBias, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle });
 		}
 	}
 	const tracktotal = handleList.Count;
-	if (bBasicLogging) {console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks');}
-	if (!tracktotal) {console.log('Query created: ' + query[querylength]); return;}
+	if (bBasicLogging) { console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks'); }
+	if (!tracktotal) { console.log('Query created: ' + query[querylength]); return; }
 	// Compute similarity distance by Weight and/or Graph
 	// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
 	let scoreData = [];
@@ -1400,7 +1395,7 @@ async function searchByDistance({
 		let tfo = fb.TitleFormat(genreStyleTag.join('|'));
 		handleList.OrderByFormat(tfo, 1);
 	}
-	if (bProfile) {test.Print('Task #3: Remove Duplicates and sorting', false);}
+	if (bProfile) { test.Print('Task #3: Remove Duplicates and sorting', false); }
 	// Get the tag values for all the handle list. Skip those with weight 0.
 	// Now flat is not needed, we have 1 array of tags per track [i][j]
 	// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length, but it's done per track.
@@ -1409,7 +1404,7 @@ async function searchByDistance({
 	let z = 0;
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.type.includes('virtual')) {continue;}
+		if (tag.type.includes('virtual')) { continue; }
 		if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tagsArr.push(tag.tf);
 		}
@@ -1417,17 +1412,17 @@ async function searchByDistance({
 	tagsArr.push(['TITLE']);
 	if (calcTags.artistRegion.weight !== 0) {
 		tagsArr.push([globTags.artist]);
-		if (calcTags.artistRegion.tf.length) {tagsArr.push(calcTags.artistRegion.tf);}
+		if (calcTags.artistRegion.tf.length) { tagsArr.push(calcTags.artistRegion.tf); }
 	}
-	tagsArr = tagsArr.map((arr) => {return arr.map((tag) => {return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag);}).join(', ');});
+	tagsArr = tagsArr.map((arr) => { return arr.map((tag) => { return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag); }).join(', '); });
 	const tagsValByKey = [];
 	let tagsVal = [];
 	if (bTagsCache) {
 		tagsVal = tagsCache.getTags(tagsArr, handleList.Convert());
-		tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal[tag];});
+		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal[tag]; });
 	} else {
 		tagsVal = getTagsValuesV3(handleList, tagsArr);
-		tagsArr.forEach((tag, i) => {tagsValByKey[i] = tagsVal.map((tag) => {return tag[i];});});
+		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal.map((tag) => { return tag[i]; }); });
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
@@ -1436,7 +1431,7 @@ async function searchByDistance({
 		tag.bString = tag.type.includes('string');
 		tag.bGraph = tag.type.includes('graph');
 		tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
-		if (tag.type.includes('virtual')) {continue;}
+		if (tag.type.includes('virtual')) { continue; }
 		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.handle = tagsValByKey[z++];
 		} else {
@@ -1449,17 +1444,17 @@ async function searchByDistance({
 		artistHandle = tagsValByKey[z++];
 		calcTags.artistRegion.handle = calcTags.artistRegion.tf.length ? tagsValByKey[z++] : null;
 	}
-	if (bProfile) {test.Print('Task #4: Library tags', false);}
+	if (bProfile) { test.Print('Task #4: Library tags', false); }
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
 	while (i < tracktotal) {
 		let weightValue = 0;
 		let mapDistance = Infinity; // We consider points are not linked by default
 		// Get the tags according to weight and filter ''. Also create sets for comparison
-		const handleTag = {genreStyle: {set: new Set()}};
+		const handleTag = { genreStyle: { set: new Set() } };
 		for (let key in calcTags) {
 			const tag = calcTags[key];
-			if (tag.bVirtual) {continue;}
+			if (tag.bVirtual) { continue; }
 			handleTag[key] = {};
 			if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) {
 				if (tag.bMultiple) {
@@ -1472,7 +1467,7 @@ async function searchByDistance({
 					handleTag[key].val = tag.bString ? tag.handle[i][0] : Number(tag.handle[i][0]);
 				}
 			} else {
-				if (tag.bMultiple) {
+				if (tag.bMultiple) { // NOSONAR [More clear this way...]
 					handleTag[key].val = [];
 				} else {
 					handleTag[key].val = tag.bString ? '' : null;
@@ -1481,20 +1476,18 @@ async function searchByDistance({
 			if (tag.bString) {
 				const valLen = handleTag[key].val.length;
 				if (tag.bMultiple) {
-					if (valLen && bAscii) {handleTag[key].val.forEach((val, i) => {handleTag[key].val[i] = _asciify(val);});}
+					if (valLen && bAscii) { handleTag[key].val.forEach((val, i) => { handleTag[key].val[i] = _asciify(val); }); }
 					handleTag[key].set = new Set(handleTag[key].val);
 					handleTag[key].number = handleTag[key].set.size;
-				} else {
-					if (valLen && bAscii) {handleTag[key].val = _asciify(handleTag[key].val);}
-				}
+				} else if (valLen && bAscii) { handleTag[key].val = _asciify(handleTag[key].val); }
 				if (tag.bGraphDyn && valLen) {
 					if (bFilterWithGraph) {
 						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) {handleTag.genreStyle.set.add(val);}
+							if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) { handleTag.genreStyle.set.add(val); }
 						});
 					} else {
 						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val)) {handleTag.genreStyle.set.add(val);}
+							if (!graphExclusions.has(val)) { handleTag.genreStyle.set.add(val); }
 						});
 					}
 				}
@@ -1508,11 +1501,11 @@ async function searchByDistance({
 		for (let key of sortTagKeys) {
 			const tag = calcTags[key];
 			const type = tag.type;
-			if (tag.weight === 0) {continue;}
-			if (type.includes('virtual')) {continue;}
-			if (currScoreAvailable < minScoreFilter) {continue;} // Break asap
+			if (tag.weight === 0) { continue; }
+			if (type.includes('virtual')) { continue; }
+			if (currScoreAvailable < minScoreFilter) { continue; } // Break asap
 			const scoringDistr = tag.scoringDistribution;
-			if (type.includes('multiple')){
+			if (type.includes('multiple')) {
 				const newTag = handleTag[key].number;
 				if (tag.referenceNumber !== 0) {
 					if (newTag !== 0) {
@@ -1589,14 +1582,14 @@ async function searchByDistance({
 			leftWeight -= tag.weight;
 			currScoreAvailable = round((weightValue + leftWeight) * 100 / originalWeightValue, 1);
 		}
-		if (currScoreAvailable < minScoreFilter) {i++; continue;} // Break asap
+		if (currScoreAvailable < minScoreFilter) { i++; continue; } // Break asap
 
 		if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
-			handleTag.dynGenre = {val: [], number: 0};
+			handleTag.dynGenre = { val: [], number: 0 };
 			if (handleTag.genreStyle.set.size !== 0) {
 				for (const genreStyle of handleTag.genreStyle.set) {
 					const dynGenre = sbd.genreStyleMap.get(genreStyle);
-					if (dynGenre) {handleTag.dynGenre.val.push(...dynGenre);}
+					if (dynGenre) { handleTag.dynGenre.val.push(...dynGenre); }
 				}
 			}
 			handleTag.dynGenre.number = handleTag.dynGenre.val.length;
@@ -1619,11 +1612,11 @@ async function searchByDistance({
 										score += 1 / calcTags.dynGenre.referenceNumber;
 										break;
 									}
-									else if (valueLower <= newVal && newVal <= refVal) { // (x, x + y)
+									else if (valueLower <= newVal && newVal <= refVal) { // NOSONAR [(x, x + y)]
 										score += 1 / calcTags.dynGenre.referenceNumber;
 										break;
 									}
-									else if (valueUpper <= newVal && newVal <= upperLimit) { // (x - y, upperLimit)
+									else if (valueUpper <= newVal && newVal <= upperLimit) { // NOSONAR [(x - y, upperLimit)]
 										score += 1 / calcTags.dynGenre.referenceNumber;
 										break;
 									}
@@ -1648,10 +1641,10 @@ async function searchByDistance({
 
 		if (calcTags.artistRegion.weight !== 0 && calcTags.artistRegion.reference.length) {
 			const tag = calcTags.artistRegion;
-			const newTag = handleTag.artistRegion = {val: ''};
+			const newTag = handleTag.artistRegion = { val: '' };
 			const localeTag = tag.handle ? _asciify(tag.handle[i].pop() || '') : '';
-			if (localeTag.length) {newTag.val = getCountryISO(localeTag) || '';}
-			else {newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso;}
+			if (localeTag.length) { newTag.val = getCountryISO(localeTag) || ''; }
+			else { newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso; }
 			if (newTag.val.length) {
 				const weight = tag.weight;
 				const range = tag.range;
@@ -1673,7 +1666,7 @@ async function searchByDistance({
 
 		if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber) {
 			const tag = calcTags.genreStyleRegion;
-			const newTag = handleTag.genreStyleRegion = {val: [], number: 0};
+			const newTag = handleTag.genreStyleRegion = { val: [], number: 0 };
 			const weight = tag.weight;
 			if (handleTag.genreStyle.set.size !== 0) {
 				newTag.val.push(...handleTag.genreStyle.set);
@@ -1699,7 +1692,7 @@ async function searchByDistance({
 					}
 					if (distances.length) {
 						const min = Math.min.apply(null, distances);
-						if (min === 0) {score += 1 / calcTags.genreStyleRegion.referenceNumber;}
+						if (min === 0) { score += 1 / calcTags.genreStyleRegion.referenceNumber; }
 						else {
 							const difference = range - min;
 							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
@@ -1722,8 +1715,8 @@ async function searchByDistance({
 
 		if (method === 'GRAPH') {
 			// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
-			if (!cacheLink) {cacheLink = new Map();}
-			if (!cacheLinkSet) {cacheLinkSet = new Map();}
+			if (!cacheLink) { cacheLink = new Map(); }
+			if (!cacheLinkSet) { cacheLinkSet = new Map(); }
 			// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
 			if (score >= minScoreFilter) {
 				// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
@@ -1736,7 +1729,12 @@ async function searchByDistance({
 				const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
 				if (difference.size) {
 					const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
-					const mapKey = [...[[...difference].sort(),[...toGenreStyle].sort()].sort()].join(' -> ');
+					const mapKey = [
+						...[
+							[...difference].sort((a, b) => a.localeCompare(b)),
+							[...toGenreStyle].sort((a, b) => a.localeCompare(b))
+						].sort((a, b) => a.localeCompare(b))
+					].join(' -> ');
 					const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
 					if (typeof mapValue !== 'undefined') {
 						mapDistance = mapValue;
@@ -1744,12 +1742,12 @@ async function searchByDistance({
 						mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
 						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
 					}
-				} else {mapDistance = 0;} // One is superset of the other
+				} else { mapDistance = 0; } // One is superset of the other
 			}
 		} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
-				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance});
+				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance });
 			}
 		}
 		if (method === 'WEIGHT') {
@@ -1759,10 +1757,10 @@ async function searchByDistance({
 		}
 		i++;
 	}
-	if (bProfile) {test.Print('Task #5: Score and Distance', false);}
+	if (bProfile) { test.Print('Task #5: Score and Distance', false); }
 	let poolLength = scoreData.length;
 	if (method === 'WEIGHT') {
-		scoreData.sort(function (a, b) {return b.score - a.score;});
+		scoreData.sort(function (a, b) { return b.score - a.score; });
 		let i = 0;
 		let bMin = false;
 		while (i < poolLength) {
@@ -1781,7 +1779,7 @@ async function searchByDistance({
 		}
 		poolLength = scoreData.length;
 		if (bBasicLogging) {
-			if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
+			if (bMin && minScoreFilter !== scoreFilter) { console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.'); }
 			console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks');
 		}
 	}
@@ -1789,7 +1787,7 @@ async function searchByDistance({
 		// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
 		// Now we check if all tracks are needed (over 'minScoreFilter') or only those over 'scoreFilter'.
 		// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
-		scoreData.sort(function (a, b) {return b.score - a.score;});
+		scoreData.sort(function (a, b) { return b.score - a.score; });
 		let i = 0;
 		let bMin = false;
 		while (i < poolLength) {
@@ -1806,20 +1804,20 @@ async function searchByDistance({
 			}
 			i++;
 		}
-		scoreData.sort(function (a, b) {return a.mapDistance - b.mapDistance;}); // First sorted by graph distance, then by weight
+		scoreData.sort(function (a, b) { return a.mapDistance - b.mapDistance; }); // First sorted by graph distance, then by weight
 		poolLength = scoreData.length;
-		if (bMin && minScoreFilter !== scoreFilter) {console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');}
-		if (bBasicLogging) {console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance +': ' + poolLength + ' tracks');}
+		if (bMin && minScoreFilter !== scoreFilter) { console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.'); }
+		if (bBasicLogging) { console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance + ': ' + poolLength + ' tracks'); }
 	}
 
 	// Post Filter (note there are no real duplicates at this point)
 	if (bPoolFiltering) {
 		let handlePoolArray = [];
 		let i = poolLength;
-		while (i--) {handlePoolArray.push(handleList[scoreData[i].index]);}
+		while (i--) { handlePoolArray.push(handleList[scoreData[i].index]); }
 		let handlePool = new FbMetadbHandleList(handlePoolArray);
-		handlePool = removeDuplicates({handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN}); // n + 1
-		const [titleHandlePool] = getTagsValuesV4(handlePool, ['TITLE'], void(0), void(0), null);
+		handlePool = removeDuplicates({ handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN }); // n + 1
+		const [titleHandlePool] = getTagsValuesV4(handlePool, ['TITLE'], void (0), void (0), null);
 		let filteredScoreData = [];
 		i = 0;
 		while (i < handlePool.Count) {
@@ -1834,7 +1832,7 @@ async function searchByDistance({
 		}
 		scoreData = filteredScoreData; // Maintains only selected references...
 		poolLength = scoreData.length;
-		if (bBasicLogging) {console.log('Pool of tracks after post-filtering, ' + ++poolFilteringN + ' tracks per ' + poolFilteringTag.join(', ') + ': ' + poolLength + ' tracks');}
+		if (bBasicLogging) { console.log('Pool of tracks after post-filtering, ' + ++poolFilteringN + ' tracks per ' + poolFilteringTag.join(', ') + ': ' + poolLength + ' tracks'); }
 	}
 
 	// Final selection
@@ -1851,16 +1849,16 @@ async function searchByDistance({
 			// Therefore, the track selection changes on every execution. Specially if there are not tracks on the pool to match all required movements.
 			// Those unmatched movements will get skipped (lowering the playlist length per step), but next movements are relative to the currently selected track...
 			// so successive calls on a 'small' pool, will give totally different playlist lengths. We are not matching only keys, but a 'key path', which is stricter.
-			if (bSortRandom) {console.log('Warning: Harmonic mixing is overriding Random Sorting.');}
-			if (bScatterInstrumentals) {console.log('Warning: Harmonic mixing is overriding Instrumental track\'s Scattering.');}
-			if (bProgressiveListOrder) {console.log('Warning: Harmonic mixing is overriding sort by score.');}
-			if (bSmartShuffle) {console.log('Warning: Harmonic mixing is overriding Smart Shuffle.');}
+			if (bSortRandom) { console.log('Warning: Harmonic mixing is overriding Random Sorting.'); }
+			if (bScatterInstrumentals) { console.log('Warning: Harmonic mixing is overriding Instrumental track\'s Scattering.'); }
+			if (bProgressiveListOrder) { console.log('Warning: Harmonic mixing is overriding sort by score.'); }
+			if (bSmartShuffle) { console.log('Warning: Harmonic mixing is overriding Smart Shuffle.'); }
 			bSortRandom = bProgressiveListOrder = bScatterInstrumentals = bSmartShuffle = bInverseListOrder = false;
 			if (calcTags.key.reference.length) {
 				// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
 				const size = poolLength < playlistLength ? poolLength : playlistLength;
 				const pattern = camelotWheel.createHarmonicMixingPattern(size); // On camelot_wheel_xxx.js
-				if (bSearchDebug) {console.log(pattern);}
+				if (bSearchDebug) { console.log(pattern); }
 				let nextKeyObj;
 				let keyCache = new Map();
 				let keyDebug = [];
@@ -1877,13 +1875,13 @@ async function searchByDistance({
 					if (!keyCache.has(index)) {
 						const keyCurrent = calcTags.key.handle[index][0];
 						camelotKeyCurrent = keyCurrent.length ? camelotWheel.getKeyNotationObjectCamelot(keyCurrent) : null;
-						if (camelotKeyCurrent) {keyCache.set(index, camelotKeyCurrent);}
-					} else {camelotKeyCurrent = keyCache.get(index);}
+						if (camelotKeyCurrent) { keyCache.set(index, camelotKeyCurrent); }
+					} else { camelotKeyCurrent = keyCache.get(index); }
 					// Delete from check selection
 					toCheck.delete(indexScore);
-					if (!toCheck.size) {break;}
+					if (!toCheck.size) { break; }
 					// Find next key
-					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({...camelotKeyCurrent}) : null; // Applies movement to copy of current key
+					nextKeyObj = camelotKeyCurrent ? camelotWheel[pattern[i]]({ ...camelotKeyCurrent }) : null; // Applies movement to copy of current key
 					if (nextKeyObj) { // Finds next track, but traverse pool with random indexes...
 						let bFound = false;
 						for (const indexNewScore of toCheck) {
@@ -1891,14 +1889,14 @@ async function searchByDistance({
 							if (!keyCache.has(indexNew)) {
 								const keyNew = calcTags.key.handle[indexNew][0];
 								camelotKeyNew = keyNew.length ? camelotWheel.getKeyNotationObjectCamelot(keyNew) : null;
-								if (camelotKeyNew) {keyCache.set(indexNew, camelotKeyNew);}
-								else {toCheck.delete(indexNew);}
-							} else {camelotKeyNew = keyCache.get(indexNew);}
+								if (camelotKeyNew) { keyCache.set(indexNew, camelotKeyNew); }
+								else { toCheck.delete(indexNew); }
+							} else { camelotKeyNew = keyCache.get(indexNew); }
 							if (camelotKeyNew) {
 								if (nextKeyObj.hour === camelotKeyNew.hour && nextKeyObj.letter === camelotKeyNew.letter) {
 									selectedHandlesArray.push(handleList[index]);
 									selectedHandlesData.push(scoreData[indexScore]);
-									if (bSearchDebug) {keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]);}
+									if (bSearchDebug) { keyDebug.push(camelotKeyCurrent); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyCurrent)); patternDebug.push(pattern[i]); }
 									nextIndex = indexNew; // Which will be used for next movement
 									nextIndexScore = indexNewScore; // Which will be used for next movement
 									bFound = true;
@@ -1908,22 +1906,22 @@ async function searchByDistance({
 						}
 						if (!bFound) { // If nothing is found, then continue next movement with current track
 							camelotKeyNew = camelotKeyCurrent; // For debug console on last item
-							if (j === 1) {j = 0; continue;} // try once retrying this step with default movement
+							if (j === 1) { j = 0; continue; } // try once retrying this step with default movement
 							else {
 								pattern[i] = 'perfectMatch';
-								i--;
+								i--; // NOSONAR [is intended]
 								j++;
 							}
-						} else {j = 0;} // Reset retry counter if found
+						} else { j = 0; } // Reset retry counter if found
 					} else { // No tag or bad tag
-						i--;
-						if (toCheck.size) {nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index;} // If tag was not found, then use next handle
+						i--; // NOSONAR [is intended]
+						if (toCheck.size) { nextIndexScore = [...toCheck][0]; nextIndex = scoreData[nextIndexScore].index; } // If tag was not found, then use next handle
 					}
 				}
 				// Add tail
 				selectedHandlesArray.push(handleList[nextIndex]);
 				selectedHandlesData.push(scoreData[nextIndexScore]);
-				if (bSearchDebug) {keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew));}
+				if (bSearchDebug) { keyDebug.push(camelotKeyNew); keySharpDebug.push(camelotWheel.getKeyNotationSharp(camelotKeyNew)); }
 				// Double pass
 				if (bHarmonicMixDoublePass && poolLength >= playlistLength) {
 					let tempPlaylistLength = selectedHandlesArray.length;
@@ -1937,30 +1935,30 @@ async function searchByDistance({
 							if (selectedHandlesData.indexOf(currTrackData) === -1) {
 								const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
 									let idx = -1;
-									if (keyMap.has(j)) {idx = keyMap.get(j);}
-									else {idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx);}
+									if (keyMap.has(j)) { idx = keyMap.get(j); }
+									else { idx = scoreData.indexOf(selTrackData); keyMap.set(j, idx); }
 									const selKey = calcTags.key.handle[idx];
 									return selKey[0] === calcTags.key.handle[i][0];
 								});
 								if (matchIdx !== -1) {
 									const currTrack = handleList[currTrackData.index];
-									if (toAdd.hasOwnProperty(matchIdx)) {toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData);}
-									else {toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData];}
+									if (Object.hasOwn(toAdd, matchIdx)) { toAdd[matchIdx].push(currTrack); toAddData[matchIdx].push(currTrackData); }
+									else { toAdd[matchIdx] = [currTrack]; toAddData[matchIdx] = [currTrackData]; }
 									tempPlaylistLength++;
 								}
 							}
-							if (tempPlaylistLength >= playlistLength) {break;}
+							if (tempPlaylistLength >= playlistLength) { break; }
 						}
 						// Add items in reverse order to not recalculate new idx
-						const indexes = Object.keys(toAdd).sort().reverse();
+						const indexes = Object.keys(toAdd).sort((a, b) => a.localeCompare(b)).reverse();
 						if (indexes.length) {
 							let count = 0;
 							for (let idx of indexes) {
-								selectedHandlesArray.splice(idx, 0, ...toAdd[idx]);
-								selectedHandlesData.splice(idx, 0, ...toAddData[idx]);
+								selectedHandlesArray.splice(idx, 0, ...toAdd[idx]); // NOSONAR [is not an array]
+								selectedHandlesData.splice(idx, 0, ...toAddData[idx]); // NOSONAR [is not an array]
 								count += toAdd[idx].length;
 							}
-							if (bSearchDebug) {console.log('Added ' + count + ' items on second pass');}
+							if (bSearchDebug) { console.log('Added ' + count + ' items on second pass'); }
 						}
 					}
 					// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
@@ -1972,11 +1970,11 @@ async function searchByDistance({
 						console.log(patternDebug); // Always has one item less than key arrays
 					}
 				}
-			} else {console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.');}
+			} else { console.log('Warning: Can not create in key mixing playlist, selected track has not a key tag.'); }
 		} else { // Standard methods
-			if (bInversePick) {scoreData.reverse();} // Note this changes the most distant track output at the end
+			if (bInversePick) { scoreData.reverse(); } // Note this changes the most distant track output at the end
 			if (poolLength > playlistLength) {
-				if (bRandomPick){	//Random from pool
+				if (bRandomPick) {	//Random from pool
 					const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
 					const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
 					let i = 0;
@@ -1987,7 +1985,7 @@ async function searchByDistance({
 						i++;
 					}
 				} else {
-					if (probPick < 100) { //Random but starting from high score picked tracks
+					if (probPick < 100) { // NOSONAR [Random but starting from high score picked tracks]
 						let randomseed = 0;
 						let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
 						let i = 0;
@@ -2024,12 +2022,12 @@ async function searchByDistance({
 				if (isFinite(playlistLength)) {
 					if (method === 'GRAPH') {
 						if (bBasicLogging) {
-							let propertyText = properties.hasOwnProperty('graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
+							let propertyText = Object.hasOwn(properties, 'graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
 							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
 						}
 					}
 					if (bBasicLogging) {
-						let propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+						let propertyText = Object.hasOwn(properties, 'scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
 						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 					}
 				}
@@ -2052,14 +2050,14 @@ async function searchByDistance({
 		// Forces progressive changes on tracks, independently of the previous sorting/picking methods
 		// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
 		if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
-			if (bSortRandom) {console.log('Warning: Sorting by Score is overriding Random Sorting.');}
-			selectedHandlesData.sort(function (a, b) {return b.score - a.score;});
-			selectedHandlesArray.sort(function (a, b) {return b.score - a.score;});
+			if (bSortRandom) { console.log('Warning: Sorting by Score is overriding Random Sorting.'); }
+			selectedHandlesData.sort(function (a, b) { return b.score - a.score; });
+			selectedHandlesArray.sort(function (a, b) { return b.score - a.score; });
 			if (method === 'GRAPH') { // First sorted by graph distance, then by score
-				selectedHandlesData.sort(function (a, b) {return a.mapDistance - b.mapDistance;});
-				selectedHandlesArray.sort(function (a, b) {return a.mapDistance - b.mapDistance;});
+				selectedHandlesData.sort(function (a, b) { return a.mapDistance - b.mapDistance; });
+				selectedHandlesArray.sort(function (a, b) { return a.mapDistance - b.mapDistance; });
 			}
-		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) {console.log('Warning: Sorting by Score has no use if tracks are already chosen by scoring order from pool.');}
+		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) { console.log('Warning: Sorting by Score has no use if tracks are already chosen by scoring order from pool.'); }
 		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks.
 		// May override previous sorting methods (only for instrumental tracks).
 		// Finds instrumental track indexes, and move them to a random range without overlapping.
@@ -2072,14 +2070,14 @@ async function searchByDistance({
 					const genreStyleTag = Object.values(calcTags)
 						.filter((t) => t.type.includes('graph') && !t.type.includes('virtual') && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
 						.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
-					const tagSet_i = new Set(genreStyleTag.map((item) => {return item.toLowerCase();}));
+					const tagSet_i = new Set(genreStyleTag.map((item) => { return item.toLowerCase(); }));
 					if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || speechness[i][0] === 0) { // Any match, then add to reorder list
 						newOrder.push(i);
 					}
 				}
 				// Reorder
 				const toMoveTracks = newOrder.length;
-				if (bSearchDebug) {console.log('toMoveTracks: ' + toMoveTracks);}
+				if (bSearchDebug) { console.log('toMoveTracks: ' + toMoveTracks); }
 				const scatterInterval = toMoveTracks ? Math.round(finalPlaylistLength / toMoveTracks) : 0;
 				if (scatterInterval >= 2) { // Lower value means we can not uniformly scatter instrumental tracks, better left it 'as is'
 					let removed = [], removedData = [];
@@ -2092,22 +2090,22 @@ async function searchByDistance({
 					removed.forEach((handle, index) => {
 						const i_scatterInterval = index * scatterInterval;
 						let j = Math.floor(Math.random() * (scatterInterval - 1)) + i_scatterInterval;
-						if (j === 0 && scatterInterval > 2) {j = 1;} // Don't put first track as instrumental if possible
-						if (bSearchDebug) {console.log('bScatterInstrumentals: ' + index + '->' + j);}
+						if (j === 0 && scatterInterval > 2) { j = 1; } // Don't put first track as instrumental if possible
+						if (bSearchDebug) { console.log('bScatterInstrumentals: ' + index + '->' + j); }
 						selectedHandlesArray.splice(j, 0, handle); // (at, 0, item)
 						selectedHandlesData.splice(j, 0, removedData[index]); // (at, 0, item)
 					});
-				} else if (toMoveTracks) {console.log('Warning: Not possible to apply Instrumental track\'s Scattering. Interval is too low. (' + toMoveTracks + ' < 2)');}
+				} else if (toMoveTracks) { console.log('Warning: Not possible to apply Instrumental track\'s Scattering. Interval is too low. (' + toMoveTracks + ' < 2)'); }
 			}
 		}
 		// Spotify's smart shuffle by artist
 		if (bSmartShuffle) { // Sort arrays in place using original data
-			if (bSortRandom) {console.log('Warning: Smart Shuffle is overriding Random Sorting.');}
-			if (bScatterInstrumentals) {console.log('Warning: Smart Shuffle is overriding Instrumental track\'s Scattering.');}
+			if (bSortRandom) { console.log('Warning: Smart Shuffle is overriding Random Sorting.'); }
+			if (bScatterInstrumentals) { console.log('Warning: Smart Shuffle is overriding Instrumental track\'s Scattering.'); }
 			if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
 				const shuffle = shuffleByTags({
 					tagName: smartShuffleTag,
-					data: {handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null},
+					data: { handleArray: selectedHandlesArray, dataArray: selectedHandlesData, tagsArray: null },
 					selItems: null,
 					bSendToActivePls: false,
 					bAdvancedShuffle: bSmartShuffleAdvc,
@@ -2131,13 +2129,13 @@ async function searchByDistance({
 						let newSel = bInKeyMixingPlaylist ? selectedHandlesArray[firstPlaylistLength - 1] : handleList[scoreData[poolLength - 1].index];
 						// Reuse arguments for successive calls and disable debug/logs and playlist creation
 						let newArgs = {};
-						for (let j = 0; j < arguments.length; j++) {newArgs = {...newArgs, ...arguments[j]};}
-						newArgs = {...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false ,bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false};
+						for (const arg of arguments) { newArgs = { ...newArgs, ...arg }; }
+						newArgs = { ...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false, bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false };
 						// Get #n tracks per call and reuse lower scoring track as new selection
 						let newSelectedHandlesArray;
 						for (let i = 0; i < progressiveListCreationN; i++) {
 							const prevtLength = selectedHandlesArray.length;
-							if (bSearchDebug) {console.log('selectedHandlesArray.length: ' + prevtLength);}
+							if (bSearchDebug) { console.log('selectedHandlesArray.length: ' + prevtLength); }
 							[newSelectedHandlesArray, , , newArgs['sel']] = await searchByDistance(newArgs);
 							// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 							selectedHandlesArray = removeDuplicatesV2({
@@ -2145,11 +2143,11 @@ async function searchByDistance({
 								checkKeys: checkDuplicatesByTag,
 								bAdvTitle
 							}).Convert();
-							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) {selectedHandlesArray.length = prevtLength + newPlaylistLength;}
+							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) { selectedHandlesArray.length = prevtLength + newPlaylistLength; }
 						}
-					} else {console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.');}
-				} else {console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.');}
-			} else {console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance');}
+					} else { console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.'); }
+				} else { console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.'); }
+			} else { console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance'); }
 		}
 		// Invert any previous algorithm
 		if (bInverseListOrder) {
@@ -2157,22 +2155,22 @@ async function searchByDistance({
 			selectedHandlesData.reverse();
 		}
 		// Logging
-		if (bProfile) {test.Print('Task #6: Final Selection', false);}
+		if (bProfile) { test.Print('Task #6: Final Selection', false); }
 		if (bShowFinalSelection && !bProgressiveListCreation) {
 			let i = finalPlaylistLength;
 			let conText = 'List of selected tracks:';
-			while (i--) {conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : '');}
+			while (i--) { conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : ''); }
 			console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 		}
 	} else {
-		if (bProfile) {test.Print('Task #6: Final Selection', false);}
+		if (bProfile) { test.Print('Task #6: Final Selection', false); }
 		if (bBasicLogging) {
 			let propertyText = '';
 			if (method === 'GRAPH') {
-				propertyText = properties.hasOwnProperty('graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
+				propertyText = Object.hasOwn(properties, 'graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
 				console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
 			}
-			propertyText = properties.hasOwnProperty('scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
+			propertyText = Object.hasOwn(properties, 'scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
 			console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 		}
 	}
@@ -2184,7 +2182,7 @@ async function searchByDistance({
 		if (bUseTheme) {
 			const themeRegexp = /%SBD_THEME%/gi;
 			if (bIsTF && themeRegexp.test(playlistName)) {
-				playlistNameEval = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + theme.name +')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
+				playlistNameEval = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + theme.name + ')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
 			} else {
 				playlistNameEval = playlistName;
 			}
@@ -2208,13 +2206,11 @@ async function searchByDistance({
 		}
 		const outputHandleList = new FbMetadbHandleList(selectedHandlesArray);
 		plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
-		if (bBasicLogging) {console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.');}
-	} else {
-		if (bBasicLogging) {console.log('Final selection length: ' + finalPlaylistLength + ' tracks.');}
-	}
+		if (bBasicLogging) { console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.'); }
+	} else if (bBasicLogging) { console.log('Final selection length: ' + finalPlaylistLength + ' tracks.'); }
 	// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
-	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') {window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);}
-	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') {window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);}
+	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); }
+	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); }
 	// Output handle list (as array), the score data, current selection (reference track) and more distant track
 	return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handleList[scoreData[poolLength - 1].index] : -1)];
 }
@@ -2239,20 +2235,20 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 				return null;
 			}
 			if (output.indexOf('music_graph_descriptors') === -1 || output.indexOf('()') !== -1 || output.indexOf(',') !== -1) {
-				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output), 'Search by Distance';
+				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output, 'Search by Distance');
 				return null;
 			}
-			const validVars = Object.keys(descr).map((key) => {return 'music_graph_descriptors.' + key;});
+			const validVars = Object.keys(descr).map((key) => { return 'music_graph_descriptors.' + key; });
 			if (output.indexOf('+') === -1 && output.indexOf('-') === -1 && output.indexOf('*') === -1 && output.indexOf('/') === -1 && validVars.indexOf(output) === -1) {
 				fb.ShowPopupMessage('Error parsing graphDistance (using no arithmetic or variable): ' + output, 'Search by Distance');
 				return null;
 			}
 			output = eval(output);
-			if (Number.isNaN(output)) {fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance');}
+			if (Number.isNaN(output)) { fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance'); }
 		}
-		if (bBasicLogging) {console.log('Parsed graphDistance to: ' + output);}
+		if (bBasicLogging) { console.log('Parsed graphDistance to: ' + output); }
 	}
-	if (Number.isFinite(output)) {output = Math.round(output);}
+	if (Number.isFinite(output)) { output = Math.round(output); }
 	if (output < 0) {
 		fb.ShowPopupMessage('Error parsing graphDistance (< 0): ' + output, 'Search by Distance');
 		return null;
@@ -2265,20 +2261,20 @@ function findStyleGenresMissingGraphCheck(properties) {
 	if (answer === popup.yes) {
 		const tags = JSON.parse(properties.tags[1]); // At least tags must be provided, genreStyleFilter and bAscii are optional
 		findStyleGenresMissingGraph({
-			genreStyleFilter: properties.hasOwnProperty('genreStyleFilterTag') ? JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean) : [],
+			genreStyleFilter: Object.hasOwn(properties, 'genreStyleFilterTag') ? JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean) : [],
 			genreStyleTag: Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity),
-			bAscii: properties.hasOwnProperty('bAscii') ? properties.bAscii[1] : true,
+			bAscii: Object.hasOwn(properties, 'bAscii') ? properties.bAscii[1] : true,
 			bPopup: true
 		});
 	}
 }
 
 function checkMethod(method) {
-	return (new Set(['WEIGHT','GRAPH','DYNGENRE']).has(method));
+	return (new Set(['WEIGHT', 'GRAPH', 'DYNGENRE']).has(method));
 }
 
 function checkScoringDistribution(distr) {
-	return (new Set(['LINEAR','LOGARITHMIC','LOGISTIC','NORMAL']).has(distr));
+	return (new Set(['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL']).has(distr));
 }
 
 // Save and load cache on json
@@ -2289,13 +2285,13 @@ function saveCache(cacheMap, path) {
 function loadCache(path) {
 	let cacheMap;
 	if (_isFile(path)) {
-		if (utils.GetFileSize(path) > 400000000) {console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path);}
+		if (utils.GetFileSize(path) > 400000000) { console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path); }
 		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance', utf8);
 		if (obj) {
 			obj = Object.entries(obj);
 			obj.forEach((pair) => {
-				if (pair[1] === null) {pair[1] = Infinity;} // TODO: Only 1 cache structure for both files
-				if (pair[1].distance === null) {pair[1].distance = Infinity;}
+				if (pair[1] === null) { pair[1] = Infinity; } // TODO: Only 1 cache structure for both files
+				if (pair[1].distance === null) { pair[1].distance = Infinity; }
 			}); // stringify converts Infinity to null, this reverts the change
 			cacheMap = new Map(obj);
 		}
@@ -2309,23 +2305,21 @@ function processRecipe(initialRecipe) {
 	const processRecipeFile = (newRecipe) => {
 		const newPath = !_isFile(newRecipe) && _isFile(recipePath + newRecipe) ? recipePath + newRecipe : newRecipe;
 		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8);
-		if (!newRecipeObj) {console.log('Recipe not found: ' + newPath);}
-		else {
-			if (newRecipeObj.hasOwnProperty('tags') && toAdd.hasOwnProperty('tags')) {
-				const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
-				toAdd = {...newRecipeObj, ...toAdd, tags};
-			} else {toAdd = {...newRecipeObj, ...toAdd};}
-		}
+		if (!newRecipeObj) { console.log('Recipe not found: ' + newPath); }
+		else if (Object.hasOwn(newRecipeObj, 'tags') && Object.hasOwn(toAdd, 'tags')) {
+			const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
+			toAdd = { ...newRecipeObj, ...toAdd, tags };
+		} else { toAdd = { ...newRecipeObj, ...toAdd }; }
 		return newRecipeObj;
 	};
 	const deepMergeTags = (newTags, toAddTags) => {
-		const tags = {...newTags};
+		const tags = { ...newTags };
 		for (let key in toAddTags) {
-			if (!tags.hasOwnProperty(key)) {
+			if (!Object.hasOwn(tags, key)) {
 				tags[key] = toAddTags[key];
 			} else {
 				for (let subKey in toAddTags[key]) {
-					if (!tags[key].hasOwnProperty(subKey)) {
+					if (!Object.hasOwn(tags[key], subKey)) {
 						tags[key][subKey] = toAddTags[key][subKey];
 					}
 				}
@@ -2337,19 +2331,19 @@ function processRecipe(initialRecipe) {
 	while (newRecipe.length) {
 		if (isString(newRecipe)) {
 			const newRecipeObj = processRecipeFile(newRecipe);
-			if (!newRecipeObj) {break;}
+			if (!newRecipeObj) { break; }
 			newRecipe = newRecipeObj.recipe || '';
 		} else if (isArrayStrings(newRecipe)) {
 			for (const subRecipe of newRecipe) {
 				const newRecipeObj = processRecipeFile(subRecipe);
-				if (!newRecipeObj) {newRecipe = ''; break;}
+				if (!newRecipeObj) { newRecipe = ''; break; }
 				newRecipe = newRecipeObj.recipe || '';
 				if (newRecipe.length) {
 					const procRecipe = processRecipe(newRecipe);
-					if (procRecipe.hasOwnProperty('tags') && toAdd.hasOwnProperty('tags')) {
+					if (Object.hasOwn(procRecipe, 'tags') && Object.hasOwn(toAdd, 'tags')) {
 						const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
-						toAdd = {...procRecipe, ...toAdd, tags};
-					} else {toAdd = {...procRecipe, ...toAdd};}
+						toAdd = { ...procRecipe, ...toAdd, tags };
+					} else { toAdd = { ...procRecipe, ...toAdd }; }
 				}
 			}
 		} else {
@@ -2369,11 +2363,11 @@ const weightDistribution = memoize((scoringDistribution, proportion /* Should ne
 		proportionWeight = ((1 + Math.log(proportion) * 0.5) + ((1 - proportion) * 0.5) ** (Math.exp(proportion) * alpha));
 	} else if (scoringDistribution === 'LOGISTIC') {
 		const alpha = 2 + Math.abs(tagNumber - newTagNumber);
-		proportionWeight = Math.max(1 - 2/(Math.exp(alpha * proportion) + 1), Math.min(Math.log(1 + proportion * 1.8), 1));
+		proportionWeight = Math.max(1 - 2 / (Math.exp(alpha * proportion) + 1), Math.min(Math.log(1 + proportion * 1.8), 1));
 	} else if (scoringDistribution === 'NORMAL') {
 		const sigma = 0.3 * (1 + Math.abs(tagNumber - newTagNumber)) / Math.max(tagNumber, newTagNumber);
 		const mu = 0.4;
-		proportionWeight = cdfz((proportion - mu) / sigma);
+		proportionWeight = zScoreToCDF((proportion - mu) / sigma);
 	}
 	return proportionWeight;
 });
