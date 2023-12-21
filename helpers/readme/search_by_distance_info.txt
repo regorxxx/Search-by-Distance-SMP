@@ -3,5 +3,5 @@
 That data may come handy in creating new playlists (for tuning settings
 or filters), or to be used along Timeline-SMP (*) or World-Map-SMP (**)
 
-(*)  https://github.com/regorxxx/Yimeline-SMP
+(*)  https://github.com/regorxxx/Timeline-SMP
 (**) https://github.com/regorxxx/World-Map-SMP

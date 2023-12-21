@@ -1,33 +1,46 @@
 ﻿'use strict';
-//28/11/23
+//21/12/23
 
+/* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable , MF_MENUBREAK:readable */
 include('..\\helpers\\buttons_xxx.js');
+/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, themedButton:readable, _gr:readable, _scale:readable, _gdiFont:readable, themedButton:readable, chars:readable, round:readable */
+include('..\\helpers\\helpers_xxx_input.js');
+/* global Input:readable */
 include('..\\helpers\\helpers_xxx_properties.js');
+/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
+include('..\\helpers\\helpers_xxx_prototypes.js');
+/* global isBoolean:readable, isJSON:readable, _p:readable , capitalizePartial:readable */
+include('..\\helpers\\helpers_xxx_tags.js');
+/* global query_join:readable, getTagsValuesV5:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
+/* global _menu:readable, settingsMenu:readable */
 include('..\\helpers\\menu_xxx_extras.js');
+/* global _createSubMenuEditEntries:readable */
 include('..\\helpers\\helpers_xxx_statistics.js');
+/* global calcStatistics:readable */
 include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
+/* global sbd:readable, music_graph_descriptors:readable */
 include('..\\main\\search_by_distance\\search_by_distance_extra.js'); // Load after buttons_xxx.js so properties are only set once
-var version = sbd.version;
+var version = sbd.version; // NOSONAR [shared on files]
 
 try {window.DefineScript('Search by Distance Info Button', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Info Button loaded.'); */} //May be loaded along other buttons
 
 
-var prefix = 'sbd';
+var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
-var newButtonsProperties = { //You can simply add new properties here
+var newButtonsProperties = { // NOSONAR [shared on files]
 	bTooltipInfo:	['Show shortcuts on tooltip', true, {func: isBoolean}, true],
 	bIconMode:		['Icon-only mode?', false, {func: isBoolean}, false],
 	entries:		['Info entries', JSON.stringify([
-		{name: 'By Genre', 
+		{name: 'By Genre',
 			tf: ['GENRE', 'ARTIST GENRE LAST.FM', 'ARTIST GENRE ALLMUSIC', 'ALBUM GENRE LAST.FM', 'ALBUM GENRE ALLMUSIC', 'ALBUM GENRE WIKIPEDIA', 'ARTIST GENRE WIKIPEDIA']},
-		{name: 'By Style', 
+		{name: 'By Style',
 			tf: ['STYLE']},
 	]), {func: isJSON}],
 };
 newButtonsProperties.entries.push(newButtonsProperties.entries[1]);
-newButtonsProperties = {...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
+newButtonsProperties = {...newButtonsProperties}; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // And retrieve
 buttonsBar.list.push(newButtonsProperties);
@@ -35,34 +48,34 @@ buttonsBar.list.push(newButtonsProperties);
 addButton({
 	'Search by Distance Info': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, 'Graph Info', function (mask) {
 		if (mask === MK_SHIFT) {
-				const menu = settingsMenu(
-					this, true, ['buttons_search_by_distance_info.js'], void(0), void(0),
-					(menu) => {
-						menu.newEntry({entryText: 'sep'});
-						_createSubMenuEditEntries(menu, void(0), {
-							name: 'Graph Info',
-							list: JSON.parse(this.buttonsProperties.entries[1]), 
-							defaults: JSON.parse(this.buttonsProperties.entries[3]), 
-							input : () => {
-								const entry = {
-									tf: Input.json('array strings', '',
+			const menu = settingsMenu(
+				this, true, ['buttons_search_by_distance_info.js'], void(0), void(0),
+				(menu) => {
+					menu.newEntry({entryText: 'sep'});
+					_createSubMenuEditEntries(menu, void(0), {
+						name: 'Graph Info',
+						list: JSON.parse(this.buttonsProperties.entries[1]),
+						defaults: JSON.parse(this.buttonsProperties.entries[3]),
+						input : () => {
+							const entry = {
+								tf: Input.json('array strings', '',
 									'Enter tag names:\n\n' +
 									'Ex:\n' + JSON.stringify(['GENRE', 'ALBUM GENRE WIKIPEDIA'])
-									, 'Graph Info', JSON.stringify(['GENRE', 'ALBUM GENRE WIKIPEDIA']), void(0), true),
-								};
-								if (!entry.tf) {return;}
-								return entry;
-							},
-							bNumbered: true,
-							onBtnUp: (entries) => {
-								this.buttonsProperties.entries[1] = JSON.stringify(entries);
-								overwriteProperties(this.buttonsProperties);
-							}
-						});
-					}
-				)
-				menu.btn_up(this.currX, this.currY + this.currH);
-			// createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
+									, 'Graph Info', JSON.stringify(['GENRE', 'ALBUM GENRE WIKIPEDIA']), void(0), true
+								),
+							};
+							if (!entry.tf) {return;}
+							return entry;
+						},
+						bNumbered: true,
+						onBtnUp: (entries) => {
+							this.buttonsProperties.entries[1] = JSON.stringify(entries);
+							overwriteProperties(this.buttonsProperties);
+						}
+					});
+				}
+			);
+			menu.btn_up(this.currX, this.currY + this.currH);
 		} else {
 			graphInfoMenu.bind(this)().btn_up(this.currX, this.currY + this.currH);
 		}
@@ -80,8 +93,6 @@ function buttonTooltipSbdCustom(parent) {
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
 	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click for config)';}
-	// if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)'} 
-	// if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)'}
 	return info;
 }
 
@@ -106,7 +117,7 @@ function graphInfoMenu() {
 						const val = info.MetaValue(idx, count).trim();
 						tag.val[i].push(val);
 						if (i === 0 || i !== 0 && !/TITLE|ALBUM_TRACKS/i.test(tag.type)) {tag.valSet.add(val);}
-					};
+					}
 				}
 			});
 		});
@@ -118,16 +129,16 @@ function graphInfoMenu() {
 	{	// Same...
 		entries.forEach((entry) => {
 			// Add separators
-			if (entry.hasOwnProperty('name') && entry.name === 'sep') {
+			if (Object.hasOwn(entry, 'name') && entry.name === 'sep') {
 				menu.newEntry({entryText: 'sep'});
-			} else { 
+			} else {
 				// Create names for all entries
 				entry.name = entry.name.length > 40 ? entry.name.substring(0,40) + ' ...' : entry.name;
 				// Entries
 				const bSingle = entry.valSet.size <= 1;
 				const menuName = bSingle ? menu.getMainMenuName() : menu.newMenu(entry.name);
 				if (entry.valSet.size === 0) {entry.valSet.add('');}
-				[...entry.valSet].sort((a,b) => a.localeCompare(b, 'en', {'sensitivity': 'base'})).forEach((tagVal, i) => {
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, 'en', {'sensitivity': 'base'})).forEach((tagVal, i) => {
 					menu.newEntry({menuName, entryText:  bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25), func: () => {
 						// report
 						const report = [];
@@ -152,7 +163,7 @@ function graphInfoMenu() {
 						report.push('Most frequent date: ' + Math.round(stats.mode.value) + ' ' + _p(stats.mode.frequency + ' times'));
 						report.push('Average date: ' + Math.round(stats.mean));
 						report.push('Median date: ' + Math.round(stats.median));
-						report.push('Standard deviation: ' + Math.round(stats.sigma)) + ' years';
+						report.push('Standard deviation: ' + Math.round(stats.sigma) + ' years');
 						report.push('Range date (75%-95%): ' + stats.popRange.universal['75%'].map(Math.round).join(' - '));
 						report.push('-'.repeat(40));
 						report.push('');
@@ -160,14 +171,15 @@ function graphInfoMenu() {
 						const data = clone(music_graph_descriptors.nodeList.get(music_graph_descriptors.getSubstitution(tagVal)));
 						const nodeSet = music_graph_descriptors.getNodeSet(false);
 						for (let key in data) {
-							switch (key) {
+							switch (key) { // NOSONAR
 								case 'region': {
 									if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = 'All';}
 									else {data[key] = JSON.stringify(data[key], null, '\t');}
+									break;
 								}
 								default: {
 									if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = '-';}
-									else if (key !== 'region' && Array.isArray(data[key])){
+									else if (Array.isArray(data[key])){
 										data[key] = data[key].map((sg) => {
 											return nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0];
 										});

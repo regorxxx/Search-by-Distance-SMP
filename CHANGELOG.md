@@ -54,6 +54,8 @@
 - Code cleanup.
 ### Removed
 ### Fixed
+- Readmes: minor fix to  'search_by_distance_info.txt' file.
+- Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
 - Crash when using a probability of picking lower than 100 in some cases.
 - Minor fixes.
