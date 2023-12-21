@@ -313,7 +313,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 			sbd.isCalculatingCache = true;
 			const bBar = typeof buttonsBar !== 'undefined';
 			const sbdButtons = bBar
-				? buttonsBar.listKeys.flat(Infinity).filter((key) => { return key.match(/^(?:Search by Distance.*)|(?:Playlist Tools$)/i); })
+				? buttonsBar.listKeys.flat(Infinity).filter((key) => { return key.match(/(?:^Search by Distance.*)|(?:^Playlist Tools$)/i); })
 				: [];
 			if (bBar) {
 				sbdButtons.forEach((key) => {

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//21/12/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -131,7 +131,7 @@ if (!barProperties.firstPopup[1]) {
 // Load Buttons
 function loadButtonsFile(bStartup = false) {
 	let names = [];
-	const file = folders.data + barProperties.name[1] + '.json';
+	const file = folders.data + barProperties.name[1] + '.json'; // NOSONAR [it's always a string...]
 	const presetPopup = () => {
 		if (bStartup && !buttonsBar.firstPopup) { return false; }
 		// Show popup with presets
