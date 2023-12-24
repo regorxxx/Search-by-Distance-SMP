@@ -275,10 +275,10 @@ if (sbd.panelProperties.bTagsCache[1]) {
 // Only use file cache related to current descriptors, otherwise delete it
 const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('descriptorCRC') : null;
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
-const bMissmatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
-if (bMissmatchCRC) {
+const bMismatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
+if (bMismatchCRC) {
 	if (sbd.panelProperties.descriptorCRC[1] !== -1) { // There may be multiple panels, don't nuke it on first init on a new panel
-		console.log('Search by Distance: CRC mistmatch. Deleting old json cache.');
+		console.log('Search by Distance: CRC mismatch. Deleting old json cache.');
 		_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
 		_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
 	}
@@ -478,7 +478,7 @@ const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tag
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
-if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMissmatchCRC) {
+if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMismatchCRC) {
 	const data = [...recipeAllowedKeys].map((key) => {
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
@@ -576,11 +576,11 @@ function testRecipe({ path = null, json = null, baseTags = null } = {}) {
 				result.report.push('Tag missing multi-value type ' + _p(validValTypes.join(', ')) + ': ' + key);
 			}
 			// Range
-			const rangeRegx = /-*range/i;
-			if (Object.hasOwn(tag, 'range') && !tag.type.some((t) => rangeRegx.test(t))) {
+			const rangeRegEx = /-*range/i;
+			if (Object.hasOwn(tag, 'range') && !tag.type.some((t) => rangeRegEx.test(t))) {
 				result.valid = false;
 				result.report.push('Tag missing range type: ' + key);
-			} else if (tag.type.some((t) => rangeRegx.test(t)) && !Object.hasOwn(tag, 'range')) {
+			} else if (tag.type.some((t) => rangeRegEx.test(t)) && !Object.hasOwn(tag, 'range')) {
 				result.valid = false;
 				result.report.push('Tag missing range property: ' + key);
 			}
@@ -945,7 +945,7 @@ async function searchByDistance({
 	catch (e) { fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return; }
 	// Query
 	let query = [];
-	let queryl = 0;
+	let preQueryLength = 0;
 
 	// These should be music characteristics not genre/styles. Like 'electric blues' o 'acoustic', which could apply to any blues style... those things are not connected by graph, but considered only for weight scoring instead.
 	const graphExclusions = descr.map_distance_exclusions; // Set
@@ -1004,7 +1004,7 @@ async function searchByDistance({
 		if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
 			originalWeightValue += tag.weight;
 			if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
-				queryl = query.length;
+				preQueryLength = query.length;
 				const tagNameTF = type.includes('multiple') // May be a tag or a function...
 					? tag.tf.map((t) => { return ((t.indexOf('$') === -1) ? t : _q(t)); })
 					: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
@@ -1020,19 +1020,19 @@ async function searchByDistance({
 							});
 							keyComb.push(query_join(subKeyComb, 'OR'));
 						});
-						// And combinate queries
-						if (keyComb.length !== 0) { query[queryl] = query_join(keyComb, 'OR'); }
-					} else { query[queryl] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
+						// And combine queries
+						if (keyComb.length !== 0) { query[preQueryLength] = query_join(keyComb, 'OR'); }
+					} else { query[preQueryLength] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
 				} else if (type.includes('percentRange')) {
 					const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
 					const rangeLower = round(tag.reference * (100 - tag.range) / 100, 0);
-					if (rangeUpper !== rangeLower) { query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
-					else { query[queryl] += tagNameTF + ' EQUAL ' + tag.reference; }
+					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
 				} else if (type.includes('absRange')) {
 					const rangeUpper = tag.reference + tag.range;
 					const rangeLower = tag.reference - tag.range;
-					if (rangeUpper !== rangeLower) { query[queryl] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
-					else { query[queryl] += tagNameTF + ' EQUAL ' + tag.reference; }
+					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
 				} else if (type.includes('combinations')) {
 					const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
 					const tagComb = k_combinations(tag.reference, k);
@@ -1066,18 +1066,18 @@ async function searchByDistance({
 					} else { // For a single group just match all
 						groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match + ' ' + val).join(' AND '));
 					}
-					query[queryl] = query_join(groups, 'OR');
+					query[preQueryLength] = query_join(groups, 'OR');
 				} else {
 					if (Array.isArray(tagNameTF)) {
 						const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						query[queryl] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
+						query[preQueryLength] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
 					} else {
 						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
-						query[queryl] = query_combinations([tag.reference], tagNameTF, 'OR', void (0), match);
+						query[preQueryLength] = query_combinations([tag.reference], tagNameTF, 'OR', void (0), match);
 					}
 
 				}
-				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[queryl]; }
+				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			}
 		} else if (tag.weight !== 0 && bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
 	}
@@ -1133,17 +1133,17 @@ async function searchByDistance({
 	// But having the same values for other tags could make the track pass to the final pool too, specially for Graph method.
 	// So a variable pre-filter would be needed, calculated according to the input weight values and -estimated- later filters scoring.
 	// Also an input track missing some tags could break the pre-filter logic if not adjusted.
-	queryl = query.length;
-	if (queryl === 0) {
+	preQueryLength = query.length;
+	if (preQueryLength === 0) {
 		if (!originalScore) {
 			console.log('No query available for selected track. Probably missing tags!');
 			return;
-		} else { query[queryl] = ''; } // Pre-Filter may not be relevant according to weights...
+		} else { query[preQueryLength] = ''; } // Pre-Filter may not be relevant according to weights...
 	}
-	const querylength = query.length;
+	const queryLength = query.length;
 	if (method === 'WEIGHT') { // Weight or Dyngenre method. Pre-filtering is really simple...
-		if (querylength === 1 && !query[0].length) { query[querylength] = ''; }
-		else { query[querylength] = query_join(query, 'OR'); } //join previous queries
+		if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
+		else { query[queryLength] = query_join(query, 'OR'); } //join previous queries
 	} else { // Graph Method
 		let influencesQuery = [];
 		if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
@@ -1164,8 +1164,8 @@ async function searchByDistance({
 		if (bUseInfluencesFilter) { // Outputs only influences using queries (and changes other settings!)
 			let influences = [];
 			calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
-				let infl = descr.getInfluences(genreStyle);
-				if (infl.length) { influences.push(...descr.replaceWithSubstitutionsReverse(infl)); }
+				let sgInfluences = descr.getInfluences(genreStyle);
+				if (sgInfluences.length) { influences.push(...descr.replaceWithSubstitutionsReverse(sgInfluences)); }
 			});
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 			if (influences.length) {
@@ -1177,10 +1177,10 @@ async function searchByDistance({
 			}
 		}
 		if (influencesQuery.length) {
-			query[querylength] = query_join(influencesQuery, 'AND');
+			query[queryLength] = query_join(influencesQuery, 'AND');
 		} else {
-			if (querylength === 1 && !query[0].length) { query[querylength] = ''; }
-			else { query[querylength] = query_join(query, 'OR'); } //join previous query's
+			if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
+			else { query[queryLength] = query_join(query, 'OR'); } //join previous query's
 		}
 	}
 	const queryStages = []; // Currently unused
@@ -1192,8 +1192,8 @@ async function searchByDistance({
 			queryArtist = 'NOT ' + _p(query_join(queryArtist, 'OR'));
 		}
 		if (queryArtist.length) {
-			if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryArtist); }
-			else { query[querylength] += queryArtist; }
+			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryArtist); }
+			else { query[queryLength] += queryArtist; }
 		}
 	}
 	if (bSimilArtistsFilter && !bUseTheme) {
@@ -1215,8 +1215,8 @@ async function searchByDistance({
 			querySimil = query_join(querySimil, 'OR');
 		}
 		if (querySimil.length) {
-			if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(querySimil); }
-			else { query[querylength] += querySimil; }
+			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(querySimil); }
+			else { query[queryLength] += querySimil; }
 		}
 	}
 	if (artistRegionFilter !== -1) {
@@ -1228,8 +1228,8 @@ async function searchByDistance({
 				if (len > 50000) { // Minor optimization for huge queries
 					queryStages.push(queryRegion);
 				} else {
-					if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion); }
-					else { query[querylength] += queryRegion; }
+					if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion); }
+					else { query[queryLength] += queryRegion; }
 				}
 			}
 		} else if (bBasicLogging) {
@@ -1248,8 +1248,8 @@ async function searchByDistance({
 					if (len > 50000) { // Minor optimization for huge queries
 						queryStages.push(queryRegion);
 					} else {
-						if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(queryRegion); }
-						else { query[querylength] += queryRegion; }
+						if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion); }
+						else { query[queryLength] += queryRegion; }
 					}
 				}
 			}
@@ -1302,7 +1302,7 @@ async function searchByDistance({
 					'Non valid Dynamic query or wrong parsing:\n\n' + dynQueries[i] +
 					'\n\nConverted to:\n\n' + dynQuery +
 					(bUseTheme
-						? '\n\n\nCheck the theme has the requrired tags:\n' + validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
+						? '\n\n\nCheck the theme has the required tags:\n' + validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
 						: ''
 					)
 					, 'Search by distance'
@@ -1317,17 +1317,17 @@ async function searchByDistance({
 			if (len > 50000) { // Minor optimization for huge queries
 				queryStages.push(selQuery);
 			} else {
-				if (query[querylength].length) { query[querylength] = _p(query[querylength]) + ' AND ' + _p(selQuery); }
-				else { query[querylength] += selQuery; }
+				if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(selQuery); }
+				else { query[queryLength] += selQuery; }
 			}
 		}
 	}
 	if (forcedQuery.length) { //Add user input query to the previous one
 		// Swap order to improve performance, since the forced query always short circuits the search
-		if (query[querylength].length) { query[querylength] = _p(forcedQuery) + ' AND ' + _p(query[querylength]); }
-		else { query[querylength] += forcedQuery; }
+		if (query[queryLength].length) { query[queryLength] = _p(forcedQuery) + ' AND ' + _p(query[queryLength]); }
+		else { query[queryLength] += forcedQuery; }
 	}
-	if (!query[querylength].length) { query[querylength] = 'ALL'; }
+	if (!query[queryLength].length) { query[queryLength] = 'ALL'; }
 
 	// Preload lib items
 	const libraryItems = fb.GetLibraryItems();
@@ -1348,8 +1348,8 @@ async function searchByDistance({
 	}
 
 	// Load query
-	if (bShowQuery) { console.log('Query created: ' + query[querylength]); }
-	let handleList = fb.GetQueryItemsCheck(libraryItems, query[querylength]);
+	if (bShowQuery) { console.log('Query created: ' + query[queryLength]); }
+	let handleList = fb.GetQueryItemsCheck(libraryItems, query[queryLength]);
 	const debugQuery = (queryItems, q) => {
 		if (!queryItems) {
 			fb.ShowPopupMessage(
@@ -1362,7 +1362,7 @@ async function searchByDistance({
 			);
 		}
 	};
-	debugQuery(handleList, query[querylength]);
+	debugQuery(handleList, query[queryLength]);
 	if (queryStages.length) {
 		queryStages.forEach((subQuery) => {
 			if (bShowQuery) { console.log('Sub-Query created: ' + subQuery); }
@@ -1384,9 +1384,9 @@ async function searchByDistance({
 			handleList = removeDuplicatesV2({ handleList, sortBias, sortOutput: '%TITLE% - ' + globTags.artist + ' - ' + globTags.date, checkKeys: checkDuplicatesByTag, bAdvTitle });
 		}
 	}
-	const tracktotal = handleList.Count;
-	if (bBasicLogging) { console.log('Items retrieved by query (minus duplicates): ' + tracktotal + ' tracks'); }
-	if (!tracktotal) { console.log('Query created: ' + query[querylength]); return; }
+	const trackTotal = handleList.Count;
+	if (bBasicLogging) { console.log('Items retrieved by query (minus duplicates): ' + trackTotal + ' tracks'); }
+	if (!trackTotal) { console.log('Query created: ' + query[queryLength]); return; }
 	// Compute similarity distance by Weight and/or Graph
 	// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
 	let scoreData = [];
@@ -1447,7 +1447,7 @@ async function searchByDistance({
 	if (bProfile) { test.Print('Task #4: Library tags', false); }
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
-	while (i < tracktotal) {
+	while (i < trackTotal) {
 		let weightValue = 0;
 		let mapDistance = Infinity; // We consider points are not linked by default
 		// Get the tags according to weight and filter ''. Also create sets for comparison
@@ -1976,22 +1976,22 @@ async function searchByDistance({
 			if (poolLength > playlistLength) {
 				if (bRandomPick) {	//Random from pool
 					const numbers = Array(poolLength).fill().map((_, index) => index).shuffle();
-					const randomseed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
+					const randomSeed = numbers.slice(0, playlistLength); //random numbers from 0 to poolLength - 1
 					let i = 0;
 					while (i < playlistLength) {
-						const i_random = randomseed[i];
+						const i_random = randomSeed[i];
 						selectedHandlesArray.push(handleList[scoreData[i_random].index]);
 						selectedHandlesData.push(scoreData[i_random]);
 						i++;
 					}
 				} else {
 					if (probPick < 100) { // NOSONAR [Random but starting from high score picked tracks]
-						let randomseed = 0;
+						let randomSeed = 0;
 						let indexSelected = new Set(); //Save index and handles in parallel. Faster than comparing handles.
 						let i = 0;
 						while (indexSelected.size < playlistLength) {
-							randomseed = Math.floor((Math.random() * 100) + 1);
-							if (randomseed < probPick) {
+							randomSeed = Math.floor((Math.random() * 100) + 1);
+							if (randomSeed < probPick) {
 								if (!indexSelected.has(scoreData[i].index)) { //No duplicate selection
 									indexSelected.add(scoreData[i].index);
 									selectedHandlesArray.push(handleList[scoreData[i].index]);
@@ -2134,8 +2134,8 @@ async function searchByDistance({
 						// Get #n tracks per call and reuse lower scoring track as new selection
 						let newSelectedHandlesArray;
 						for (let i = 0; i < progressiveListCreationN; i++) {
-							const prevtLength = selectedHandlesArray.length;
-							if (bSearchDebug) { console.log('selectedHandlesArray.length: ' + prevtLength); }
+							const prevLength = selectedHandlesArray.length;
+							if (bSearchDebug) { console.log('selectedHandlesArray.length: ' + prevLength); }
 							[newSelectedHandlesArray, , , newArgs['sel']] = await searchByDistance(newArgs);
 							// Get all new tracks, remove duplicates after merging with previous tracks and only then cut to required length
 							selectedHandlesArray = removeDuplicatesV2({
@@ -2143,11 +2143,11 @@ async function searchByDistance({
 								checkKeys: checkDuplicatesByTag,
 								bAdvTitle
 							}).Convert();
-							if (selectedHandlesArray.length > prevtLength + newPlaylistLength) { selectedHandlesArray.length = prevtLength + newPlaylistLength; }
+							if (selectedHandlesArray.length > prevLength + newPlaylistLength) { selectedHandlesArray.length = prevLength + newPlaylistLength; }
 						}
 					} else { console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.'); }
 				} else { console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.'); }
-			} else { console.popup('Warning: Can not create a Progressive List. rogressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance'); }
+			} else { console.popup('Warning: Can not create a Progressive List. progressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance'); }
 		}
 		// Invert any previous algorithm
 		if (bInverseListOrder) {
