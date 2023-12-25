@@ -1,5 +1,8 @@
 ﻿'use strict';
-//10/10/22
+//24/12/23
+
+/* exported camelotWheel */
+
 /*
 	The Camelot Wheel lists musical keys that are displayed as 'hours' on a clock. For example, 4 o'clock
 	corresponds to 4B or 4A. The 'B' letter represents major keys, and the ‘A’ letter represents the minor
@@ -21,6 +24,7 @@
 			- Energy Boost ++ (nX -> n+2X): adding two 'hours' (+2), equivalent to going up a step.
 			- Dramatic Energy Raise (nX -> n+7X): adding seven 'hours' (+7), equivalent to going up a half step.
 */
+
 const camelotWheel = function () {
 	// Private fields
 	// Use methods at bottom to get a copy of the objects and not just a reference to the originals
@@ -264,7 +268,7 @@ const camelotWheel = function () {
 		},
 		hasKey(xy) {
 			return (typeof xy === 'object'
-				? (xy.hasOwnProperty('hour') && xy.hasOwnProperty('letter')
+				? (Object.prototype.hasOwnProperty.call(xy, 'hour') && Object.prototype.hasOwnProperty.call(xy, 'letter')
 					? keyNotation.has(xy.hour + xy.letter)
 					: false)
 				: keyNotation.has(xy)
@@ -351,12 +355,16 @@ const camelotWheel = function () {
 		},
 		energySwitch(x) {
 			x.letter = (x.letter === 'A' || x.letter === 'B'
-				? (x.letter === 'A'
+				? (
+					x.letter === 'A'
 						? 'B'
-						: 'A')
-				: (x.letter === 'm'
-					? 'd'
-					: 'm')
+						: 'A'
+				)
+				: (
+					x.letter === 'm'
+						? 'd'
+						: 'm'
+				)
 			);
 			return x;
 		},
@@ -412,7 +420,7 @@ const camelotWheel = function () {
 		createRange(x, keyRange, notation = {name: ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ , bFlat: true}) {
 			// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
 			// Gets both, flat and sharp equivalences
-			let nextKeyObj, nextKeyFlat, nextKeySharp;
+			let nextKeyObj;
 			let keyComb = [];
 			[{...x}, this.energySwitch({...x})].forEach((keyObj, i) => {
 				[this.energyBoost, this.energyDrop].forEach((movement) => {
@@ -432,23 +440,43 @@ const camelotWheel = function () {
 			});
 			return (notation.bFlat ? [...keyComb] : keyComb); // To be used with a query, contains all keys within given range
 		},
-		createHarmonicMixingPattern(playlistLength) {
+		createHarmonicMixingPattern(playlistLength, options = {/* movements, bRandomize, bFillPerfectMatch */}) { // NOSONAR
+			const defaults = {
+				movements: { // Values are percentages of the total sum
+					perfectMatch: 	35	, // perfectMatch (=)
+					energyBoost	: 	10	, // energyBoost (+1)
+					energyDrop	:	10	, // energyDrop (-1)
+					energySwitch:	10	, // energySwitch (B/A)
+					moodBoost	:	5	, // moodBoost (+3)
+					moodDrop	:	5	, // moodDrop (-3)
+					energyRaise	:	5	, // energyRaise (+7)
+					domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
+					subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
+				},
+				bRandomize: false,
+				bFillPerfectMatch: true
+			};
 			// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-			// TODO: randomize proportions a bit and use perfectMatch as default for the rest
-			const movements = {
-				perfectMatch: 	35	, // perfectMatch (=)
-				energyBoost	: 	10	, // energyBoost (+1)
-				energyDrop	:	10	, // energyDrop (-1)
-				energySwitch:	10	, // energySwitch (B/A)
-				moodBoost	:	5	, // moodBoost (+3)
-				moodDrop	:	5	, // moodDrop (-3)
-				energyRaise	:	5	, // energyRaise (+7)
-				domKey		:	10	, // domKey (+1 & B/A) = energyBoost & energySwitch
-				subDomKey	:	10	, // subDomKey (-1 & B/A) = energyDrop & energySwitch
-			}; // Sum must be 100%
+			const movements = options.movements
+				? {...options.movements}
+				: {...defaults.movements};
+			// It may also be randomized a bit more
+			if ({...defaults, ...options}.bRandomize) {
+				const totalWeight = Object.values(movements).reduce((total, curr) => total + curr, 0);
+				Object.keys(movements).forEach((key) => {
+					movements[key] += Math.round((10 - Math.random() * 20) * totalWeight / 100);
+					if (movements[key] < 0) {delete movements[key];}
+				});
+			}
+			// And any proportions below 100% are filled with exact matches
+			if ({...defaults, ...options}.bFillPerfectMatch) {
+				const toFill = 100 - Object.keys(movements).reduce((total, curr) => total + curr, 0);
+				if (toFill > 0) {movements.perfectMatch += toFill;}
+			}
+			const totalWeight = Object.values(movements).reduce((total, curr) => total + curr, 0);
 			let pattern = [];
 			Object.keys(movements).forEach((key) => {
-				pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / 100)).fill(key));
+				pattern = pattern.concat(Array(Math.ceil(playlistLength * movements[key] / totalWeight)).fill(key));
 			});
 			// Sort randomly
 			let last = pattern.length;
@@ -458,7 +486,6 @@ const camelotWheel = function () {
 				--last;
 				[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
 			}
-
 			// Cut to desired length and output
 			if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
 			return pattern;
@@ -467,7 +494,7 @@ const camelotWheel = function () {
 			let keyArr = [];
 			if (Array.isArray(pattern) && pattern.length && this.hasKey(x)) {
 				if (typeof x === 'string') {keyArr.push(this.getKeyNotationObjectCamelot(x));}
-				else if (typeof x === 'object' && x.hasOwnProperty('hour') && x.hasOwnProperty('letter')) {keyArr.push(x);}
+				else if (typeof x === 'object' && Object.prototype.hasOwnProperty.call(x, 'hour') && Object.prototype.hasOwnProperty.call(x, 'letter')) {keyArr.push(x);}
 				else {return keyArr;}
 				pattern.forEach( (movement, index) => {keyArr.push(this[movement]({...keyArr[index - 1]}));});
 				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return this.getKeyNotationSharp(keyObj);});} // Translate back
@@ -487,5 +514,5 @@ const camelotWheel = function () {
 			}
 			return reference;
 		}
-	}
+	};
 }();
