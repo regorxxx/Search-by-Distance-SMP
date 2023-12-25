@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//25/12/23
 
 /* exported settingsMenu */
 
@@ -19,8 +19,8 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		parent:			button context
 		bShowValues:	show value along the menu entry
 		readmeFiles:	list of files to show on readme submenu
-		popups:			{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, popup will appear.
-		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Everytime such setting is changed, callback will fire (after changing the setting).
+		popups:			{key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
+		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
 		extraEntries:	function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
 	*/
 	if (extraEntries && !isFunction(extraEntries)) {throw new Error('settingsMenu: extraEntries is not a function');}
@@ -29,7 +29,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 	const parentName = isFunction(parent.text) ? parent.text(parent) : parent.text;
 	const readmeList = readmeFiles.length && _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
 	// Menu
-	menu.newEntry({entryText: 'Configurate button:', func: null, flags: MF_GRAYED});
+	menu.newEntry({entryText: 'Configure button:', func: null, flags: MF_GRAYED});
 	menu.newEntry({entryText: 'sep'});
 	{
 		const options = Object.keys(properties);
