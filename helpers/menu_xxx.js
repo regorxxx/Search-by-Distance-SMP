@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//27/12/23
 
 /* exported _menu, _attachedMenu */
 
@@ -57,7 +57,7 @@
 										values between 0 and 5.
 									For Boolean checks of a single entry, just return true/false
 			-options:				When provided, its length is used to consider the last n entries. In case it's not provided,
-										length is one or zero, only a single entry is considered and the check is boolean.
+										length is one or zero, only a single entry is considered and the check is boolean. It may also be provided directly as a number.
 			-NOTE Idx check:		Shorthand for .newCheckMenu(menuName, entryTextA, void(0), boolFunc), where the entry is
 										automatically retrieved from the last one added to the menu.
 			-NOTE Boolean check:	Shorthand for .newCheckMenu(menuName, options[0], options[options.length - 1], idxFunc),
@@ -194,7 +194,7 @@ function _menu({ bInit = true, bSupressDefaultMenu = true, properties = null, iM
 		const lastEntry = entryArr[entryArr.length - 1];
 		const len = options ? (Array.isArray(options) ? options.length : Number(options)) : 0;
 		return (len > 1
-			? this.newCheckMenu(lastEntry.menuName, entryArr[entryArr.length - options.length].entryText, lastEntry.entryText, func) /* idx check */
+			? this.newCheckMenu(lastEntry.menuName, entryArr[entryArr.length - len].entryText, lastEntry.entryText, func) /* idx check */
 			: this.newCheckMenu(lastEntry.menuName, lastEntry.entryText, void (0), func) /* boolean check */
 		);
 	};
@@ -513,9 +513,9 @@ function _menu({ bInit = true, bSupressDefaultMenu = true, properties = null, iM
 		let nextIndex = [0, 0, 0, 0, 0];
 		const chars = hiddenChars;
 		const num = chars.length;
-		let prevId = nextIndex.length;
+		let prevId = '';
 		return (bNext = true, bReset = false) => {
-			if (bReset) { nextIndex = [0, 0, 0, 0, 0]; return nextIndex; }
+			if (bReset) { nextIndex = [0, 0, 0, 0, 0]; prevId = ''; return prevId; }
 			if (!bNext) { return prevId; }
 			let a = nextIndex[0];
 			let b = nextIndex[1];
@@ -545,8 +545,8 @@ function _menu({ bInit = true, bSupressDefaultMenu = true, properties = null, iM
 	}
 
 	function compareKeys(a, b) {
-		const aKeys = Object.keys(a).sort();
-		const bKeys = Object.keys(b).sort();
+		const aKeys = Object.keys(a).sort((a, b) => a.localeCompare(b));
+		const bKeys = Object.keys(b).sort((a, b) => a.localeCompare(b));
 		return JSON.stringify(aKeys) === JSON.stringify(bKeys);
 	}
 

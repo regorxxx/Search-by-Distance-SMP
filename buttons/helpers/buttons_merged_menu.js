@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//27/12/23
 
 /* exported createButtonsMenu */
 
@@ -153,7 +153,9 @@ function createButtonsMenu(name) {
 	menu.newEntry({ entryText: 'sep' });
 	{
 		const menuName = menu.newMenu('Colors...');
-		const getColorName = (val) => { return (val !== -1 ? ntc.name(Chroma(val).hex())[1] : '-none-'); };
+		const getColorName = (val) => {
+			return (val !== -1 ? (ntc.name(Chroma(val).hex())[1] || '').toString() || 'unknown' : '-none-');
+		}; // From statistics
 		menu.newEntry({ menuName, entryText: 'UI colors: (Ctrl + Click to reset)', flags: MF_GRAYED });
 		menu.newEntry({ menuName, entryText: 'sep' });
 		menu.newEntry({
@@ -216,7 +218,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED
 		});
-		menu.newCheckMenu(menuName, 'Use dynamic hover color', void (0), () => { return barProperties.bDynHoverColor[1]; });
+		menu.newCheckMenuLast(() => barProperties.bDynHoverColor[1]);
 		menu.newEntry({
 			menuName, entryText: 'Use hover color gradient', func: () => {
 				buttonsBar.config.bHoverGrad = barProperties.bHoverGrad[1] = !barProperties.bHoverGrad[1]; // buttons_xxx.js
@@ -224,7 +226,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: !barProperties.bBgButtons[1] && (barProperties.hoverColor[1] !== -1 || barProperties.bDynHoverColor[1]) ? MF_STRING : MF_GRAYED
 		});
-		menu.newCheckMenu(menuName, 'Use hover color gradient', void (0), () => { return barProperties.bHoverGrad[1]; });
+		menu.newCheckMenuLast(() => barProperties.bHoverGrad[1]);
 		menu.newEntry({
 			menuName, entryText: 'Use buttons\' borders on hover', func: () => {
 				buttonsBar.config.bBorders = barProperties.bBorders[1] = !barProperties.bBorders[1];
@@ -232,7 +234,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED
 		});
-		menu.newCheckMenu(menuName, 'Use buttons\' borders on hover', void (0), () => { return barProperties.bBorders[1]; });
+		menu.newCheckMenuLast(() => barProperties.bBorders[1]);
 		menu.newEntry({ menuName, entryText: 'sep' });
 		menu.newEntry({
 			menuName, entryText: 'Set active button color...' + '\t[' + getColorName(barProperties.activeColor[1]) + ']', func: () => {
@@ -292,7 +294,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}
 		});
-		menu.newCheckMenu(menuName, 'Use themed buttons', void (0), () => { return barProperties.bBgButtons[1]; });
+		menu.newCheckMenuLast(() => barProperties.bBgButtons[1]);
 		menu.newEntry({ menuName, entryText: 'sep' });
 		menu.newEntry({
 			menuName, entryText: 'Reset all configuration...', func: () => {
@@ -391,7 +393,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}
 		});
-		menu.newCheckMenu(menuName, 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), void (0), () => { return barProperties.bReflow[1]; });
+		menu.newCheckMenuLast(() => barProperties.bReflow[1]);
 		menu.newEntry({
 			menuName, entryText: 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), func: () => {
 				barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
@@ -400,7 +402,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: barProperties.bFullSize[1] ? MF_GRAYED : MF_STRING
 		});
-		menu.newCheckMenu(menuName, 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), void (0), () => { return barProperties.bAlignSize[1]; });
+		menu.newCheckMenuLast(() => barProperties.bAlignSize[1]);
 		menu.newEntry({
 			menuName, entryText: 'Full size buttons', func: () => {
 				barProperties.bFullSize[1] = !barProperties.bFullSize[1];
@@ -409,7 +411,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}
 		});
-		menu.newCheckMenu(menuName, 'Full size buttons', void (0), () => { return barProperties.bFullSize[1]; });
+		menu.newCheckMenuLast(() => barProperties.bFullSize[1]);
 	}
 	{
 		const menuName = menu.newMenu('Other UI settings...');
@@ -420,7 +422,7 @@ function createButtonsMenu(name) {
 				buttonsBar.config.bShowID = barProperties.bShowId[1]; // buttons_xxx.js
 			}
 		});
-		menu.newCheckMenu(menuName, 'Show properties IDs on tooltip', void (0), () => { return barProperties.bShowId[1]; });
+		menu.newCheckMenuLast(() => barProperties.bShowId[1]);
 		menu.newEntry({ menuName, entryText: 'sep' });
 		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({
@@ -447,7 +449,7 @@ function createButtonsMenu(name) {
 					window.Repaint(true);
 				}
 			});
-			menu.newCheckMenu(subMenu, 'Force for all buttons', void (0), () => { return buttonsBar.config.bIconMode; });
+			menu.newCheckMenuLast(() => buttonsBar.config.bIconMode);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), func: () => {
 					barProperties.bIconModeExpand[1] = !barProperties.bIconModeExpand[1];
@@ -456,7 +458,7 @@ function createButtonsMenu(name) {
 					window.Repaint();
 				}, flags: buttonsBar.config.orientation === 'x' ? MF_STRING : MF_GRAYED
 			});
-			menu.newCheckMenu(subMenu, 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), void (0), () => { return buttonsBar.config.bIconModeExpand; });
+			menu.newCheckMenuLast(() => buttonsBar.config.bIconModeExpand);
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
 				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key], 'bIconMode'))) {
@@ -481,7 +483,7 @@ function createButtonsMenu(name) {
 							window.Repaint();
 						}, flags: buttonsBar.config.bIconMode || bHeadless ? MF_GRAYED : MF_STRING
 					});
-					menu.newCheckMenu(subMenu, entryText, void (0), () => { return arrKeys.some((key) => buttonsBar.buttons[key].bIconMode); });
+					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].bIconMode));
 				}
 			});
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
@@ -526,7 +528,7 @@ function createButtonsMenu(name) {
 					window.Repaint(true);
 				}, flags: checkHeadless() ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenu(subMenu, 'Enable for all buttons', void (0), checkHeadless);
+			menu.newCheckMenuLast(checkHeadless);
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
 				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
@@ -550,7 +552,7 @@ function createButtonsMenu(name) {
 							window.Repaint(true);
 						}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING
 					});
-					menu.newCheckMenu(subMenu, entryText, void (0), () => { return arrKeys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode()); });
+					menu.newCheckMenuLast(() => { return arrKeys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode()); });
 				}
 			});
 			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
@@ -582,7 +584,7 @@ function createButtonsMenu(name) {
 				overwriteProperties(barProperties);
 			}
 		});
-		menu.newCheckMenu(subMenu, 'Asynchronous loading (startup)', void (0), () => barProperties.bLoadAsync[1]);
+		menu.newCheckMenuLast(() => barProperties.bLoadAsync[1]);
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{
@@ -605,7 +607,7 @@ function createButtonsMenu(name) {
 				}
 			}
 		});
-		menu.newCheckMenu(subMenu, 'Automatically check for updates', void (0), () => barProperties.bAutoUpdateCheck[1]);
+		menu.newCheckMenuLast(() => barProperties.bAutoUpdateCheck[1]);
 		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Check for updates...', func: () => {

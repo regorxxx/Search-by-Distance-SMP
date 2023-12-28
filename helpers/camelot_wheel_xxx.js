@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/12/23
+//27/12/23
 
 /* exported camelotWheel */
 
@@ -268,7 +268,7 @@ const camelotWheel = function () {
 		},
 		hasKey(xy) {
 			return (typeof xy === 'object'
-				? (Object.prototype.hasOwnProperty.call(xy, 'hour') && Object.prototype.hasOwnProperty.call(xy, 'letter')
+				? (Object.hasOwn(xy, 'hour') && Object.hasOwn(xy, 'letter')
 					? keyNotation.has(xy.hour + xy.letter)
 					: false)
 				: keyNotation.has(xy)
@@ -494,7 +494,7 @@ const camelotWheel = function () {
 			let keyArr = [];
 			if (Array.isArray(pattern) && pattern.length && this.hasKey(x)) {
 				if (typeof x === 'string') {keyArr.push(this.getKeyNotationObjectCamelot(x));}
-				else if (typeof x === 'object' && Object.prototype.hasOwnProperty.call(x, 'hour') && Object.prototype.hasOwnProperty.call(x, 'letter')) {keyArr.push(x);}
+				else if (typeof x === 'object' && Object.hasOwn(x, 'hour') && Object.hasOwn(x, 'letter')) {keyArr.push(x);}
 				else {return keyArr;}
 				pattern.forEach( (movement, index) => {keyArr.push(this[movement]({...keyArr[index - 1]}));});
 				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return this.getKeyNotationSharp(keyObj);});} // Translate back

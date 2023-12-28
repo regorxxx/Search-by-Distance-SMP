@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//27/12/23
 
 /* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter, findStyleGenresMissingGraph */
 
@@ -474,7 +474,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 			'https://github.com/regorxxx/Music-Graph/issues\n\n' +
 			'An example of a good report of missing genre/style would be:\n' +
 			'"Hey check this Metal style, you missed from the 90s which is not equal\n' +
-			'to \'Black Metal\' or any other present style (+ youtube link)"\n\n' +
+			'to \'Black Metal\' or any other present style (+ YouTube link)"\n\n' +
 			'An example of a bad report of missing genre/style would be:\n' +
 			'"Hey, \'Folk/Rock\' is missing, but it\'s a known genre. Add it please."\n' +
 			'(This is not valid because there is already a \'Folk-Rock\' entry, just use\n' +
