@@ -1,12 +1,15 @@
 ﻿'use strict';
-//24/11/23
+//28/12/23
 
+/* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
+
+/* eslint-disable indent */
 const music_graph_descriptors_allmusic = {
 	style_substitutions: [
 	/* 	CODES:
 		*	->	Already included items on the graph (are checked against it and reported if not found)
 		-	->	Items which don't have an alternative term (reported as missing)
-		0	->	Items which are meant to be filtered (added to the exclusions s: [filter) 
+		0	->	Items which are meant to be filtered (added to the exclusions s: [filter)
 	*/
 	/* Classical */
 			['Avant-Garde Classical'			,	['Avant-Garde Music'				]],
@@ -417,7 +420,7 @@ const music_graph_descriptors_allmusic = {
 			['Trap'								,	['Trap (Latin)'						]],
 			['0'								,	['Urbano'							]],
 	/* International */
-	/* 
+	/*
 		Most of these are omitted since they point to music classified by cultural groups, not to genres
 		with similar characteristics.
 	*/
@@ -745,7 +748,7 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Siamese'							]],
 			['0'								,	['Thai'								]],
 			['0'								,	['Vietnamese'						]],
-		/* Southern African */	
+		/* Southern African */
 			['0'								,	['Southern African'					]],
 			['0'								,	['Angolan'							]],
 			['0'								,	['Chimurenga'						]],
@@ -930,13 +933,13 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Electric Delta Blues'				]],
 			['0'								,	['Finger-Picked Guitar'				]],
 			['0'								,	['Modern Delta Blues'				]],
-		/* Early Acoustic Blues */	
+		/* Early Acoustic Blues */
 			['0'								,	['Early Acoustic Blues'				]],
 			['0'								,	['Acoustic Blues'					]],
 			['0'								,	['Acoustic Memphis Blues'			]],
 			['0'								,	['Classic Blues Vocals'				]],
 			['0'								,	['Classic Female Blues'				]],
-			['-'								,	['Dirty Blues'						]],	
+			['-'								,	['Dirty Blues'						]],
 			['0'								,	['Early American Blues'				]],
 			['-'								,	['Piedmont Blues'					]],
 			['-'								,	['Pre-War Blues'					]],
@@ -945,7 +948,7 @@ const music_graph_descriptors_allmusic = {
 		/* East Coast Blues */
 			['-'								,	['East Coast Blues'					]],
 			['-'								,	['New York Blues'					]],
-		/* Electric Blues */		
+		/* Electric Blues */
 			['*'								,	['Detroit Blues'					]],
 			['0'								,	['Electric Blues'					]],
 			['0'								,	['Electric Country Blues'			]],
@@ -1250,6 +1253,7 @@ const music_graph_descriptors_allmusic = {
 	// For graph filtering
 	map_distance_exclusions: new Set(), // Filled automatically with code list
 };
+/* eslint-enable indent */
 
 // Don't edit past this line...
 if (Object.keys(music_graph_descriptors_allmusic).length) {
@@ -1317,24 +1321,23 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 	Object.keys(allm).forEach((key) => { // We have only: arrays, sets, strings, numbers and booleans properties
 		if (Array.isArray(parent[key]) && Array.isArray(allm[key])) { // Arrays
 			allm[key].forEach((nodeArray, i) => {
-					// [ [A,[values]], ..., [[X,[values]], ... ] index of X within main array? Using flat(), length gets doubled.
-					const doubleIndex = parent[key].flat().indexOf(nodeArray[0]);
-					const index = !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
-					if (index !== -1) { // If present on both files, replace with new value
-						const oldPair = parent[key][index];
-						const newPair = allm[key][i];
-						const oldPairSet = new Set(oldPair[1]);
-						const newPairSet = new Set(newPair[1]);
-						const toDelete = newPairSet.size ? oldPairSet.intersection(newPairSet) : null;
-						// Merge sets and delete elements present on both
-						// Note replacing [A,[B,C]] with [A,[]] is the same than deleting the line, since no link will be created
-						const newValue = newPairSet.size ? [...oldPairSet.union(newPairSet).difference(toDelete)] : []; 
-						oldPair[1] = newValue;
-					} else { // Otherwise just push new pair
-						parent[key].push(allm[key][i]);
-					}
+				// [ [A,[values]], ..., [[X,[values]], ... ] index of X within main array? Using flat(), length gets doubled.
+				const doubleIndex = parent[key].flat().indexOf(nodeArray[0]);
+				const index = !(doubleIndex & 1) ? doubleIndex / 2 : -1; // -1 for odd indexes, halved for even values
+				if (index !== -1) { // If present on both files, replace with new value
+					const oldPair = parent[key][index];
+					const newPair = allm[key][i];
+					const oldPairSet = new Set(oldPair[1]);
+					const newPairSet = new Set(newPair[1]);
+					const toDelete = newPairSet.size ? oldPairSet.intersection(newPairSet) : null;
+					// Merge sets and delete elements present on both
+					// Note replacing [A,[B,C]] with [A,[]] is the same than deleting the line, since no link will be created
+					const newValue = newPairSet.size ? [...oldPairSet.union(newPairSet).difference(toDelete)] : [];
+					oldPair[1] = newValue;
+				} else { // Otherwise just push new pair
+					parent[key].push(allm[key][i]);
 				}
-			);
+			});
 		} else if (parent[key].constructor === Set && allm[key].constructor === Set) { // Sets
 			const oldPairSet = parent[key];
 			const newPairSet = allm[key];

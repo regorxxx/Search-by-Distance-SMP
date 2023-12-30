@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/11/23
+//30/12/23
 
 include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -22,7 +22,7 @@ var newButtonsProperties = { //You can simply add new properties here
 	bTooltipInfo:	['Show shortcuts on tooltip', true, {func: isBoolean}, true],
 	bIconMode:		['Icon-only mode?', false, {func: isBoolean}, false]
 };
-newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work 
+newButtonsProperties = {...SearchByDistance_properties, ...newButtonsProperties}; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
 newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // And retrieve
 buttonsBar.list.push(newButtonsProperties);
@@ -66,7 +66,7 @@ addButton({
 				searchByDistance({properties : this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this}); // All set according to properties panel!
 			}
 		}
-	}, null, void(0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void(0), void(0), 
+	}, null, void(0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void(0), void(0),
 	{
 		'on_notify_data': (parent, name, info) => {
 			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') {return;}
@@ -75,7 +75,7 @@ addButton({
 				case 'Search by Distance: share configuration': {
 					if (info) {
 						if (info.notifyThis && parent.name === info.name) {return;} // Don't apply to same button
-						parent.switcHighlight(true);
+						parent.switchHighlight(true);
 						const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
 						if (answer === popup.yes) {
 							parent.buttonsProperties.tags[1] = String(info.tags[1]);
@@ -86,7 +86,7 @@ addButton({
 							parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
 							overwriteProperties(parent.buttonsProperties);
 						}
-						parent.switcHighlight(false);
+						parent.switchHighlight(false);
 						window.Repaint();
 					}
 					break;
@@ -97,7 +97,7 @@ addButton({
 	(parent) => { // Update tooltip on init
 		const properties = parent.buttonsProperties;
 		parent.recipe = {
-			recipe: properties.recipe[1].length ? processRecipe(properties.recipe[1], JSON.parse(properties.tags[1])) : null, 
+			recipe: properties.recipe[1].length ? processRecipe(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
 			name: properties.recipe[1] || ''
 		};
 	},
@@ -115,23 +115,23 @@ function buttonTooltipSbdCustom(parent) {
 	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
 	info += '\nMethod:\t' + (recipe.hasOwnProperty('method') ? recipe.method : properties.method[1]);
 	const sort = (
-		((recipe.hasOwnProperty('bSmartShuffle') ? recipe.bSmartShuffle : properties.bSmartShuffle[1]) 
-			? 'Smart Shuffle' 
+		((recipe.hasOwnProperty('bSmartShuffle') ? recipe.bSmartShuffle : properties.bSmartShuffle[1])
+			? 'Smart Shuffle'
 			: ''
-		) || ((recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) 
-			? 'Harmonic Mix' 
+		) || ((recipe.hasOwnProperty('bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1])
+			? 'Harmonic Mix'
 			: ''
-		) || ((recipe.hasOwnProperty('bSortRandom') ? recipe.bSortRandom : properties.bSortRandom[1]) 
-			? 'Random' 
+		) || ((recipe.hasOwnProperty('bSortRandom') ? recipe.bSortRandom : properties.bSortRandom[1])
+			? 'Random'
 			: ''
-		) || ((recipe.hasOwnProperty('bProgressiveListOrder') ? recipe.bProgressiveListOrder : properties.bProgressiveListOrder[1]) 
-			? 'Score' 
+		) || ((recipe.hasOwnProperty('bProgressiveListOrder') ? recipe.bProgressiveListOrder : properties.bProgressiveListOrder[1])
+			? 'Score'
 			: ''
-		)) + ((recipe.hasOwnProperty('bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1]) 
-			? ' - Progressive playlist' 
+		)) + ((recipe.hasOwnProperty('bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1])
+			? ' - Progressive playlist'
 			: ''
 		) + ((recipe.hasOwnProperty('artistRegionFilter') ? recipe.artistRegionFilter : properties.artistRegionFilter[1]) !== -1 || (recipe.hasOwnProperty('genreStyleRegionFilter') ? recipe.genreStyleRegionFilter : properties.genreStyleRegionFilter[1]) !== -1
-			? ' - Cultural filter' 
+			? ' - Cultural filter'
 			: ''
 		);
 	info += sort ? '   ' + _p(sort) : '';
@@ -141,7 +141,7 @@ function buttonTooltipSbdCustom(parent) {
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
 	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click for other config and tools)';}
-	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)'} 
+	if (!bShift && bControl || bTooltipInfo) {info += '\n(Ctrl + L. Click to set recipe)'}
 	if (bShift && bControl || bTooltipInfo) {info += '\n(Shift + Ctrl + L. Click to set theme)'}
 	return info;
 }
@@ -149,7 +149,7 @@ function buttonTooltipSbdCustom(parent) {
 function processRecipe(recipeFile, tags) {
 	let recipe = {};
 	if (recipeFile.length) {
-		recipe = _isFile(recipeFile) 
+		recipe = _isFile(recipeFile)
 			? _jsonParseFileCheck(recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
 			: _jsonParseFileCheck(recipePath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {};
 		if (Object.keys(recipe).length !== 0) {

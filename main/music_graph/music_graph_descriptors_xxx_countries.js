@@ -1,14 +1,15 @@
 ﻿'use strict';
-//18/01/23
+//28/12/23
 
 if (typeof include !== 'undefined') {
 	include('..\\map\\region_xxx.js');
+	/* global RegionMap:readable */
 }
 
 /*
 	Cultural descriptors
 */
-const music_graph_descriptors_countries = new regionMap ({
+const music_graph_descriptors_countries = new RegionMap({
 	nodeName: 'country',
 	culturalRegion: {
 		'Antarctica': {
@@ -18,95 +19,95 @@ const music_graph_descriptors_countries = new regionMap ({
 		},
 		'Africa': {
 			'West Africa': [
-				'SLE','NGA','LBR','GMB','GHA','GNB','GIN','SEN','CIV','BEN','TGO','CPV','MLI','MRT','BFA'
+				'SLE', 'NGA', 'LBR', 'GMB', 'GHA', 'GNB', 'GIN', 'SEN', 'CIV', 'BEN', 'TGO', 'CPV', 'MLI', 'MRT', 'BFA'
 			],
 			'Maghreb': [ // North Africa
-				'DZA','TUN','ESH','MAR','LBY','EGY'
+				'DZA', 'TUN', 'ESH', 'MAR', 'LBY', 'EGY'
 			],
 			'Central Africa': [
-				'COD','COG','GAB','SSD','NER','UGA','GNQ','CMR','RWA','CAF','TCD','BDI'
+				'COD', 'COG', 'GAB', 'SSD', 'NER', 'UGA', 'GNQ', 'CMR', 'RWA', 'CAF', 'TCD', 'BDI'
 			],
 			'East Africa': [
-				'ETH','KEN','SDN','SOM','DJI','ERI'
+				'ETH', 'KEN', 'SDN', 'SOM', 'DJI', 'ERI'
 			],
 			'South Africa': [
-				'ZAF','TZA','MOZ','NAM','ZMB','ZWE','COM','SWZ','SYC','STP','SHN','REU','AGO','MDG','BWA','ATF','LSO','MWI','MUS','MYT','BVT'
+				'ZAF', 'TZA', 'MOZ', 'NAM', 'ZMB', 'ZWE', 'COM', 'SWZ', 'SYC', 'STP', 'SHN', 'REU', 'AGO', 'MDG', 'BWA', 'ATF', 'LSO', 'MWI', 'MUS', 'MYT', 'BVT'
 			]
 		},
 		'Asia': {
 			'Central Asia': [
-				'NPL','BTN'
+				'NPL', 'BTN'
 			],
 			'East Asia': [
-				'TWN','CHN','JPN','PRK','MAC','HKG'
+				'TWN', 'CHN', 'JPN', 'PRK', 'MAC', 'HKG'
 			],
 			'West Asia': [
-				'TKM','TJK','IRN','PAK','UZB','KAZ','KOR','AFG','KGZ'
+				'TKM', 'TJK', 'IRN', 'PAK', 'UZB', 'KAZ', 'KOR', 'AFG', 'KGZ'
 			],
 			'South Asia': [
-				'BGD','THA','IND','MMR','VNM','LKA','SGP','TLS','PHL','MYS','LAO','KHM','MDV','BRN','MNP','IOT','IDN'
+				'BGD', 'THA', 'IND', 'MMR', 'VNM', 'LKA', 'SGP', 'TLS', 'PHL', 'MYS', 'LAO', 'KHM', 'MDV', 'BRN', 'MNP', 'IOT', 'IDN'
 			],
 			'North Asia': [
-				'MNG','RUS'
+				'MNG', 'RUS'
 			]
 		},
 		'Europe': {
 			'Eastern Europe': [
-				'ALB','UKR','SRB','MKD','HRV','MDA','MNE','ROU','BIH','BGR'
+				'ALB', 'UKR', 'SRB', 'MKD', 'HRV', 'MDA', 'MNE', 'ROU', 'BIH', 'BGR'
 			],
 			'Southern Europe': [
-				'AND','ESP','ITA','GIB','GRC','PRT','MLT','SMR','VAT'
+				'AND', 'ESP', 'ITA', 'GIB', 'GRC', 'PRT', 'MLT', 'SMR', 'VAT'
 			],
 			'Central Europe': [
-				'AUT','CHE','SVN','SVK','DEU','CZE','LIE','POL','HUN'
+				'AUT', 'CHE', 'SVN', 'SVK', 'DEU', 'CZE', 'LIE', 'POL', 'HUN'
 			],
 			'Western Europe': [
-				'BEL','GBR','MCO','IRL','FRA','LUX','NLD','GGY','IMN','JEY'
+				'BEL', 'GBR', 'MCO', 'IRL', 'FRA', 'LUX', 'NLD', 'GGY', 'IMN', 'JEY'
 			],
 			'Northern Europe': [
-				'BLR','SWE','NOR','LTU','EST','DNK','FIN','SJM','LVA','GRL','FRO','ISL'
+				'BLR', 'SWE', 'NOR', 'LTU', 'EST', 'DNK', 'FIN', 'SJM', 'LVA', 'GRL', 'FRO', 'ISL'
 			]
 		},
 		'Mashriq': { // West Asia
 			'Arabian Peninsula': [
-				'BHR','SAU','OMN','QAT','YEM','ARE'
+				'BHR', 'SAU', 'OMN', 'QAT', 'YEM', 'ARE'
 			],
 			'Anatolia': [
-				'AZE','ARM','TUR','GEO'
+				'AZE', 'ARM', 'TUR', 'GEO'
 			],
 			'Levant': [
-				'SYR','ISR','PSE','LBN','JOR','CYP'
+				'SYR', 'ISR', 'PSE', 'LBN', 'JOR', 'CYP'
 			],
 			'Mesopotamia': [
-				'IRQ','KWT'
+				'IRQ', 'KWT'
 			]
 		},
 		'America': {
 			'Caribbean': [
-				'CUB','DMA','DOM','JAM','PRI','MSR','VIR','VGB','TCA','TTO','VCT','LCA','KNA','HTI','CYM','MTQ','ANT','GLP','GRD','AIA'
+				'CUB', 'DMA', 'DOM', 'JAM', 'PRI', 'MSR', 'VIR', 'VGB', 'TCA', 'TTO', 'VCT', 'LCA', 'KNA', 'HTI', 'CYM', 'MTQ', 'ANT', 'GLP', 'GRD', 'AIA'
 			],
 			'North America': [
-				'ATG','ABW','BHS','BRB','USA','CAN','SPM','BMU'
+				'ATG', 'ABW', 'BHS', 'BRB', 'USA', 'CAN', 'SPM', 'BMU'
 			],
 			'Central America': [
-				'CRI','SLV','GTM','HND','MEX','NIC','PAN','BLZ'
+				'CRI', 'SLV', 'GTM', 'HND', 'MEX', 'NIC', 'PAN', 'BLZ'
 			],
 			'South America': [
-				'ARG','CHL','COL','ECU','URY','PRY','PER','VEN','SUR','SGS','BOL','GUF','BRA','FLK','GUY'
+				'ARG', 'CHL', 'COL', 'ECU', 'URY', 'PRY', 'PER', 'VEN', 'SUR', 'SGS', 'BOL', 'GUF', 'BRA', 'FLK', 'GUY'
 			]
 		},
 		'Oceania': {
 			'Australasia': [
-				'AUS','CCK','CXR','NFK','HMD'
+				'AUS', 'CCK', 'CXR', 'NFK', 'HMD'
 			],
 			'Melanesia': [
-				'VUT','NCL','SLB','PNG','FJI'
+				'VUT', 'NCL', 'SLB', 'PNG', 'FJI'
 			],
 			'Micronesia': [
-				'PLW','GUM','FSM','NRU','MHL'
+				'PLW', 'GUM', 'FSM', 'NRU', 'MHL'
 			],
 			'Polynesia': [
-				'TUV','WLF','UMI','TKL','TON','WSM','PCN','PYF','COK','NZL','ASM','NIU','KIR'
+				'TUV', 'WLF', 'UMI', 'TKL', 'TON', 'WSM', 'PCN', 'PYF', 'COK', 'NZL', 'ASM', 'NIU', 'KIR'
 			]
 		}
 	}

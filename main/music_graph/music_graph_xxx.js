@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/12/23
+//28/12/23
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -140,7 +140,8 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	}
 
 	for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
-		if (j === style_supergenre_cluster_break) {j = 0;}  //Join supergenres clusters in circle: last one is next to first one
+		//Join supergenres clusters in circle: last one is next to first one
+		if (j === style_supergenre_cluster_break) {j = 0;} // NOSONAR [intended]
 		mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], {weight: inter_supergenre, absoluteWeight: 0});
 	}
 
@@ -177,7 +178,6 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 				for (h = 0; h < style_supergenre_length; h++) {
 					if (superGenreSets[h].has(style_primary_origin[i][0]) && superGenreSets[h].has(style_primary_origin[i][1][j])) {
 						mygraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], {weight: Infinity, absoluteWeight: primary_origin_influence});
-						// console.log(style_primary_origin[i][0], style_primary_origin[i][1][j]);
 					}
 				}
 			}
@@ -193,7 +193,6 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 				for (h = 0; h < style_supergenre_length; h++) {
 					if (superGenreSets[h].has(style_secondary_origin[i][0]) && superGenreSets[h].has(style_secondary_origin[i][1][j])) {
 						mygraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], {weight: Infinity, absoluteWeight: secondary_origin_influence});
-						// console.log(style_secondary_origin[i][0], style_secondary_origin[i][1][j]);
 					}
 				}
 			}
@@ -215,7 +214,7 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 	const style_primary_origin = descriptor.style_primary_origin;
 	const style_secondary_origin = descriptor.style_secondary_origin;
 	const style_weak_substitutions = descriptor.style_weak_substitutions;
-	// const style_substitutions =  descriptor.style_substitutions; // Not used on drawing
+	// Not used on drawing: descriptor.style_substitutions
 	// Weights
 	const primary_origin = descriptor.primary_origin;
 	const secondary_origin = descriptor.secondary_origin;
@@ -226,7 +225,7 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 	const supergenre_supercluster = descriptor.supergenre_supercluster;
 	const inter_supergenre = descriptor.inter_supergenre;
 	const inter_supergenre_supercluster = descriptor.inter_supergenre_supercluster;
-	// const substitutions = descriptor.substitutions; // Not used on drawing
+	// Not used on drawing: descriptor.substitutions
 	// Drawing
 	const nodeSize = descriptor.nodeSize;
 	const nodeShape = descriptor.nodeShape;
@@ -339,7 +338,8 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 	}
 
 	for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
-		if (j === style_supergenre_cluster_break) {j = 0;} //Join supergenres clusters in circle: last one is next to first one
+		//Join supergenres clusters in circle: last one is next to first one
+		if (j === style_supergenre_cluster_break) {j = 0;} // NOSONAR [intended]
 		mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], {weight: inter_supergenre, absoluteWeight: 0, lineshape: ['stroke-dasharray', '5, 5'], linecolor: ['stroke', map_colors.get(style_supergenre_cluster[0][0])]});
 	}
 
@@ -598,8 +598,8 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	});
 	const _ALL_ = ['style_supergenre_supercluster', 'style_supergenre_cluster', 'style_supergenre', 'style_cluster', 'style_primary_origin', 'style_secondary_origin', 'style_anti_influence', 'style_weak_substitutions', 'style_substitutions'];
 	{ // Check letter case
-		const sep = /([ \-&\/()]|'n'|\bD')/g; // Added parentheses so they are also included on the split array
-		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM'], [/\bL\.\A\. /gi, 'L.A. ']];
+		const sep = /([ \-&/()]|'n'|\bD')/g; // Added parentheses so they are also included on the split array
+		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM'], [/\bL\.A\. /gi, 'L.A. ']];
 		const ommit = [/_cluster$/i];
 		const allmusic = new Set(['New Wave of British Heavy Alternative Metal']);
 		_ALL_.forEach((key) => {
@@ -665,7 +665,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	// Test basic paths using the graph.
 	// Try to load the already existing graph, otherwise uses a new one. If debug is called without the required dependencies then this is skipped.
 	let bGraphDeclared = true;
-	try {sbd && sbd.allMusicGraph;}
+	try {sbd && sbd.allMusicGraph;} // NOSONAR
 	catch(e) {
 		if (e.name === 'ReferenceError') {
 			bGraphDeclared = false;
@@ -688,7 +688,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		let path = [];
 		const superGenreNumbers = music_graph_descriptors.style_supergenre.length; // SuperGenres
 		for (let i = 0; i < superGenreNumbers; i++, nextIndex++) {
-			if (i + 1 === superGenreNumbers) {nextIndex = 0;}
+			if (i + 1 === superGenreNumbers) {nextIndex = 0;} // NOSONAR [intended]
 			keyOne = music_graph_descriptors.style_supergenre[i][0];
 			keyTwo = music_graph_descriptors.style_supergenre[nextIndex][0];
 			({distance, path} = calcGraphDistance(mygraph, keyOne, keyTwo, true));
@@ -704,7 +704,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		}
 		const style_supergenre_clusterNumbers = music_graph_descriptors.style_supergenre_cluster.length; // style_supergenre_clusters
 		for (let i = 0; i < style_supergenre_clusterNumbers; i++, nextIndex++) {
-			if (i + 1 === style_supergenre_clusterNumbers) {nextIndex = 0;}
+			if (i + 1 === style_supergenre_clusterNumbers) {nextIndex = 0;} // NOSONAR [intended]
 			if(music_graph_descriptors.style_supergenre_cluster[i][0] !== 'SKIP' && music_graph_descriptors.style_supergenre_cluster[nextIndex][0] !== 'SKIP' ) {
 				keyOne = music_graph_descriptors.style_supergenre_cluster[i][0];
 				keyTwo = music_graph_descriptors.style_supergenre_cluster[nextIndex][0];
@@ -722,7 +722,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		}
 		const style_supergenre_superclusterNumbers = music_graph_descriptors.style_supergenre_supercluster.length; // style_supergenre_superclusters
 		for (let i = 0; i < style_supergenre_superclusterNumbers; i++, nextIndex++) {
-			if (i + 1 === style_supergenre_superclusterNumbers) {nextIndex = 0;}
+			if (i + 1 === style_supergenre_superclusterNumbers) {nextIndex = 0;} // NOSONAR [intended]
 			keyOne = music_graph_descriptors.style_supergenre_supercluster[i][0];
 			keyTwo = music_graph_descriptors.style_supergenre_supercluster[nextIndex][0];
 			({distance, path} = calcGraphDistance(mygraph, keyOne, keyTwo, true));

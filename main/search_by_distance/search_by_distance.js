@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/12/23
+//28/12/23
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -72,7 +72,7 @@ include('..\\..\\helpers\\dyngenre_map_xxx.js');
 include('..\\music_graph\\music_graph_xxx.js');
 /* global musicGraph:readable, music_graph_descriptors:readable, graphDebug:readable */
 include('..\\music_graph\\music_graph_test_xxx.js');
-/* global testGraph:readable, testGraphV2:readable */
+/* global testGraphNodes:readable, testGraphNodeSets:readable */
 include('..\\filter_and_query\\remove_duplicates.js');
 /* global removeDuplicatesV2:readable, removeDuplicatesV3:readable, removeDuplicates:readable, */
 include('..\\sort\\scatter_by_tags.js');
@@ -404,8 +404,10 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 	}
 	// Multiple Graph testing and logging of results using the existing cache
 	if (sbd.panelProperties.bSearchDebug[1] && sbd.panelProperties.bStartLogging[1]) {
-		doOnce('Test 1', testGraph)(sbd.allMusicGraph);
-		doOnce('Test 2', testGraphV2)(sbd.allMusicGraph);
+		[testGraphNodes, testGraphNodeSets, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
+			console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
+			doOnce('Test i', f)(sbd.allMusicGraph);
+		});
 	}
 }
 
