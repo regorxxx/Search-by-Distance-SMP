@@ -51,6 +51,9 @@
 ## [Unreleased][]
 ### Added
 - Added integrity checks to global user settings files, found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\[...].json'. In particular queries are now check to ensure they are valid and will throw a popup at init otherwise. Other settings are check to ensure they contain valid values too.
+- Toolbar: new settings for text (or icon) position: left, right (default), top and bottom. These settings mimic CUI options at the buttons bar.
+- Toolbar: new settings for text scale (now independent of button and icon scale).
+- Toolbar: new settings for icon scale (now independent of button and text scale).
 ### Changed
 - Helpers: updated helpers.
 - Code cleanup.
@@ -59,6 +62,7 @@
 - Readmes: minor fix to  'search_by_distance_info.txt' file.
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
+- Toolbar: buttons' size not restored back to normal height after disabling 'Full size buttons' without reloading the panel.
 - Crash when using a probability of picking lower than 100 in some cases.
 - Minor fixes.
 

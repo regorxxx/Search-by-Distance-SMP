@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//30/12/23
 
 /* exported themedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -41,11 +41,14 @@ buttonsBar.config = {
 	activeColor: RGB(0, 163, 240),
 	animationColors: [RGBA(10, 120, 204, 50), RGBA(199, 231, 255, 30)],
 	orientation: 'x',
+	textPosition: 'right',
 	bReflow: false,
 	bAlignSize: true,
 	bUseThemeManager: true,
 	partAndStateID: 1, // 1 standard button, 6  bg/border button (+hover)
 	scale: _scale(0.7, false),
+	iconScale: _scale(0.7, false),
+	textScale: _scale(0.7, false),
 	bIconMode: false,
 	bIconModeExpand: false,
 	bUseCursors: true,
@@ -84,7 +87,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	let newCoordinates;
 	const orientation = buttonOrientation.toLowerCase();
 	const old = buttonsBar.oldButtonCoordinates;
-	const bFirstButton = !old[orientation] ? true : false;
+	const bFirstButton = !old[orientation];
 	const keys = ['x', 'y', 'w', 'h'];
 	const bFuncCoord = Object.fromEntries(keys.map((c) => { return [c, isFunction(coord[c])]; }));
 	const iCoord = Object.fromEntries(keys.map((c) => { return [c, bFuncCoord[c] ? coord[c]() : coord[c]]; }));
@@ -115,20 +118,20 @@ function themedButton(
 	text,
 	func,
 	state,
-	gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale),
+	gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.textScale),
 	description,
 	prefix = '',
 	buttonsProperties = {},
 	icon = null,
-	gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.scale),
+	gFontIcon = _gdiFont(globFonts.buttonIcon.name, globFonts.buttonIcon.size * buttonsBar.config.iconScale),
 	variables = null,
 	listener = null,
 	onInit = null,
 	update = { scriptName: '', repository: '' }
 ) {
 	this.name = '';
-	this.state = state ? state : buttonStates.normal;
-	this.animation = []; /* {bActive, condition, animStep} */
+	this.state = state || buttonStates.normal;
+	this.animation = []; /* {bActive, condition, animStep} */ // NOSONAR
 	this.highlight = false;
 	this.active = false;
 	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
@@ -144,19 +147,27 @@ function themedButton(
 	this.description = description;
 	this.text = text;
 	this.textWidth = isFunction(this.text) ? (parent) => { return _gr.CalcTextWidth(this.text(parent), gFont); } : _gr.CalcTextWidth(this.text, gFont);
+	this.textHeight = isFunction(this.text) ? (parent) => { return _gr.CalcTextHeight(this.text(parent), gFont); } : _gr.CalcTextHeight(this.text, gFont);
 	this.iconImage = this.gFontIcon === null;
 	if (this.iconImage) {
 		this.icon = icon;
-		this.iconWidth = null;
+		this.iconWidth = this.iconHeight = isFunction(this.icon)
+			? () => 12.25 * buttonsBar.config.iconScale
+			: 12.25 * buttonsBar.config.iconScale;
 	} else {
 		// if using the default font, then it has probably failed to load the right one, skip icon
 		this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null;
-		this.iconWidth = isFunction(this.icon) ? (parent) => { return _gr.CalcTextWidth(this.icon(parent), gFontIcon); } : _gr.CalcTextWidth(this.icon, gFontIcon);
+		this.iconWidth = isFunction(this.icon)
+			? (parent) => { return _gr.CalcTextWidth(this.icon(parent), gFontIcon); }
+			: _gr.CalcTextWidth(this.icon, gFontIcon);
+		this.iconHeight = isFunction(this.icon)
+			? (parent) => { return _gr.CalcTextHeight(this.icon(parent), gFontIcon); }
+			: _gr.CalcTextHeight(this.icon, gFontIcon);
 	}
 	this.func = func;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description) ? (parent) => { return (this.prefix ? this.prefix.replace('_', '') + ': ' + this.description(parent) : this.description(parent)); } : () => { return (this.prefix ? this.prefix.replace('_', '') + ': ' + this.description : this.description); }; // Adds prefix to description, whether it's a func or a string
-	this.buttonsProperties = Object.assign({}, buttonsProperties); // Clone properties for later use
+	this.buttonsProperties = { ...buttonsProperties }; // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
 	this.bHeadlessMode = false;
@@ -195,7 +206,7 @@ function themedButton(
 		throttledRepaint();
 	};
 
-	this.switcHighlight = function (bActive = null) {
+	this.switchHighlight = function (bActive = null) {
 		this.highlight = bActive !== null ? bActive : !this.highlight;
 		window.Repaint();
 	};
@@ -261,7 +272,7 @@ function themedButton(
 			return;
 		}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
-		// Check SO allows button theme
+		// Check if OS allows button theme
 		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
 			try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; }
 			if (!this.g_theme) {
@@ -306,10 +317,33 @@ function themedButton(
 		this.currY = yCalc + buttonsBar.config.offset.button.y;
 		this.currW = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'y' ? window.Width : wCalc;
 		this.currH = buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? window.Height : hCalc;
+		const textPos = buttonsBar.config.textPosition.toLowerCase();
+		const bVerticalAlignIcon = ['top', 'bottom'].includes(textPos);
+		const extraH = bVerticalAlignIcon
+			? (isFunction(this.icon) ? this.iconHeight(this) : this.iconHeight) / 2
+			: 0;
 		// When moving buttons, the button may be drawn at another position though
 		if (this.moveX) { xCalc = this.moveX; }
 		if (this.moveY) { yCalc = this.moveY; }
 		// Draw button
+		const textCoords = {
+			x: xCalc,
+			y: yCalc - extraH,
+			w: wCalc,
+			h: hCalc
+		};
+		const iconCoords = {
+			x: xCalc,
+			y: yCalc - extraH,
+			w: wCalc,
+			h: hCalc
+		};
+		const iconCoordsBg = {
+			x: xCalc,
+			y: yCalc - extraH,
+			w: 0,
+			h: 0
+		};
 		if (buttonsBar.useThemeManager()) { this.g_theme.DrawThemeBackground(gr, this.currX, this.currY, this.currW, this.currH); }
 		else {
 			const x = this.currX + 1;
@@ -417,68 +451,118 @@ function themedButton(
 			gr.SetSmoothingMode(0);
 		}
 		// The rest...
-		if (this.icon !== null) {
-			let textOffsetX = 0;
-			const iconCalculated = isFunction(this.icon) ? this.icon(this) : this.icon;
+		const iconCalculated = this.icon !== null
+			? isFunction(this.icon) ? this.icon(this) : this.icon
+			: null;
+		let iconImage;
+		if (iconCalculated) {
 			const textWidthCalculated = bIconMode
 				? 0
 				: isFunction(this.text) ? this.textWidth(this) : this.textWidth;
+			const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
+			const iconHeightCalculated = isFunction(this.icon) ? this.iconHeight(this) : this.iconHeight;
 			if (this.iconImage) { // Icon image
-				if (iconCalculated.length) {
-					const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor)) ? iconCalculated.replace(/(\..*$)/i, '_dark$1') : null;
-					const iconColor = this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor;
-					const bMask = ![RGB(255, 255, 255), -1, RGB(0, 0, 0)].includes(iconColor);
-					const iconDarkMode = iconCalculatedDarkMode && !bMask ? gdi.Image(iconCalculatedDarkMode) : null;
-					let icon = bMask ? gdi.CreateImage(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale) : iconDarkMode || gdi.Image(iconCalculated);
-					if (icon) {
-						if (!bMask) {
-							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) { icon = icon.InvertColours(); }
-							icon = icon.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
+				const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor))
+					? iconCalculated.replace(/(\..*$)/i, '_dark$1')
+					: null;
+				const iconColor = this.active
+					? buttonsBar.config.activeColor
+					: buttonsBar.config.textColor;
+				const bMask = ![RGB(255, 255, 255), -1, RGB(0, 0, 0)].includes(iconColor);
+				const iconDarkMode = iconCalculatedDarkMode && !bMask
+					? gdi.Image(iconCalculatedDarkMode)
+					: null;
+				iconImage = bMask
+					? gdi.CreateImage(iconWidthCalculated, iconHeightCalculated)
+					: iconDarkMode || gdi.Image(iconCalculated);
+				if (iconImage) {
+					if (bMask) {
+						const iconGr = iconImage.GetGraphics();
+						iconGr.FillSolidRect(0, 0, iconImage.Width, iconImage.Height, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor);
+						iconImage.ReleaseGraphics(iconGr);
+						let iconMask = gdi.Image(iconCalculated.replace(/(\..*$)/i, '_mask$1'));
+						if (iconMask) {
+							iconMask = iconMask.Resize(iconWidthCalculated, iconHeightCalculated, InterpolationMode.NearestNeighbor);
+							iconImage.ApplyMask(iconMask);
 						}
-						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-							? xCalc + wCalc / 2 - (bIconMode ? icon.Width * 1 / 2 : icon.Width * 7 / 10) - textWidthCalculated / 2
-							: xCalc + icon.Width / 2;
-						if (bMask) {
-							const iconGr = icon.GetGraphics();
-							iconGr.FillSolidRect(0, 0, icon.Width, icon.Height, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor);
-							icon.ReleaseGraphics(iconGr);
-							let iconMask = gdi.Image(iconCalculated.replace(/(\..*$)/i, '_mask$1'));
-							if (iconMask) {
-								iconMask = iconMask.Resize(16 * buttonsBar.config.scale, 16 * buttonsBar.config.scale, InterpolationMode.NearestNeighbor);
-								icon.ApplyMask(iconMask);
-							}
-						}
-						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - icon.Height * 1 / 2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
-						textOffsetX = icon.Width * 7 / 10;
-					} else { textOffsetX = 16 * buttonsBar.config.scale * 7 / 10; }
+					} else {
+						if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) { iconImage = iconImage.InvertColours(); }
+						iconImage = iconImage.Resize(iconWidthCalculated, iconHeightCalculated, InterpolationMode.NearestNeighbor);
+					}
+					if (bVerticalAlignIcon) {
+						iconCoords.x += wCalc / 2 - iconImage.Width * 1 / 2;
+						if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1); }
+						else { iconCoords.y += _scale(1); }
+					} else {
+						if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {
+							iconCoords.x += wCalc / 2 - (
+								bIconMode
+									? iconImage.Width * 1 / 2
+									: iconImage.Width * 7 / 10
+							) - textWidthCalculated / 2;
+						} else { iconCoords.x += iconWidthCalculated / 2; }
+						if (textPos === 'left') { iconCoords.x += textWidthCalculated + iconImage.Width / 2; }
+					}
+				} else {
+					textCoords.x += 16 * buttonsBar.config.iconScale * 7 / 10;
 				}
 			} else { // Icon text
-				const iconWidthCalculated = isFunction(this.icon) ? this.iconWidth(this) : this.iconWidth;
-				if (iconCalculated) { // Icon
-					if (this.active) { // Draw copy of icon in background blurred
-						let icon = gdi.CreateImage(this.gFontIcon.Size, this.gFontIcon.Size);
-						const g = icon.GetGraphics();
-						g.DrawString(iconCalculated, this.gFontIcon, lightenColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
-						icon = icon.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
-						icon.ReleaseGraphics(g);
-						// Image gets shifted in x and y axis... since it's not using text flags
-						const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-							? xCalc + wCalc / 2 - (bIconMode ? iconWidthCalculated * 13 / 20 : iconWidthCalculated * 9 / 10) - textWidthCalculated / 2
-							: xCalc + icon.Width * 3 / 5;
-						gr.DrawImage(icon, iconX + buttonsBar.config.offset.icon.x, yCalc + hCalc / 2 - iconWidthCalculated * 1 / 2 + buttonsBar.config.offset.icon.y, wCalc, hCalc, 0, 0, wCalc, hCalc, 0);
+				if (this.active) { // Draw copy of icon in background blurred
+					iconImage = gdi.CreateImage(this.gFontIcon.Size, this.gFontIcon.Size);
+					const g = iconImage.GetGraphics();
+					g.DrawString(iconCalculated, this.gFontIcon, lightenColor(buttonsBar.config.activeColor, 50), 0, 0, this.gFontIcon.Size, this.gFontIcon.Size, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+					iconImage = iconImage.Resize(this.gFontIcon.Size + 2, this.gFontIcon.Size + 2, InterpolationMode.Bilinear);
+					iconImage.ReleaseGraphics(g);
+					// Image gets shifted in x and y axis... since it's not using text flags
+					if (bVerticalAlignIcon) {
+						if (textPos === 'top') { iconCoordsBg.y += iconImage.Height - _scale(2); }
+						iconCoordsBg.x += wCalc / 2 - (2 * iconImage.Width - iconWidthCalculated) * 1 / 2 + _scale(1);
+					} else {
+						if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {
+							iconCoordsBg.x += wCalc / 2 - iconWidthCalculated;
+						} else { iconCoordsBg.x += iconImage.Width * 3 / 5; }
+						if (!bIconMode) {
+							if (textPos === 'right') { iconCoordsBg.x -= textWidthCalculated / 2 - iconWidthCalculated / 7; }
+							else { iconCoordsBg.x += textWidthCalculated / 2 + iconWidthCalculated - _scale(2); }
+						} else {
+							iconCoordsBg.x += iconWidthCalculated * 1 / 3;
+						}
+						if (textPos === 'right') { textCoords.x += _scale(2); }
 					}
-					const iconX = buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign // Align left on Y axis
-						? xCalc - (bIconMode ? 0 : iconWidthCalculated / 5) - textWidthCalculated / 2
-						: xCalc - wCalc / 2 + iconWidthCalculated * 5 / 4;
-					gr.GdiDrawText(iconCalculated, this.gFontIcon, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconX + buttonsBar.config.offset.icon.x, yCalc + buttonsBar.config.offset.icon.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 				}
-				textOffsetX = iconWidthCalculated;
+				if (bVerticalAlignIcon) {
+					if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1); }
+					else { iconCoords.y += _scale(1); }
+				} else {
+					if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {
+						iconCoords.x += bIconMode
+							? 0
+							: - iconWidthCalculated / 5;
+					} else { iconCoords.x += wCalc / 2 + iconWidthCalculated * 5 / 4; }
+					if (textPos === 'right') { iconCoords.x -= textWidthCalculated / 2 - _scale(1); }
+					else if (!bIconMode) { iconCoords.x += textWidthCalculated / 2 + iconWidthCalculated - iconWidthCalculated / 5; }
+				}
 			}
-			// Text
-			gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, xCalc + textOffsetX + buttonsBar.config.offset.text.x, yCalc + buttonsBar.config.offset.text.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
-		} else {
-			gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, xCalc + buttonsBar.config.offset.text.x, yCalc + buttonsBar.config.offset.text.y, wCalc, hCalc, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			if (textPos === 'top') { textCoords.y -= _scale(1); }
+			else if (textPos === 'bottom') { textCoords.y += iconHeightCalculated; }
+			else if (textPos === 'right') { textCoords.x += iconWidthCalculated / 2 + _scale(1); }
+			else if (textPos === 'left') { textCoords.x -= iconWidthCalculated / 2; }
 		}
+		// Icon
+		if (iconCalculated) {
+			for (const key in buttonsBar.config.offset.icon) { iconCoords[key] += buttonsBar.config.offset.icon[key]; }
+			if (iconImage) {
+				const coords = this.iconImage ? iconCoords : iconCoordsBg;
+				coords.w = iconImage.Width; coords.h = iconImage.Height;
+				gr.DrawImage(iconImage, coords.x, coords.y + hCalc / 2 - coords.h * 1 / 2, coords.w, coords.h, 0, 0, coords.w, coords.h, 0);
+			}
+			if (!this.iconImage && this.icon) {
+				gr.GdiDrawText(iconCalculated, this.gFontIcon, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor, iconCoords.x, iconCoords.y, iconCoords.w, iconCoords.h, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+			}
+		}
+		for (const key in buttonsBar.config.offset.text) { textCoords[key] += buttonsBar.config.offset.text[key]; }
+		// text
+		gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, textCoords.x, textCoords.y, textCoords.w, textCoords.h, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 		// Process all animations but only paint once
 		let bDone = false;
 		this.animation.forEach((animation) => {
@@ -529,6 +613,7 @@ function themedButton(
 	this.adjustNameWidth = function (newName, offset = 30) {
 		this.text = newName;
 		this.adjustButtonWidth(newName, offset);
+		this.changeTextScale(buttonsBar.config.textScale);
 		this.changeScale(buttonsBar.config.scale);
 		window.Repaint();
 	};
@@ -539,11 +624,37 @@ function themedButton(
 		this.h *= newScale;
 		this.currH *= newScale;
 		this.currW *= newScale;
+	};
+	this.changeTextScale = function (scale) {
+		const newScale = scale / buttonsBar.config.textScale;
 		this.gFont = _gdiFont(this.gFont.Name, this.gFont.Size * newScale);
-		this.textWidth = isFunction(this.text) ? (parent) => { return _gr.CalcTextWidth(this.text(parent), this.gFont); } : _gr.CalcTextWidth(this.text, this.gFont);
+		this.textWidth = isFunction(this.text)
+			? (parent) => { return _gr.CalcTextWidth(this.text(parent), this.gFont); }
+			: _gr.CalcTextWidth(this.text, this.gFont);
+	};
+	this.changeIconScale = function (scale) {
+		const newScale = scale / buttonsBar.config.iconScale;
 		if (!this.iconImage) {
 			this.gFontIcon = _gdiFont(this.gFontIcon.Name, this.gFontIcon.Size * newScale);
-			this.iconWidth = isFunction(this.icon) ? (parent) => { return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon); } : _gr.CalcTextWidth(this.icon, this.gFontIcon);
+			this.iconWidth = isFunction(this.icon)
+				? (parent) => { return _gr.CalcTextWidth(this.icon(parent), this.gFontIcon); }
+				: _gr.CalcTextWidth(this.icon, this.gFontIcon);
+			this.iconHeight = isFunction(this.icon)
+				? (parent) => { return _gr.CalcTextHeight(this.icon(parent), gFontIcon); }
+				: _gr.CalcTextHeight(this.icon, gFontIcon);
+		} else {
+			this.iconWidth = this.iconHeight = isFunction(this.icon)
+				? () => 12.25 * scale
+				: 12.25 * scale;
+		}
+	};
+
+	this.changePosSize = function () {
+		if (this.icon) {
+			const textPos = buttonsBar.config.textPosition.toLowerCase();
+			const bVerticalAlignIcon = ['top', 'bottom'].includes(textPos);
+			this.h += (isFunction(this.icon) ? this.iconHeight(this) : this.iconHeight) * (bVerticalAlignIcon ? 1 : -1);
+			this.currH = this.h;
 		}
 	};
 
@@ -574,6 +685,7 @@ function themedButton(
 		onInit = null;
 	}
 	if (this.isHeadlessMode()) { this.state = buttonStates.hide; }
+	if (['top', 'bottom'].includes(buttonsBar.config.textPosition.toLowerCase())) { this.changePosSize(true); }
 }
 const throttledRepaint = throttle(() => window.Repaint(), 1000);
 
@@ -620,6 +732,7 @@ function chooseButton(x, y) {
 }
 
 addEventListener('on_paint', (gr) => {
+	// extendGR(gr, { Repaint: true, ImgBox: true }); // helpers_xxx_prototypes_smp.js
 	// Toolbar
 	if (buttonsBar.config.bToolbar) {
 		gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);
@@ -635,6 +748,7 @@ addEventListener('on_paint', (gr) => {
 		gr.FillSolidRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, opaqueColor(invert(buttonsBar.config.toolbarColor), 15));
 		gr.DrawRect(buttonsBar.move.rec.x, buttonsBar.move.rec.y, buttonsBar.move.rec.w, buttonsBar.move.rec.h, 1, invert(buttonsBar.config.toolbarColor));
 	}
+	if (window.debugPainting) { window.drawDebugRectAreas(gr); }
 });
 
 addEventListener('on_mouse_move', (x, y, mask) => {

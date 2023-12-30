@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/12/23
+//30/12/23
 
 /* exported createButtonsMenu */
 
@@ -10,9 +10,9 @@ include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global folders:readable, MF_GRAYED:readable, MF_STRING:readable, VK_CONTROL:readable, VK_SHIFT:readable, popup:readable, globSettings:readable, checkUpdate:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
-/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable, deleteProperties:readable, */
+/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable, deleteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global require:readable, capitalizeAll:readable, round:readable, _p:readable, */
+/* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
 /* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _jsonParseFileCheck:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
@@ -326,16 +326,49 @@ function createButtonsMenu(name) {
 				} else {
 					input = Input.number('real positive', buttonsBar.config.scale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
 					if (input === null) { return; }
-					for (let key in buttonsBar.buttons) {
-						if (!Object.hasOwn(buttonsBar.buttons, key)) { continue; }
-						buttonsBar.buttons[key].changeScale(input);
-					}
 				}
-				buttonsBar.config.scale = input; // buttons_xxx.js
-				barProperties.scale[1] = buttonsBar.config.scale;
+				barProperties.scale[1] = buttonsBar.config.scale = input; // buttons_xxx.js
+				const bApplyAll = WshShell.Popup('Also apply to text and icons?', 0, 'Buttons bar', popup.question + popup.yes_no) === popup.yes;
+				if (bApplyAll) {
+					barProperties.iconScale[1] = buttonsBar.config.iconScale = buttonsBar.config.scale;
+					barProperties.textScale[1] = buttonsBar.config.textScale = buttonsBar.config.scale;
+				}
+				overwriteProperties(barProperties);
+				window.Reload();
+			}
+		});
+		menu.newEntry({
+			menuName, entryText: 'Set text scale...' + '\t[' + round(buttonsBar.config.textScale, 2) + ']', func: () => {
+				let input;
+				if (utils.IsKeyPressed(VK_CONTROL)) {
+					input = buttonsBar.config.default.textScale;
+				} else {
+					input = Input.number('real positive', buttonsBar.config.textScale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
+					if (input === null) { return; }
+				}
+				for (let key in buttonsBar.buttons) {
+					if (!Object.hasOwn(buttonsBar.buttons, key)) { continue; }
+					buttonsBar.buttons[key].changeTextScale(input);
+				}
+				barProperties.textScale[1] = buttonsBar.config.textScale = input;
 				overwriteProperties(barProperties);
 				window.Repaint();
 				buttonSizeCheck();
+			}
+			, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING
+		});
+		menu.newEntry({
+			menuName, entryText: 'Set icon scale...' + '\t[' + round(buttonsBar.config.iconScale, 2) + ']', func: () => {
+				let input;
+				if (utils.IsKeyPressed(VK_CONTROL)) {
+					input = buttonsBar.config.default.iconScale;
+				} else {
+					input = Input.number('real positive', buttonsBar.config.iconScale, 'Enter value:\n(real number > 0)', 'Buttons bar', 0.8, [n => n > 0 && n < Infinity]);
+					if (input === null) { return; }
+				}
+				barProperties.iconScale[1] = buttonsBar.config.iconScale = input;
+				overwriteProperties(barProperties);
+				window.Reload();
 			}
 		});
 		menu.newEntry({ menuName, entryText: 'sep' });
@@ -368,6 +401,7 @@ function createButtonsMenu(name) {
 				overwriteProperties(barProperties);
 				window.Repaint();
 			}
+			, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING
 		});
 		menu.newEntry({
 			menuName, entryText: 'Set icon offset...' + '\t[' + Object.values(buttonsBar.config.offset.icon) + ']', func: () => {
@@ -385,29 +419,64 @@ function createButtonsMenu(name) {
 			}
 		});
 		menu.newEntry({ menuName, entryText: 'sep' });
+		{
+			const currPos = buttonsBar.config.bIconMode
+				? buttonsBar.config.textPosition === 'top'
+					? 'bottom'
+					: buttonsBar.config.textPosition.replace('bottom', 'top').replace(/left|right/, 'center')
+				: buttonsBar.config.textPosition;
+			const subMenuName = menu.newMenu(
+				buttonsBar.config.bIconMode
+					? 'Icon position...' + '\t' + _b(capitalize(currPos))
+					: 'Text position...' + '\t' + _b(capitalize(currPos))
+				, menuName);
+			const options = buttonsBar.config.bIconMode ? ['top', 'bottom', 'center'] : ['top', 'bottom', 'left', 'right'];
+			options.forEach((o) => {
+				const pos = buttonsBar.config.bIconMode
+					? o === 'top' ? 'bottom' : o.replace('bottom', 'top')
+					: o;
+				menu.newEntry({
+					menuName: subMenuName, entryText: capitalize(pos), func: () => {
+						buttonsBar.config.textPosition = barProperties.textPosition[1] = o.replace('center', 'right');
+						overwriteProperties(barProperties);
+						window.Reload();
+					}
+				});
+			});
+			menu.newCheckMenuLast(() => {
+				return options.indexOf(
+					buttonsBar.config.bIconMode
+						? buttonsBar.config.textPosition.replace(/left|right/, 'center')
+						: buttonsBar.config.textPosition
+				);
+			}, options.length);
+		}
+		menu.newEntry({ menuName, entryText: 'sep' });
 		menu.newEntry({
 			menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
-				barProperties.bReflow[1] = !barProperties.bReflow[1];
+				buttonsBar.config.bReflow = barProperties.bReflow[1] = !barProperties.bReflow[1];
 				overwriteProperties(barProperties);
-				buttonsBar.config.bReflow = barProperties.bReflow[1]; // buttons_xxx.js
 				window.Repaint();
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bReflow[1]);
 		menu.newEntry({
 			menuName, entryText: 'Normalize buttons ' + (buttonsBar.config.bReflow ? 'size' : (orientation === 'x' ? 'height' : 'width')), func: () => {
-				barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
+				buttonsBar.config.bAlignSize = barProperties.bAlignSize[1] = !barProperties.bAlignSize[1];
 				overwriteProperties(barProperties);
-				buttonsBar.config.bAlignSize = barProperties.bAlignSize[1]; // buttons_xxx.js
 				window.Repaint();
 			}, flags: barProperties.bFullSize[1] ? MF_GRAYED : MF_STRING
 		});
 		menu.newCheckMenuLast(() => barProperties.bAlignSize[1]);
 		menu.newEntry({
 			menuName, entryText: 'Full size buttons', func: () => {
-				barProperties.bFullSize[1] = !barProperties.bFullSize[1];
+				buttonsBar.config.bFullSize = barProperties.bFullSize[1] = !barProperties.bFullSize[1];
 				overwriteProperties(barProperties);
-				buttonsBar.config.bFullSize = barProperties.bFullSize[1]; // buttons_xxx.js
+				if (!buttonsBar.config.bFullSize) {
+					for (let key in buttonsBar.buttons) {
+						buttonsBar.buttons[key].currH = buttonsBar.buttons[key].h;
+					}
+				}
 				window.Repaint();
 			}
 		});
@@ -417,9 +486,8 @@ function createButtonsMenu(name) {
 		const menuName = menu.newMenu('Other UI settings...');
 		menu.newEntry({
 			menuName, entryText: 'Show properties IDs on tooltip', func: () => {
-				barProperties.bShowId[1] = !barProperties.bShowId[1];
+				buttonsBar.config.bShowID = barProperties.bShowId[1] = !barProperties.bShowId[1];
 				overwriteProperties(barProperties);
-				buttonsBar.config.bShowID = barProperties.bShowId[1]; // buttons_xxx.js
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bShowId[1]);
@@ -427,9 +495,8 @@ function createButtonsMenu(name) {
 		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({
 			menuName, entryText: 'Toolbar orientation \t[' + orientation.toUpperCase() + ']', func: () => {
-				barProperties.orientation[1] = orientation === 'x' ? 'y' : 'x';
+				buttonsBar.config.orientation = barProperties.orientation[1] = orientation === 'x' ? 'y' : 'x';
 				overwriteProperties(barProperties);
-				buttonsBar.config.orientation = barProperties.orientation[1]; // buttons_xxx.js
 				window.Reload();
 			}
 		});
@@ -437,9 +504,8 @@ function createButtonsMenu(name) {
 			const subMenu = menu.newMenu('Icons-only mode...', menuName);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Force for all buttons', func: () => {
-					barProperties.bIconMode[1] = !barProperties.bIconMode[1];
+					buttonsBar.config.bIconMode = barProperties.bIconMode[1] = !barProperties.bIconMode[1];
 					overwriteProperties(barProperties);
-					buttonsBar.config.bIconMode = barProperties.bIconMode[1]; // buttons_xxx.js
 					// When normalizing size, sizers are dynamically calculated on paint... so need to force it
 					if (buttonsBar.config.bAlignSize) {
 						buttonsBar.config.bAlignSize = false; // buttons_xxx.js
@@ -452,9 +518,8 @@ function createButtonsMenu(name) {
 			menu.newCheckMenuLast(() => buttonsBar.config.bIconMode);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Expand on mouse over' + (buttonsBar.config.orientation === 'y' ? '\t[Y]' : ''), func: () => {
-					barProperties.bIconModeExpand[1] = !barProperties.bIconModeExpand[1];
+					buttonsBar.config.bIconModeExpand = barProperties.bIconModeExpand[1] = !barProperties.bIconModeExpand[1];
 					overwriteProperties(barProperties);
-					buttonsBar.config.bIconModeExpand = barProperties.bIconModeExpand[1]; // buttons_xxx.js
 					window.Repaint();
 				}, flags: buttonsBar.config.orientation === 'x' ? MF_STRING : MF_GRAYED
 			});

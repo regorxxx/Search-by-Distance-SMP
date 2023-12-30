@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/12/23
+//30/12/23
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -79,6 +79,9 @@ let barProperties = {
 	bBorders: ['Buttons\' borders', true, { func: isBoolean }],
 	bAutoUpdateCheck: ['Automatically check updates?', globSettings.bAutoUpdateCheck, { func: isBoolean }, globSettings.bAutoUpdateCheck],
 	bLoadAsync: ['Asynchronous loading?', true, { func: isBoolean }],
+	iconScale: ['UI icon scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
+	textScale: ['UI text scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
+	textPosition: ['UI text position', 'right', { func: isString }],
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
@@ -115,6 +118,9 @@ buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)';
 // Assign size and pos
 buttonsBar.config.scale = barProperties.scale[1];
+buttonsBar.config.textScale = barProperties.textScale[1];
+buttonsBar.config.iconScale = barProperties.iconScale[1];
+buttonsBar.config.textPosition = barProperties.textPosition[1];
 buttonsBar.config.offset = JSON.parse(barProperties.offset[1]);
 buttonsBar.config.bFullSize = barProperties.bFullSize[1];
 
