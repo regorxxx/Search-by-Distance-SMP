@@ -24,7 +24,7 @@ include('helpers\\buttons_sbd_menu_config.js'); // Button menu
 
 var version = sbd.version; // NOSONAR [shared on files]
 
-try { window.DefineScript('Search by Distance Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) {/* console.log('Search by Distance (CUSTOM) Buttons loaded.'); */ } //May be loaded along other buttons
+try { window.DefineScript('Search by Distance Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ }
 
 var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'

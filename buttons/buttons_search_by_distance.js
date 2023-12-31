@@ -18,7 +18,7 @@ include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after bu
 /* global SearchByDistance_properties:readable, music_graph_descriptors:readable, sbd:readable, searchByDistance:readable, updateCache:readable, findStyleGenresMissingGraphCheck:readable, testBaseTags:readable */
 var version = sbd.version; // NOSONAR[global]
 
-try { window.DefineScript('Search by Distance Buttons', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) {/* console.log('Search by Distance Buttons loaded.'); */ } //May be loaded along other buttons
+try { window.DefineScript('Search by Distance Buttons', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ }
 
 var prefix = 'sbd'; // NOSONAR[global]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'

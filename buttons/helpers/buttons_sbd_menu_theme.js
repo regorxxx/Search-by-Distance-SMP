@@ -1,10 +1,21 @@
 ﻿'use strict';
-//23/11/23
+//31/12/23
 
+/* exported createThemeMenu */
+
+/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
+/* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
+/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, globTags:readable , VK_SHIFT:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
+/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable */
+include('..\\..\\helpers\\helpers_xxx_properties.js');
+/* global overwriteProperties:readable */
+include('..\\..\\helpers\\helpers_xxx_prototypes.js');
+/* global _b:readable, _q:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
+/* global getTagsValuesV3:readable */
 
 const themeMenu = new _menu();
 
@@ -21,7 +32,7 @@ function createThemeMenu(parent) {
 	let forcedThemePath = '';
 	if (properties.recipe[1].length) {
 		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) : _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], 'Recipe json', 'Search by distance', utf8);
-		bHasForcedTheme = recipe && recipe.hasOwnProperty('theme');
+		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
 			if (_isFile(recipe.theme)) {forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme;}
 			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {
@@ -49,7 +60,7 @@ function createThemeMenu(parent) {
 		// Force data type
 		themeTagsKeys.forEach((key, i) => {
 			if (tags[key].type.includes('number')) {
-				themeTagsValues[i] = themeTagsValues[i].map((val) => Number(val)); 
+				themeTagsValues[i] = themeTagsValues[i].map((val) => Number(val));
 			}
 		});
 		// Tags obj
@@ -88,7 +99,7 @@ function createThemeMenu(parent) {
 			themeMenu.newEntry({menuName, entryText: 'Open readme...', func: () => {
 				const readme = _open(readmePath, utf8); // Executed on script load
 				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
-				else {console.log('Readme not found: ' + value);}
+				else {console.log('Readme not found: ' + readmePath);}
 			}});
 		}
 		themeMenu.newEntry({menuName, entryText: 'Open themes folder', func: () => {
@@ -125,10 +136,10 @@ function createThemeMenu(parent) {
 		if (!theme) {return;}
 		// Check
 		// Theme tags must contain at least all the user tags
-		const tagCheck = theme.hasOwnProperty('tags') ? theme.tags.findIndex((tagArr) => {return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck));}) : 0;
-		const bCheck = theme.hasOwnProperty('name') && tagCheck === -1;
+		const tagCheck = Object.hasOwn(theme, 'tags') ? theme.tags.findIndex((tagArr) => {return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck));}) : 0;
+		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
-			console.log('File is not a valid theme: ' + (theme.hasOwnProperty('tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));
+			console.log('File is not a valid theme: ' + (Object.hasOwn(theme, 'tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));
 			return;
 		}
 		// List files, with full path or relative path (portable)

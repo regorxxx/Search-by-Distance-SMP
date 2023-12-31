@@ -24,8 +24,7 @@ include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after bu
 include('..\\main\\search_by_distance\\search_by_distance_extra.js'); // Load after buttons_xxx.js so properties are only set once
 var version = sbd.version; // NOSONAR [shared on files]
 
-try {window.DefineScript('Search by Distance Info Button', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) {/* console.log('Search by Distance Info Button loaded.'); */} //May be loaded along other buttons
-
+try {window.DefineScript('Search by Distance Info Button', {author:'regorxxx', version, features: {drag_n_drop: false}});} catch (e) { /* May be loaded along other buttons */ }
 
 var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'

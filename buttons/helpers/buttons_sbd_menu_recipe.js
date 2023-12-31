@@ -1,9 +1,23 @@
 ﻿'use strict';
-//05/04/23
+//31/12/23
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_file.js');
+
+/* exported createRecipeMenu */
+
+/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable, recipeAllowedKeys:readable, recipePropertiesAllowedKeys:readable, testRecipe:readable */ // eslint-disable-line no-unused-vars
+include('..\\..\\helpers\\menu_xxx.js');
+/* global _menu:readable */
+include('..\\..\\helpers\\helpers_xxx.js');
+/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, VK_CONTROL:readable */
+include('..\\..\\helpers\\helpers_xxx_file.js');
+/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable */
+include('..\\..\\helpers\\helpers_xxx_properties.js');
+/* global overwriteProperties:readable */
+include('..\\..\\helpers\\helpers_xxx_prototypes.js');
+/* global _b:readable, _q:readable, _p:readable, isJSON:readable */
 
 const recipeMenu = new _menu();
 
@@ -31,7 +45,7 @@ function createRecipeMenu(parent) {
 		recipeAllowedKeys.forEach((key) => {
 			if (!excludedKeys.has(key)) {
 				const check = properties[key][2];
-				if (check && typeof check === 'object' && check.hasOwnProperty('func') && check.func === isJSON) {
+				if (check && typeof check === 'object' && Object.hasOwn(check, 'func') && check.func === isJSON) {
 					recipe[key] = JSON.parse(properties[key][1]);
 				} else {
 					recipe[key] = properties[key][1];
@@ -57,7 +71,7 @@ function createRecipeMenu(parent) {
 			Object.keys(properties).forEach((rKey) => {
 				if (!recipePropertiesAllowedKeys.has(rKey)) {return;}
 				const check = properties[rKey][2];
-				if (check && typeof check === 'object' && check.hasOwnProperty('func') && check.func === isJSON) {
+				if (check && typeof check === 'object' && Object.hasOwn(check, 'func') && check.func === isJSON) {
 					recipe.properties[rKey] = JSON.parse(properties[rKey][1]);
 				} else {
 					recipe.properties[rKey] = properties[rKey][1];
@@ -75,7 +89,7 @@ function createRecipeMenu(parent) {
 			recipeMenu.newEntry({menuName, entryText: 'Open readme...', func: () => {
 				const readme = _open(readmePath, utf8); // Executed on script load
 				if (readme.length) {fb.ShowPopupMessage(readme, window.Name);}
-				else {console.log('Readme not found: ' + value);}
+				else {console.log('Readme not found: ' + readmePath);}
 			}});
 		}
 		recipeMenu.newEntry({menuName, entryText: 'Open recipes folder', func: () => {
@@ -117,18 +131,18 @@ function createRecipeMenu(parent) {
 	});
 	const menus = [];
 	const names = {};
-	options.forEach((file, j) => {
+	options.forEach((file) => {
 		const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
 		if (!recipe) {return;}
-		const name = recipe.hasOwnProperty('name') ? recipe.name : utils.SplitFilePath(file)[1];
+		const name = Object.hasOwn(recipe, 'name') ? recipe.name : utils.SplitFilePath(file)[1];
 		let theme = null;
-		if (recipe.hasOwnProperty('theme')) {
+		if (Object.hasOwn(recipe, 'theme')) {
 			if (_isFile(recipe.theme)) {theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8);}
 			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {theme = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, 'Recipe json', 'Search by distance', utf8);}
 			else {console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance');}
 		}
 		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
-		if (names.hasOwnProperty(name)) {names[name]++;}
+		if (Object.hasOwn(names, name)) {names[name]++;}
 		else {names[name] = 1;}
 		const result = testRecipe({json: recipe, baseTags: tags});
 		const entryText = (names[name] === 1 ? name : name + ' ' + _p(names[name])) + (!result.valid ? '\t(error)' : '');
@@ -145,7 +159,7 @@ function createRecipeMenu(parent) {
 					parent.recipe = {recipe: null, name: ''}; // Update tooltip
 				}
 			} else if (!result.valid) { // Don't allow to use a recipe with errors, show report instead
-				console.popup(result.report.join('\n\t- '), 'Recipe error'); 
+				console.popup(result.report.join('\n\t- '), 'Recipe error');
 			} else {
 				properties.recipe[1] = file;
 				data.recipe = name;
