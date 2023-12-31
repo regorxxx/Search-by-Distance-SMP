@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//31/12/23
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -806,7 +806,7 @@ async function graphStatistics({
 	const distances = [];
 	const total = cacheLink.size;
 	cacheLink.forEach((value) => {
-		const distance = value.distance + value.influenceDistance;
+		const distance = value[0] + value[1];
 		distances.push(distance);
 		if (distance > statistics.maxDistance) {statistics.maxDistance = distance;}
 		else if (distance && distance < statistics.minNonZeroDistance) {statistics.minNonZeroDistance = distance;}

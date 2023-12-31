@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//31/12/23
 
 /* exported calcMeanDistanceV2, calcCacheLinkSG, calcCacheLinkSGV2 , getAntiInfluences, getInfluences, getNodesFromPath */
 
@@ -168,8 +168,10 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 }
 
 // Finds distance between two sets of nodes
-// It's recommended to cache the mean distance too when sets are repeated frequently
-// and only call calcMeanDistance if needed
+// It's recommended to cache the mean distance between sets of genres
+// when these are repeated frequently instead of calling calcMeanDistance
+// This cache is optimized to have minimum size on JSON
+// map -> [nodeA-nodeB: [distance, influence], ...]
 var cacheLink; // NOSONAR [shared on files]
 
 // Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
@@ -199,12 +201,12 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new, influ
 					const id = [style_genre, style_genreNew].sort((a, b) => a.localeCompare(b)).join('-'); // A-B and B-A are the same link
 					const jh_link = cacheLink.get(id);
 					if (jh_link) { //toStyleGenre changes more, so first one...
-						jh_distance = jh_link.distance;
-						jh_influenceDistance = jh_link.influenceDistance;
+						jh_distance = jh_link[0];
+						jh_influenceDistance = jh_link[1];
 					} else { // Calc distances not found at cache. This is the heaviest part of the calc.
 						({ distance: jh_distance, influence: jh_influenceDistance } = calcGraphDistance(mygraph, style_genre, style_genreNew, true, influenceMethod));
 						//Graph is initialized at startup
-						cacheLink.set(id, { distance: jh_distance, influenceDistance: jh_influenceDistance });
+						cacheLink.set(id, [jh_distance, jh_influenceDistance]);
 					}
 					if (jh_distance < setMin) { setMin = jh_distance; }
 					if (jh_influenceDistance !== 0) { influenceDistance += jh_influenceDistance; }
@@ -256,7 +258,7 @@ function calcCacheLinkSG(mygraph, nodeList = [...new Set(music_graph_descriptors
 		while (j < nodeListLen) {
 			let { distance: ij_distance, influence: ij_antinfluenceDistance } = calcGraphDistance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
 			if (limit === -1 || ij_distance <= limit) {
-				cache.set(nodeList[i] + '-' + nodeList[j], { distance: ij_distance, influenceDistance: ij_antinfluenceDistance });
+				cache.set(nodeList[i] + '-' + nodeList[j], [ij_distance, ij_antinfluenceDistance]);
 			}
 			j++;
 		}
@@ -291,7 +293,7 @@ function calcCacheLinkSGV2(mygraph, styleGenres /*new Set (['Rock', 'Folk', ...]
 						let { distance: ij_distance, influence: ij_antinfluenceDistance } = calcGraphDistance(mygraph, nodeList[i], nodeList[j], true, influenceMethod);
 						if (limit === -1 || ij_distance <= limit) {
 							// Sorting removes the need to check A-B and B-A later...
-							cache.set([nodeList[i], nodeList[j]].sort((a, b) => a.localeCompare(b)).join('-'), { distance: ij_distance, influenceDistance: ij_antinfluenceDistance });
+							cache.set([nodeList[i], nodeList[j]].sort((a, b) => a.localeCompare(b)).join('-'), [ij_distance, ij_antinfluenceDistance]);
 						}
 						k++;
 						const progress = Math.floor(k / total * 4) * 25;

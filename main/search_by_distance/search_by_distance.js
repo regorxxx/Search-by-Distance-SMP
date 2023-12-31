@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//31/12/23
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -2280,8 +2280,9 @@ function checkScoringDistribution(distr) {
 }
 
 // Save and load cache on json
+// Save without formatting to make it smaller (~ 1 MB less) and faster (~ 50 ms less) for 100K entries
 function saveCache(cacheMap, path) {
-	_save(path, JSON.stringify(Object.fromEntries(cacheMap), null, '\t'));
+	_save(path, JSON.stringify(Object.fromEntries(cacheMap)));
 }
 
 function loadCache(path) {
@@ -2291,9 +2292,9 @@ function loadCache(path) {
 		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance', utf8);
 		if (obj) {
 			obj = Object.entries(obj);
-			obj.forEach((pair) => {
-				if (pair[1] === null) { pair[1] = Infinity; } // TODO: Only 1 cache structure for both files
-				if (pair[1].distance === null) { pair[1].distance = Infinity; }
+			obj.forEach((pair) => { // There are 2 possible cache structures
+				if (pair[1] === null) { pair[1] = Infinity; }
+				else if (pair[1][0] === null) { pair[1][0] = Infinity; }
 			}); // stringify converts Infinity to null, this reverts the change
 			cacheMap = new Map(obj);
 		}
