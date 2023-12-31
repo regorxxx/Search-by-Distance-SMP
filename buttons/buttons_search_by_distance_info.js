@@ -1,7 +1,8 @@
 ﻿'use strict';
 //21/12/23
 
-/* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable , MF_MENUBREAK:readable */
+include('..\\helpers\\helpers_xxx.js');
+/* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable, MF_MENUBREAK:readable */
 include('..\\helpers\\buttons_xxx.js');
 /* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, themedButton:readable, _gr:readable, _scale:readable, _gdiFont:readable, themedButton:readable, chars:readable, round:readable */
 include('..\\helpers\\helpers_xxx_input.js');

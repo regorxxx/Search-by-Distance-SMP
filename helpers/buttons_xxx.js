@@ -152,8 +152,8 @@ function themedButton(
 	if (this.iconImage) {
 		this.icon = icon;
 		this.iconWidth = this.iconHeight = isFunction(this.icon)
-			? () => 12.25 * buttonsBar.config.iconScale
-			: 12.25 * buttonsBar.config.iconScale;
+			? () => 13 * buttonsBar.config.iconScale
+			: 13 * buttonsBar.config.iconScale;
 	} else {
 		// if using the default font, then it has probably failed to load the right one, skip icon
 		this.icon = this.gFontIcon.Name !== 'Microsoft Sans Serif' ? icon : null;
@@ -491,7 +491,7 @@ function themedButton(
 					}
 					if (bVerticalAlignIcon) {
 						iconCoords.x += wCalc / 2 - iconImage.Width * 1 / 2;
-						if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1); }
+						if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1.5); }
 						else { iconCoords.y += _scale(1); }
 					} else {
 						if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/12/23
+//30/12/23
 
 /* exported zScoreToProbability, probabilityToZscore, zScoreToCDF, calcStatistics */
 
@@ -31,20 +31,20 @@ function zScoreToProbability(z) {
 		} else if (y < 1) {
 			w = y * y;
 			x = ((((((((0.000124818987 * w
-						- 0.001075204047) * w + 0.005198775019) * w
-						- 0.019198292004) * w + 0.059054035642) * w
-						- 0.151968751364) * w + 0.319152932694) * w
-						- 0.531923007300) * w + 0.797884560593) * y * 2;
+				- 0.001075204047) * w + 0.005198775019) * w
+				- 0.019198292004) * w + 0.059054035642) * w
+				- 0.151968751364) * w + 0.319152932694) * w
+				- 0.531923007300) * w + 0.797884560593) * y * 2;
 		} else {
 			y -= 2;
 			x = (((((((((((((-0.000045255659 * y
-							+ 0.000152529290) * y - 0.000019538132) * y
-							- 0.000676904986) * y + 0.001390604284) * y
-							- 0.000794620820) * y - 0.002034254874) * y
-							+ 0.006549791214) * y - 0.010557625006) * y
-							+ 0.011630447319) * y - 0.009279453341) * y
-							+ 0.005353579108) * y - 0.002141268741) * y
-							+ 0.000535310849) * y + 0.999936657524;
+				+ 0.000152529290) * y - 0.000019538132) * y
+				- 0.000676904986) * y + 0.001390604284) * y
+				- 0.000794620820) * y - 0.002034254874) * y
+				+ 0.006549791214) * y - 0.010557625006) * y
+				+ 0.011630447319) * y - 0.009279453341) * y
+				+ 0.005353579108) * y - 0.002141268741) * y
+				+ 0.000535310849) * y + 0.999936657524;
 		}
 	}
 	return z > 0.0 ? ((x + 1) * 0.5) : ((1 - x) * 0.5);
@@ -63,8 +63,8 @@ function probabilityToZscore(p) {
 	let maxz = Z_MAX;
 	let zval = 0.0;
 	let pval;
-	if (p < 0) {p = 0.0;}
-	if (p > 1) {p = 1.0;}
+	if (p < 0) { p = 0.0; }
+	if (p > 1) { p = 1.0; }
 	while ((maxz - minz) > Z_EPSILON) {
 		pval = zScoreToProbability(zval);
 		if (pval > p) {
@@ -74,7 +74,7 @@ function probabilityToZscore(p) {
 		}
 		zval = (maxz + minz) * 0.5;
 	}
-	return(zval);
+	return (zval);
 }
 
 /*  cdfz  --   Compute Cumulative Distribution Function
@@ -83,7 +83,7 @@ function probabilityToZscore(p) {
 
 function zScoreToCDF(z, bSym = true) {
 	const Z_MAX = 4.09;
-	if (z > Z_MAX) {z = Z_MAX;}
+	if (z > Z_MAX) { z = Z_MAX; }
 	const i = Math.round(z / 0.01);
 	const cdfs = [
 		/* 0.00		0.01	 0.02	  0.03	   0.04		0.05	 0.06	  0.07	   0.08		0.09 */
@@ -132,8 +132,8 @@ function zScoreToCDF(z, bSym = true) {
 	return bSym ? cdfs[i] * 2 : cdfs[i];
 }
 
-function calcStatistics(dataArr, options = {bClampRange: true}) {
-	options = {bClampRange: true, ...options};
+function calcStatistics(dataArr, options = { bClampRange: true }) {
+	options = { bClampRange: true, ...options };
 	const statistics = {
 		max: -Infinity,
 		min: +Infinity,
@@ -147,23 +147,23 @@ function calcStatistics(dataArr, options = {bClampRange: true}) {
 		sigma: 0,
 		range: 0,
 		popRange: {
-			normal:		{'50%': [], '75%': [], '89%': [], '95%': []},
-			universal:	{'50%': [], '75%': [], '89%': [], '95%': []}
+			normal: { '50%': [], '75%': [], '89%': [], '95%': [] },
+			universal: { '50%': [], '75%': [], '89%': [], '95%': [] }
 		},
 
 	};
 	statistics.count = dataArr.length;
 	dataArr.forEach((val) => {
-		if (val > statistics.max) {statistics.max = val; statistics.maxCount = 1;}
-		else if (val === statistics.max) {statistics.maxCount++;}
-		if (val < statistics.min) {statistics.min = val; statistics.minCount = 1;}
-		else if (val === statistics.min) {statistics.minCount++;}
+		if (val > statistics.max) { statistics.max = val; statistics.maxCount = 1; }
+		else if (val === statistics.max) { statistics.maxCount++; }
+		if (val < statistics.min) { statistics.min = val; statistics.minCount = 1; }
+		else if (val === statistics.min) { statistics.minCount++; }
 		statistics.sum += val;
-		statistics.sigma += val**2;
+		statistics.sigma += val ** 2;
 	});
 	statistics.range = statistics.max - statistics.min;
 	statistics.mean = statistics.sum / statistics.count;
-	statistics.sigma = Math.sqrt((statistics.sigma - statistics.sum**2 / statistics.count) / (statistics.count - 1));
+	statistics.sigma = Math.sqrt((statistics.sigma - statistics.sum ** 2 / statistics.count) / (statistics.count - 1));
 	statistics.popRange.universal['50%'].push(statistics.mean - Math.sqrt(2) * statistics.sigma, statistics.mean + Math.sqrt(2) * statistics.sigma);
 	statistics.popRange.universal['75%'].push(statistics.mean - 2 * statistics.sigma, statistics.mean + 2 * statistics.sigma);
 	statistics.popRange.universal['89%'].push(statistics.mean - 3 * statistics.sigma, statistics.mean + 3 * statistics.sigma);
@@ -183,12 +183,12 @@ function calcStatistics(dataArr, options = {bClampRange: true}) {
 	const binSize = 1;
 	const histogram = calcHistogram(dataArr, binSize, statistics.max, statistics.min);
 	const masxFreq = Math.max(...histogram);
-	statistics.mode = {value: statistics.min + histogram.indexOf(masxFreq) * binSize, frequency: masxFreq};
+	statistics.mode = { value: statistics.min + histogram.indexOf(masxFreq) * binSize, frequency: masxFreq };
 	{
 		let i = 0, acumFreq = statistics.count / 2;
 		while (true) { // eslint-disable-line no-constant-condition
 			acumFreq -= histogram[i];
-			if (acumFreq <= 0) {break;} else {i++;}
+			if (acumFreq <= 0) { break; } else { i++; }
 		}
 		statistics.median = statistics.min + (i > 0 ? (2 * i - 1) * binSize / 2 : 0);
 	}
@@ -200,12 +200,12 @@ function calcHistogram(data, size, max, min) {
 		min = Infinity;
 		max = -Infinity;
 		for (const item of data) {
-			if (item < min) {min = item;}
-			if (item > max) {max = item;}
+			if (item < min) { min = item; }
+			if (item > max) { max = item; }
 		}
 	}
-	if (min === Infinity) {min = 0;}
-	if (max === -Infinity) {max = 0;}
+	if (min === Infinity) { min = 0; }
+	if (max === -Infinity) { max = 0; }
 	let bins = Math.ceil((max - min + 1) / size);
 	const histogram = new Array(bins).fill(0);
 	for (const item of data) {

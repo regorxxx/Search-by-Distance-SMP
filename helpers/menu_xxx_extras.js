@@ -1,7 +1,12 @@
 ﻿'use strict';
-//15/11/23
+//30/12/23
 
-function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, onBtnUp}*/) {
+/* exported _createSubMenuEditEntries */
+
+include('menu_xxx.js');
+/* global isFunction:readable, MF_GRAYED:readable, MF_STRING:readable, clone:readable,  */
+
+function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, onBtnUp}*/) { // NOSONAR
 	/*
 		name:			popup name
 		subMenuName:	name for the edit entries sub-menu
@@ -10,7 +15,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		input:			should be a function which returns an object: () => {return {....};}
 						there is no need to add logic for 'name' key, it's built-in. Only add whatever you need.
 						make sure it returns null or undefined if user cancels or values are not valid!
-		bAdd: 			true to show an 'Add entry' option on submenu 
+		bAdd: 			true to show an 'Add entry' option on submenu
 		bNumbered:		true to enumerate each entry shown
 		bDuplicate:		allow entries with duplicated names
 		onBtnUp:		function to run after any menu entry is run (usually to save the modified entries on properties). List is passed as argument. onBtnUp(options.list) => {...}
@@ -24,7 +29,6 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 	// options.list always point to the original entry list and original values are edited
 	const subMenuSecondName = parent.newMenu(options.subMenuName || 'Edit entries from list...', menuName); // It will throw if the menu already exists!
 	let i = 0;
-	const seps = [];
 	options.list.forEach((entry, index) => {
 		if (entry.name !== 'sep') {i++;}
 		const entryName = (entry.name === 'sep' ? '------(separator)------' + parent.getNextId() : (options.bNumbered ? i + '. ' : '') + (entry.name.length > 40 ? entry.name.substring(0,40) + ' ...' : entry.name));
@@ -39,7 +43,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			try {newEntry = JSON.parse(newEntry);} catch (e) {fb.ShowPopupMessage('Input: ' + newEntry.toString() + '\n\n' + e, 'JSON error'); return;}
 			if (!newEntry) {return;}
 			if (!options.bDuplicate && options.list.filter((otherEntry) => otherEntry !== entry).findIndex((otherEntry) => otherEntry.name === newEntry.name) !== -1) {
-				fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', scriptName);
+				fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
 				return;
 			}
 			options.list[index] = newEntry;
@@ -48,7 +52,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		}, flags: entry.name === 'sep' ? MF_GRAYED : MF_STRING});
 		parent.newEntry({menuName: subMenuThirdName, entryText: 'Move entry...', func: () => {
 			let pos = 1;
-			try {pos = Number(utils.InputBox(window.ID, 'Move up X indexes (negative is down):\n', options.name, pos, true));} 
+			try {pos = Number(utils.InputBox(window.ID, 'Move up X indexes (negative is down):\n', options.name, pos, true));}
 			catch (e) {return;}
 			if (pos === 0 || !Number.isSafeInteger(pos)) {return;}
 			if (index - pos < 0) {pos = 0;}
@@ -67,7 +71,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 	});
 	if (!options.list.length) {parent.newEntry({menuName: subMenuSecondName, entryText: '(none saved yet)', func: null, flags: MF_GRAYED});}
 	parent.newEntry({menuName: subMenuSecondName, entryText: 'sep'});
-	if (!options.hasOwnProperty('bAdd') || options.bAdd) {
+	if (!Object.hasOwn(options, 'bAdd') || options.bAdd) {
 		parent.newEntry({menuName: subMenuSecondName, entryText: 'Add new entry to list...' , func: () => {
 			// Input all variables
 			let input;
@@ -78,12 +82,12 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			if (entryName === 'sep') {input = {name: entryName};} // Add separator
 			else { // or new entry
 				if (!options.bDuplicate && options.list.findIndex((entry) => entry.name === entryName) !== -1) {
-					fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', scriptName);
+					fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
 					return;
 				}
 				const entry = options.input();
 				if (!entry) {return;}
-				input = {name: entryName, ...entry}
+				input = {name: entryName, ...entry};
 			}
 			// Add entry
 			options.list.push(input);
