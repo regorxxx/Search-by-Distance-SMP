@@ -68,7 +68,7 @@ function createThemeMenu(parent) {
 		themeTagsKeys.forEach((key, i) => {themeTags[key] = themeTagsValues[i];});
 		// Iso
 		themeTags.iso = [];
-		const localeTags = getTagsValuesV3(selHandleList, ['LOCALE LAST.FM']).flat().map((tag) => tag.filter(Boolean).pop());
+		const localeTags = getTagsValuesV3(selHandleList, [globTags.locale]).flat().map((tag) => tag.filter(Boolean).pop());
 		localeTags.forEach((localeTag) => {
 			if (localeTag) {themeTags.iso.push(getCountryISO(localeTag));}
 			else {

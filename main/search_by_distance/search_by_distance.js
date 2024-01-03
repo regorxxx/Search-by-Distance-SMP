@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/12/23
+//03/01/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -95,8 +95,8 @@ const SearchByDistance_properties = {
 		key: { weight: 5, tf: [globTags.key], baseScore: 0, scoringDistribution: 'LOGARITHMIC', type: ['string', 'single', 'keyMix', 'keyRange'], range: 3 },
 		bpm: { weight: 5, tf: [globTags.bpm], baseScore: 0, scoringDistribution: 'NORMAL', type: ['number', 'single', 'percentRange'], range: 50 },
 		date: { weight: 10, tf: [globTags.date], baseScore: 0, scoringDistribution: 'NORMAL', type: ['number', 'single', 'absRange'], range: 30 },
-		composer: { weight: 0, tf: ['COMPOSER'], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple'] },
-		artistRegion: { weight: 5, tf: ['LOCALE LAST.FM'], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5 },
+		composer: { weight: 0, tf: [globTags.composer], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple'] },
+		artistRegion: { weight: 5, tf: [globTags.locale], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5 },
 		genreStyleRegion: { weight: 7, tf: [], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5 },
 	})],
 	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
@@ -1428,7 +1428,7 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		tag.bVirtual = tag.type.includes('virtual'); // TODO: move at top
+		tag.bVirtual = tag.type.includes('virtual'); // TODO move at top
 		tag.bMultiple = tag.type.includes('multiple');
 		tag.bString = tag.type.includes('string');
 		tag.bGraph = tag.type.includes('graph');
@@ -1788,7 +1788,7 @@ async function searchByDistance({
 	else { // GRAPH
 		// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
 		// Now we check if all tracks are needed (over 'minScoreFilter') or only those over 'scoreFilter'.
-		// TODO: FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
+		// TODO FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
 		scoreData.sort(function (a, b) { return b.score - a.score; });
 		let i = 0;
 		let bMin = false;
