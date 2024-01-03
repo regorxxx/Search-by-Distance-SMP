@@ -1,10 +1,10 @@
 ﻿All tools use a default set of tags, pretty standard, remapped like:
 	- Date -> $year(%DATE%)			- Artist -> ARTIST
-	- Genre: -> GENRE				- Style: -> STYLE
-	- Mood: -> MOOD					- Bpm -> BPM
-	- Key -> KEY					- Rating -> %RATING%
+	- Genre: -> GENRE			- Style: -> STYLE
+	- Mood: -> MOOD				- Bpm -> BPM
+	- Key -> KEY				- Rating -> %RATING%
 
-For a comprehensive list check:
+There are many more! For a comprehensive list check:
 [FOOBAR PROFILE FOLDER]\js_data\presets\global\globTags.json
 
 By default all tools will tend to use such associations whenever they are
@@ -21,7 +21,7 @@ load those values, and existing tools will require a 'Restore defaults',
 Note your personalized settings may be lost on the process, so it should
 be done as soon as possible when installing scripts for the first time.
 
-This may come handy for tools which involve queries, since those are 
+This may come handy for tools which involve queries, since those are
 usually set on the scripts their-selves and can not be set in a way
 compatible with every user's tag patterns. This patches that hole.
 
@@ -29,7 +29,7 @@ Example:
 	Let's say in our library the date of a track is associated to
 	'ORIGINAL RELEASE DATE' instead of 'DATE' tag (not recommended,
 	such tagging pattern will break compatibility with most software).
-	
+
 	If we want to remap all date usage to our custom tag, just edit
 	'globTags.json' and change:
 		[...]
