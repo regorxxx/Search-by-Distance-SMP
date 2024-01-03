@@ -1,7 +1,7 @@
 ﻿'use strict';
-//30/12/23
+//03/01/24
 
-/* exported themedButton, getUniquePrefix, addButton, getButtonVersion */
+/* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
 /* global buttonsPath:readable, barProperties:readable, */
 include('helpers_xxx.js');
@@ -113,7 +113,7 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function themedButton(
+function ThemedButton(
 	coordinates,
 	text,
 	func,

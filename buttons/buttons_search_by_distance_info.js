@@ -1,10 +1,10 @@
 ﻿'use strict';
-//21/12/23
+//03/01/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable, MF_MENUBREAK:readable */
 include('..\\helpers\\buttons_xxx.js');
-/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, themedButton:readable, _gr:readable, _scale:readable, _gdiFont:readable, themedButton:readable, chars:readable, round:readable */
+/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable, _gr:readable, _scale:readable, _gdiFont:readable, ThemedButton:readable, chars:readable, round:readable */
 include('..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
 include('..\\helpers\\helpers_xxx_properties.js');
@@ -46,7 +46,7 @@ newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // A
 buttonsBar.list.push(newButtonsProperties);
 
 addButton({
-	'Search by Distance Info': new themedButton({x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, 'Graph Info', function (mask) {
+	'Search by Distance Info': new ThemedButton({x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) /_scale(buttonsBar.config.scale), h: 22}, 'Graph Info', function (mask) {
 		if (mask === MK_SHIFT) {
 			const menu = settingsMenu(
 				this, true, ['buttons_search_by_distance_info.js'], void(0), void(0),

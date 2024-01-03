@@ -1,8 +1,8 @@
 ﻿'use strict';
-//30/12/23
+//03/01/24
 
 include('..\\helpers\\buttons_xxx.js');
-/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, themedButton:readable */
+/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable */
 /* global menu_panelProperties:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global settingsMenu:readable  */
@@ -72,7 +72,7 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 */
 
 addButton({
-	'Search by Distance nearest tracks': new themedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Nearest Tracks', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Nearest Tracks', function (mask) {
+	'Search by Distance nearest tracks': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Nearest Tracks', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Nearest Tracks', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 		} else {
@@ -86,7 +86,7 @@ addButton({
 			searchByDistance(args);
 		}
 	}, null, void (0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void (0), { descriptionText: 'Random mix with only nearest tracks' }),
-	'Search by Distance similar tracks': new themedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Tracks', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Tracks', function (mask) {
+	'Search by Distance similar tracks': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Tracks', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Tracks', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 		} else {
@@ -100,7 +100,7 @@ addButton({
 			searchByDistance(args);
 		}
 	}, null, void (0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void (0), { descriptionText: 'Random mix a bit varied on styles (but similar genre), most tracks within a decade' }),
-	'Search by Distance similar genres': new themedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Genres', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Genres', function (mask) {
+	'Search by Distance similar genres': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Genres', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Genres', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 		} else {
@@ -114,7 +114,7 @@ addButton({
 			searchByDistance(args);
 		}
 	}, null, void (0), buttonTooltipSbd, prefix, newButtonsProperties, chars.wand, void (0), { descriptionText: 'Random mix even more varied on styles/genres, most tracks within a decade' }),
-	'Search by Distance similar mood': new themedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Mood', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Mood', function (mask) {
+	'Search by Distance similar mood': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Similar Mood', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Similar Mood', function (mask) {
 		if (mask === MK_SHIFT) {
 			settingsMenu(this, true, ['buttons_search_by_distance.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 		} else {

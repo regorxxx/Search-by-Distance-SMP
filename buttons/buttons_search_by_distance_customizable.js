@@ -1,10 +1,10 @@
 ﻿'use strict';
-//30/12/23
+//03/01/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
 include('..\\helpers\\buttons_xxx.js');
-/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, themedButton:readable */
+/* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable */
 include('..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\helpers\\helpers_xxx_prototypes.js');
@@ -55,7 +55,7 @@ testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
-	'Search by Distance Customizable': new themedButton({ x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, newButtonsProperties.customName[1], function (mask) {
+	'Search by Distance Customizable': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, newButtonsProperties.customName[1], function (mask) {
 		if (mask === MK_SHIFT) {
 			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
@@ -63,7 +63,7 @@ addButton({
 		} else if (mask === MK_CONTROL + MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else {
-			if (this.buttonsProperties['customName'][1] === 'Customize!') {
+			if (this.buttonsProperties['customName'][1] === 'Customize!') { // NOSONAR
 				let input = '';
 				try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
 				catch (e) { return; }
@@ -86,7 +86,7 @@ addButton({
 		'on_notify_data': (parent, name, info) => {
 			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
 			if (!name.startsWith('Search by Distance')) { return; }
-			switch (name) {
+			switch (name) { // NOSONAR
 				case 'Search by Distance: share configuration': {
 					if (info) {
 						if (info.notifyThis && parent.name === info.name) { return; } // Don't apply to same button
