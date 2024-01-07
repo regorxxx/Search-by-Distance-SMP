@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/24
+//07/01/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable, MF_MENUBREAK:readable */
@@ -12,7 +12,7 @@ include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
 /* global isBoolean:readable, isJSON:readable, _p:readable , capitalizePartial:readable */
 include('..\\helpers\\helpers_xxx_tags.js');
-/* global query_join:readable, getTagsValuesV5:readable */
+/* global queryJoin:readable, getTagsValuesV5:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global _menu:readable, settingsMenu:readable */
 include('..\\helpers\\menu_xxx_extras.js');
@@ -146,7 +146,7 @@ function graphInfoMenu() {
 						report.push('-'.repeat(40));
 						report.push('');
 						// Data from library
-						const query = query_join(entry.tf.map((tag) => tag + ' IS ' + tagVal), 'OR');
+						const query = queryJoin(entry.tf.map((tag) => tag + ' IS ' + tagVal), 'OR');
 						const libItems = fb.GetLibraryItems();
 						const handleList = fb.GetQueryItems(libItems, query);
 						report.push('Tracks: ' + handleList.Count + ' ' + _p(round(handleList.Count/libItems.Count * 100, 1) + '% from ' + libItems.Count + ' total items'));
