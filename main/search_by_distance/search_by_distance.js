@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/24
+//07/01/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -58,7 +58,7 @@ include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
-/* global checkQuery:readable, getTagsValuesV4:readable, query_join:readable, getTagsValuesV3:readable, query_combinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
+/* global checkQuery:readable, getTagsValuesV4:readable, queryJoin:readable, getTagsValuesV3:readable, queryCombinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
 if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
@@ -819,7 +819,7 @@ async function searchByDistance({
 		}
 		if (bBasicLogging) {
 			console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : '')); // NOSONAR [is always a string]
-			console.log(theme);
+			console.log(theme); // DEBUG
 		}
 	}
 	// Sel check
@@ -958,6 +958,21 @@ async function searchByDistance({
 	const genreStyleFilter = new Set(JSON.parse(properties['genreStyleFilterTag'][1]).concat(''));
 	const bTagFilter = !genreStyleFilter.isEqual(new Set([''])); // Only use filter when required
 
+	// Simplify access to tag types
+	for (let key in calcTags) {
+		const tag = calcTags[key];
+		tag.bVirtual = tag.type.includes('virtual');
+		tag.bMultiple = tag.type.includes('multiple');
+		tag.bSingle = tag.type.includes('single');
+		tag.bString = tag.type.includes('string');
+		tag.bNumber = tag.type.includes('number');
+		tag.bGraph = tag.type.includes('graph');
+		tag.bGraphDyn = tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
+		tag.bKeyRange = tag.type.includes('keyRange');
+		tag.bPercentRange = tag.bNumber && tag.type.includes('percentRange');
+		tag.bAbsRange = tag.bNumber && tag.type.includes('absRange');
+	}
+
 	// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)
 	// We use flat since it's only 1 track: genre[0][i] === genre.flat()[i]
 	// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length.
@@ -966,20 +981,20 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		tag.reference = [];
-		if (tag.type.includes('virtual')) { continue; }
-		const bGenreStyle = tag.type.includes('graph') && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
+		if (tag.bVirtual) { continue; }
+		const bGenreStyle = tag.bGraph && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
 		if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
 		}
-		if (tag.type.includes('single')) {
-			if (tag.type.includes('string')) {
+		if (tag.bSingle) {
+			if (tag.bString) {
 				tag.reference = tag.reference[0] || '';
-			} else if (tag.type.includes('number')) {
+			} else if (tag.bNumber) {
 				tag.reference = Number(tag.reference[0]) || null;
 			}
 		}
-		if (tag.type.includes('string')) {
-			if (tag.type.includes('multiple')) {
+		if (tag.bString) {
+			if (tag.bMultiple) {
 				if (tag.reference.length && bAscii) { tag.reference.forEach((val, i) => { tag.reference[i] = _asciify(val); }); }
 				tag.referenceSet = new Set(tag.reference);
 				tag.referenceNumber = tag.referenceSet.size;
@@ -1020,10 +1035,10 @@ async function searchByDistance({
 							keyArr.forEach((keyVal) => {
 								subKeyComb.push(tagNameTF + ' IS ' + keyVal);
 							});
-							keyComb.push(query_join(subKeyComb, 'OR'));
+							keyComb.push(queryJoin(subKeyComb, 'OR'));
 						});
 						// And combine queries
-						if (keyComb.length !== 0) { query[preQueryLength] = query_join(keyComb, 'OR'); }
+						if (keyComb.length !== 0) { query[preQueryLength] = queryJoin(keyComb, 'OR'); }
 					} else { query[preQueryLength] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
 				} else if (type.includes('percentRange')) {
 					const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
@@ -1061,21 +1076,21 @@ async function searchByDistance({
 						groups = groups.map((o) => { return { base: [...o.base], or: [...o.or] }; });
 						groups = groups.map((o) => {
 							return (o.or.length
-								? query_join(query_combinations(o.base, tagNameTF, 'AND', void (0), match).concat(query_combinations(o.or, tagNameTF, 'OR', void (0), match)), 'AND')
+								? queryJoin(queryCombinations(o.base, tagNameTF, 'AND', void (0), match).concat(queryCombinations(o.or, tagNameTF, 'OR', void (0), match)), 'AND')
 								: void (0)
 							);
 						}).filter(Boolean);
 					} else { // For a single group just match all
 						groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match + ' ' + val).join(' AND '));
 					}
-					query[preQueryLength] = query_join(groups, 'OR');
+					query[preQueryLength] = queryJoin(groups, 'OR');
 				} else {
 					if (Array.isArray(tagNameTF)) {
 						const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-						query[preQueryLength] = query_join(query_combinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
+						query[preQueryLength] = queryJoin(queryCombinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
 					} else {
 						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
-						query[preQueryLength] = query_combinations([tag.reference], tagNameTF, 'OR', void (0), match);
+						query[preQueryLength] = queryCombinations([tag.reference], tagNameTF, 'OR', void (0), match);
 					}
 
 				}
@@ -1145,7 +1160,7 @@ async function searchByDistance({
 	const queryLength = query.length;
 	if (method === 'WEIGHT') { // Weight or Dyngenre method. Pre-filtering is really simple...
 		if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
-		else { query[queryLength] = query_join(query, 'OR'); } //join previous queries
+		else { query[queryLength] = queryJoin(query, 'OR'); } //join previous queries
 	} else { // Graph Method
 		let influencesQuery = [];
 		if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
@@ -1158,8 +1173,8 @@ async function searchByDistance({
 			if (influences.length) {
 				influences = [...new Set(influences)];
 				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
-				temp = 'NOT (' + query_join(temp, 'OR') + ')'; // flattens the array
+				let temp = queryCombinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
+				temp = 'NOT (' + queryJoin(temp, 'OR') + ')'; // flattens the array
 				influencesQuery.push(temp);
 			}
 		}
@@ -1173,16 +1188,16 @@ async function searchByDistance({
 			if (influences.length) {
 				influences = [...new Set(influences)];
 				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let temp = query_combinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
-				temp = _p(query_join(temp, 'OR')); // flattens the array. Here changes the 'not' part
+				let temp = queryCombinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
+				temp = _p(queryJoin(temp, 'OR')); // flattens the array. Here changes the 'not' part
 				influencesQuery.push(temp);
 			}
 		}
 		if (influencesQuery.length) {
-			query[queryLength] = query_join(influencesQuery, 'AND');
+			query[queryLength] = queryJoin(influencesQuery, 'AND');
 		} else {
 			if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
-			else { query[queryLength] = query_join(query, 'OR'); } //join previous query's
+			else { query[queryLength] = queryJoin(query, 'OR'); } //join previous query's
 		}
 	}
 	const queryStages = []; // Currently unused
@@ -1191,7 +1206,7 @@ async function searchByDistance({
 		let queryArtist = '';
 		if (tags.length) {
 			queryArtist = tags.map((artist) => { return globTags.artist + ' IS ' + artist; });
-			queryArtist = 'NOT ' + _p(query_join(queryArtist, 'OR'));
+			queryArtist = 'NOT ' + _p(queryJoin(queryArtist, 'OR'));
 		}
 		if (queryArtist.length) {
 			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryArtist); }
@@ -1214,7 +1229,7 @@ async function searchByDistance({
 		}
 		if (similTags.length) {
 			querySimil = similTags.map((artist) => { return globTags.artist + ' IS ' + artist; });
-			querySimil = query_join(querySimil, 'OR');
+			querySimil = queryJoin(querySimil, 'OR');
 		}
 		if (querySimil.length) {
 			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(querySimil); }
@@ -1243,8 +1258,8 @@ async function searchByDistance({
 			const styleGenreRegion = getZoneGraphFilter([...calcTags.genreStyle.referenceSet], genreStyleRegionFilter).map((sg) => sanitizeQueryVal(sg));
 			if (styleGenreRegion.length) {
 				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
-				let queryRegion = query_combinations(styleGenreRegion, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
-				queryRegion = query_join(queryRegion, 'OR'); // flattens the array
+				let queryRegion = queryCombinations(styleGenreRegion, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
+				queryRegion = queryJoin(queryRegion, 'OR'); // flattens the array
 				const len = queryRegion.length;
 				if (len) {
 					if (len > 50000) { // Minor optimization for huge queries
@@ -1286,7 +1301,7 @@ async function searchByDistance({
 								return g1 + '$' + g3 + g4.replace(/"/g, '');
 							});
 						});
-						dynQuery = query_join(expanded, regNot.test(dynQuery) ? 'AND' : 'OR');
+						dynQuery = queryJoin(expanded, regNot.test(dynQuery) ? 'AND' : 'OR');
 					} else { dynQuery = ''; }
 				}
 				// Execute
@@ -1312,7 +1327,7 @@ async function searchByDistance({
 				return null;
 			}
 		}).filter(Boolean);
-		selQuery = query_join(selQuery, 'AND') || '';
+		selQuery = queryJoin(selQuery, 'AND') || '';
 		// Add to list
 		const len = selQuery.length;
 		if (len) {
@@ -1406,8 +1421,8 @@ async function searchByDistance({
 	let z = 0;
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.type.includes('virtual')) { continue; }
-		if (tag.weight !== 0 || tag.tf.length && (tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+		if (tag.bVirtual) { continue; }
+		if (tag.weight !== 0 || tag.tf.length && (tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tagsArr.push(tag.tf);
 		}
 	}
@@ -1428,12 +1443,7 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		tag.bVirtual = tag.type.includes('virtual'); // TODO move at top
-		tag.bMultiple = tag.type.includes('multiple');
-		tag.bString = tag.type.includes('string');
-		tag.bGraph = tag.type.includes('graph');
-		tag.bGraphDyn = tag.type.includes('graph') && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
-		if (tag.type.includes('virtual')) { continue; }
+		if (tag.bVirtual) { continue; }
 		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.handle = tagsValByKey[z++];
 		} else {
@@ -1502,12 +1512,11 @@ async function searchByDistance({
 		let currScoreAvailable = 100;
 		for (let key of sortTagKeys) {
 			const tag = calcTags[key];
-			const type = tag.type;
 			if (tag.weight === 0) { continue; }
-			if (type.includes('virtual')) { continue; }
+			if (tag.bVirtual) { continue; }
 			if (currScoreAvailable < minScoreFilter) { continue; } // Break asap
 			const scoringDistr = tag.scoringDistribution;
-			if (type.includes('multiple')) {
+			if (tag.bMultiple) {
 				const newTag = handleTag[key].number;
 				if (tag.referenceNumber !== 0) {
 					if (newTag !== 0) {
@@ -1523,14 +1532,14 @@ async function searchByDistance({
 							: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.referenceNumber, tag.referenceNumber);
 					}
 				}
-			} else if (type.includes('single')) {
+			} else if (tag.bSingle) {
 				const newTag = handleTag[key].val;
-				if (type.includes('string')) {
+				if (tag.bString) {
 					if (tag.reference.length) {
 						if (newTag.length) {
 							if (newTag === tag.reference) {
 								weightValue += tag.weight;
-							} else if (type.includes('keyRange') && tag.range !== 0) {
+							} else if (tag.bKeyRange && tag.range !== 0) {
 								const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 								const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
 								if (camelotKey && camelotKeyNew) {
@@ -1552,12 +1561,12 @@ async function searchByDistance({
 								: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.range, tag.range);
 						}
 					}
-				} else if (type.includes('number')) {
+				} else if (tag.bNumber) {
 					if (tag.reference !== null) {
 						if (newTag !== null) {
 							if (newTag === tag.reference) {
 								weightValue += tag.weight;
-							} else if (type.includes('percentRange') && tag.range !== 0) {
+							} else if (tag.bPercentRange && tag.range !== 0) {
 								const range = tag.reference * tag.range / 100;
 								const difference = range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
@@ -1565,7 +1574,7 @@ async function searchByDistance({
 										? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
 										: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
 								}
-							} else if (type.includes('absRange') && tag.range !== 0) {
+							} else if (tag.bAbsRange && tag.range !== 0) {
 								const difference = tag.range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
 									weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
@@ -1788,7 +1797,6 @@ async function searchByDistance({
 	else { // GRAPH
 		// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
 		// Now we check if all tracks are needed (over 'minScoreFilter') or only those over 'scoreFilter'.
-		// TODO FILTER DYNAMICALLY MAX DISTANCE*STYLES OR ABSOLUTE score?
 		scoreData.sort(function (a, b) { return b.score - a.score; });
 		let i = 0;
 		let bMin = false;
@@ -1966,8 +1974,8 @@ async function searchByDistance({
 					// Debug console: using double pass reports may not be accurate since tracks on second pass are skipped on log
 					if (bSearchDebug) {
 						console.log('Keys from selection:');
-						console.log(keyDebug);
-						console.log(keySharpDebug);
+						console.log(keyDebug); // DEBUG
+						console.log(keySharpDebug); // DEBUG
 						console.log('Pattern applied:');
 						console.log(patternDebug); // Always has one item less than key arrays
 					}
@@ -2070,7 +2078,7 @@ async function searchByDistance({
 				for (let i = 0; i < finalPlaylistLength; i++) {
 					const index = selectedHandlesData[i].index;
 					const genreStyleTag = Object.values(calcTags)
-						.filter((t) => t.type.includes('graph') && !t.type.includes('virtual') && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
+						.filter((t) => t.bGraph && !t.bVirtual && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
 						.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
 					const tagSet_i = new Set(genreStyleTag.map((item) => { return item.toLowerCase(); }));
 					if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || speechness[i][0] === 0) { // Any match, then add to reorder list
