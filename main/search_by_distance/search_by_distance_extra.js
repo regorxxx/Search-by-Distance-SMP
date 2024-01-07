@@ -364,7 +364,6 @@ function getCountriesFromISO(iso, mode) {
 		: [filterNodes , oppositeNodes];
 }
 
-// TODO test
 function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTag = globTags.locale) {
 	// Retrieve artist
 	const dataId = 'artist';
