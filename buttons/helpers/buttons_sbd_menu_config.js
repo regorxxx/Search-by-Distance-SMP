@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//04/01/24
 
 /* exported createConfigMenu */
 
@@ -893,7 +893,7 @@ function createConfigMenu(parent) {
 				parent.switchAnimation('Graph statistics', true);
 				graphStatistics({properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod}).then((resolve) => {
 					_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
-					console.log(resolve.text);
+					console.log(resolve.text); // DEBUG
 					parent.switchAnimation('Graph statistics', false);
 					if (sbd.panelProperties.bProfile[1]) {profiler.Print();}
 				});

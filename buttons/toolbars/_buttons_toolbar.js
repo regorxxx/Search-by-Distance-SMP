@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/12/23
+//04/01/24
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -227,7 +227,7 @@ const includeButton = (() => {
 			buttonsBar.listKeys.push(newKeys);
 			window.Repaint();
 		} else {
-			console.log(buttonPath + ' not loaded');
+			console.log(buttonPath + ' not loaded'); // DEBUG
 		}
 	};
 })();

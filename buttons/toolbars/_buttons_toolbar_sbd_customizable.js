@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/12/23
+//04/01/24
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
@@ -35,7 +35,7 @@ buttonsBar.config.toolbarColor = RGB(211,218,237);
 		if (_isFile(path)) {
 			include(path, {always_evaluate: true});
 		} else {
-			console.log(path +' not loaded');
+			console.log(path +' not loaded'); // DEBUG
 		}
 	}
 	/*

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//04/01/24
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -220,6 +220,6 @@ music_graph_descriptors_culture.distanceDebug = function distanceDebug() {
 		['Aussie Rock', 'New Wave'],			// 4
 		['Disco', 'New Wave'],				// 1
 	].forEach((pair) => {
-		console.log(pair.join(' <-> ') + ' = ', music_graph_descriptors_culture.getDistance(...pair));
+		console.log(pair.join(' <-> ') + ' = ', music_graph_descriptors_culture.getDistance(...pair)); // DEBUG
 	});
 };

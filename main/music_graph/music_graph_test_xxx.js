@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//04/01/24
 
 /* exported testGraphNodes, testGraphNodeSets */
 
@@ -46,7 +46,7 @@ function testGraphNodes(mygraph) {
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
 			({distance, influence, path} = calcGraphDistance(mygraph, o.from, o.to, true));
 			idpath = getNodesFromPath(path);
-			console.log(idpath + '\t' + distance + ' (' + influence + ')');
+			console.log(idpath + '\t' + distance + ' (' + influence + ')'); // DEBUG
 		}
 	});
 	test.Print('', false);
@@ -189,7 +189,7 @@ function testGraphNodeSets(mygraph) {
 	].forEach((o) => {
 		if (Object.hasOwn(o, 'name')) {console.log(o.name);}
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
-			console.log(o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(mygraph, o.from, o.to));
+			console.log(o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(mygraph, o.from, o.to)); // DEBUG
 		}
 	});
 
