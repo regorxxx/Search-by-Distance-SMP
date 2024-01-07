@@ -57,6 +57,7 @@
 - Toolbar: new settings for text scale (now independent of button and icon scale).
 - Toolbar: new settings for icon scale (now independent of button and text scale).
 ### Changed
+- Cultural Regions: improvements to processing when using cultural filters in some cases.
 - Cache: changed cache structure to minimize file size (up to 50%) and loading time (up to 30%). Link cache will need to be rebuilt on update.
 - Helpers: updated helpers.
 - Code cleanup.

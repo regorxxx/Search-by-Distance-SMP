@@ -1,11 +1,11 @@
 ﻿'use strict';
-//27/12/23
+//07/01/24
 
 /* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter, findStyleGenresMissingGraph */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, music_graph_descriptors_user:readable */
-/* global getTagsValuesV3:readable, getTagsValuesV4:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, query_combinations:readable, query_join:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable */
+/* global getTagsValuesV3:readable, getTagsValuesV4:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable, _qCond:readable, isInt:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 /* global music_graph_descriptors_countries:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
@@ -35,7 +35,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	if (method === 'reference') {
 		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
 		const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
-		const allowedGenresQuery = query_combinations(allowedGenres, genreStyleTagQuery, 'OR', 'AND');
+		const allowedGenresQuery = queryCombinations(allowedGenres, genreStyleTagQuery, 'OR', 'AND');
 		forcedQuery = _p(artist.map((tag) => { return _p('NOT ' + globTags.artist + ' IS ' + tag); }).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 	}
 	// Weight with all artist's tracks
@@ -58,7 +58,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 		if (method === 'variable' || method === 'weighted') {
 			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
 			const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
-			const allowedGenresQuery = query_join(query_combinations(allowedGenres, genreStyleTagQuery, 'OR'), 'OR');
+			const allowedGenresQuery = queryJoin(queryCombinations(allowedGenres, genreStyleTagQuery, 'OR'), 'OR');
 			forcedQuery = _p(artist.map((tag) => { return _p('NOT ' + globTags.artist + ' IS ' + tag); }).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
 			if (method === 'weighted') { // Weight will be <= 1 according to how representative of the artist's works is
 				weight = [...new Set(genreStyle)].reduce((total, val) => { return total + (genreStyleWeight.has(val) ? genreStyleWeight.get(val) : 0); }, 0);
@@ -140,7 +140,7 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 	}
 	if (!newData.length) { console.log('Nothing found.'); return []; }
 	if (!_isFile(file)) {
-		newData.forEach((obj) => { console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); });
+		newData.forEach((obj) => { console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); }); // DEBUG
 		_save(file, JSON.stringify(newData, null, '\t'));
 	} else {
 		const data = _jsonParseFile(file, utf8);
@@ -151,7 +151,7 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 				const idx = idxMap.get(obj.artist);
 				if (idx >= 0) { data[idx] = obj; }
 				else { data.push(obj); }
-				console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum)));
+				console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); // DEBUG
 			});
 		}
 		_deleteFile(file);
@@ -254,7 +254,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 
 /* function getIsoFromHandle (handle, worldMapData = null) {
 	let iso = '';
-	const tagName = 'LOCALE LAST.FM';
+	const tagName = globTags.locale;
 	const localeTag = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(handle).split(', ').filter(Boolean).pop() || '';
 	if (localeTag.length) {iso = getCountryISO(localeTag) || '';}
 	else {
@@ -324,7 +324,48 @@ function getArtistsSameZone({ selHandle = fb.GetFocusItem() } = {}) {
 	return artists;
 }
 
-function getZoneArtistFilter(iso, mode = 'region', worldMapData = null) {
+function getCountriesFromISO(iso, mode) {
+	const keys = ['continent', 'region', 'country', 'no-continent', 'no-region', 'no-country'];
+	mode = isInt(mode)
+		? keys[mode] || ''
+		: mode ? mode.toLowerCase() : '';
+	console.log(mode);
+	// Retrieve current region
+	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(iso);
+	// Set allowed countries from current region
+	let filterNodes = [];
+	let oppositeNodes = [];
+	switch (mode) {
+		case 'continent':
+		case 'no-continent': {
+			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
+			filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
+			oppositeNodes =  [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			break;
+		}
+		case 'region':
+		case 'no-region': {
+			filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
+			oppositeNodes = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			break;
+		}
+		case 'country':
+		case 'no-country': {
+			filterNodes = [iso];
+			oppositeNodes = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			break;
+		}
+		default: {
+			filterNodes = music_graph_descriptors_countries.getNodes();
+		}
+	}
+	return mode.startsWith('no-')
+		? [oppositeNodes, filterNodes]
+		: [filterNodes , oppositeNodes];
+}
+
+// TODO test
+function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTag = globTags.locale) {
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data
@@ -334,49 +375,8 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = null) {
 		if (data) { worldMapData = data; }
 	}
 	if (!worldMapData) { console.log('getZoneArtistFilter: no world map data available'); return; }
-	// Retrieve current region
-	const selRegion = music_graph_descriptors_countries.getFirstNodeRegion(iso);
 	// Set allowed countries from current region
-	let countryISO;
-	switch (isString(mode) ? mode.toLowerCase() : mode) {
-		case 0:
-		case 'continent': {
-			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
-			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
-			break;
-		}
-		case 1:
-		case 'region': {
-			countryISO = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
-			break;
-		}
-		case 2:
-		case 'country': {
-			countryISO = [iso];
-			break;
-		}
-		case 3: // TODO Compare if negating previous nodes is smaller than the opposite list, which should be faster for queries
-		case 'no-continent': {
-			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
-			const filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
-			countryISO = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
-			break;
-		}
-		case 4:
-		case 'no-region': {
-			const filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selRegion).flat(Infinity);
-			countryISO = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
-			break;
-		}
-		case 5:
-		case 'no-country': {
-			countryISO = music_graph_descriptors_countries.getNodes().filter((node) => node !== iso);
-			break;
-		}
-		default: {
-			countryISO = music_graph_descriptors_countries.getNodes();
-		}
-	}
+	const [countryISO, noCountryISO] = getCountriesFromISO(iso, mode);
 	const countryName = new Set(countryISO.map((iso) => { return isoMapRev.get(iso).toLowerCase(); }).filter(Boolean));
 	countryName.forEach((name) => { if (nameReplacersRev.has(name)) { countryName.add(nameReplacersRev.get(name)); } }); // Add alternate names
 	// Compare and get list of allowed artists
@@ -387,9 +387,16 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = null) {
 	});
 	// Query
 	let query = [];
-	query.push(query_join(artists.map((artist) => globTags.artist + ' IS ' + artist), 'OR'));
-	query.push(query_join([...countryName].map((country) => 'LOCALE LAST.FM IS ' + country), 'OR'));
-	query = query_join(query, 'OR');
+	query.push(queryJoin(artists.map((artist) => globTags.artist + ' IS ' + artist), 'OR'));
+	// Compare if negating countries is smaller than the opposite list, which should be faster for queries
+	if (noCountryISO.length < countryISO.length) {
+		const noCountryName = new Set(noCountryISO.map((iso) => { return isoMapRev.get(iso).toLowerCase(); }).filter(Boolean));
+		noCountryName.forEach((name) => { if (nameReplacersRev.has(name)) { countryName.add(nameReplacersRev.get(name)); } });
+		query.push(_qCond(localeTag) + ' PRESENT AND NOT ' + _p(queryJoin([...noCountryName].map((country) => _qCond(localeTag) + ' IS ' + country), 'OR')));
+	} else {
+		query.push(queryJoin([...countryName].map((country) => _qCond(localeTag) + ' IS ' + country), 'OR'));
+	}
+	query = queryJoin(query, 'OR');
 	return { artists, countries: { iso: countryISO, name: countryName }, query };
 }
 
