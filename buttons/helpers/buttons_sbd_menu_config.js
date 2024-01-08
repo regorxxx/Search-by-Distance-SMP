@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/24
+//08/01/24
 
 /* exported createConfigMenu */
 
@@ -170,7 +170,14 @@ function createConfigMenu(parent) {
 		options.forEach((key, i) => {
 			const keyFormat = new Set(['dynGenre']).has(key)
 				? capitalize(key)
-				: capitalizeAll(key.replace(/(Genre|Style)/g,'/$1').replace(/(Region)/g,' $1'), [' ', '/', '\\']);
+				: capitalizeAll(
+					key
+						.replace(/\B(Genre|Style)(\b|[A-Z])/g,' $1 $2')
+						.replace(/\B(Region)(?:\b|[A-Z])/g,' $1')
+						.replace(/(genre) (style)/gi,'$1/$2')
+						.replace(/(style) (genre)/gi,'$1/$2')
+					, [' ', '/', '\\']
+				);
 			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName);
 			const baseTag = tags[key];
 			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
