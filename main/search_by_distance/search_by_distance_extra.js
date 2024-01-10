@@ -1,11 +1,11 @@
 ﻿'use strict';
-//07/01/24
+//10/01/24
 
 /* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter, findStyleGenresMissingGraph */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, music_graph_descriptors_user:readable */
-/* global getTagsValuesV3:readable, getTagsValuesV4:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable, _qCond:readable, isInt:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable, _qCond:readable, isInt:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 /* global music_graph_descriptors_countries:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
@@ -18,7 +18,7 @@ include('..\\world_map\\world_map_tables.js');
 async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted' } = {}) {
 	const test = sbd.panelProperties.bProfile[1] ? new FbProfiler('calculateSimilarArtists') : null;
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
-	const artist = getTagsValuesV3(new FbMetadbHandleList(selHandle), [globTags.artist], true).flat().filter(Boolean);
+	const artist = getHandleListTags(new FbMetadbHandleList(selHandle), [globTags.artist], { bMerged: true }).flat().filter(Boolean);
 	const libQuery = artist.map((tag) => { return _p(globTags.artist + ' IS ' + tag); }).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
 	let selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
@@ -33,7 +33,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	// Find which genre/styles are nearest as pre-filter using the selected track
 	let forcedQuery = '';
 	if (method === 'reference') {
-		const genreStyle = getTagsValuesV3(new FbMetadbHandleList(selHandle), genreStyleTag, true).flat().filter(Boolean);
+		const genreStyle = getHandleListTags(new FbMetadbHandleList(selHandle), genreStyleTag, { bMerged: true }).flat().filter(Boolean);
 		const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 		const allowedGenresQuery = queryCombinations(allowedGenres, genreStyleTagQuery, 'OR', 'AND');
 		forcedQuery = _p(artist.map((tag) => { return _p('NOT ' + globTags.artist + ' IS ' + tag); }).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
@@ -42,7 +42,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	const genreStyleWeight = new Map();
 	let weight = 1;
 	if (method === 'weighted') {
-		const genreStyle = getTagsValuesV3(selArtistTracks, genreStyleTag, true).flat(Infinity).filter(Boolean);
+		const genreStyle = getHandleListTags(selArtistTracks, genreStyleTag, { bMerged: true }).flat(Infinity).filter(Boolean);
 		const size = genreStyle.length;
 		genreStyle.forEach((val) => {
 			if (genreStyleWeight.has(val)) { genreStyleWeight.set(val, genreStyleWeight.get(val) + 1); }
@@ -56,7 +56,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	for await (const sel of randomSelTracks) {
 		// Find which genre/styles are nearest as pre-filter with randomly chosen tracks
 		if (method === 'variable' || method === 'weighted') {
-			const genreStyle = getTagsValuesV3(new FbMetadbHandleList(sel), genreStyleTag, true).flat().filter(Boolean);
+			const genreStyle = getHandleListTags(new FbMetadbHandleList(sel), genreStyleTag, { bMerged: true }).flat().filter(Boolean);
 			const allowedGenres = getNearestGenreStyles(genreStyle, 50, sbd.allMusicGraph);
 			const allowedGenresQuery = queryJoin(queryCombinations(allowedGenres, genreStyleTagQuery, 'OR'), 'OR');
 			forcedQuery = _p(artist.map((tag) => { return _p('NOT ' + globTags.artist + ' IS ' + tag); }).join(' AND ')) + (allowedGenresQuery.length ? ' AND ' + _p(allowedGenresQuery) : '');
@@ -70,7 +70,8 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 			const dateTag = tags.date.tf[0];
 			if (dateTag) {
 				const dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
-				const date = getTagsValuesV4(new FbMetadbHandleList(sel), [dateTag], true).flat().filter(Boolean)[0];
+				const date = getHandleListTagsV2(new FbMetadbHandleList(sel), [dateTag], { bMerged: true })
+					.flat().filter(Boolean)[0];
 				dateQuery = date && date.length ? _p(dateQueryTag + ' GREATER ' + (Number(date) - Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2))) : null;
 			}
 		}
@@ -84,7 +85,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 		});
 		const [selectedHandlesArray, selectedHandlesData,] = data || [[], []];
 		// Group tracks per artist and sum their score
-		const similArtist = getTagsValuesV3(new FbMetadbHandleList(selectedHandlesArray), [globTags.artist], true);
+		const similArtist = getHandleListTags(new FbMetadbHandleList(selectedHandlesArray), [globTags.artist], { bMerged: true });
 		const similArtistData = new Map();
 		let totalScore = 0;
 		const totalCount = selectedHandlesArray.length;
@@ -340,7 +341,7 @@ function getCountriesFromISO(iso, mode) {
 		case 'no-continent': {
 			const selMainRegion = music_graph_descriptors_countries.getMainRegion(selRegion);
 			filterNodes = music_graph_descriptors_countries.getNodesFromRegion(selMainRegion).flat(Infinity);
-			oppositeNodes =  [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
+			oppositeNodes = [...new Set(music_graph_descriptors_countries.getNodes()).difference(new Set(filterNodes))];
 			break;
 		}
 		case 'region':
@@ -361,7 +362,7 @@ function getCountriesFromISO(iso, mode) {
 	}
 	return mode.startsWith('no-')
 		? [oppositeNodes, filterNodes]
-		: [filterNodes , oppositeNodes];
+		: [filterNodes, oppositeNodes];
 }
 
 function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTag = globTags.locale) {
@@ -460,7 +461,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 		return null;
 	}
 	// Get tags
-	let tags = new Set(getTagsValuesV4(fb.GetLibraryItems(), tagsToCheck, false, true).flat(Infinity));
+	let tags = new Set(getHandleListTagsV2(fb.GetLibraryItems(), tagsToCheck, { bEmptyVal: true }).flat(Infinity));
 	if (bAscii) { tags = new Set([...tags].map((tag) => { return _asciify(tag); })); }
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));

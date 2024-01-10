@@ -133,7 +133,7 @@ function zScoreToCDF(z, bSym = true) {
 }
 
 function calcStatistics(dataArr, options = { bClampRange: true }) {
-	options = { bClampRange: true, ...options };
+	options = { bClampRange: true, ...(options || {}) };
 	const statistics = {
 		max: -Infinity,
 		min: +Infinity,

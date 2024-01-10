@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/12/23
+//10/01/24
 
 /* exported camelotWheel */
 
@@ -263,7 +263,7 @@ const camelotWheel = function () {
 			return bMap ? new Map([...keyNotation.entries()]) : [...keyNotation.entries()];
 		},
 		getKeyNotationObjectTable(bMap = true) {
-			const entries = [...keyNotationObject.entries()].map((entry) => {return [entry[0], this.clone(entry[1])];});
+			const entries = [...keyNotationObject.entries()].map((entry) => { return [entry[0], this.clone(entry[1])]; });
 			return bMap ? new Map(entries) : entries;
 		},
 		hasKey(xy) {
@@ -275,13 +275,13 @@ const camelotWheel = function () {
 			);
 		},
 		getKeyNotationObjectCamelot(xy) { // Retrieves camelot object
-			if (typeof xy === 'object') {return this.getKeyNotationObjectCamelot(xy.hour + xy.letter);}
-			return (this.hasKey(xy) ? {...keyNotationObject.get(xy)} : null);
+			if (typeof xy === 'object') { return this.getKeyNotationObjectCamelot(xy.hour + xy.letter); }
+			return (this.hasKey(xy) ? { ...keyNotationObject.get(xy) } : null);
 		},
 		getKeyNotationObjectOpen(xy) { // Retrieves open key object
-			if (typeof xy === 'object') {return this.getKeyNotationObjectOpen(xy.hour + xy.letter);}
+			if (typeof xy === 'object') { return this.getKeyNotationObjectOpen(xy.hour + xy.letter); }
 			const x = this.getKeyNotationObjectCamelot(xy);
-			if (x) {this.translateObjectCamelotToOpen(x);}
+			if (x) { this.translateObjectCamelotToOpen(x); }
 			return x;
 		},
 		translateObjectCamelotToOpen(x) { // {Camelot} -> {Open Key}
@@ -294,7 +294,7 @@ const camelotWheel = function () {
 			x.letter = (x.letter === 'm' ? 'A' : 'B');
 			return x;
 		},
-		translateToNotation(x, notation = ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ ) {
+		translateToNotation(x, notation = ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */) {
 			let keys = new Set();
 			notation.forEach((name) => {
 				switch (name) {
@@ -321,7 +321,7 @@ const camelotWheel = function () {
 			return [...keys];
 		},
 		clone(x) {
-			return {...x};
+			return { ...x };
 		},
 		/*
 			Methods to retrieve Key Strings (y) from Key Objects (x)
@@ -344,13 +344,13 @@ const camelotWheel = function () {
 			otherwise the original will be modified!
 			Works for Camelot or Open key objects, no need to translate
 		*/
-		perfectMatch(x) {return x;},
+		perfectMatch(x) { return x; },
 		energyBoost(x) {
-			x.hour = this.cyclicOffset(x.hour, 1, [1,12]);
+			x.hour = this.cyclicOffset(x.hour, 1, [1, 12]);
 			return x;
 		},
 		energyDrop(x) {
-			x.hour = this.cyclicOffset(x.hour, -1, [1,12]);
+			x.hour = this.cyclicOffset(x.hour, -1, [1, 12]);
 			return x;
 		},
 		energySwitch(x) {
@@ -369,11 +369,11 @@ const camelotWheel = function () {
 			return x;
 		},
 		moodBoost(x) {
-			x.hour = this.cyclicOffset(x.hour, 3, [1,12]);
+			x.hour = this.cyclicOffset(x.hour, 3, [1, 12]);
 			return x;
 		},
 		moodDrop(x) {
-			x.hour = this.cyclicOffset(x.hour, -3, [1,12]);
+			x.hour = this.cyclicOffset(x.hour, -3, [1, 12]);
 			return x;
 		},
 		domKey(x) {
@@ -387,7 +387,7 @@ const camelotWheel = function () {
 			return x;
 		},
 		energyRaise(x) {
-			x.hour = this.cyclicOffset(x.hour, 7, [1,12]);
+			x.hour = this.cyclicOffset(x.hour, 7, [1, 12]);
 			return x;
 		},
 		/*
@@ -407,8 +407,8 @@ const camelotWheel = function () {
 			);
 		},
 		getDistance(xy1, xy2, bConvert = true) {
-			const x1C = bConvert ? this.getKeyNotationObjectCamelot(xy1): xy1;
-			const x2C = bConvert ? this.getKeyNotationObjectCamelot(xy2): xy2;
+			const x1C = bConvert ? this.getKeyNotationObjectCamelot(xy1) : xy1;
+			const x2C = bConvert ? this.getKeyNotationObjectCamelot(xy2) : xy2;
 			if (x1C && x2C) {
 				return (this.getLetterDistance(x1C, x2C, false) + this.getHourDistance(x1C, x2C, false));
 			}
@@ -417,14 +417,14 @@ const camelotWheel = function () {
 		/*
 			Methods to create and apply patterns
 		*/
-		createRange(x, keyRange, notation = {name: ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */ , bFlat: true}) {
+		createRange(x, keyRange, notation = { name: ['camelot'] /* flat, sharp, open, camelot, openObj, camelotObj */, bFlat: true }) {
 			// Cross on wheel with length keyRange, can change hour or letter, but not both without a penalty (-1 length)
 			// Gets both, flat and sharp equivalences
 			let nextKeyObj;
 			let keyComb = [];
-			[{...x}, this.energySwitch({...x})].forEach((keyObj, i) => {
+			[{ ...x }, this.energySwitch({ ...x })].forEach((keyObj, i) => {
 				[this.energyBoost, this.energyDrop].forEach((movement) => {
-					nextKeyObj = {...keyObj}; // Make a copy
+					nextKeyObj = { ...keyObj }; // Make a copy
 					// Mayor axis with same letter i = 0
 					// Minor axis after changing letter i = 1
 					for (let j = 0; j < keyRange - i; j++) {
@@ -434,7 +434,7 @@ const camelotWheel = function () {
 					}
 				});
 				// Same letter and number or different letter
-				nextKeyObj = {...keyObj};
+				nextKeyObj = { ...keyObj };
 				const subKeyComb = this.translateToNotation(nextKeyObj, notation.name);
 				notation.bFlat ? keyComb.push(...subKeyComb) : keyComb.push(subKeyComb);
 			});
@@ -456,22 +456,21 @@ const camelotWheel = function () {
 				bRandomize: false,
 				bFillPerfectMatch: true
 			};
+			options = { ...defaults, ...(options || {}) };
 			// Instead of predefining a mixing pattern, create one randomly each time, with predefined proportions
-			const movements = options.movements
-				? {...options.movements}
-				: {...defaults.movements};
+			const movements = options.movements;
 			// It may also be randomized a bit more
-			if ({...defaults, ...options}.bRandomize) {
+			if (options.bRandomize) {
 				const totalWeight = Object.values(movements).reduce((total, curr) => total + curr, 0);
 				Object.keys(movements).forEach((key) => {
 					movements[key] += Math.round((10 - Math.random() * 20) * totalWeight / 100);
-					if (movements[key] < 0) {delete movements[key];}
+					if (movements[key] < 0) { delete movements[key]; }
 				});
 			}
 			// And any proportions below 100% are filled with exact matches
-			if ({...defaults, ...options}.bFillPerfectMatch) {
+			if (options.bFillPerfectMatch) {
 				const toFill = 100 - Object.keys(movements).reduce((total, curr) => total + curr, 0);
-				if (toFill > 0) {movements.perfectMatch += toFill;}
+				if (toFill > 0) { movements.perfectMatch += toFill; }
 			}
 			const totalWeight = Object.values(movements).reduce((total, curr) => total + curr, 0);
 			let pattern = [];
@@ -487,17 +486,17 @@ const camelotWheel = function () {
 				[pattern[n], pattern[last]] = [pattern[last], pattern[n]];
 			}
 			// Cut to desired length and output
-			if (pattern.length > playlistLength) {pattern.length = playlistLength;} // finalPlaylistLength is always <= PlaylistLength
+			if (pattern.length > playlistLength) { pattern.length = playlistLength; } // finalPlaylistLength is always <= PlaylistLength
 			return pattern;
 		},
 		applyPattern(x, pattern, bReturnObj = true) {
 			let keyArr = [];
 			if (Array.isArray(pattern) && pattern.length && this.hasKey(x)) {
-				if (typeof x === 'string') {keyArr.push(this.getKeyNotationObjectCamelot(x));}
-				else if (typeof x === 'object' && Object.hasOwn(x, 'hour') && Object.hasOwn(x, 'letter')) {keyArr.push(x);}
-				else {return keyArr;}
-				pattern.forEach( (movement, index) => {keyArr.push(this[movement]({...keyArr[index - 1]}));});
-				if (!bReturnObj) {keyArr = keyArr.map((keyObj) => {return this.getKeyNotationSharp(keyObj);});} // Translate back
+				if (typeof x === 'string') { keyArr.push(this.getKeyNotationObjectCamelot(x)); }
+				else if (typeof x === 'object' && Object.hasOwn(x, 'hour') && Object.hasOwn(x, 'letter')) { keyArr.push(x); }
+				else { return keyArr; }
+				pattern.forEach((movement, index) => { keyArr.push(this[movement]({ ...keyArr[index - 1] })); });
+				if (!bReturnObj) { keyArr = keyArr.map((keyObj) => { return this.getKeyNotationSharp(keyObj); }); } // Translate back
 			}
 			return keyArr;
 		},
@@ -509,8 +508,8 @@ const camelotWheel = function () {
 		cyclicOffset(reference, offset, limits) {
 			if (offset && reference >= limits[0] && reference <= limits[1]) {
 				reference += offset;
-				if (reference < limits[0]) {reference += limits[1];}
-				if (reference > limits[1]) {reference -= limits[1];}
+				if (reference < limits[0]) { reference += limits[1]; }
+				if (reference > limits[1]) { reference -= limits[1]; }
 			}
 			return reference;
 		}

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/01/24
+//10/01/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -58,7 +58,7 @@ include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
-/* global checkQuery:readable, getTagsValuesV4:readable, queryJoin:readable, getTagsValuesV3:readable, queryCombinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
+/* global checkQuery:readable, getHandleListTagsV2:readable, queryJoin:readable, getHandleListTags:readable, queryCombinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
 if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
@@ -984,7 +984,7 @@ async function searchByDistance({
 		if (tag.bVirtual) { continue; }
 		const bGenreStyle = tag.bGraph && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
 		if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
-			tag.reference = (bUseTheme ? theme.tags[0][key] : getTagsValuesV3(selHandleList, tag.tf, true).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
+			tag.reference = (bUseTheme ? theme.tags[0][key] : getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
 		}
 		if (tag.bSingle) {
 			if (tag.bString) {
@@ -1438,7 +1438,7 @@ async function searchByDistance({
 		tagsVal = tagsCache.getTags(tagsArr, handleList.Convert());
 		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal[tag]; });
 	} else {
-		tagsVal = getTagsValuesV3(handleList, tagsArr);
+		tagsVal = getHandleListTags(handleList, tagsArr);
 		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal.map((tag) => { return tag[i]; }); });
 	}
 	for (let key in calcTags) {
@@ -1827,7 +1827,7 @@ async function searchByDistance({
 		while (i--) { handlePoolArray.push(handleList[scoreData[i].index]); }
 		let handlePool = new FbMetadbHandleList(handlePoolArray);
 		handlePool = removeDuplicates({ handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN }); // n + 1
-		const [titleHandlePool] = getTagsValuesV4(handlePool, ['TITLE'], void (0), void (0), null);
+		const [titleHandlePool] = getHandleListTagsV2(handlePool, ['TITLE'], { splitBy: null });
 		let filteredScoreData = [];
 		i = 0;
 		while (i < handlePool.Count) {
@@ -2074,7 +2074,7 @@ async function searchByDistance({
 		if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
 			if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
 				let newOrder = [];
-				const [language, speechness] = getTagsValuesV4(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS'], false);
+				const [language, speechness] = getHandleListTagsV2(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS']);
 				for (let i = 0; i < finalPlaylistLength; i++) {
 					const index = selectedHandlesData[i].index;
 					const genreStyleTag = Object.values(calcTags)

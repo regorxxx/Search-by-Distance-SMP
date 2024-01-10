@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/01/24
+//10/01/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable, MF_MENUBREAK:readable */
@@ -12,7 +12,7 @@ include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
 /* global isBoolean:readable, isJSON:readable, _p:readable , capitalizePartial:readable */
 include('..\\helpers\\helpers_xxx_tags.js');
-/* global queryJoin:readable, getTagsValuesV5:readable */
+/* global queryJoin:readable, getHandleListTagsTyped:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global _menu:readable, settingsMenu:readable */
 include('..\\helpers\\menu_xxx_extras.js');
@@ -157,7 +157,7 @@ function graphInfoMenu() {
 							{name: 'Loved:\t\t  ',			query: '%FEEDBACK% IS 1'}
 						];
 						report.push(...subQuery.map((q) => '\t' + q.name + fb.GetQueryItems(handleList, q.query).Count));
-						const date = getTagsValuesV5(handleList, [{name: globTags.date, type: 'number'}], true).flat(Infinity).filter(Boolean);
+						const date = getHandleListTagsTyped(handleList, [{name: globTags.date, type: 'number'}]).flat(Infinity).filter(Boolean);
 						const stats = calcStatistics(date);
 						report.push('Min/Max date: ' + stats.min + '/' + stats.max);
 						report.push('Most frequent date: ' + Math.round(stats.mode.value) + ' ' + _p(stats.mode.frequency + ' times'));

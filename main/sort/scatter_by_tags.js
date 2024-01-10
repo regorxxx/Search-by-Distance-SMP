@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/23
+//10/01/24
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -9,7 +9,7 @@ include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global range:readable, _p:readable, ReverseIterableMap:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
-/* global getTagsValuesV3:readable, getTagsValuesV4:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable */
 
 /*
 	Scatter by tags
@@ -32,12 +32,12 @@ function scatterByTags({
 	if (!selItems || selItems.Count <= 2) { return; }
 	// Convert input
 	const totalTracks = selItems.Count;
-	tagName = tagName.split(/;|,/g);
-	tagValue = tagValue.toLowerCase().split(/;|,/g);
+	tagName = tagName.split(/[;,]/g);
+	tagValue = tagValue.toLowerCase().split(/[;,]/g);
 	const tagValueSet = new Set(tagValue);
 	let selItemsArray = selItems.Clone().Convert();
 	// Get tag values and find tag value
-	const tagValues = getTagsValuesV3(selItems, tagName, true);
+	const tagValues = getHandleListTags(selItems, tagName, { bMerged: true });
 	let newOrder = [];
 	for (let i = 0; i < totalTracks; i++) {
 		const tagValue_i = tagValues[i].filter(Boolean).map((item) => { return item.toLowerCase(); });
@@ -114,12 +114,12 @@ function intercalateByTags({
 	if (!selItems || selItems.Count <= 2) { return; }
 	// Convert input
 	const totalTracks = selItems.Count;
-	tagName = tagName.split(/;|,/g);
+	tagName = tagName.split(/[;,]/g);
 	let selItemsArray = selItems.Convert();
 	let selItemsArrayOut = [];
 	// Get tag values and find tag value
 	// Split elements by equal value, by reverse order
-	const tagValues = getTagsValuesV3(selItems, tagName, true).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
+	const tagValues = getHandleListTags(selItems, tagName, { bMerged: true }).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
 	let valMap = new ReverseIterableMap();
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
@@ -259,7 +259,7 @@ function shuffleByTags({
 		? null
 		: new FbMetadbHandleList(selItemsArray);
 	const tagValues = (selItemsClone
-		? getTagsValuesV3(selItemsClone, tagName, true)
+		? getHandleListTags(selItemsClone, tagName, { bMerged: true })
 		: [...tagsArray]
 	).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
 	let valMap = new ReverseIterableMap();
@@ -345,7 +345,7 @@ function shuffleByTags({
 				}
 			}
 			const newTags = missingTags.size
-				? getTagsValuesV4(selItemsList, [...missingTags])
+				? getHandleListTagsV2(selItemsList, [...missingTags])
 					.map((tagArr) => tagArr.map(
 						(tagVal) => new Set(tagVal.filter(Boolean).map((t) => t.toLowerCase()))
 					))
