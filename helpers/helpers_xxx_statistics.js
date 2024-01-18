@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/12/23
+//16/01/24
 
 /* exported zScoreToProbability, probabilityToZscore, zScoreToCDF, calcStatistics */
 
@@ -132,8 +132,8 @@ function zScoreToCDF(z, bSym = true) {
 	return bSym ? cdfs[i] * 2 : cdfs[i];
 }
 
-function calcStatistics(dataArr, options = { bClampRange: true }) {
-	options = { bClampRange: true, ...(options || {}) };
+function calcStatistics(dataArr, options = { bClampPopRange: true }) {
+	options = { bClampPopRange: true, ...(options || {}) };
 	const statistics = {
 		max: -Infinity,
 		min: +Infinity,
@@ -172,7 +172,7 @@ function calcStatistics(dataArr, options = { bClampRange: true }) {
 	statistics.popRange.normal['75%'].push(statistics.mean - 1.149954 * statistics.sigma, statistics.mean + 1.149954 * statistics.sigma);
 	statistics.popRange.normal['89%'].push(statistics.mean - 1.644854 * statistics.sigma, statistics.mean + 1.644854 * statistics.sigma);
 	statistics.popRange.normal['95%'].push(statistics.mean - 2 * statistics.sigma, statistics.mean + 2 * statistics.sigma);
-	if (options.bClamppopRange) {
+	if (options.bClampPopRange) {
 		for (let key in statistics.popRange) {
 			for (let subKey in statistics.popRange[key]) {
 				statistics.popRange[key][subKey][0] = Math.max(statistics.min, statistics.popRange[key][subKey][0]);
