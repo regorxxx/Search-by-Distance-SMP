@@ -128,10 +128,10 @@ const SearchByDistance_properties = {
 	bProgressiveListCreation: ['Recursive playlist creation, uses output as new references', false],
 	progressiveListCreationN: ['Steps when using recursive playlist creation (>1 and <=100)', 4, { range: [[2, 100]], func: isInt }, 4],
 	playlistName: ['Playlist name (TF allowed)', 'Search...', { func: isString }, 'Search...'],
-	bAscii: ['Asciify string values internally?', true],
+	bAscii: ['Asciify string values internally', true],
 	checkDuplicatesByTag: ['Remove duplicates by', JSON.stringify(globTags.remDupl)],
 	sortBias: ['Duplicates track selection bias', globQuery.remDuplBias, { func: isStringWeak }, globQuery.remDuplBias],
-	bAdvTitle: ['Duplicates advanced RegExp title matching?', true],
+	bAdvTitle: ['Duplicates advanced RegExp title matching', true],
 	bSmartShuffle: ['Smart Shuffle by Artist', true],
 	smartShuffleTag: ['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc: ['Smart Shuffle extra conditions', true],
@@ -143,9 +143,7 @@ const SearchByDistance_properties = {
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 	const k = key.toLowerCase();
-	if (k.endsWith('weight')) {
-		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
-	} else if (k.endsWith('length')) {
+	if (k.endsWith('length')) {
 		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
 		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
@@ -166,10 +164,10 @@ const SearchByDistance_panelProperties = {
 	bShowFinalSelection: ['Enables selection\'s final scoring console logs', true],
 	firstPopup: ['Search by distance: Fired once', false],
 	descriptorCRC: ['Graph Descriptors CRC', -1], // Calculated later on first time
-	bAllMusicDescriptors: ['Load AllMusic descriptors?', false],
-	bLastfmDescriptors: ['Load Last.fm descriptors?', false],
+	bAllMusicDescriptors: ['Load AllMusic descriptors', false],
+	bLastfmDescriptors: ['Load Last.fm descriptors', false],
 	bStartLogging: ['Startup logging', false],
-	bTagsCache: ['Read tags from cache instead of files?', false]
+	bTagsCache: ['Read tags from cache instead of files', false]
 };
 // Checks
 Object.keys(SearchByDistance_panelProperties).forEach((key) => { // Checks
@@ -1096,10 +1094,13 @@ async function searchByDistance({
 				}
 				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			}
-		} else if (tag.weight !== 0 && bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
+		} else if (tag.weight !== 0) {
+			if (bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
+			tag.weight = 0;
+		}
 	}
 	// Dyngenre virtual tag is calculated with previous values
-	if (calcTags.genreStyle.referenceSize !== 0 && calcTags.dynGenre.weight !== 0) {
+	if (calcTags.genreStyle.referenceNumber !== 0 && calcTags.dynGenre.weight !== 0) {
 		for (const genreStyle in calcTags.genreStyle.referenceSet) {
 			const dynGenre = sbd.genreStyleMap.get(genreStyle);
 			if (dynGenre) { calcTags.dynGenre.reference.push(...dynGenre); }
@@ -1108,7 +1109,10 @@ async function searchByDistance({
 		if (calcTags.dynGenre.referenceNumber !== 0) {
 			originalWeightValue += calcTags.dynGenre.weight;
 		}
-	} else if (calcTags.dynGenre.weight !== 0 && bBasicLogging) { console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags'); }
+	} else if (calcTags.dynGenre.weight !== 0) {
+		if (bBasicLogging) { console.log('\'dynGenre\' weight was not zero but selected track had no style nor genre tags'); }
+		calcTags.dynGenre.weight = 0;
+	}
 	// Artist Cultural tag requires world map data
 	let worldMapData;
 	if (calcTags.artistRegion.weight !== 0 || artistRegionFilter !== -1) {
@@ -1129,15 +1133,21 @@ async function searchByDistance({
 			originalWeightValue += calcTags.artistRegion.weight;
 		} else {
 			calcTags.artistRegion.reference = '';
-			if (bBasicLogging && calcTags.artistRegion.weight !== 0) { console.log('\'artistRegion\' weight was not zero but selected track had no locale tags'); }
+			if (calcTags.artistRegion.weight !== 0) {
+				if (bBasicLogging) { console.log('\'artistRegion\' weight was not zero but selected track had no locale tags'); }
+				calcTags.artistRegion.weight = 0;
+			}
 		}
 	}
 	// Genre Cultural tag is calculated with previous values
-	if (calcTags.genreStyle.referenceSize !== 0 && calcTags.genreStyleRegion.weight !== 0) {
+	if (calcTags.genreStyle.referenceNumber !== 0 && calcTags.genreStyleRegion.weight !== 0) {
 		calcTags.genreStyleRegion.reference.push(...calcTags.genreStyle.referenceSet);
 		calcTags.genreStyleRegion.referenceNumber = calcTags.genreStyleRegion.reference.length;
 		if (calcTags.genreStyleRegion.referenceNumber !== 0) {
 			originalWeightValue += calcTags.genreStyleRegion.weight;
+		} else {
+			if (bBasicLogging) { console.log('\'genreStyleRegion\' weight was not zero but selected track had no genre/style tags'); }
+			calcTags.genreStyleRegion.weight = 0;
 		}
 	}
 	// Total score
@@ -1520,7 +1530,7 @@ async function searchByDistance({
 				const newTag = handleTag[key].number;
 				if (tag.referenceNumber !== 0) {
 					if (newTag !== 0) {
-						let common = tag.referenceSet.intersectionSize(handleTag[key].set);
+						const common = tag.referenceSet.intersectionSize(handleTag[key].set);
 						if (common !== 0) {
 							weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
 								? tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber)
