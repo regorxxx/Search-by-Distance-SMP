@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/01/24
+//23/01/24
 
 /* exported createConfigMenu */
 
@@ -595,6 +595,10 @@ function createConfigMenu(parent) {
 					{ title: 'From last 30 years', query: 'DATE GREATER #$sub(#YEAR#,30)#' },
 					{ title: 'From last 20 years', query: 'DATE GREATER #$sub(#YEAR#,20)#' },
 					{ title: 'From last 10 years', query: 'DATE GREATER #$sub(#YEAR#,10)#' },
+					{ title: 'sep' },
+					{ title: 'In 15 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 15' },
+					{ title: 'In 10 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 10' },
+					{ title: 'In 5 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 5' },
 				];
 			}
 			menu.newEntry({ menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED });
@@ -611,10 +615,22 @@ function createConfigMenu(parent) {
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'dynQueries') ? MF_GRAYED : MF_STRING
 				});
-				menu.newCheckMenu(subMenuName, entryText, void (0), () => {
-					const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : properties['dynQueries'][1];
+				menu.newCheckMenuLast(() => {
+					const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters;
 					return prop.includes(obj.query);
 				});
+			});
+			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newEntry({
+				menuName: subMenuName, entryText: 'None', func: () => {
+					currentFilters.length = 0;
+					properties['dynQueries'][1] = JSON.stringify(currentFilters);
+					overwriteProperties(properties); // Updates panel
+				}
+			});
+			menu.newCheckMenuLast(() => {
+				const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters;
+				return prop.length === 0;
 			});
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
