@@ -50,6 +50,8 @@
 
 ## [Unreleased][]
 ### Added
+- Dynamic queries: added new dynamic queries for tracks within a date period relative to the reference track.
+- Dynamic queries: added 'None' entry to clean all dynamic queries. If the entry is not checked, then there is at least a dynamic query set (even if it's not shown on the menus).
 - Configuration: added COMPOSER to the list of global tags.
 - Configuration: added LOCALE LAST.FM to the list of global tags.
 - Configuration: added integrity checks to global user settings files, found at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\[...].json'. In particular queries are now check to ensure they are valid and will throw a popup at init otherwise. Other settings are check to ensure they contain valid values too.
@@ -117,7 +119,7 @@
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
 - Descriptors: added Country Rap, Square Dance, Rodeo, Jug Band, K-Pop, J-Pop, Kayokyoku styles.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
-- Dynamic queries: added dynamic queries (like those found at [Playlist Tools]()) for tracks and themes. Dynamic queries are like standard queries but with placeholders (#DATE#) which are evaluated on-the-fly, before running the query, using the selected reference track (or theme).  These queries are then used to filter the library at pre-scoring stage, changing the filter according to the reference For ex. for a Bob Dylan's track: COMPOSER IS #ARTIST# -> COMPOSER IS Bob Dylan. Full documentation can be found on the associated readme.
+- Dynamic queries: added dynamic queries (like those found at [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/)) for tracks and themes. Dynamic queries are like standard queries but with placeholders (#DATE#) which are evaluated on-the-fly, before running the query, using the selected reference track (or theme).  These queries are then used to filter the library at pre-scoring stage, changing the filter according to the reference For ex. for a Bob Dylan's track: COMPOSER IS #ARTIST# -> COMPOSER IS Bob Dylan. Full documentation can be found on the associated readme.
 - Readmes: added readmes for dynamic queries, cultural filters and influence filters.
 - HTML: added buttons to graph html page to directly go to live version or open the GitHub repository.
 ### Changed
