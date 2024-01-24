@@ -1524,9 +1524,11 @@ async function searchByDistance({
 	if (bProfile) { test.Print('Task #4: Library tags', false); }
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
+	let weightValue, mapDistance, leftWeight, currScoreAvailable;
+	let bRelated, bUnrelated;
 	while (i < trackTotal) {
-		let weightValue = 0;
-		let mapDistance = Infinity; // We consider points are not linked by default
+		weightValue = 0;
+		mapDistance = Infinity; // We consider points are not linked by default
 		// Get the tags according to weight and filter ''. Also create sets for comparison
 		const handleTag = { genreStyle: { set: new Set() } };
 		for (let key in calcTags) {
@@ -1573,16 +1575,20 @@ async function searchByDistance({
 
 		// O(i*j*k) time
 		// i = # tracks retrieved by query, j & K = # number of style/genre tags
+		bRelated = bUnrelated = false;
 		['related', 'unrelated'].forEach((key) => { // Adds an offset score as base
 			const tag = calcTags[key];
 			if (tag.weight === 0) { return; }
 			const ids = handleTag[key].set.add(titleHandle[0]);
 			if (artistHandle) { artistHandle[i].forEach((artist) => ids.add(artist)); }
-			if (tag.referenceSet.intersectionSize(ids) !== 0) { weightValue += tag.weight; }
+			if (tag.referenceSet.intersectionSize(ids) !== 0) {
+				weightValue += tag.weight;
+				if (key === 'related') {bRelated = true;} else {bUnrelated = true;}
+			}
 		});
 
-		let leftWeight = totalWeight;
-		let currScoreAvailable = 100;
+		leftWeight = totalWeight;
+		currScoreAvailable = 100;
 		for (let key of sortTagKeys) {
 			const tag = calcTags[key];
 			if (tag.weight === 0) { continue; }
@@ -1831,12 +1837,12 @@ async function searchByDistance({
 		} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
-				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance });
+				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance, bRelated, bUnrelated });
 			}
 		}
 		if (method === 'WEIGHT') {
 			if (score > minScoreFilter) {
-				scoreData.push({ index: i, name: titleHandle[i][0], score });
+				scoreData.push({ index: i, name: titleHandle[i][0], score, bRelated, bUnrelated });
 			}
 		}
 		i++;
@@ -2242,7 +2248,13 @@ async function searchByDistance({
 		if (bShowFinalSelection && !bProgressiveListCreation) {
 			let i = finalPlaylistLength;
 			let conText = 'List of selected tracks:';
-			while (i--) { conText += '\n                  ' + selectedHandlesData[i].name + ' - ' + selectedHandlesData[i].score + '/100 Simil.' + (typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : ''); }
+			while (i--) {
+				conText += '\n                  ' + selectedHandlesData[i].name +
+					' - ' + selectedHandlesData[i].score + '/100 Simil.' +
+					(typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : '') +
+					(selectedHandlesData[i].bRelated ? ' [related]' : '') +
+					(selectedHandlesData[i].bUnrelated ? ' [unrelated]' : '');
+			}
 			console.log(conText); // Much faster to output the entire list at once than calling log n times. It takes more than 2 secs with +50 Tracks!!
 		}
 	} else {
