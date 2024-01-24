@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/01/24
+//24/01/24
 
 /* exported dynamicTags, numericTags, cyclicTags, keyTags, sanitizeTagIds, sanitizeTagValIds, queryCombinations, queryReplaceWithCurrent, checkQuery, getHandleTags, getHandleListTags ,getHandleListTagsV2, getHandleListTagsTyped, cyclicTagsDescriptor, isQuery */
 
@@ -55,20 +55,56 @@ const logicDic = ['AND', 'OR', 'AND NOT', 'OR NOT'];
 	Query and tag manipulation
 */
 
-// Quote special chars according to https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Titleformat_Reference#Syntax
+/**
+ * Quote special chars according to https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Titleformat_Reference#Syntax
+ *
+ * @function
+ * @name sanitizeTagTfo
+ * @kind function
+ * @param {string} tag
+ * @returns {string}
+ */
 function sanitizeTagTfo(tag) {
 	return tag.replace(/'/g, '\'\'').replace(/%/g, '\'%\'').replace(/\$/g, '\'$$\'').replace(/\[/g, '\'[\'').replace(/\]/g, '\']\'').replace(/\(/g, '\'(\'').replace(/\)/g, '\')\'').replace(/,/g, '\',\'');
 }
 
-// Quote value if needed
+/**
+ * Quote value if needed for queries
+ *
+ * @function
+ * @name sanitizeQueryVal
+ * @kind function
+ * @param {string} val
+ * @returns {string}
+ */
 function sanitizeQueryVal(val) {
 	return (val.match(/[()]/g) ? _q(val) : val);
 }
 
-// Quote value if needed
+/**
+ * Sanitizes a tag to retrieve a plain ASCII value via TF.
+ *
+ * @function
+ * @name sanitizeTagIds
+ * @kind function
+ * @param {string} tag - Tag without %
+ * @param {boolean} bSpace?
+ * @returns {string}
+ */
 function sanitizeTagIds(tag, bSpace = true) {
 	return '$ascii($lower($trim($replace(' + tag.toUpperCase() + ',\'\',,`,,’,,´,,-,,\\,,/,,:,,$char(34),' + (bSpace ? ', ,' : '') + '))))';
 }
+
+/**
+ * Sanitizes a tag to retrieve a plain ASCII value via RegExp.
+ *
+ * @function
+ * @name sanitizeTagValIds
+ * @kind function
+ * @param {string} val
+ * @param {?boolean} bSpace
+ * @returns {string}
+ */
 function sanitizeTagValIds(val, bSpace = true) {
 	return _asciify(val).trim().replace(
 		bSpace
@@ -78,8 +114,19 @@ function sanitizeTagValIds(val, bSpace = true) {
 	).toLowerCase();
 }
 
-// Replace #str# with current values, where 'str' is a TF expression which will be evaluated on handle
-// Use try/catch to test validity of the query output
+/**
+ * Replace #strTF# with current values, where 'strTF' is a TF expression which will be evaluated on handle (or against tags).
+ * Use try/catch to test validity of the query output
+ *
+ * @function
+ * @name queryReplaceWithCurrent
+ * @kind function
+ * @param {string} query
+ * @param {FbMetadbHandle} handle
+ * @param {{string: string}} tags - If no handle is provided, evaluates TF expression looking for 'strTF' property at the object
+ * @param {{ bToLowerCase: boolean bDebug: boolean }} options - bToLowerCase: value from #strTF# will use lowercase
+ * @returns {?string}
+ */
 function queryReplaceWithCurrent(query, handle, tags = {}, options = {bToLowerCase: false, bDebug: false}) {
 	options = {bToLowerCase: false, bDebug: false, ...options};
 	if (options.bDebug) { console.log('Initial query:', query); }
@@ -97,10 +144,10 @@ function queryReplaceWithCurrent(query, handle, tags = {}, options = {bToLowerCa
 	if (!handle) {
 		if ((query.match(/#/g) || []).length >= 2) {
 			if (options.bDebug) { console.log(tags); }
-			if (!tags) { console.log('queryReplaceWithCurrent(): handle is null'); return; }
+			if (!tags) { console.log('queryReplaceWithCurrent(): handle is null'); return null; }
 		} else { return query; }
 	}
-	if (/#NEXTKEY#|#PREVKEY#/g.test(query)) { console.log('queryReplaceWithCurrent(): found NEXTKEY|PREVKEY placeholders'); return; }
+	if (/#NEXTKEY#|#PREVKEY#/g.test(query)) { console.log('queryReplaceWithCurrent(): found NEXTKEY|PREVKEY placeholders'); return null; }
 	if (query.indexOf('#') !== -1) {
 		let idx = [query.indexOf('#')];
 		let curr = idx[idx.length - 1];
@@ -176,7 +223,7 @@ function queryReplaceWithCurrent(query, handle, tags = {}, options = {bToLowerCa
  * @function
  * @name queryJoin
  * @kind function
- * @param {Array.<string>} queryArray - Array of queries crated by {@link queryCombinations}
+ * @param {string[]} queryArray - Array of queries created by {@link queryCombinations}
  * @param {string} setLogic - May be: AND|OR|AND NOT|OR NOT
  * @returns {string|undefined}
  *  @example
@@ -224,12 +271,12 @@ function queryJoin(queryArray, setLogic) {
  * @function
  * @name queryCombinations
  * @kind function
- * @param {Array.<string>|Array.<Array.<string>>} tagsArray - The tag values in 1D or 2D array
- * @param {string|Array.<string>} queryKey - May be a single or array of TitleFormat strings
+ * @param {string[]|string[][]} tagsArray - The tag values in 1D or 2D array
+ * @param {string|string[]} queryKey - May be a single or array of TitleFormat strings
  * @param {string} tagsArrayLogic - May be: AND|OR|AND NOT|OR NOT
  * @param {?string} subtagsArrayLogic - May be: AND|OR|AND NOT|OR NOT
  * @param {?string} [match='IS'] - [=IS] May be: IS|HAS|EQUAL
- * @returns {string|Array.<string>|undefined}
+ * @returns {string|string[]|undefined}
  * @example
  * // Returns 'ARTIST IS A OR ARTIST IS B'
  * queryCombinations(['A','B'], 'ARTIST', 'OR', void(0), 'IS')
@@ -366,20 +413,31 @@ function isQuery(query, bAllowEmpty, bAllowSort = false, bAllowPlaylist = false)
 	return bPass;
 }
 
-// [n Tags]
-function getHandleTags(handle, tagsArray, options = { bMerged: false, bCached: false }) {
+/**
+ * Retrieve tags from a handle using .GetFileInfo(). Returns an array of arrays
+ * with length equal to the number of tags. [n Tags]
+ *
+ * @function
+ * @name getHandleTags
+ * @kind function
+ * @param {FbMetadbHandleList} handleList
+ * @param {string[]} tagsArray
+ * @param {{ bMerged: boolean bCached: boolean }} options
+ * @returns {string[][]|string[]}
+ */
+function getHandleTags(handleList, tagsArray, options = { bMerged: false, bCached: false }) {
 	if (!isArrayStrings(tagsArray)) { return null; }
-	if (!handle) { return null; }
+	if (!handleList) { return null; }
 	options = { bMerged: false, bCached: false, ...(options || {}) };
 	const tagArrayLen = tagsArray.length;
 	const toCache = new Set(tagsArray);
 	let outputArray = new Array(tagArrayLen);
 	if (options.bCached) {
-		const values = tagsVolatileCache.get(handle, tagsArray) || {};
+		const values = tagsVolatileCache.get(handleList, tagsArray) || {};
 		for (const key in values) { outputArray[tagsArray.indexOf(key)] = values[key]; toCache.delete(key); }
 	}
 	if (outputArray.filter(Boolean).length !== tagArrayLen) {
-		const handleInfo = handle.GetFileInfo();
+		const handleInfo = handleList.GetFileInfo();
 		let i = 0;
 		while (i < tagArrayLen) {
 			let tagValues = [];
@@ -397,7 +455,7 @@ function getHandleTags(handle, tagsArray, options = { bMerged: false, bCached: f
 		}
 		if (toCache.size) {
 			tagsVolatileCache.set(
-				handle,
+				handleList,
 				Object.fromEntries(outputArray.map((tag, i) => {
 					const key = tagsArray[i];
 					return toCache.has(key) ? [tagsArray[i], tag] : null;
@@ -409,16 +467,27 @@ function getHandleTags(handle, tagsArray, options = { bMerged: false, bCached: f
 	return outputArray;
 }
 
-// [handle count x [n Tags]]
-function getHandleListTags(handle, tagsArray, options = { bMerged: false, bCached: false }) {
+/**
+ * Retrieve tags from a handle list using .EvalWithMetadbs(). Tags are split by ', '.
+ * Returns an array of arrays with length equal to the number of handles. [handle count x [n Tags]]
+ *
+ * @function
+ * @name getHandleListTags
+ * @kind function
+ * @param {FbMetadbHandle} handleList
+ * @param {string[]} tagsArray
+ * @param {{ bMerged: boolean bCached: boolean }} options
+ * @returns {string[][]|string[]}
+ */
+function getHandleListTags(handleList, tagsArray, options = { bMerged: false, bCached: false }) {
 	if (!isArrayStrings(tagsArray)) { return null; }
-	if (!handle) { return null; }
+	if (!handleList) { return null; }
 	options = { bMerged: false, bCached: false, ...(options || {}) };
 	const tagArray_length = tagsArray.length;
 	let outputArray = [];
 	let i = 0;
 	let tagString = '';
-	const outputArray_length = handle.Count;
+	const outputArray_length = handleList.Count;
 	while (i < tagArray_length) {
 		const tagStr = tagsArray[i].indexOf('$') === -1
 			? tagsArray[i].indexOf('%') === -1
@@ -430,7 +499,7 @@ function getHandleListTags(handle, tagsArray, options = { bMerged: false, bCache
 		i++;
 	}
 	let tfo = fb.TitleFormat(tagString);
-	outputArray = tfo.EvalWithMetadbs(handle);
+	outputArray = tfo.EvalWithMetadbs(handleList);
 	if (options.bMerged) { // Just an array of values per track: n x 1
 		for (let i = 0; i < outputArray_length; i++) {
 			outputArray[i] = outputArray[i].split(', ');
@@ -446,7 +515,18 @@ function getHandleListTags(handle, tagsArray, options = { bMerged: false, bCache
 	return outputArray;
 }
 
-// [n Tags x [handle count]]
+/**
+ * Retrieve tags from a handle list using .EvalWithMetadbs(). Tags are split by ', '.
+ * Returns an array of arrays with length equal to the number of tags. [n Tags x [handle count]]
+ *
+ * @function
+ * @name getHandleListTagsV2
+ * @kind function
+ * @param {FbMetadbHandle} handleList
+ * @param {string[]} tagsArray
+ * @param {{ bMerged: boolean bEmptyVal: boolean splitBy: boolean iLimit: number bCached: boolean }} options
+ * @returns {string[][]|string[]}
+ */
 function getHandleListTagsV2(handle, tagsArray, options = { bMerged: false, bEmptyVal: false, splitBy: ', ', iLimit: -1, bCached: false }) {
 	if (!isArrayStrings(tagsArray)) { return null; }
 	if (!handle) { return null; }
@@ -488,7 +568,19 @@ function getHandleListTagsV2(handle, tagsArray, options = { bMerged: false, bEmp
 	return outputArray;
 }
 
-// [n Tags x [handle count]]
+/**
+ * Retrieve tags from a handle list using .EvalWithMetadbs(). Tags are split by ', '. Values are
+ * cast to the given type provided at 'tagsArray'.
+ * Returns an array of arrays with length equal to the number of tags. [n Tags x [handle count]]
+ *
+ * @function
+ * @name getHandleListTagsTyped
+ * @kind function
+ * @param {FbMetadbHandle} handleList
+ * @param {{name: string type: string}[]} tagsArray - Type: number|string
+ * @param {{ bMerged: boolean bEmptyVal: boolean splitBy: boolean iLimit: number bCached: boolean }} options
+ * @returns {string[][]|string[]}
+ */
 function getHandleListTagsTyped(handle, tagsArray, options = { bMerged: false, bEmptyVal: false, splitBy: ', ', iLimit: -1, bCached: false }) {
 	if (!isArray(tagsArray)) { return null; }
 	if (!handle) { return null; }
