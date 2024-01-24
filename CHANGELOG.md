@@ -51,6 +51,7 @@
 ## [Unreleased][]
 ### Added
 - Tags: added 'RELATED' and 'UNRELATED' tags which may be used to specify tracks which are considered similar or not similar by the user. Matching the tag adds the given weight as absolute score to the total, i.e. it's not averaged with all weights. These special tags may use as values any combination of 'TITLE', 'ARTIST' or 'MUSICBRAINZ_TRACKID'. As expected, giving a title, would match any track with such title (from any artist). Giving an artist would match any track from such artist. And using the id value, would ensure only specif tracks are matched. This is something similar to the love/hate feature on Spotify (to make tracks appear or not on generated playlists), although in this case these special tags ensure you are only excluding/including specific tracks in relation to others, not globally. See the readme for more info.
+- Tags: to simplify the usage of 'RELATED' and 'UNRELATED' tags (see above), new entries at the customizable button (see Other tools\Relate selected tracks...) have been added. They allow to add the 'MUSICBRAINZ_TRACKID' values to 'RELATED' or 'UNRELATED' tags for the selected tracks or the last track used as reference in a few clicks.
 - Dynamic queries: added new dynamic queries for tracks within a date period relative to the reference track.
 - Dynamic queries: added 'None' entry to clean all dynamic queries. If the entry is not checked, then there is at least a dynamic query set (even if it's not shown on the menus).
 - Configuration: added COMPOSER to the list of global tags.
