@@ -170,7 +170,22 @@ function queryReplaceWithCurrent(query, handle, tags = {}, options = {bToLowerCa
 	return query;
 }
 
-// Joins an array of queries with 'SetLogic' between them: AND (NOT) / OR (NOT)
+/**
+ * Joins an array of queries with 'SetLogic' between them: AND (NOT) / OR (NOT)
+ *
+ * @function
+ * @name queryJoin
+ * @kind function
+ * @param {Array.<string>} queryArray - Array of queries crated by {@link queryCombinations}
+ * @param {string} setLogic - May be: AND|OR|AND NOT|OR NOT
+ * @returns {string|undefined}
+ *  @example
+ * // Returns '(ARTIST IS A OR ARTIST IS B) OR (TITLE IS A OR TITLE IS B)'
+ * queryJoin(
+ * 	queryCombinations(['A','B'], ['ARTIST', 'TITLE'], 'OR', void(0), 'IS')
+ * 	, 'OR'
+ * );
+ */
 function queryJoin(queryArray, setLogic) {
 	setLogic = (setLogic || '').toUpperCase();
 	if (logicDic.indexOf(setLogic) === -1) {
@@ -200,12 +215,28 @@ function queryJoin(queryArray, setLogic) {
 	return query;
 }
 
-// It gets either a 2D array of tag values [[,],...], output from k_combinations(), or 1D array, and creates a query for all those combinations.
-// For 2D, every subset uses 'subtagsArrayLogic' between the tags. And then 'tagsArrayLogic' between subsets. QueryKey is the tag name.
-// So that means you can create queries like:
-// '(MOOD IS mood1 AND MOOD IS mood2) OR (MOOD IS mood1 AND MOOD IS mood3) OR ...'
-// Currently configurable only AND (NOT) / OR (NOT) logics.
-// For 1D arrays, only 'tagsArrayLogic' is used. i.e. 'STYLE IS style1 OR STYLE IS style2 ...'
+/**
+ * It gets either a 2D array of tag values [[,],...], output from k_combinations(), or 1D array, and creates a query for all those combinations.
+ * For 2D, every subset uses 'subtagsArrayLogic' between the tags. And then 'tagsArrayLogic' between subsets. QueryKey is the tag name.
+ * For 1D arrays, only 'tagsArrayLogic' is used.
+ * When using an array as 'tagsArrayLogic', the output is also an array, meant to be used with {@link queryJoin}
+ *
+ * @function
+ * @name queryCombinations
+ * @kind function
+ * @param {Array.<string>|Array.<Array.<string>>} tagsArray - The tag values in 1D or 2D array
+ * @param {string|Array.<string>} queryKey - May be a single or array of TitleFormat strings
+ * @param {string} tagsArrayLogic - May be: AND|OR|AND NOT|OR NOT
+ * @param {?string} subtagsArrayLogic - May be: AND|OR|AND NOT|OR NOT
+ * @param {?string} [match='IS'] - [=IS] May be: IS|HAS|EQUAL
+ * @returns {string|Array.<string>|undefined}
+ * @example
+ * // Returns 'ARTIST IS A OR ARTIST IS B'
+ * queryCombinations(['A','B'], 'ARTIST', 'OR', void(0), 'IS')
+ * @example
+ * // Returns '[ARTIST IS A OR ARTIST IS B, TITLE IS A OR TITLE IS B]
+ * queryCombinations(['A','B'], ['ARTIST', 'TITLE'], 'OR', void(0), 'IS')
+ */
 function queryCombinations(tagsArray, queryKey, tagsArrayLogic /*AND, OR [NOT]*/, subtagsArrayLogic /*AND, OR [NOT]*/, match = 'IS' /*IS, HAS, EQUAL*/) {
 	// Wrong tagsArray
 	if (tagsArray === null || Object.prototype.toString.call(tagsArray) !== '[object Array]' || tagsArray.length === null || tagsArray.length === 0) {
