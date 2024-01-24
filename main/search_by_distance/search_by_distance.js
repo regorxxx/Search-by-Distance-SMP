@@ -2440,6 +2440,9 @@ function processRecipe(initialRecipe) {
 }
 
 const weightDistribution = memoize((scoringDistribution, proportion /* Should never be zero! */, tagNumber = 0, newTagNumber = 0) => {
+	if (proportion < 0) {
+		return - weightDistribution(scoringDistribution, - proportion, tagNumber, newTagNumber);
+	}
 	let proportionWeight = 1;
 	if (scoringDistribution === 'LINEAR' || proportion === 1 || proportion === 0) {
 		proportionWeight = proportion;
@@ -2452,7 +2455,9 @@ const weightDistribution = memoize((scoringDistribution, proportion /* Should ne
 	} else if (scoringDistribution === 'NORMAL') {
 		const sigma = 0.3 * (1 + Math.abs(tagNumber - newTagNumber)) / Math.max(tagNumber, newTagNumber);
 		const mu = 0.4;
-		proportionWeight = zScoreToCDF((proportion - mu) / sigma);
+		proportionWeight = proportion > mu
+			? zScoreToCDF((proportion - mu) / sigma)
+			: 0;
 	}
 	return proportionWeight;
 });
