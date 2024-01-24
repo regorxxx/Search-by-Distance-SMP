@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//24/01/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -114,7 +114,7 @@ const music_graph_descriptors = {
 		['Gospel_supergenre'				,	['Contemporary Christian Music','Christian Rock','Modern Gospel','Ragtime','Stride','Traditional Gospel','Spirituals','Worksongs']],
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
-		['Rap_supergenre'					,	['Glitch Hop','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
+		['Rap_supergenre'					,	['Symphonic Rap','Glitch Hop','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
 		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
@@ -164,7 +164,7 @@ const music_graph_descriptors = {
 		['Post-Disco XL'					,	['Dance-Rock','Dance Pop','Italo Disco']],
 		['Soft Pop XL'						,	['Sunshine Pop','Soft Rock','Folk Pop','Chanson']],
 		['Urban'							,	['Urban Soul','Urban Breaks']],
-		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap']],
+		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop']],
 		['Funk'								,	['Classic Funk','P-Funk','Deep Funk','Electrofunk','Funk Rock','Contemporary Funk','Funk Blues','Deep Funk Revival','Psychedelic Funk']],
 		['Soul'								,	['Philadelphia Soul','Motown Sound','Southern Soul','Psychedelic Soul']],
@@ -341,7 +341,8 @@ const music_graph_descriptors = {
 		['Kawaii Metal'						,	['Pop Metal','J-Pop']],
 		['Darksynth'						,	['Darkwave','Synthwave']],
 		['Kayokyoku'						,	['J-Pop']],
-		['K-Pop'							,	['Contemporary R&B', 'Urban Soul','Electropop']],
+		['K-Pop'							,	['Contemporary R&B','Urban Soul','Electropop']],
+		['Symphonic Rap'					,	['Contemporary Classical','Jazz Rap']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -376,7 +377,8 @@ const music_graph_descriptors = {
 		['Loungetronica'					,	['Deep House','Melodic Techno-House']],
 		['Rodeo'							,	['Outlaw Country','Square Dance']],
 		['Kayokyoku'						,	['Rock & Roll','Vocal Pop']],
-		['K-Pop'							,	['Europop']]
+		['K-Pop'							,	['Europop']],
+		['Symphonic Rap'					,	['Underground Rap','Symphonic Rock']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -412,18 +414,21 @@ const music_graph_descriptors = {
 		['Electrorock'						,	['Neo-Traditional Folk','Classic Rock XL','Traditional Pop','Freak Folk','Garage Rock Revival','Garage Pop','Retro Rock']],
 		['Classical Sufi'					,	['Folk Pop','Folk-Rock','Folktronica','Folk Punk','Contemporary Folk','Renaissance','South American Folk_supergenre','North American Folk_supergenre','European Folk_supergenre']],
 		['Pre-Columbian Ritual-Tribal'		,	['Afro-Latin Ritual-Tribal']],
-		['Rap_supergenre'					,	['Traditional Country','Americana XL','Roots Rock']]
+		['Rap_supergenre'					,	['Traditional Country','Americana XL','Roots Rock']],
+		['Symphonic Rap'					,	['Hardcore Rap']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound
 	// really bad together on the same listening session, even if the search of similar tracks is broadened a lot.
 	style_anti_influences_conditional: [
 		'Classical Music_supercluster',
-		'Jazz_supergenre',
 		'Electronic Music_supercluster',
+		'Blues_supergenre',
+		'Jazz_supergenre',
+		'Rap_supergenre',
+		'Progressive Rock XL',
 		'Sadcore',
 		'Nature Music',
-		'Progressive Rock XL',
 		'Anatolian Rock',
 		'Desert Blues',
 		'Pagan Folk'

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/24
+//24/01/24
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -158,7 +158,7 @@ music_graph_descriptors_culture.ommit = new Set(['Industrial_supergenre', 'Blues
 
 // Populate with substitutions
 (function () {
-	const _ALL_ = ['Minimal Industrial', 'Electro-Industrial', 'Industrial Folk', 'Industrial Rock', 'Industrial Punk', 'Industrial Metal', 'Ambient Industrial', 'Avant-Garde Industrial', 'Dark Ambient', 'Dark Industrial', 'Noise Music', 'Post-Metal', 'Psychedelic Rock', 'Psychedelic Pop', 'Avant-Prog', 'Hard Rock', 'Blues Rock', 'Neo-Psychedelia', 'Contemporary Rock', '90s Rock', 'Garage Pop', 'Retro Rock', 'Electropop', 'Indie', 'Contemporary R&B', 'Electronic', 'Folk', 'Industrial', 'Heavy Metal', 'Classic Rock', 'Progressive Rock', 'Rock', 'Avant-Garde Classical', 'Contemporary Classical', 'Pop Rock', 'Folk Pop', 'Contemporary Folk', 'Folk-Jazz', 'Folktronica', 'Pop', 'Ambient Classical', 'Contemporary Soul', 'Post-Jazz', 'Neo-Classical New Age', 'Modern Electric Blues', 'Psychedelic Blues', 'Psychedelic Soul', 'Psychedelic Folk', 'Electrorock', 'Baroque Pop', 'Folk-Pop', 'Chill-Out Downtempo', 'Neo Psychedelia', 'Nature Music', 'Ambient New Age', 'Healing Music', 'Spirituals', 'Worksongs', 'Ambient Metal', 'Crossover Prog', 'Piano Blues', 'Contemporary Blues', 'Contemporary Funk', 'Dance-Rock', '80s Rock', 'Soft Rock', 'Funktronica', 'Hang Music', 'Vaporwave', 'Ambient Electronic', 'Classical', 'Synth'];
+	const _ALL_ = ['Minimal Industrial', 'Electro-Industrial', 'Industrial Folk', 'Industrial Rock', 'Industrial Punk', 'Industrial Metal', 'Ambient Industrial', 'Avant-Garde Industrial', 'Dark Ambient', 'Dark Industrial', 'Noise Music', 'Post-Metal', 'Psychedelic Rock', 'Psychedelic Pop', 'Avant-Prog', 'Hard Rock', 'Blues Rock', 'Neo-Psychedelia', 'Contemporary Rock', '90s Rock', 'Garage Pop', 'Retro Rock', 'Electropop', 'Indie', 'Contemporary R&B', 'Electronic', 'Folk', 'Industrial', 'Heavy Metal', 'Classic Rock', 'Progressive Rock', 'Rock', 'Avant-Garde Classical', 'Contemporary Classical', 'Pop Rock', 'Folk Pop', 'Contemporary Folk', 'Folk-Jazz', 'Folktronica', 'Pop', 'Ambient Classical', 'Contemporary Soul', 'Post-Jazz', 'Neo-Classical New Age', 'Modern Electric Blues', 'Psychedelic Blues', 'Psychedelic Soul', 'Psychedelic Folk', 'Electrorock', 'Baroque Pop', 'Folk-Pop', 'Chill-Out Downtempo', 'Neo Psychedelia', 'Nature Music', 'Ambient New Age', 'Healing Music', 'Spirituals', 'Worksongs', 'Ambient Metal', 'Crossover Prog', 'Piano Blues', 'Contemporary Blues', 'Contemporary Funk', 'Dance-Rock', '80s Rock', 'Soft Rock', 'Funktronica', 'Hang Music', 'Vaporwave', 'Ambient Electronic', 'Classical', 'Synth', 'Symphonic Rap'];
 	const parent = music_graph_descriptors_culture;
 	_ALL_.forEach((sg) => {
 		parent.getMainRegions().forEach((key) => {
