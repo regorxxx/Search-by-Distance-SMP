@@ -1097,7 +1097,6 @@ async function searchByDistance({
 						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
 						query[preQueryLength] = queryCombinations([tag.reference], tagNameTF, 'OR', void (0), match);
 					}
-
 				}
 				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			} else if (bNegativeWeighting && tag.weight * 2 / totalWeight >= totalWeight / countWeights / 100) {
@@ -1191,9 +1190,13 @@ async function searchByDistance({
 	}
 	// Already calculated previously
 	['related', 'unrelated'].forEach((key) => {
-		if (calcTags[key].referenceNumber === 0 && calcTags[key].weight !== 0) {
+		const tag = calcTags[key];
+		if (tag.referenceNumber === 0 && tag.weight !== 0) {
 			if (bBasicLogging) { console.log('\'' + key + '\' weight was not zero but selected track had no related/unrelated tags'); }
-			calcTags[key].weight = 0;
+			tag.weight = 0;
+		}
+		if (key === 'related' && tag.weight !== 0) {
+			query[preQueryLength] = queryJoin(queryCombinations([...tag.referenceSet], ['MUSICBRAINZ_TRACKID', 'ARTIST', 'TITLE'], 'OR'), 'OR');
 		}
 	});
 	// Total score
