@@ -1100,6 +1100,38 @@ async function searchByDistance({
 
 				}
 				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
+			} else if (bNegativeWeighting && tag.weight * 2 / totalWeight >= totalWeight / countWeights / 100) {
+				preQueryLength = query.length;
+				const tagNameTF = type.includes('multiple') // May be a tag or a function...
+					? tag.tf.map((t) => { return ((t.indexOf('$') === -1) ? t : _q(t)); })
+					: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
+				if (type.includes('keyRange')) {
+					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
+					if (camelotKey) {
+						let keyComb = [];
+						const keysInRange = camelotWheel.createRange(camelotKey, tag.range * 2, { name: ['flat', 'sharp', 'open', 'camelot'], bFlat: false });
+						keysInRange.forEach((keyArr) => {
+							let subKeyComb = [];
+							keyArr.forEach((keyVal) => {
+								subKeyComb.push(tagNameTF + ' IS ' + keyVal);
+							});
+							keyComb.push(queryJoin(subKeyComb, 'OR'));
+						});
+						// And combine queries
+						if (keyComb.length !== 0) { query[preQueryLength] = queryJoin(keyComb, 'OR'); }
+					} else { query[preQueryLength] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
+				} else if (type.includes('percentRange')) {
+					const rangeUpper = round(tag.reference * (100 + tag.range * 2) / 100, 0);
+					const rangeLower = round(tag.reference * (100 - tag.range * 2) / 100, 0);
+					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
+				} else if (type.includes('absRange')) {
+					const rangeUpper = Math.ceil(tag.reference + tag.range * 2);
+					const rangeLower = Math.floor(tag.reference - tag.range * 2);
+					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
+					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
+				}
+				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			}
 		} else if (tag.weight !== 0) {
 			if (bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
