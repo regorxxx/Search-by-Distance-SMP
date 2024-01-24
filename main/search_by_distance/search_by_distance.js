@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/01/24
+//24/01/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -98,6 +98,8 @@ const SearchByDistance_properties = {
 		composer: { weight: 0, tf: [globTags.composer], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple'] },
 		artistRegion: { weight: 5, tf: [globTags.locale], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange', 'tfRemap'], range: 5 },
 		genreStyleRegion: { weight: 7, tf: [], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5 },
+		related: { weight: 25, tf: [globTags.related], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'virtual', 'tfRemap', 'bNegative'] },
+		unrelated: { weight: -25, tf: [globTags.unrelated], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'virtual', 'tfRemap', 'bNegative'] },
 	})],
 	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
 	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
@@ -213,6 +215,11 @@ const sbd = {
 			{ type: '', val: [] }
 		];
 	},
+	lastSearch: {
+		/** @type {FbMetadbHandle|null} */
+		handle: null, // For critical usage, check if file exist first on library changes!
+		options: {},
+	}
 };
 [sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 
@@ -912,7 +919,7 @@ async function searchByDistance({
 	// Zero weights if there are no tag names to look for
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.type.includes('virtual')) { continue; }
+		if (tag.type.includes('virtual') && !['related', 'unrelated'].includes(key)) { continue; }
 		if (tag.tf.length === 0) {
 			tag.weight = 0;
 			if (tag.type.includes('keyMix')) { bInKeyMixingPlaylist = false; }
@@ -979,7 +986,7 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		tag.reference = [];
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
 		const bGenreStyle = tag.bGraph && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
 		if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.reference = (bUseTheme ? theme.tags[0][key] : getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
@@ -1150,6 +1157,13 @@ async function searchByDistance({
 			calcTags.genreStyleRegion.weight = 0;
 		}
 	}
+	// Already calculated previously
+	['related', 'unrelated'].forEach((key) => {
+		if (calcTags[key].referenceNumber === 0 && calcTags[key].weight !== 0) {
+			if (bBasicLogging) { console.log('\'' + key + '\' weight was not zero but selected track had no related/unrelated tags'); }
+			calcTags[key].weight = 0;
+		}
+	});
 	// Total score
 	const originalScore = (originalWeightValue * 100) / totalWeight; // if it has tags missing then original Distance != totalWeight
 	if (bProfile) { test.Print('Task #1: Reference track / theme', false); }
@@ -1441,6 +1455,9 @@ async function searchByDistance({
 		tagsArr.push([globTags.artist]);
 		if (calcTags.artistRegion.tf.length) { tagsArr.push(calcTags.artistRegion.tf); }
 	}
+	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
+		tagsArr.push(['MUSICBRAINZ_TRACKID']);
+	}
 	tagsArr = tagsArr.map((arr) => { return arr.map((tag) => { return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag); }).join(', '); });
 	const tagsValByKey = [];
 	let tagsVal = [];
@@ -1466,6 +1483,9 @@ async function searchByDistance({
 		artistHandle = tagsValByKey[z++];
 		calcTags.artistRegion.handle = calcTags.artistRegion.tf.length ? tagsValByKey[z++] : null;
 	}
+	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
+		calcTags.unrelated.handle = calcTags.related.handle = tagsValByKey[z++];
+	}
 	if (bProfile) { test.Print('Task #4: Library tags', false); }
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
@@ -1476,7 +1496,7 @@ async function searchByDistance({
 		const handleTag = { genreStyle: { set: new Set() } };
 		for (let key in calcTags) {
 			const tag = calcTags[key];
-			if (tag.bVirtual) { continue; }
+			if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
 			handleTag[key] = {};
 			if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) {
 				if (tag.bMultiple) {
@@ -1518,6 +1538,14 @@ async function searchByDistance({
 
 		// O(i*j*k) time
 		// i = # tracks retrieved by query, j & K = # number of style/genre tags
+		['related', 'unrelated'].forEach((key) => { // Adds an offset score as base
+			const tag = calcTags[key];
+			if (tag.weight === 0) { return; }
+			const ids = handleTag[key].set.add(titleHandle[0]);
+			if (artistHandle) { artistHandle[i].forEach((artist) => ids.add(artist)); }
+			if (tag.referenceSet.intersectionSize(ids) !== 0) { weightValue += tag.weight; }
+		});
+
 		let leftWeight = totalWeight;
 		let currScoreAvailable = 100;
 		for (let key of sortTagKeys) {
@@ -1731,8 +1759,8 @@ async function searchByDistance({
 				weightValue += Math.min(weight, weight * calcTags.genreStyleRegion.baseScore / 100);
 			}
 		}
-
-		const score = round(weightValue * 100 / originalWeightValue, 1); // The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
+		// The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
+		const score = Math.max(0, Math.min(round(weightValue * 100 / originalWeightValue, 1), 100));
 
 		if (method === 'GRAPH') {
 			// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
@@ -2228,13 +2256,17 @@ async function searchByDistance({
 		plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
 		if (bBasicLogging) { console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.'); }
 	} else if (bBasicLogging) { console.log('Final selection length: ' + finalPlaylistLength + ' tracks.'); }
+	// Store options
+	sbd.lastSearch.handle = sel;
+	sbd.lastSearch.options = {
+		theme, recipe, bAscii, bTagsCache, bAdvTitle, checkDuplicatesByTag, sortBias, tags, bNegativeWeighting, bFilterWithGraph, forcedQuery, dynQueries, bSameArtistFilter, bSimilArtistsFilter, bConditionAntiInfluences, bUseAntiInfluencesFilter, bUseInfluencesFilter, artistRegionFilter, genreStyleRegionFilter, method, scoreFilter, minScoreFilter, graphDistance, poolFilteringTag, poolFilteringN, bPoolFiltering, bRandomPick, bInversePick, probPick, playlistLength, bSortRandom, bProgressiveListOrder, bInverseListOrder, bScatterInstrumentals, bSmartShuffle, bSmartShuffleAdvc, smartShuffleSortBias, bInKeyMixingPlaylist, bHarmonicMixDoublePass, bProgressiveListCreation, progressiveListCreationN, bProfile, bShowQuery, bShowFinalSelection, bBasicLogging, bSearchDebug, playlistName, bCreatePlaylist
+	};
 	// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
 	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); }
 	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); }
 	// Output handle list (as array), the score data, current selection (reference track) and more distant track
 	return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handleList[scoreData[poolLength - 1].index] : -1)];
 }
-
 
 /*
 	Helpers

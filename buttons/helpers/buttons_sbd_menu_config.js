@@ -3,7 +3,7 @@
 
 /* exported createConfigMenu */
 
-/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -244,10 +244,17 @@ function createConfigMenu(parent) {
 				const bIsDyngenreProp = weights[i].bIsDyngenreProp;
 				const bRecipe = weights[i].bRecipe;
 				const tag = weights[i].tag;
+				const bNegative = tag.type.includes('bNegative');
 				const entryText = 'Weight' + weights[i].entrySuffix;
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						const input = Input.number('int positive', tag.weight, 'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: (greater or equal to 0)', 'Search by distance', 15);
+						const input = Input.number(
+							bNegative ? 'int' : 'int positive',
+							tag.weight,
+							'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: ' + (bNegative ? '(integer)' : '(greater or equal to 0)'),
+							'Search by distance',
+							bNegative ? -15 : 15
+						);
 						if (input === null) { return; }
 						baseTag.weight = input;
 						properties.tags[1] = JSON.stringify(tags);
@@ -255,7 +262,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			{	// Scoring
+			if (!['related', 'unrelated'].includes(key)) {	// Scoring
 				const options = ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL'];
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'scoringDistribution') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -272,8 +279,8 @@ function createConfigMenu(parent) {
 				});
 				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => { return options.indexOf(tag.scoringDistribution); });
 			}
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
-			{	// Base score
+			if (!menu.isLastEntry('sep')) { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); }
+			if (!['related', 'unrelated'].includes(key)) {	// Base score
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'baseScore') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
@@ -287,7 +294,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			if (!menu.isLastEntry('sep')) { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); }
 			{	// Edit
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -937,6 +944,53 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
+		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		{
+			{
+				const flags = plman.ActivePlaylist !== -1 && plman.GetPlaylistSelectedItems(plman.ActivePlaylist).Count > 1 ? MF_STRING : MF_GRAYED;
+				menu.newEntry({
+					menuName: submenu, entryText: 'Relate selected tracks (between them)', func: () => {
+						addTracksRelation({ mode: 'related', tagsKeys: { related: tags.related.tf } });
+					}, flags
+				});
+				menu.newEntry({
+					menuName: submenu, entryText: 'Unrelate selected tracks (between them)', func: () => {
+						addTracksRelation({ mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf } });
+					}, flags
+				});
+			}
+			menu.newEntry({ menuName: submenu, entryText: 'sep' });
+			{
+				const sel = plman.ActivePlaylist !== -1
+					? plman.GetPlaylistSelectedItems(plman.ActivePlaylist)
+					: null;
+				const flags = sel && sel.Count > 0 && sbd.lastSearch.handle && !(sel.Count === 1 && sel[0].RawPath === sbd.lastSearch.handle.RawPath)
+					? MF_STRING
+					: MF_GRAYED;
+				menu.newEntry({
+					menuName: submenu, entryText: 'Relate selected tracks to last search', func: () => {
+						sel.Convert().forEach((handle) => {
+							if (sbd.lastSearch.handle.RawPath === handle.RawPath) {return;}
+							addTracksRelation({
+								handleList: new FbMetadbHandleList([handle, sbd.lastSearch.handle]),
+								mode: 'related', tagsKeys: { unrelated: tags.related.tf }
+							});
+						});
+					}, flags
+				});
+				menu.newEntry({
+					menuName: submenu, entryText: 'Unrelate selected tracks to last search', func: () => {
+						sel.Convert().forEach((handle) => {
+							if (sbd.lastSearch.handle.RawPath === handle.RawPath) {return;}
+							addTracksRelation({
+								handleList: new FbMetadbHandleList([handle, sbd.lastSearch.handle]),
+								mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf }
+							});
+						});
+					}, flags
+				});
+			}
+		}
 	}
 	{	// Debug
 		const submenu = menu.newMenu('Debug and testing');
@@ -1105,6 +1159,7 @@ function createConfigMenu(parent) {
 			{ name: 'Filter: influences', file: folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt' },
 			{ name: 'sep' },
 			{ name: 'Tags & Weights: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt' },
+			{ name: 'Tags & Weights: related tracks', file: folders.xxx + 'helpers\\readme\\search_by_distance_related.txt' },
 			{ name: 'sep' },
 			{ name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt' },
 			{ name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png' },

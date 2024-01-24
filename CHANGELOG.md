@@ -50,6 +50,7 @@
 
 ## [Unreleased][]
 ### Added
+- Tags: added 'RELATED' and 'UNRELATED' tags which may be used to specify tracks which are considered similar or not similar by the user. Matching the tag adds the given weight as absolute score to the total, i.e. it's not averaged with all weights. These special tags may use as values any combination of 'TITLE', 'ARTIST' or 'MUSICBRAINZ_TRACKID'. As expected, giving a title, would match any track with such title (from any artist). Giving an artist would match any track from such artist. And using the id value, would ensure only specif tracks are matched. This is something similar to the love/hate feature on Spotify (to make tracks appear or not on generated playlists), although in this case these special tags ensure you are only excluding/including specific tracks in relation to others, not globally. See the readme for more info.
 - Dynamic queries: added new dynamic queries for tracks within a date period relative to the reference track.
 - Dynamic queries: added 'None' entry to clean all dynamic queries. If the entry is not checked, then there is at least a dynamic query set (even if it's not shown on the menus).
 - Configuration: added COMPOSER to the list of global tags.
@@ -59,12 +60,14 @@
 - Toolbar: new settings for text scale (now independent of button and icon scale).
 - Toolbar: new settings for icon scale (now independent of button and text scale).
 ### Changed
+- Tags: improved queries created according to tags and weights when using 'Negative score for tags out of range'; as result processing time may be lower in some cases (if weight is not high enough to filter a track by such tag but negative cases would exclude it).
 - Cultural Regions: improvements to processing when using cultural filters in some cases.
 - Cache: changed cache structure to minimize file size (up to 50%) and loading time (up to 30%). Link cache will need to be rebuilt on update.
 - Helpers: updated helpers.
 - Code cleanup.
 ### Removed
 ### Fixed
+- Scoring Method: fix to incorrect handling of (negative) values outside range for some methods ('NORMAL' and 'LOGISTIC').
 - Readmes: minor fix to  'search_by_distance_info.txt' file.
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.

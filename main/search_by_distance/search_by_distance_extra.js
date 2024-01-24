@@ -1,11 +1,11 @@
 ﻿'use strict';
-//10/01/24
+//23/01/24
 
-/* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter, findStyleGenresMissingGraph */
+/* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter, findStyleGenresMissingGraph , addTracksRelation */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, music_graph_descriptors_user:readable */
-/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable, _qCond:readable, isInt:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, round:readable, round:readable, round:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, secondsToTime:readable, _jsonParseFileCheck:readable, isArray:readable, secondsToTime:readable, _bt:readable, isString:readable, _asciify:readable, _qCond:readable, isInt:readable, getHandleTags:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 /* global music_graph_descriptors_countries:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
@@ -500,4 +500,60 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 		missing.joinEvery(', ', 6);
 	if (bPopup) { fb.ShowPopupMessage(report, 'Search by distance'); }
 	return missing;
+}
+
+function addTracksRelation({
+	handleList = plman.ActivePlaylist !== -1
+		? plman.GetPlaylistSelectedItems(plman.ActivePlaylist)
+		: new FbMetadbHandleList(),
+	mode = 'related',
+	tagsKeys = { related: [globTags.related], unrelated: [globTags.unrelated] }
+} = {}) {
+	if (!handleList.Count) { return false; }
+	if (!mode) { return false; }
+	mode = mode.toLowerCase();
+	// Use remapped tags but clean expressions
+	tagsKeys = { related: [globTags.related], unrelated: [globTags.unrelated], ...tagsKeys };
+	const tfRegExp = /\$\w*\(.*\)/i;
+	Object.keys(tagsKeys).forEach((key) => {
+		tagsKeys[key] = tagsKeys[key].filter(Boolean);
+		tagsKeys[key] = tagsKeys[key].filter((tf) => !tfRegExp.test(tf));
+	});
+	if (Object.values(tagsKeys).some((tfArr) => !tfArr.length)) { return false; }
+	if (!Object.hasOwn(tagsKeys, mode)) { return false; }
+	const tags = [];
+	handleList.Sort();
+	const handleListArr = handleList.Convert();
+	// Retrieve previous values
+	handleListArr.forEach((handle) => {
+		const prevIds = getHandleTags(handle, tagsKeys[mode]);
+		tags.push(
+			Object.fromEntries(tagsKeys[mode].map((tf, i) => { return [[tf], new Set(prevIds[i])]; }))
+		);
+	});
+	// Add new ones
+	handleListArr.forEach((handle, i) => {
+		const newIds = getHandleTags(handle, ['MUSICBRAINZ_TRACKID', 'TITLE']);
+		for (const idArr of newIds) {
+			if (idArr.length) {
+				idArr.forEach((id) => {
+					tags.forEach((handleTags, j) => {
+						if (i === j) { return; }
+						tagsKeys[mode].forEach((tf) => handleTags[tf].add(id));
+					});
+				});
+				break; // Prefer IDs by order
+			}
+		}
+	});
+	// Tag
+	tags.forEach((handleTags) => {
+		tagsKeys[mode].forEach((tf) => handleTags[tf] = [...handleTags[tf]]);
+	});
+	try { handleList.UpdateFileInfoFromJSON(JSON.stringify(tags)); }
+	catch (e) {
+		console.popup(e, window.Name);
+		return false;
+	}
+	return true;
 }
