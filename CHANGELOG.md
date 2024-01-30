@@ -73,6 +73,7 @@
 - Readmes: minor fix to  'search_by_distance_info.txt' file.
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
+- Tags: incorrect scoring of genre/style tags when they were put on custom tags. Issue #25.
 - Toolbar: buttons' size not restored back to normal height after disabling 'Full size buttons' without reloading the panel.
 - Crash when using a probability of picking lower than 100 in some cases.
 - Minor fixes.
