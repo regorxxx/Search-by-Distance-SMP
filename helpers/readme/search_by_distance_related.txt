@@ -1,0 +1,40 @@
+﻿Tracks considered too similar/different by the user  are handled with
+special tags which identify these relations.
+
+Source:
+--------
+Tags are retrieved by TF (can be remapped), by default:
+	- 'RELATED'
+	- 'UNRELATED'
+
+These tags can contain any mix of any of these values:
+	- TITLE
+	- ARTIST
+	- MUSICBRAINZ_TRACKID: is an unique ID associated to a recording,
+	so there is no possibility of collisions with tracks with same 
+	title or artist but not being the same recording.
+
+Special Tags: (tags and weighting)
+-------------
+	- Related: if the reference track has any value on this tag, then
+	any other track matching by TITLE, ARTIST or MUSICBRAINZ_TRACKID
+	such values will be considered more similar. The weight is
+	configurable. In any case the max score will be 100.
+	
+	- Unrelated: if the reference track has any value on this tag, then
+	any other track matching by TITLE, ARTIST or MUSICBRAINZ_TRACKID 
+	such values will be considered less similar. The weight is 
+	configurable. In any case the min score will be zero.
+	
+	- This additional score is added/subtracted to the main score 
+	calculations, so it's only applied in case the reference track has 
+	such tags. OTherwise it's simply skipped. For this reason, there is
+	no 'Base score' or 'Scoring method' settings available, since the 
+	weight is added as is. For ex. a related track just gets +25 score
+	points if matched.
+	
+	- Setting related tracks weight to 100 will ensure they are always
+	shown on the output playlist.
+	
+	- Setting unrelated tracks weight to -100 will ensure they will
+	never be shown on the output playlist.
