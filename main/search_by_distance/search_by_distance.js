@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/01/24
+//30/01/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -876,6 +876,7 @@ async function searchByDistance({
 			return;
 		}
 	}
+	if (calcTags.genreStyle.tf.length) { calcTags.genreStyle.tf = [...new Set(calcTags.genreStyle.tf)]; }
 	// Check default virtual tags are present or add them
 	const defaultTags = JSON.parse(SearchByDistance_properties.tags[3]);
 	Object.keys(defaultTags).forEach((key) => {
@@ -1008,7 +1009,12 @@ async function searchByDistance({
 	}
 	// Sets for later comparison
 	if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0 || calcTags.genreStyleRegion.weight !== 0) {
-		calcTags.genreStyle.referenceSet = new Set(calcTags.genre.reference.concat(calcTags.style.reference)).difference(graphExclusions); // Remove exclusions
+		calcTags.genreStyle.referenceSet = Object.keys(calcTags).reduce((acc, key) => {
+			const tag = calcTags[key];
+			return tag.bGraphDyn && calcTags[key].reference.length > 0
+				? acc.add(...calcTags[key].reference)
+				: acc;
+		}, new Set()).difference(graphExclusions); // Remove exclusions
 		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 	}
 
@@ -1472,6 +1478,7 @@ async function searchByDistance({
 		handleList.OrderByFormat(tfo, 1);
 	}
 	if (bProfile) { test.Print('Task #3: Remove Duplicates and sorting', false); }
+	if (bSearchDebug) { console.log(JSON.stringify(calcTags, void (0), '\t')); }
 	// Get the tag values for all the handle list. Skip those with weight 0.
 	// Now flat is not needed, we have 1 array of tags per track [i][j]
 	// Also filter using boolean to remove '' values within an array, so [''] becomes [] with 0 length, but it's done per track.
@@ -1583,7 +1590,7 @@ async function searchByDistance({
 			if (artistHandle) { artistHandle[i].forEach((artist) => ids.add(artist)); }
 			if (tag.referenceSet.intersectionSize(ids) !== 0) {
 				weightValue += tag.weight;
-				if (key === 'related') {bRelated = true;} else {bUnrelated = true;}
+				if (key === 'related') { bRelated = true; } else { bUnrelated = true; }
 			}
 		});
 
