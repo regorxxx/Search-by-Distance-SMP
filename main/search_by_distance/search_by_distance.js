@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/01/24
+//01/02/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -1012,9 +1012,12 @@ async function searchByDistance({
 		calcTags.genreStyle.referenceSet = Object.keys(calcTags).reduce((acc, key) => {
 			const tag = calcTags[key];
 			return tag.bGraphDyn && calcTags[key].reference.length > 0
-				? acc.add(...calcTags[key].reference)
+				? acc.union(new Set(calcTags[key].reference))
 				: acc;
 		}, new Set()).difference(graphExclusions); // Remove exclusions
+		if (bFilterWithGraph) {
+			calcTags.genreStyle.referenceSet = calcTags.genreStyle.referenceSet.intersection(descr.getNodeSet());
+		}
 		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 	}
 
@@ -1030,6 +1033,7 @@ async function searchByDistance({
 		if (tag.weight === 0 || tag.tf.length === 0) { continue; }
 		if (type.includes('virtual')) { continue; }
 		if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
+			if (bSearchDebug) { console.log(key + ': ' + originalWeightValue + ' + ' + tag.weight); }
 			originalWeightValue += tag.weight;
 			if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 				preQueryLength = query.length;
@@ -1075,10 +1079,10 @@ async function searchByDistance({
 								const intersection = sg.base.intersection(s);
 								if (sg.base.size === s.size && intersection.size === sg.base.size - 1 || sg.base.size === s.size - 1 && intersection.size === sg.base.size) {
 									if (sg.base.size === s.size) {
-										sg.or.add(...sg.base.difference(intersection));
+										sg.or = sg.or.union(sg.base.difference(intersection));
 										sg.base = intersection;
 									}
-									sg.or.add(...s.difference(intersection));
+									sg.or = sg.or.union(s.difference(intersection));
 									bDone = true;
 								}
 							});
@@ -1151,6 +1155,7 @@ async function searchByDistance({
 		}
 		calcTags.dynGenre.referenceNumber = calcTags.dynGenre.reference.length;
 		if (calcTags.dynGenre.referenceNumber !== 0) {
+			if (bSearchDebug) { console.log('dynGenre: ' + originalWeightValue + ' + ' + calcTags.dynGenre.weight); }
 			originalWeightValue += calcTags.dynGenre.weight;
 		}
 	} else if (calcTags.dynGenre.weight !== 0) {
@@ -1173,6 +1178,7 @@ async function searchByDistance({
 			}
 		}
 		if (iso) {
+			if (bSearchDebug) { console.log('artistRegion: ' + originalWeightValue + ' + ' + calcTags.artistRegion.weight); }
 			calcTags.artistRegion.reference = _asciify(iso);
 			originalWeightValue += calcTags.artistRegion.weight;
 		} else {
@@ -1188,6 +1194,7 @@ async function searchByDistance({
 		calcTags.genreStyleRegion.reference.push(...calcTags.genreStyle.referenceSet);
 		calcTags.genreStyleRegion.referenceNumber = calcTags.genreStyleRegion.reference.length;
 		if (calcTags.genreStyleRegion.referenceNumber !== 0) {
+			if (bSearchDebug) { console.log('genreStyleRegion: ' + originalWeightValue + ' + ' + calcTags.genreStyleRegion.weight); }
 			originalWeightValue += calcTags.genreStyleRegion.weight;
 		} else {
 			if (bBasicLogging) { console.log('\'genreStyleRegion\' weight was not zero but selected track had no genre/style tags'); }

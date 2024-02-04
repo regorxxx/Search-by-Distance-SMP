@@ -50,7 +50,7 @@
 
 ## [Unreleased][]
 ### Added
-- Tags: added 'RELATED' and 'UNRELATED' tags which may be used to specify tracks which are considered similar or not similar by the user. Matching the tag adds the given weight as absolute score to the total, i.e. it's not averaged with all weights. These special tags may use as values any combination of 'TITLE', 'ARTIST' or 'MUSICBRAINZ_TRACKID'. As expected, giving a title, would match any track with such title (from any artist). Giving an artist would match any track from such artist. And using the id value, would ensure only specif tracks are matched. This is something similar to the love/hate feature on Spotify (to make tracks appear or not on generated playlists), although in this case these special tags ensure you are only excluding/including specific tracks in relation to others, not globally. See the readme for more info.
+- Tags: added 'RELATED' and 'UNRELATED' tags which may be used to specify tracks which are considered similar or not similar by the user. Matching the tag adds the given weight as absolute score to the total, i.e. it's not averaged with all weights. These special tags may use as values any combination of 'TITLE', 'ARTIST' or 'MUSICBRAINZ_TRACKID'. As expected, giving a title, would match any track with such title (from any artist). Giving an artist would match any track from such artist. And using the id value, would ensure only specific tracks are matched. This is something similar to the love/hate feature on Spotify (to make tracks appear or not on generated playlists), although in this case these special tags ensure you are only excluding/including specific tracks in relation to others, not globally. See the readme for more info.
 - Tags: to simplify the usage of 'RELATED' and 'UNRELATED' tags (see above), new entries at the customizable button (see Other tools\Relate selected tracks...) have been added. They allow to add the 'MUSICBRAINZ_TRACKID' values to 'RELATED' or 'UNRELATED' tags for the selected tracks or the last track used as reference in a few clicks.
 - Dynamic queries: added new dynamic queries for tracks within a date period relative to the reference track.
 - Dynamic queries: added 'None' entry to clean all dynamic queries. If the entry is not checked, then there is at least a dynamic query set (even if it's not shown on the menus).
@@ -74,6 +74,7 @@
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
 - Tags: incorrect scoring of genre/style tags when they were put on custom tags. Issue #25.
+- Tags: incorrect handling of genre/style tags not present on the graph for the reference track. Issue #26.
 - Toolbar: buttons' size not restored back to normal height after disabling 'Full size buttons' without reloading the panel.
 - Crash when using a probability of picking lower than 100 in some cases.
 - Minor fixes.
@@ -412,7 +413,7 @@
 - Cache: improved graph links cache asynchronous calculation.
 - Properties: additional checks to variables and properties. In case a previous property is not valid, reset to default using menus where applicable.
 - Properties: remapped tags properties have been rewritten, previous config will be lost. Tags now follow a JSON format, which will be more compatible with TF functions in any field.
-- Properties: 'Exclude any track with graph distance greater than (only GRAPH method)' property now also allows 'Infinity' as value, which equals to allowing any genre/style on the graph. But it may be used in conjuction with other filters, like influences or similar artists, thus not being equivalent to 'WEIGHT' or 'DYNGENRE' methods.
+- Properties: 'Exclude any track with graph distance greater than (only GRAPH method)' property now also allows 'Infinity' as value, which equals to allowing any genre/style on the graph. But it may be used in conjunction with other filters, like influences or similar artists, thus not being equivalent to 'WEIGHT' or 'DYNGENRE' methods.
 - Buttons: default method of installation requires now to load the toolbar (no more single buttons support), from there, any button can be loaded as desired.
 - Buttons: the buttons bar now shows a message when no buttons have been added, left clicking shows a popup with available buttons presets. Right clicking opens the menu to configure the toolbar or add buttons manually.
 - Buttons: reworked pre-defined filters switching, using RegExp, which should hopefully work in almost any case no matter their order or position on the forced query.
@@ -733,7 +734,7 @@
 ## [2.0.0] - 2021-06-15
 ### Added
 - Recipes: Recipes presets may be used to set variables of the function. Whenever the argument is set, it's used instead of related property. Custom button now allows to use a recipe file. Once set, button would always use the recipe as arguments instead of the properties variables. A recipe may force the use of a theme.
-- Recipes: custom button now allows to set the recipe file used by pressing Ctrl + L. Click. 'None' would use the current properties variables, which is the default behaviour.
+- Recipes: custom button now allows to set the recipe file used by pressing Ctrl + L. Click. 'None' would use the current properties variables, which is the default behavior.
 - Themes: themes presets may be used as reference instead of tracks. Whenever the argument is set, it's used instead of the selection. Custom button now allows to use a theme file. Once set, button would always use the theme as reference instead of the current selection.
 - Buttons: custom button now allows to set the theme file used by pressing Shift + L. Click. 'None' would use the current selection, which is the default behavior.
 - Buttons: custom button now allows to create a theme file using the currently focused track's tags. See theme menu (Shift + L. Click).
