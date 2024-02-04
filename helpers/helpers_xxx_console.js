@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/01/24
+//01/02/24
 
 include(fb.ComponentPath + 'docs\\Codepages.js');
 /* global convertCharsetToCodepage:readable */
@@ -34,16 +34,16 @@ function consoleLog() {
 	}
 	// Add dd/mm/yyyy
 	if (lastMod !== today) {
-		log += (log && log.length ? '\n' : '') + '--------->' + today + '<---------';
+		log += (log && log.length ? '\r\n' : '') + '--------->' + today + '<---------';
 	}
 	// Add HH:MM:SS
 	const stamp = bCache ? '' : '[' + new Date().toLocaleTimeString() + ']';
-	log += (log && log.length ? '\n' : '') + (bCache ? '' : stamp);
+	log += (log && log.length ? '\r\n' : '') + (bCache ? '' : stamp);
 	// Unpack args
 	const args = bCache ? console.Cache : [[...arguments]];
 	if (bCache) { console.Cache = []; }
 	args.forEach((call, j) => {
-		if (bCache && j !== 0) { log += '\n'; }
+		if (bCache && j !== 0) { log += '\r\n'; }
 		call.forEach((arg, i) => {
 			const val = console.formatArg(arg);
 			log += (bCache && i === 0 ? '' : ' ') + val;
@@ -73,6 +73,7 @@ console.formatArg = (arg) => {
 			if (arg !== null) {
 				let instance = null;
 				switch (true) {	// Get object types
+					case Array.isArray(arg): { instance = { name: 'Array', type: 'array' }; break; }
 					case arg instanceof Set: { instance = { name: 'Set', type: 'array' }; break; }
 					case arg instanceof Map: { instance = { name: 'Map', type: 'array' }; break; }
 					case arg instanceof WeakMap: { instance = { name: 'WeakMap', type: 'array' }; break; }

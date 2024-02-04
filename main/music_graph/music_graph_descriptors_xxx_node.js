@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//01/02/24
 
 /*
 	Inverse mapping for the graph
@@ -7,13 +7,31 @@
 
 /* global music_graph_descriptors:readable, music_graph_descriptors_culture:readable */
 
+/**
+* @typedef {Object} musicGraphNode
+* @property {[string]} superGenre
+* @property {[string]} cluster
+* @property {[string]} superCluster
+* @property {[string]} styleCluster
+* @property {[string]} primaryOrigin
+* @property {[string]} secondaryOrigin
+* @property {[string]} antiInfluence
+* @property {[string]} weakSubstitution
+* @property {[string]} substitution
+* @property {[string]} region
+*/
+
 (function () { // Used internally on all inputs below
 	const test = typeof FbProfiler !== 'undefined' ? new FbProfiler('Music Graph: node list') : null;
+	/** @type {Map<string,musicGraphNode>} */
 	const nodeList = new Map();
 	const cache = {
 		cluster: new Map(),
+		clusterList: new Set(),
 		superCluster: new Map(),
+		superClusterList: new Set(),
 		styleCluster: new Map(),
+		styleClusterList: new Set(),
 		primaryOrigin: new Map(),
 		secondaryOrigin: new Map(),
 		antiInfluence: new Map(),
@@ -23,16 +41,19 @@
 	// Cache values
 	music_graph_descriptors.style_supergenre_cluster.forEach((cl) => {
 		if (cl[0] === 'SKIP') { return; }
+		cache.clusterList.add(cl[0]);
 		cl[1].forEach((sg) => {
 			cache.cluster.set(sg, cl[0]);
 		});
 	});
 	music_graph_descriptors.style_supergenre_supercluster.forEach((scl) => {
+		cache.superClusterList.add(scl[0]);
 		scl[1].forEach((cl) => {
 			cache.superCluster.set(cl, scl[0]);
 		});
 	});
 	music_graph_descriptors.style_cluster.forEach((scl) => {
+		cache.styleClusterList.add(scl[0]);
 		scl[1].forEach((genreStyle) => {
 			if (cache.styleCluster.has(genreStyle)) {
 				cache.styleCluster.get(genreStyle).push(scl[0]);
@@ -80,7 +101,7 @@
 				nodeList.set(genreStyle, node);
 			} else {
 				nodeList.set(genreStyle,
-					{	// This can be expanded with dates, direct connections or user statistics like top rated tracks or average rating on library
+					{	// Can be expanded with dates, direct connections or user statistics like top rated tracks or average rating on library
 						superGenre: [superGenre].filter(Boolean),
 						cluster: [cluster].filter(Boolean),
 						superCluster: [superCluster].filter(Boolean),
@@ -96,23 +117,59 @@
 			}
 		});
 	});
+	// Process substitutions (which may link to clusters) and style clusters (which may be used as a genre too)
 	[music_graph_descriptors.style_substitutions, music_graph_descriptors.style_cluster].forEach((arr) => {
-		arr.map((sub) => sub[0]).forEach((genreStyle) => {
+		arr.map((sub) => sub[0]).forEach((genreStyle, i) => {
 			if (nodeList.has(genreStyle)) { return; }
-			const cluster = cache.cluster.get(genreStyle);
-			const superCluster = cache.superCluster.get(genreStyle);
+			const bStyleCluster = cache.styleClusterList.has(genreStyle);
+			const bCluster = !bStyleCluster && cache.clusterList.has(genreStyle);
+			const bSuperCluster = !bStyleCluster && !bCluster && cache.superClusterList.has(genreStyle);
+			let superGenre = new Set();
+			let cluster = new Set();
+			let superCluster = new Set();
+			let styleCluster = new Set();
+			switch (true) {
+				case bStyleCluster: {
+					const childs = music_graph_descriptors.style_cluster[i][1];
+					childs.forEach((child) => {
+						const node = nodeList.get(child);
+						if (!node) {return;}
+						node.superGenre.forEach((sg) => {
+							cluster.add(cache.cluster.get(sg));
+							superGenre.add(sg);
+						});
+					});
+					cluster.forEach((cl) => superCluster.add(cache.superCluster.get(cl)));
+					styleCluster.add(genreStyle);
+					break;
+				}
+				case bCluster: {
+					cluster.add(genreStyle);
+					superCluster.add(cache.superCluster.get(cluster));
+					break;
+				}
+				case bSuperCluster: {
+					superCluster.add(genreStyle);
+					break;
+				}
+				default: {
+					cluster.add(cache.cluster.get(genreStyle));
+					superCluster.add(cache.superCluster.get(genreStyle));
+					(cache.styleCluster.get(genreStyle) || []).forEach((sc) => styleCluster.add(sc));
+				}
+			}
 			nodeList.set(genreStyle,
-				{	// This can be expanded with dates, direct connections or user statistics like top rated tracks or average rating on library
-					superGenre: [],
-					cluster: [cluster].filter(Boolean),
-					superCluster: [superCluster].filter(Boolean),
-					styleCluster: cache.styleCluster.get(genreStyle) || [],
+				{
+					superGenre: [...superGenre].filter(Boolean),
+					cluster: [...cluster].filter(Boolean),
+					superCluster: [...superCluster].filter(Boolean),
+					styleCluster: [...styleCluster].filter(Boolean),
 					primaryOrigin: cache.primaryOrigin.get(genreStyle) || [],
 					secondaryOrigin: cache.secondaryOrigin.get(genreStyle) || [],
 					antiInfluence: cache.antiInfluence.get(genreStyle) || [],
 					weakSubstitution: cache.weakSubstitution.get(genreStyle) || [],
 					substitution: cache.substitution.get(genreStyle) || [],
-					region: music_graph_descriptors_culture.getStyleRegion(genreStyle) || [] // With caching takes 120 ms for the entire graph, with inverse lookup table just 30 ms
+					region: music_graph_descriptors_culture.getStyleRegion(genreStyle) || []
 				}
 			);
 		});

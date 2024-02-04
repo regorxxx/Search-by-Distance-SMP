@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/01/24
+//01/02/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -45,6 +45,15 @@
 
 	Tests are also available with the buttons present on these scripts (customizable button and Playlist Tools).
 */
+
+/**
+ * The above code is declaring a constant variable called "music_graph_descriptors" and assigning it an object value.
+ *
+ * @constant
+ * @name music_graph_descriptors
+ * @kind variable
+ * @type {{ style_supergenre_supercluster: (string | string[])[][]; style_supergenre_cluster: (string | string[])[][]; style_supergenre: (string | string[])[][]; style_cluster: (string | string[])[][]; style_primary_origin: (string | string[])[][]; style_secondary_origin: (string | string[])[][]; style_anti_influence: (string | string[])[][]; style_anti_influences_conditional: string[]; style_weak_substitutions: (string | string[])[][]; style_substitutions: (string | string[])[][]; map_distance_exclusions: Set<string>; nodeList: Map<string,musicGraphNode>; renderMethod: string; }}
+ */
 const music_graph_descriptors = {
 	/*
 		----------------------------------------------------------------------------------------------------

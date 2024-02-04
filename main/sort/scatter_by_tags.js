@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/01/24
+//01/02/24
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -178,10 +178,17 @@ function intercalateByTags({
 	return selItemsArray;
 }
 
-// Applies semi-random patterns, not allowing the same artist 2 times in a row, while not falling into strict intercalation
-// Based on: https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/
-// Note for some proportions there is an exact solution, and that's used instead of relying on the random method
-// Beware it returns null when items are <= 2. Just reuse original list in such case
+/**
+ * Applies semi-random patterns, not allowing the same artist 2 times in a row, while not falling into strict intercalation
+ * Based on: https://engineering.atspotify.com/2014/02/how-to-shuffle-songs/
+ * Note for some proportions there is an exact solution, and that's used instead of relying on the random method. Beware it returns null when items are <= 2. Just reuse original list in such case
+ *
+ * @function
+ * @name shuffleByTags
+ * @kind function
+ * @param {{ tagName?: string[] selItems?: FbMetadbHandleList bSendToActivePls?: boolean data?: { handleArray: any[] dataArray: any[] tagsArray: any[] } bAdvancedShuffle?: boolean sortBias?: string sortDir?: number bDebug?: boolean }} { tagName, selItems, bSendToActivePls, data, bAdvancedShuffle, sortBias, sortDir, bDebug }?
+ * @returns {{handleList:FbMetadbHandleList handleArray:FbMetadbHandle[] dataArray:any[] tagsArray:any[]}}
+ */
 function shuffleByTags({
 	tagName = ['ALBUM ARTIST'],
 	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
