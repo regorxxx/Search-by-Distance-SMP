@@ -65,6 +65,7 @@
 - Tags: improved queries created according to tags and weights when using 'Negative score for tags out of range'; as result processing time may be lower in some cases (if weight is not high enough to filter a track by such tag but negative cases would exclude it).
 - Cultural Regions: improvements to processing when using cultural filters in some cases.
 - Cache: changed cache structure to minimize file size (up to 50%) and loading time (up to 30%). Link cache will need to be rebuilt on update.
+- Configuration: changed the remove duplicates bias to prefer tracks with higher play-counts and positive feedback tag (love/hate).
 - Helpers: updated helpers.
 - Code cleanup.
 ### Removed
