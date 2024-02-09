@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/01/24
+//08/02/24
 
 /* exported createConfigMenu */
 
@@ -940,7 +940,7 @@ function createConfigMenu(parent) {
 		{
 			menu.newEntry({
 				menuName: submenu, entryText: 'Calculate same zone artists', func: () => {
-					getArtistsSameZone({ properties });
+					console.log(getArtistsSameZone({ properties }));
 				}
 			});
 		}

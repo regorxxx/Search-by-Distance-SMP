@@ -78,8 +78,11 @@ include('..\\filter_and_query\\remove_duplicates.js');
 include('..\\sort\\scatter_by_tags.js');
 /* global shuffleByTags:readable */
 include('..\\..\\helpers\\callbacks_xxx.js');
+include('search_by_distance_genres.js');
+/* global findStyleGenresMissingGraph:readable */
+include('search_by_distance_culture.js');
+/* global getCountryISO:readable, getLocaleFromId:readable, getZoneArtistFilter:readable, getZoneGraphFilter:readable, music_graph_descriptors_countries:readable, music_graph_descriptors_culture:readable */
 include('search_by_distance_extra.js');
-/* global findStyleGenresMissingGraph:readable, getCountryISO:readable, getLocaleFromId:readable, getZoneArtistFilter:readable, getZoneGraphFilter:readable, music_graph_descriptors_countries:readable, music_graph_descriptors_culture:readable */
 
 checkCompatible('1.6.1', 'smp');
 
