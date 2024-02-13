@@ -30,5 +30,6 @@
 	"buttons_tags_automation.js": "tags_automation.txt",
 	"buttons_tags_fingerprint_chromaprint.js": "fingerprint_tag.txt",
 	"buttons_tags_fingerprint_fooid.js": "fingerprint_tag.txt",
-	"buttons_tags_save_tags.js": "save_tags.txt"
+	"buttons_tags_save_tags.js": "save_tags.txt",
+	"buttons_others_wrapped.js": "wrapped.txt"
 }
