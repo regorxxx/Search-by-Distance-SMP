@@ -939,14 +939,11 @@ async function searchByDistance({
 		} else { method = 'WEIGHT'; } // For calcs they are the same!
 	} else { calcTags.dynGenre.weight = 0; }
 
-	const totalWeight = Object.keys(calcTags).reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
-	const countWeights = Object.keys(calcTags).reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
-
 	if (!playlistLength) {
 		if (bBasicLogging) { console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.'); }
 		return;
 	}
-	if (!totalWeight && method === 'WEIGHT') {
+	if (method === 'WEIGHT' && Object.keys(calcTags).every((key) => calcTags[key].weight === 0)) {
 		if (bBasicLogging) {
 			if (calcTags.dynGenre.weight !== 0) { console.log('Check weight values, all are set to zero and \'dynGenre\' weight is not used for WEIGHT method.'); }
 			else { console.log('Check weight values, all are set to zero.'); }
@@ -1028,7 +1025,23 @@ async function searchByDistance({
 			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'');
 		}
 	}
-
+	for (let key in calcTags) {
+		const tag = calcTags[key];
+		const type = tag.type;
+		if (tag.weight === 0) { continue; }
+		if (type.includes('virtual')) { continue; }
+		const bHasMultiple = type.includes('multiple') && tag.referenceNumber !== 0;
+		const bHasSingle = type.includes('single');
+		const bHasString = bHasSingle && type.includes('string') && tag.reference.length;
+		const bHasNumber = bHasSingle && type.includes('number') && tag.reference !== null;
+		if (!bHasMultiple && !bHasString && !bHasNumber) {
+			if (bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
+			tag.weight = 0;
+		}
+	}
+	const totalWeight = Object.keys(calcTags).reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
+	const countWeights = Object.keys(calcTags).reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
+	if (bSearchDebug) { console.log('Init Weights:', totalWeight, countWeights); }
 	let originalWeightValue = 0;
 	// Queries and ranges
 	const queryDebug = bSearchDebug ? [] : null;
@@ -1150,9 +1163,6 @@ async function searchByDistance({
 				}
 				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			}
-		} else if (tag.weight !== 0) {
-			if (bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
-			tag.weight = 0;
 		}
 	}
 	// Dyngenre virtual tag is calculated with previous values
@@ -1522,6 +1532,7 @@ async function searchByDistance({
 		tagsArr.push(['MUSICBRAINZ_TRACKID']);
 	}
 	tagsArr = tagsArr.map((arr) => { return arr.map((tag) => { return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag); }).join(', '); });
+	if (bBasicLogging) { console.log(tagsArr); }
 	const tagsValByKey = [];
 	let tagsVal = [];
 	if (bTagsCache) {
