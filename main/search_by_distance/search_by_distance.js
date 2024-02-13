@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/02/24
+//13/02/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -805,8 +805,10 @@ async function searchByDistance({
 	}
 	const bUseRecipeTags = !!(bUseRecipe && Object.hasOwn(recipeProperties, 'tags'));
 	// Parse args
-	graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging);
-	if (graphDistance === null) { return; }
+	if (method === 'GRAPH') {
+		graphDistance = parseGraphDistance(graphDistance, descr, bBasicLogging);
+		if (graphDistance === null) { return; }
+	}
 	// Theme check
 	const bUseTheme = !!(theme && (typeof recipe === 'string' && theme.length || Object.keys(theme).length));
 	if (bUseTheme) {

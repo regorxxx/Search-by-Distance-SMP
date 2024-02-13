@@ -68,6 +68,7 @@
 - Cache: changed cache structure to minimize file size (up to 50%) and loading time (up to 30%). Link cache will need to be rebuilt on update.
 - Configuration: changed the remove duplicates bias to prefer tracks with higher play-counts and positive feedback tag (love/hate).
 - Helpers: updated helpers.
+- Console: removed unnecessary logging in some cases.
 - Console: improved log file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
 - Code cleanup.
 ### Removed
