@@ -1189,7 +1189,9 @@ async function searchByDistance({
 		} else {
 			calcTags.artistRegion.reference = '';
 			if (calcTags.artistRegion.weight !== 0) {
-				if (bBasicLogging) { console.log('\'artistRegion\' weight was not zero but selected track had no locale tags'); }
+				if (bBasicLogging) {
+					console.log('Weight was not zero but selected track had no artist region tags for: ' + _b(calcTags.artistRegion.tf));
+				}
 				calcTags.artistRegion.weight = 0;
 			}
 		}
@@ -1202,7 +1204,9 @@ async function searchByDistance({
 			if (bSearchDebug) { console.log('genreStyleRegion: ' + originalWeightValue + ' + ' + calcTags.genreStyleRegion.weight); }
 			originalWeightValue += calcTags.genreStyleRegion.weight;
 		} else {
-			if (bBasicLogging) { console.log('\'genreStyleRegion\' weight was not zero but selected track had no genre/style tags'); }
+			if (bBasicLogging) {
+				console.log('Weight was not zero but selected track had no genre/style region tags for: ' + _b(calcTags.genreStyleRegion.tf));
+			}
 			calcTags.genreStyleRegion.weight = 0;
 		}
 	}
@@ -1210,7 +1214,9 @@ async function searchByDistance({
 	['related', 'unrelated'].forEach((key) => {
 		const tag = calcTags[key];
 		if (tag.referenceNumber === 0 && tag.weight !== 0) {
-			if (bBasicLogging) { console.log('\'' + key + '\' weight was not zero but selected track had no related/unrelated tags'); }
+			if (bBasicLogging) {
+				console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(calcTags[key].tf));
+			}
 			tag.weight = 0;
 		}
 		if (key === 'related' && tag.weight !== 0) {
@@ -1331,7 +1337,7 @@ async function searchByDistance({
 		}
 	}
 	if (genreStyleRegionFilter !== -1) {
-		if (calcTags.genreStyle.referenceSet.size) {
+		if (calcTags.genreStyle.referenceNumber) {
 			const styleGenreRegion = getZoneGraphFilter([...calcTags.genreStyle.referenceSet], genreStyleRegionFilter).map((sg) => sanitizeQueryVal(sg));
 			if (styleGenreRegion.length) {
 				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
