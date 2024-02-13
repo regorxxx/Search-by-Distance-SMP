@@ -1024,6 +1024,9 @@ async function searchByDistance({
 			calcTags.genreStyle.referenceSet = calcTags.genreStyle.referenceSet.intersection(descr.getNodeSet());
 		}
 		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
+		if (calcTags.genreStyle.referenceNumber === 0 && method === 'GRAPH') {
+			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'');
+		}
 	}
 
 	let originalWeightValue = 0;
@@ -1555,7 +1558,7 @@ async function searchByDistance({
 		weightValue = 0;
 		mapDistance = Infinity; // We consider points are not linked by default
 		// Get the tags according to weight and filter ''. Also create sets for comparison
-		const handleTag = { genreStyle: { set: new Set() } };
+		const handleTag = { genreStyle: { set: new Set(), number: 0 } };
 		for (let key in calcTags) {
 			const tag = calcTags[key];
 			if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
@@ -1597,6 +1600,7 @@ async function searchByDistance({
 				}
 			}
 		}
+		handleTag.genreStyle.number = handleTag.genreStyle.set.size;
 
 		// O(i*j*k) time
 		// i = # tracks retrieved by query, j & K = # number of style/genre tags
@@ -1701,7 +1705,7 @@ async function searchByDistance({
 
 		if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
 			handleTag.dynGenre = { val: [], number: 0 };
-			if (handleTag.genreStyle.set.size !== 0) {
+			if (handleTag.genreStyle.number !== 0) {
 				for (const genreStyle of handleTag.genreStyle.set) {
 					const dynGenre = sbd.genreStyleMap.get(genreStyle);
 					if (dynGenre) { handleTag.dynGenre.val.push(...dynGenre); }
@@ -1779,11 +1783,11 @@ async function searchByDistance({
 			}
 		}
 
-		if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber) {
+		if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber !== 0) {
 			const tag = calcTags.genreStyleRegion;
 			const newTag = handleTag.genreStyleRegion = { val: [], number: 0 };
 			const weight = tag.weight;
-			if (handleTag.genreStyle.set.size !== 0) {
+			if (handleTag.genreStyle.number !== 0) {
 				newTag.val.push(...handleTag.genreStyle.set);
 			}
 			newTag.number = newTag.val.length;
@@ -1834,30 +1838,34 @@ async function searchByDistance({
 			if (!cacheLinkSet) { cacheLinkSet = new Map(); }
 			// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
 			if (score >= minScoreFilter) {
-				// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
-				// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
-				// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
-				// Pre-filtering number of tracks is the best approach to reduce calc time (!)
-				// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
-				const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
-				const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
-				const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
-				if (difference.size) {
-					const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
-					const mapKey = [
-						...[
-							[...difference].sort((a, b) => a.localeCompare(b)).join(','),
-							[...toGenreStyle].sort((a, b) => a.localeCompare(b)).join(','),
-						].sort((a, b) => a.localeCompare(b))
-					].join(' -> ');
-					const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
-					if (typeof mapValue !== 'undefined') {
-						mapDistance = mapValue;
-					} else { // Calculate it if not found
-						mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
-						cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
+				if (calcTags.genreStyle.referenceNumber !== 0) {
+					if (handleTag.genreStyle.number !== 0) {
+						// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
+						// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
+						// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
+						// Pre-filtering number of tracks is the best approach to reduce calc time (!)
+						// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
+						const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
+						const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
+						const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
+						if (difference.size) {
+							const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
+							const mapKey = [
+								...[
+									[...difference].sort((a, b) => a.localeCompare(b)).join(','),
+									[...toGenreStyle].sort((a, b) => a.localeCompare(b)).join(','),
+								].sort((a, b) => a.localeCompare(b))
+							].join(' -> ');
+							const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
+							if (typeof mapValue !== 'undefined') {
+								mapDistance = mapValue;
+							} else { // Calculate it if not found
+								mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
+								cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
+							}
+						} else { mapDistance = 0; } // One is superset of the other
 					}
-				} else { mapDistance = 0; } // One is superset of the other
+				} else { mapDistance = 0; } // Behaves like weight method
 			}
 		} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 		if (method === 'GRAPH') {
@@ -1866,7 +1874,7 @@ async function searchByDistance({
 			}
 		}
 		if (method === 'WEIGHT') {
-			if (score > minScoreFilter) {
+			if (score >= minScoreFilter) {
 				scoreData.push({ index: i, name: titleHandle[i][0], score, bRelated, bUnrelated });
 			}
 		}
