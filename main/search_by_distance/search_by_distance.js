@@ -1774,7 +1774,7 @@ async function searchByDistance({
 			const newTag = handleTag.artistRegion = { val: '' };
 			const localeTag = tag.handle ? _asciify(tag.handle[i].pop() || '') : '';
 			if (localeTag.length) { newTag.val = getCountryISO(localeTag) || ''; }
-			else { newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso; }
+			else if (artistHandle) { newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso; }
 			if (newTag.val.length) {
 				const weight = tag.weight;
 				const range = tag.range;
