@@ -77,6 +77,7 @@
 - Readmes: minor fix to  'search_by_distance_info.txt' file.
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
+- Tags: incorrect graph distance of genre/style tags if there were zero values. A reference with no genre/style tags should fallback to WEIGHT method and compared tracks should report infinite distance when missing the tags in GRAPH method. Issue #27.
 - Tags: incorrect scoring of genre/style tags when they were put on custom tags. Issue #25.
 - Tags: incorrect handling of genre/style tags not present on the graph for the reference track. Issue #26.
 - Toolbar: buttons' size not restored back to normal height after disabling 'Full size buttons' without reloading the panel.
