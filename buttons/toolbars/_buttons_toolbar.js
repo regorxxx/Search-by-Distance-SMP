@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/24
+//15/02/24
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -18,12 +18,14 @@
 var bLoadTags = true; // NOSONAR
 var version = '1.0.0'; // NOSONAR
 
+try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ }
+
 {
 	const dependencies = [
 		'helpers\\buttons_xxx.js',
 		/* global buttonsBar:readable */
 		'helpers\\helpers_xxx.js',
-		/* global globSettings:readable, folders:readable, globFonts:readable, DT_VCENTER:readable, DT_CENTER:readable, DT_END_ELLIPSIS:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, checkUpdate:readable */
+		/* global globSettings:readable, folders:readable, globFonts:readable, DT_VCENTER:readable, DT_CENTER:readable, DT_END_ELLIPSIS:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, checkUpdate:readable , globProfiler:readable */
 		'helpers\\helpers_xxx_foobar.js',
 		'helpers\\helpers_xxx_properties.js',
 		/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable */
@@ -52,7 +54,7 @@ var version = '1.0.0'; // NOSONAR
 	else { dependencies.forEach((file) => { include('buttons\\' + file); }); }
 }
 
-try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ }
+globProfiler.Print('helpers');
 
 let barProperties = {
 	name: ['Name of config json file', 'buttons_' + randomString(5), { func: isString }],
@@ -133,6 +135,8 @@ if (!barProperties.firstPopup[1]) {
 	const readme = _open(readmePath, utf8);
 	if (readme.length) { fb.ShowPopupMessage(readme, 'Toolbar'); }
 }
+
+globProfiler.Print('settings');
 
 // Load Buttons
 function loadButtonsFile(bStartup = false) {
@@ -226,6 +230,7 @@ const includeButton = (() => {
 			});
 			buttonsBar.listKeys.push(newKeys);
 			window.Repaint();
+			globProfiler.Print('button - ' + buttonPath.replace(folders.xxx, ''));
 		} else {
 			console.log(buttonPath + ' not loaded'); // DEBUG
 		}
@@ -244,7 +249,7 @@ function includeButtons() {
 function includeButtonsAsync(timeout = 100) {
 	if (buttonsPath.length) {
 		return Promise.serial(buttonsPath, includeButton, timeout)
-			.then(() => { console.log('Buttons loaded: ' + buttonsBar.listKeys.flat(Infinity).join(', ')); });
+			.then(() => console.log('Buttons loaded: ' + buttonsBar.listKeys.flat(Infinity).join(', ')));
 	}
 	return Promise.resolve(false);
 }
@@ -284,3 +289,5 @@ if (barProperties.bAutoUpdateCheck[1]) {
 		});
 	});
 }
+
+globProfiler.Print('callbacks');
