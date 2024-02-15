@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/02/24
+//15/02/24
 var version = '6.1.3'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -1022,7 +1022,7 @@ async function searchByDistance({
 		}
 		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 		if (calcTags.genreStyle.referenceNumber === 0 && method === 'GRAPH') {
-			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'');
+			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'\n\tAll tracks will be considered to have a graph distance of zero and only compared by score.');
 		}
 	}
 	for (let key in calcTags) {
@@ -2292,10 +2292,12 @@ async function searchByDistance({
 		if (bShowFinalSelection && !bProgressiveListCreation) {
 			let i = finalPlaylistLength;
 			let conText = 'List of selected tracks:';
+			const bNoGraph = calcTags.genreStyle.referenceNumber === 0 && method === 'GRAPH';
 			while (i--) {
 				conText += '\n                  ' + selectedHandlesData[i].name +
 					' - ' + selectedHandlesData[i].score + '/100 Simil.' +
 					(typeof selectedHandlesData[i].mapDistance !== 'undefined' ? ' - ' + selectedHandlesData[i].mapDistance + ' Graph' : '') +
+					(bNoGraph ? ' [no genre/style tag]' : '') +
 					(selectedHandlesData[i].bRelated ? ' [related]' : '') +
 					(selectedHandlesData[i].bUnrelated ? ' [unrelated]' : '');
 			}
