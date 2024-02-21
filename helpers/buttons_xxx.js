@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/24
+//21/02/24
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -463,7 +463,7 @@ function ThemedButton(
 			const iconHeightCalculated = isFunction(this.icon) ? this.iconHeight(this) : this.iconHeight;
 			if (this.iconImage) { // Icon image
 				const iconCalculatedDarkMode = !isDark(...toRGB(buttonsBar.config.textColor))
-					? iconCalculated.replace(/(\..*$)/i, '_dark$1')
+					? iconCalculated.replace(/(icons\\.*)(\..*$)/i, '$1_dark$2')
 					: null;
 				const iconColor = this.active
 					? buttonsBar.config.activeColor
@@ -480,7 +480,7 @@ function ThemedButton(
 						const iconGr = iconImage.GetGraphics();
 						iconGr.FillSolidRect(0, 0, iconImage.Width, iconImage.Height, this.active ? buttonsBar.config.activeColor : buttonsBar.config.textColor);
 						iconImage.ReleaseGraphics(iconGr);
-						let iconMask = gdi.Image(iconCalculated.replace(/(\..*$)/i, '_mask$1'));
+						let iconMask = gdi.Image(iconCalculated.replace(/(icons\\.*)(\..*$)/i, '$1_mask$2'));
 						if (iconMask) {
 							iconMask = iconMask.Resize(iconWidthCalculated, iconHeightCalculated, InterpolationMode.NearestNeighbor);
 							iconImage.ApplyMask(iconMask);

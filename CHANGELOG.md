@@ -71,6 +71,7 @@
 - Helpers: updated helpers.
 - Console: removed unnecessary logging in some cases.
 - Console: improved log file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
+- UI: wrong parsing of png masks on unix systems (currently, it only affected the ListenBrainz icon when changing the font color).
 - Code cleanup.
 ### Removed
 ### Fixed
