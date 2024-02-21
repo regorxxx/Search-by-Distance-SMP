@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/02/24
+//19/02/24
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -19,7 +19,15 @@ include('..\\..\\helpers\\helpers_xxx_tags.js');
 	Output is sent to active playlist or as a handle list by setting 'bSendToActivePls'.
 */
 
-// For an specific value (tagValue) for a given tag (tagName)
+/**
+ * Scatters a handleList for an specific tag value in selected tags.
+ *
+ * @function
+ * @name scatterByTags
+ * @kind function
+ * @param {{ tagName?: string tagValue?: string selItems?: FbMetadbHandleList bSendToActivePls?: boolean }} { tagName, tagValue, selItems, bSendToActivePls }?
+ * @returns {FbMetadbHandleList|null}
+ */
 function scatterByTags({
 	tagName = 'GENRE,STYLE',
 	tagValue = 'instrumental',
@@ -27,9 +35,9 @@ function scatterByTags({
 	bSendToActivePls = true
 } = {}) {
 	// Safety checks
-	if (!tagName.length) { return; }
-	if (!tagValue.length) { return; }
-	if (!selItems || selItems.Count <= 2) { return; }
+	if (!tagName.length) { return null; }
+	if (!tagValue.length) { return null; }
+	if (!selItems || selItems.Count <= 2) { return null; }
 	// Convert input
 	const totalTracks = selItems.Count;
 	tagName = tagName.split(/[;,]/g);
@@ -103,15 +111,23 @@ function scatterByTags({
 	return selItemsArray;
 }
 
-// Does the same but for any value for a given tag
+/**
+ * Scatters a handleList for any repeated value in selected tags.
+ *
+ * @function
+ * @name intercalateByTags
+ * @kind function
+ * @param {{ tagName?: string selItems?: FbMetadbHandleList bSendToActivePls?: boolean }} { tagName, selItems, bSendToActivePls }?
+ * @returns {FbMetadbHandleList|null}
+ */
 function intercalateByTags({
 	tagName = 'ALBUM ARTIST',
 	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 	bSendToActivePls = true,
 } = {}) {
 	// Safety checks
-	if (!tagName.length) { return; }
-	if (!selItems || selItems.Count <= 2) { return; }
+	if (!tagName.length) { return null; }
+	if (!selItems || selItems.Count <= 2) { return null; }
 	// Convert input
 	const totalTracks = selItems.Count;
 	tagName = tagName.split(/[;,]/g);
@@ -204,8 +220,10 @@ function shuffleByTags({
 	const dataTagsLen = data && data.tagsArray ? data.tagsArray.length : 0;
 	const dataLen = data && data.dataArray ? data.dataArray.length : null;
 	const itemsCount = selItems ? selItems.Count : 0;
-	const bEnhPlayCount = (typeof isEnhPlayCount !== 'undefined' && isEnhPlayCount) || (isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
-	const bPlayCount = (typeof isPlayCount !== 'undefined' && isPlayCount) || (isPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	const bEnhPlayCount = (typeof isEnhPlayCount !== 'undefined' && isEnhPlayCount)
+		|| (typeof isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+	const bPlayCount = (typeof isPlayCount !== 'undefined' && isPlayCount)
+		|| (typeof isPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
 	sortBias = (sortBias || '').toLowerCase();
 	if (dataHandleLen <= 2 && itemsCount <= 2) { console.log('shuffleByTags: not enough items. -> ' + Math.max(itemsCount, dataHandleLen)); return null; }
 	if (!Array.isArray(tagName) || !tagName.length) { console.log('shuffleByTags: tagName is not an array of tags. -> ' + tagName); return null; }
