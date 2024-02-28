@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [7.0.0](#700---2024-02-28)
 - [6.1.3](#613---2023-12-17)
 - [6.1.2](#612---2023-12-09)
 - [6.1.1](#611---2023-12-08)
@@ -49,6 +50,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [7.0.0] - 2024-02-28
 ### Added
 - Tags: added 'RELATED' and 'UNRELATED' tags which may be used to specify tracks which are considered similar or not similar by the user. Matching the tag adds the given weight as absolute score to the total, i.e. it's not averaged with all weights. These special tags may use as values any combination of 'TITLE', 'ARTIST' or 'MUSICBRAINZ_TRACKID'. As expected, giving a title, would match any track with such title (from any artist). Giving an artist would match any track from such artist. And using the id value, would ensure only specific tracks are matched. This is something similar to the love/hate feature on Spotify (to make tracks appear or not on generated playlists), although in this case these special tags ensure you are only excluding/including specific tracks in relation to others, not globally. See the readme for more info.
 - Tags: to simplify the usage of 'RELATED' and 'UNRELATED' tags (see above), new entries at the customizable button (see Other tools\Relate selected tracks...) have been added. They allow to add the 'MUSICBRAINZ_TRACKID' values to 'RELATED' or 'UNRELATED' tags for the selected tracks or the last track used as reference in a few clicks.
@@ -806,7 +813,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.3...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.3...v7.0.0
 [6.1.3]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.2...v6.1.3
 [6.1.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.1...v6.1.2
 [6.1.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v6.1.0...v6.1.1
