@@ -3,10 +3,10 @@
 	"buttons_lastfm_tools.js": "lastfm_tools.txt",
 	"buttons_listenbrainz_tools.js": "listenbrainz_tools.txt",
 	"buttons_others_auto_dj.js": "",
-	"buttons_others_autobackup.js": "autobackup.txt",
-	"buttons_others_device_priority.js": "device_priority.txt",
-	"buttons_others_device_selector.js": "",
-	"buttons_others_main_menu.js": "main_menu_shortcut.txt",
+	"buttons_utils_autobackup.js": "autobackup.txt",
+	"buttons_device_priority.js": "device_priority.txt",
+	"buttons_device_selector.js": "",
+	"buttons_utils_main_menu.js": "main_menu_shortcut.txt",
 	"buttons_playlist_filter.js": "remove_duplicates.txt",
 	"buttons_playlist_history.js": "playlist_history.txt",
 	"buttons_playlist_remove_duplicates.js": "remove_duplicates.txt",
@@ -31,5 +31,5 @@
 	"buttons_tags_fingerprint_chromaprint.js": "fingerprint_tag.txt",
 	"buttons_tags_fingerprint_fooid.js": "fingerprint_tag.txt",
 	"buttons_tags_save_tags.js": "save_tags.txt",
-	"buttons_others_wrapped.js": "wrapped.txt"
+	"buttons_stats_wrapped.js": "wrapped.txt"
 }
