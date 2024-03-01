@@ -22,7 +22,7 @@ $ifgreater($get(LUFS_TEN),40,$add($get(LUFS),100),
 $get(LUFS)))$iflonger($get(LUFS_ROUND),4,
 $left($get(LUFS_ROUND),2).$substr($get(LUFS_ROUND),3,3),$left($get(LUFS_ROUND),1).$substr($get(LUFS_ROUND),2,2)),))
 
-$if($get(PLR),
+$if($get(LUFS),
 	$ifgreater($get(LUFS),13,$set_style(back,$rgb(97,204,51,97,204,51)),
 	$ifgreater($get(LUFS),9,$set_style(back,$rgb(224,192,65,224,192,65)),
 	$ifgreater($get(LUFS),7,$set_style(back,$rgb(251,82,0,251,82,0)),

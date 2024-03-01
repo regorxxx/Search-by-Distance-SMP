@@ -56,6 +56,7 @@
 - UI: Improved panel repaint routines to minimize resources usage.
 ### Removed
 ### Fixed
+- Presets: fixed LUFS TitleFormat CUI preset.
 
 ## [7.0.0] - 2024-02-28
 ### Added
