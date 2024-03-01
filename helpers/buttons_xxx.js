@@ -1,17 +1,19 @@
 ﻿'use strict';
-//21/02/24
+//01/03/24
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
-/* global buttonsPath:readable, barProperties:readable, */
+/* global buttonsPath:readable, barProperties:readable */
 include('helpers_xxx.js');
-/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable */
+/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable, globSettings:readable */
 include('helpers_xxx_basic_js.js');
-/* global doOnce:readable, throttle:readable,  */
+/* global doOnce:readable, throttle:readable */
 include('helpers_xxx_prototypes.js');
 /* global isFunction:readable */
+include('helpers_xxx_prototypes_smp.js');
+/* global extendGR:readable */
 include('helpers_xxx_properties.js');
-/* global getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable,  */
+/* global getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable */
 include('helpers_xxx_UI.js');
 /* global RGB:readable, RGBA:readable, _tt:readable, _scale:readable, _gdiFont:readable, _gr:readable, invert:readable, isDark:readable, opaqueColor:readable, toRGB:readable, blendColors:readable, lightenColor:readable */
 include('helpers_xxx_flags.js');
@@ -189,7 +191,7 @@ function ThemedButton(
 
 	this.switchActive = function (bActive = null) {
 		this.active = bActive !== null ? bActive : !this.active;
-		window.Repaint();
+		window.RepaintRect(this.currX, this.currY, this.currW, this.currH);
 	};
 
 	this.switchAnimation = function (name, bActive, condition = null, animationColors = buttonsBar.config.animationColors) {
@@ -203,12 +205,12 @@ function ThemedButton(
 		} else {
 			this.animation.push({ name, bActive, condition, animStep: bActive ? 0 : -1, date: bActive ? Date.now() : -1, colors: animationColors });
 		}
-		throttledRepaint();
+		throttledRepaint(this);
 	};
 
 	this.switchHighlight = function (bActive = null) {
 		this.highlight = bActive !== null ? bActive : !this.highlight;
-		window.Repaint();
+		window.RepaintRect(this.currX, this.currY, this.currW, this.currH);
 	};
 
 	this.cleanAnimation = function () {
@@ -569,26 +571,23 @@ function ThemedButton(
 			if (animation.bActive) {
 				if (animation.condition && Object.prototype.toString.call(animation.condition) === '[object Promise]') { animation.condition.then((bEnd) => { if (bEnd) { this.switchAnimation(animation.name, false); } }); }
 				if (animation.condition && isFunction(animation.condition) && animation.condition()) { this.switchAnimation(animation.name, false); }
-				else {
-					if (!bDone) {
-						bDone = true;
-						const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y;
-						const w = wCalc - 4; const h = hCalc - 2; const arc = 3;
-						if (bDrawBackground) { // 90 degrees produces a glitch on the left at step = 2 XD so lets put 88...
-							gr.FillGradRect(x, y + 1, w + 2, h, animation.animStep * 88, animation.colors[0], animation.colors[1], 1);
-						} else {
-							gr.FillGradRect(x, y + 1, w + 1, h, animation.animStep * 90, animation.colors[1], animation.colors[0], 0.5);
-							gr.DrawRoundRect(x, y, w, h, arc, arc, 1, animation.colors[0]);
-						}
-						const now = Date.now();
-						if (now - animation.date > 2000) {
-							animation.animStep++;
-							animation.date = now;
-						}
-
+				else if (!bDone) {
+					bDone = true;
+					const x = xCalc + 1 + buttonsBar.config.offset.button.x; const y = yCalc + buttonsBar.config.offset.button.y;
+					const w = wCalc - 4; const h = hCalc - 2; const arc = 3;
+					if (bDrawBackground) { // 90 degrees produces a glitch on the left at step = 2 XD so lets put 88...
+						gr.FillGradRect(x, y + 1, w + 2, h, animation.animStep * 88, animation.colors[0], animation.colors[1], 1);
+					} else {
+						gr.FillGradRect(x, y + 1, w + 1, h, animation.animStep * 90, animation.colors[1], animation.colors[0], 0.5);
+						gr.DrawRoundRect(x, y, w, h, arc, arc, 1, animation.colors[0]);
+					}
+					const now = Date.now();
+					if (now - animation.date > 2000) {
+						animation.animStep++;
+						animation.date = now;
 					}
 				}
-				throttledRepaint();
+				throttledRepaint(this);
 			}
 		});
 		this.cleanAnimation(); // Remove finished ones
@@ -687,7 +686,7 @@ function ThemedButton(
 	if (this.isHeadlessMode()) { this.state = buttonStates.hide; }
 	if (['top', 'bottom'].includes(buttonsBar.config.textPosition.toLowerCase())) { this.changePosSize(true); }
 }
-const throttledRepaint = throttle(() => window.Repaint(), 1000);
+const throttledRepaint = throttle((parent) => window.RepaintRect(parent.currX, parent.currY, parent.currW, parent.currH), 1000);
 
 function drawAllButtons(gr) {
 	const orientation = buttonsBar.config.orientation.toLowerCase();
@@ -732,7 +731,7 @@ function chooseButton(x, y) {
 }
 
 addEventListener('on_paint', (gr) => {
-	// extendGR(gr, { Repaint: true, ImgBox: true }); // helpers_xxx_prototypes_smp.js
+	if (globSettings.bDebugPaint) { extendGR(gr, { Repaint: true, ImgBox: true }); }
 	// Toolbar
 	if (buttonsBar.config.bToolbar) {
 		gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);
@@ -764,8 +763,11 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		}
 	} else if (buttonsBar.gDown && buttonsBar.curBtn && buttonsBar.curBtn.state !== buttonStates.down) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
-		old && old.changeState(buttonStates.normal);
-		window.Repaint();
+		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
+		if (old) {
+			old.changeState(buttonStates.normal);
+			window.RepaintRect(old.currX, old.currY, old.currW, old.currH);
+		}
 		return;
 	}
 
@@ -921,7 +923,7 @@ addEventListener('on_mouse_leave', () => {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.normal);
-		window.Repaint();
+		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
 		buttonsBar.curBtn = null;
 	}
 	if (buttonsBar.config.bIconModeExpand) {
@@ -945,7 +947,7 @@ addEventListener('on_mouse_lbtn_down', (x, y, mask) => { // eslint-disable-line 
 	buttonsBar.gDown = true;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
-		window.Repaint();
+		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
 	}
 });
 
@@ -963,7 +965,7 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 		// Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
 		if (buttonsBar.curBtn && window.IsVisible) {
 			buttonsBar.curBtn.changeState(buttonStates.hover);
-			window.Repaint();
+			window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
 		}
 	} else if (mask === MK_SHIFT) {
 		if (Object.hasOwn(buttonsBar, 'shiftMenu')) { buttonsBar.shiftMenu().btn_up(x, this.y + this.h); }
@@ -1033,7 +1035,7 @@ function moveButton(fromKey, toKey) {
 	buttonsPath.splice(toPos, 0, buttonsPath.splice(fromPos, 1)[0]);
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
 	const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
-	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t'));
+	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t')); // NOSONAR
 	// Since properties have a prefix according to their loading order, when there are multiple instances of the same
 	// script, moving a button when there are other 'clones' means the other buttons may get their properties names
 	// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
@@ -1122,8 +1124,10 @@ function getButtonVersion(source = 'Playlist-Tools-SMP') {
 	if (!ver) {
 		switch (source.toLowerCase()) { // NOSONAR [to add more options]
 			case 'playlist-tools-smp':
-				try { ver = utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001).match(/var version = '(.*)'/mi)[1]; }
-				catch (e) { /* empty */ }
+				try {
+					ver = RegExp(/var version = '(.*)'/mi)
+						.exec(utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001))[1];
+				} catch (e) { /* empty */ }
 				break;
 		}
 	}
