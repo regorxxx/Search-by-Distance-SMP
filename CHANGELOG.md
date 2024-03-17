@@ -52,6 +52,7 @@
 
 ## [Unreleased][]
 ### Added
+- Descriptors: added Musical, Cabaret, Murga, Industrial Musical, Rock Musical, Music Hall, Revue, Vaudeville and Chèo styles.
 ### Changed
 ### Removed
 ### Fixed

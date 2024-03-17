@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/02/24
+//17/03/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -136,7 +136,7 @@ const music_graph_descriptors = {
 		['Classical Baroque Era_supergenre',	['Allemande','Canon','Cantata','Chaconne','Concerto','Courante','Fugue','Classical Gavotte','Gigue','Mass','Minuet','Opera','Oratorio','Partita','Passacaglia','Passepied','Prelude','Sarabande','Sinfonia','Sonata','Suite','Sonatina']],
 		['Classical Classical Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
 		['Classical Romantic Era_supergenre',	['Bagatelle','Ballade','Ballet','Caprice','Carol','Concerto','Classical Dance','Divertimento','Étude','Fantasy','Impromptu','Intermezzo','Lied','Mass','Classical Mazurka','March','Music Hall','Nocturne','Octet','Opera','Oratorio','Polonaise','Prelude','Quartet','Quintet','Requiem','Rhapsody','Rondo','Scherzo','Serenade','Sinfonia Concertante','Sonata','Symphony','Suite','Waltz']],
-		['Classical Modernist Era_supergenre',	['Avant-Garde Classical','Contemporary Classical','Neo-Classical','Third Stream','Ambient Classical']],
+		['Classical Modernist Era_supergenre',	['Avant-Garde Classical','Contemporary Classical','Neo-Classical','Third Stream','Ambient Classical','Musical','Cabaret','Murga']],
 		['Japanese Classical_supergenre',		['Kabuki']],
 		['Indian Classical_supergenre',			['Hindustani']]
 	],
@@ -220,7 +220,8 @@ const music_graph_descriptors = {
 		['Ballroom Music XL'				,	['Waltz','Allemande','Chaconne','Courante','Classical Gavotte','Gigue','Minuet','Galliard','Passacaglia','Passepied','Pavane','Saltarello','Classical Dance','Polonaise']],
 		['Poetry-Secular Music XL'			,	['Lied','Rhapsody','Serenade','Madrigal','Estampie','Ballata','Ballade','Canzona']],
 		['Choral-Spiritual Music XL'		,	['Mass','Gregorian','Chant','Motet','Organum','Choral','Lauda','Litany','Madrigale Spirituale','Motet-Chanson','Sequence']],
-		['Choral-Orchestral Music XL'		,	['Oratorio','Opera']]
+		['Choral-Orchestral Music XL'		,	['Oratorio','Opera']],
+		['Contemporary Popular Choral XL'	,	['Musical','Cabaret','Murga']]
 	],
 	/*
 		-> Influences: Special relations between genres and styles. Like origins, derivatives or things considered 'anti-influences'.
@@ -351,7 +352,7 @@ const music_graph_descriptors = {
 		['Darksynth'						,	['Darkwave','Synthwave']],
 		['Kayokyoku'						,	['J-Pop']],
 		['K-Pop'							,	['Contemporary R&B','Urban Soul','Electropop']],
-		['Symphonic Rap'					,	['Contemporary Classical','Jazz Rap']]
+		['Symphonic Rap'					,	['Contemporary Classical','Jazz-Rap']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -424,7 +425,8 @@ const music_graph_descriptors = {
 		['Classical Sufi'					,	['Folk Pop','Folk-Rock','Folktronica','Folk Punk','Contemporary Folk','Renaissance','South American Folk_supergenre','North American Folk_supergenre','European Folk_supergenre']],
 		['Pre-Columbian Ritual-Tribal'		,	['Afro-Latin Ritual-Tribal']],
 		['Rap_supergenre'					,	['Traditional Country','Americana XL','Roots Rock']],
-		['Symphonic Rap'					,	['Hardcore Rap']]
+		['Symphonic Rap'					,	['Hardcore Rap']],
+		['Opera'							,	['Contemporary Popular Choral XL']],
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound
@@ -555,6 +557,7 @@ const music_graph_descriptors = {
 		['Branle'							,	['Branle D\'Ossau','Branle De Noirmoutier']],
 		['J-Pop'							,	['Japanese Pop'						]],
 		['K-Pop'							,	['Korean Pop'						]],
+		['Musical'							,	['Industrial Musical','Rock Musical','Music Hall','Revue','Vaudeville','Chèo']],
 	],
 	/*
 		-> Filtering: this is mostly a list of folksonomy tags which are explicitly filtered. Any value not present
@@ -573,7 +576,7 @@ const music_graph_descriptors = {
 		'Free Improvisation','Jam','Comedy','Children\'s Music','Christmas','Japanese',
 		'African','Indian','Nubian','Greek','Spanish Hip-Hop','German Rock','Israeli',
 		'Spoken Word','Israeli Rock','Uruguayan Rock','Mexican Rock','Italian Rock',
-		'Asian Folk','Torch Songs','Dummy','Rock Opera','Musical','Tuareg Music','Tex-Mex',
+		'Asian Folk','Torch Songs','Dummy','Rock Opera','Tuareg Music','Tex-Mex',
 		'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock','Turkish',
 		'Film Score', 'Anime Music', 'Worldbeat'
 	]),
