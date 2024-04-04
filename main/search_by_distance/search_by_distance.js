@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/03/24
+//04/04/24
 var version = '7.2.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -484,8 +484,8 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /*
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringTag', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
-const recipePropertiesAllowedKeys = new Set(['smartShuffleTag']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle']);
+const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMismatchCRC) {
@@ -752,6 +752,7 @@ async function searchByDistance({
 			});
 		}
 		if (bSearchDebug) { console.log(recipe); }
+		const globalArgs = new Set(['poolFilteringTag']);
 		Object.keys(recipe).forEach((key) => { // Process current recipe
 			const value = recipe[key] !== null ? recipe[key] : Infinity;
 			if (recipeAllowedKeys.has(key)) {
@@ -765,6 +766,9 @@ async function searchByDistance({
 						Object.keys(newProperties).forEach((rKey) => {
 							if (!Object.hasOwn(properties, rKey)) { console.log('Recipe has a property key not recognized: ' + rKey); return; }
 							recipeProperties[rKey] = newProperties[rKey];
+							if (globalArgs.has(rKey)) {
+								// eval(key + ' = ' + value);
+							}
 						});
 					}
 				} else if (key === 'tags') { // Overrule current ones (but don't touch original object!)
@@ -892,7 +896,7 @@ async function searchByDistance({
 		}
 	});
 	if (bSearchDebug) { console.log(JSON.stringify(calcTags, void (0), '\t')); }
-	const smartShuffleTag = JSON.parse(recipeProperties.smartShuffleTag || properties.smartShuffleTag[1]).filter(Boolean);
+	const smartShuffleTag = (recipeProperties.smartShuffleTag || JSON.parse(properties.smartShuffleTag[1])).filter(Boolean);
 	const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? _t(tag) : tag); });
 	const genreStyleTagQuery = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? tag : _q(tag)); });
 
@@ -1532,7 +1536,7 @@ async function searchByDistance({
 		tagsArr.push(['MUSICBRAINZ_TRACKID']);
 	}
 	tagsArr = tagsArr.map((arr) => { return arr.map((tag) => { return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag); }).join(', '); });
-	if (bBasicLogging) { console.log(tagsArr); }
+	if (bSearchDebug) { console.log(tagsArr); }
 	const tagsValByKey = [];
 	let tagsVal = [];
 	if (bTagsCache) {

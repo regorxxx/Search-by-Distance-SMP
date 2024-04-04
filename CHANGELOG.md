@@ -56,6 +56,8 @@
 ### Changed
 ### Removed
 ### Fixed
+- Presets: recipe error on some cases for user-created recipes. May require to rebuild user created recipes (or remove any trace of "poolFilteringTag" from them using a text editor). Issue #30.
+- Tags: new tags created via popups, using percentage ranges, were missing the range property. Issue #29.
 
 ## [7.2.0] - 2024-03-21
 ### Added

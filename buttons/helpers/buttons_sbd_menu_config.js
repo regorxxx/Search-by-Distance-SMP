@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/24
+//04/04/24
 
 /* exported createConfigMenu */
 
@@ -39,7 +39,9 @@ function createConfigMenu(parent) {
 		options.forEach((key) => {
 			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
 			const idxEnd = properties[key][0].indexOf('(');
-			const value = JSON.parse(bProperties && Object.hasOwn(recipe.properties, key) ? recipe[key] : properties[key][1]).join(',');
+			const value = bProperties && Object.hasOwn(recipe.properties, key)
+				? recipe.properties[key]
+				: JSON.parse(properties[key][1]).join(',');
 			const entryText = properties[key][0]
 				.substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1
 					? idxEnd - 1
@@ -352,7 +354,7 @@ function createConfigMenu(parent) {
 							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
 						} else if (nTag.type.includes('number')) {
 							if (WshShell.Popup('Uses absolute range?\n\nSince tag values are numbers, comparison is done within a range. Absolute range will make the configurable range to be used as an absolute value, i.e. 30 equals to +-30. For ex. for dates.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('absRange'); nTag.range = 0; }
-							else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percent value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('percentRange'); }
+							else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percent value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('percentRange'); nTag.range = 0; }
 						}
 					} else {
 						if (nTag.type.includes('string')) {
