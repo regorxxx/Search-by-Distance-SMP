@@ -54,6 +54,7 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
 - Presets: recipe error on some cases for user-created recipes. May require to rebuild user created recipes (or remove any trace of "poolFilteringTag" from them using a text editor). Issue #30.
