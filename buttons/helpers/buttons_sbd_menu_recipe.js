@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/02/24
+//05/04/24
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -78,7 +78,7 @@ function createRecipeMenu(parent) {
 				}
 			});
 		}
-		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t'));
+		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t').replace(/\n/g,'\r\n'));
 		if (!bDone) {fb.ShowPopupMessage('Error saving recipe file:' + filePath, 'Search by distance'); return;}
 		else {_explorer(filePath);}
 	}});

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/04/24
+//05/04/24
 
 /* exported createConfigMenu */
 
@@ -575,7 +575,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
-					if (!bFile) { _save(file, JSON.stringify(options, null, '\t')); }
+					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g,'\r\n')); }
 					_explorer(file);
 				}
 			});
@@ -1052,7 +1052,7 @@ function createConfigMenu(parent) {
 					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphStatistics') : null;
 					parent.switchAnimation('Graph statistics', true);
 					graphStatistics({ properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod }).then((resolve) => {
-						_save(folders.temp + 'musicGraphStatistics.txt', resolve.text);
+						_save(folders.temp + 'musicGraphStatistics.txt', resolve.text.replace(/\n/g,'\r\n'));
 						console.log(resolve.text); // DEBUG
 						parent.switchAnimation('Graph statistics', false);
 						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
