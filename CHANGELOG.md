@@ -54,6 +54,9 @@
 ## [Unreleased][]
 ### Added
 ### Changed
+- Presets: enhanced parsing of recipe's variables.
+- Presets: new recipes and query filter presets are now saved with Windows EOL for compatibility improvements with Windows text editors.
+- Helpers: json button files are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
