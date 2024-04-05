@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/04/24
+//05/04/24
 var version = '7.2.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -764,31 +764,28 @@ async function searchByDistance({
 					const newProperties = recipe[key];
 					if (newProperties) {
 						Object.keys(newProperties).forEach((rKey) => {
-							if (!Object.hasOwn(properties, rKey)) { console.log('Recipe has a property key not recognized: ' + rKey); return; }
-							recipeProperties[rKey] = newProperties[rKey];
+							if (!Object.hasOwn(properties, rKey)) { console.log('Recipe has a not recognized property key: ' + rKey); return; }
+							let newValue = newProperties[rKey] !== null ? newProperties[rKey] : Infinity;
+							recipeProperties[rKey] = newValue;
 							if (globalArgs.has(rKey)) {
-								// eval(key + ' = ' + value);
+								if (newValue !== Infinity) {
+									newValue = JSON.stringify(recipeProperties[rKey]);
+								}
+								eval(rKey + ' = ' + newValue);
 							}
 						});
 					}
 				} else if (key === 'tags') { // Overrule current ones (but don't touch original object!)
 					recipeProperties.tags = recipe.tags;
 				} else {
-					if (isStringWeak(value)) {
-						eval(key + ' = \'' + value + '\'');
-					} else if (isArrayStrings(value)) {
-						const newVal = '\'' + value.join('\',\'') + '\'';
-						eval(key + ' = [' + newVal + ']');
-					} else if (typeof value === 'object') {
-						const newVal = JSON.stringify(value);
-						eval(key + ' = ' + newVal);
-					} else {
-						eval(key + ' = ' + value);
-					}
+					const newValue = value !== Infinity
+						? JSON.stringify(value)
+						: value;
+					eval(key + ' = ' + newValue);
 					if (key === 'theme') { bOverwriteTheme = true; }
 					if (bSearchDebug) { console.log(key, value, eval(key)); }
 				}
-			} else { console.log('Recipe has a variable not recognized: ' + key); }
+			} else { console.log('Recipe has a not recognized variable: ' + key); }
 		});
 		// Process placeholders for tags
 		if (Object.hasOwn(recipe, 'tags') && Object.hasOwn(recipe.tags, '*')) {
