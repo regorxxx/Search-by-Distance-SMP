@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/03/24
+//05/04/24
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -1035,7 +1035,7 @@ function moveButton(fromKey, toKey) {
 	buttonsPath.splice(toPos, 0, buttonsPath.splice(fromPos, 1)[0]);
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
 	const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
-	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t')); // NOSONAR
+	_save(folders.data + barProperties.name[1] + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g,'\r\n')); // NOSONAR
 	// Since properties have a prefix according to their loading order, when there are multiple instances of the same
 	// script, moving a button when there are other 'clones' means the other buttons may get their properties names
 	// shifted by one. They need to be adjusted or buttons at greater indexes will inherit properties from lower ones!
