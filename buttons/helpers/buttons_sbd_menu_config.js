@@ -592,7 +592,7 @@ function createConfigMenu(parent) {
 			if (bFile) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
 			} else {
-				options = [
+				options = [ // Use tag names which are then remapped to the user selected tag, i.e. GENRE to all genre tags
 					{ title: 'Same Artist', query: globTags.artist + ' IS #' + globTags.artistRaw + '#' },
 					{ title: 'sep' },
 					{ title: 'Different Genre', query: 'NOT GENRE IS #GENRE#' },
