@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/02/24
+//16/04/24
 
 /* exported createButtonsMenu */
 
@@ -703,6 +703,7 @@ function createButtonsMenu(name) {
 		});
 		if (readmeList) {
 			// Add additional readmes
+			readmeList['Global settings'] = 'global_settings.txt';
 			readmeList['Tagging requisites'] = 'tags_structure.txt';
 			readmeList['Tags sources'] = 'tags_sources.txt';
 			readmeList['Other tags notes'] = 'tags_notes.txt';
