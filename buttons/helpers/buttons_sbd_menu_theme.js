@@ -1,9 +1,9 @@
 ﻿'use strict';
-//10/01/24
+//17/04/24
 
 /* exported createThemeMenu */
 
-/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -31,7 +31,7 @@ function createThemeMenu(parent) {
 	let forcedTheme = null;
 	let forcedThemePath = '';
 	if (properties.recipe[1].length) {
-		const recipe = _isFile(properties.recipe[1]) ? _jsonParseFileCheck(properties.recipe[1], 'Recipe json', 'Search by distance', utf8) : _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\recipes\\' + properties.recipe[1], 'Recipe json', 'Search by distance', utf8);
+		const recipe = processRecipePlaceholder(properties.recipe[1], tags);
 		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
 			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme; }
@@ -90,7 +90,7 @@ function createThemeMenu(parent) {
 			const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t'));
-			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); return; }
+			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
 			else { _explorer(filePath); }
 		}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED
 	});
@@ -146,10 +146,18 @@ function createThemeMenu(parent) {
 		if (!theme) { return; }
 		// Check
 		// Theme tags must contain at least all the user tags
-		const tagCheck = Object.hasOwn(theme, 'tags') ? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); }) : 0;
+		const tagCheck = Object.hasOwn(theme, 'tags')
+			? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); })
+			: 0;
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
-			console.log('File is not a valid theme: ' + (Object.hasOwn(theme, 'tags') && tagCheck !== -1 ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : file));
+			console.log('Theme: ' + theme.name + (file ? ' (' + file + ')' : ''));
+			console.log(
+				'Theme is missing some keys: ' +
+				(Object.hasOwn(theme, 'tags') && tagCheck !== -1
+					? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))]
+					: 'name')
+			);
 			return;
 		}
 		// List files, with full path or relative path (portable)

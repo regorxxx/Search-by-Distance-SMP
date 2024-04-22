@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/24
+//17/04/24
 var version = '7.2.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -822,10 +822,18 @@ async function searchByDistance({
 		// Array of objects
 		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
 		// Theme tags must contain at least all the user tags
-		const tagCheck = Object.hasOwn(theme, 'tags') ? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); }) : 0;
+		const tagCheck = Object.hasOwn(theme, 'tags')
+			? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); })
+			: 0;
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
-			console.log('Theme selected for mix is missing some keys: ' + (Object.hasOwn(theme, 'name') ? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))] : 'name'));
+			console.log('Using theme as reference: ' + theme.name + (path ? ' (' + path + ')' : '')); // NOSONAR [is always a string]
+			console.log(
+				'Theme is missing some keys: ' +
+				(Object.hasOwn(theme, 'tags') && tagCheck !== -1
+					? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))]
+					: 'name')
+			);
 			return;
 		}
 		if (bBasicLogging) {
@@ -1122,7 +1130,7 @@ async function searchByDistance({
 					}
 					query[preQueryLength] = queryJoin(groups, 'OR');
 				} else {
-					if (Array.isArray(tagNameTF)) {
+					if (Array.isArray(tagNameTF)) { // NOSONAR
 						const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 						query[preQueryLength] = queryJoin(queryCombinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
 					} else {
@@ -1292,10 +1300,8 @@ async function searchByDistance({
 		}
 		if (influencesQuery.length) {
 			query[queryLength] = queryJoin(influencesQuery, 'AND');
-		} else {
-			if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
-			else { query[queryLength] = queryJoin(query, 'OR'); } //join previous query's
-		}
+		} else if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
+		else { query[queryLength] = queryJoin(query, 'OR'); } //join previous query's
 	}
 	const queryStages = []; // Currently unused
 	if (bSameArtistFilter && !bUseTheme) {
@@ -1341,10 +1347,9 @@ async function searchByDistance({
 			if (len) {
 				if (len > 50000) { // Minor optimization for huge queries
 					queryStages.push(queryRegion);
-				} else {
-					if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion); }
-					else { query[queryLength] += queryRegion; }
-				}
+				} else if (query[queryLength].length) {
+					query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion);
+				} else { query[queryLength] += queryRegion; }
 			}
 		} else if (bBasicLogging) {
 			console.log('Artist cultural filter was used but selected track had no locale tags');
@@ -1361,10 +1366,9 @@ async function searchByDistance({
 				if (len) {
 					if (len > 50000) { // Minor optimization for huge queries
 						queryStages.push(queryRegion);
-					} else {
-						if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion); }
-						else { query[queryLength] += queryRegion; }
-					}
+					} else if (query[queryLength].length) {
+						query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion);
+					} else { query[queryLength] += queryRegion; }
 				}
 			}
 		}
@@ -1430,10 +1434,9 @@ async function searchByDistance({
 		if (len) {
 			if (len > 50000) { // Minor optimization for huge queries
 				queryStages.push(selQuery);
-			} else {
-				if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(selQuery); }
-				else { query[queryLength] += selQuery; }
-			}
+			} else if (query[queryLength].length) {
+				query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(selQuery);
+			} else { query[queryLength] += selQuery; }
 		}
 	}
 	if (forcedQuery.length) { //Add user input query to the previous one
@@ -1951,6 +1954,7 @@ async function searchByDistance({
 		while (i--) { handlePoolArray.push(handleList[scoreData[i].index]); }
 		let handlePool = new FbMetadbHandleList(handlePoolArray);
 		handlePool = removeDuplicates({ handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN }); // n + 1
+		/** * @type {[string[][]]} */
 		const [titleHandlePool] = getHandleListTagsV2(handlePool, ['TITLE'], { splitBy: null });
 		let filteredScoreData = [];
 		i = 0;
@@ -2198,6 +2202,7 @@ async function searchByDistance({
 		if (bScatterInstrumentals) { // Could reuse scatterByTags but since we already have the tags... done here
 			if (finalPlaylistLength > 2) { // Otherwise don't spend time with this...
 				let newOrder = [];
+				/** * @type {[string[][], string[][]]} */
 				const [language, speechness] = getHandleListTagsV2(new FbMetadbHandleList(selectedHandlesArray), ['LANGUAGE', 'SPEECHNESS']);
 				for (let i = 0; i < finalPlaylistLength; i++) {
 					const index = selectedHandlesData[i].index;
@@ -2205,7 +2210,7 @@ async function searchByDistance({
 						.filter((t) => t.bGraph && !t.bVirtual && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
 						.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
 					const tagSet_i = new Set(genreStyleTag.map((item) => { return item.toLowerCase(); }));
-					if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || speechness[i][0] === 0) { // Any match, then add to reorder list
+					if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || Number(speechness[i][0]) === 0) { // Any match, then add to reorder list
 						newOrder.push(i);
 					}
 				}
@@ -2450,8 +2455,12 @@ function loadCache(path) {
 function processRecipe(initialRecipe) {
 	let toAdd = {};
 	const processRecipeFile = (newRecipe) => {
-		const newPath = !_isFile(newRecipe) && _isFile(recipePath + newRecipe) ? recipePath + newRecipe : newRecipe;
-		const newRecipeObj = _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8);
+		const newPath = _isFile(newRecipe)
+			? newRecipe
+			: _isFile(recipePath + newRecipe)
+				? recipePath + newRecipe
+				: null;
+		const newRecipeObj = newPath ? _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8) : null;
 		if (!newRecipeObj) { console.log('Recipe not found: ' + newPath); }
 		else if (Object.hasOwn(newRecipeObj, 'tags') && Object.hasOwn(toAdd, 'tags')) {
 			const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);

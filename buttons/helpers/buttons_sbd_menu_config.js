@@ -3,7 +3,7 @@
 
 /* exported createConfigMenu */
 
-/* global processRecipe:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -25,7 +25,7 @@ function createConfigMenu(parent) {
 	const defTags = JSON.parse(properties.tags[3]);
 	// Process recipe
 	let recipe = {};
-	if (properties.recipe[1].length) { recipe = processRecipe(properties.recipe[1], tags); }
+	if (properties.recipe[1].length) { recipe = processRecipePlaceholder(properties.recipe[1], tags); }
 	// Update tooltip
 	parent.recipe = { recipe: properties.recipe[1].length ? recipe : null, name: properties.recipe[1] || '' };
 	// Recipe forced properties?

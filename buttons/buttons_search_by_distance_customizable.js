@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/24
+//17/04/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -112,7 +112,7 @@ addButton({
 	(parent) => { // Update tooltip on init
 		const properties = parent.buttonsProperties;
 		parent.recipe = {
-			recipe: properties.recipe[1].length ? processRecipe(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
+			recipe: properties.recipe[1].length ? processRecipePlaceholder(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
 			name: properties.recipe[1] || ''
 		};
 	},
@@ -165,18 +165,20 @@ function buttonTooltipSbdCustom(parent) {
 	return info;
 }
 
-function processRecipe(recipeFile, tags) {
+function processRecipePlaceholder(recipeFile, tags) {
 	let recipe = {};
 	if (recipeFile.length) {
 		recipe = _isFile(recipeFile)
 			? _jsonParseFileCheck(recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
-			: _jsonParseFileCheck(recipePath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {};
+			: _isFile(recipePath + recipeFile)
+				? _jsonParseFileCheck(recipePath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
+				: {};
 		if (Object.keys(recipe).length !== 0) {
 			const result = testRecipe({ json: recipe, baseTags: tags });
 			if (!result.valid) { console.popup(result.report.join('\n\t- '), 'Recipe error'); }
 			// Process nested recipes
 			if (Object.hasOwn(recipe, 'recipe')) {
-				const toAdd = processRecipe(recipe.recipe);
+				const toAdd = processRecipePlaceholder(recipe.recipe);
 				delete toAdd.recipe;
 				Object.keys(toAdd).forEach((key) => {
 					if (!Object.hasOwn(recipe, key)) {
@@ -207,6 +209,9 @@ function processRecipe(recipeFile, tags) {
 					if (!Object.hasOwn(recipe.tags, key)) { recipe.tags[key] = recipe.tags['*']; }
 				}
 			}
+		} else {
+			console.log('Recipe file not found:\n\t', recipeFile); // DEBUG
+			fb.ShowPopupMessage('Recipe  file not found:\n' + recipeFile, 'Search by distance');
 		}
 	}
 	return recipe;
