@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/12/23
+//07/05/24
 
 /* exported findCountryCoords,isNearCountry, findCountry, getCountryName, alpha3toAlpha2, nameReplacersRev, nameShortRev */
 
@@ -73,7 +73,7 @@ function getCountryISO(country) {
 		if (isoCoordinates.has(country)) {
 			isoCode = country;
 		} else {
-			if (isoMap.has(country.toLowerCase())) { isoCode = isoMap.get(country.toLowerCase()); }
+			if (isoMap.has(country.toLowerCase())) { isoCode = isoMap.get(country.toLowerCase()); } // NOSONAR
 			else if (nameReplacers.has(country.toLowerCase())) { isoCode = isoMap.get(nameReplacers.get(country.toLowerCase())); }
 		}
 	}
@@ -86,7 +86,7 @@ function getCountryName(iso) {
 		if (isoMapRev.has(iso.toUpperCase())) {
 			country = isoMapRev.get(iso.toUpperCase());
 		} else {
-			if (isoMap.has(iso.toLowerCase())) { country = iso; }
+			if (isoMap.has(iso.toLowerCase())) { country = iso; } // NOSONAR
 			else if (nameReplacers.has(iso.toLowerCase())) { country = nameReplacers.get(iso.toLowerCase()); }
 		}
 	}

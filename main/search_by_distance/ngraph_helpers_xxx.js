@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/12/23
+//07/05/24
 
 /* exported calcMeanDistanceV2, calcCacheLinkSG, calcCacheLinkSGV2 , getAntiInfluences, getInfluences, getNodesFromPath */
 
@@ -189,7 +189,7 @@ function calcMeanDistance(mygraph, style_genre_reference, style_genre_new, influ
 	if (style_genre_reference.size === 0 || style_genre_new.size === 0) { // When no tags are available, sets are empty & tracks are not connected
 		mapDistance = Infinity;
 	} else { // With non-empty sets
-		if (!difference.size) { // If style_genre_new is superset of style_genre_reference.
+		if (!difference.size) { // NOSONAR [If style_genre_new is superset of style_genre_reference]
 			mapDistance = 0;
 		} else {
 			let influenceDistance = 0;
