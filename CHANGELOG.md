@@ -53,11 +53,13 @@
 
 ## [Unreleased][]
 ### Added
+- Remove duplicates: added multi-value parsing to duplicates removal. i.e. A track with multiple artists but same title can be considered a duplicated if at least one of those artists matches (instead of requiring all to match).  This setting can be switched at the 'Other settings...\Duplicates' submenu.
 - Readmes: added readme for global settings found at 'foobar2000\js_data\presets\global' .json files.
 - Configuration: expanded user configurable file at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json' with a new setting for console logging to file. Disabled by default. Now this is a change from the previous behavior, where console was always logged to 'console.log' file at the [FOOBAR PROFILE FOLDER]. It can now be switched, but since it's probably not useful for most users is disabled by default.
 ### Changed
 - Presets: enhanced parsing of recipe's variables.
 - Presets: new recipes and query filter presets are now saved with Windows EOL for compatibility improvements with Windows text editors.
+- Remove duplicates: improved performance of duplicates removal in multiple places.
 - Helpers: json button files are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Helpers: updated helpers.
 ### Removed

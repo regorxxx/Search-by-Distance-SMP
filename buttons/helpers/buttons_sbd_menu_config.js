@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/24
+//09/05/24
 
 /* exported createConfigMenu */
 
@@ -865,7 +865,7 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Menu to configure other playlist attributes:
-		const menuName = menu.newMenu('Other playlist attributes');
+		const menuName = menu.newMenu('Other settings');
 		{
 			const options = ['playlistName'];
 			options.forEach((key) => {
@@ -900,12 +900,13 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{
+			const subMenuName = menu.newMenu('Duplicates', menuName);
 			{
-				createTagMenu(menuName, ['checkDuplicatesByTag']);
+				createTagMenu(subMenuName, ['checkDuplicatesByTag']);
 			}
 			{
 				menu.newEntry({
-					menuName, entryText: 'Duplicates selection bias...' + (Object.hasOwn(recipe, 'sortBias') ? '\t(forced by recipe)' : ''), func: () => {
+					menuName: subMenuName, entryText: 'Duplicates selection bias...' + (Object.hasOwn(recipe, 'sortBias') ? '\t(forced by recipe)' : ''), func: () => {
 						const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\n\nHigher valued tracks will be preferred.', 'Search by distance', globQuery.remDuplBias, void (0), false);
 						if (input === null) { return; }
 						properties['sortBias'][1] = input;
@@ -915,10 +916,13 @@ function createConfigMenu(parent) {
 			}
 			{
 				createBoolMenu(
-					menuName,
-					['bAdvTitle'],
+					subMenuName,
+					['bAdvTitle', 'bMultiple'],
 					void (0),
-					(key) => { if (key === 'bAdvTitle' && properties.bAdvTitle[1]) { fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance'); } }
+					(key) => {
+						if (key === 'bAdvTitle' && properties.bAdvTitle[1]) { fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance'); }
+						if (key === 'bMultiple' && properties.bMultiple[1]) { fb.ShowPopupMessage(globRegExp.singleTags.desc, 'Search by distance'); }
+					}
 				);
 			}
 		}

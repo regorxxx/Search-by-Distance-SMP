@@ -1,11 +1,11 @@
 ﻿'use strict';
-//09/02/24
+//09/05/24
 
 /* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, addTracksRelation */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, getNearestGenreStyles:readable */
-/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicatesV2:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, secondsToTime:readable, getHandleTags:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicates:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, secondsToTime:readable, getHandleTags:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_node.js');
 // music_graph_descriptors.nodeList
 
@@ -17,7 +17,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	const libQuery = artist.map((tag) => { return _p(globTags.artist + ' IS ' + tag); }).join(' AND ');
 	// Retrieve artist's tracks and remove duplicates
 	let selArtistTracks = fb.GetQueryItems(fb.GetLibraryItems(), libQuery);
-	selArtistTracks = removeDuplicatesV2({ handleList: selArtistTracks, sortBias: globQuery.remDuplBias, bPreserveSort: false, bAdvTitle: true });
+	selArtistTracks = removeDuplicates({ handleList: selArtistTracks, sortBias: globQuery.remDuplBias, bPreserveSort: false, bAdvTitle: true, bMultiple: true });
 	// Use only X random tracks instead of all of them
 	const report = new Map();
 	const randomSelTracks = selArtistTracks.Convert().shuffle().slice(0, size);
@@ -124,7 +124,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 }
 
 async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties } = {}) {
-	const handleList = removeDuplicatesV2({ handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist] });
+	const handleList = removeDuplicates({ handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist] });
 	const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
 	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) { return; }
 	let profiler = new FbProfiler('Calculate similar artists');
