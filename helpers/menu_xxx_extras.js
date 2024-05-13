@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/12/23
+//13/05/24
 
 /* exported _createSubMenuEditEntries */
 
@@ -27,7 +27,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		throw new Error('_createSubMenuEditEntries: list, defaults or input options are non valid or not provided');
 	}
 	// options.list always point to the original entry list and original values are edited
-	const subMenuSecondName = parent.newMenu(options.subMenuName || 'Edit entries from list...', menuName); // It will throw if the menu already exists!
+	const subMenuSecondName = parent.newMenu(options.subMenuName || 'Edit entries from list', menuName); // It will throw if the menu already exists!
 	let i = 0;
 	options.list.forEach((entry, index) => {
 		if (entry.name !== 'sep') {i++;}
