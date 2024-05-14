@@ -272,7 +272,7 @@ function removeDuplicates({ handleList = null, sortOutput = null, checkKeys = gl
 	}
 	let items = [];
 
-	const sep = '|‎ |'; // Contains U+200E invisible char
+	const sep = '|‎|'; // Contains U+200E invisible char
 	let sortInput; // Sorting
 	let checkLength = checkKeys.length;
 	let i = 0;
@@ -306,10 +306,14 @@ function removeDuplicates({ handleList = null, sortOutput = null, checkKeys = gl
 						? str.split(', ')
 						: [str.replace(titleRe, '').replace(titleReV2, 'ing').replace(titleReV3, '$&g').trim()];
 				});
-				const bFound = strArr.every((subStrArr, j) => subStrArr.some((subStr) => dics[j].has(subStr)));
+				const bFound = strArr.every((subStrArr, j) =>
+					subStrArr.some((subStr) => (dics[j] || new Set()).has(subStr))
+				);
 				if (!bFound) {
 					items.push(copyHandleList[i]);
-					strArr.forEach((subStrArr, j) => subStrArr.forEach((subStr) => dics[j].add(subStr)));
+					strArr.forEach((subStrArr, j) =>
+						subStrArr.forEach((subStr) => (dics[j] || new Set()).add(subStr))
+					);
 				}
 				i++;
 			}
