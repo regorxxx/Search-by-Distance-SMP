@@ -83,7 +83,7 @@ function filterDuplicates({ handleList = null, sortOutput = null, checkKeys = gl
 	}
 	let items = [];
 
-	const sep = '|';
+	const sep = '|‎ |'; // Contains U+200E invisible char
 	let sortInput; // Sorting
 	let checklength = checkKeys.length;
 	let i = 0;
@@ -272,11 +272,11 @@ function removeDuplicates({ handleList = null, sortOutput = null, checkKeys = gl
 	}
 	let items = [];
 
-	const sep = '|';
+	const sep = '|‎ |'; // Contains U+200E invisible char
 	let sortInput; // Sorting
-	let checklength = checkKeys.length;
+	let checkLength = checkKeys.length;
 	let i = 0;
-	while (i < checklength) {
+	while (i < checkLength) {
 		const key = _t(checkKeys[i]);
 		if (i === 0) { sortInput = key; }
 		else { sortInput += sep + key; }
@@ -294,7 +294,7 @@ function removeDuplicates({ handleList = null, sortOutput = null, checkKeys = gl
 	i = 0;
 	const count = tfoCopy.length;
 	if (bMultiple) {
-		const dics = [...new Array(checklength)].map(() => new Set());
+		const dics = [...new Array(checkLength)].map(() => new Set());
 		const toSplitKeys = checkKeys.map((key) => !RegExp(globRegExp.singleTags.re).exec(key));
 		if (bAdvTitle) {
 			const titleRe = globRegExp.title.re;
@@ -431,12 +431,12 @@ async function removeDuplicatesAsync({ handleList = null, sortOutput = null, che
 	let items = [];
 	let copy = handleList.Clone();
 
-	const sep = '|';
+	const sep = '|‎ |'; // Contains U+200E invisible char
 	let sortInput; // Sorting
 	let tags = [];
 	const count = copy.Count;
-	const checklength = checkKeys.length;
-	for (let i = 0; i < checklength; i++) {
+	const checkLength = checkKeys.length;
+	for (let i = 0; i < checkLength; i++) {
 		let key = _t(checkKeys[i]);
 		if (i === 0) { sortInput = key; }
 		else { sortInput += sep + key; }
@@ -456,7 +456,7 @@ async function removeDuplicatesAsync({ handleList = null, sortOutput = null, che
 
 	let set = new Set();
 	if (bMultiple) {
-		const dics = [...new Array(checklength)].map(() => new Set());
+		const dics = [...new Array(checkLength)].map(() => new Set());
 		const toSplitKeys = checkKeys.map((key) => !RegExp(globRegExp.singleTags.re).exec(key));
 		let i = 0;
 		if (bAdvTitle) {
@@ -583,7 +583,7 @@ function showDuplicates({ handleList = null, sortOutput = null, checkKeys = glob
 	let items = [];
 	let copy = handleList.Clone();
 
-	const sep = '|';
+	const sep = '|‎ |'; // Contains U+200E invisible char
 	let sortInput; // Sorting
 	let checklength = checkKeys.length;
 	let i = 0;
