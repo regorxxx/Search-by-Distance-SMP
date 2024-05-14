@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/05/24
+//14/05/24
 
 /* exported createConfigMenu */
 
@@ -921,7 +921,16 @@ function createConfigMenu(parent) {
 					void (0),
 					(key) => {
 						if (key === 'bAdvTitle' && properties.bAdvTitle[1]) { fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance'); }
-						if (key === 'bMultiple' && properties.bMultiple[1]) { fb.ShowPopupMessage(globRegExp.singleTags.desc, 'Search by distance'); }
+						if (key === 'bMultiple') {
+							fb.ShowPopupMessage(
+								'When this option is enabled, multi-value tags are parsed independently and a track may be considered a duplicate if at least one of those values match (instead of requiring all to match in the same order).\n\nSo for \'[ARTIST, DATE, TITLE]\' tags, these are duplicates with this option enabled:\n' +
+								'\nJimi Hendrix - 1969 - Blabla' +
+								'\nJimi Hendrix experience, Jimi Hendrix - 1969 - Blabla' +
+								'\nBand of Gypys, Jimi Hendrix - 1969 - Blabla' +
+								'\n\nWith multi-value parsing disabled, these are considered non-duplicated tracks since not all artists match.',
+								'Search by distance'
+							);
+						}
 					}
 				);
 			}
