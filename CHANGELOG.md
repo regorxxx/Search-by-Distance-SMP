@@ -61,6 +61,7 @@
 - Presets: enhanced parsing of recipe's variables.
 - Presets: new recipes and query filter presets are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Remove duplicates: improved performance of duplicates removal in multiple places.
+- Descriptors: added Deathcore style.
 - Helpers: json button files are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Helpers: updated helpers.
 ### Removed

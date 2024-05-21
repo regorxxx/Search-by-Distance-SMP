@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//15/05/24
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -1143,7 +1143,7 @@ const music_graph_descriptors_allmusic = {
 			['Post-Metal'						,	['Blackgaze'						]],
 			['British Metal'					,	['British Alternative Metal'		]],
 			['Death Metal'						,	['Death Alternative Metal'			]],
-			['-'								,	['Deathcore'						]],
+			['*'								,	['Deathcore'						]],
 			['Doom Metal'						,	['Doom Alternative Metal'			]],
 			['Doom Metal'						,	['Drone Alternative Metal','Drone Metal']],
 			['Trancecore'						,	['Electronicore'					]],
