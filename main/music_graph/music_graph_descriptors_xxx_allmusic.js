@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/05/24
+//31/05/24
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -124,7 +124,7 @@ const music_graph_descriptors_allmusic = {
 			['-'								,	['Left-Field House'					]],
 			['*'								,	['Microhouse'						]],
 			['*'								,	['Progressive House'				]],
-			['Tech House'								,	['Tech-House'						]],
+			['Tech House'						,	['Tech-House'						]],
 			['-'								,	['Tribal House'						]],
 			['*'								,	['UK Garage'						]],
 		/* Jungle / Drum'n'Bass */
@@ -369,8 +369,8 @@ const music_graph_descriptors_allmusic = {
 		/* Alternative Rap */
 			['Alt. Rap'							,	['Alternative Rap'					]],
 			['0'								,	['Afroswing'						]],
-			['0'								,	['Cloud Rap'						]],
-			['0'								,	['Grime'							]],
+			['*'								,	['Cloud Rap'						]],
+			['*'								,	['Grime'							]],
 			['0'								,	['Instrumental Hip-Hop'				]],
 			['*'								,	['Jazz-Rap'							]],
 			['-'								,	['Left-Field Rap'					]],
@@ -999,7 +999,7 @@ const music_graph_descriptors_allmusic = {
 			['Baroque Pop'						,	['Chamber Pop'						]],
 			['*'								,	['Chillwave'						]],
 			['-'								,	['Cocktail'							]],
-			['-'								,	['Cold Wave'						]],
+			['Coldwave'							,	['Cold Wave'						]],
 			['-'								,	['College Rock'						]],
 			['*'								,	['Cowpunk'							]],
 			['*'								,	['Darkwave'							]],
