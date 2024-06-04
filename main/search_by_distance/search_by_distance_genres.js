@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/02/24
+//01/06/24
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles */
 
@@ -43,7 +43,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 }
 
 // Utilities
-function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['GENRE'], bAscii = true, bPopup = true } = {}) {
+function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['GENRE','STYLE'], bAscii = true, bPopup = true } = {}) {
 	// Skipped values at pre-filter
 	const tagValuesExcluded = new Set(genreStyleFilter); // Filter holes and remove duplicates
 	// Get all tags and their frequency
@@ -89,7 +89,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 			'\'WEIGHT\' or \'DYNGENRE\' methods on the scripts.\n\n'
 			: '') +
 		'List of tags not present on the graph descriptors:\n' +
-		missing.joinEvery(', ', 6);
+		(missing.joinEvery(', ', 6) || 'None found.');
 	if (bPopup) { fb.ShowPopupMessage(report, 'Search by distance'); }
 	return missing;
 }
