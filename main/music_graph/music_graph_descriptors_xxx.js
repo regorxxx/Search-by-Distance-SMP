@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/05/24
+//05/06/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -268,7 +268,7 @@ const music_graph_descriptors = {
 		['Doo Wop'							,	['R&B','Philadelphia Soul']],
 		['Southern Soul'					,	['R&B','Traditional Gospel','Classic Funk','Soul Blues','Modern Gospel','Ska']],
 		['Motown Sound'						,	['R&B','Philadelphia Soul','Modern Gospel','Neo Soul','Rocksteady']],
-		['Philadelphia Soul'				,	['Doo Wop','Motown Sound','UK Reggae']],
+		['Philadelphia Soul'				,	['Doo Wop','Motown Sound','UK Reggae','Disco']],
 		['Classic Funk'						,	['P-Funk','Deep Funk','Electrofunk']],
 		['P-Funk'							,	['Classic Funk','Deep Funk','Electrofunk','Old-School']],
 		['Bossa Nova'						,	['Latin-Jazz','Swing','Lounge','Samba']],
@@ -396,7 +396,8 @@ const music_graph_descriptors = {
 		['K-Pop'							,	['Europop']],
 		['Symphonic Rap'					,	['Underground Rap','Symphonic Rock']],
 		['Cloud Rap'						,	['Trip Hop']],
-		['Grime'							,	['Dancehall']]
+		['Grime'							,	['Dancehall']],
+		['Philadelphia Soul'				,	['Smooth Soul']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.

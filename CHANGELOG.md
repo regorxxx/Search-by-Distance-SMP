@@ -53,20 +53,20 @@
 
 ## [Unreleased][]
 ### Added
-- Descriptors: added Cloud Rap, Grime & Dark Techno styles.
+- Descriptors: added Cloud Rap, Grime, Deathcore and Dark Techno styles.
 - Descriptors: added Gothic XL style cluster.
 - Remove duplicates: added multi-value parsing to duplicates removal. i.e. A track with multiple artists but same title can be considered a duplicated if at least one of those artists matches (instead of requiring all to match).  This setting can be switched at the 'Other settings...\Duplicates' submenu. See [this](https://github.com/regorxxx/Search-by-Distance-SMP/issues/31#issuecomment-2111061984) for more info.
 - Readmes: added readme for global settings found at 'foobar2000\js_data\presets\global' .json files.
 - Configuration: expanded user configurable file at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json' with a new setting for console logging to file. Disabled by default. Now this is a change from the previous behavior, where console was always logged to 'console.log' file at the [FOOBAR PROFILE FOLDER]. It can now be switched, but since it's probably not useful for most users is disabled by default.
 ### Changed
 - Descriptors: improved AllMusic support.
+- Descriptors: updated some primary and secondary influences.
 - Configuration: changed the remove duplicates bias to prefer lossless tracks with 16 bits per sample, 44.1 Khz sample rate and greater %DYNAMIC RANGE% values.
 - UI: minor menu tweaks to better group and name some settings.
 - UI: minor menu tweaks to reports.
 - Presets: enhanced parsing of recipe's variables.
 - Presets: new recipes and query filter presets are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Remove duplicates: improved performance of duplicates removal in multiple places.
-- Descriptors: added Deathcore style.
 - Helpers: json button files are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Helpers: updated helpers.
 ### Removed
@@ -178,7 +178,7 @@
 ### Added
 - Buttons: added new button 'search_by_distance_info', which pretty basic functionality right now, to display general statistics for a genre/style from the selected track. That data may come handy in creating new playlists (for tuning settings or filters), or to be used along [Timeline-SMP](https://regorxxx.github.io/foobar2000-SMP.github.io/scripts/timeline-smp/) or [World-Map-SMP](https://regorxxx.github.io/foobar2000-SMP.github.io/scripts/world-map-smp/) statistics.
 - Buttons bar: new setting to enable asynchronous loading of buttons, now the default behavior.
-- Descriptors: added Country Rap, Square Dance, Rodeo, Jug Band, K-Pop, J-Pop, Kayokyoku styles.
+- Descriptors: added Country Rap, Square Dance, Rodeo, Jug Band, K-Pop, J-Pop and Kayokyoku styles.
 - Descriptors: improved debug tests to avoid duplicates entries in substitutions, influences, etc.
 - Dynamic queries: added dynamic queries (like those found at [Playlist Tools](https://github.com/regorxxx/Playlist-Tools-SMP/)) for tracks and themes. Dynamic queries are like standard queries but with placeholders (#DATE#) which are evaluated on-the-fly, before running the query, using the selected reference track (or theme).  These queries are then used to filter the library at pre-scoring stage, changing the filter according to the reference For ex. for a Bob Dylan's track: COMPOSER IS #ARTIST# -> COMPOSER IS Bob Dylan. Full documentation can be found on the associated readme.
 - Readmes: added readmes for dynamic queries, cultural filters and influence filters.
