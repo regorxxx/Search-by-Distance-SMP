@@ -53,7 +53,7 @@
 
 ## [Unreleased][]
 ### Added
-- Descriptors: added Cloud Rap, Grime, Deathcore and Dark Techno styles.
+- Descriptors: added Cloud Rap, Grime, Deathcore, Neoperreo and Dark Techno styles.
 - Descriptors: added Gothic XL style and Electronic Rap XL cluster.
 - Remove duplicates: added multi-value parsing to duplicates removal. i.e. A track with multiple artists but same title can be considered a duplicated if at least one of those artists matches (instead of requiring all to match).  This setting can be switched at the 'Other settings...\Duplicates' submenu. See [this](https://github.com/regorxxx/Search-by-Distance-SMP/issues/31#issuecomment-2111061984) for more info.
 - Readmes: added readme for global settings found at 'foobar2000\js_data\presets\global' .json files.
