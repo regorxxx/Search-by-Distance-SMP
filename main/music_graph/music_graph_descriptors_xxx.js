@@ -173,7 +173,8 @@ const music_graph_descriptors = {
 		['Disco XL'							,	['Funktronica','Electrofunk','Disco','Eurodisco','Disco Pop']],
 		['Post-Disco XL'					,	['Dance-Rock','Dance Pop','Italo Disco']],
 		['Soft Pop XL'						,	['Sunshine Pop','Soft Rock','Folk Pop','Chanson']],
-		['Urban'							,	['Urban Soul','Urban Breaks']],
+		['Urban R&B XL'						,	['Urban Soul','Urban Breaks']],
+		['Urban Music & Rap XL'				,	['Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime']],
 		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop','Cloud Rap']],
 		['Funk'								,	['Classic Funk','P-Funk','Deep Funk','Electrofunk','Funk Rock','Contemporary Funk','Funk Blues','Deep Funk Revival','Psychedelic Funk']],
@@ -577,6 +578,7 @@ const music_graph_descriptors = {
 		['J-Pop'							,	['Japanese Pop'						]],
 		['K-Pop'							,	['Korean Pop'						]],
 		['Musical'							,	['Industrial Musical','Rock Musical','Music Hall','Revue','Vaudeville','Chèo']],
+		['Trap'								,	['Latin Trap','Trap Latino'			]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
