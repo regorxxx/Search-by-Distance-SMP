@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/05/24
+//09/06/24
 var version = '7.2.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -485,7 +485,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /*
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle','bMultiple']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -1028,6 +1028,8 @@ async function searchByDistance({
 				? acc.union(new Set(calcTags[key].reference))
 				: acc;
 		}, new Set()).difference(graphExclusions); // Remove exclusions
+		// Replace with substitutions which could introduce duplicates
+		calcTags.genreStyle.referenceSet = new Set(descr.replaceWithSubstitutions([...calcTags.genreStyle.referenceSet], true));
 		if (bFilterWithGraph) {
 			calcTags.genreStyle.referenceSet = calcTags.genreStyle.referenceSet.intersection(descr.getNodeSet());
 		}
@@ -1607,11 +1609,11 @@ async function searchByDistance({
 				if (tag.bGraphDyn && valLen) {
 					if (bFilterWithGraph) {
 						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) { handleTag.genreStyle.set.add(val); }
+							if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
 						});
 					} else {
 						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val)) { handleTag.genreStyle.set.add(val); }
+							if (!graphExclusions.has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
 						});
 					}
 				}
