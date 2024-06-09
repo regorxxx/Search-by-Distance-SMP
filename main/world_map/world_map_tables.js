@@ -86,7 +86,7 @@ function getCountryISO(country, bAlpha2 = false) {
 function getCountryName(iso) {
 	let country = '';
 	if (iso && iso.length) {
-		if (alpha2toAlpha3.has(iso.toUpperCase())) { country = alpha2toAlpha3.get(iso.toUpperCase()); }
+		if (alpha2toAlpha3.has(iso.toUpperCase())) { iso = alpha2toAlpha3.get(iso.toUpperCase()); }
 		if (isoMapRev.has(iso.toUpperCase())) {
 			country = isoMapRev.get(iso.toUpperCase());
 		} else {
