@@ -54,11 +54,12 @@
 ## [Unreleased][]
 ### Added
 - Descriptors: added Cloud Rap, Grime, Deathcore, Neoperreo and Dark Techno styles.
-- Descriptors: added Gothic XL style and Electronic Rap XL cluster.
+- Descriptors: added Gothic XL style, Urban Rap XL, Urban R&B XL, Electronic Rap XL cluster.
 - Remove duplicates: added multi-value parsing to duplicates removal. i.e. A track with multiple artists but same title can be considered a duplicated if at least one of those artists matches (instead of requiring all to match).  This setting can be switched at the 'Other settings...\Duplicates' submenu. See [this](https://github.com/regorxxx/Search-by-Distance-SMP/issues/31#issuecomment-2111061984) for more info.
 - Readmes: added readme for global settings found at 'foobar2000\js_data\presets\global' .json files.
 - Configuration: expanded user configurable file at '[FOOBAR PROFILE FOLDER]\js_data\presets\global\globSettings.json' with a new setting for console logging to file. Disabled by default. Now this is a change from the previous behavior, where console was always logged to 'console.log' file at the [FOOBAR PROFILE FOLDER]. It can now be switched, but since it's probably not useful for most users is disabled by default.
 ### Changed
+- GRAPH: better handling of substitutions, which are now parsed before calculating scores, in case they introduce duplicates (like 'Trap' and 'Latin Trap' both being replaced by 'Trap').
 - Descriptors: improved AllMusic support.
 - Descriptors: updated some primary and secondary influences.
 - Configuration: changed the remove duplicates bias to prefer lossless tracks with 16 bits per sample, 44.1 Khz sample rate and greater %DYNAMIC RANGE% values.
