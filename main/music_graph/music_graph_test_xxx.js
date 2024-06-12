@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/24
+//12/06/24
 
 /* exported testGraphNodes, testGraphNodeSets */
 
@@ -41,6 +41,11 @@ function testGraphNodes(mygraph) {
 		{from: 'Pagan Folk',	to: 'Americana'},
 		{from: 'Pagan Folk',	to: 'Tulsa Sound'},
 		{from: 'P-Funk',		to: 'Psychedelic Rock'},
+		{from: 'Emo Rap',		to: 'Sadcore'},
+		{from: 'Emo Rap',		to: 'Emo Rock'},
+		{from: 'Sadcore',		to: 'Nu Metal'},
+		{from: 'Emo Rap',		to: 'Jazz-Rap'},
+		{from: 'Emo Rap',		to: 'Cloud Rap'},
 	].forEach((o) => {
 		if (Object.hasOwn(o, 'name')) {console.log(o.name);}
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {

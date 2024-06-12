@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/06/24
+//12/06/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -123,7 +123,7 @@ const music_graph_descriptors = {
 		['Gospel_supergenre'				,	['Contemporary Christian Music','Christian Rock','Modern Gospel','Ragtime','Stride','Traditional Gospel','Spirituals','Worksongs']],
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
-		['Rap_supergenre'					,	['Neoperreo','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
+		['Rap_supergenre'					,	['Neoperreo','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
 		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
@@ -177,6 +177,7 @@ const music_graph_descriptors = {
 		['Urban Music & Rap XL'				,	['Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime']],
 		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop','Cloud Rap']],
+		['Sad Emo XL'						,	['Emo Rap','Emo Pop','Emo Rock','Sadcore']],
 		['Funk'								,	['Classic Funk','P-Funk','Deep Funk','Electrofunk','Funk Rock','Contemporary Funk','Funk Blues','Deep Funk Revival','Psychedelic Funk']],
 		['Soul'								,	['Philadelphia Soul','Motown Sound','Southern Soul','Psychedelic Soul']],
 		['Deep Soul XL'						,	['Smooth Soul','Soul Blues','Southern Soul']],
@@ -362,7 +363,8 @@ const music_graph_descriptors = {
 		['Cloud Rap'						,	['Trap','Chillwave']],
 		['Grime'							,	['UK Garage']],
 		['Eurodance'						,	['Hip House']],
-		['Ghettotech'						,	['Detroit Techno','Electro']]
+		['Ghettotech'						,	['Detroit Techno','Electro']],
+		['Emo Rap'							,	['Trap','Sadcore','Cloud Rap']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -399,13 +401,14 @@ const music_graph_descriptors = {
 		['Kayokyoku'						,	['Rock & Roll','Vocal Pop']],
 		['K-Pop'							,	['Europop']],
 		['Symphonic Rap'					,	['Underground Rap','Symphonic Rock']],
-		['Cloud Rap'						,	['Trip Hop']],
+		['Cloud Rap'						,	['Trip Hop','Jazz-Rap']],
 		['Grime'							,	['Dancehall']],
 		['Philadelphia Soul'				,	['Smooth Soul']],
 		['Neoperreo'						,	['Hip House']],
 		['Eurodance'						,	['Progressive House']],
 		['Acid House'						,	['Hip House','Trip Hop']],
-		['Ghettotech'						,	['Ghetto House','Hip House']]
+		['Ghettotech'						,	['Ghetto House','Hip House']],
+		['Emo Rap'							,	['Emo Pop','Nu Metal','Jazz-Rap','Horrorcore']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -444,7 +447,9 @@ const music_graph_descriptors = {
 		['Rap_supergenre'					,	['Traditional Country','Americana XL','Roots Rock']],
 		['Symphonic Rap'					,	['Hardcore Rap']],
 		['Opera'							,	['Contemporary Popular Choral XL']],
-		['Cloud Rap'						,	['Hardcore Rap','Gangsta','Horrorcore']]
+		['Cloud Rap'						,	['Hardcore Rap','Gangsta','Horrorcore']],
+		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock']],
+		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound
@@ -457,6 +462,7 @@ const music_graph_descriptors = {
 		'Rap_supergenre',
 		'Progressive Rock XL',
 		'Sadcore',
+		'Emo Rap',
 		'Nature Music',
 		'Anatolian Rock',
 		'Desert Blues',
@@ -578,7 +584,9 @@ const music_graph_descriptors = {
 		['J-Pop'							,	['Japanese Pop'						]],
 		['K-Pop'							,	['Korean Pop'						]],
 		['Musical'							,	['Industrial Musical','Rock Musical','Music Hall','Revue','Vaudeville','Chèo']],
-		['Trap'								,	['Latin Trap','Trap Latino'			]]
+		['Trap'								,	['Latin Trap','Trap Latino'			]],
+		['Kawaii Metal'						,	['Yurufuwa','Idol Metal','Cute Metal','Kawaiicore']],
+		['Trancecore'						,	['Electronicore','Synthcore'		]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
