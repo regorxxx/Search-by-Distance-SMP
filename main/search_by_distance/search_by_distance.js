@@ -1052,8 +1052,11 @@ async function searchByDistance({
 			tag.weight = 0;
 		}
 	}
-	const totalWeight = Object.keys(calcTags).reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
-	const countWeights = Object.keys(calcTags).reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
+	// Related and unrelated tags are not considered here, but just added to the total score before any calculation is done, to break asap. Tracks witch such tags are accounted with extra queries
+	const totalWeight = Object.keys(calcTags).filter((key) => !['related', 'unrelated'].includes(key))
+		.reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
+	const countWeights = Object.keys(calcTags).filter((key) => !['related', 'unrelated'].includes(key))
+		.reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
 	if (bSearchDebug) { console.log('Init Weights:', totalWeight, countWeights); }
 	let originalWeightValue = 0;
 	// Queries and ranges
@@ -1246,6 +1249,7 @@ async function searchByDistance({
 			tag.weight = 0;
 		}
 		if (key === 'related' && tag.weight !== 0) {
+			preQueryLength = query.length;
 			query[preQueryLength] = queryJoin(queryCombinations([...tag.referenceSet], ['MUSICBRAINZ_TRACKID', 'ARTIST', 'TITLE'], 'OR'), 'OR');
 		}
 	});
@@ -1641,7 +1645,7 @@ async function searchByDistance({
 			const tag = calcTags[key];
 			if (tag.weight === 0) { continue; }
 			if (tag.bVirtual) { continue; }
-			if (currScoreAvailable < minScoreFilter) { continue; } // Break asap
+			if (currScoreAvailable < minScoreFilter) { break; } // Break asap
 			const scoringDistr = tag.scoringDistribution;
 			if (tag.bMultiple) {
 				const newTag = handleTag[key].number;

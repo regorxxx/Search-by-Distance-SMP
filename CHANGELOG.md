@@ -70,6 +70,7 @@
 - Remove duplicates: improved performance of duplicates removal in multiple places.
 - Helpers: json button files are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Helpers: updated helpers.
+- Performance improvement (approx. 15%) changing the 'RELATED'/'UNRELATED' tags logic usage implemented at [7.0.0](#700---2024-02-28). Note this change applies no matter the reference tracks has or not such tags, as long as they have a weight associated.
 ### Removed
 ### Fixed
 - Influences: in some cases (anti)influences weight was not considered properly to calculate the total graph distance between nodes which had multiple links.
