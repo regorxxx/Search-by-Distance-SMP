@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/02/24
+//13/06/24
 
 /*
 	Inverse mapping for the graph
@@ -83,7 +83,7 @@
 					node.push(genreStyle);
 				});
 			} else {
-				cache[o.name].set(genreStyleFrom[0], [genreStyleFrom[0]]);
+				cache[o.name].set(genreStyleFrom[0], [...genreStyleFrom[1]]);
 			}
 		});
 	});
