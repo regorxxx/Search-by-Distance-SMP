@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/06/24
+//17/06/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -590,29 +590,31 @@ const music_graph_descriptors = {
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
-		'Alt. Rock and Hardcore','Blues and Worksongs','Classic and Orchestral','Electronic and Synth','Folk and Folk-Rock','Hip-Hop and Reggae','Jazz and Lounge','Metal and Hard Rock','Pop and Rock','Soul and Funk','Other styles'
+		'Alt. Rock and Hardcore','Blues and Gospel','Classic and Orchestral','Electronic and Synth','Folk and Folk-Rock','Hip-Hop and Reggae','Jazz and Lounge','Metal and Hard Rock','Pop and Rock','Soul and Funk','Other styles'
 	],
 	getStyleGroup: (style_cluster) => {
 		if (/(-| |^)(metal|stoner|doom)(-| |$)/i.test(style_cluster)) {
 			return 'Metal and Hard Rock';
 		} else if (/(-| |^)(folk|folk-rock|americana|country|afro)(-| |$)/i.test(style_cluster)) {
 			return 'Folk and Folk-Rock';
-		} else if (/(-| |^)(urban|rap|reggae|loungetronica)(-| |$)/i.test(style_cluster)) {
+		} else if (/(-| |^)(urban|rap|reggae|loungetronica|jamaican)(-| |$)/i.test(style_cluster)) {
 			return 'Hip-Hop and Reggae';
-		} else if (/(-| |^)(electro|electronic|dance|house|rave|gabber|bass|wave)(-| |$)/i.test(style_cluster)) {
-			return 'Electronic and Synth';
-		} else if (/(-| |^)(gothic|progressive|punk|grunge|gaze)(-| |$)/i.test(style_cluster)) {
+		} else if (/(-| |^)(punk)(-| |$)/i.test(style_cluster)) {
 			return 'Alt. Rock and Hardcore';
-		} else if (/(-| |^)(pop|rock)(-| |$)/i.test(style_cluster)) {
-			return 'Pop and Rock';
-		} else if (/(-| |^)(soul|funk|disco)(-| |$)/i.test(style_cluster)) {
+		} else if (/(-| |^)(electro|electronic|dance|house|rave|gabber|bass|wave|techno|trance|breakbeat|downtempo|hardcore)(-| |$)/i.test(style_cluster)) {
+			return 'Electronic and Synth';
+		} else if (/(-| |^)(gothic|progressive|grunge|gaze|industrial|alternative|emo)(-| |$)/i.test(style_cluster)) {
+			return 'Alt. Rock and Hardcore';
+		} else if (/(-| |^)(soul|funk|disco|r&b)(-| |$)/i.test(style_cluster)) {
 			return 'Soul and Funk';
+		} else if (/(-| |^)(choral|ballroom|orchestral|Chamber|secular|spiritual|classical)(-| |$)/i.test(style_cluster)) {
+			return 'Classic and Orchestral';
+		} else if (/(-| |^)(pop|rock|contemporary)(-| |$)/i.test(style_cluster)) {
+			return 'Pop and Rock';
 		} else if (/(-| |^)(jazz|lounge|easy)(-| |$)/i.test(style_cluster)) {
 			return 'Jazz and Lounge';
-		} else if (/(-| |^)(blues)(-| |$)/i.test(style_cluster)) {
-			return 'Blues and Worksongs';
-		} else if (/(-| |^)(choral|ballroom|orchestral|Chamber|secular|spiritual)(-| |$)/i.test(style_cluster)) {
-			return 'Classic and Orchestral';
+		} else if (/(-| |^)(blues|gospel)(-| |$)/i.test(style_cluster)) {
+			return 'Blues and Gospel';
 		} else {
 			return 'Other styles';
 		}
@@ -798,9 +800,15 @@ const music_graph_descriptors = {
 
 	// Other
 	bPreRender: true, // (false) Renders graph on the fly on browsers or (true) pre-rendering (it may take some time while loading entire graph)
-	renderMethod: 'realDistance'	// ('graph') Renders graph according to link centrality/gravity forces.
-									// ('graphWeighted') uses the link's weight values at top to render similar distances to real ones, but also using link forces.
-									// ('realDistance') uses the link's weight values at top to render real distances. Beware it will look really weird!
+
+	/**
+	'graph': Renders graph according to link centrality/gravity forces.
+	'graphWeighted': uses the link's weight values at top to render similar distances
+		to real ones, but also using link forces.
+	'realDistance': uses the link's weight values at top to render real distances.
+		Beware it will look really weird!
+	*/
+	renderMethod: 'realDistance'
 };
 
 (function () {	// Clean non ASCII values
