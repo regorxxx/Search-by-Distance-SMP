@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/05/24
+//13/06/24
 
 /* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, addTracksRelation */
 
@@ -219,7 +219,8 @@ function addTracksRelation({
 		? plman.GetPlaylistSelectedItems(plman.ActivePlaylist)
 		: new FbMetadbHandleList(),
 	mode = 'related',
-	tagsKeys = { related: [globTags.related], unrelated: [globTags.unrelated] }
+	tagsKeys = { related: [globTags.related], unrelated: [globTags.unrelated] },
+	idTags = ['MUSICBRAINZ_TRACKID', 'TITLE']
 } = {}) {
 	if (!handleList.Count) { return false; }
 	if (!mode) { return false; }
@@ -244,13 +245,14 @@ function addTracksRelation({
 		);
 	});
 	// Add new ones
+	const newIds = getHandleListTags(handleList, idTags);
 	handleListArr.forEach((handle, i) => {
-		const newIds = getHandleTags(handle, ['MUSICBRAINZ_TRACKID', 'TITLE']);
-		for (const idArr of newIds) {
+		const handleIds = newIds[i];
+		for (const idArr of handleIds) {
 			if (idArr.length) {
 				idArr.forEach((id) => {
 					tags.forEach((handleTags, j) => {
-						if (i === j) { return; }
+						if (i === j || newIds[j].flat(Infinity).includes(id)) { return; }
 						tagsKeys[mode].forEach((tf) => handleTags[tf].add(id));
 					});
 				});
@@ -262,6 +264,7 @@ function addTracksRelation({
 	tags.forEach((handleTags) => {
 		tagsKeys[mode].forEach((tf) => handleTags[tf] = [...handleTags[tf]]);
 	});
+	console.log('Search by distance: relating ' + handleList.Count + ' tracks...');
 	try { handleList.UpdateFileInfoFromJSON(JSON.stringify(tags)); }
 	catch (e) {
 		console.popup(e, window.Name);

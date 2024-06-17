@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/05/24
+//13/06/24
 
 /* exported createConfigMenu */
 
@@ -964,13 +964,24 @@ function createConfigMenu(parent) {
 			{
 				const flags = plman.ActivePlaylist !== -1 && plman.GetPlaylistSelectedItems(plman.ActivePlaylist).Count > 1 ? MF_STRING : MF_GRAYED;
 				menu.newEntry({
-					menuName: submenu, entryText: 'Relate selected tracks (between them)', func: () => {
+					menuName: submenu, entryText: 'Relate selected tracks (by MBID/Title)', func: () => {
 						addTracksRelation({ mode: 'related', tagsKeys: { related: tags.related.tf } });
 					}, flags
 				});
 				menu.newEntry({
-					menuName: submenu, entryText: 'Unrelate selected tracks (between them)', func: () => {
+					menuName: submenu, entryText: 'Unrelate selected tracks (by MBID/Title)', func: () => {
 						addTracksRelation({ mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf } });
+					}, flags
+				});
+				menu.newEntry({ menuName: submenu, entryText: 'sep' });
+				menu.newEntry({
+					menuName: submenu, entryText: 'Relate selected tracks (by Artist)', func: () => {
+						addTracksRelation({ mode: 'related', tagsKeys: { related: tags.related.tf }, idTags: ['ALBUM ARTIST'] });
+					}, flags
+				});
+				menu.newEntry({
+					menuName: submenu, entryText: 'Unrelate selected tracks (by Artist)', func: () => {
+						addTracksRelation({ mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf }, idTags: ['ALBUM ARTIST'] });
 					}, flags
 				});
 			}
