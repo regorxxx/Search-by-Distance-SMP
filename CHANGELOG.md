@@ -54,7 +54,7 @@
 ## [Unreleased][]
 ### Added
 - Descriptors: added Cloud Rap, Grime, Deathcore, Neoperreo, Emo Rap and Dark Techno styles.
-- Descriptors: added Gothic XL style, Urban Rap XL, Urban R&B XL, Electronic Rap XL, Sad Emo XL cluster.
+- Descriptors: added Gothic XL style, Urban Rap XL, Urban R&B XL, Electronic Rap XL, Sad Emo XL, Progressive Electronic XL and Early Progressive Electronic XL cluster.
 - Remove duplicates: added multi-value parsing to duplicates removal. i.e. A track with multiple artists but same title can be considered a duplicated if at least one of those artists matches (instead of requiring all to match).  This setting can be switched at the 'Other settings...\Duplicates' submenu. See [this](https://github.com/regorxxx/Search-by-Distance-SMP/issues/31#issuecomment-2111061984) for more info.
 - Tags: to simplify the usage of 'RELATED' and 'UNRELATED' tags, new entries at the customizable button (see Other tools\Relate selected tracks...) have been added. They allow to add the 'ARTIST' values to 'RELATED' or 'UNRELATED' tags for the selected tracks (skipping the own artist of the track upon tagging).
 - Readmes: added readme for global settings found at 'foobar2000\js_data\presets\global' .json files.
