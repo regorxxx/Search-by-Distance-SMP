@@ -64,6 +64,7 @@
 - Descriptors: improved AllMusic support.
 - Descriptors: updated some primary and secondary influences.
 - Configuration: changed the remove duplicates bias to prefer lossless tracks with 16 bits per sample, 44.1 Khz sample rate and greater %DYNAMIC RANGE% values.
+- Tags: reworked similar artists, same artist and cultural filters to better handle tag values with commas.
 - Tags: relating/unrelating tracks by MBID or title now skips the own value of such tags before tagging. i.e. you can select multiple tracks with same title, and they will not add that title on theirselves but only different ones.
 - UI: minor menu tweaks to better group and name some settings.
 - UI: minor menu tweaks to reports.

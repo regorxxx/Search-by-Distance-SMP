@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/06/24
+//14/06/24
 
 /* exported calcMeanDistanceV2, calcCacheLinkSG, calcCacheLinkSGV2 , getAntiInfluences, getInfluences, getNodesFromPath */
 
@@ -97,6 +97,7 @@ function calcGraphDistance(mygraph, keyOne, keyTwo, bUseInfluence = false, influ
 		}
 		distance = Infinity;
 	} else {
+		// TODO: move this into pathfinder. Zeronodes and Direct can be calculated afterwards since it is irrelevant for path finding. fullpath case is trivial since it requires checking every link. adjacentNodes may be calculated on the first and last step of pathfinder. In any case all links between nodes must be checked.
 		distance = getDistanceFromPath(mygraph, path, bJointGraph);
 		if (bUseInfluence) {
 			// Checks links between pairs of nodes to find if they are (anti)influences
