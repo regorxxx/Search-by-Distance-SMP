@@ -66,6 +66,8 @@
 - Configuration: changed the remove duplicates bias to prefer lossless tracks with 16 bits per sample, 44.1 Khz sample rate and greater %DYNAMIC RANGE% values.
 - Tags: reworked similar artists, same artist and cultural filters to better handle tag values with commas.
 - Tags: relating/unrelating tracks by MBID or title now skips the own value of such tags before tagging. i.e. you can select multiple tracks with same title, and they will not add that title on theirselves but only different ones.
+- UI: tag values are now listed on the button tooltip of info button.
+- UI: info button tooltip behavior now follows the global setting for the toolbar.
 - UI: minor menu tweaks to better group and name some settings.
 - UI: minor menu tweaks to reports.
 - Presets: enhanced parsing of recipe's variables.

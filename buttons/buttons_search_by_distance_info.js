@@ -1,6 +1,7 @@
 ﻿'use strict';
-//10/01/24
+//19/06/24
 
+/* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, MF_GRAYED:readable, globQuery:readable, globTags:readable, clone:readable, MF_STRING:readable, MF_MENUBREAK:readable */
 include('..\\helpers\\buttons_xxx.js');
@@ -12,7 +13,7 @@ include('..\\helpers\\helpers_xxx_properties.js');
 include('..\\helpers\\helpers_xxx_prototypes.js');
 /* global isBoolean:readable, isJSON:readable, _p:readable , capitalizePartial:readable */
 include('..\\helpers\\helpers_xxx_tags.js');
-/* global queryJoin:readable, getHandleListTagsTyped:readable */
+/* global queryJoin:readable, getHandleListTagsTyped:readable, _b:readable, _t:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global _menu:readable, settingsMenu:readable */
 include('..\\helpers\\menu_xxx_extras.js');
@@ -30,7 +31,6 @@ var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { // NOSONAR [shared on files]
-	bTooltipInfo:	['Show shortcuts on tooltip', true, {func: isBoolean}, true],
 	bIconMode:		['Icon-only mode?', false, {func: isBoolean}, false],
 	entries:		['Info entries', JSON.stringify([
 		{name: 'By Genre',
@@ -86,13 +86,24 @@ addButton({
 // Helper
 function buttonTooltipSbdCustom(parent) {
 	const properties = parent.buttonsProperties;
-	const bTooltipInfo = properties.bTooltipInfo[1];
-	let info = 'Genre/style info by acoustic-folksonomy models:';
+	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
+	let info = 'Genre/style info by acoustic-folksonomy models:\n';
+	const sel = fb.GetFocusItem();
+	if (sel) {
+		const entries = JSON.parse(properties.entries[1]);
+		let tfo = fb.TitleFormat(
+			entries.map((entry) => {
+				return '$puts(info,' + entry.tf.map((tag, i) => _b((i ? '\\, ' : '') + _t(tag))).join('') + ')' +
+					entry.name + ':\t$ifgreater($len($get(info)),50,$cut($get(info),50)...,$get(info))';
+			}).join('$crlf()')
+		);
+		info += tfo.EvalWithMetadb(sel);
+	} else { info += 'No track selected'; }
 	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
-	if (bShift && !bControl || bTooltipInfo) {info += '\n(Shift + L. Click for config)';}
+	if (bShift && !bControl || bInfo) {info += '\n(Shift + L. Click for config)';}
 	return info;
 }
 
