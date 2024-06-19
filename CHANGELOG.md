@@ -79,6 +79,7 @@
 - Influences: in some cases (anti)influences weight was not considered properly to calculate the total graph distance between nodes which had multiple links.
 - Presets: recipe error on some cases for user-created recipes. May require to rebuild user created recipes (or remove any trace of "poolFilteringTag" from them using a text editor). Issue #30.
 - Tags: new tags created via popups, using percentage ranges, were missing the range property. Issue #29.
+- Configuration: .json files at 'foobar2000\js_data\presets\global' not being saved with the calculated properties based on user values from other files.
 
 ## [7.2.0] - 2024-03-21
 ### Added
