@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/06/24
+//21/06/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -712,7 +712,8 @@ const music_graph_descriptors = {
 	// Anything named '..._supergenre' will be added to the html color label legend automatically.
 	// If more than one '...Folk..._supergenre' or '...Classical..._supergenre' is found, then it will be skipped.
 	// i.e. It will list Folk and Classical only once, even if there are multiple (sub)SuperGenres.
-	map_colors: [	// Todo: use colorbrewer sequential palettes
+	// As alternative, colorbrewer sequential palettes could be used
+	map_colors: [
 		// Supergenres
 		['Industrial_supergenre'				,'#e04103'],
 		['Metal_supergenre'						,'#D88417'],
