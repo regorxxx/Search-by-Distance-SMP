@@ -42,5 +42,5 @@
 	},
 	"scoreFilter": 70,
 	"method": "GRAPH",
-	"graphDistance": "music_graph_descriptors.cluster * 4 * 1/2"
+	"graphDistance": "music_graph_descriptors.cluster * 5 / 4"
 }
