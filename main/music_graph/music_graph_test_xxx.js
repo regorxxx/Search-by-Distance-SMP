@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/06/24
+//01/07/24
 
 /* exported testGraphNodes, testGraphNodeSets */
 
@@ -47,6 +47,7 @@ function testGraphNodes(mygraph) {
 		{from: 'Emo Rap',			to: 'Jazz-Rap'},
 		{from: 'Emo Rap',			to: 'Cloud Rap'},
 		{from: 'Progressive House',	to: 'Progressive Trance'},
+		{from: 'Dixieland',			to: 'Modal Jazz'},
 	].forEach((o) => {
 		if (Object.hasOwn(o, 'name')) {console.log(o.name);}
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
@@ -155,6 +156,10 @@ function testGraphNodeSets(mygraph) {
 		{
 			from:	[ 'Blues', 'Blues Rock', 'Modern Electric Blues', 'Electric Blues' ],
 			to:		[ 'Hard Rock', 'Heavy Metal', 'Glam Metal', 'Pop Metal' ]
+		},
+		{
+			from:	[ 'Jazz', 'Dixieland' ],
+			to:		[ 'Jazz', 'Modal Jazz' ]
 		},
 		// Exchanging one genre from the Reference with one from the Target outputs different distance
 		{	name: '<------------------- Exchange asymmetry ------------------->'},
