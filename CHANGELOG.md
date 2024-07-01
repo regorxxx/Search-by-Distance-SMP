@@ -63,6 +63,7 @@
 - GRAPH: better handling of substitutions, which are now parsed before calculating scores, in case they introduce duplicates (like 'Trap' and 'Latin Trap' both being replaced by 'Trap').
 - Descriptors: improved AllMusic support.
 - Descriptors: updated some primary and secondary influences.
+- Descriptors: updated some anti-influences (in particular for jazz styles).
 - Configuration: changed the remove duplicates bias to prefer lossless tracks with 16 bits per sample, 44.1 Khz sample rate and greater %DYNAMIC RANGE% values.
 - Tags: reworked similar artists, same artist and cultural filters to better handle tag values with commas.
 - Tags: relating/unrelating tracks by MBID or title now skips the own value of such tags before tagging. i.e. you can select multiple tracks with same title, and they will not add that title on theirselves but only different ones.
@@ -70,6 +71,7 @@
 - UI: info button tooltip behavior now follows the global setting for the toolbar.
 - UI: minor menu tweaks to better group and name some settings.
 - UI: minor menu tweaks to reports.
+- Presets: reworked changes introduced at [4.0.0](#400---2023-02-15) related to graph distance.
 - Presets: enhanced parsing of recipe's variables.
 - Presets: new recipes and query filter presets are now saved with Windows EOL for compatibility improvements with Windows text editors.
 - Remove duplicates: improved performance of duplicates removal in multiple places.
