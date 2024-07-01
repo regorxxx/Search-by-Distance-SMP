@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/06/24
+//01/07/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -187,7 +187,7 @@ const music_graph_descriptors = {
 		['Traditional Blues XL'				,	['Vaudeville Blues','Country Blues','Delta Blues']],
 		['Traditional Country'				,	['Neo-Traditional Country','Nashville Sound','Bakersfield Sound','Bluegrass','Honky Tonk','Hillbilly','Country Boogie','Jug Band','Square Dance']],
 		['Post-Jazz'						,	['Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion']],
-		['Modern Jazz'						,	['Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop']],
+		['Modern Jazz'						,	['Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Funk','Hard-Bop','Cool Jazz','Modal Jazz','Bebop']],
 		['Classic Jazz'						,	['Gypsy-Jazz','New Orleans Jazz','Dixieland','Chicago Jazz','Mainstream Jazz','Swing','Big Band','New Orleans Jazz Revival','Dixieland Revival']],
 		['Mainstream Jazz XL'				,	['Contemporary Jazz','Mainstream Jazz','Swing','Soul-Jazz','Jazz-Blues']],
 		['Reggae'							,	['Reggae Fusion','Ragga','UK Reggae','Dub','Roots Reggae','Rocksteady']],
@@ -450,7 +450,9 @@ const music_graph_descriptors = {
 		['Opera'							,	['Contemporary Popular Choral XL']],
 		['Cloud Rap'						,	['Hardcore Rap','Gangsta','Horrorcore']],
 		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock']],
-		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']]
+		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']],
+		['Swing'							,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']],
+		['Dixieland'						,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound
