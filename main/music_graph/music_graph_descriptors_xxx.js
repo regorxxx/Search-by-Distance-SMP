@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/24
+//26/07/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -52,7 +52,7 @@
  * @constant
  * @name music_graph_descriptors
  * @kind variable
- * @type {{ style_supergenre_supercluster: (string | string[])[][]; style_supergenre_cluster: (string | string[])[][]; style_supergenre: (string | string[])[][]; style_cluster: (string | string[])[][]; style_primary_origin: (string | string[])[][]; style_secondary_origin: (string | string[])[][]; style_anti_influence: (string | string[])[][]; style_anti_influences_conditional: string[]; style_weak_substitutions: (string | string[])[][]; style_substitutions: (string | string[])[][]; map_distance_exclusions: Set<string>; nodeList: Map<string,musicGraphNode>; renderMethod: string; }}
+ * @type {{ style_supergenre_supercluster: (string | string[])[][]; style_supergenre_cluster: (string | string[])[][]; style_supergenre: (string | string[])[][]; style_cluster: (string | string[])[][]; style_primary_origin: (string | string[])[][]; style_secondary_origin: (string | string[])[][]; style_anti_influence: (string | string[])[][]; style_anti_influences_conditional: string[]; style_weak_substitutions: (string | string[])[][]; style_substitutions: (string | string[])[][]; map_distance_exclusions: Set<string>; primary_origin:number; secondary_origin:number; weak_substitutions:number; cluster:number; intra_supergenre:number; supergenre_cluster:number; supergenre_supercluster:number; inter_supergenre:number; inter_supergenre_supercluster:number; substitutions:number; anti_influence:number; primary_origin_influence:number; secondary_origin_influence:number; nodeList: Map<string,musicGraphNode>; renderMethod: string; }}
  */
 const music_graph_descriptors = {
 	/*
@@ -590,7 +590,8 @@ const music_graph_descriptors = {
 		['Musical'							,	['Industrial Musical','Rock Musical','Music Hall','Revue','Vaudeville','Chèo']],
 		['Trap'								,	['Latin Trap','Trap Latino'			]],
 		['Kawaii Metal'						,	['Yurufuwa','Idol Metal','Cute Metal','Kawaiicore']],
-		['Trancecore'						,	['Electronicore','Synthcore'		]]
+		['Trancecore'						,	['Electronicore','Synthcore'		]],
+		['Synthwave'						,	['Retrowave'						]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [

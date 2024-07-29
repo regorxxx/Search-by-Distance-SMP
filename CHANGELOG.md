@@ -54,6 +54,7 @@
 
 ## [Unreleased][]
 ### Added
+- Descriptors: added Retrowave style.
 - Near Genres Filter: new option to filter the library using only genres/styles which are near the selected reference, greatly reducing processing time up to 50% (although some corner cases similar after calculating the mean distance may be excluded). By default is set to Auto. It works with any of the search methods, although it uses the genres relationship found at the GRAPH method.
 ### Changed
 - UI: minor QoL improvements on menu entries.
