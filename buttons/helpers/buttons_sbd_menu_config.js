@@ -1,9 +1,9 @@
 ﻿'use strict';
-//13/06/24
+//26/07/24
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, weightDistribution:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -506,7 +506,7 @@ function createConfigMenu(parent) {
 			});
 		}
 		{	// Additional filters
-			const subMenuName = menu.newMenu('Additional pre-defined filters...', menuName);
+			const subMenuName = menu.newMenu('Additional pre-defined filters', menuName);
 			let options = [];
 			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
 			const bFile = _isFile(file);
@@ -575,14 +575,14 @@ function createConfigMenu(parent) {
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
-					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g,'\r\n')); }
+					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
 					_explorer(file);
 				}
 			});
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Dynamic queries
-			const subMenuName = menu.newMenu('Dynamic query filters...', menuName);
+			const subMenuName = menu.newMenu('Dynamic query filters', menuName);
 			let options = [];
 			const currentFilters = JSON.parse(properties['dynQueries'][1]);
 			const data = JSON.parse(properties.data[1]);
@@ -650,6 +650,55 @@ function createConfigMenu(parent) {
 			});
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
+		{	// Near genres filter
+			const key = 'nearGenresFilter';
+			const subMenuName = menu.newMenu('Nearest genres filter', menuName);
+			const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
+			const graphDistance = parseGraphVal(Object.hasOwn(recipe, 'graphDistance') ? recipe.graphDistance : properties.graphDistance[1]);
+			const score = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
+			const nearScoreFilter = Math.max(
+				music_graph_descriptors.cluster * 5 / 4,
+				Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', score, 5))
+			);
+			const options = [
+				{
+					name: 'Automatic' + (bIsGraph
+						? '\t[' + graphDistance * 2 + ']'
+						: '\t[' + nearScoreFilter + ']'),
+					val: 0
+				},
+				{
+					name: 'Custom' + (Object.hasOwn(recipe, key)
+						? recipe[key] > 0 ? '\t[' + recipe[key] + ']' : ''
+						: properties[key][1] > 0 ? '\t[' + properties[key][1] + ']' : ''),
+					val: properties[key][1] > 0 ? properties[key][1] : 1
+				},
+				{ name: 'sep' },
+				{ name: 'Disabled', val: -1 },
+			];
+			options.forEach((opt) => {
+				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
+				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
+				menu.newEntry({
+					menuName: subMenuName, entryText, func: () => {
+						let input = opt.val;
+						const defVal = properties[key][1] > 0 ? properties[key][1] : graphDistance * 2;
+						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genres/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', 'Search by distance'); }
+						if (input > 0) {
+							input = Input.number('int', defVal, 'Enter number: (between -1 and Infinity)\n\nDisabled (-1),  automatic (0) or any Graph distance value (suggested 2 x max Graph distance).', 'Search by distance', defVal, [(input) => input >= -1]);
+							if (input === null) {
+								if (Input.isLastEqual) { input = Input.previousInput; }
+								else { return; }
+							}
+						}
+						properties[key][1] = input;
+						overwriteProperties(properties); // Updates panel
+					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
+				});
+			});
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1])); });
+		}
+		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Influences filter
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
 			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
@@ -671,17 +720,17 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Culture filters
-			const subMenuName = menu.newMenu('Artist cultural filter...', menuName);
+			const subMenuName = menu.newMenu('Artist cultural filter', menuName);
 			const options = [
-				{ name: 'All', val: -1 },
-				{ name: 'sep' },
 				{ name: 'Same continent', val: 0 },
 				{ name: 'Same region', val: 1 },
 				{ name: 'Same country', val: 2 },
 				{ name: 'sep' },
 				{ name: 'Different continent', val: 3 },
 				{ name: 'Different region', val: 4 },
-				{ name: 'Different country', val: 5 }
+				{ name: 'Different country', val: 5 },
+				{ name: 'sep' },
+				{ name: 'Disabled', val: -1 }
 			];
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
@@ -697,15 +746,15 @@ function createConfigMenu(parent) {
 			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (Object.hasOwn(recipe, 'artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1])); });
 		}
 		{	// Culture filters
-			const subMenuName = menu.newMenu('Genre cultural filter...', menuName);
+			const subMenuName = menu.newMenu('Genre cultural filter', menuName);
 			const options = [
-				{ name: 'All', val: -1 },
-				{ name: 'sep' },
 				{ name: 'Same continent', val: 0 },
 				{ name: 'Same region', val: 1 },
 				{ name: 'sep' },
 				{ name: 'Different continent', val: 2 },
-				{ name: 'Different region', val: 3 }
+				{ name: 'Different region', val: 3 },
+				{ name: 'sep' },
+				{ name: 'Disabled', val: -1 }
 			];
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
@@ -730,7 +779,10 @@ function createConfigMenu(parent) {
 			const options = ['poolFilteringN'];
 			options.forEach((key) => {
 				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+				const val = Object.hasOwn(recipe, key)
+					? '\t[' + (recipe[key] === -1 ? '-disabled-' : recipe[key]) + '] (forced by recipe)'
+					: '\t[' + (properties[key][1] === -1 ? '-disabled-' : properties[key][1])  + ']';
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + val;
 				menu.newEntry({
 					menuName, entryText, func: () => {
 						const input = Input.number('int', properties[key][1], 'Enter number: (greater or equal to 0)\n(-1 to disable)', 'Search by distance', properties[key][3], [(input) => input >= -1]);
@@ -799,7 +851,7 @@ function createConfigMenu(parent) {
 			}
 		);
 		{
-			const subMenuName = menu.newMenu('Smart Shuffle sorting bias...', menuName, properties.bSmartShuffle[1] ? MF_STRING : MF_GRAYED);
+			const subMenuName = menu.newMenu('Smart Shuffle sorting bias', menuName, properties.bSmartShuffle[1] ? MF_STRING : MF_GRAYED);
 			const options = [
 				{ key: 'Random', flags: MF_STRING },
 				{ key: 'Play count', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount' },
@@ -996,7 +1048,7 @@ function createConfigMenu(parent) {
 				menu.newEntry({
 					menuName: submenu, entryText: 'Relate selected tracks to last search', func: () => {
 						sel.Convert().forEach((handle) => {
-							if (sbd.lastSearch.handle.RawPath === handle.RawPath) {return;}
+							if (sbd.lastSearch.handle.RawPath === handle.RawPath) { return; }
 							addTracksRelation({
 								handleList: new FbMetadbHandleList([handle, sbd.lastSearch.handle]),
 								mode: 'related', tagsKeys: { unrelated: tags.related.tf }
@@ -1007,7 +1059,7 @@ function createConfigMenu(parent) {
 				menu.newEntry({
 					menuName: submenu, entryText: 'Unrelate selected tracks to last search', func: () => {
 						sel.Convert().forEach((handle) => {
-							if (sbd.lastSearch.handle.RawPath === handle.RawPath) {return;}
+							if (sbd.lastSearch.handle.RawPath === handle.RawPath) { return; }
 							addTracksRelation({
 								handleList: new FbMetadbHandleList([handle, sbd.lastSearch.handle]),
 								mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf }
@@ -1076,7 +1128,7 @@ function createConfigMenu(parent) {
 					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphStatistics') : null;
 					parent.switchAnimation('Graph statistics', true);
 					graphStatistics({ properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod }).then((resolve) => {
-						_save(folders.temp + 'musicGraphStatistics.txt', resolve.text.replace(/\n/g,'\r\n'));
+						_save(folders.temp + 'musicGraphStatistics.txt', resolve.text.replace(/\n/g, '\r\n'));
 						console.log(resolve.text); // DEBUG
 						parent.switchAnimation('Graph statistics', false);
 						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
@@ -1116,7 +1168,7 @@ function createConfigMenu(parent) {
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{
-		const subMenuName = menu.newMenu('Button config...');
+		const subMenuName = menu.newMenu('Button config');
 		menu.newEntry({
 			menuName: subMenuName, entryText: 'Rename button...', func: () => {
 				let input = '';
@@ -1169,7 +1221,7 @@ function createConfigMenu(parent) {
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{	// Readmes
-		const subMenuName = menu.newMenu('Readmes...');
+		const subMenuName = menu.newMenu('Readmes');
 		menu.newEntry({ menuName: subMenuName, entryText: 'Open popup with readme:', func: null, flags: MF_GRAYED });
 		menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
 		let iCount = 0;

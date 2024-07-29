@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/07/24
+//26/07/24
 var version = '7.3.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -79,7 +79,7 @@ include('..\\sort\\scatter_by_tags.js');
 /* global shuffleByTags:readable */
 include('..\\..\\helpers\\callbacks_xxx.js');
 include('search_by_distance_genres.js');
-/* global findStyleGenresMissingGraph:readable */
+/* global findStyleGenresMissingGraph:readable, getNearestGenreStyles:readable */
 include('search_by_distance_culture.js');
 /* global getCountryISO:readable, getLocaleFromId:readable, getZoneArtistFilter:readable, getZoneGraphFilter:readable, music_graph_descriptors_countries:readable, music_graph_descriptors_culture:readable */
 include('search_by_distance_extra.js');
@@ -145,6 +145,7 @@ const SearchByDistance_properties = {
 	artistRegionFilter: ['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, { range: [[-1, 5]], func: isInt }, -1],
 	genreStyleRegionFilter: ['Genre region filter: none (-1), continent (0), region (1)', -1, { range: [[-1, 3]], func: isInt }, -1],
 	dynQueries: ['Dynamic query filtering', JSON.stringify([]), { func: isJSON }, JSON.stringify([])],
+	nearGenresFilter: ['Near genres filter: none (-1), auto (0) or any distance value', 0, { range: [[-1, Infinity]], func: isInt }, 0]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -661,6 +662,7 @@ async function searchByDistance({
 	bUseInfluencesFilter = Object.hasOwn(properties, 'bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
 	artistRegionFilter = Object.hasOwn(properties, 'artistRegionFilter') ? Number(properties.artistRegionFilter[1]) : -1,
 	genreStyleRegionFilter = Object.hasOwn(properties, 'genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter[1]) : -1,
+	nearGenresFilter = Object.hasOwn(properties, 'nearGenresFilter') ? Number(properties.nearGenresFilter[1]) : 0,
 	// --->Scoring Method
 	method = Object.hasOwn(properties, 'method') ? properties.method[1] : 'GRAPH',
 	// --->Scoring filters
@@ -1128,7 +1130,10 @@ async function searchByDistance({
 						groups = groups.map((o) => { return { base: [...o.base], or: [...o.or] }; });
 						groups = groups.map((o) => {
 							return (o.or.length
-								? queryJoin(queryCombinations(o.base, tagNameTF, 'AND', void (0), match).concat(queryCombinations(o.or, tagNameTF, 'OR', void (0), match)), 'AND')
+								? queryJoin(
+									queryCombinations(o.base, tagNameTF, 'AND', void (0), match)
+										.concat(queryCombinations(o.or, tagNameTF, 'OR', void (0), match))
+								)
 								: void (0)
 							);
 						}).filter(Boolean);
@@ -1256,7 +1261,10 @@ async function searchByDistance({
 		}
 		if (key === 'related' && tag.weight !== 0) {
 			preQueryLength = query.length;
-			query[preQueryLength] = queryJoin(queryCombinations([...tag.referenceSet], ['MUSICBRAINZ_TRACKID', 'ARTIST', 'TITLE'], 'OR'), 'OR');
+			query[preQueryLength] = queryJoin(
+				queryCombinations([...tag.referenceSet], ['MUSICBRAINZ_TRACKID', 'ARTIST', 'TITLE'], 'OR')
+				, 'OR'
+			);
 		}
 	});
 	// Total score
@@ -1313,7 +1321,7 @@ async function searchByDistance({
 			}
 		}
 		if (influencesQuery.length) {
-			query[queryLength] = queryJoin(influencesQuery, 'AND');
+			query[queryLength] = queryJoin(influencesQuery);
 		} else if (queryLength === 1 && !query[0].length) { query[queryLength] = ''; }
 		else { query[queryLength] = queryJoin(query, 'OR'); } //join previous query's
 	}
@@ -1334,7 +1342,7 @@ async function searchByDistance({
 			queryArtist = 'NOT ' + _p(queryJoin(queryArtist, 'OR'));
 		}
 		if (queryArtist.length) {
-			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryArtist); }
+			if (query[queryLength].length) { query[queryLength] = queryJoin([query[queryLength], queryArtist]); }
 			else { query[queryLength] += queryArtist; }
 		}
 	}
@@ -1360,7 +1368,7 @@ async function searchByDistance({
 			querySimil = queryJoin(querySimil, 'OR');
 		}
 		if (querySimil.length) {
-			if (query[queryLength].length) { query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(querySimil); }
+			if (query[queryLength].length) { query[queryLength] = queryJoin([query[queryLength], querySimil]); }
 			else { query[queryLength] += querySimil; }
 		}
 	}
@@ -1373,7 +1381,7 @@ async function searchByDistance({
 				if (len > 50000) { // Minor optimization for huge queries
 					queryStages.push(queryRegion);
 				} else if (query[queryLength].length) {
-					query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion);
+					query[queryLength] = queryJoin([query[queryLength], queryRegion]);
 				} else { query[queryLength] += queryRegion; }
 			}
 		} else if (bBasicLogging) {
@@ -1392,10 +1400,28 @@ async function searchByDistance({
 					if (len > 50000) { // Minor optimization for huge queries
 						queryStages.push(queryRegion);
 					} else if (query[queryLength].length) {
-						query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(queryRegion);
+						query[queryLength] = queryJoin([query[queryLength], queryRegion]);
 					} else { query[queryLength] += queryRegion; }
 				}
 			}
+		}
+	}
+	if (nearGenresFilter !== -1) {
+		const maxDistance = nearGenresFilter || (method === 'GRAPH'
+			? graphDistance * 2
+			: Math.max(
+				music_graph_descriptors.cluster * 5 / 4,
+				Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', scoreFilter / 100, 5))
+			)
+		);
+		const nearestGenres = getNearestGenreStyles([...calcTags.genreStyle.referenceSet], maxDistance, sbd.allMusicGraph);
+		if (nearestGenres.length) {
+			const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+			let queryNearGenres = queryCombinations(nearestGenres, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
+			queryNearGenres = queryJoin(queryNearGenres, 'OR'); // flattens the array
+			console.log(queryNearGenres);
+			if (query[queryLength].length) { query[queryLength] = queryJoin([query[queryLength], queryNearGenres]); }
+			else { query[queryLength] += queryNearGenres; }
 		}
 	}
 	if (dynQueries.length) {
@@ -1423,7 +1449,7 @@ async function searchByDistance({
 								return tag.indexOf('$') !== -1
 									? (g1.replace('%', '') + _qCond(tag) + g3.replace('%', ''))
 									: (g1 + tag + g3);
-							}).replace(/(.*\()("\$)(.*)(\)"[\),])/g, function (match, g1, g2, g3, g4) { // eslint-disable-line no-useless-escape
+							}).replace(/(.*\()("\$)(.*)(\)"[),])/g, function (match, g1, g2, g3, g4) { // eslint-disable-line no-useless-escape
 								return g1 + '$' + g3 + g4.replace(/"/g, '');
 							});
 						});
@@ -1453,20 +1479,20 @@ async function searchByDistance({
 				return null;
 			}
 		}).filter(Boolean);
-		selQuery = queryJoin(selQuery, 'AND') || '';
+		selQuery = queryJoin(selQuery) || '';
 		// Add to list
 		const len = selQuery.length;
 		if (len) {
 			if (len > 50000) { // Minor optimization for huge queries
 				queryStages.push(selQuery);
 			} else if (query[queryLength].length) {
-				query[queryLength] = _p(query[queryLength]) + ' AND ' + _p(selQuery);
+				query[queryLength] = queryJoin([query[queryLength], selQuery]);
 			} else { query[queryLength] += selQuery; }
 		}
 	}
 	if (forcedQuery.length) { //Add user input query to the previous one
 		// Swap order to improve performance, since the forced query always short circuits the search
-		if (query[queryLength].length) { query[queryLength] = _p(forcedQuery) + ' AND ' + _p(query[queryLength]); }
+		if (query[queryLength].length) { query[queryLength] = queryJoin([forcedQuery, query[queryLength]]); }
 		else { query[queryLength] += forcedQuery; }
 	}
 	if (!query[queryLength].length) { query[queryLength] = 'ALL'; }
@@ -2536,7 +2562,19 @@ function processRecipe(initialRecipe) {
 	return toAdd;
 }
 
-const weightDistribution = memoize((scoringDistribution, proportion /* Should never be zero! */, tagNumber = 0, newTagNumber = 0) => {
+/**
+ * Description
+ *
+ * @function
+ * @name weightDistribution
+ * @kind Function
+ * @param {'LINEAR'|'LOGARITHMIC'|'LOGISTIC'|'NORMAL'} scoringDistribution
+ * @param {number} proportion - Input score (linear)
+ * @param {number} tagNumber - [=0] Number of tags from reference (to shape distribution)
+ * @param {number} newTagNumber - [=0] Number of tags from target (to shape distribution)
+ * @returns {number}
+ */
+const weightDistribution = memoize((/** @type {'LINEAR'|'LOGARITHMIC'|'LOGISTIC'|'NORMAL'} */ scoringDistribution, proportion /* Should never be zero! */, tagNumber = 0, newTagNumber = 0) => {
 	if (proportion < 0) {
 		return - weightDistribution(scoringDistribution, - proportion, tagNumber, newTagNumber);
 	}
