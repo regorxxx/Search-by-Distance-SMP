@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/06/24
+//25/07/24
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles */
 
@@ -36,9 +36,11 @@ function getNearestNodes(fromNode, maxDistance, graph = musicGraph()) {
 
 function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph()) {
 	let genreStyles = [...fromGenreStyles]; // Include theirselves
-	fromGenreStyles.forEach((node) => { getNearestNodes(node, maxDistance, graph).forEach((obj) => { genreStyles.push(obj.toId); }); });
+	fromGenreStyles.forEach((node) => {
+		getNearestNodes(node, maxDistance, graph).forEach((obj) => genreStyles.push(obj.toId));
+	});
 	genreStyles = music_graph_descriptors.replaceWithSubstitutionsReverse([...new Set(genreStyles)]);
-	genreStyles = [...(new Set(genreStyles.filter((node) => { return !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi); })))];
+	genreStyles = [...(new Set(genreStyles.filter((node) => !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi))))];
 	return genreStyles;
 }
 
