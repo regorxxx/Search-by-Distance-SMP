@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [7.4.0](#740---2024-07-30)
 - [7.3.0](#730---2024-07-24)
 - [7.2.0](#720---2024-03-21)
 - [7.1.0](#710---2024-03-15)
@@ -53,6 +54,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [7.4.0] - 2024-07-30
 ### Added
 - Descriptors: added Retrowave style.
 - Near Genres Filter: new option to filter the library using only genres/styles which are near the selected reference, greatly reducing processing time up to 50% (although some corner cases similar after calculating the mean distance may be excluded). By default is set to Auto. It works with any of the search methods, although it uses the genres relationship found at the GRAPH method.
@@ -871,7 +878,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.4.0...HEAD
+[7.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.2.0...v7.3.0
 [7.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.0.0...v7.1.0
