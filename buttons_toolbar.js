@@ -16,7 +16,7 @@
 // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
 // eslint-disable-next-line no-unused-vars
 var bLoadTags = true; // NOSONAR
-var version = '1.1.0'; // NOSONAR
+var version = '1.1.1'; // NOSONAR
 
 try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ }
 

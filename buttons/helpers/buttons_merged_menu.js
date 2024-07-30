@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/04/24
+//30/07/24
 
 /* exported createButtonsMenu */
 
@@ -152,7 +152,7 @@ function createButtonsMenu(name) {
 	});
 	menu.newEntry({ entryText: 'sep' });
 	{
-		const menuName = menu.newMenu('Colors...');
+		const menuName = menu.newMenu('Colors');
 		const getColorName = (val) => {
 			return (val !== -1 ? (ntc.name(Chroma(val).hex())[1] || '').toString() || 'unknown' : '-none-');
 		}; // From statistics
@@ -314,7 +314,7 @@ function createButtonsMenu(name) {
 		});
 	}
 	{
-		const menuName = menu.newMenu('Size and placement...');
+		const menuName = menu.newMenu('Size and placement');
 		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({ menuName, entryText: 'UI placement: (Ctrl + Click to reset)', flags: MF_GRAYED });
 		menu.newEntry({ menuName, entryText: 'sep' });
@@ -483,7 +483,7 @@ function createButtonsMenu(name) {
 		menu.newCheckMenuLast(() => barProperties.bFullSize[1]);
 	}
 	{
-		const menuName = menu.newMenu('Other UI settings...');
+		const menuName = menu.newMenu('Other UI settings');
 		menu.newEntry({
 			menuName, entryText: 'Show properties IDs on tooltip', func: () => {
 				buttonsBar.config.bShowID = barProperties.bShowId[1] = !barProperties.bShowId[1];
@@ -501,7 +501,7 @@ function createButtonsMenu(name) {
 			}
 		});
 		{
-			const subMenu = menu.newMenu('Icons-only mode...', menuName);
+			const subMenu = menu.newMenu('Icons-only mode', menuName);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Force for all buttons', func: () => {
 					buttonsBar.config.bIconMode = barProperties.bIconMode[1] = !barProperties.bIconMode[1];
@@ -575,7 +575,7 @@ function createButtonsMenu(name) {
 		{
 			const keys = buttonsBar.listKeys.map((arr) => arr.filter((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))).flat(Infinity).filter(Boolean);
 			const checkHeadless = () => keys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());
-			const subMenu = menu.newMenu('Headless mode...' + (keys.length ? '' : '\t[none]'), menuName, keys.length ? MF_STRING : MF_GRAYED);
+			const subMenu = menu.newMenu('Headless mode' + (keys.length ? '' : '\t[none]'), menuName, keys.length ? MF_STRING : MF_GRAYED);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Enable for all buttons', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
@@ -642,7 +642,7 @@ function createButtonsMenu(name) {
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{
-		const subMenu = menu.newMenu('Other settings...');
+		const subMenu = menu.newMenu('Other settings');
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Asynchronous loading (startup)', func: () => {
 				barProperties.bLoadAsync[1] = !barProperties.bLoadAsync[1];
@@ -653,7 +653,7 @@ function createButtonsMenu(name) {
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{
-		const subMenu = menu.newMenu('Updates...');
+		const subMenu = menu.newMenu('Updates');
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Automatically check for updates', func: () => {
 				barProperties.bAutoUpdateCheck[1] = !barProperties.bAutoUpdateCheck[1];
@@ -693,7 +693,7 @@ function createButtonsMenu(name) {
 	}
 	menu.newEntry({ entryText: 'sep' });
 	{
-		const subMenu = menu.newMenu('Readmes...');
+		const subMenu = menu.newMenu('Readmes');
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Toolbar', func: () => {
 				const readmePath = folders.xxx + 'helpers\\readme\\toolbar.txt';

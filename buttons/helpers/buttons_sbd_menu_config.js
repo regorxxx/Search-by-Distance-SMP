@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/07/24
+//30/07/24
 
 /* exported createConfigMenu */
 
@@ -34,6 +34,10 @@ function createConfigMenu(parent) {
 	const bRecipeTags = Object.hasOwn(recipe, 'tags');
 	// Recipe-only tags?
 	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
+	const graphDistance = Object.hasOwn(recipe, 'graphDistance')
+		? parseGraphVal(recipe.graphDistance)
+		: parseGraphVal(properties.graphDistance[1]);
+	const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
 	// Helpers
 	const createTagMenu = (menuName, options) => {
 		options.forEach((key) => {
@@ -109,9 +113,7 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{
-			const graphDistance = Object.hasOwn(recipe, 'graphDistance') ? parseGraphVal(recipe.graphDistance) : parseGraphVal(properties.graphDistance[1]);
 			const key = 'graphDistance';
-			const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
 			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
 			const idxEnd = properties[key][0].indexOf('(');
 			const val = properties[key][1];
@@ -484,8 +486,11 @@ function createConfigMenu(parent) {
 	{	// Pre-scoring filters:
 		const menuName = menu.newMenu('Set pre-scoring filters');
 		{	// Forced Query
+			const bRecipe = Object.hasOwn(recipe, 'forcedQuery');
+			const prop = bRecipe ? recipe.forcedQuery : properties['forcedQuery'][1];
 			menu.newEntry({
-				menuName, entryText: 'Set Global Forced Query...' + (Object.hasOwn(recipe, 'forcedQuery') ? '\t(forced by recipe)' : ''), func: (cache) => {
+				menuName, entryText: 'Set Global Forced Query...' +(!prop.length ? '[none]' : '[enabled]') + (bRecipe ? '(forced by recipe)' : ''),
+				func: (cache) => {
 					let input = '';
 					try { input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', cache || properties['forcedQuery'][1], true); }
 					catch (e) { return; }
@@ -502,11 +507,10 @@ function createConfigMenu(parent) {
 					}
 					properties['forcedQuery'][1] = input;
 					overwriteProperties(properties); // Updates panel
-				}, flags: Object.hasOwn(recipe, 'forcedQuery') ? MF_GRAYED : MF_STRING
+				}, flags: bRecipe ? MF_GRAYED : MF_STRING
 			});
 		}
 		{	// Additional filters
-			const subMenuName = menu.newMenu('Additional pre-defined filters', menuName);
 			let options = [];
 			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
 			const bFile = _isFile(file);
@@ -529,6 +533,13 @@ function createConfigMenu(parent) {
 					{ title: 'Not Live (unless Hi-Fi)', query: globQuery.noLive }
 				];
 			}
+			const hasQuery = (obj) => {
+				if (!obj.query) { return false; }
+				const prop = Object.hasOwn(recipe, 'forcedQuery') ? recipe.forcedQuery : properties['forcedQuery'][1];
+				return !!(prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')', '\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)')));
+			};
+			const filterCount = options.map(hasQuery).filter(Boolean).length;
+			const subMenuName = menu.newMenu('Additional pre-defined filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED });
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			const switchQuery = (input, query) => {
@@ -567,10 +578,7 @@ function createConfigMenu(parent) {
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'forcedQuery') ? MF_GRAYED : MF_STRING
 				});
-				menu.newCheckMenu(subMenuName, entryText, void (0), () => {
-					const prop = Object.hasOwn(recipe, 'forcedQuery') ? recipe.forcedQuery : properties['forcedQuery'][1];
-					return !!(prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')', '\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)')));
-				});
+				menu.newCheckMenu(subMenuName, entryText, void (0), () => hasQuery(obj));
 			});
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
@@ -582,7 +590,6 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Dynamic queries
-			const subMenuName = menu.newMenu('Dynamic query filters', menuName);
 			let options = [];
 			const currentFilters = JSON.parse(properties['dynQueries'][1]);
 			const data = JSON.parse(properties.data[1]);
@@ -610,6 +617,7 @@ function createConfigMenu(parent) {
 					{ title: 'In 5 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 5' },
 				];
 			}
+			const subMenuName = menu.newMenu('Dynamic query filters' + ((Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters).length === 0 ? '\t[none]' : ''), menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED });
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			options.forEach((obj) => {
@@ -652,37 +660,33 @@ function createConfigMenu(parent) {
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Near genres filter
 			const key = 'nearGenresFilter';
-			const subMenuName = menu.newMenu('Nearest genres filter', menuName);
-			const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
-			const graphDistance = parseGraphVal(Object.hasOwn(recipe, 'graphDistance') ? recipe.graphDistance : properties.graphDistance[1]);
 			const score = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
 			const nearScoreFilter = Math.max(
 				music_graph_descriptors.cluster * 5 / 4,
 				Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', score, 5))
 			);
+			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
+			const autoVal = bIsGraph ? graphDistance * 2 : nearScoreFilter;
 			const options = [
 				{
-					name: 'Automatic' + (bIsGraph
-						? '\t[' + graphDistance * 2 + ']'
-						: '\t[' + nearScoreFilter + ']'),
+					name: 'Automatic' + '\t[' + autoVal + ']',
 					val: 0
 				},
 				{
-					name: 'Custom' + (Object.hasOwn(recipe, key)
-						? recipe[key] > 0 ? '\t[' + recipe[key] + ']' : ''
-						: properties[key][1] > 0 ? '\t[' + properties[key][1] + ']' : ''),
-					val: properties[key][1] > 0 ? properties[key][1] : 1
+					name: 'Custom' + (keyVal > 0 ? '\t[' + keyVal + ']' : ''),
+					val: (keyVal > 0 ? keyVal : 1)
 				},
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 },
 			];
+			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? 'disabled' : (keyVal || 'auto: ' + autoVal)) + ']', menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
 						let input = opt.val;
-						const defVal = properties[key][1] > 0 ? properties[key][1] : graphDistance * 2;
+						const defVal = keyVal || autoVal;
 						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genres/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', 'Search by distance'); }
 						if (input > 0) {
 							input = Input.number('int', defVal, 'Enter number: (between -1 and Infinity)\n\nDisabled (-1),  automatic (0) or any Graph distance value (suggested 2 x max Graph distance).', 'Search by distance', defVal, [(input) => input >= -1]);
@@ -696,13 +700,12 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1])); });
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Influences filter
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
 			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
-			const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
 			options.forEach((key) => {
 				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
 				const bGraphCondition = !bIsGraph && (key === 'bUseAntiInfluencesFilter' || key === 'bConditionAntiInfluences' || key === 'bUseInfluencesFilter');
@@ -720,7 +723,8 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Culture filters
-			const subMenuName = menu.newMenu('Artist cultural filter', menuName);
+			const key = 'artistRegionFilter';
+			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
 			const options = [
 				{ name: 'Same continent', val: 0 },
 				{ name: 'Same region', val: 1 },
@@ -732,21 +736,23 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
+			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[disabled]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
-				const entryText = opt.name + (Object.hasOwn(recipe, 'artistRegionFilter') && recipe.artistRegionFilter === opt.val ? '\t(forced by recipe)' : '');
+				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
 						if (opt.val !== -1) { fb.ShowPopupMessage('This filter allows only artists from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
-						properties['artistRegionFilter'][1] = opt.val;
+						properties[key][1] = opt.val;
 						overwriteProperties(properties); // Updates panel
-					}, flags: (Object.hasOwn(recipe, 'artistRegionFilter') ? MF_GRAYED : MF_STRING)
+					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (Object.hasOwn(recipe, 'artistRegionFilter') ? recipe['artistRegionFilter'] : properties['artistRegionFilter'][1])); });
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
 		}
 		{	// Culture filters
-			const subMenuName = menu.newMenu('Genre cultural filter', menuName);
+			const key = 'genreStyleRegionFilter';
+			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
 			const options = [
 				{ name: 'Same continent', val: 0 },
 				{ name: 'Same region', val: 1 },
@@ -756,18 +762,19 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
+			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[disabled]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
-				const entryText = opt.name + (Object.hasOwn(recipe, 'genreStyleRegionFilter') && recipe.genreStyleRegionFilter === opt.val ? '\t(forced by recipe)' : '');
+				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
 						if (opt.val !== -1) { fb.ShowPopupMessage('This filter allows only genre/styles from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
-						properties['genreStyleRegionFilter'][1] = opt.val;
+						properties[key][1] = opt.val;
 						overwriteProperties(properties); // Updates panel
-					}, flags: (Object.hasOwn(recipe, 'genreStyleRegionFilter') ? MF_GRAYED : MF_STRING)
+					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === (Object.hasOwn(recipe, 'genreStyleRegionFilter') ? recipe['genreStyleRegionFilter'] : properties['genreStyleRegionFilter'][1])); });
+			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
 		}
 	}
 	{	// Post-scoring filters:
@@ -781,7 +788,7 @@ function createConfigMenu(parent) {
 				const idxEnd = properties[key][0].indexOf('(');
 				const val = Object.hasOwn(recipe, key)
 					? '\t[' + (recipe[key] === -1 ? '-disabled-' : recipe[key]) + '] (forced by recipe)'
-					: '\t[' + (properties[key][1] === -1 ? '-disabled-' : properties[key][1])  + ']';
+					: '\t[' + (properties[key][1] === -1 ? '-disabled-' : properties[key][1]) + ']';
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + val;
 				menu.newEntry({
 					menuName, entryText, func: () => {
