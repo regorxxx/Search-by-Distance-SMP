@@ -175,8 +175,8 @@ function createConfigMenu(parent) {
 			};
 			obj.tag = obj.bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 			obj.entrySuffix = obj.bRecipe || obj.bIsDyngenreRecipe
-				? '\t[' + (obj.bIsDyngenreRecipe ? 'disabled' : obj.tag.weight) + '] (forced by recipe)'
-				: '\t[' + (obj.bIsDyngenreProp ? 'disabled' : obj.tag.weight) + ']';
+				? '\t[' + (obj.bIsDyngenreRecipe ? '-disabled-' : obj.tag.weight) + '] (forced by recipe)'
+				: '\t[' + (obj.bIsDyngenreProp ? '-disabled-' : obj.tag.weight) + ']';
 			const weight = obj.tag.weight.toString().padStart(2, 0);
 			obj.menuSuffix = obj.bRecipe || obj.bIsDyngenreRecipe
 				? '\t[' + (obj.bIsDyngenreRecipe ? '-disabled-' : 'weight: ' + weight) + '] (forced by recipe)'
@@ -679,7 +679,7 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 },
 			];
-			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? 'disabled' : (keyVal || 'auto: ' + autoVal)) + ']', menuName);
+			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -736,7 +736,7 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
-			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[disabled]' : '\t[enabled]'), menuName);
+			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -762,7 +762,7 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
-			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[disabled]' : '\t[enabled]'), menuName);
+			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
 				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
