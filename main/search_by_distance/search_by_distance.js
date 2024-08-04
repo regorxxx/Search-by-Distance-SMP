@@ -1025,7 +1025,7 @@ async function searchByDistance({
 		}
 	}
 	// Sets for later comparison
-	if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0 || calcTags.genreStyleRegion.weight !== 0 || nearGenresFilter !== -1) {
+	if (method === 'GRAPH' || calcTags.dynGenre.weight !== 0 || calcTags.genreStyleRegion.weight !== 0 || nearGenresFilter !== -1 || genreStyleRegionFilter !== -1) {
 		calcTags.genreStyle.referenceSet = Object.keys(calcTags).reduce((acc, key) => {
 			const tag = calcTags[key];
 			return tag.bGraphDyn && calcTags[key].reference.length > 0
