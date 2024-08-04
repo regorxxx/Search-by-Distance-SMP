@@ -162,7 +162,7 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 	profiler.Print();
 	const report = newData.map((obj) => // List of artists with tabbed similar artists + score
 		obj.artist + ':\n\t' + (obj.val.map((sim) =>
-			_b(sim.score) + '\t' + sim.artist
+			_b(sim.score + '%') + '\t' + sim.artist
 		).join('\n\t') || '-NONE-')
 	).join('\n\n');
 	fb.ShowPopupMessage(report, 'Search by distance');
