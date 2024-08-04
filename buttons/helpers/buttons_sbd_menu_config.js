@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/08/24
+//04/08/24
 
 /* exported createConfigMenu */
 
@@ -700,7 +700,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
+			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Influences filter
@@ -748,7 +748,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
+			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
 		}
 		{	// Culture filters
 			const key = 'genreStyleRegionFilter';
@@ -774,7 +774,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenu(subMenuName, options[0].name, options[options.length - 1].name, () => { return options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal); });
+			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
 		}
 	}
 	{	// Post-scoring filters:
@@ -888,10 +888,10 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenu(subMenuName, options[0].key, 'Custom TF...', () => {
+			menu.newCheckMenuLast(() => {
 				const idx = options.findIndex((opt) => opt.key.replace(/ /g, '').toLowerCase() === properties.smartShuffleSortBias[1]);
 				return idx !== -1 ? idx : options.length;
-			});
+			}, options.length + 2);
 		}
 	}
 	{	// Special playlists:
