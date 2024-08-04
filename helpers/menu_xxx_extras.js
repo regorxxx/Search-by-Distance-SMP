@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/05/24
+//04/08/24
 
 /* exported _createSubMenuEditEntries */
 
@@ -62,6 +62,15 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			if (options.onBtnUp) {options.onBtnUp(options.list);}
 			return options.list;
 		}});
+		const defTag = options.defaults.find((defTag) => entry.name === defTag.name);
+		if (defTag) {
+			parent.newEntry({menuName: subMenuThirdName, entryText: 'sep'});
+			parent.newEntry({menuName: subMenuThirdName, entryText: 'Reset default entry', func: () => {
+				options.list[index] = defTag;
+				if (options.onBtnUp) {options.onBtnUp(options.list);}
+				return options.list;
+			}});
+		}
 		parent.newEntry({menuName: subMenuThirdName, entryText: 'sep'});
 		parent.newEntry({menuName: subMenuThirdName, entryText: 'Remove entry', func: () => {
 			options.list.splice(index, 1);
