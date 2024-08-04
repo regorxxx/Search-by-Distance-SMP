@@ -3,7 +3,7 @@
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, weightDistribution:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, weightDistribution:readable, shuffleBiasTf:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -871,10 +871,10 @@ function createConfigMenu(parent) {
 			menu.newEntry({ menuName: subMenuName, entryText: 'Prioritize tracks by:', flags: MF_GRAYED });
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
 			options.forEach((opt) => {
-				const tf = opt.key.replace(/ /g, '').toLowerCase();
+				opt.tf = opt.key.replace(/ /g, '').toLowerCase();
 				menu.newEntry({
 					menuName: subMenuName, entryText: opt.key + (opt.flags ? '\t' + opt.req : ''), func: () => {
-						properties.smartShuffleSortBias[1] = tf;
+						properties.smartShuffleSortBias[1] = opt.tf;
 						overwriteProperties(properties); // Updates panel
 					}, flags: (Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING) | opt.flags
 				});
@@ -882,7 +882,10 @@ function createConfigMenu(parent) {
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Custom TF...', func: () => {
-					const input = Input.string('string', properties.smartShuffleSortBias[1], 'Enter TF expression:', 'Search by distance', properties.smartShuffleSortBias[3]);
+					const currValue = options.find((opt) => opt.tf === properties.smartShuffleSortBias[1])
+						? shuffleBiasTf(properties.smartShuffleSortBias[1])
+						: properties.smartShuffleSortBias[1];
+					const input = Input.string('string', currValue, 'Enter TF expression:', 'Search by distance', shuffleBiasTf('rating'));
 					if (input === null) { return; }
 					properties.smartShuffleSortBias[1] = input;
 					overwriteProperties(properties); // Updates panel

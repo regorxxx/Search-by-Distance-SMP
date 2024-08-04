@@ -60,11 +60,13 @@
 - Similar artists: reworked similar artists database handling and unified processing with other similar artists databases (like ListenBrainz one included on other scripts).
 - Similar artists: recipe for calculation now uses the near genres filter added at [7.4.0](#740---2024-07-30) on auto mode. Total processing time should now be much lower than before.
 - Helpers: updated helpers.
+- UI: Smart shuffle sorting bias custom entry now shows as default TF expression the last one used if it was associated to a named entry (instead of its name).
 ### Removed
 ### Fixed
 - Near Genres Filter: fix crash using 'WEIGHT' method if the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).
 - Genre Cultural Filter: fix crash in some methods if to 'Genre/style Region' tag had no assigned weight and the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).
 - UI: crash opening settings menu with some recipes. [Issue 33](https://github.com/regorxxx/Search-by-Distance-SMP/issues/33).
+- Smart shuffle: foo_playcount was not being properly detected (instead looking for foo_enhanced_playcount).
 
 ## [7.4.0] - 2024-07-30
 ### Added
@@ -331,7 +333,7 @@
 
 ## [4.5.0] - 2023-07-28
 ### Added
-- Selection manipulation\Shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
+- Smart shuffle: new sorting bias settings. Key (sorted from 12A to 1B), Key 6A centered (starting from 6A). Using these is like merging Harmonic Mix (consecutive tracks should have similar keys) and Smart Shuffle.
 - Descriptors: updated descriptors with multiple additions and improvements for Folk and Progressive Rock music.
 ### Changed
 - Configuration: ALBUM ARTIST is now used instead of ARTIST by default (on new installations). This ensures better compatibility with classical music, where the artist is the actual performer but the album artist is the original composer/artist. To apply the change on existing installations, delete '[foobar_profile]\js_data\presets\global\globQuery.json' and '[foobar_profile]\foobar2000\js_data\presets\global\globTags.json' files. Further configuration may be needed via menus.
