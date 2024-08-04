@@ -55,7 +55,10 @@
 
 ## [Unreleased][]
 ### Added
+- Near Genres Filter: added support at recipes.
 ### Changed
+- Similar artists: reworked similar artists database handling and unified processing with other similar artists databases (like ListenBrainz one included on other scripts).
+- Similar artists: recipe for calculation now uses the near genres filter added at [7.4.0](#740---2024-07-30) on auto mode. Total processing time should now be much lower than before.
 ### Removed
 ### Fixed
 
