@@ -148,7 +148,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 
 async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties } = {}) {
 	const handleList = removeDuplicates({ handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist] });
-	const time = secondsToTime(Math.round(handleList.Count * 30 * fb.GetLibraryItems().Count / 70000));
+	const time = secondsToTime(Math.round(handleList.Count * 5 * fb.GetLibraryItems().Count / 70000));
 	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) { return; }
 	let profiler = new FbProfiler('Calculate similar artists');
 	const newData = [];
