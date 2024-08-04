@@ -66,6 +66,7 @@
 - Near Genres Filter: fix crash using 'WEIGHT' method if the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).
 - Genre Cultural Filter: fix crash in some methods if to 'Genre/style Region' tag had no assigned weight and the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).
 - UI: crash opening settings menu with some recipes. [Issue 33](https://github.com/regorxxx/Search-by-Distance-SMP/issues/33).
+- UI: minor errors on menu entries tips.
 - Smart shuffle: foo_playcount was not being properly detected (instead looking for foo_enhanced_playcount).
 
 ## [7.4.0] - 2024-07-30
