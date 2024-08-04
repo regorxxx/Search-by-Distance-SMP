@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/07/24
+//04/08/24
 var version = '7.4.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -50,7 +50,7 @@ var bLoadTags = true; // NOSONAR [shared on files]
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global isFoobarV2:readable, checkCompatible:readable, globTags:readable, folders:readable, globQuery:readable, iDelayLibrary:readable */
 /* global debounce:readable, doOnce:readable, clone:readable , memoize:readable */
-/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable, _jsonParseFile:readable */
+/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable */
 include('..\\..\\helpers\\helpers_xxx_crc.js');
 /* global crc32:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -59,6 +59,8 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
 /* global checkQuery:readable, getHandleListTagsV2:readable, queryJoin:readable, getHandleListTags:readable, queryCombinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
+include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
+/* global getSimilarDataFromFile:readable */
 if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
@@ -1355,7 +1357,7 @@ async function searchByDistance({
 		)];
 		let querySimil = '';
 		if (!similTags.length && _isFile(file)) {
-			const data = _jsonParseFile(file, utf8);
+			const data = getSimilarDataFromFile(file);
 			const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
 			if (data) {
 				const dataArtist = data.find((obj) => { return obj.artist === artist; });
@@ -1419,7 +1421,6 @@ async function searchByDistance({
 			const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 			let queryNearGenres = queryCombinations(nearestGenres, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 			queryNearGenres = queryJoin(queryNearGenres, 'OR'); // flattens the array
-			console.log(queryNearGenres);
 			if (query[queryLength].length) { query[queryLength] = queryJoin([query[queryLength], queryNearGenres]); }
 			else { query[queryLength] += queryNearGenres; }
 		}

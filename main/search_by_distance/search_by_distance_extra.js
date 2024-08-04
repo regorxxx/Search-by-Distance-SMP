@@ -1,15 +1,39 @@
 ﻿'use strict';
-//13/06/24
+//04/08/24
 
-/* exported calculateSimilarArtistsFromPls, writeSimilarArtistsTags, addTracksRelation */
+/* exported calculateSimilarArtistsFromPls, addTracksRelation */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, getNearestGenreStyles:readable */
-/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicates:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _isFile:readable, _save:readable, _jsonParseFile:readable, utf8:readable, _deleteFile:readable, _b:readable, secondsToTime:readable, getHandleTags:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicates:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _b:readable, secondsToTime:readable, getHandleTags:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_node.js');
 // music_graph_descriptors.nodeList
+include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
+/* global updateTrackSimilarTags:readable, updateSimilarDataFile:radable, updateSimilarDataFile:readable */
 
-// Similar artists
+/**
+ * Output similar artists to the one from input FbMetadbHandle using (@see searchByDistance)
+ *
+ * @async
+ * @function
+ * @name calculateSimilarArtists
+ * @kind function
+ * @param {Object} [o] - arguments
+ * @param {FbMetadbHandle?} o.selHandle - [=fb.GetFocusItem()] Input FbMetadbHandle
+ * @param {Object?} o.properties - [=null] searchByDistance properties object
+ * @param {(Object|string)?} o.theme - [=null] searchByDistance theme object or path
+ * @param {(Object|string)?} o.recipe - [='int_simil_artists_calc_graph.json'] searchByDistance recipe object or path
+ * @param {number} o.dateRange - [=10] Filters the compared track within a date range (from reference)
+ * @param {number} o.size - [=50] Number of (random) tracks to use as reference from input artist
+ * @param {('reference'|'weighted'|'variable')?} o.method - [='weighted'] Algorithm used to aggregate artist similarity scores.
+ *
+ * 		'reference' uses only the input handle as reference to filter the genre/style comparison. It creates a bias towards the input, thus can be used to force categorization into a specific genre/style corpus.
+ *
+ *		'weighted' will use every random track (from input artist) independently and aggregate their score based on how many times that genre/style appears in the input artist's tracks. Bias is reduced to a minimum, only depending on the user library (i.e. if a library mostly contains Rock tracks for a New Age artist, it will be in fact match with other Rock artists).
+ *
+ *		'variable' will use every random track (from input artist) independently and aggregate their score calculating the mean. It may introduce a bias if the random tracks chosen are not representative of the artist's work.
+ * @returns {Promise<{ artist: string; val: { artist: string; count: number; score: number; }[]; }>}
+ */
 async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted' } = {}) {
 	const test = sbd.panelProperties.bProfile[1] ? new FbProfiler('calculateSimilarArtists') : null;
 	// Retrieve all tracks for the selected artist and compare them against the library (any other track not by the artist)
@@ -39,11 +63,11 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	if (method === 'weighted') {
 		const genreStyle = getHandleListTags(selArtistTracks, genreStyleTag, { bMerged: true }).flat(Infinity).filter(Boolean);
 		const size = genreStyle.length;
-		genreStyle.forEach((val) => {
-			if (genreStyleWeight.has(val)) { genreStyleWeight.set(val, genreStyleWeight.get(val) + 1); }
-			else { genreStyleWeight.set(val, 1); }
+		genreStyle.forEach((g) => {
+			if (genreStyleWeight.has(g)) { genreStyleWeight.set(g, genreStyleWeight.get(g) + 1); }
+			else { genreStyleWeight.set(g, 1); }
 		});
-		genreStyleWeight.forEach((val, key) => { genreStyleWeight.set(key, val / size); });
+		genreStyleWeight.forEach((g, key) => { genreStyleWeight.set(key, g / size); });
 	}
 	// Add all possible exclusions to make it faster (even if it less precise)
 	// newConfig.genreStyleFilter[1] = [...(clone(music_graph_descriptors.map_distance_exclusions).union(new Set(newConfig.genreStyleFilter[1].split(/| */))))].join(',');
@@ -112,14 +136,13 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	// Get all matched artists and sort by score
 	let total = [];
 	for (const [, value] of report) {
-		const count = round(value.count / size * 100, 1);
+		const count = round(value.count / size * 100, 2);
 		if (count > 1) {
-			const score = round(value.score / size, 2);
-			const scoreW = round(value.score / value.count, 1);
-			total.push({ artist: value.artist, score, count, scoreW });
+			const score = round(value.score / value.count, 1);
+			total.push({ artist: value.artist, count, score });
 		}
 	}
-	total.sort((a, b) => { return b.scoreW - a.scoreW; });
+	total.sort((a, b) => { return b.score - a.score; });
 	return { artist: artist.join(', '), val: total };
 }
 
@@ -135,83 +158,18 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 		if (output.val.length) { newData.push(output); }
 	}
 	if (!newData.length) { console.log('Nothing found.'); return []; }
-	if (!_isFile(file)) {
-		newData.forEach((obj) => { console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); }); // DEBUG
-		_save(file, JSON.stringify(newData, null, '\t'));
-	} else {
-		const data = _jsonParseFile(file, utf8);
-		if (data) {
-			const idxMap = new Map();
-			data.forEach((obj, idx) => { idxMap.set(obj.artist, idx); });
-			newData.forEach((obj) => {
-				const idx = idxMap.get(obj.artist);
-				if (idx >= 0) { data[idx] = obj; }
-				else { data.push(obj); }
-				console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); // DEBUG
-			});
-		}
-		_deleteFile(file);
-		_save(file, JSON.stringify(data || newData, null, '\t'));
-	}
+	updateSimilarDataFile(file, newData, iNum);
 	profiler.Print();
 	const report = newData.map((obj) => // List of artists with tabbed similar artists + score
 		obj.artist + ':\n\t' + (obj.val.map((sim) =>
-			_b(sim.scoreW) + '\t' + sim.artist
+			_b(sim.score) + '\t' + sim.artist
 		).join('\n\t') || '-NONE-')
 	).join('\n\n');
 	fb.ShowPopupMessage(report, 'Search by distance');
-	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Similar artists', popup.question + popup.yes_no) === popup.no) { return; }
-	else {
-		newData.forEach((obj) => {
-			const artist = obj.artist.split(', ');
-			const similarArtists = obj.val.map((o) => { return o.artist; }).slice(0, iNum);
-			if (!similarArtists.length) { return; }
-			const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), artist.map((a) => { return globTags.artist + ' IS ' + a; }).join(' OR '));
-			const count = artistTracks.Count;
-			if (count) {
-				let arr = [];
-				for (let i = 0; i < count; ++i) {
-					arr.push({
-						[tagName]: similarArtists
-					});
-				}
-				artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
-				console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
-			}
-		});
+	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Similar artists', popup.question + popup.yes_no) === popup.yes) {
+		updateTrackSimilarTags({data: newData, iNum, tagName, windowName: 'Search by distance', bPopup: false });
 	}
 	return newData;
-}
-
-function writeSimilarArtistsTags({ file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE' } = {}) {
-	if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return false; }
-	if (!_isFile(file)) { return false; }
-	else {
-		const data = _jsonParseFile(file, utf8);
-		if (data) {
-			const bRewrite = WshShell.Popup('Rewrite previously added similar artist tags?', 0, window.Name, popup.question + popup.yes_no) === popup.yes;
-			const queryNoRw = ' AND ' + tagName + ' MISSING';
-			data.forEach((obj) => {
-				const artist = obj.artist.split(', ');
-				const similarArtists = obj.val.map((o) => { return o.artist; }).slice(0, iNum);
-				if (!similarArtists.length) { return; }
-				const queryArtists = artist.map((a) => { return globTags.artist + ' IS ' + a; }).join(' OR ');
-				const artistTracks = fb.GetQueryItems(fb.GetLibraryItems(), (bRewrite ? queryArtists : _p(queryArtists) + queryNoRw));
-				const count = artistTracks.Count;
-				if (count) {
-					let arr = [];
-					for (let i = 0; i < count; ++i) {
-						arr.push({
-							[tagName]: similarArtists
-						});
-					}
-					artistTracks.UpdateFileInfoFromJSON(JSON.stringify(arr));
-					console.log('Updating tracks by ' + artist + ': ' + count + ' tracks.');
-				}
-			});
-		}
-	}
-	return true;
 }
 
 function addTracksRelation({

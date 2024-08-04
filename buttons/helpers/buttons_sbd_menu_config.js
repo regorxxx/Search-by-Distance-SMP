@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/07/24
+//02/08/24
 
 /* exported createConfigMenu */
 
@@ -489,7 +489,7 @@ function createConfigMenu(parent) {
 			const bRecipe = Object.hasOwn(recipe, 'forcedQuery');
 			const prop = bRecipe ? recipe.forcedQuery : properties['forcedQuery'][1];
 			menu.newEntry({
-				menuName, entryText: 'Set Global Forced Query...' +(!prop.length ? '[none]' : '[enabled]') + (bRecipe ? '(forced by recipe)' : ''),
+				menuName, entryText: 'Set Global Forced Query...' + (!prop.length ? '[none]' : '[enabled]') + (bRecipe ? '(forced by recipe)' : ''),
 				func: (cache) => {
 					let input = '';
 					try { input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', cache || properties['forcedQuery'][1], true); }
@@ -1006,7 +1006,7 @@ function createConfigMenu(parent) {
 			});
 			menu.newEntry({
 				menuName: submenu, entryText: 'Write similar artists tags', func: () => {
-					writeSimilarArtistsTags();
+					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: 'SIMILAR ARTISTS SEARCHBYDISTANCE', windowName: 'Search by Distance' });
 				}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED
 			});
 		}
