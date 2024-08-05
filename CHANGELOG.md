@@ -71,7 +71,8 @@
 - UI: minor errors on menu entries tips.
 - Smart shuffle: foo_playcount was not being properly detected (instead looking for foo_enhanced_playcount).
 - Tags cache: crash due to wrong path at include code.
-- Tags: crash in some corner cases using WEIGHT method.
+- Tags: crash in some corner cases using WEIGHT method. See [Issue 34](https://github.com/regorxxx/Search-by-Distance-SMP/issues/34)
+- Tags: crash in some corner cases if tags were not properly set. See [Issue 34](https://github.com/regorxxx/Search-by-Distance-SMP/issues/34)
 
 ## [7.4.0] - 2024-07-30
 ### Added

@@ -1580,8 +1580,7 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		if (tag.bVirtual) { continue; }
-		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || tag.bKeyMix)) {
-		// if (tag.weight !== 0 || tag.tf.length && (tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
 			tagsArr.push(tag.tf);
 		}
 	}
@@ -1608,19 +1607,22 @@ async function searchByDistance({
 		const tag = calcTags[key];
 		if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
 		if (tag.bVirtual) { continue; }
-		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || tag.bKeyMix)) {
+		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
 			tag.handle = tagsValByKey[z++];
 		} else {
 			tag.handle = null;
 		}
 	}
+	if (bSearchDebug) {console.log('Tag:', 'title - index', z);}
 	const titleHandle = tagsValByKey[z++];
 	let artistHandle;
 	if (calcTags.artistRegion.weight !== 0) {
+		if (bSearchDebug) {console.log('Tag:', 'artist - index', z);}
 		artistHandle = tagsValByKey[z++];
 		calcTags.artistRegion.handle = calcTags.artistRegion.tf.length ? tagsValByKey[z++] : null;
 	}
 	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
+		if (bSearchDebug) {console.log('Tag:', 'related/unrelated - index', z);}
 		calcTags.unrelated.handle = calcTags.related.handle = tagsValByKey[z++];
 	}
 	if (bProfile) { test.Print('Task #4: Library tags', false); }
@@ -1637,7 +1639,7 @@ async function searchByDistance({
 			const tag = calcTags[key];
 			if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
 			handleTag[key] = {};
-			if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) { // No need for bKeyMix, since is only used for sorting
+			if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn)) { // No need for bKeyMix, since is only used for sorting
 				if (tag.bMultiple) {
 					if (tag.bGraph && bTagFilter) {
 						handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
