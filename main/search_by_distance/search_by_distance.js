@@ -993,6 +993,7 @@ async function searchByDistance({
 		tag.bNumber = tag.type.includes('number');
 		tag.bGraph = tag.type.includes('graph');
 		tag.bGraphDyn = tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH' || calcTags.genreStyleRegion.weight !== 0);
+		tag.bKeyMix = tag.type.includes('keyMix') && bInKeyMixingPlaylist;
 		tag.bKeyRange = tag.type.includes('keyRange');
 		tag.bPercentRange = tag.bNumber && tag.type.includes('percentRange');
 		tag.bAbsRange = tag.bNumber && tag.type.includes('absRange');
@@ -1007,9 +1008,11 @@ async function searchByDistance({
 		const tag = calcTags[key];
 		tag.reference = [];
 		if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
-		const bGenreStyle = tag.bGraph && (tags.dynGenre.weight !== 0 || method === 'GRAPH' || tags.genreStyleRegion.weight !== 0);
-		if (tag.weight !== 0 || (tag.tf.length && bGenreStyle || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
-			tag.reference = (bUseTheme ? theme.tags[0][key] : getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
+		if (tag.weight !== 0 || (tag.tf.length && (tag.bGraphDyn || tag.bKeyMix))) {
+			tag.reference = (bUseTheme
+				? theme.tags[0][key]
+				: getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()
+			).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
 		}
 		if (tag.bSingle) {
 			if (tag.bString) {
@@ -1577,7 +1580,8 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		if (tag.bVirtual) { continue; }
-		if (tag.weight !== 0 || tag.tf.length && (tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || tag.bKeyMix)) {
+		// if (tag.weight !== 0 || tag.tf.length && (tag.bGraph && (calcTags.dynGenre.weight !== 0 || method === 'GRAPH') || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tagsArr.push(tag.tf);
 		}
 	}
@@ -1604,7 +1608,7 @@ async function searchByDistance({
 		const tag = calcTags[key];
 		if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
 		if (tag.bVirtual) { continue; }
-		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
+		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || tag.bKeyMix)) {
 			tag.handle = tagsValByKey[z++];
 		} else {
 			tag.handle = null;
@@ -1633,7 +1637,7 @@ async function searchByDistance({
 			const tag = calcTags[key];
 			if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
 			handleTag[key] = {};
-			if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) {
+			if (tag.weight !== 0 || tag.tf.length && tag.bGraphDyn) { // No need for bKeyMix, since is only used for sorting
 				if (tag.bMultiple) {
 					if (tag.bGraph && bTagFilter) {
 						handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
