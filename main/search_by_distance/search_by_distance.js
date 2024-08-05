@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/08/24
+//05/08/24
 var version = '7.4.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -164,13 +164,13 @@ Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 });
 
 const SearchByDistance_panelProperties = {
-	bCacheOnStartup: ['Calculates link cache on script startup (instead of on demand)', true],
+	bCacheOnStartup: ['Calculate link cache on script startup (instead of on demand)', true],
 	bGraphDebug: ['Warnings about links/nodes set wrong', false],
-	bSearchDebug: ['Enables debugging console logs', false],
-	bProfile: ['Enables profiling console logs', false],
-	bShowQuery: ['Enables query console logs', false],
-	bBasicLogging: ['Enables basic console logs', true],
-	bShowFinalSelection: ['Enables selection\'s final scoring console logs', true],
+	bSearchDebug: ['Enable debugging console logs', false],
+	bProfile: ['Enable profiling console logs', false],
+	bShowQuery: ['Enable query console logs', false],
+	bBasicLogging: ['Enable basic console logs', true],
+	bShowFinalSelection: ['Enable selection\'s final scoring console logs', true],
 	firstPopup: ['Search by distance: Fired once', false],
 	descriptorCRC: ['Graph Descriptors CRC', -1], // Calculated later on first time
 	bAllMusicDescriptors: ['Load AllMusic descriptors', false],
@@ -205,7 +205,9 @@ const sbd = {
 	styleMap: [],
 	genreStyleMap: [],
 	isCalculatingCache: false,
-	panelProperties: (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') ? getPropertiesPairs(SearchByDistance_properties, sbd_prefix) : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
+	panelProperties: (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined')
+		? getPropertiesPairs(SearchByDistance_properties, sbd_prefix)
+		: getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	version,
 	get tagSchema() { return { weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */ }; },
 	get tagTypeSchema() {
@@ -274,7 +276,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 */
 if (sbd.panelProperties.bTagsCache[1]) {
 	if (typeof tagsCache === 'undefined') {
-		include('..\\helpers\\helpers_xxx_tags_cache.js');
+		include('..\\..\\helpers\\helpers_xxx_tags_cache.js');
 	}
 	doOnce('Load tags cache', debounce(() => {
 		tagsCache.load(); // eslint-disable-line no-undef
@@ -1600,6 +1602,7 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
+		if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
 		if (tag.bVirtual) { continue; }
 		if (tag.weight !== 0 || tag.tf.length && (tag.bGraphDyn || (tag.type.includes('keyMix') && bInKeyMixingPlaylist))) {
 			tag.handle = tagsValByKey[z++];

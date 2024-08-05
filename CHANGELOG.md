@@ -55,12 +55,14 @@
 
 ## [Unreleased][]
 ### Added
+- Console: exposed all logging settings into 'Debug and testing' submenu of customizable button. Make use of these when reporting errors (and share the console logs).
 - Near Genres Filter: added support at recipes.
 ### Changed
 - Similar artists: reworked similar artists database handling and unified processing with other similar artists databases (like ListenBrainz one included on other scripts).
 - Similar artists: recipe for calculation now uses the near genres filter added at [7.4.0](#740---2024-07-30) on auto mode. Total processing time should now be much lower than before.
-- Helpers: updated helpers.
 - UI: Smart shuffle sorting bias custom entry now shows as default TF expression the last one used if it was associated to a named entry (instead of its name).
+- UI: cleanup and reordering of 'Debug and testing' submenu.
+- Helpers: updated helpers.
 ### Removed
 ### Fixed
 - Near Genres Filter: fix crash using 'WEIGHT' method if the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).
@@ -68,6 +70,7 @@
 - UI: crash opening settings menu with some recipes. [Issue 33](https://github.com/regorxxx/Search-by-Distance-SMP/issues/33).
 - UI: minor errors on menu entries tips.
 - Smart shuffle: foo_playcount was not being properly detected (instead looking for foo_enhanced_playcount).
+- Tags cache: crash due to wrong path at include code.
 
 ## [7.4.0] - 2024-07-30
 ### Added

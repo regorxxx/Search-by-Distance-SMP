@@ -91,15 +91,16 @@ function createConfigMenu(parent) {
 	const createBoolMenu = (menuName, options, flag = [], hook = null) => {
 		options.forEach((key, i) => {
 			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep', flags: MF_GRAYED }); return; }
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
+			const props = Object.hasOwn(properties, key) ? properties : sbd.panelProperties;
+			const entryText = props[key][0].substring(props[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
 			menu.newEntry({
 				menuName, entryText, func: () => {
-					properties[key][1] = !properties[key][1];
+					props[key][1] = !props[key][1];
 					if (hook) { hook(key, i); }
-					overwriteProperties(properties); // Updates panel
+					overwriteProperties(props);
 				}, flags: Object.hasOwn(recipe, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenu(menuName, entryText, void (0), () => { return (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]); });
+			menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : props[key][1]));
 		});
 	};
 
@@ -1082,6 +1083,61 @@ function createConfigMenu(parent) {
 	}
 	{	// Debug
 		const submenu = menu.newMenu('Debug and testing');
+		{
+			const submenuTwo = menu.newMenu('Logging', submenu);
+			createBoolMenu(
+				submenuTwo,
+				['bGraphDebug', 'sep', 'bShowQuery', 'bBasicLogging', 'bShowFinalSelection', 'bSearchDebug', 'bProfile']
+			);
+		}
+		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		{
+			const submenuTwo = menu.newMenu('Descriptors', submenu);
+			{
+				menu.newEntry({
+					menuName: submenuTwo, entryText: 'Calculate Music Graph statistics', func: () => {
+						const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphStatistics') : null;
+						parent.switchAnimation('Graph statistics', true);
+						graphStatistics({ properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod }).then((resolve) => {
+							_save(folders.temp + 'musicGraphStatistics.txt', resolve.text.replace(/\n/g, '\r\n'));
+							console.log(resolve.text); // DEBUG
+							parent.switchAnimation('Graph statistics', false);
+							if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
+						});
+					}
+				});
+			}
+			menu.newEntry({ menuName: submenuTwo, entryText: 'sep' });
+			{ // Open graph html file
+				menu.newEntry({
+					menuName: submenuTwo, entryText: 'Show Music Graph on Browser', func: () => {
+						const file = folders.xxx + 'Draw Graph.html';
+						if (_isFile(file)) { _run(file); }
+					}
+				});
+			}
+			menu.newEntry({ menuName: submenuTwo, entryText: 'sep' });
+			{ // Open descriptors
+				menu.newEntry({
+					menuName: submenuTwo, entryText: 'Open main descriptor', func: () => {
+						const file = folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx.js';
+						if (_isFile(file)) { _explorer(file); _run('notepad.exe', file); }
+					}
+				});
+				menu.newEntry({
+					menuName: submenuTwo, entryText: 'Open user descriptor', func: () => {
+						const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
+						if (!_isFile(file)) {
+							_copyFile(folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx_user.js', file);
+							const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt', utf8);
+							if (readme.length) { fb.ShowPopupMessage(readme, 'User descriptors'); }
+						}
+						if (_isFile(file)) { _explorer(file); _run('notepad.exe', file); }
+					}
+				});
+			}
+		}
+		menu.newEntry({ menuName: submenu, entryText: 'sep' });
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({
 				menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
@@ -1129,50 +1185,6 @@ function createConfigMenu(parent) {
 					cacheLinkSet = void (0); // NOSONAR [global]
 					updateCache({ bForce: true, properties }); // Creates new one and also notifies other panels to discard their cache
 				}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED
-			});
-		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
-		{
-			menu.newEntry({
-				menuName: submenu, entryText: 'Graph statistics', func: () => {
-					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphStatistics') : null;
-					parent.switchAnimation('Graph statistics', true);
-					graphStatistics({ properties, graph: sbd.allMusicGraph, influenceMethod: sbd.influenceMethod }).then((resolve) => {
-						_save(folders.temp + 'musicGraphStatistics.txt', resolve.text.replace(/\n/g, '\r\n'));
-						console.log(resolve.text); // DEBUG
-						parent.switchAnimation('Graph statistics', false);
-						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
-					});
-				}
-			});
-		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
-		{ // Open descriptors
-			menu.newEntry({
-				menuName: submenu, entryText: 'Open main descriptor', func: () => {
-					const file = folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx.js';
-					if (_isFile(file)) { _explorer(file); _run('notepad.exe', file); }
-				}
-			});
-			menu.newEntry({
-				menuName: submenu, entryText: 'Open user descriptor', func: () => {
-					const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
-					if (!_isFile(file)) {
-						_copyFile(folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx_user.js', file);
-						const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt', utf8);
-						if (readme.length) { fb.ShowPopupMessage(readme, 'User descriptors'); }
-					}
-					if (_isFile(file)) { _explorer(file); _run('notepad.exe', file); }
-				}
-			});
-		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
-		{ // Open graph html file
-			menu.newEntry({
-				menuName: submenu, entryText: 'Show Music Graph on Browser', func: () => {
-					const file = folders.xxx + 'Draw Graph.html';
-					if (_isFile(file)) { _run(file); }
-				}
 			});
 		}
 	}
