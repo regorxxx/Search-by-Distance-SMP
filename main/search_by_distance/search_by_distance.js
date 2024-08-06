@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/24
+//06/08/24
 var version = '7.4.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution */
@@ -60,7 +60,7 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 include('..\\..\\helpers\\helpers_xxx_tags.js');
 /* global checkQuery:readable, getHandleListTagsV2:readable, queryJoin:readable, getHandleListTags:readable, queryCombinations:readable, sanitizeQueryVal:readable, queryReplaceWithCurrent:readable */
 include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
-/* global getSimilarDataFromFile:readable */
+/* global mergeSimilarDataFromFiles:readable */
 if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
@@ -119,6 +119,7 @@ const SearchByDistance_properties = {
 	bConditionAntiInfluences: ['Conditional anti-influences filter', false],
 	bUseInfluencesFilter: ['Allow only influences by query', false],
 	bSimilArtistsFilter: ['Allow only similar artists', false],
+	bSimilArtistsExternal: ['External similar artists tags', false],
 	genreStyleFilterTag: ['Filter for genre/style', JSON.stringify(['Children\'s Music', '?'])],
 	poolFilteringTag: ['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN: ['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, { greaterEq: -1, func: isInt }, -1],
@@ -490,7 +491,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /*
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -659,6 +660,7 @@ async function searchByDistance({
 	bSameArtistFilter = Object.hasOwn(properties, 'bSameArtistFilter') ? properties.bSameArtistFilter[1] : false,
 	// Similar artists
 	bSimilArtistsFilter = Object.hasOwn(properties, 'bSimilArtistsFilter') ? properties.bSimilArtistsFilter[1] : false,
+	bSimilArtistsExternal = Object.hasOwn(properties, 'bSimilArtistsExternal') ? properties.bSimilArtistsExternal[1] : false,
 	// Filter anti-influences by query, before any scoring/distance calc.
 	bConditionAntiInfluences = Object.hasOwn(properties, 'bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz)
 	bUseAntiInfluencesFilter = !bConditionAntiInfluences && Object.hasOwn(properties, 'bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
@@ -1354,15 +1356,32 @@ async function searchByDistance({
 		}
 	}
 	if (bSimilArtistsFilter && !bUseTheme) {
-		const file = folders.data + 'searchByDistance_artists.json';
-		const tagName = '[$meta_sep(SIMILAR ARTISTS SEARCHBYDISTANCE,|‎ |)]';
+		const files = [
+			folders.data + 'searchByDistance_artists.json',
+			...(bSimilArtistsExternal
+				? [
+					folders.data + 'listenbrainz_artists.json'
+				]
+				: []
+			),
+		];
+		const tagName = _b([
+			globTags.sbdSimilarArtist,
+			...(bSimilArtistsExternal
+				? [
+					globTags.lbSimilarArtist
+				]
+				: []
+			)
+		].map((t) => '[$meta_sep(' + t + ',|‎ |)]').join('|‎ |'));
+		if (bSearchDebug) { console.log('Similar artists filter:', tagName); }
 		// Exotic separators are preferred to ', ' since this tag may contain such char...
 		const similTags = [...new Set(
 			fb.TitleFormat(tagName).EvalWithMetadb(sel).split('|‎ |').filter(Boolean)
 		)];
 		let querySimil = '';
-		if (!similTags.length && _isFile(file)) {
-			const data = getSimilarDataFromFile(file);
+		if (!similTags.length && files.some(_isFile)) {
+			const data = mergeSimilarDataFromFiles(files);
 			const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
 			if (data) {
 				const dataArtist = data.find((obj) => { return obj.artist === artist; });
@@ -1371,7 +1390,7 @@ async function searchByDistance({
 			if (!bSameArtistFilter) { similTags.push(artist); } // Always add the original artist as a valid value
 		}
 		if (similTags.length) {
-			querySimil = similTags.map((artist) => { return globTags.artist + ' IS ' + artist; });
+			querySimil = similTags.map((artist) => { return globTags.artistRaw + ' IS ' + artist; });
 			querySimil = queryJoin(querySimil, 'OR');
 		}
 		if (querySimil.length) {
@@ -1592,8 +1611,8 @@ async function searchByDistance({
 	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
 		tagsArr.push(['MUSICBRAINZ_TRACKID']);
 	}
-	tagsArr = tagsArr.map((arr) => { return arr.map((tag) => { return (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag); }).join(', '); });
-	if (bSearchDebug) { console.log(tagsArr); }
+	tagsArr = tagsArr.map((arr) => arr.map((tag) => (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag)).join(', '));
+	if (bSearchDebug) { console.log('Tags to retrieve:', tagsArr); }
 	const tagsValByKey = [];
 	let tagsVal = [];
 	if (bTagsCache) {
@@ -1605,9 +1624,9 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
 		if (tag.bVirtual) { continue; }
 		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
+			if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
 			tag.handle = tagsValByKey[z++];
 		} else {
 			tag.handle = null;

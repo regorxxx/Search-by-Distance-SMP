@@ -1,0 +1,8 @@
+﻿Filters the library by a query built according to the similar artists of
+the reference track. This query is built on-the-fly using the file tags
+or JSON database (in both cases they must be computed first).
+
+Note it will always prefer file tags, if present, over any JSON database;
+both are never merged. This is done to ensure a possibility to override
+the database with a preferred value (tags) if desired. If that's not
+desired, just don't use similar artist tags or update them on demand.

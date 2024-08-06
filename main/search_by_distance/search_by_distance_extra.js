@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/08/24
+//06/08/24
 
 /* exported calculateSimilarArtistsFromPls, addTracksRelation */
 
@@ -12,7 +12,7 @@ include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
 /* global updateTrackSimilarTags:readable, updateSimilarDataFile:radable, updateSimilarDataFile:readable */
 
 /**
- * Output similar artists to the one from input FbMetadbHandle using (@see searchByDistance)
+ * Output similar artists to the one from input FbMetadbHandle using (@see {@link searchByDistance})
  *
  * @async
  * @function

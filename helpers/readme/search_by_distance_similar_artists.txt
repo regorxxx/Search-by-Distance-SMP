@@ -2,15 +2,15 @@
 those from the currently selected tracks (duplicates are filtered first).
 This option may be found on the customizable button and Playlist Tools.
 
-It tries to compute something equivalent to 'Similar Artists Last.fm', 
+It tries to compute something equivalent to 'Similar Artists Last.fm',
 which can be retrieved with Bio script (but requires internet). In this
 case the process is entirely offline and uses the already coded routines
 of Search by Distance to find which artists are usually the most similar
-to a random set of [N=50] tracks by every selected artist. 
- 
+to a random set of [N=50] tracks by every selected artist.
+
 It requires some time, since it's equivalent to perform the regular
 'GRAPH' search x N times x selected artist(s). The advantage is that it
-does not requires internet and works with any artists, whether it's 
+does not requires internet and works with any artists, whether it's
 'popular' or not, since it's not based on things like users' listening
 behaviors, eurocentric bias, etc. Results are also limited to what the
 user has on library, instead of being based on an external list (static).
@@ -20,14 +20,15 @@ to be calculated once. Later changes to the graph descriptors may affect
 the results, in that case the same artists may be checked again to update
 the list if required.
 
-Search by Distance offers multiple filtering options based on those 
+Search by Distance offers multiple filtering options based on those
 results, which may be used on the customizable button or via recipes.
 Script uses both the JSON file and tags (take precedence if present).
 
 After scanning, results (from JSON) may also be saved to tags for all the
 tracks present on library by the analyzed artists. On tags, other tools
 like Playlist Tools may use them to easily create queries, pools, etc.
-Tag is named 'SIMILAR ARTISTS SEARCHBYDISTANCE'.
+Tag is named 'SIMILAR ARTISTS SEARCHBYDISTANCE' (but it may be changed
+at '[FOOBAR_PROFILE]\js_data\presets\global\globTags.json').
 
 NOTE: Estimated processing time will be shown on popups, have that in
 mind when processing a large library (it may be better to process it
@@ -42,13 +43,13 @@ already properly tagged artist does not count here, since adding more
 'Rock' tracks by Aerosmith to your library will not change anything
 if all the existing tracks by Aerosmith were already representative
 of their main work (Rock). In any case think of your library like an
-Spotify server: whenever you add/edit tracks there, the global 
+Spotify server: whenever you add/edit tracks there, the global
 statistics change and also the way tracks and artists inter-relate. It's
-a live thing. Use your own criterion about rerunning analysis when 
+a live thing. Use your own criterion about rerunning analysis when
 needed, considering the time/exactness equation.
 
 Finally, it must be taken into consideration that 2 artists does not
-have to be considered mutually similar. i.e. A may be similar to B, 
+have to be considered mutually similar. i.e. A may be similar to B,
 but B may be more similar to C. Since only the most [up to] 10 similar
 artists are taken into consideration, in some use-cases situations like
 those are possible.

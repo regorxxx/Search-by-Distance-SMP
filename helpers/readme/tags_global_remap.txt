@@ -5,7 +5,7 @@
 	- Key -> KEY				- Rating -> %RATING%
 
 There are many more! For a comprehensive list check:
-[FOOBAR PROFILE FOLDER]\js_data\presets\global\globTags.json
+[FOOBAR_PROFILE]\js_data\presets\global\globTags.json
 
 By default all tools will tend to use such associations whenever they are
 not configured to use other tags or remapping. Many tools have specific

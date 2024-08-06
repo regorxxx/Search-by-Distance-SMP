@@ -1,12 +1,12 @@
 'use strict';
-//04/08/24
+//06/08/24
 
-/* exported writeSimilarArtistsTags, updateSimilarDataFile */
+/* exported writeSimilarArtistsTags, updateSimilarDataFile, mergeSimilarDataFromFiles */
 
 include('helpers_xxx_tags.js');
 /* global globTags:readable, folders:readable, WshShell:readable, popup:readable, _jsonParseFile:readable,_jsonParseFileCheck:readable, _isFile:readable, _p:readable, utf8:readable, queryJoin:readable, _save:readable, _deleteFile:readable */
 
-function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS LISTENBRAINZ', windowName = window.name } = {}) {
+function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.json', iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name } = {}) {
 	if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, windowName, popup.question + popup.yes_no) === popup.no) { return false; }
 	if (!_isFile(file)) { return false; }
 	else {
@@ -16,7 +16,7 @@ function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.j
 	return false;
 }
 
-function updateTrackSimilarTags({ data, iNum = 10, tagName = 'SIMILAR ARTISTS LISTENBRAINZ', windowName = window.name, bPopup = true } = {}) {
+function updateTrackSimilarTags({ data, iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name, bPopup = true } = {}) {
 	if (!data || !data.length) { return false; }
 	const bRewrite = bPopup
 		? WshShell.Popup('Rewrite previously added similar artist tags?', 0, windowName, popup.question + popup.yes_no) === popup.yes
@@ -84,4 +84,25 @@ function getSimilarDataFromFile(file, newData = null, iNum = Infinity) {
 
 	}
 	return data || newData;
+}
+
+function mergeSimilarDataFromFiles(files, newData = null, iNum = Infinity) {
+	let dataArr;
+	if (files && files.length) {
+		dataArr = files.map((file) => getSimilarDataFromFile(file, null, iNum))
+			.concat(newData)
+			.filter(Boolean)
+			.reduce((acc, curr) => {
+				const idxMap = new Map();
+				acc.forEach((obj, idx) => idxMap.set(obj.artist, idx));
+				curr.forEach((obj) => {
+					const idx = idxMap.get(obj.artist);
+					if (idx >= 0) { acc[idx].val = [...acc[idx].val, ...obj.val]; }
+					else { acc.push(obj); }
+				});
+				return acc;
+			}, [])
+			.forEach((obj) => obj.val.sort((a, b) => { return b.score - a.score; }));
+	}
+	return dataArr || newData;
 }

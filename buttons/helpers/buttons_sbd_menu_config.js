@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/08/24
+//06/08/24
 
 /* exported createConfigMenu */
 
@@ -705,8 +705,10 @@ function createConfigMenu(parent) {
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Influences filter
-			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter', 'sep', 'bSimilArtistsFilter', 'sep', 'bSameArtistFilter'];
-			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences') ? recipe['bConditionAntiInfluences'] : properties['bConditionAntiInfluences'][1];
+			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
+			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences')
+				? recipe['bConditionAntiInfluences']
+				: properties['bConditionAntiInfluences'][1];
 			options.forEach((key) => {
 				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
 				const bGraphCondition = !bIsGraph && (key === 'bUseAntiInfluencesFilter' || key === 'bConditionAntiInfluences' || key === 'bUseInfluencesFilter');
@@ -714,12 +716,35 @@ function createConfigMenu(parent) {
 				menu.newEntry({
 					menuName, entryText, func: () => {
 						if (key === 'bConditionAntiInfluences') { fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance'); }
-						if (key === 'bSameArtistFilter') { fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance'); }
 						properties[key][1] = !properties[key][1];
 						overwriteProperties(properties); // Updates panel
 					}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
 				});
-				menu.newCheckMenu(menuName, entryText, void (0), () => { return (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]); });
+				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
+			});
+		}
+		menu.newEntry({ menuName, entryText: 'sep' });
+		{	// Artist filter
+			const options = ['bSimilArtistsFilter', 'bSimilArtistsExternal', 'sep', 'bSameArtistFilter'];
+			const bConditionSimilArtists = Object.hasOwn(recipe, 'bSimilArtistsFilter')
+				? recipe['bSimilArtistsFilter']
+				: properties['bSimilArtistsFilter'][1];
+			options.forEach((key) => {
+				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
+				menu.newEntry({
+					menuName, entryText, func: () => {
+						if (key === 'bSimilArtistsFilter') {
+							const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt', utf8);
+							if (readme.length) { fb.ShowPopupMessage(readme, 'Similar Artists'); }
+						}
+						if (key === 'bSimilArtistsExternal') { fb.ShowPopupMessage('This option expands the similar artists filter with tags retrieved by ListenBrainz (https://github.com/regorxxx/ListenBrainz-SMP) or other scripts. If there is a JSON database associated, it will also be used. In any case, note the tags from JSON and files are never merged, always preferring file tags.\n\nList of tags used:\n\n' + [globTags.sbdSimilarArtist, globTags.lbSimilarArtist].join('\n'), 'Search by distance'); }
+						if (key === 'bSameArtistFilter') { fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance'); }
+						properties[key][1] = !properties[key][1];
+						overwriteProperties(properties); // Updates panel
+					}, flags: (key === 'bSimilArtistsExternal' && !bConditionSimilArtists ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
+				});
+				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
 			});
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
@@ -1010,7 +1035,7 @@ function createConfigMenu(parent) {
 			});
 			menu.newEntry({
 				menuName: submenu, entryText: 'Write similar artists tags', func: () => {
-					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: 'SIMILAR ARTISTS SEARCHBYDISTANCE', windowName: 'Search by Distance' });
+					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: globTags.sbdSimilarArtist, windowName: 'Search by Distance' });
 				}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED
 			});
 		}
@@ -1257,10 +1282,11 @@ function createConfigMenu(parent) {
 			{ name: 'Filter: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural_filter.txt' },
 			{ name: 'Filter: dynamic query', file: folders.xxx + 'helpers\\readme\\search_by_distance_dynamic_query.txt' },
 			{ name: 'Filter: influences', file: folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt' },
+			{ name: 'Filter: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt' },
 			{ name: 'sep' },
 			{ name: 'Tags & Weights: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt' },
 			{ name: 'Tags & Weights: related tracks', file: folders.xxx + 'helpers\\readme\\search_by_distance_related.txt' },
-			{ name: 'sep' },
+			{ name: 'Tags & Weights: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt' },{ name: 'sep' },
 			{ name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt' },
 			{ name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png' },
 			{ name: 'sep' },
@@ -1268,7 +1294,7 @@ function createConfigMenu(parent) {
 			{ name: 'Sorting: harmonic mixing', file: folders.xxx + 'helpers\\readme\\harmonic_mixing.txt' },
 			{ name: 'sep' },
 			{ name: 'Recipes & Themes', file: folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt' },
-			{ name: 'Similar Artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt' },
+
 			{ name: 'User descriptors', file: folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt' },
 			{ name: 'sep' },
 			{ name: 'Tagging requisites', file: folders.xxx + 'helpers\\readme\\tags_structure.txt' },
