@@ -58,6 +58,7 @@
 - Similar artists: added readme to similar artists filter explaining its usage.
 - Similar artists: added new option to use the similar artists tags and database from other scripts. For ex. [ListenBrainz-SMP](https://github.com/regorxxx/ListenBrainz-SMP)
 - Near Genres Filter: added support at recipes.
+- Near filter: added "aggressiveness" setting to tweak how the auto mode works. Higher values will further filter the library, while lower values will filter in a more relaxed way.
 - Console: exposed all logging settings into 'Debug and testing' submenu of customizable button. Make use of these when reporting errors (and share the console logs).
 ### Changed
 - Similar artists: reworked similar artists database handling and unified processing with other similar artists databases (like ListenBrainz one included on other scripts).
@@ -65,6 +66,9 @@
 - Similar artists: similar artist tags may now be remapped (globally) at '[FOOBAR_PROFILE]\js_data\presets\global\globTags.json'.
 - UI: Smart shuffle sorting bias custom entry now shows as default TF expression the last one used if it was associated to a named entry (instead of its name).
 - UI: cleanup and reordering of 'Debug and testing' submenu.
+- UI: the input box to set the GRAPH distance now allows a value of zero (i.e. only tracks with same genre/styles).
+- UI: the input box to set the GRAPH distance now warns if the value used will limit results to only tracks with same genre/styles. This may happen not only when it's set to 0, but also if the distance is lower than the minimum distance between 2 points at the graph. This warning also applies for the near genres filter custom input.
+- Debug: improved debug of descriptors weights (and keys).
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
