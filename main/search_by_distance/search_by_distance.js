@@ -1,8 +1,8 @@
 ﻿'use strict';
-//06/08/24
+//07/08/24
 var version = '7.4.0'; // NOSONAR [shared on files]
 
-/* exported  searchByDistance, checkScoringDistribution */
+/* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
 
 /*
 	Search by Distance
@@ -109,7 +109,7 @@ const SearchByDistance_properties = {
 	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
 	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
 	graphDistance: ['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre',
-		{ func: (x) => { return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || isInt(x) || x === Infinity; } }, 'music_graph_descriptors.intra_supergenre'],
+		{ func: (x) => { return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || (isInt(x) && x >= 0) || x === Infinity; } }, 'music_graph_descriptors.intra_supergenre'],
 	method: ['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', { func: checkMethod }, 'GRAPH'],
 	bNegativeWeighting: ['Negative score for tags out of range', true],
 	bFilterWithGraph: ['Filter values not present on the graph', true],
@@ -148,7 +148,8 @@ const SearchByDistance_properties = {
 	artistRegionFilter: ['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, { range: [[-1, 5]], func: isInt }, -1],
 	genreStyleRegionFilter: ['Genre region filter: none (-1), continent (0), region (1)', -1, { range: [[-1, 3]], func: isInt }, -1],
 	dynQueries: ['Dynamic query filtering', JSON.stringify([]), { func: isJSON }, JSON.stringify([])],
-	nearGenresFilter: ['Near genres filter: none (-1), auto (0) or any distance value', 0, { range: [[-1, Infinity]], func: isInt }, 0]
+	nearGenresFilter: ['Near genres filter: none (-1), auto (0) or any distance value', 0, { range: [[-1, Infinity]], func: isInt }, 0],
+	nearGenresFilterAggressiveness: ['Near genres filter aggressiveness (0-10)', 5, { range: [[0, 10]], func: isInt }, 5]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -491,7 +492,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 /*
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'nearGenresFilterAggressiveness', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -669,6 +670,7 @@ async function searchByDistance({
 	artistRegionFilter = Object.hasOwn(properties, 'artistRegionFilter') ? Number(properties.artistRegionFilter[1]) : -1,
 	genreStyleRegionFilter = Object.hasOwn(properties, 'genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter[1]) : -1,
 	nearGenresFilter = Object.hasOwn(properties, 'nearGenresFilter') ? Number(properties.nearGenresFilter[1]) : 0,
+	nearGenresFilterAggressiveness = Object.hasOwn(properties, 'nearGenresFilterAggressiveness') ? Number(properties.nearGenresFilterAggressiveness[1]) : 5,
 	// --->Scoring Method
 	method = Object.hasOwn(properties, 'method') ? properties.method[1] : 'GRAPH',
 	// --->Scoring filters
@@ -1433,12 +1435,12 @@ async function searchByDistance({
 		}
 	}
 	if (nearGenresFilter !== -1) {
-		const maxDistance = nearGenresFilter || (method === 'GRAPH'
-			? graphDistance * 2
-			: Math.max(
-				music_graph_descriptors.cluster * 5 / 4,
-				Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', scoreFilter / 100, 5))
-			)
+		const maxDistance = nearGenresFilterDistribution(
+			nearGenresFilter,
+			{
+				aggressiveness: nearGenresFilterAggressiveness,
+				...(method === 'GRAPH' ? { graphDistance } : { scoreFilter })
+			}
 		);
 		const nearestGenres = getNearestGenreStyles([...calcTags.genreStyle.referenceSet], maxDistance, sbd.allMusicGraph);
 		if (nearestGenres.length) {
@@ -1626,22 +1628,22 @@ async function searchByDistance({
 		const tag = calcTags[key];
 		if (tag.bVirtual) { continue; }
 		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
-			if (bSearchDebug) {console.log('Tag:', key, tag.weight, '- index', z);}
+			if (bSearchDebug) { console.log('Tag:', key, tag.weight, '- index', z); }
 			tag.handle = tagsValByKey[z++];
 		} else {
 			tag.handle = null;
 		}
 	}
-	if (bSearchDebug) {console.log('Tag:', 'title - index', z);}
+	if (bSearchDebug) { console.log('Tag:', 'title - index', z); }
 	const titleHandle = tagsValByKey[z++];
 	let artistHandle;
 	if (calcTags.artistRegion.weight !== 0) {
-		if (bSearchDebug) {console.log('Tag:', 'artist - index', z);}
+		if (bSearchDebug) { console.log('Tag:', 'artist - index', z); }
 		artistHandle = tagsValByKey[z++];
 		calcTags.artistRegion.handle = calcTags.artistRegion.tf.length ? tagsValByKey[z++] : null;
 	}
 	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
-		if (bSearchDebug) {console.log('Tag:', 'related/unrelated - index', z);}
+		if (bSearchDebug) { console.log('Tag:', 'related/unrelated - index', z); }
 		calcTags.unrelated.handle = calcTags.related.handle = tagsValByKey[z++];
 	}
 	if (bProfile) { test.Print('Task #4: Library tags', false); }
@@ -2488,6 +2490,39 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 	return output;
 }
 
+/**
+ * Description
+ *
+ * @function
+ * @name checkMinGraphDistance
+ * @kind Function
+ * @param {number|string} graphDistance - Graph distance to check, may be a string (key from descriptors) or number
+ * @param {object} descr - Graph descriptors
+ * @returns {{subtitutions:boolean, links:boolean}}
+ */
+function checkMinGraphDistance(graphDistance, descr = music_graph_descriptors) {
+	graphDistance = parseGraphDistance(graphDistance, descr, false);
+	const check = {
+		subtitutions: {
+			pass: true,
+			min: Math.min(...descr.substitution_keys.map((key) => descr[key]).filter(Boolean))
+		},
+		links: {
+			pass: true,
+			min: Math.min(...descr.distance_keys.map((key) => descr[key]).filter(Boolean))
+		},
+		report: ''
+	};
+	['subtitutions', 'links'].forEach((key) => check[key].pass = graphDistance >= check[key].min);
+	const bLinks = !check.links.pass;
+	const bSubs = !check.subtitutions.pass;
+	const bBoth = bLinks && bSubs;
+	if (bLinks ||bSubs) {
+		check.report = 'Value set (' + parseGraphDistance(graphDistance, descr, false) + ') is lower than the minimum ' + (bLinks ? 'link ' + _p(check.links.min) : '') + (bBoth ? ' and ' : '') + (bSubs ? 'subtitution ' + _p(check.subtitutions.min) : '') + ' distance' + (bBoth ? 's' : '') + '.\n\nOutput results will be mostly limited to tracks with same genre/styles.';
+	}
+	return check;
+}
+
 function findStyleGenresMissingGraphCheck(properties) {
 	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, 'Search by distance', popup.question + popup.yes_no);
 	if (answer === popup.yes) {
@@ -2625,3 +2660,24 @@ const weightDistribution = memoize((/** @type {'LINEAR'|'LOGARITHMIC'|'LOGISTIC'
 	}
 	return proportionWeight;
 });
+
+/**
+ * Description
+ *
+ * @function
+ * @name nearGenresFilterDistribution
+ * @kind Function
+ * @param {number} mode - 0 (auto) to Infinity
+ * @param {{graphDistance?:number, scoreFilter?:number, aggressiveness:number}} options - [={aggressiveness: 5}] Uses GRAPH method or WEIGHT method acording to the key passed. Aggressiveness is only used on when mode is set to 0 (auto), and defaults to a medium value (5) if not provided.
+ * @returns {number}
+ */
+function nearGenresFilterDistribution(mode, options = { aggressiveness: 5 }) {
+	const maxDistance = mode || (options.graphDistance
+		? options.graphDistance * 2
+		: Math.max(
+			music_graph_descriptors.cluster * 5 / 4,
+			Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', options.scoreFilter / 100, 5))
+		) * (100 - ((options.aggressiveness || 5) - 5) * 10) / 100
+	);
+	return round(maxDistance, 2);
+}

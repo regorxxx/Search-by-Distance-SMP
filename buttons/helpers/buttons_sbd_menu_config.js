@@ -1,9 +1,9 @@
 ﻿'use strict';
-//06/08/24
+//07/08/24
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, weightDistribution:readable, shuffleBiasTf:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable,checkMinGraphDistance:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -39,6 +39,7 @@ function createConfigMenu(parent) {
 		: parseGraphVal(properties.graphDistance[1]);
 	const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
 	// Helpers
+	const descriptors = music_graph_descriptors;
 	const createTagMenu = (menuName, options) => {
 		options.forEach((key) => {
 			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
@@ -124,10 +125,13 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
-					try { input = utils.InputBox(window.ID, 'Enter number: (greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance', val, true); } catch (e) { return; }
-					if (!input || !input.length) { return; }
+					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance', val, true); } catch (e) { return; }
+					if (!input && input !== '0' || !input.length) { return; }
 					if (parseGraphDistance(input) === null) { return; }
 					if (!Number.isNaN(Number(input))) { input = Number(input); } // Force a number type if possible
+					if (!properties[key][2].func(input)) { return; }
+					const check = checkMinGraphDistance(input); // Check against min link distances
+					if (check.report) { fb.ShowPopupMessage(check.report, 'Graph distance'); }
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
 				}, flags
@@ -661,13 +665,11 @@ function createConfigMenu(parent) {
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Near genres filter
 			const key = 'nearGenresFilter';
-			const score = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
-			const nearScoreFilter = Math.max(
-				music_graph_descriptors.cluster * 5 / 4,
-				Math.round(music_graph_descriptors.intra_supergenre * 2 * weightDistribution('LOGISTIC', score, 5))
-			);
+			const scoreFilter = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
+			const aggressiveness = Object.hasOwn(recipe, 'nearGenresFilterAggressiveness') ? recipe.nearGenresFilterAggressiveness : properties.nearGenresFilterAggressiveness[1];
+			const nearScoreFilter = nearGenresFilterDistribution(0, { scoreFilter, aggressiveness });
 			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
-			const autoVal = bIsGraph ? graphDistance * 2 : nearScoreFilter;
+			const autoVal = bIsGraph ? nearGenresFilterDistribution(0, { graphDistance, aggressiveness }) : nearScoreFilter;
 			const options = [
 				{
 					name: 'Automatic' + '\t[' + autoVal + ']',
@@ -696,12 +698,31 @@ function createConfigMenu(parent) {
 								else { return; }
 							}
 						}
+						if (input > 0) {
+							const check = checkMinGraphDistance(input); // Check against min link distances
+							if (check.report) { fb.ShowPopupMessage(check.report, 'Near genres filter'); }
+						}
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
 			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
+			if (keyVal === 0) {
+				const key = 'nearGenresFilterAggressiveness';
+				const val = properties[key][1];
+				const displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
+				const entryText = 'Automatic aggressiveness...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
+				menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+				menu.newEntry({
+					menuName: subMenuName, entryText, func: () => {
+						const input = Input.number('int', val, 'Enter number: (between 0 and 10)\n\nBy default is set to 5; higher values filter in a more aggressive way, and lower values, the opposite.', 'Search by distance', 5, [(input) => input >= 0 && input <= 10]);
+						if (input === null) { return; }
+						properties[key][1] = input;
+						overwriteProperties(properties); // Updates panel
+					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
+				});
+			}
 		}
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Influences filter
@@ -715,7 +736,7 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : (bGraphCondition ? '\t(Only GRAPH)' : ''));
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						if (key === 'bConditionAntiInfluences') { fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + music_graph_descriptors.replaceWithSubstitutionsReverse(music_graph_descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance'); }
+						if (key === 'bConditionAntiInfluences') { fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance'); }
 						properties[key][1] = !properties[key][1];
 						overwriteProperties(properties); // Updates panel
 					}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
@@ -1286,7 +1307,7 @@ function createConfigMenu(parent) {
 			{ name: 'sep' },
 			{ name: 'Tags & Weights: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt' },
 			{ name: 'Tags & Weights: related tracks', file: folders.xxx + 'helpers\\readme\\search_by_distance_related.txt' },
-			{ name: 'Tags & Weights: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt' },{ name: 'sep' },
+			{ name: 'Tags & Weights: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt' }, { name: 'sep' },
 			{ name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt' },
 			{ name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png' },
 			{ name: 'sep' },

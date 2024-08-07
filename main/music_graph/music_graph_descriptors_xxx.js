@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/07/24
+//07/08/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -651,6 +651,10 @@ const music_graph_descriptors = {
 				These are the weight values for graph links between styles(S) and genres(G)
 		----------------------------------------------------------------------------------------------------
 	*/
+	// List of keys for convenience if iterating
+	distance_keys: [ 'secondary_origin', 'primary_origin', 'cluster', 'intra_supergenre', 'supergenre_cluster', 'supergenre_supercluster', 'inter_supergenre', 'inter_supergenre_supercluster'],
+	substitution_keys: [ 'weak_substitutions', 'substitutions'],
+	influences_keys: [ 'anti_influence', 'primary_origin_influence', 'secondary_origin_influence'],
 	/*
 		Direct: A -> B (weight applied x1)
 		Direct connections should have bigger costs since they are not accumulative
