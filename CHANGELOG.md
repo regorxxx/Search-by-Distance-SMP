@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [7.5.0](#750---2024-08-13)
 - [7.4.0](#740---2024-07-30)
 - [7.3.0](#730---2024-07-24)
 - [7.2.0](#720---2024-03-21)
@@ -54,6 +55,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [7.5.0] - 2024-08-13
 ### Added
 - Similar artists: added readme to similar artists filter explaining its usage.
 - Similar artists: added new option to use the similar artists tags and database from other scripts. For ex. [ListenBrainz-SMP](https://github.com/regorxxx/ListenBrainz-SMP)
@@ -901,7 +908,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.4.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.5.0...HEAD
+[7.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.2.0...v7.3.0
 [7.2.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.1.0...v7.2.0
