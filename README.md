@@ -52,7 +52,7 @@ There are 3 methods to calculate similarity between tracks: WEIGHT, GRAPH (see a
 ![Animation12](https://user-images.githubusercontent.com/83307074/116776801-073aba80-aa5a-11eb-8f3f-82e02ccf265e.gif)
 
 ## Note about editing 'helpers/music_graph_descriptors_xxx.js' or user file
-Graph behavior, new genres or substitutions may be tweaked by the use. Changes to the descriptors may be added to an user file instead of editing the original descriptor: 'helpers/music_graph_descriptors_xxx_user.js'. Check sample for more info.
+Graph behavior, new genres or substitutions may be tweaked by the user. Changes to the descriptors may be added to an user file instead of editing the original descriptor: 'helpers/music_graph_descriptors_xxx_user.js'. Check sample for more info.
 
 ### Also integrates
  1. [Music-Graph](https://github.com/regorxxx/Music-Graph): An open source graph representation of most genres and styles found on popular, classical and folk music.
