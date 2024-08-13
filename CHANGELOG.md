@@ -62,7 +62,7 @@
 - Console: exposed all logging settings into 'Debug and testing' submenu of customizable button. Make use of these when reporting errors (and share the console logs).
 ### Changed
 - Similar artists: reworked similar artists database handling and unified processing with other similar artists databases (like ListenBrainz one included on other scripts).
-- Similar artists: recipe for calculation now uses the near genres filter added at [7.4.0](#740---2024-07-30) on auto mode. Total processing time should now be much lower than before.
+- Similar artists: recipe for calculation now uses the near genres filter added at [7.4.0](#740---2024-07-30) on auto mode. Total processing time should now be much lower than before, processing 3k artists in a few hours at max instead of days.
 - Similar artists: similar artist tags may now be remapped (globally) at '[FOOBAR_PROFILE]\js_data\presets\global\globTags.json'.
 - UI: Smart shuffle sorting bias custom entry now shows as default TF expression the last one used if it was associated to a named entry (instead of its name).
 - UI: cleanup and reordering of 'Debug and testing' submenu.
