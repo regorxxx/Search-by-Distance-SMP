@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/01/24
+//09/08/24
 
 /* exported camelotWheel */
 
@@ -263,7 +263,7 @@ const camelotWheel = function () {
 			return bMap ? new Map([...keyNotation.entries()]) : [...keyNotation.entries()];
 		},
 		getKeyNotationObjectTable(bMap = true) {
-			const entries = [...keyNotationObject.entries()].map((entry) => { return [entry[0], this.clone(entry[1])]; });
+			const entries = Array.from(keyNotationObject.entries(), (entry) => { return [entry[0], this.clone(entry[1])]; });
 			return bMap ? new Map(entries) : entries;
 		},
 		hasKey(xy) {

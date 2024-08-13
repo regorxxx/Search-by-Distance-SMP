@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/24
+//09/08/24
 var version = '7.4.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -383,7 +383,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 						});
 					}
 					if (properties && Object.hasOwn(properties, 'bAscii') && properties.bAscii[1]) {
-						setTimeout(() => { resolve(new Set([...new Set(tagValues)].map((tag) => { return _asciify(tag); }))); }, 500);
+						setTimeout(() => { resolve(new Set(Array.from(new Set(tagValues), (tag) => _asciify(tag)))); }, 500);
 					} else {
 						setTimeout(() => { resolve(new Set(tagValues)); }, 500);
 					}
@@ -497,14 +497,17 @@ const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTa
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
 if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMismatchCRC) {
-	const data = [...recipeAllowedKeys].map((key) => {
+	const data = Array.from(recipeAllowedKeys, (key) => {
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
 		if (!descr.length) {
 			if (key.toLowerCase().indexOf('properties') !== -1) {
 				descr = {
 					'Object properties to pass other arguments':
-						Object.fromEntries([...recipePropertiesAllowedKeys].map((key) => { return [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]]; }))
+						Object.fromEntries(Array.from(
+							recipePropertiesAllowedKeys,
+							(key) => [key, (SearchByDistance_properties[key] || SearchByDistance_panelProperties[key])[0]]
+						))
 				};
 			}
 			if (key === 'name') { descr = 'Preset name (instead of filename)'; }
@@ -914,8 +917,8 @@ async function searchByDistance({
 	});
 	if (bSearchDebug) { console.log(JSON.stringify(calcTags, void (0), '\t')); }
 	const smartShuffleTag = (recipeProperties.smartShuffleTag || JSON.parse(properties.smartShuffleTag[1])).filter(Boolean);
-	const genreStyleTag = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? _t(tag) : tag); });
-	const genreStyleTagQuery = [...new Set(calcTags.genreStyle.tf)].map((tag) => { return (tag.indexOf('$') === -1 ? tag : _q(tag)); });
+	const genreStyleTag = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (tag.indexOf('$') === -1 ? _t(tag) : tag));
+	const genreStyleTagQuery = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (tag.indexOf('$') === -1 ? tag : _q(tag)));
 
 	// Check input
 	playlistLength = (playlistLength >= 0) ? playlistLength : 0;
@@ -1149,7 +1152,7 @@ async function searchByDistance({
 							);
 						}).filter(Boolean);
 					} else { // For a single group just match all
-						groups.push([...tagCombSet[0]].map((val) => tagNameTF + ' ' + match + ' ' + val).join(' AND '));
+						groups.push(Array.from(tagCombSet[0], (val) => tagNameTF + ' ' + match + ' ' + val).join(' AND '));
 					}
 					query[preQueryLength] = queryJoin(groups, 'OR');
 				} else {

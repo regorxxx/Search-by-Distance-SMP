@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/02/24
+//09/08/24
 
 /* exported getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter */
 
@@ -149,11 +149,11 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTa
 	query.push(queryJoin(artists.map((artist) => globTags.artist + ' IS ' + artist), 'OR'));
 	// Compare if negating countries is smaller than the opposite list, which should be faster for queries
 	if (noCountryISO.length < countryISO.length) {
-		const noCountryName = new Set(noCountryISO.map((iso) => { return isoMapRev.get(iso).toLowerCase(); }).filter(Boolean));
+		const noCountryName = new Set(noCountryISO.map((iso) => isoMapRev.get(iso).toLowerCase()).filter(Boolean));
 		noCountryName.forEach((name) => { if (nameReplacersRev.has(name)) { countryName.add(nameReplacersRev.get(name)); } });
-		query.push(_qCond(localeTag) + ' PRESENT AND NOT ' + _p(queryJoin([...noCountryName].map((country) => _qCond(localeTag) + ' IS ' + country), 'OR')));
+		query.push(_qCond(localeTag) + ' PRESENT AND NOT ' + _p(queryJoin(Array.from(noCountryName, (country) => _qCond(localeTag) + ' IS ' + country), 'OR')));
 	} else {
-		query.push(queryJoin([...countryName].map((country) => _qCond(localeTag) + ' IS ' + country), 'OR'));
+		query.push(queryJoin(Array.from(countryName, (country) => _qCond(localeTag) + ' IS ' + country), 'OR'));
 	}
 	query = queryJoin(query, 'OR');
 	return { artists, countries: { iso: countryISO, name: countryName }, query };

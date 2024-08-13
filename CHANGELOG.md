@@ -70,6 +70,7 @@
 - UI: the input box to set the GRAPH distance now warns if the value used will limit results to only tracks with same genre/styles. This may happen not only when it's set to 0, but also if the distance is lower than the minimum distance between 2 points at the graph. This warning also applies for the near genres filter custom input.
 - Debug: improved debug of descriptors weights (and keys).
 - Helpers: updated helpers.
+- Performance improvement (approx. 8%) due to code cleanup.
 ### Removed
 ### Fixed
 - Near Genres Filter: fix crash using 'WEIGHT' method if the filter was active. [Issue 32](https://github.com/regorxxx/Search-by-Distance-SMP/issues/32).

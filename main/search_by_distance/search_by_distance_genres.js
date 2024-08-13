@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/07/24
+//09/08/24
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles */
 
@@ -56,7 +56,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 	}
 	// Get tags
 	let tags = new Set(getHandleListTagsV2(fb.GetLibraryItems(), tagsToCheck, { bEmptyVal: true }).flat(Infinity));
-	if (bAscii) { tags = new Set([...tags].map((tag) => { return _asciify(tag); })); }
+	if (bAscii) { tags = new Set(Array.from(tags, (tag) => _asciify(tag))); }
 	// Get node list (+ weak substitutions + substitutions + style cluster)
 	const nodeList = new Set(music_graph_descriptors.style_supergenre.flat(Infinity)).union(new Set(music_graph_descriptors.style_weak_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_substitutions.flat(Infinity))).union(new Set(music_graph_descriptors.style_cluster.flat(Infinity)));
 	// Compare (- user exclusions - graph exclusions)
