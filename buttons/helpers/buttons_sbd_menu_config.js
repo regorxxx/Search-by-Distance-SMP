@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/24
+//30/09/24
 
 /* exported createConfigMenu */
 
@@ -333,6 +333,21 @@ function createConfigMenu(parent) {
 				});
 			}
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			{	// Clone
+				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
+				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
+				const bVirtual = tag.type.includes('virtual');
+				menu.newEntry({
+					menuName: subMenuName, entryText: 'Clone tag...' + (bVirtual ? '\t(virtual tag)' : ''), func: () => {
+						const name = Input.string('string', key, 'Enter a new name for the tag:\n(must be different to the original one)\n\nNote cloning also carries over the current recipe settings (which may override any base value set by the tag); if cloning the base tag is desired, set the recipe to \'None\' before cloning.', 'Search by distance', 'My Tag');
+						if (name === null) { return; }
+						tags[name] = clone(tag);
+						properties.tags[1] = JSON.stringify(tags);
+						overwriteProperties(properties); // Updates panel
+						testBaseTags(tags);
+					}, flags: bVirtual ? MF_GRAYED : MF_STRING
+				});
+			}
 			{	// Delete
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
 				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
