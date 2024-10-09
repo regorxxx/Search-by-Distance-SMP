@@ -60,6 +60,8 @@
 - UI: tag slots on search button can now be cloned. Note cloning also carries over any modification introduced by the active recipe.
 - UI: tag entries on info button can now be cloned.
 - Configuration: changed the remove duplicates bias to prefer tracks containing 'BEST' within a 'TRACKDSP' tag.
+- [JSplitter (SMP)](https://foobar2000.ru/forum/viewtopic.php?t=6378&start=360) support and ES2021 compatibility.
+- Helpers: in case saving a file throws an error due to long paths (+255 chars) a warning popup will be shown.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed
