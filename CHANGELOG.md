@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [7.6.0](#460---2024-10-09)
 - [7.5.0](#750---2024-08-13)
 - [7.4.0](#740---2024-07-30)
 - [7.3.0](#730---2024-07-24)
@@ -55,6 +56,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [7.6.0] - 2024-10-09
 ### Added
 ### Changed
 - UI: tag slots on search button can now be cloned. Note cloning also carries over any modification introduced by the active recipe.
@@ -914,7 +921,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.5.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.6.0...HEAD
+[7.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.5.0...v7.6.0
 [7.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.2.0...v7.3.0
