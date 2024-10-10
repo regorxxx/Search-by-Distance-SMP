@@ -1,5 +1,5 @@
 ﻿Toolbar panel allows to fully configure sub-modules loaded as buttons.
-R. Click to configure the toolbar:
+R. Click to open toolbar menu:
 	- Add new buttons
 	- Remove
 	- Change order
@@ -9,6 +9,11 @@ R. Click to configure the toolbar:
 	- Change orientation and buttons wrap
 	
 Hold R. Click to reorder buttons.
+
+M. Click to show headless buttons for 2 seconds. Then they are hidden.
+
+Shift + Win + R. Click to open SMP/JSplitter panel menu (works globally
+on any script and panel, at any position).
 	
 The button list is automatically built from this path: '.\buttons\*.js'
 

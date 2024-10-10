@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/24
+//10/10/24
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -16,7 +16,7 @@
 // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
 // eslint-disable-next-line no-unused-vars
 var bLoadTags = true; // NOSONAR
-var version = '1.1.1'; // NOSONAR
+var version = '1.2.0'; // NOSONAR
 
 try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ }
 
@@ -117,7 +117,7 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Align all widths and heights according to orientation
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
-buttonsBar.config.toolbarTooltip = 'R. Click to configure...\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)';
+buttonsBar.config.toolbarTooltip = 'R. Click for toolbar menu\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)\n(Shift + Win + R. Click for SMP panel menu)';
 // Assign size and pos
 buttonsBar.config.scale = barProperties.scale[1];
 buttonsBar.config.textScale = barProperties.textScale[1];

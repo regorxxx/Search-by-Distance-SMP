@@ -2,7 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
-- [7.6.0](#460---2024-10-09)
+- [7.6.0](#760---2024-10-09)
 - [7.5.0](#750---2024-08-13)
 - [7.4.0](#740---2024-07-30)
 - [7.3.0](#730---2024-07-24)
@@ -57,6 +57,7 @@
 
 ## [Unreleased][]
 ### Added
+- UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 ### Changed
 ### Removed
 ### Fixed
