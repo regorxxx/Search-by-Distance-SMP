@@ -59,6 +59,9 @@
 ### Added
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 ### Changed
+- Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.
+- Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.
+- Dynamic queries: improved entries file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
 - Helpers: updated helpers.
 ### Removed
 ### Fixed

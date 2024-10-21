@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/09/24
+//21/10/24
 
 /* exported createConfigMenu */
 
@@ -611,7 +611,8 @@ function createConfigMenu(parent) {
 		menu.newEntry({ menuName, entryText: 'sep' });
 		{	// Dynamic queries
 			let options = [];
-			const currentFilters = JSON.parse(properties['dynQueries'][1]);
+			const currentPropFilters = JSON.parse(properties['dynQueries'][1]) || [];
+			const currentFilters = (Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentPropFilters) || [];
 			const data = JSON.parse(properties.data[1]);
 			const isTheme = (data.forcedTheme.length ? data.forcedTheme : data.theme) !== 'None';
 			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_dynamic_filters.json';
@@ -637,7 +638,15 @@ function createConfigMenu(parent) {
 					{ title: 'In 5 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 5' },
 				];
 			}
-			const subMenuName = menu.newMenu('Dynamic query filters' + ((Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters).length === 0 ? '\t[none]' : ''), menuName);
+			const hasQuery = (query) => {
+				if (query || !query.length) { return false; }
+				return !!(query.match(new RegExp(query.replace('(', '\\(').replace(')', '\\)'))) && !query.match(new RegExp('NOT \\(' + query + '\\)')));
+			};
+			const filterCount = currentFilters.length;
+			const filterState = currentFilters.map((query) => hasQuery(query));
+			const found = filterState.reduce((acc, state) => acc + (state ? 1 : 0), 0);
+			const notFound = filterCount - found;
+			const subMenuName = menu.newMenu('Dynamic query filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED });
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			options.forEach((obj) => {
@@ -645,34 +654,49 @@ function createConfigMenu(parent) {
 				const entryText = obj.title + (Object.hasOwn(recipe, 'dynQueries') ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						const idx = currentFilters.indexOf(obj.query);
-						if (idx !== -1) { currentFilters.splice(idx, 1); }
-						else { currentFilters.push(obj.query); }
-						properties['dynQueries'][1] = JSON.stringify(currentFilters);
+						const idx = currentPropFilters.indexOf(obj.query);
+						if (idx !== -1) { currentPropFilters.splice(idx, 1); }
+						else { currentPropFilters.push(obj.query); }
+						properties['dynQueries'][1] = JSON.stringify(currentPropFilters);
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'dynQueries') ? MF_GRAYED : MF_STRING
 				});
 				menu.newCheckMenuLast(() => {
-					const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters;
+					const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentPropFilters;
 					return prop.includes(obj.query);
 				});
 			});
+			if (notFound) {
+				menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+				let i = 0;
+				filterState.forEach((state, idx) => {
+					if (!state) {
+						menu.newEntry({
+							menuName: subMenuName, entryText: 'Other filter ' + _p(++i),
+							func: () => {
+								fb.ShowPopupMessage('Non recognized filter:\n\n' + currentFilters[idx] +'\n\nYou may add this filter as an entry by adding it to the entries file with a custom name and copying the query (using the \'Edit Entries...\' option).', 'Dynamic query filter');
+							}
+						});
+						menu.newCheckMenuLast(() => true);
+					}
+				});
+			}
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'None', func: () => {
-					currentFilters.length = 0;
-					properties['dynQueries'][1] = JSON.stringify(currentFilters);
+					currentPropFilters.length = 0;
+					properties['dynQueries'][1] = JSON.stringify(currentPropFilters);
 					overwriteProperties(properties); // Updates panel
 				}
 			});
 			menu.newCheckMenuLast(() => {
-				const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentFilters;
+				const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentPropFilters;
 				return prop.length === 0;
 			});
 			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
-					if (!bFile) { _save(file, JSON.stringify(options, null, '\t')); }
+					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
 					_explorer(file);
 				}
 			});

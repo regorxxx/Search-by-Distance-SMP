@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/07/24
+//21/10/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -151,6 +151,11 @@ function buttonTooltipSbdCustom(parent) {
 		(
 			(Object.hasOwn(recipe, 'artistRegionFilter') ? recipe.artistRegionFilter : properties.artistRegionFilter[1]) !== -1 || (Object.hasOwn(recipe, 'genreStyleRegionFilter') ? recipe.genreStyleRegionFilter : properties.genreStyleRegionFilter[1]) !== -1
 				? ' - Cultural filter'
+				: ''
+		) +
+		(
+			(Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : (JSON.parse(properties.dynQueries[1])) || []).length !== 0
+				? ' - Dynamic query'
 				: ''
 		);
 	info += sort ? '   ' + _p(sort) : '';
