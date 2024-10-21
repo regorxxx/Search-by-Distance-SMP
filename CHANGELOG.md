@@ -57,6 +57,8 @@
 
 ## [Unreleased][]
 ### Added
+- Descriptors: added Bubblegum Bass and Big Room House style.
+- Descriptors: added Mainstream Electronic cluster.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 ### Changed
 - Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.

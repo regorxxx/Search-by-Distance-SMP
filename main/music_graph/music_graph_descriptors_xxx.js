@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/24
+//21/10/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -124,11 +124,11 @@ const music_graph_descriptors = {
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
 		['Rap_supergenre'					,	['Neoperreo','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
-		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
+		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bubblegum Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
 		['Techno_supergenre'				,	['Melodic Techno-House','Ghetto House','Ghettotech','Dark Techno','Juke','Hardtechno','Tech Trance','Tech House','Industrial Techno','Minimal Techno','Ambient Techno','IDM','Hardtek','Freetekno','Hardcore Techno','Hardcore Rave','New Beat','Detroit Techno','Kuduro']],
-		['House_supergenre'					,	['Melodic Techno-House','Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
+		['House_supergenre'					,	['Melodic Techno-House','Big Room House','Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
 		['Trance_supergenre'				,	['Neo Trance','Epic Trance','Hardtrance','NRG','Hard NRG','Hard House','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Classic Trance','Acid Trance']],
 		['Downtempo_supergenre'				,	['Electronic Sufi','Darksynth','Synthwave','Vaporwave','Minimal Wave','Nu Jazz','Minimal Industrial','Digital Minimalism','Glitch','Ambient Breaks','Illbient','Chill-Out Downtempo','Ambient House','Ambient','Ambient Electronic','Ambient New Age','Nature Music','New Age','Neo-Classical New Age','Hang Music','Healing Music','New Acoustic','Dark Ambient','Dark Industrial','Bit Music','Synth','Muzak','Minimalism','Lounge','Exotica','Musique Concrete']],
 		['Classical Medieval Era_supergenre',	['Ballata','Estampie','Gregorian','Chant','Madrigal','Motet','Organum','Saltarello']],
@@ -202,6 +202,7 @@ const music_graph_descriptors = {
 		['Early Progressive Electronic XL'	,	['Krautrock','New Age','Synth']],
 		['Progressive Electronic XL'		,	['Progressive House','Progressive Trance','Melodic Techno-House','Deep House']],
 		['Electronic Rap XL'				,	['Hip House','Ghettotech','Grime','EDM Trap','Trap','Electro','Glitch Hop']],
+		['Mainstream Electronic'			,	['Melodic Techno-House','Big Room House','Electro House','Progressive House','Bubblegum Bass']],
 		['New Age XL'						,	['Neo-Classical New Age','Healing Music','New Age','New Acoustic']],
 		['New Age Folk XL'					,	['Hang Music','Celtic New Age','New Acoustic']],
 		['Afro-Cuban XL'					,	['Son']],
@@ -365,7 +366,8 @@ const music_graph_descriptors = {
 		['Grime'							,	['UK Garage']],
 		['Eurodance'						,	['Hip House']],
 		['Ghettotech'						,	['Detroit Techno','Electro']],
-		['Emo Rap'							,	['Trap','Sadcore','Cloud Rap']]
+		['Emo Rap'							,	['Trap','Sadcore','Cloud Rap']],
+		['Nu-Disco'							,	['French House']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -409,7 +411,8 @@ const music_graph_descriptors = {
 		['Eurodance'						,	['Progressive House']],
 		['Acid House'						,	['Hip House','Trip Hop']],
 		['Ghettotech'						,	['Ghetto House','Hip House']],
-		['Emo Rap'							,	['Emo Pop','Nu Metal','Jazz-Rap','Horrorcore']]
+		['Emo Rap'							,	['Emo Pop','Nu Metal','Jazz-Rap','Horrorcore']],
+		['Bubblegum Bass'					,	['UK Bass']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -591,7 +594,8 @@ const music_graph_descriptors = {
 		['Trap'								,	['Latin Trap','Trap Latino'			]],
 		['Kawaii Metal'						,	['Yurufuwa','Idol Metal','Cute Metal','Kawaiicore']],
 		['Trancecore'						,	['Electronicore','Synthcore'		]],
-		['Synthwave'						,	['Retrowave'						]]
+		['Synthwave'						,	['Retrowave'						]],
+		['Nu-Disco'							,	['Disco House'						]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
