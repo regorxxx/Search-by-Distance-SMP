@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/10/24
+//29/10/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -242,7 +242,7 @@ const music_graph_descriptors = {
 		['British Folk-Rock'				,	['Folk-Rock','Folk Baroque','Progressive Folk']],
 		['Progressive Folk'					,	['Folk-Rock','Proto-Prog','Crossover Prog','Symphonic Rock','Italian Prog. Rock','Japanese Prog. Rock','Nuevo Flamenco']],
 		['Progressive Rock XL'				,	['Space Rock']],
-		['Freak Folk'						,	['Folk-Rock','British Folk-Rock']],
+		['Freak Folk'						,	['Folk-Rock','British Folk-Rock','Folk Baroque','Psychedelic Folk']],
 		['Garage Rock'						,	['Rock & Roll','Surf Rock','Space Rock','Psychedelic Rock','Acid Rock','Pub Rock','Proto-Punk','Garage Rock Revival','Post-Punk Revival','Garage Punk','Garage Pop']],
 		['Beat Music'						,	['Rock & Roll','Folk-Rock','Psychedelic Rock','Acid Rock','Pop Rock','Power Pop','Hard Rock','R&B','Raga Rock']],
 		['Psychedelic Rock'					,	['Space Rock','Proto-Prog','Heavy Prog','Eclectic Prog','Canterbury Scene','Krautrock','Italian Prog. Rock','Japanese Prog. Rock','Psychedelic Folk','Acid Rock','Glam Rock','Garage Rock','Hard Rock','P-Funk','Classic Funk','Blues Rock','British Blues','Fusion','Neo-Psychedelia','Raga Rock']],
@@ -388,7 +388,7 @@ const music_graph_descriptors = {
 		['Bossa Nova'						,	['Cool Jazz']],
 		['Post-Bop'							,	['Mainstream Jazz','Free Jazz']],
 		['Nuevo Flamenco'					,	['Folk-Jazz','Flamenco Rock']],
-		['Freak Folk'						,	['Close Harmony']],
+		['Freak Folk'						,	['Close Harmony','Baroque Pop','Ambient New Age','Neo-Classical New Age','Malian Folk','Desert Blues','Acid Rock']],
 		['Electrorock'						,	['Industrial Rock']],
 		['Classical Sufi'					,	['Psychedelic Folk','Ambient Folk']],
 		['Electronic Sufi'					,	['Classical Sufi','Chill-Out Downtempo','Ambient House']],
@@ -424,7 +424,7 @@ const music_graph_descriptors = {
 		['Grunge'							,	['Indie','Britpop','Funk Metal','Beat Music','Roots Rock','Glam Rock','Pop Metal','Glam Metal','Hair Metal','Kawaii Metal']],
 		['Post-Britpop'						,	['Garage Rock Revival','Post-Punk Revival','Garage Punk']],
 		['Garage Rock Revival'				,	['Dream Pop','Shoegaze']],
-		['Freak Folk'						,	['Electropop','Psychedelic Rock','Acid Rock']],
+		['Freak Folk'						,	['Electropop','Psychedelic Rock','Celtic Folk','Pagan Folk','Medieval','Renaissance Rock','Alt. Rock','Rock_cluster','Tishoumaren','Hill Country Blues','Blues_supergenre','Country Rock','Classic Rock XL','Soft Rock','Roots Rock','Southern Rock']],
 		['Chill-Out Downtempo'				,	['Progressive Trance','New Age','New Age XL','Neo-Classical New Age','Healing Music','New Acoustic']],
 		['Future Jazz'						,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre']],
 		['Jazz_supergenre'					,	['Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre','Progressive Rock XL','Folk Music_supercluster','Alt. Rock','Psychedelic Rock']],
@@ -452,7 +452,7 @@ const music_graph_descriptors = {
 		['Symphonic Rap'					,	['Hardcore Rap']],
 		['Opera'							,	['Contemporary Popular Choral XL']],
 		['Cloud Rap'						,	['Hardcore Rap','Gangsta','Horrorcore']],
-		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock']],
+		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock','Celtic Folk','Pagan Folk']],
 		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']],
 		['Swing'							,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']],
 		['Dixieland'						,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']]
