@@ -25,7 +25,7 @@ There are 3 methods to calculate similarity between tracks: WEIGHT, GRAPH (see a
 	Uses a simplification of the GRAPH method. Let's say we assign a number to every "big" cluster of points on the music graph, then we can simply	put any genre/style point into any of those clusters and give them a value.
 
 ### Other features 
-* Fully configurable tag remmaping, weights, etc.
+* Fully configurable tag remapping, weights, etc.
 * The comparison pool can be filtered with multiple filters:
   * Global forced query (for example to always exclude live tracks).
   * Dynamic queries based on the reference track.
