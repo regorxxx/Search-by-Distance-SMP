@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/06/24
+//03/11/24
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -34,9 +34,9 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	bIconMode:		['Icon-only mode?', false, {func: isBoolean}, false],
 	entries:		['Info entries', JSON.stringify([
 		{name: 'By Genre',
-			tf: ['GENRE', 'ARTIST GENRE LAST.FM', 'ARTIST GENRE ALLMUSIC', 'ALBUM GENRE LAST.FM', 'ALBUM GENRE ALLMUSIC', 'ALBUM GENRE WIKIPEDIA', 'ARTIST GENRE WIKIPEDIA']},
+			tf:  [...new Set([globTags.genre, 'GENRE', 'ARTIST GENRE LAST.FM', 'ARTIST GENRE ALLMUSIC', 'ALBUM GENRE LAST.FM', 'ALBUM GENRE ALLMUSIC', 'ALBUM GENRE WIKIPEDIA', 'ARTIST GENRE WIKIPEDIA'])]},
 		{name: 'By Style',
-			tf: ['STYLE']},
+			tf:  [...new Set([globTags.style, 'STYLE'])]},
 	]), {func: isJSON}],
 };
 newButtonsProperties.entries.push(newButtonsProperties.entries[1]);
@@ -60,8 +60,8 @@ addButton({
 							const entry = {
 								tf: Input.json('array strings', '',
 									'Enter tag names:\n\n' +
-									'Ex:\n' + JSON.stringify(['GENRE', 'ALBUM GENRE WIKIPEDIA'])
-									, 'Graph Info', JSON.stringify(['GENRE', 'ALBUM GENRE WIKIPEDIA']), void(0), true
+									'Ex:\n' + JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA'])
+									, 'Graph Info', JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA']), void(0), true
 								),
 							};
 							if (!entry.tf) {return;}

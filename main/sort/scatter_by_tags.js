@@ -1,10 +1,10 @@
 ﻿'use strict';
-//04/08/24
+//03/11/24
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global isEnhPlayCount:readable, isPlayCount:readable */
+/* global isEnhPlayCount:readable, isPlayCount:readable, globTags:readable */
 include('..\\..\\helpers\\helpers_xxx_basic_js.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global range:readable, _p:readable, ReverseIterableMap:readable */
@@ -29,7 +29,7 @@ include('..\\..\\helpers\\helpers_xxx_tags.js');
  * @returns {FbMetadbHandleList|null}
  */
 function scatterByTags({
-	tagName = 'GENRE,STYLE',
+	tagName = [globTags.genre, globTags.style].join(','),
 	tagValue = 'instrumental',
 	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
 	bSendToActivePls = true
@@ -341,9 +341,9 @@ function shuffleByTags({
 	if (bAdvancedShuffle) {
 		const selItemsList = new FbMetadbHandleList(selItemsArrayOut);
 		const conditions = {
-			instrumental: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY', 'LANGUAGE'], val: [['instrumental'], ['instrumental'], ['instrumental'], ['zxx']], bPrev: true },
-			live: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['live'], ['live'], ['live']], bPrev: false },
-			vocal: { tags: ['GENRE', 'STYLE', 'FOLKSONOMY'], val: [['female vocal'], ['female vocal'], ['female vocal']], bPrev: false },
+			instrumental: { tags: [globTags.genre, globTags.style, globTags.folksonomy, 'LANGUAGE'], val: [['instrumental'], ['instrumental'], ['instrumental'], ['zxx']], bPrev: true },
+			live: { tags: [globTags.genre, globTags.style, globTags.folksonomy], val: [['live'], ['live'], ['live']], bPrev: false },
+			vocal: { tags: [globTags.genre, globTags.style, globTags.folksonomy], val: [['female vocal'], ['female vocal'], ['female vocal']], bPrev: false },
 		};
 		// Retrieve tags and reuse whenever it's possible
 		const types = Object.keys(conditions);
@@ -499,8 +499,8 @@ function shuffleBiasTf(sortBias = 'random') {
 	sortBias = (sortBias || '').toLowerCase();
 	let sortTF;
 	switch (sortBias) {
-		case 'playcount': sortTF = '$max(%PLAY_COUNT%,%LASTFM_PLAY_COUNT%,0)'; break;
-		case 'rating': sortTF = '$max(%RATING%,$meta(RATING),0)'; break;
+		case 'playcount': sortTF = globTags.playCount; break;
+		case 'rating': sortTF = '$max(' + globTags.rating + ',$meta(RATING),0)'; break;
 		case 'popularity': sortTF = '$max($meta(Track Statistics Last.fm,5[score]),0)'; break;
 		case 'lastplayed': sortTF = bEnhPlayCount ? '%LAST_PLAYED_ENHANCED%' : '%LAST_PLAYED%'; break;
 		case 'key': sortTF = '$if($stricmp(%KEY%,G#m),$puts(kTrans,1B))$if($stricmp(%KEY%,Abm),$puts(kTrans,1B))$if($stricmp(%KEY%,D#m),$puts(kTrans,2B))$if($stricmp(%KEY%,Ebm),$puts(kTrans,2B))$if($stricmp(%KEY%,A#m),$puts(kTrans,3B))$if($stricmp(%KEY%,Bbm),$puts(kTrans,3B))$if($stricmp(%KEY%,Fm),$puts(kTrans,4B))$if($stricmp(%KEY%,Cm),$puts(kTrans,5B))$if($stricmp(%KEY%,Gm),$puts(kTrans,6B))$if($stricmp(%KEY%,Dm),$puts(kTrans,7B))$if($stricmp(%KEY%,Am),$puts(kTrans,8B))$if($stricmp(%KEY%,Em),$puts(kTrans,9B))$if($stricmp(%KEY%,Bm),$puts(kTrans,10B))$if($stricmp(%KEY%,F#m),$puts(kTrans,11B))$if($stricmp(%KEY%,Gbm),$puts(kTrans,11B))$if($stricmp(%KEY%,C#m),$puts(kTrans,12B))$if($stricmp(%KEY%,Dbm),$puts(kTrans,12B))$if($stricmp(%KEY%,6m),$puts(kTrans,1B))$if($stricmp(%KEY%,7m),$puts(kTrans,2B))$if($stricmp(%KEY%,8m),$puts(kTrans,3B))$if($stricmp(%KEY%,9m),$puts(kTrans,4B))$if($stricmp(%KEY%,10m),$puts(kTrans,5B))$if($stricmp(%KEY%,11m),$puts(kTrans,6B))$if($stricmp(%KEY%,12m),$puts(kTrans,7B))$if($stricmp(%KEY%,1m),$puts(kTrans,8B))$if($stricmp(%KEY%,2m),$puts(kTrans,9B))$if($stricmp(%KEY%,3m),$puts(kTrans,10B))$if($stricmp(%KEY%,4m),$puts(kTrans,11B))$if($stricmp(%KEY%,5m),$puts(kTrans,12B))$if($stricmp(%KEY%,B),$puts(kTrans,1A))$if($stricmp(%KEY%,F#),$puts(kTrans,2A))$if($stricmp(%KEY%,Gb),$puts(kTrans,2A))$if($stricmp(%KEY%,C#),$puts(kTrans,3A))$if($stricmp(%KEY%,Db),$puts(kTrans,3A))$if($stricmp(%KEY%,G#),$puts(kTrans,4A))$if($stricmp(%KEY%,Ab),$puts(kTrans,4A))$if($stricmp(%KEY%,D#),$puts(kTrans,5A))$if($stricmp(%KEY%,Eb),$puts(kTrans,5A))$if($stricmp(%KEY%,A#),$puts(kTrans,6A))$if($stricmp(%KEY%,Bb),$puts(kTrans,6A))$if($stricmp(%KEY%,F),$puts(kTrans,7A))$if($stricmp(%KEY%,C),$puts(kTrans,8A))$if($stricmp(%KEY%,G),$puts(kTrans,9A))$if($stricmp(%KEY%,D),$puts(kTrans,10A))$if($stricmp(%KEY%,A),$puts(kTrans,11A))$if($stricmp(%KEY%,E),$puts(kTrans,12A))$if($stricmp(%KEY%,6d),$puts(kTrans,1A))$if($stricmp(%KEY%,7d),$puts(kTrans,2A))$if($stricmp(%KEY%,8d),$puts(kTrans,3A))$if($stricmp(%KEY%,9d),$puts(kTrans,4A))$if($stricmp(%KEY%,10d),$puts(kTrans,5A))$if($stricmp(%KEY%,11d),$puts(kTrans,6A))$if($stricmp(%KEY%,12d),$puts(kTrans,7A))$if($stricmp(%KEY%,1d),$puts(kTrans,8A))$if($stricmp(%KEY%,2d),$puts(kTrans,9A))$if($stricmp(%KEY%,3d),$puts(kTrans,10A))$if($stricmp(%KEY%,4d),$puts(kTrans,11A))$if($stricmp(%KEY%,5d),$puts(kTrans,12A))$if($get(kTrans),,$puts(kTrans,%key%))$get(kTrans)'; break;
