@@ -452,7 +452,7 @@ const music_graph_descriptors = {
 		['Symphonic Rap'					,	['Hardcore Rap']],
 		['Opera'							,	['Contemporary Popular Choral XL']],
 		['Cloud Rap'						,	['Hardcore Rap','Gangsta','Horrorcore']],
-		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock','Celtic Folk','Pagan Folk']],
+		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock','Celtic Folk','Pagan Folk','Ska Punk','Rumba Flamenca']],
 		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']],
 		['Swing'							,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']],
 		['Dixieland'						,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']]
