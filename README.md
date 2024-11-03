@@ -21,11 +21,11 @@ There are 3 methods to calculate similarity between tracks: WEIGHT, GRAPH (see a
 
 * GRAPH: -> Score + Distance  
 	Apart from scoring, it compares the genre/styles tags to the ones of the reference track using a graph and calculating their minimum mean distance. Imagine [Google maps for genre/styles](https://regorxxx.github.io/Music-Graph/Draw%20Graph.html), and looking for the distance from Rock to Jazz for ex. Note this is totally different to simple string matching, so 'Acid Rock' may be similar to 'Psychedelic Rock' even if they are totally different tag values (or strings). This method is pretty computational intensive (but tons of optimizations have been taken in place).
-* DYNGENRE: -> Score + Simplifed Distance
+* DYNGENRE: -> Score + Simplifed Distance  
 	Uses a simplification of the GRAPH method. Let's say we assign a number to every "big" cluster of points on the music graph, then we can simply	put any genre/style point into any of those clusters and give them a value.
 
 ### Other features 
-* Fully configurable tag remmaping, weights, etc.
+* Fully configurable tag remapping, weights, etc.
 * The comparison pool can be filtered with multiple filters:
   * Global forced query (for example to always exclude live tracks).
   * Dynamic queries based on the reference track.
