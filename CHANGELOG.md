@@ -61,6 +61,7 @@
 - Descriptors: added Mainstream Electronic cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
+- Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 ### Changed
 - Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.
 - Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.

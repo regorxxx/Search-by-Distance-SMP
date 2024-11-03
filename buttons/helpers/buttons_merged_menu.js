@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/07/24
+//31/10/24
 
 /* exported createButtonsMenu */
 
@@ -32,7 +32,7 @@ function createButtonsMenu(name) {
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newEntry({ entryText: 'sep' });
 	if (!_isFolder(folders.data)) { _createFolder(folders.data); }
-	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_selector.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js']);
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
 	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => { return path.split('\\').pop(); }));
@@ -51,10 +51,15 @@ function createButtonsMenu(name) {
 		);
 	}
 	{
-		const subMenu = menu.newMenu('Add buttons');
+		const subMenu = menu.newMenu('Add button');
+		menu.newEntry({ menuName: subMenu, entryText: 'Ctrl + L. Click opens readme:', flags: MF_GRAYED });
+		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
-			let entryText = path.split('\\').pop() + (isAllowed(fileName) ? (isAllowedV2(fileName) ? '' : '\t(Playlist Tools)') : '\t(1 allowed)');
+			let entryText = path.split('\\').pop() + (isAllowed(fileName)
+				? (isAllowedV2(fileName)
+					? '' : '\t(Playlist Tools)'
+				) : '\t(1 allowed)');
 			let subMenuFolder = subCategories.find((folder) => { return entryText.indexOf(folder) !== -1; }) || 'Others';
 			if (subMenuFolder && subMenuFolder.length) {
 				subMenuFolder = parseSubMenuFolder(subMenuFolder);
@@ -63,21 +68,24 @@ function createButtonsMenu(name) {
 			entryText = entryText.replace('buttons_', '').replace('others_', '');
 			menu.newEntry({
 				menuName: subMenuFolder, entryText, func: () => {
-					buttonsPath.push(path);
-					const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
-					_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
+					const bOnlyReadme = utils.IsKeyPressed(VK_CONTROL);
+					if (!bOnlyReadme) {
+						buttonsPath.push(path);
+						const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
+						_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
+					}
 					if (readmeList) {
 						const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
 						const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
 						if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
 					}
-					window.Reload();
+					if (!bOnlyReadme) { window.Reload(); }
 				}, flags: isAllowed(fileName) && isAllowedV2(fileName) ? MF_STRING : MF_GRAYED
 			});
 		});
 	}
 	{
-		const subMenu = menu.newMenu('Remove buttons');
+		const subMenu = menu.newMenu('Remove button');
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({
 				menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
@@ -126,8 +134,8 @@ function createButtonsMenu(name) {
 		});
 	}
 	{
-		const subMenu = menu.newMenu('Change buttons position');
-		menu.newEntry({ menuName: subMenu, entryText: 'Can also be moved pressing R. Click:', flags: MF_GRAYED });
+		const subMenu = menu.newMenu('Change button position');
+		menu.newEntry({ menuName: subMenu, entryText: 'Or pressing R. Click over buttons:', flags: MF_GRAYED });
 		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({

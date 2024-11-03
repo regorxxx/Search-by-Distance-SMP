@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/10/24
+//31/10/24
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -171,8 +171,8 @@ function loadButtonsFile(bStartup = false) {
 					['buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_playlist_filter.js', 'buttons_playlist_history.js']
 			},
 			{
-				name: 'Device priority', files: _isFile(folders.xxx + 'buttons\\buttons_device_selector.js')
-					? ['buttons_device_priority.js', 'buttons_device_selector.js']
+				name: 'Device priority', files: _isFile(folders.xxx + 'buttons\\buttons_device_switcher.js')
+					? ['buttons_device_priority.js', 'buttons_device_switcher.js']
 					: ['buttons_device_priority.js']
 			},
 			{
@@ -192,7 +192,7 @@ function loadButtonsFile(bStartup = false) {
 		const input = Input.number('int positive', presets.length, 'Choose a preset (by number) from the following list, to load the toolbar with pre-defined buttons (they may be added/removed at any time later):\n' + presets.map((p, i) => '\t' + _b(i + 1) + ' ' + p.name).join('\n') + '\n\nCanceling will load a blank toolbar by default.', 'Toolbar: preset', 1, [(n) => n > 0 && n <= presets.length]);
 		if (input == null) { return false; }
 		names = presets[input - 1].files.map((path) => { return path.split('\\').pop(); });
-		_save(file, JSON.stringify(names, null, '\t').replace(/\n/g,'\r\n'));
+		_save(file, JSON.stringify(names, null, '\t').replace(/\n/g, '\r\n'));
 	};
 	if (!_isFile(file)) {
 		presetPopup();
@@ -209,10 +209,16 @@ function loadButtonsFile(bStartup = false) {
 				names[idx] = rename.to;
 			}
 		});
-		if (!isArrayEqual(data, names)) { _save(file, JSON.stringify(names, null, '\t')).replace(/\n/g,'\r\n'); } // Rewrite file for older versions
+		if (!isArrayEqual(data, names)) { _save(file, JSON.stringify(names, null, '\t')).replace(/\n/g, '\r\n'); } // Rewrite file for older versions
 		if (!names.length) { presetPopup(); }
 	}
-	buttonsPath = names.map((name) => { return folders.xxx + 'buttons\\' + name; });
+	const remap = new Map([
+		['buttons_tags_automation.js', 'buttons_tags_tagger.js'],
+		['buttons_device_selector.js', 'buttons_device_switcher.js'],
+	]);
+	buttonsPath = names
+		.map((name) => remap.has(name) ? remap.get(name) : name )
+		.map((name) => folders.xxx + 'buttons\\' + name );
 	return buttonsPath.length;
 }
 
