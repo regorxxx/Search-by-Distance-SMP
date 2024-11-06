@@ -1655,336 +1655,48 @@ async function searchByDistance({
 	}
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
-	let weightValue, mapDistance, leftWeight, currScoreAvailable;
-	let bRelated, bUnrelated;
+	let mapDistance, score, bRelated, bUnrelated;
+	let order = 0;
 	while (i < trackTotal) {
-		weightValue = 0;
-		mapDistance = Infinity; // We consider points are not linked by default
 		if (bProfile) { test.CheckPoint('#5.1 - Score'); }
 		// Get the tags according to weight and filter ''. Also create sets for comparison
 		if (bProfile) { test.CheckPoint('#5.1.1 - Score'); }
-		const handleTag = { genreStyle: { set: new Set(), number: 0 } };
-		for (let key in calcTags) {
-			const tag = calcTags[key];
-			if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
-			handleTag[key] = {};
-			if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn)) { // No need for bKeyMix, since is only used for sorting
-				if (tag.bMultiple) {
-					if (tag.bGraph && bTagFilter) {
-						handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
-					} else {
-						handleTag[key].val = tag.handle[i].filter(Boolean);
-					}
-				} else {
-					handleTag[key].val = tag.bString ? tag.handle[i][0] : Number(tag.handle[i][0]);
-				}
-			} else {
-				if (tag.bMultiple) { // NOSONAR [More clear this way...]
-					handleTag[key].val = [];
-				} else {
-					handleTag[key].val = tag.bString ? '' : null;
-				}
-			}
-			if (tag.bString) {
-				const valLen = handleTag[key].val.length;
-				if (tag.bMultiple) {
-					if (valLen && bAscii) { handleTag[key].val.forEach((val, i) => { handleTag[key].val[i] = _asciify(val); }); }
-					handleTag[key].set = new Set(handleTag[key].val);
-					handleTag[key].number = handleTag[key].set.size;
-				} else if (valLen && bAscii) { handleTag[key].val = _asciify(handleTag[key].val); }
-				if (tag.bGraphDyn && valLen) {
-					if (bFilterWithGraph) {
-						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
-						});
-					} else {
-						handleTag[key].val.forEach((val) => {
-							if (!graphExclusions.has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
-						});
-					}
-				}
-			}
-		}
-		handleTag.genreStyle.number = handleTag.genreStyle.set.size;
+		const handleTag = parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, descr, i });
 		if (bProfile) { test.CheckPointStep('#5.1.1 - Score'); }
-		// O(i*j*k) time
-		// i = # tracks retrieved by query, j & K = # number of style/genre tags
-		if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
-		bRelated = bUnrelated = false;
-		['related', 'unrelated'].forEach((key) => { // Adds an offset score as base
-			const tag = calcTags[key];
-			if (tag.weight === 0) { return; }
-			const ids = handleTag[key].set.add(titleHandle[0]);
-			if (artistHandle) { artistHandle[i].forEach((artist) => ids.add(artist)); }
-			if (tag.referenceSet.intersectionSize(ids) !== 0) {
-				weightValue += tag.weight;
-				if (key === 'related') { bRelated = true; } else { bUnrelated = true; }
-			}
-		});
+		if (method === 'GRAPH' && (handleTag.genreStyle.number + calcTags.genreStyle.referenceNumber) <= 6) { order = 1; }
+		if (order === 0) {
+			// O(i*j*k) time
+			// i = # tracks retrieved by query, j & K = # number of style/genre tags
+			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
+			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
+			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
+			if (score === -1) { i++; continue; }
 
-		leftWeight = totalWeight;
-		currScoreAvailable = 100;
-		for (let key of sortTagKeys) {
-			const tag = calcTags[key];
-			if (tag.weight === 0) { continue; }
-			if (tag.bVirtual) { continue; }
-			if (currScoreAvailable < minScoreFilter) { break; } // Break asap
-			const scoringDistr = tag.scoringDistribution;
-			if (tag.bMultiple) {
-				const newTag = handleTag[key].number;
-				if (tag.referenceNumber !== 0) {
-					if (newTag !== 0) {
-						const common = tag.referenceSet.intersectionSize(handleTag[key].set);
-						if (common !== 0) {
-							const score = common / tag.referenceNumber;
-							weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
-								? tag.weight * weightDistribution(scoringDistr, score)
-								: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, newTag);
-						}
-					} else if (tag.baseScore !== 0) { // When compared track is missing this tag, add a base score
-						const score = tag.baseScore / 100;
-						weightValue += scoringDistr === 'LINEAR' || score >= 1 
-							? tag.weight * weightDistribution(scoringDistr, score)
-							: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, tag.referenceNumber);
-					}
-				}
-			} else if (tag.bSingle) {
-				const newTag = handleTag[key].val;
-				if (tag.bString) {
-					if (tag.reference.length) {
-						if (newTag.length) {
-							if (newTag === tag.reference) {
-								weightValue += tag.weight;
-							} else if (tag.bKeyRange && tag.range !== 0) {
-								const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
-								const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
-								if (camelotKey && camelotKeyNew) {
-									const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
-									const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
-									const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
-									// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
-									if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
-										const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range); //becomes negative outside the allowed range!
-										weightValue += scoringDistr === 'LINEAR' || score >= 1  // Avoid memoizing last var if not needed
-											? tag.weight * weightDistribution(scoringDistr, score)
-											: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
-									}
-								}
-							}
-						} else if (tag.baseScore !== 0) {
-							const score = tag.baseScore / 100;
-							weightValue += scoringDistr === 'LINEAR' || score >= 1 
-								? tag.weight * weightDistribution(scoringDistr, score)
-								: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
-						}
-					}
-				} else if (tag.bNumber) {
-					if (tag.reference !== null) {
-						if (newTag !== null) {
-							if (newTag === tag.reference) {
-								weightValue += tag.weight;
-							} else if (tag.bPercentRange && tag.range !== 0) {
-								const range = tag.reference * tag.range / 100;
-								const difference = range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
-								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-									const score = difference / tag.range / tag.reference * 100;
-									weightValue += scoringDistr === 'LINEAR' || score >= 1  // Avoid memoizing last var if not needed
-										? tag.weight * weightDistribution(scoringDistr, score)
-										: tag.weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
-								}
-							} else if (tag.bAbsRange && tag.range !== 0) {
-								const difference = tag.range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
-								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-									const score = difference / tag.range;
-									weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
-										? tag.weight * weightDistribution(scoringDistr, score)
-										: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(difference));
-								}
-							}
-						} else if (tag.baseScore !== 0) {
-							const score = tag.baseScore / 100;
-							weightValue += scoringDistr === 'LINEAR' || score >= 1
-								? tag.weight * weightDistribution(scoringDistr, score)
-								: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
-						}
-					}
-				}
-			}
-			leftWeight -= tag.weight;
-			currScoreAvailable = round((weightValue + leftWeight) * 100 / originalWeightValue, 1);
-		}
-		if (currScoreAvailable < minScoreFilter) { i++; continue; } // Break asap
+			if (method === 'GRAPH') {
+				if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
+				if (score >= minScoreFilter) { mapDistance = calcDistance({ calcTags, handleTag }); }
+				else {mapDistance = Infinity; }
+				if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
+				if (mapDistance > graphDistance) { i++; continue; }
+			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
+		} else {
+			if (method === 'GRAPH') {
+				if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
+				mapDistance = calcDistance({ calcTags, handleTag });
+				if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
+				if (mapDistance > graphDistance) { i++; continue; }
+			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 
-		if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
-			handleTag.dynGenre = { val: [], number: 0 };
-			if (handleTag.genreStyle.number !== 0) {
-				for (const genreStyle of handleTag.genreStyle.set) {
-					const dynGenre = sbd.genreStyleMap.get(genreStyle);
-					if (dynGenre) { handleTag.dynGenre.val.push(...dynGenre); }
-				}
-			}
-			handleTag.dynGenre.number = handleTag.dynGenre.val.length;
-			if (handleTag.dynGenre.number !== 0) {
-				let j = 0;
-				let score = 0;
-				while (j < calcTags.dynGenre.referenceNumber) {
-					let h = 0;
-					while (h < handleTag.dynGenre.number) {
-						const newVal = handleTag.dynGenre.val[h];
-						const refVal = calcTags.dynGenre.reference[j];
-						if (newVal === refVal) {
-							score += 1 / calcTags.dynGenre.referenceNumber;
-							break;
-						} else if (calcTags.dynGenre.range !== 0) {
-							const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](refVal, calcTags.dynGenre.range, true);
-							if (valueLower !== -1) { //All or none are -1
-								if (valueLower > refVal) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
-									if (lowerLimit <= newVal && newVal <= valueLower) { // (lowerLimit , x)
-										score += 1 / calcTags.dynGenre.referenceNumber;
-										break;
-									}
-									else if (valueLower <= newVal && newVal <= refVal) { // NOSONAR [(x, x + y)]
-										score += 1 / calcTags.dynGenre.referenceNumber;
-										break;
-									}
-									else if (valueUpper <= newVal && newVal <= upperLimit) { // NOSONAR [(x - y, upperLimit)]
-										score += 1 / calcTags.dynGenre.referenceNumber;
-										break;
-									}
-								} else if (valueLower <= newVal && newVal <= valueUpper) {
-									score += 1 / calcTags.dynGenre.referenceNumber;
-									break;
-								}
-							}
-						}
-						h++;
-					}
-					j++;
-				}
-				const scoringDistr = calcTags.dynGenre.scoringDistribution;
-				weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
-					? calcTags.dynGenre.weight * weightDistribution(scoringDistr, score)
-					: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
-			} else if (calcTags.dynGenre.baseScore !== 0) {
-				weightValue += Math.min(calcTags.dynGenre.weight, calcTags.dynGenre.weight * calcTags.dynGenre.baseScore / 100);
-			}
+			// O(i*j*k) time
+			// i = # tracks retrieved by query, j & K = # number of style/genre tags
+			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
+			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
+			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
+			if (score === -1 || score < minScoreFilter) { i++; continue; }
 		}
-
-		if (calcTags.artistRegion.weight !== 0 && calcTags.artistRegion.reference.length) {
-			const tag = calcTags.artistRegion;
-			const newTag = handleTag.artistRegion = { val: '' };
-			const localeTag = tag.handle ? _asciify(tag.handle[i].pop() || '') : '';
-			if (localeTag.length) { newTag.val = getCountryISO(localeTag) || ''; }
-			else if (artistHandle) { newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso; }
-			if (newTag.val.length) {
-				const weight = tag.weight;
-				const range = tag.range;
-				if (newTag.val === tag.reference) {
-					weightValue += weight;
-				} else if (range !== 0) {
-					const difference = range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
-					if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-						const scoringDistr = tag.scoringDistribution;
-						const score = difference / range;
-						weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
-							? weight * weightDistribution(scoringDistr, score)
-							: weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
-					}
-				}
-			} else if (calcTags.artistRegion.baseScore !== 0) {
-				weightValue += Math.min(calcTags.artistRegion.weight, calcTags.artistRegion.weight * calcTags.artistRegion.baseScore / 100);
-			}
-		}
-
-		if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber !== 0) {
-			const tag = calcTags.genreStyleRegion;
-			const newTag = handleTag.genreStyleRegion = { val: [], number: 0 };
-			const weight = tag.weight;
-			if (handleTag.genreStyle.number !== 0) {
-				newTag.val.push(...handleTag.genreStyle.set);
-			}
-			newTag.number = newTag.val.length;
-			if (newTag.number !== 0) {
-				const range = tag.range;
-				let j = 0;
-				let score = 0;
-				while (j < calcTags.genreStyleRegion.referenceNumber) {
-					let h = 0;
-					let distances = [];
-					while (h < newTag.number) {
-						const newVal = newTag.val[h];
-						const refVal = calcTags.genreStyleRegion.reference[j];
-						if (newVal === refVal) {
-							distances.push(0);
-							break;
-						} else if (range !== 0) {
-							distances.push(music_graph_descriptors_culture.getDistance(refVal, newVal));
-						}
-						h++;
-					}
-					if (distances.length) {
-						const min = Math.min.apply(null, distances);
-						if (min === 0) { score += 1 / calcTags.genreStyleRegion.referenceNumber; }
-						else {
-							const difference = range - min;
-							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-								score += difference / range / calcTags.genreStyleRegion.referenceNumber;
-							}
-						}
-					}
-					j++;
-				}
-				const scoringDistr = calcTags.genreStyleRegion.scoringDistribution;
-				weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
-					? weight * weightDistribution(scoringDistr, score)
-					: weight * weightDistribution(scoringDistr, score, calcTags.genreStyleRegion.referenceNumber, newTag.number);
-			} else if (calcTags.genreStyleRegion.baseScore !== 0) {
-				weightValue += Math.min(weight, weight * calcTags.genreStyleRegion.baseScore / 100);
-			}
-		}
-		// The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
-		const score = Math.max(0, Math.min(round(weightValue * 100 / originalWeightValue, 1), 100));
-		if (sbd.panelProperties.bSearchDebug[1] && Number.isNaN(score)) { console.log('Score is NaN', weightValue, originalWeightValue); }
-		if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
-		if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
-		if (method === 'GRAPH') {
-			if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
-			// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
-			if (!cacheLink) { cacheLink = new Map(); }
-			if (!cacheLinkSet) { cacheLinkSet = new Map(); }
-			// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
-			if (score >= minScoreFilter) {
-				if (calcTags.genreStyle.referenceNumber !== 0) {
-					if (handleTag.genreStyle.number !== 0) {
-						// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
-						// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
-						// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
-						// Pre-filtering number of tracks is the best approach to reduce calc time (!)
-						// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
-						const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
-						const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
-						const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
-						if (difference.size) {
-							const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
-							const mapKey = [
-								...[
-									[...difference].sort((a, b) => a.localeCompare(b)).join(','),
-									[...toGenreStyle].sort((a, b) => a.localeCompare(b)).join(','),
-								].sort((a, b) => a.localeCompare(b))
-							].join(' -> ');
-							const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
-							if (typeof mapValue !== 'undefined') {
-								mapDistance = mapValue;
-							} else { // Calculate it if not found
-								mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
-								cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
-							}
-						} else { mapDistance = 0; } // One is superset of the other
-					}
-				} else { mapDistance = 0; } // Behaves like weight method
-			}
-			if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
-		} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
+	
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
 				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance, bRelated, bUnrelated });
@@ -2479,6 +2191,330 @@ async function searchByDistance({
 /*
 	Helpers
 */
+
+function parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, descr, i }) {
+	const handleTag = { genreStyle: { set: new Set(), number: 0 } };
+	for (let key in calcTags) {
+		const tag = calcTags[key];
+		if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
+		handleTag[key] = {};
+		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn)) { // No need for bKeyMix, since is only used for sorting
+			if (tag.bMultiple) {
+				if (tag.bGraph && bTagFilter) {
+					handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
+				} else {
+					handleTag[key].val = tag.handle[i].filter(Boolean);
+				}
+			} else {
+				handleTag[key].val = tag.bString ? tag.handle[i][0] : Number(tag.handle[i][0]);
+			}
+		} else {
+			if (tag.bMultiple) { // NOSONAR [More clear this way...]
+				handleTag[key].val = [];
+			} else {
+				handleTag[key].val = tag.bString ? '' : null;
+			}
+		}
+		if (tag.bString) {
+			const valLen = handleTag[key].val.length;
+			if (tag.bMultiple) {
+				if (valLen && bAscii) { handleTag[key].val.forEach((val, i) => { handleTag[key].val[i] = sbd.asciify(val); }); }
+				handleTag[key].set = new Set(handleTag[key].val);
+				handleTag[key].number = handleTag[key].set.size;
+			} else if (valLen && bAscii) { handleTag[key].val = sbd.asciify(handleTag[key].val); }
+			if (tag.bGraphDyn && valLen) {
+				if (bFilterWithGraph) {
+					handleTag[key].val.forEach((val) => {
+						if (!graphExclusions.has(val) && descr.getNodeSet().has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
+					});
+				} else {
+					handleTag[key].val.forEach((val) => {
+						if (!graphExclusions.has(val)) { handleTag.genreStyle.set.add(descr.getSubstitution(val)); }
+					});
+				}
+			}
+		}
+	}
+	handleTag.genreStyle.number = handleTag.genreStyle.set.size;
+	return handleTag;
+}
+
+function calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }) {
+	let bRelated = false, bUnrelated = false;
+	let weightValue = 0;
+	['related', 'unrelated'].forEach((key) => { // Adds an offset score as base
+		const tag = calcTags[key];
+		if (tag.weight === 0) { return; }
+		const ids = handleTag[key].set.add(titleHandle[0]);
+		if (artistHandle) { artistHandle[i].forEach((artist) => ids.add(artist)); }
+		if (tag.referenceSet.intersectionSize(ids) !== 0) {
+			weightValue += tag.weight;
+			if (key === 'related') { bRelated = true; } else { bUnrelated = true; }
+		}
+	});
+
+	let leftWeight = totalWeight;
+	let currScoreAvailable = 100;
+	for (let key of sortTagKeys) {
+		const tag = calcTags[key];
+		if (tag.weight === 0) { continue; }
+		if (tag.bVirtual) { continue; }
+		if (currScoreAvailable < minScoreFilter) { break; } // Break asap
+		const scoringDistr = tag.scoringDistribution;
+		if (tag.bMultiple) {
+			const newTag = handleTag[key].number;
+			if (tag.referenceNumber !== 0) {
+				if (newTag !== 0) {
+					const common = tag.referenceSet.intersectionSize(handleTag[key].set);
+					if (common !== 0) {
+						const score = common / tag.referenceNumber;
+						weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+							? tag.weight * weightDistribution(scoringDistr, score)
+							: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, newTag);
+					}
+				} else if (tag.baseScore !== 0) { // When compared track is missing this tag, add a base score
+					const score = tag.baseScore / 100;
+					weightValue += scoringDistr === 'LINEAR' || score >= 1
+						? tag.weight * weightDistribution(scoringDistr, score)
+						: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, tag.referenceNumber);
+				}
+			}
+		} else if (tag.bSingle) {
+			const newTag = handleTag[key].val;
+			if (tag.bString) {
+				if (tag.reference.length) {
+					if (newTag.length) {
+						if (newTag === tag.reference) {
+							weightValue += tag.weight;
+						} else if (tag.bKeyRange && tag.range !== 0) {
+							const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
+							const camelotKeyNew = camelotWheel.getKeyNotationObjectCamelot(newTag);
+							if (camelotKey && camelotKeyNew) {
+								const bLetterEqual = (camelotKey.letter === camelotKeyNew.letter);
+								const diff = Math.abs(camelotKey.hour - camelotKeyNew.hour);
+								const hourDifference = tag.range - (diff > 6 ? 12 - diff : diff);
+								// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
+								if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
+									const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range); //becomes negative outside the allowed range!
+									weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+										? tag.weight * weightDistribution(scoringDistr, score)
+										: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
+								}
+							}
+						}
+					} else if (tag.baseScore !== 0) {
+						const score = tag.baseScore / 100;
+						weightValue += scoringDistr === 'LINEAR' || score >= 1
+							? tag.weight * weightDistribution(scoringDistr, score)
+							: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
+					}
+				}
+			} else if (tag.bNumber) {
+				if (tag.reference !== null) {
+					if (newTag !== null) {
+						if (newTag === tag.reference) {
+							weightValue += tag.weight;
+						} else if (tag.bPercentRange && tag.range !== 0) {
+							const range = tag.reference * tag.range / 100;
+							const difference = range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
+							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+								const score = difference / tag.range / tag.reference * 100;
+								weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+									? tag.weight * weightDistribution(scoringDistr, score)
+									: tag.weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
+							}
+						} else if (tag.bAbsRange && tag.range !== 0) {
+							const difference = tag.range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
+							if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+								const score = difference / tag.range;
+								weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+									? tag.weight * weightDistribution(scoringDistr, score)
+									: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(difference));
+							}
+						}
+					} else if (tag.baseScore !== 0) {
+						const score = tag.baseScore / 100;
+						weightValue += scoringDistr === 'LINEAR' || score >= 1
+							? tag.weight * weightDistribution(scoringDistr, score)
+							: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
+					}
+				}
+			}
+		}
+		leftWeight -= tag.weight;
+		currScoreAvailable = round((weightValue + leftWeight) * 100 / originalWeightValue, 1);
+	}
+	if (currScoreAvailable < minScoreFilter) { return { score: -1, bRelated, bUnrelated }; } // Break asap
+
+	if (calcTags.dynGenre.weight !== 0 && calcTags.dynGenre.referenceNumber !== 0) {
+		handleTag.dynGenre = { val: [], number: 0 };
+		if (handleTag.genreStyle.number !== 0) {
+			for (const genreStyle of handleTag.genreStyle.set) {
+				const dynGenre = sbd.genreStyleMap.get(genreStyle);
+				if (dynGenre) { handleTag.dynGenre.val.push(...dynGenre); }
+			}
+		}
+		handleTag.dynGenre.number = handleTag.dynGenre.val.length;
+		if (handleTag.dynGenre.number !== 0) {
+			let j = 0;
+			let score = 0;
+			while (j < calcTags.dynGenre.referenceNumber) {
+				let h = 0;
+				while (h < handleTag.dynGenre.number) {
+					const newVal = handleTag.dynGenre.val[h];
+					const refVal = calcTags.dynGenre.reference[j];
+					if (newVal === refVal) {
+						score += 1 / calcTags.dynGenre.referenceNumber;
+						break;
+					} else if (calcTags.dynGenre.range !== 0) {
+						const [valueLower, valueUpper, lowerLimit, upperLimit] = cyclicTagsDescriptor['dynamic_genre'](refVal, calcTags.dynGenre.range, true);
+						if (valueLower !== -1) { //All or none are -1
+							if (valueLower > refVal) { // we reached the limits and swapped values (x - y ... upperLimit + 1 = lowerLimit ... x ... x + y ... upperLimit)
+								if (lowerLimit <= newVal && newVal <= valueLower) { // (lowerLimit , x)
+									score += 1 / calcTags.dynGenre.referenceNumber;
+									break;
+								}
+								else if (valueLower <= newVal && newVal <= refVal) { // NOSONAR [(x, x + y)]
+									score += 1 / calcTags.dynGenre.referenceNumber;
+									break;
+								}
+								else if (valueUpper <= newVal && newVal <= upperLimit) { // NOSONAR [(x - y, upperLimit)]
+									score += 1 / calcTags.dynGenre.referenceNumber;
+									break;
+								}
+							} else if (valueLower <= newVal && newVal <= valueUpper) {
+								score += 1 / calcTags.dynGenre.referenceNumber;
+								break;
+							}
+						}
+					}
+					h++;
+				}
+				j++;
+			}
+			const scoringDistr = calcTags.dynGenre.scoringDistribution;
+			weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+				? calcTags.dynGenre.weight * weightDistribution(scoringDistr, score)
+				: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
+		} else if (calcTags.dynGenre.baseScore !== 0) {
+			weightValue += Math.min(calcTags.dynGenre.weight, calcTags.dynGenre.weight * calcTags.dynGenre.baseScore / 100);
+		}
+	}
+
+	if (calcTags.artistRegion.weight !== 0 && calcTags.artistRegion.reference.length) {
+		const tag = calcTags.artistRegion;
+		const newTag = handleTag.artistRegion = { val: '' };
+		const localeTag = tag.handle ? sbd.asciify(tag.handle[i].pop() || '') : '';
+		if (localeTag.length) { newTag.val = getCountryISO(localeTag) || ''; }
+		else if (artistHandle) { newTag.val = getLocaleFromId(artistHandle[i][0], worldMapData).iso; }
+		if (newTag.val.length) {
+			const weight = tag.weight;
+			const range = tag.range;
+			if (newTag.val === tag.reference) {
+				weightValue += weight;
+			} else if (range !== 0) {
+				const difference = range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
+				if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+					const scoringDistr = tag.scoringDistribution;
+					const score = difference / range;
+					weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+						? weight * weightDistribution(scoringDistr, score)
+						: weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
+				}
+			}
+		} else if (calcTags.artistRegion.baseScore !== 0) {
+			weightValue += Math.min(calcTags.artistRegion.weight, calcTags.artistRegion.weight * calcTags.artistRegion.baseScore / 100);
+		}
+	}
+
+	if (calcTags.genreStyleRegion.weight !== 0 && calcTags.genreStyleRegion.referenceNumber !== 0) {
+		const tag = calcTags.genreStyleRegion;
+		const newTag = handleTag.genreStyleRegion = { val: [], number: 0 };
+		const weight = tag.weight;
+		if (handleTag.genreStyle.number !== 0) {
+			newTag.val.push(...handleTag.genreStyle.set);
+		}
+		newTag.number = newTag.val.length;
+		if (newTag.number !== 0) {
+			const range = tag.range;
+			let j = 0;
+			let score = 0;
+			while (j < calcTags.genreStyleRegion.referenceNumber) {
+				let h = 0;
+				let distances = [];
+				while (h < newTag.number) {
+					const newVal = newTag.val[h];
+					const refVal = calcTags.genreStyleRegion.reference[j];
+					if (newVal === refVal) {
+						distances.push(0);
+						break;
+					} else if (range !== 0) {
+						distances.push(music_graph_descriptors_culture.getDistance(refVal, newVal));
+					}
+					h++;
+				}
+				if (distances.length) {
+					const min = Math.min.apply(null, distances);
+					if (min === 0) { score += 1 / calcTags.genreStyleRegion.referenceNumber; }
+					else {
+						const difference = range - min;
+						if ((difference < 0 && bNegativeWeighting) || difference > 0) {
+							score += difference / range / calcTags.genreStyleRegion.referenceNumber;
+						}
+					}
+				}
+				j++;
+			}
+			const scoringDistr = calcTags.genreStyleRegion.scoringDistribution;
+			weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+				? weight * weightDistribution(scoringDistr, score)
+				: weight * weightDistribution(scoringDistr, score, calcTags.genreStyleRegion.referenceNumber, newTag.number);
+		} else if (calcTags.genreStyleRegion.baseScore !== 0) {
+			weightValue += Math.min(weight, weight * calcTags.genreStyleRegion.baseScore / 100);
+		}
+	}
+	// The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
+	const score = Math.max(0, Math.min(round(weightValue * 100 / originalWeightValue, 1), 100));
+	if (sbd.panelProperties.bSearchDebug[1] && Number.isNaN(score)) { console.log('Score is NaN', weightValue, originalWeightValue); }
+	return { score, bRelated, bUnrelated };
+}
+
+function calcDistance({ calcTags, handleTag }) {
+	let mapDistance = Infinity; // Consider points are not linked by default
+	// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
+	if (!cacheLink) { cacheLink = new Map(); }
+	if (!cacheLinkSet) { cacheLinkSet = new Map(); }
+	// Weight filtering excludes most of the tracks before other calcs -> Much Faster than later! (40k tracks can be reduced to just ~1k)
+	if (calcTags.genreStyle.referenceNumber !== 0) {
+		if (handleTag.genreStyle.number !== 0) {
+			// Get the minimum distance of the entire set of tags (track B, i) to every style of the original track (A, j):
+			// Worst case is O(i*j*k*lg(n)) time, greatly reduced by caching results (since tracks may be unique but not their tag values)
+			// where n = # nodes on map, i = # tracks retrieved by query, j & K = # number of style/genre tags
+			// Pre-filtering number of tracks is the best approach to reduce calc time (!)
+			// Distance cached at 2 points, for individual links (Rock -> Jazz) and entire sets ([Rock, Alt. Rock, Indie] -> [Jazz, Swing])
+			const fromDiff = calcTags.genreStyle.referenceSet.difference(handleTag.genreStyle.set);
+			const toDiff = handleTag.genreStyle.set.difference(calcTags.genreStyle.referenceSet);
+			const difference = fromDiff.size < toDiff.size ? fromDiff : toDiff;
+			if (difference.size) {
+				const toGenreStyle = fromDiff.size < toDiff.size ? handleTag.genreStyle.set : calcTags.genreStyle.referenceSet;
+				const mapKey = [
+					...[
+						[...difference].sort((a, b) => a.localeCompare(b)).join(','),
+						[...toGenreStyle].sort((a, b) => a.localeCompare(b)).join(','),
+					].sort((a, b) => a.localeCompare(b))
+				].join(' -> ');
+				const mapValue = cacheLinkSet.get(mapKey); // Mean distance from entire set (A,B,C) to (X,Y,Z)
+				if (typeof mapValue !== 'undefined') {
+					mapDistance = mapValue;
+				} else { // Calculate it if not found
+					mapDistance = calcMeanDistance(sbd.allMusicGraph, calcTags.genreStyle.referenceSet, handleTag.genreStyle.set, sbd.influenceMethod);
+					cacheLinkSet.set(mapKey, mapDistance); // Caches the mean distance from entire set (A,B,C) to (X,Y,Z)
+				}
+			} else { mapDistance = 0; } // One is superset of the other // One is superset of the other
+		}
+	} else { mapDistance = 0; } // Behaves like weight method
+	return mapDistance;
+}
 
 function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBasicLogging = true) {
 	let output = graphDistance;

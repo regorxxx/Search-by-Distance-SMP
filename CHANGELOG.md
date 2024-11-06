@@ -69,6 +69,7 @@
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Debug: expanded profiling logs and tools.
 - Helpers: updated helpers.
+- Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
 ### Removed
 ### Fixed
 - UI: '&' being displayed as '_' on tooltips.
