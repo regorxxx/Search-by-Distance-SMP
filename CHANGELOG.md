@@ -72,6 +72,7 @@
 ### Removed
 ### Fixed
 - UI: '&' being displayed as '_' on tooltips.
+- Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total socre. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
 
 ## [7.6.0] - 2024-10-09
 ### Added

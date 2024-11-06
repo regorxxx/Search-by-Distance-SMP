@@ -1736,14 +1736,16 @@ async function searchByDistance({
 					if (newTag !== 0) {
 						const common = tag.referenceSet.intersectionSize(handleTag[key].set);
 						if (common !== 0) {
-							weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-								? tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber)
-								: tag.weight * weightDistribution(scoringDistr, common / tag.referenceNumber, tag.referenceNumber, newTag);
+							const score = common / tag.referenceNumber;
+							weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+								? tag.weight * weightDistribution(scoringDistr, score)
+								: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, newTag);
 						}
 					} else if (tag.baseScore !== 0) { // When compared track is missing this tag, add a base score
-						weightValue += scoringDistr === 'LINEAR'
-							? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
-							: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.referenceNumber, tag.referenceNumber);
+						const score = tag.baseScore / 100;
+						weightValue += scoringDistr === 'LINEAR' || score >= 1 
+							? tag.weight * weightDistribution(scoringDistr, score)
+							: tag.weight * weightDistribution(scoringDistr, score, tag.referenceNumber, tag.referenceNumber);
 					}
 				}
 			} else if (tag.bSingle) {
@@ -1763,16 +1765,17 @@ async function searchByDistance({
 									// Cross on wheel with length keyRange + 1, can change hour or letter, but not both without a penalty
 									if ((hourDifference < 0 && bNegativeWeighting) || hourDifference > 0) {
 										const score = bLetterEqual ? ((hourDifference + 1) / (tag.range + 1)) : (hourDifference / tag.range); //becomes negative outside the allowed range!
-										weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+										weightValue += scoringDistr === 'LINEAR' || score >= 1  // Avoid memoizing last var if not needed
 											? tag.weight * weightDistribution(scoringDistr, score)
 											: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(hourDifference));
 									}
 								}
 							}
 						} else if (tag.baseScore !== 0) {
-							weightValue += scoringDistr === 'LINEAR'
-								? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
-								: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.range, tag.range);
+							const score = tag.baseScore / 100;
+							weightValue += scoringDistr === 'LINEAR' || score >= 1 
+								? tag.weight * weightDistribution(scoringDistr, score)
+								: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
 						}
 					}
 				} else if (tag.bNumber) {
@@ -1784,22 +1787,25 @@ async function searchByDistance({
 								const range = tag.reference * tag.range / 100;
 								const difference = range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-									weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-										? tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100)
-										: tag.weight * weightDistribution(scoringDistr, difference / tag.range / tag.reference * 100, range, Math.abs(difference));
+									const score = difference / tag.range / tag.reference * 100;
+									weightValue += scoringDistr === 'LINEAR' || score >= 1  // Avoid memoizing last var if not needed
+										? tag.weight * weightDistribution(scoringDistr, score)
+										: tag.weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
 								}
 							} else if (tag.bAbsRange && tag.range !== 0) {
 								const difference = tag.range - Math.abs(tag.reference - newTag); //becomes negative outside the allowed range!
 								if ((difference < 0 && bNegativeWeighting) || difference > 0) {
-									weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-										? tag.weight * weightDistribution(scoringDistr, difference / tag.range)
-										: tag.weight * weightDistribution(scoringDistr, difference / tag.range, tag.range, Math.abs(difference));
+									const score = difference / tag.range;
+									weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+										? tag.weight * weightDistribution(scoringDistr, score)
+										: tag.weight * weightDistribution(scoringDistr, score, tag.range, Math.abs(difference));
 								}
 							}
 						} else if (tag.baseScore !== 0) {
-							weightValue += scoringDistr === 'LINEAR'
-								? tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100)
-								: tag.weight * weightDistribution(scoringDistr, tag.baseScore / 100, tag.range, tag.range);
+							const score = tag.baseScore / 100;
+							weightValue += scoringDistr === 'LINEAR' || score >= 1
+								? tag.weight * weightDistribution(scoringDistr, score)
+								: tag.weight * weightDistribution(scoringDistr, score, tag.range, tag.range);
 						}
 					}
 				}
@@ -1856,7 +1862,7 @@ async function searchByDistance({
 					j++;
 				}
 				const scoringDistr = calcTags.dynGenre.scoringDistribution;
-				weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+				weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
 					? calcTags.dynGenre.weight * weightDistribution(scoringDistr, score)
 					: calcTags.dynGenre.weight * weightDistribution(scoringDistr, score, calcTags.dynGenre.referenceNumber, handleTag.dynGenre.number);
 			} else if (calcTags.dynGenre.baseScore !== 0) {
@@ -1879,9 +1885,10 @@ async function searchByDistance({
 					const difference = range - music_graph_descriptors_countries.getDistance(tag.reference, newTag.val);
 					if ((difference < 0 && bNegativeWeighting) || difference > 0) {
 						const scoringDistr = tag.scoringDistribution;
-						weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
-							? weight * weightDistribution(scoringDistr, difference / range)
-							: weight * weightDistribution(scoringDistr, difference / range, range, Math.abs(difference));
+						const score = difference / range;
+						weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
+							? weight * weightDistribution(scoringDistr, score)
+							: weight * weightDistribution(scoringDistr, score, range, Math.abs(difference));
 					}
 				}
 			} else if (calcTags.artistRegion.baseScore !== 0) {
@@ -1928,7 +1935,7 @@ async function searchByDistance({
 					j++;
 				}
 				const scoringDistr = calcTags.genreStyleRegion.scoringDistribution;
-				weightValue += scoringDistr === 'LINEAR' // Avoid memoizing last var if not needed
+				weightValue += scoringDistr === 'LINEAR' || score >= 1 // Avoid memoizing last var if not needed
 					? weight * weightDistribution(scoringDistr, score)
 					: weight * weightDistribution(scoringDistr, score, calcTags.genreStyleRegion.referenceNumber, newTag.number);
 			} else if (calcTags.genreStyleRegion.baseScore !== 0) {
@@ -1937,6 +1944,7 @@ async function searchByDistance({
 		}
 		// The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 		const score = Math.max(0, Math.min(round(weightValue * 100 / originalWeightValue, 1), 100));
+		if (sbd.panelProperties.bSearchDebug[1] && Number.isNaN(score)) { console.log('Score is NaN', weightValue, originalWeightValue); }
 		if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 		if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 		if (method === 'GRAPH') {
@@ -2661,7 +2669,7 @@ const weightDistribution = memoize((/** @type {'LINEAR'|'LOGARITHMIC'|'LOGISTIC'
 		return - weightDistribution(scoringDistribution, - proportion, tagNumber, newTagNumber);
 	}
 	let proportionWeight = 1;
-	if (scoringDistribution === 'LINEAR' || proportion === 1 || proportion === 0) {
+	if (scoringDistribution === 'LINEAR' || proportion >= 1 || proportion === 0) {
 		proportionWeight = proportion;
 	} else if (scoringDistribution === 'LOGARITHMIC') {
 		const alpha = 2 - Math.abs(tagNumber - newTagNumber) / Math.max(tagNumber, newTagNumber);
