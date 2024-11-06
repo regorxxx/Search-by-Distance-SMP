@@ -1,9 +1,9 @@
 ﻿'use strict';
-//21/10/24
+//06/11/24
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable,checkMinGraphDistance:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -13,7 +13,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global capitalize:readable, capitalizeAll:readable, capitalizePartial:readable, isString:readable, _p:readable , isArrayEqual:readable */
+/* global capitalize:readable, capitalizeAll:readable, capitalizePartial:readable, isString:readable, _p:readable , isArrayEqual:readable, range: readable */
 include('..\\..\\helpers\\helpers_xxx_time.js');
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
@@ -1255,6 +1255,30 @@ function createConfigMenu(parent) {
 					if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 				}
 			});
+			if (sbd.panelProperties.bProfile[1]) {
+				menu.newEntry({
+					menuName: submenu, entryText: 'Run speed tests (check console)', func: () => {
+						const sel = fb.GetSelection();
+						const stats = { total: 0, steps: []};
+						const times = 100;
+						Promise.serial(range(1, times, 1), () => {
+							searchByDistance({ sel, properties: parent.buttonsProperties, theme: parent.buttonsProperties.theme[1], recipe: parent.buttonsProperties.recipe[1], parent });
+							stats.total += sbd.profiler.Time;
+							sbd.profiler.CheckPoints.forEach((sp) => {
+								const found = stats.steps.find((s) => s && s.name === sp.name);
+								if (found) {found.acc += sp.acc;} 
+								else {stats.steps.push({...sp});}
+							});
+							return Promise.wait(1000);
+						}).then(() => {
+							console.log('Times executed:\t' + times);
+							console.log('Average runtime:\t' + stats.total / times + ' ms');
+							stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms'));
+						});
+	
+					}
+				});
+			}
 		}
 		menu.newEntry({ menuName: submenu, entryText: 'sep' });
 		{ 	// Graph cache reset Async

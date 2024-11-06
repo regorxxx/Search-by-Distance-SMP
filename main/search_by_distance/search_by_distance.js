@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/10/24
+//06/11/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -51,10 +51,11 @@ include('..\\..\\helpers\\helpers_xxx.js');
 /* global isFoobarV2:readable, checkCompatible:readable, globTags:readable, folders:readable, globQuery:readable, iDelayLibrary:readable */
 /* global debounce:readable, doOnce:readable, clone:readable , memoize:readable */
 /* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable */
+/* global memoryPrint:readable */
 include('..\\..\\helpers\\helpers_xxx_crc.js');
 /* global crc32:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global isInt:readable, isJSON:readable, isBoolean:readable, regExBool:readable, isString:readable, isStringWeak:readable, _t:readable, _asciify:readable, _p:readable, isArrayStrings:readable, round:readable, _q:readable, _b:readable, _bt:readable, _qCond:readable */
+/* global isInt:readable, isJSON:readable, isBoolean:readable, regExBool:readable, isString:readable, isStringWeak:readable, _t:readable, _p:readable, isArrayStrings:readable, round:readable, _q:readable, _b:readable, _bt:readable, _qCond:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
@@ -230,7 +231,9 @@ const sbd = {
 		/** @type {FbMetadbHandle|null} */
 		handle: null, // For critical usage, check if file exist first on library changes!
 		options: {},
-	}
+	},
+	asciify: (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0142/g, 'l'),
+	profiler: null
 };
 [sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
 
@@ -289,7 +292,7 @@ if (sbd.panelProperties.bTagsCache[1]) {
 	Reuse cache on the same session, from other panels and from json file
 */
 // Only use file cache related to current descriptors, otherwise delete it
-const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('descriptorCRC') : null;
+if (sbd.panelProperties.bProfile[1]) { sbd.profiler = new FbProfiler('descriptorCRC'); }
 const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
 const bMismatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMismatchCRC) {
@@ -301,7 +304,7 @@ if (bMismatchCRC) {
 	sbd.panelProperties.descriptorCRC[1] = descriptorCRC;
 	overwriteProperties(sbd.panelProperties); // Updates panel
 }
-if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
+if (sbd.panelProperties.bProfile[1]) { sbd.profiler.Print(); }
 // Start cache
 var cacheLinkSet; // NOSONAR [shared on files]
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
@@ -383,7 +386,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 						});
 					}
 					if (properties && Object.hasOwn(properties, 'bAscii') && properties.bAscii[1]) {
-						setTimeout(() => { resolve(new Set(Array.from(new Set(tagValues), (tag) => _asciify(tag)))); }, 500);
+						setTimeout(() => { resolve(new Set(Array.from(new Set(tagValues), (tag) => sbd.asciify(tag)))); }, 500);
 					} else {
 						setTimeout(() => { resolve(new Set(tagValues)); }, 500);
 					}
@@ -470,13 +473,6 @@ addEventListener('on_script_unload', () => {
 	if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Saving Cache.'); }
 	if (cacheLink) { saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json'); }
 	if (cacheLinkSet) { saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json'); }
-	// SMP Bug: https://github.com/TheQwertiest/foo_spider_monkey_panel/issues/205
-	/*
-	if (!sbd.panelProperties.firstPopup[1]) {
-		sbd.panelProperties.firstPopup[1] = true;
-		overwriteProperties(sbd.panelProperties); // Updates panel
-	}
-	*/
 	console.flush();
 });
 
@@ -487,6 +483,9 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 	const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
 	graphDebug(sbd.allMusicGraph);
 	if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
+}
+if (sbd.panelProperties.bProfile[1]) {
+	memoryPrint('Search by Distance Graph', sbd.allMusicGraph);
 }
 
 /*
@@ -869,7 +868,8 @@ async function searchByDistance({
 	// Method check
 	if (!checkMethod(method)) { console.popup('Method not recognized: ' + method + '\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return; }
 	// Start calcs
-	const test = bProfile ? new FbProfiler('Search by Distance') : null;
+	/** @type {FbProfiler} */
+	const test = sbd.profiler = bProfile ? new FbProfiler('Search by Distance') : null;
 	// Copy recipe tags
 	if (bUseRecipeTags) {
 		for (let key in recipeProperties.tags) {
@@ -1030,10 +1030,10 @@ async function searchByDistance({
 		}
 		if (tag.bString) {
 			if (tag.bMultiple) {
-				if (tag.reference.length && bAscii) { tag.reference.forEach((val, i) => { tag.reference[i] = _asciify(val); }); }
+				if (tag.reference.length && bAscii) { tag.reference.forEach((val, i) => { tag.reference[i] = sbd.asciify(val); }); }
 				tag.referenceSet = new Set(tag.reference);
 				tag.referenceNumber = tag.referenceSet.size;
-			} else if (tag.reference.length && bAscii) { tag.reference = _asciify(tag.reference); }
+			} else if (tag.reference.length && bAscii) { tag.reference = sbd.asciify(tag.reference); }
 		}
 	}
 	// Sets for later comparison
@@ -1238,7 +1238,7 @@ async function searchByDistance({
 		}
 		if (iso) {
 			if (bSearchDebug) { console.log('artistRegion: ' + originalWeightValue + ' + ' + calcTags.artistRegion.weight); }
-			calcTags.artistRegion.reference = _asciify(iso);
+			calcTags.artistRegion.reference = sbd.asciify(iso);
 			originalWeightValue += calcTags.artistRegion.weight;
 		} else {
 			calcTags.artistRegion.reference = '';
@@ -1649,7 +1649,10 @@ async function searchByDistance({
 		if (bSearchDebug) { console.log('Tag:', 'related/unrelated - index', z); }
 		calcTags.unrelated.handle = calcTags.related.handle = tagsValByKey[z++];
 	}
-	if (bProfile) { test.Print('Task #4: Library tags', false); }
+	if (bProfile) {
+		test.Print('Task #4: Library tags', false);
+		memoryPrint('Search by Distance Tags', calcTags);
+	}
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let i = 0;
 	let weightValue, mapDistance, leftWeight, currScoreAvailable;
@@ -1657,7 +1660,9 @@ async function searchByDistance({
 	while (i < trackTotal) {
 		weightValue = 0;
 		mapDistance = Infinity; // We consider points are not linked by default
+		if (bProfile) { test.CheckPoint('#5.1 - Score'); }
 		// Get the tags according to weight and filter ''. Also create sets for comparison
+		if (bProfile) { test.CheckPoint('#5.1.1 - Score'); }
 		const handleTag = { genreStyle: { set: new Set(), number: 0 } };
 		for (let key in calcTags) {
 			const tag = calcTags[key];
@@ -1701,9 +1706,10 @@ async function searchByDistance({
 			}
 		}
 		handleTag.genreStyle.number = handleTag.genreStyle.set.size;
-
+		if (bProfile) { test.CheckPointStep('#5.1.1 - Score'); }
 		// O(i*j*k) time
 		// i = # tracks retrieved by query, j & K = # number of style/genre tags
+		if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
 		bRelated = bUnrelated = false;
 		['related', 'unrelated'].forEach((key) => { // Adds an offset score as base
 			const tag = calcTags[key];
@@ -1931,8 +1937,10 @@ async function searchByDistance({
 		}
 		// The original track will get a 100 score, even if it has tags missing (original Distance != totalWeight)
 		const score = Math.max(0, Math.min(round(weightValue * 100 / originalWeightValue, 1), 100));
-
+		if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
+		if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 		if (method === 'GRAPH') {
+			if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
 			// Create cache if it doesn't exist. It may happen when calling the function too fast on first init (this avoids a crash)!
 			if (!cacheLink) { cacheLink = new Map(); }
 			if (!cacheLinkSet) { cacheLinkSet = new Map(); }
@@ -1967,6 +1975,7 @@ async function searchByDistance({
 					}
 				} else { mapDistance = 0; } // Behaves like weight method
 			}
+			if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
 		} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
@@ -1980,7 +1989,13 @@ async function searchByDistance({
 		}
 		i++;
 	}
-	if (bProfile) { test.Print('Task #5: Score and Distance', false); }
+	if (bProfile) {
+		test.Print('Task #5: Score and Distance', false);
+		test.CheckPointPrint('#5.1 - Score', ' total');
+		test.CheckPointPrint('#5.1.1 - Score', ' total');
+		test.CheckPointPrint('#5.1.2 - Score', ' total');
+		test.CheckPointPrint('#5.2 - Graph', ' total');
+	}
 	let poolLength = scoreData.length;
 	if (method === 'WEIGHT') {
 		scoreData.sort(function (a, b) { return b.score - a.score; });
@@ -2520,7 +2535,7 @@ function checkMinGraphDistance(graphDistance, descr = music_graph_descriptors) {
 	const bLinks = !check.links.pass;
 	const bSubs = !check.subtitutions.pass;
 	const bBoth = bLinks && bSubs;
-	if (bLinks ||bSubs) {
+	if (bLinks || bSubs) {
 		check.report = 'Value set (' + parseGraphDistance(graphDistance, descr, false) + ') is lower than the minimum ' + (bLinks ? 'link ' + _p(check.links.min) : '') + (bBoth ? ' and ' : '') + (bSubs ? 'subtitution ' + _p(check.subtitutions.min) : '') + ' distance' + (bBoth ? 's' : '') + '.\n\nOutput results will be mostly limited to tracks with same genre/styles.';
 	}
 	return check;
