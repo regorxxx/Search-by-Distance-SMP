@@ -62,11 +62,14 @@
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
+- Info: added hated stats.
+- Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 ### Changed
 - Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.
 - Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.
 - Dynamic queries: improved entries file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
+- Info: loved/hated tracks follow global tags settings.
 - Debug: expanded profiling logs and tools.
 - Helpers: updated helpers.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.

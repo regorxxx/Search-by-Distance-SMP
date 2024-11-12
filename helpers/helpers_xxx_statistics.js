@@ -1,5 +1,5 @@
 ﻿'use strict';
-//16/01/24
+//11/11/24
 
 /* exported zScoreToProbability, probabilityToZscore, zScoreToCDF, calcStatistics */
 
@@ -152,8 +152,34 @@ function calcStatistics(dataArr, options = { bClampPopRange: true }) {
 		},
 
 	};
+	const bMapKeys = dataArr.some((val) => typeof val === 'string');
+	if (bMapKeys) {
+		const copy = [...dataArr];
+		const freqMap = new Map();
+		copy.forEach((val) => {
+			const freq = freqMap.get(val);
+			if (typeof freq === 'undefined') {freqMap.set(val, 1);}
+			else {freqMap.set(val, freq + 1);}
+		});
+		const points = [...freqMap].map((pair) => {return {key: pair[0], val: Math.round(pair[1])};});
+		const stats = calcStatistics([...freqMap.values()], options);
+		['max', 'mean', 'median', 'mode', 'min'].forEach((key) => {
+			const ref = Math.round(stats[key]);
+			if (key === 'max') {points.sort((a, b) => b.val - a.val);} // Sorting allows to break earlier
+			else if (key === 'min') {points.reverse();}
+			stats[key + 'Keys'] = [];
+			let bFound = false;
+			for (const p in points) {
+				if (p.val === ref) {stats[key + 'Points'].push(p); bFound = true;}
+				else if (bFound) {break;}
+			}
+			if (key === 'max' || key === 'min') {stats[key + '10Points'] = points.slice(0, 9).map((p) => p);}
+		});
+		return stats;
+	}
 	statistics.count = dataArr.length;
-	dataArr.forEach((val) => {
+	dataArr.forEach((val, i) => {
+		if (bMapKeys) { val = i; }
 		if (val > statistics.max) { statistics.max = val; statistics.maxCount = 1; }
 		else if (val === statistics.max) { statistics.maxCount++; }
 		if (val < statistics.min) { statistics.min = val; statistics.minCount = 1; }

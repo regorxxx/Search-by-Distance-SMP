@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/11/24
+//11/11/24
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -11,7 +11,7 @@ include('..\\helpers\\helpers_xxx_input.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\helpers\\helpers_xxx_prototypes.js');
-/* global isBoolean:readable, isJSON:readable, _p:readable , capitalizePartial:readable */
+/* global isBoolean:readable, isJSON:readable, _p:readable, capitalizePartial:readable, isStringWeak: readable */
 include('..\\helpers\\helpers_xxx_tags.js');
 /* global queryJoin:readable, getHandleListTagsTyped:readable, _b:readable, _t:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
@@ -153,54 +153,87 @@ function graphInfoMenu() {
 					menu.newEntry({menuName, entryText:  bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25), func: () => {
 						// report
 						const report = [];
-						report.push('Genre/style: ' + tagVal);
-						report.push('-'.repeat(40));
+						const header = (title) => {
+							const len = title.length;
+							report.push('-'.repeat(len));
+							report.push(title);
+							report.push('-'.repeat(len));
+						};
+						header('Genre/style: ' + tagVal);
 						report.push('');
 						// Data from library
 						const query = queryJoin(entry.tf.map((tag) => tag + ' IS ' + tagVal), 'OR');
 						const libItems = fb.GetLibraryItems();
 						const handleList = fb.GetQueryItems(libItems, query);
-						report.push('Tracks: ' + handleList.Count + ' ' + _p(round(handleList.Count/libItems.Count * 100, 1) + '% from ' + libItems.Count + ' total items'));
-						const subQuery = [
-							{name: 'With rating >= 3: ',	query: globQuery.ratingGr2},
-							{name: 'With rating >= 4: ',	query: globQuery.ratingGr3},
-							{name: 'With rating  = 5: ',	query: globTags.rating + ' IS 5'},
-							{name: 'Loved:\t\t  ',			query: '%FEEDBACK% IS 1'}
-						];
-						report.push(...subQuery.map((q) => '\t' + q.name + fb.GetQueryItems(handleList, q.query).Count));
-						const date = getHandleListTagsTyped(handleList, [{name: globTags.date, type: 'number'}]).flat(Infinity).filter(Boolean);
-						const stats = calcStatistics(date);
-						report.push('Min/Max date: ' + stats.min + '/' + stats.max);
-						report.push('Most frequent date: ' + Math.round(stats.mode.value) + ' ' + _p(stats.mode.frequency + ' times'));
-						report.push('Average date: ' + Math.round(stats.mean));
-						report.push('Median date: ' + Math.round(stats.median));
-						report.push('Standard deviation: ' + Math.round(stats.sigma) + ' years');
-						report.push('Range date (75%-95%): ' + stats.popRange.universal['75%'].map(Math.round).join(' - '));
-						report.push('-'.repeat(40));
+						{ // Library stats
+							const trackCount = handleList.Count;
+							const libCount = libItems.Count;
+							header('Library stats:');
+							{ // Artists
+								const artists = getHandleListTagsTyped(handleList, [{name: globTags.artistRaw, type: 'string'}]).flat(Infinity).filter((n) => isStringWeak(n));
+								const uniqLibArtists = new Set(getHandleListTagsTyped(libItems, [{name: globTags.artistRaw, type: 'string'}]).flat(Infinity).filter((n) => isStringWeak(n)));
+								const uniqArtists = new Set(artists);
+								const uniqArtistsCount = uniqArtists.size;
+								const uniqLibArtistsCount = uniqLibArtists.size;
+								const stats = calcStatistics(artists);
+								report.push('Artists: ' + uniqArtistsCount + ' ' + _p(round(uniqArtistsCount/uniqLibArtistsCount * 100, 2) + '% from ' + uniqLibArtistsCount + ' total library artists'));
+								report.push('');
+								const totalTop5 = stats.max10Points.slice(0,5).reduce((acc, p) => acc + p.val, 0);
+								report.push('Top artists (by # tracks): ' + totalTop5  + ' ' + _p(round(totalTop5/trackCount * 100, 2) + '% of tracks'));
+								stats.max10Points.slice(0,5).forEach((p) => {
+									report.push('\t' + p.key + ' - ' + p.val + ' ' + _p(round(p.val/trackCount * 100, 2) + '% of tracks'));
+								});
+							}
+							report.push('');
+							{ // Tracks
+								report.push('Tracks: ' + trackCount + ' ' + _p(round(trackCount/libCount * 100, 2) + '% from ' + libCount + ' total library tracks'));
+								const subQuery = [
+									{name: 'With rating >= 3: ',	query: globQuery.ratingGr2},
+									{name: 'With rating >= 4: ',	query: globQuery.ratingGr3},
+									{name: 'With rating  = 5: ',	query: globTags.rating + ' IS 5'},
+									{name: 'Loved:\t\t  ',			query: globQuery.loved},
+									{name: 'Hated:\t\t  ',			query: globQuery.hated}
+								];
+								report.push(...subQuery.map((q) => '\t' + q.name + fb.GetQueryItems(handleList, q.query).Count));
+							}
+							report.push('');
+							{ // Dates
+								const date = getHandleListTagsTyped(handleList, [{name: globTags.date, type: 'number'}]).flat(Infinity).filter(Boolean);
+								const stats = calcStatistics(date);
+								report.push('Min/Max date: ' + stats.min + '/' + stats.max);
+								report.push('Most frequent date: ' + Math.round(stats.mode.value) + ' ' + _p(stats.mode.frequency + ' times'));
+								report.push('Average date: ' + Math.round(stats.mean));
+								report.push('Median date: ' + Math.round(stats.median));
+								report.push('Standard deviation: ' + Math.round(stats.sigma) + ' years');
+								report.push('Range date (75%-95%): ' + stats.popRange.universal['75%'].map(Math.round).join(' - '));
+							}
+						}
 						report.push('');
-						// Data from descriptors
-						const data = clone(music_graph_descriptors.nodeList.get(music_graph_descriptors.getSubstitution(tagVal)));
-						const nodeSet = music_graph_descriptors.getNodeSet(false);
-						for (let key in data) {
-							switch (key) { // NOSONAR
-								case 'region': {
-									if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = 'All';}
-									else {data[key] = JSON.stringify(data[key], null, '\t');}
-									break;
-								}
-								default: {
-									if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = '-';}
-									else if (Array.isArray(data[key])){
-										data[key] = data[key].map((sg) => {
-											return nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0];
-										});
+						{ // Data from descriptors
+							header('Graph info:' );
+							const data = clone(music_graph_descriptors.nodeList.get(music_graph_descriptors.getSubstitution(tagVal)));
+							const nodeSet = music_graph_descriptors.getNodeSet(false);
+							for (let key in data) {
+								switch (key) { // NOSONAR
+									case 'region': {
+										if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = 'All';}
+										else {data[key] = JSON.stringify(data[key], null, '\t');}
+										break;
+									}
+									default: {
+										if (!data[key] || Array.isArray(data[key]) && !data[key].length) {data[key] = '-';}
+										else if (Array.isArray(data[key])){
+											data[key] = data[key].map((sg) => {
+												return nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0];
+											});
+										}
 									}
 								}
 							}
+							report.push(...Object.entries(data).map((pair) => {
+								return capitalizePartial(pair[0]).split(/(?=[A-Z])/).join(' ') + ': ' + (Array.isArray(pair[1]) ? pair[1].join(', ') : pair[1]);
+							}));
 						}
-						report.push(...Object.entries(data).map((pair) => {
-							return capitalizePartial(pair[0]).split(/(?=[A-Z])/).join(' ') + ': ' + (Array.isArray(pair[1]) ? pair[1].join(', ') : pair[1]);
-						}));
 						// report
 						fb.ShowPopupMessage(report.join('\n'), 'Graph info');
 					}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 ? MF_MENUBREAK : MF_STRING), data: {bDynamicMenu: true}});
