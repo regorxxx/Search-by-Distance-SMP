@@ -30,7 +30,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 	const readmeList = readmeFiles.length && _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
 	// Menu
 	menu.newEntry({ entryText: 'Configure button:', func: null, flags: MF_GRAYED });
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const options = Object.keys(properties);
 		options.forEach((key) => {
@@ -92,7 +92,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		});
 	}
 	if (extraEntries) { extraEntries(menu, this); }
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	menu.newEntry({
 		entryText: 'Restore defaults...', func: () => {
 			const options = Object.keys(properties);
@@ -101,7 +101,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		}
 	});
 	if (readmeList) {
-		menu.newEntry({ entryText: 'sep' });
+		menu.newSeparator();
 		if (readmeFiles.length > 1) {
 			readmeFiles.forEach((name) => {
 				const readmeFile = Object.hasOwn(readmeList, name) ? readmeList[name] : '';

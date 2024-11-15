@@ -38,7 +38,7 @@ function createRecipeMenu(parent) {
 	});
 	// Header
 	recipeMenu.newEntry({ entryText: 'Set recipe file: (Ctrl + Click to hide)', func: null, flags: MF_GRAYED });
-	recipeMenu.newEntry({ entryText: 'sep' });
+	recipeMenu.newSeparator();
 	recipeMenu.newEntry({
 		entryText: 'Create recipe file with current config', func: () => {
 			const recipe = { name: '' };
@@ -120,7 +120,7 @@ function createRecipeMenu(parent) {
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
 		});
 	}
-	recipeMenu.newEntry({ entryText: 'sep' });
+	recipeMenu.newSeparator();
 	recipeMenu.newEntry({
 		entryText: 'None' + (currRecipeFile && !_isFile(currRecipeFile) && !_isFile(recipePath + currRecipeFile)
 			? '\t(recipe not found)'
@@ -133,7 +133,7 @@ function createRecipeMenu(parent) {
 			overwriteProperties(properties);
 		}
 	});
-	recipeMenu.newEntry({ entryText: 'sep' });
+	recipeMenu.newSeparator();
 	// List
 	const options = [];
 	files.forEach((file) => {

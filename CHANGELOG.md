@@ -72,6 +72,7 @@
 - Info: loved/hated tracks follow global tags settings.
 - Debug: expanded profiling logs and tools.
 - Helpers: updated helpers.
+- Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
 ### Removed
 ### Fixed

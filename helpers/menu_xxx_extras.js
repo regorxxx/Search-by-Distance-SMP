@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/24
+//15/11/24
 
 /* exported _createSubMenuEditEntries */
 
@@ -71,7 +71,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			}
 		});
 		if (bClone) {
-			parent.newEntry({ menuName: subMenuThirdName, entryText: 'sep' });
+			parent.newSeparator(subMenuThirdName);
 			parent.newEntry({
 				menuName: subMenuThirdName, entryText: 'Clone entry...', func: () => {
 					// Input all variables
@@ -101,7 +101,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			});
 		}
 		if (bAdd && options.bCopyCurrent && parent.isNotSeparator(entry)) {
-			parent.newEntry({ menuName: subMenuThirdName, entryText: 'sep' });
+			parent.newSeparator(subMenuThirdName);
 			parent.newEntry({
 				menuName: subMenuThirdName, entryText: 'Update with current settings', func: () => {
 					const current = options.input(true);
@@ -114,7 +114,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		}
 		const defTag = options.defaults.find((defTag) => entry.name === defTag.name);
 		if (defTag) {
-			parent.newEntry({ menuName: subMenuThirdName, entryText: 'sep' });
+			parent.newSeparator(subMenuThirdName);
 			parent.newEntry({
 				menuName: subMenuThirdName, entryText: 'Reset default entry', func: () => {
 					options.list[index] = defTag;
@@ -123,7 +123,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 				}
 			});
 		}
-		parent.newEntry({ menuName: subMenuThirdName, entryText: 'sep' });
+		parent.newSeparator(subMenuThirdName);
 		parent.newEntry({
 			menuName: subMenuThirdName, entryText: 'Remove entry', func: () => {
 				options.list.splice(index, 1);
@@ -133,7 +133,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		});
 	});
 	if (!options.list.length) { parent.newEntry({ menuName: subMenuSecondName, entryText: '(none saved yet)', func: null, flags: MF_GRAYED }); }
-	parent.newEntry({ menuName: subMenuSecondName, entryText: 'sep' });
+	parent.newSeparator(subMenuSecondName);
 	if (bAdd) {
 		parent.newEntry({
 			menuName: subMenuSecondName, entryText: 'Add new entry to list...', func: () => {
@@ -160,7 +160,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			}
 		});
 	}
-	parent.newEntry({ menuName: subMenuSecondName, entryText: 'sep' });
+	parent.newSeparator(subMenuSecondName);
 	parent.newEntry({
 		menuName: subMenuSecondName, entryText: 'Restore defaults...', func: () => {
 			options.list.length = 0;

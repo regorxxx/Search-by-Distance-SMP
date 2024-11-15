@@ -48,7 +48,7 @@ function createThemeMenu(parent) {
 	}
 	// Header
 	themeMenu.newEntry({ entryText: 'Set theme file: (Shift + Click to hide)', func: null, flags: MF_GRAYED });
-	themeMenu.newEntry({ entryText: 'sep' });
+	themeMenu.newSeparator();
 	// Create theme
 	themeMenu.newEntry({
 		entryText: 'Create theme file with selected track', func: () => {
@@ -124,7 +124,7 @@ function createThemeMenu(parent) {
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
 		});
 	}
-	themeMenu.newEntry({ entryText: 'sep' });
+	themeMenu.newSeparator();
 	themeMenu.newEntry({
 		entryText: 'None', func: () => {
 			properties.theme[1] = '';
@@ -133,7 +133,7 @@ function createThemeMenu(parent) {
 			overwriteProperties(properties);
 		}, flags: !bHasForcedTheme ? MF_STRING : MF_GRAYED
 	});
-	themeMenu.newEntry({ entryText: 'sep' });
+	themeMenu.newSeparator();
 	// All entries
 	const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
 	// List

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/11/24
+//15/11/24
 
 /* exported createConfigMenu */
 
@@ -42,7 +42,7 @@ function createConfigMenu(parent) {
 	const descriptors = music_graph_descriptors;
 	const createTagMenu = (menuName, options) => {
 		options.forEach((key) => {
-			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
+			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const idxEnd = properties[key][0].indexOf('(');
 			const value = bProperties && Object.hasOwn(recipe.properties, key)
 				? recipe.properties[key]
@@ -76,7 +76,7 @@ function createConfigMenu(parent) {
 
 	const createSwitchMenu = (menuName, option, values, flag = [], hook = null) => {
 		values.forEach((key, i) => {
-			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep', flags: MF_GRAYED }); return; }
+			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const entryText = key + (Object.hasOwn(recipe, option) && recipe[option] === key ? '\t(forced by recipe)' : '');
 			menu.newEntry({
 				menuName, entryText, func: () => {
@@ -91,7 +91,7 @@ function createConfigMenu(parent) {
 
 	const createBoolMenu = (menuName, options, flag = [], hook = null) => {
 		options.forEach((key, i) => {
-			if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep', flags: MF_GRAYED }); return; }
+			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const props = Object.hasOwn(properties, key) ? properties : sbd.panelProperties;
 			const entryText = props[key][0].substring(props[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
 			menu.newEntry({
@@ -107,13 +107,13 @@ function createConfigMenu(parent) {
 
 	// Header
 	menu.newEntry({ entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED });
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{	// Search Methods
 		const menuName = menu.newMenu('Set Search method');
 		{
 			createSwitchMenu(menuName, 'method', ['WEIGHT', 'GRAPH', 'DYNGENRE']);
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const key = 'graphDistance';
 			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
@@ -137,11 +137,11 @@ function createConfigMenu(parent) {
 				}, flags
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const options = ['scoreFilter', 'minScoreFilter'];
 			options.forEach((key) => {
-				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep', flags: MF_GRAYED }); return; }
+				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
 				const idxEnd = properties[key][0].indexOf('(');
 				const val = properties[key][1];
@@ -156,7 +156,7 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bFilterWithGraph'],
 			[
 				void (0),
@@ -247,7 +247,7 @@ function createConfigMenu(parent) {
 					});
 				}
 			}
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			menu.newSeparator(subMenuName);
 			{	// Weights
 				const bIsDyngenreRecipe = weights[i].bIsDyngenreRecipe;
 				const bIsDyngenreProp = weights[i].bIsDyngenreProp;
@@ -288,7 +288,7 @@ function createConfigMenu(parent) {
 				});
 				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => { return options.indexOf(tag.scoringDistribution); });
 			}
-			if (!menu.isLastEntry('sep')) { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); }
+			if (!menu.isLastEntry('sep')) { menu.newSeparator(subMenuName); }
 			if (!['related', 'unrelated'].includes(key)) {	// Base score
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'baseScore') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -303,7 +303,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			if (!menu.isLastEntry('sep')) { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); }
+			if (!menu.isLastEntry('sep')) { menu.newSeparator(subMenuName); }
 			{	// Edit
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -332,7 +332,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			menu.newSeparator(subMenuName);
 			{	// Clone
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -379,7 +379,7 @@ function createConfigMenu(parent) {
 							else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percent value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('percentRange'); nTag.range = 0; }
 						}
 					} else {
-						if (nTag.type.includes('string')) {
+						if (nTag.type.includes('string')) { // NOSONAR
 							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
 						}
 					}
@@ -390,12 +390,12 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
 			createTagMenu(menuName, options);
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			createBoolMenu(menuName, ['bNegativeWeighting'],
 				[
@@ -478,7 +478,7 @@ function createConfigMenu(parent) {
 				menu.newCheckMenu(menuName, entryText, void (0), () => { return (Object.hasOwn(recipe, key) ? recipe[key] : propObj[key][1]); });
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Reset
 			menu.newEntry({
 				menuName, entryText: 'Restore defaults...', func: () => {
@@ -536,21 +536,26 @@ function createConfigMenu(parent) {
 			const bFile = _isFile(file);
 			if (bFile) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
+				let bSave;
+				options.forEach((o) => {
+					if (!Object.hasOwn(o, 'name')) { o.name = o.title; bSave = true; }
+				});
+				if (bSave) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
 			} else {
 				options = [
-					{ title: 'Female vocals', query: globQuery.female },
-					{ title: 'Instrumentals', query: globQuery.instrumental },
-					{ title: 'Acoustic tracks', query: globQuery.acoustic },
-					{ title: 'Rating > 2', query: globQuery.ratingGr2 },
-					{ title: 'Rating > 3', query: globQuery.ratingGr3 },
-					{ title: 'Length < 6 min', query: globQuery.shortLength },
-					{ title: 'Only Stereo', query: globQuery.stereo },
-					{ title: 'sep' },
-					{ title: 'No Female vocals', query: globQuery.noFemale },
-					{ title: 'No Instrumentals', query: globQuery.noInstrumental },
-					{ title: 'No Acoustic tracks', query: globQuery.noAcoustic },
-					{ title: 'Not rated', query: globQuery.noRating },
-					{ title: 'Not Live (unless Hi-Fi)', query: globQuery.noLive }
+					{ name: 'Female vocals', query: globQuery.female },
+					{ name: 'Instrumentals', query: globQuery.instrumental },
+					{ name: 'Acoustic tracks', query: globQuery.acoustic },
+					{ name: 'Rating > 2', query: globQuery.ratingGr2 },
+					{ name: 'Rating > 3', query: globQuery.ratingGr3 },
+					{ name: 'Length < 6 min', query: globQuery.shortLength },
+					{ name: 'Only Stereo', query: globQuery.stereo },
+					{ name: 'sep' },
+					{ name: 'No Female vocals', query: globQuery.noFemale },
+					{ name: 'No Instrumentals', query: globQuery.noInstrumental },
+					{ name: 'No Acoustic tracks', query: globQuery.noAcoustic },
+					{ name: 'Not rated', query: globQuery.noRating },
+					{ name: 'Not Live (unless Hi-Fi)', query: globQuery.noLive }
 				];
 			}
 			const hasQuery = (obj) => {
@@ -561,7 +566,7 @@ function createConfigMenu(parent) {
 			const filterCount = options.map(hasQuery).filter(Boolean).length;
 			const subMenuName = menu.newMenu('Additional pre-defined filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED });
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			const switchQuery = (input, query) => {
 				const cleanParentheses = (input, query) => {
 					let cache = '';
@@ -586,8 +591,8 @@ function createConfigMenu(parent) {
 			};
 			const queryRegExp = (query) => { return query.replace('(', '\\(').replace(')', '\\)'); };
 			options.forEach((obj) => {
-				if (obj.title === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED }); return; }
-				const entryText = obj.title + (Object.hasOwn(recipe, 'forcedQuery') ? '\t(forced by recipe)' : '');
+				if (menu.isSeparator(obj)) { menu.newSeparator(subMenuName); return; }
+				const entryText = obj.name + (Object.hasOwn(recipe, 'forcedQuery') ? '\t(forced by recipe)' : '');
 				let input = '';
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
@@ -600,7 +605,7 @@ function createConfigMenu(parent) {
 				});
 				menu.newCheckMenu(subMenuName, entryText, void (0), () => hasQuery(obj));
 			});
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
 					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
@@ -608,7 +613,7 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Dynamic queries
 			let options = [];
 			const currentPropFilters = JSON.parse(properties['dynQueries'][1]) || [];
@@ -619,23 +624,28 @@ function createConfigMenu(parent) {
 			const bFile = _isFile(file);
 			if (bFile) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
+				let bSave;
+				options.forEach((o) => {
+					if (!Object.hasOwn(o, 'name')) { o.name = o.title; delete o.title; bSave = true; }
+				});
+				if (bSave) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
 			} else {
 				options = [ // Use tag names which are then remapped to the user selected tag, i.e. GENRE to all genre tags
-					{ title: 'Same Artist', query: globTags.artist + ' IS #' + globTags.artistRaw + '#' },
-					{ title: 'sep' },
-					{ title: 'Different Genre', query: 'NOT GENRE IS #GENRE#' },
-					{ title: 'Different Style', query: 'NOT STYLE IS #STYLE#' },
-					{ title: 'sep' },
-					{ title: 'Date greater (+15)', query: 'DATE GREATER #$add(%DATE%,15)#' },
-					{ title: 'Date lower (-15)', query: 'DATE LESS #$sub(%DATE%,15)#' },
-					{ title: 'sep' },
-					{ title: 'From last 30 years', query: 'DATE GREATER #$sub(#YEAR#,30)#' },
-					{ title: 'From last 20 years', query: 'DATE GREATER #$sub(#YEAR#,20)#' },
-					{ title: 'From last 10 years', query: 'DATE GREATER #$sub(#YEAR#,10)#' },
-					{ title: 'sep' },
-					{ title: 'In 15 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 15' },
-					{ title: 'In 10 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 10' },
-					{ title: 'In 5 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 5' },
+					{ name: 'Same Artist', query: globTags.artist + ' IS #' + globTags.artistRaw + '#' },
+					{ name: 'sep' },
+					{ name: 'Different Genre', query: 'NOT GENRE IS #GENRE#' },
+					{ name: 'Different Style', query: 'NOT STYLE IS #STYLE#' },
+					{ name: 'sep' },
+					{ name: 'Date greater (+15)', query: 'DATE GREATER #$add(%DATE%,15)#' },
+					{ name: 'Date lower (-15)', query: 'DATE LESS #$sub(%DATE%,15)#' },
+					{ name: 'sep' },
+					{ name: 'From last 30 years', query: 'DATE GREATER #$sub(#YEAR#,30)#' },
+					{ name: 'From last 20 years', query: 'DATE GREATER #$sub(#YEAR#,20)#' },
+					{ name: 'From last 10 years', query: 'DATE GREATER #$sub(#YEAR#,10)#' },
+					{ name: 'sep' },
+					{ name: 'In 15 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 15' },
+					{ name: 'In 10 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 10' },
+					{ name: 'In 5 years range', query: '"$replace($sub(%DATE%,#DATE#),-,)" LESS 5' },
 				];
 			}
 			const hasQuery = (query) => {
@@ -648,10 +658,10 @@ function createConfigMenu(parent) {
 			const notFound = filterCount - found;
 			const subMenuName = menu.newMenu('Dynamic query filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED });
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			options.forEach((obj) => {
-				if (obj.title === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED }); return; }
-				const entryText = obj.title + (Object.hasOwn(recipe, 'dynQueries') ? '\t(forced by recipe)' : '');
+				if (menu.isSeparator(obj)) { menu.newSeparator(subMenuName); return; }
+				const entryText = obj.name + (Object.hasOwn(recipe, 'dynQueries') ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
 						const idx = currentPropFilters.indexOf(obj.query);
@@ -667,21 +677,21 @@ function createConfigMenu(parent) {
 				});
 			});
 			if (notFound) {
-				menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+				menu.newSeparator(subMenuName);
 				let i = 0;
 				filterState.forEach((state, idx) => {
 					if (!state) {
 						menu.newEntry({
 							menuName: subMenuName, entryText: 'Other filter ' + _p(++i),
 							func: () => {
-								fb.ShowPopupMessage('Non recognized filter:\n\n' + currentFilters[idx] +'\n\nYou may add this filter as an entry by adding it to the entries file with a custom name and copying the query (using the \'Edit Entries...\' option).', 'Dynamic query filter');
+								fb.ShowPopupMessage('Non recognized filter:\n\n' + currentFilters[idx] + '\n\nYou may add this filter as an entry by adding it to the entries file with a custom name and copying the query (using the \'Edit Entries...\' option).', 'Dynamic query filter');
 							}
 						});
 						menu.newCheckMenuLast(() => true);
 					}
 				});
 			}
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'None', func: () => {
 					currentPropFilters.length = 0;
@@ -693,7 +703,7 @@ function createConfigMenu(parent) {
 				const prop = Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentPropFilters;
 				return prop.length === 0;
 			});
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep', flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Edit entries...' + (bFile ? '' : '\t(new file)'), func: () => {
 					if (!bFile) { _save(file, JSON.stringify(options, null, '\t').replace(/\n/g, '\r\n')); }
@@ -701,7 +711,7 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Near genres filter
 			const key = 'nearGenresFilter';
 			const scoreFilter = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
@@ -723,7 +733,7 @@ function createConfigMenu(parent) {
 			];
 			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName);
 			options.forEach((opt) => {
-				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
@@ -746,13 +756,13 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
+			menu.newCheckMenuLast((o) => o.findIndex((opt) => opt.val === keyVal), options);
 			if (keyVal === 0) {
 				const key = 'nearGenresFilterAggressiveness';
 				const val = properties[key][1];
 				const displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
 				const entryText = 'Automatic aggressiveness...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
-				menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+				menu.newSeparator(subMenuName);
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
 						const input = Input.number('int', val, 'Enter number: (between 0 and 10)\n\nBy default is set to 5; higher values filter in a more aggressive way, and lower values, the opposite.', 'Search by distance', 5, [(input) => input >= 0 && input <= 10]);
@@ -763,14 +773,14 @@ function createConfigMenu(parent) {
 				});
 			}
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Influences filter
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
 			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences')
 				? recipe['bConditionAntiInfluences']
 				: properties['bConditionAntiInfluences'][1];
 			options.forEach((key) => {
-				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const bGraphCondition = !bIsGraph && (key === 'bUseAntiInfluencesFilter' || key === 'bConditionAntiInfluences' || key === 'bUseInfluencesFilter');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : (bGraphCondition ? '\t(Only GRAPH)' : ''));
 				menu.newEntry({
@@ -783,14 +793,14 @@ function createConfigMenu(parent) {
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Artist filter
 			const options = ['bSimilArtistsFilter', 'bSimilArtistsExternal', 'sep', 'bSameArtistFilter'];
 			const bConditionSimilArtists = Object.hasOwn(recipe, 'bSimilArtistsFilter')
 				? recipe['bSimilArtistsFilter']
 				: properties['bSimilArtistsFilter'][1];
 			options.forEach((key) => {
-				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName, entryText, func: () => {
@@ -807,7 +817,7 @@ function createConfigMenu(parent) {
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{	// Culture filters
 			const key = 'artistRegionFilter';
 			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
@@ -824,7 +834,7 @@ function createConfigMenu(parent) {
 			];
 			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
-				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
@@ -834,7 +844,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
+			menu.newCheckMenuLast((o) => o.findIndex((opt) => opt.val === keyVal), options);
 		}
 		{	// Culture filters
 			const key = 'genreStyleRegionFilter';
@@ -850,7 +860,7 @@ function createConfigMenu(parent) {
 			];
 			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
 			options.forEach((opt) => {
-				if (opt.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
@@ -860,7 +870,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
-			menu.newCheckMenuLast(() => options.filter(menu.isNotSeparator).findIndex((opt) => opt.val === keyVal), options);
+			menu.newCheckMenuLast((o) => o.findIndex((opt) => opt.val === keyVal), options);
 		}
 	}
 	{	// Post-scoring filters:
@@ -901,7 +911,7 @@ function createConfigMenu(parent) {
 				}
 			);
 		}
-		menu.newEntry({ menuName, entryText: 'sep', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		{
 			const options = ['probPick'];
 			options.forEach((key) => {
@@ -955,7 +965,7 @@ function createConfigMenu(parent) {
 				{ key: 'Key 6A centered', flags: MF_STRING },
 			];
 			menu.newEntry({ menuName: subMenuName, entryText: 'Prioritize tracks by:', flags: MF_GRAYED });
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			menu.newSeparator(subMenuName);
 			options.forEach((opt) => {
 				opt.tf = opt.key.replace(/ /g, '').toLowerCase();
 				menu.newEntry({
@@ -965,7 +975,7 @@ function createConfigMenu(parent) {
 					}, flags: (Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING) | opt.flags
 				});
 			});
-			menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+			menu.newSeparator(subMenuName);
 			menu.newEntry({
 				menuName: subMenuName, entryText: 'Custom TF...', func: () => {
 					const currValue = options.find((opt) => opt.tf === properties.smartShuffleSortBias[1])
@@ -1003,7 +1013,7 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			createBoolMenu(
 				menuName,
@@ -1017,7 +1027,7 @@ function createConfigMenu(parent) {
 		{
 			const options = ['playlistName'];
 			options.forEach((key) => {
-				if (key === 'sep') { menu.newEntry({ menuName, entryText: 'sep' }); return; }
+				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const idxEnd = properties[key][0].indexOf('(');
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
@@ -1030,7 +1040,7 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const options = ['playlistLength'];
 			options.forEach((key) => {
@@ -1046,7 +1056,7 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const subMenuName = menu.newMenu('Duplicates', menuName);
 			{
@@ -1084,56 +1094,56 @@ function createConfigMenu(parent) {
 			}
 		}
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{	// Other tools
-		const submenu = menu.newMenu('Other tools');
+		const subMenu = menu.newMenu('Other tools');
 		{
 			menu.newEntry({
-				menuName: submenu, entryText: 'Calculate similar artists tags', func: () => {
+				menuName: subMenu, entryText: 'Calculate similar artists tags', func: () => {
 					calculateSimilarArtistsFromPls({ items: plman.GetPlaylistSelectedItems(plman.ActivePlaylist), properties });
 				}
 			});
 			menu.newEntry({
-				menuName: submenu, entryText: 'Write similar artists tags', func: () => {
+				menuName: subMenu, entryText: 'Write similar artists tags', func: () => {
 					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: globTags.sbdSimilarArtist, windowName: 'Search by Distance' });
 				}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED
 			});
 		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		{
 			menu.newEntry({
-				menuName: submenu, entryText: 'Calculate same zone artists', func: () => {
+				menuName: subMenu, entryText: 'Calculate same zone artists', func: () => {
 					console.log(getArtistsSameZone({ properties }));
 				}
 			});
 		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		{
 			{
 				const flags = plman.ActivePlaylist !== -1 && plman.GetPlaylistSelectedItems(plman.ActivePlaylist).Count > 1 ? MF_STRING : MF_GRAYED;
 				menu.newEntry({
-					menuName: submenu, entryText: 'Relate selected tracks (by MBID/Title)', func: () => {
+					menuName: subMenu, entryText: 'Relate selected tracks (by MBID/Title)', func: () => {
 						addTracksRelation({ mode: 'related', tagsKeys: { related: tags.related.tf } });
 					}, flags
 				});
 				menu.newEntry({
-					menuName: submenu, entryText: 'Unrelate selected tracks (by MBID/Title)', func: () => {
+					menuName: subMenu, entryText: 'Unrelate selected tracks (by MBID/Title)', func: () => {
 						addTracksRelation({ mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf } });
 					}, flags
 				});
-				menu.newEntry({ menuName: submenu, entryText: 'sep' });
+				menu.newSeparator(subMenu);
 				menu.newEntry({
-					menuName: submenu, entryText: 'Relate selected tracks (by Artist)', func: () => {
+					menuName: subMenu, entryText: 'Relate selected tracks (by Artist)', func: () => {
 						addTracksRelation({ mode: 'related', tagsKeys: { related: tags.related.tf }, idTags: ['ALBUM ARTIST'] });
 					}, flags
 				});
 				menu.newEntry({
-					menuName: submenu, entryText: 'Unrelate selected tracks (by Artist)', func: () => {
+					menuName: subMenu, entryText: 'Unrelate selected tracks (by Artist)', func: () => {
 						addTracksRelation({ mode: 'unrelated', tagsKeys: { unrelated: tags.unrelated.tf }, idTags: ['ALBUM ARTIST'] });
 					}, flags
 				});
 			}
-			menu.newEntry({ menuName: submenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			{
 				const sel = plman.ActivePlaylist !== -1
 					? plman.GetPlaylistSelectedItems(plman.ActivePlaylist)
@@ -1142,7 +1152,7 @@ function createConfigMenu(parent) {
 					? MF_STRING
 					: MF_GRAYED;
 				menu.newEntry({
-					menuName: submenu, entryText: 'Relate selected tracks to last search', func: () => {
+					menuName: subMenu, entryText: 'Relate selected tracks to last search', func: () => {
 						sel.Convert().forEach((handle) => {
 							if (sbd.lastSearch.handle.RawPath === handle.RawPath) { return; }
 							addTracksRelation({
@@ -1153,7 +1163,7 @@ function createConfigMenu(parent) {
 					}, flags
 				});
 				menu.newEntry({
-					menuName: submenu, entryText: 'Unrelate selected tracks to last search', func: () => {
+					menuName: subMenu, entryText: 'Unrelate selected tracks to last search', func: () => {
 						sel.Convert().forEach((handle) => {
 							if (sbd.lastSearch.handle.RawPath === handle.RawPath) { return; }
 							addTracksRelation({
@@ -1167,17 +1177,17 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Debug
-		const submenu = menu.newMenu('Debug and testing');
+		const subMenu = menu.newMenu('Debug and testing');
 		{
-			const submenuTwo = menu.newMenu('Logging', submenu);
+			const submenuTwo = menu.newMenu('Logging', subMenu);
 			createBoolMenu(
 				submenuTwo,
 				['bGraphDebug', 'sep', 'bShowQuery', 'bBasicLogging', 'bShowFinalSelection', 'bSearchDebug', 'bProfile']
 			);
 		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		{
-			const submenuTwo = menu.newMenu('Descriptors', submenu);
+			const submenuTwo = menu.newMenu('Descriptors', subMenu);
 			{
 				menu.newEntry({
 					menuName: submenuTwo, entryText: 'Calculate Music Graph statistics', func: () => {
@@ -1192,7 +1202,7 @@ function createConfigMenu(parent) {
 					}
 				});
 			}
-			menu.newEntry({ menuName: submenuTwo, entryText: 'sep' });
+			menu.newSeparator(submenuTwo);
 			{ // Open graph html file
 				menu.newEntry({
 					menuName: submenuTwo, entryText: 'Show Music Graph on Browser', func: () => {
@@ -1201,7 +1211,7 @@ function createConfigMenu(parent) {
 					}
 				});
 			}
-			menu.newEntry({ menuName: submenuTwo, entryText: 'sep' });
+			menu.newSeparator(submenuTwo);
 			{ // Open descriptors
 				menu.newEntry({
 					menuName: submenuTwo, entryText: 'Open main descriptor', func: () => {
@@ -1222,10 +1232,10 @@ function createConfigMenu(parent) {
 				});
 			}
 		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		{ 	// Find genre/styles not on graph
 			menu.newEntry({
-				menuName: submenu, entryText: 'Find genres/styles not on Graph', func: () => {
+				menuName: subMenu, entryText: 'Find genres/styles not on Graph', func: () => {
 					const tags = JSON.parse(properties.tags[1]);
 					findStyleGenresMissingGraph({
 						genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
@@ -1237,7 +1247,7 @@ function createConfigMenu(parent) {
 			});
 			// Graph debug
 			menu.newEntry({
-				menuName: submenu, entryText: 'Debug Graph (check console)', func: () => {
+				menuName: subMenu, entryText: 'Debug Graph (check console)', func: () => {
 					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
 					graphDebug(sbd.allMusicGraph, true); // Show popup on pass
 					music_graph_descriptors_culture.debug(sbd.allMusicGraph);
@@ -1246,7 +1256,7 @@ function createConfigMenu(parent) {
 			});
 			// Graph test
 			menu.newEntry({
-				menuName: submenu, entryText: 'Run distance tests (check console)', func: () => {
+				menuName: subMenu, entryText: 'Run distance tests (check console)', func: () => {
 					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('testGraph') : null;
 					[testGraphNodes, testGraphNodeSets, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
 						console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
@@ -1257,33 +1267,33 @@ function createConfigMenu(parent) {
 			});
 			if (sbd.panelProperties.bProfile[1]) {
 				menu.newEntry({
-					menuName: submenu, entryText: 'Run speed tests (check console)', func: () => {
+					menuName: subMenu, entryText: 'Run speed tests (check console)', func: () => {
 						const sel = fb.GetSelection();
-						const stats = { total: 0, steps: []};
+						const stats = { total: 0, steps: [] };
 						const times = 100;
 						Promise.serial(range(1, times, 1), () => {
 							searchByDistance({ sel, properties: parent.buttonsProperties, theme: parent.buttonsProperties.theme[1], recipe: parent.buttonsProperties.recipe[1], parent });
 							stats.total += sbd.profiler.Time;
 							sbd.profiler.CheckPoints.forEach((sp) => {
 								const found = stats.steps.find((s) => s && s.name === sp.name);
-								if (found) {found.acc += sp.acc;} 
-								else {stats.steps.push({...sp});}
+								if (found) { found.acc += sp.acc; }
+								else { stats.steps.push({ ...sp }); }
 							});
 							return Promise.wait(1000);
 						}).then(() => {
 							console.log('Times executed:\t' + times);
 							console.log('Average runtime:\t' + stats.total / times + ' ms');
-							stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms'));
+							stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms')); // NOSONAR
 						});
-	
+
 					}
 				});
 			}
 		}
-		menu.newEntry({ menuName: submenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		{ 	// Graph cache reset Async
 			menu.newEntry({
-				menuName: submenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
+				menuName: subMenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
 					if (sbd.isCalculatingCache) {
 						fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console (or animation).', 'Graph cache');
 						return;
@@ -1297,7 +1307,7 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const subMenuName = menu.newMenu('Button config');
 		menu.newEntry({
@@ -1321,7 +1331,7 @@ function createConfigMenu(parent) {
 		});
 		menu.newCheckMenu(subMenuName, 'Show shortcuts on tooltip', void (0), () => { return properties.bTooltipInfo[1]; });
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{	// Reset
 		menu.newEntry({
 			entryText: 'Restore defaults...', func: () => {
@@ -1350,11 +1360,11 @@ function createConfigMenu(parent) {
 			}
 		});
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{	// Readmes
 		const subMenuName = menu.newMenu('Readmes');
 		menu.newEntry({ menuName: subMenuName, entryText: 'Open popup with readme:', func: null, flags: MF_GRAYED });
-		menu.newEntry({ menuName: subMenuName, entryText: 'sep' });
+		menu.newSeparator(subMenuName);
 		let iCount = 0;
 		const readmes = [
 			{ name: 'Main', file: folders.xxx + 'helpers\\readme\\search_by_distance.txt' },
@@ -1387,7 +1397,7 @@ function createConfigMenu(parent) {
 		].filter(Boolean);
 		if (readmes.length) {
 			readmes.forEach((entry) => { // Only show non empty files
-				if (entry.name === 'sep') { menu.newEntry({ menuName: subMenuName, entryText: 'sep' }); }
+				if (menu.isSeparator(entry)) { menu.newSeparator(subMenuName); }
 				else if (_isFile(entry.file)) {
 					const readme = _open(entry.file, utf8); // Executed on script load
 					if (readme.length) {

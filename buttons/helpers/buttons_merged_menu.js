@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/10/24
+//15/11/24
 
 /* exported createButtonsMenu */
 
@@ -30,7 +30,7 @@ function createButtonsMenu(name) {
 	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	if (!_isFolder(folders.data)) { _createFolder(folders.data); }
 	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
@@ -53,7 +53,7 @@ function createButtonsMenu(name) {
 	{
 		const subMenu = menu.newMenu('Add button');
 		menu.newEntry({ menuName: subMenu, entryText: 'Ctrl + L. Click opens readme:', flags: MF_GRAYED });
-		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
 			let entryText = path.split('\\').pop() + (isAllowed(fileName)
@@ -136,7 +136,7 @@ function createButtonsMenu(name) {
 	{
 		const subMenu = menu.newMenu('Change button position');
 		menu.newEntry({ menuName: subMenu, entryText: 'Or pressing R. Click over buttons:', flags: MF_GRAYED });
-		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		buttonsPath.forEach((path, idx) => {
 			menu.newEntry({
 				menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
@@ -147,7 +147,7 @@ function createButtonsMenu(name) {
 			});
 		});
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	menu.newEntry({
 		entryText: 'Restore all buttons', func: () => {
 			const answer = WshShell.Popup('This will maintain the current layout but delete any customized setting on all buttons. Are you sure?', 0, 'Toolbar', popup.question + popup.yes_no);
@@ -158,14 +158,14 @@ function createButtonsMenu(name) {
 			}
 		}
 	});
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const menuName = menu.newMenu('Colors');
 		const getColorName = (val) => {
 			return (val !== -1 ? (ntc.name(Chroma(val).hex())[1] || '').toString() || 'unknown' : '-none-');
 		}; // From statistics
 		menu.newEntry({ menuName, entryText: 'UI colors: (Ctrl + Click to reset)', flags: MF_GRAYED });
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set custom bar color...' + '\t[' + getColorName(barProperties.toolbarColor[1]) + ']', func: () => {
 				if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -204,7 +204,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}
 		});
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set custom hover color...' + '\t[' + getColorName(barProperties.hoverColor[1]) + ']', func: () => {
 				if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -243,7 +243,7 @@ function createButtonsMenu(name) {
 			}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED
 		});
 		menu.newCheckMenuLast(() => barProperties.bBorders[1]);
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set active button color...' + '\t[' + getColorName(barProperties.activeColor[1]) + ']', func: () => {
 				if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -271,7 +271,7 @@ function createButtonsMenu(name) {
 				window.Repaint(); // Note existing animations will use the previous colors, since the (default) colors are applied per animation once before firing
 			}
 		});
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set transparency...' + '\t[' + buttonsBar.config.toolbarTransparency + ']', func: () => {
 				if (utils.IsKeyPressed(VK_CONTROL)) {
@@ -285,7 +285,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}, flags: !barProperties.bBgButtons[1] ? MF_STRING : MF_GRAYED
 		});
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Use themed buttons', func: () => {
 				barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
@@ -303,7 +303,7 @@ function createButtonsMenu(name) {
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bBgButtons[1]);
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Reset all configuration...', func: () => {
 				barProperties.toolbarColor[1] = -1;
@@ -325,7 +325,7 @@ function createButtonsMenu(name) {
 		const menuName = menu.newMenu('Size and placement');
 		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({ menuName, entryText: 'UI placement: (Ctrl + Click to reset)', flags: MF_GRAYED });
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set scale...' + '\t[' + round(buttonsBar.config.scale, 2) + ']', func: () => {
 				let input;
@@ -379,7 +379,7 @@ function createButtonsMenu(name) {
 				window.Reload();
 			}
 		});
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Set button offset...' + '\t[' + Object.values(buttonsBar.config.offset.button) + ']', func: () => {
 				let input;
@@ -426,7 +426,7 @@ function createButtonsMenu(name) {
 				window.Repaint();
 			}
 		});
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const currPos = buttonsBar.config.bIconMode
 				? buttonsBar.config.textPosition === 'top'
@@ -459,7 +459,7 @@ function createButtonsMenu(name) {
 				);
 			}, options.length);
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Reflow buttons according to ' + (orientation === 'x' ? 'width' : 'height'), func: () => {
 				buttonsBar.config.bReflow = barProperties.bReflow[1] = !barProperties.bReflow[1];
@@ -499,7 +499,7 @@ function createButtonsMenu(name) {
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bShowId[1]);
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		const orientation = barProperties.orientation[1].toLowerCase();
 		menu.newEntry({
 			menuName, entryText: 'Toolbar orientation \t[' + orientation.toUpperCase() + ']', func: () => {
@@ -532,7 +532,7 @@ function createButtonsMenu(name) {
 				}, flags: buttonsBar.config.orientation === 'x' ? MF_STRING : MF_GRAYED
 			});
 			menu.newCheckMenuLast(() => buttonsBar.config.bIconModeExpand);
-			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
 				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key], 'bIconMode'))) {
 					const bHeadless = arrKeys.every((key) => buttonsBar.buttons[key].state === buttonStates.hide);
@@ -559,7 +559,7 @@ function createButtonsMenu(name) {
 					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].bIconMode));
 				}
 			});
-			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Restore every button', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
@@ -579,7 +579,7 @@ function createButtonsMenu(name) {
 				}, flags: buttonsBar.config.bIconMode ? MF_GRAYED : MF_STRING
 			});
 		}
-		menu.newEntry({ menuName, entryText: 'sep' });
+		menu.newSeparator(menuName);
 		{
 			const keys = buttonsBar.listKeys.map((arr) => arr.filter((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))).flat(Infinity).filter(Boolean);
 			const checkHeadless = () => keys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode());
@@ -602,7 +602,7 @@ function createButtonsMenu(name) {
 				}, flags: checkHeadless() ? MF_GRAYED : MF_STRING
 			});
 			menu.newCheckMenuLast(checkHeadless);
-			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
 				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key].buttonsProperties, 'bHeadlessMode'))) {
 					const entryText = buttonsPath[idx].split('\\').pop() + '\t(' + (idx + 1) + ')';
@@ -628,7 +628,7 @@ function createButtonsMenu(name) {
 					menu.newCheckMenuLast(() => { return arrKeys.every((key) => !Object.hasOwn(buttonsBar.buttons[key], 'bHeadlessMode') || buttonsBar.buttons[key].isHeadlessMode()); });
 				}
 			});
-			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Restore every button', func: () => {
 					buttonsBar.listKeys.forEach((arrKeys) => {
@@ -648,7 +648,7 @@ function createButtonsMenu(name) {
 			});
 		}
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const subMenu = menu.newMenu('Other settings');
 		menu.newEntry({
@@ -659,7 +659,7 @@ function createButtonsMenu(name) {
 		});
 		menu.newCheckMenuLast(() => barProperties.bLoadAsync[1]);
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const subMenu = menu.newMenu('Updates');
 		menu.newEntry({
@@ -681,7 +681,7 @@ function createButtonsMenu(name) {
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bAutoUpdateCheck[1]);
-		menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+		menu.newSeparator(subMenu);
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Check for updates...', func: () => {
 				if (typeof checkUpdate === 'undefined') { include('helpers\\helpers_xxx_web_update.js'); }
@@ -699,7 +699,7 @@ function createButtonsMenu(name) {
 			}
 		});
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	{
 		const subMenu = menu.newMenu('Readmes');
 		menu.newEntry({
@@ -718,7 +718,7 @@ function createButtonsMenu(name) {
 			readmeList['Global tag remapping'] = 'tags_global_remap.txt';
 			if (Object.hasOwn(readmeList, 'buttons_search_quicksearch.js')) { readmeList['Dynamic queries'] = 'dynamic_query.txt'; }
 			// Process
-			menu.newEntry({ menuName: subMenu, entryText: 'sep' });
+			menu.newSeparator(subMenu);
 			Object.keys(readmeList).forEach((fileName) => {
 				const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) { return; }
@@ -736,7 +736,7 @@ function createButtonsMenu(name) {
 			});
 		}
 	}
-	menu.newEntry({ entryText: 'sep' });
+	menu.newSeparator();
 	menu.newEntry({
 		entryText: 'Open buttons folder...', func: () => {
 			_explorer(folders.xxx + 'buttons');
