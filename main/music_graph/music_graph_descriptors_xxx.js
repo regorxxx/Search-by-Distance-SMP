@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/24
+//22/11/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -174,7 +174,7 @@ const music_graph_descriptors = {
 		['Post-Disco XL'					,	['Dance-Rock','Dance Pop','Italo Disco']],
 		['Soft Pop XL'						,	['Sunshine Pop','Soft Rock','Folk Pop','Chanson']],
 		['Urban R&B XL'						,	['Urban Soul','Urban Breaks']],
-		['Urban Music & Rap XL'				,	['Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime']],
+		['Urban Music & Rap XL'				,	['Urban Breaks','Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime']],
 		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop','Cloud Rap']],
 		['Sad Emo XL'						,	['Emo Rap','Emo Pop','Emo Rock','Sadcore']],
