@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/24
+//25/11/24
 
 /* exported createButtonsMenu */
 
@@ -60,7 +60,7 @@ function createButtonsMenu(name) {
 				? (isAllowedV2(fileName)
 					? '' : '\t(Playlist Tools)'
 				) : '\t(1 allowed)');
-			let subMenuFolder = subCategories.find((folder) => { return entryText.indexOf(folder) !== -1; }) || 'Others';
+			let subMenuFolder = subCategories.find((folder) => entryText.includes(folder)) || 'Others';
 			if (subMenuFolder && subMenuFolder.length) {
 				subMenuFolder = parseSubMenuFolder(subMenuFolder);
 				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
@@ -72,7 +72,7 @@ function createButtonsMenu(name) {
 					if (!bOnlyReadme) {
 						buttonsPath.push(path);
 						const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
-						_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
+						_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
 					}
 					if (readmeList) {
 						const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
@@ -127,7 +127,7 @@ function createButtonsMenu(name) {
 					}
 					// Save and reload
 					const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
-					_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t'));
+					_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
 					window.Reload();
 				}
 			});
@@ -722,7 +722,7 @@ function createButtonsMenu(name) {
 			Object.keys(readmeList).forEach((fileName) => {
 				const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) { return; }
-				let subMenuFolder = subCategories.find((folder) => { return fileName.indexOf(folder) !== -1; }) || 'Others';
+				let subMenuFolder = subCategories.find((folder) => fileName.includes(folder)) || 'Others';
 				subMenuFolder = parseSubMenuFolder(subMenuFolder);
 				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 				const entryText = fileName.replace('buttons_', '');

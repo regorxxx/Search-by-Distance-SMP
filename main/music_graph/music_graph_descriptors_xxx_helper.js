@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/08/24
+//25/11/24
 
 /* global music_graph_descriptors:readable */
 
@@ -14,7 +14,7 @@ music_graph_descriptors.getSubstitutionCache = new Map();
 music_graph_descriptors.getSubstitution = function getSubstitution(genreStyle, bOmitNonNode = false) { // Doesn't check if the style exists at all at the graph
 	let substitution = music_graph_descriptors.getSubstitutionCache.get(genreStyle);
 	if (!substitution) {
-		const pair = this.style_substitutions.find((pair) => pair[1].indexOf(this.asciify(genreStyle)) !== -1);
+		const pair = this.style_substitutions.find((pair) => pair[1].includes(this.asciify(genreStyle)));
 		substitution = pair	? pair[0] : genreStyle;
 		music_graph_descriptors.getSubstitutionCache.set(genreStyle, substitution);
 	}

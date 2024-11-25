@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/24
+//25/11/24
 
 /* exported createConfigMenu */
 
@@ -580,7 +580,7 @@ function createConfigMenu(parent) {
 					return input;
 				};
 				if (input === query) { input = ''; }
-				else if (input.indexOf(query) !== -1) {
+				else if (input.includes(query)) {
 					input = cleanParentheses(input, query);
 					input = input.replace(new RegExp('^\\(*' + queryRegExp(query) + '\\)*$|\\(?' + queryRegExp(query) + '\\)? AND | AND \\(?' + queryRegExp(query) + '\\)?', 'i'), '');
 					input = cleanParentheses(input, query);
@@ -1429,12 +1429,12 @@ function parseGraphVal(val) {
 			console.log('Error parsing graphDistance (length >= 50): ' + val);
 			return;
 		}
-		if (val.indexOf('music_graph_descriptors') === -1 || val.indexOf('()') !== -1 || val.indexOf(',') !== -1) {
+		if (!val.includes('music_graph_descriptors') || val.includes('()') || val.includes(',')) {
 			console.log('Error parsing graphDistance (is not a valid variable or using a func): ' + val);
 			return;
 		}
 		const validVars = Object.keys(music_graph_descriptors).map((key) => { return 'music_graph_descriptors.' + key; });
-		if (val.indexOf('+') === -1 && val.indexOf('-') === -1 && val.indexOf('*') === -1 && val.indexOf('/') === -1 && validVars.indexOf(val) === -1) {
+		if (!val.includes('+') && !val.includes('-') && !val.includes('*') && !val.includes('/') && !validVars.includes(val)) {
 			console.log('Error parsing graphDistance (using no arithmetics or variable): ' + val);
 			return;
 		}

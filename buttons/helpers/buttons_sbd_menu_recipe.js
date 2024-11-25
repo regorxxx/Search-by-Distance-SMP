@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/08/24
+//25/11/24
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -141,7 +141,13 @@ function createRecipeMenu(parent) {
 		const attr = _parseAttrFile(file);
 		if (attr && attr.Hidden) { return; }
 		// List files, with full path or relative path (portable)
-		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath, '.\\profile\\') : file.replace(fb.ProfilePath, '.\\')) : file);
+		options.push(
+			_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.includes(fb.ProfilePath)
+				? (fb.ProfilePath.includes('profile')
+					? file.replace(fb.ProfilePath, '.\\profile\\')
+					: file.replace(fb.ProfilePath, '.\\'))
+				: file
+		);
 	});
 	const menus = [];
 	const names = {};

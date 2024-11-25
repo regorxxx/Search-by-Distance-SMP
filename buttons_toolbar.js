@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/10/24
+//25/11/24
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -30,7 +30,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		'helpers\\helpers_xxx_properties.js',
 		/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable */
 		'helpers\\helpers_xxx_prototypes.js',
-		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isArrayEqual:readable, isJSON:readable */
+		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isJSON:readable */
 		'helpers\\helpers_xxx_UI.js',
 		/* global _scale:readable, _gdiFont:readable */
 		'helpers\\helpers_xxx_file.js',
@@ -199,20 +199,11 @@ function loadButtonsFile(bStartup = false) {
 	} else {
 		const data = _jsonParseFileCheck(file, 'Buttons bar', window.Name, utf8);
 		// Strip full path
-		if (data) { names = data.map((path) => { return path.split('\\').pop(); }); }
-		// Old buttons renamed
-		[
-			{ from: 'buttons_lastfm_list.js', to: 'buttons_lastfm_tools.js' }
-		].forEach((rename) => {
-			const idx = names.indexOf(rename.from);
-			while (names.indexOf(rename.from) !== -1) {
-				names[idx] = rename.to;
-			}
-		});
-		if (!isArrayEqual(data, names)) { _save(file, JSON.stringify(names, null, '\t')).replace(/\n/g, '\r\n'); } // Rewrite file for older versions
+		if (data) { names = data.map((path) => path.split('\\').pop()); }
 		if (!names.length) { presetPopup(); }
 	}
 	const remap = new Map([
+		['buttons_lastfm_list.js', 'buttons_lastfm_tools.js'],
 		['buttons_tags_automation.js', 'buttons_tags_tagger.js'],
 		['buttons_device_selector.js', 'buttons_device_switcher.js'],
 	]);

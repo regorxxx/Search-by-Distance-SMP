@@ -1,5 +1,5 @@
 'use strict';
-//06/08/24
+//25/11/24
 
 /* exported writeSimilarArtistsTags, updateSimilarDataFile, mergeSimilarDataFromFiles */
 
@@ -54,11 +54,11 @@ function updateTrackSimilarTags({ data, iNum = 10, tagName = globTags.lbSimilarA
 function updateSimilarDataFile(file, newData, iNum = Infinity) {
 	if (!_isFile(file)) {
 		newData.forEach((obj) => { console.log(obj.artist + ' --> ' + JSON.stringify(obj.val.slice(0, iNum))); }); // DEBUG
-		_save(file, JSON.stringify(newData, null, '\t'));
+		_save(file, JSON.stringify(newData, null, '\t').replace(/\n/g, '\r\n'));
 	} else {
 		const data = getSimilarDataFromFile(file, newData, iNum);
 		_deleteFile(file);
-		_save(file, JSON.stringify(data, null, '\t'));
+		_save(file, JSON.stringify(data, null, '\t').replace(/\n/g, '\r\n'));
 	}
 }
 

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/10/24
+//25/11/24
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -178,7 +178,7 @@ music_graph_descriptors_culture.ommit = new Set(['Industrial_supergenre', 'Blues
 					});
 				} else {
 					styleGenres.forEach((sg) => {
-						if (sg.toLowerCase().indexOf('_supergenre') !== -1) {
+						if (sg.toLowerCase().includes('_supergenre')) {
 							const idx = music_graph_descriptors.style_supergenre.findIndex((sgArr) => { return sgArr[0] === sg; });
 							if (idx !== -1) { music_graph_descriptors.style_supergenre[idx][1].forEach((newSg) => { region[subKey].push(newSg); }); }
 						} else {

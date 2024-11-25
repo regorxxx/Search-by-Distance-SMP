@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/08/24
+//25/11/24
 
 /* exported createThemeMenu */
 
@@ -89,7 +89,7 @@ function createThemeMenu(parent) {
 			theme.tags.push(themeTags);
 			const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
-			const bDone = _save(filePath, JSON.stringify(theme, null, '\t'));
+			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
 			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
 			else { _explorer(filePath); }
 		}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED
@@ -147,7 +147,7 @@ function createThemeMenu(parent) {
 		// Check
 		// Theme tags must contain at least all the user tags
 		const tagCheck = Object.hasOwn(theme, 'tags')
-			? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); })
+			? theme.tags.findIndex((tagArr) => !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)))
 			: 0;
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
@@ -161,7 +161,13 @@ function createThemeMenu(parent) {
 			return;
 		}
 		// List files, with full path or relative path (portable)
-		options.push(_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.indexOf(fb.ProfilePath) !== -1 ? (fb.ProfilePath.indexOf('profile') !== -1 ? file.replace(fb.ProfilePath, '.\\profile\\') : file.replace(fb.ProfilePath, '.\\')) : file);
+		options.push(
+			_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.includes(fb.ProfilePath)
+				? (fb.ProfilePath.includes('profile')
+					? file.replace(fb.ProfilePath, '.\\profile\\')
+					: file.replace(fb.ProfilePath, '.\\'))
+				: file
+		);
 	});
 	const menus = [];
 	options.forEach((file) => {

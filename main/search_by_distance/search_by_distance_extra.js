@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/24
+//25/11/24
 
 /* exported calculateSimilarArtistsFromPls, addTracksRelation */
 
@@ -48,7 +48,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 	const newConfig = clone(properties);
 	const tags = JSON.parse(newConfig.tags[1]);
 	const genreStyleTag = Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity).filter(Boolean);
-	const genreStyleTagQuery = genreStyleTag.map((tag) => { return tag.indexOf('$') === -1 ? tag : _q(tag); });
+	const genreStyleTagQuery = genreStyleTag.map((tag) => tag.includes('$') ? _q(tag) : tag);
 	// Find which genre/styles are nearest as pre-filter using the selected track
 	let forcedQuery = '';
 	if (method === 'reference') {
@@ -88,7 +88,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 		if (Number.isFinite(dateRange)) {
 			const dateTag = tags.date.tf[0];
 			if (dateTag) {
-				const dateQueryTag = dateTag.indexOf('$') !== -1 ? _q(dateTag) : dateTag;
+				const dateQueryTag = dateTag.includes('$') ? _q(dateTag) : dateTag;
 				const date = getHandleListTagsV2(new FbMetadbHandleList(sel), [dateTag], { bMerged: true })
 					.flat().filter(Boolean)[0];
 				dateQuery = date && date.length ? _p(dateQueryTag + ' GREATER ' + (Number(date) - Math.floor(dateRange / 2)) + ' AND ' + dateQueryTag + ' LESS ' + (Number(date) + Math.floor(dateRange / 2))) : null;

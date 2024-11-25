@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/04/24
+//25/11/24
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -849,7 +849,7 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 							buttonsBar.move.btn.moveX = x;
 							buttonsBar.move.btn.moveY = y;
 						}
-						const toBtn = buttonsBar.listKeys.find((arr) => { return arr.indexOf(curBtnKey) !== -1; });
+						const toBtn = buttonsBar.listKeys.find((arr) => arr.includes(curBtnKey));
 						const fKey = toBtn[0];
 						const lKey = toBtn[toBtn.length - 1];
 						buttonsBar.move.rec.x = buttons[fKey].currX;
@@ -1030,8 +1030,8 @@ function getUniquePrefix(string, sep = '_') {
 function moveButton(fromKey, toKey) {
 	if (typeof buttonsPath === 'undefined' || typeof barProperties === 'undefined' || !buttonsBar.listKeys.length) { console.log('Buttons: Can not move buttons in current script.'); return; }
 	if (fromKey === toKey) { return; }
-	const fromPos = buttonsBar.listKeys.findIndex((arr) => { return arr.indexOf(fromKey) !== -1; });
-	const toPos = buttonsBar.listKeys.findIndex((arr) => { return arr.indexOf(toKey) !== -1; });
+	const fromPos = buttonsBar.listKeys.findIndex((arr) => arr.includes(fromKey));
+	const toPos = buttonsBar.listKeys.findIndex((arr) => arr.includes(toKey));
 	buttonsPath.splice(toPos, 0, buttonsPath.splice(fromPos, 1)[0]);
 	buttonsBar.list.splice(toPos, 0, buttonsBar.list.splice(fromPos, 1)[0]);
 	const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });

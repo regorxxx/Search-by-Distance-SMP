@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/11/24
+//25/11/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -342,7 +342,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 			const tags = properties && Object.hasOwn(properties, 'tags') ? JSON.parse(properties.tags[1]) : null;
 			const genreStyleTags = tags
 				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity)
-					.map((tag) => { return tag.indexOf('$') === -1 ? _t(tag) : tag; }).join('|')
+					.map((tag) => !tag.includes('$') ? _t(tag) : tag).join('|')
 				: _t(globTags.genre) + '|' + _t(globTags.style);
 			console.log('Search by Distance: tags used for cache - ' + genreStyleTags);
 			const tfo = fb.TitleFormat(genreStyleTags);
@@ -500,7 +500,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
 		if (!descr.length) {
-			if (key.toLowerCase().indexOf('properties') !== -1) {
+			if (key.toLowerCase().includes('properties')) {
 				descr = {
 					'Object properties to pass other arguments':
 						Object.fromEntries(Array.from(
@@ -518,7 +518,7 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 		return [key, descr];
 	});
 	if (sbd.panelProperties.bStartLogging[1]) { console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt'); }
-	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t'));
+	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
 }
 
 function testRecipe({ path = null, json = null, baseTags = null } = {}) {
@@ -917,8 +917,8 @@ async function searchByDistance({
 	});
 	if (bSearchDebug) { console.log(JSON.stringify(calcTags, void (0), '\t')); }
 	const smartShuffleTag = (recipeProperties.smartShuffleTag || JSON.parse(properties.smartShuffleTag[1])).filter(Boolean);
-	const genreStyleTag = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (tag.indexOf('$') === -1 ? _t(tag) : tag));
-	const genreStyleTagQuery = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (tag.indexOf('$') === -1 ? tag : _q(tag)));
+	const genreStyleTag = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (!tag.includes('$') ? _t(tag) : tag));
+	const genreStyleTagQuery = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (!tag.includes('$') ? tag : _q(tag)));
 
 	// Check input
 	playlistLength = (playlistLength >= 0) ? playlistLength : 0;
@@ -1091,8 +1091,8 @@ async function searchByDistance({
 			if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 				preQueryLength = query.length;
 				const tagNameTF = type.includes('multiple') // May be a tag or a function...
-					? tag.tf.map((t) => { return ((t.indexOf('$') === -1) ? t : _q(t)); })
-					: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
+					? tag.tf.map((t) => !t.includes('$') ? t : _q(t))
+					: (!tag.tf[0].includes('$') ? tag.tf[0] : _q(tag.tf[0]));
 				if (type.includes('keyRange')) {
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 					if (camelotKey) {
@@ -1121,7 +1121,7 @@ async function searchByDistance({
 				} else if (type.includes('combinations')) {
 					const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
 					const tagComb = k_combinations(tag.reference, k);
-					const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+					const match = tagNameTF.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 					// Group as small as possible for query purposes
 					const tagCombSet = tagComb.map((a) => new Set(a));
 					let groups = [];
@@ -1157,10 +1157,10 @@ async function searchByDistance({
 					query[preQueryLength] = queryJoin(groups, 'OR');
 				} else {
 					if (Array.isArray(tagNameTF)) { // NOSONAR
-						const match = tagNameTF.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+						const match = tagNameTF.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 						query[preQueryLength] = queryJoin(queryCombinations(tag.reference, tagNameTF, 'OR', void (0), match), 'OR');
 					} else {
-						const match = tagNameTF.indexOf('$') !== -1 ? 'HAS' : 'IS';
+						const match = tagNameTF.includes('$') ? 'HAS' : 'IS';
 						query[preQueryLength] = queryCombinations([tag.reference], tagNameTF, 'OR', void (0), match);
 					}
 				}
@@ -1168,8 +1168,8 @@ async function searchByDistance({
 			} else if (bNegativeWeighting && tag.weight * 2 / totalWeight >= totalWeight / countWeights / 100) {
 				preQueryLength = query.length;
 				const tagNameTF = type.includes('multiple') // May be a tag or a function...
-					? tag.tf.map((t) => { return ((t.indexOf('$') === -1) ? t : _q(t)); })
-					: ((tag.tf[0].indexOf('$') === -1) ? tag.tf[0] : _q(tag.tf[0]));
+					? tag.tf.map((t) => !t.includes('$') ? t : _q(t))
+					: (!tag.tf[0].includes('$') ? tag.tf[0] : _q(tag.tf[0]));
 				if (type.includes('keyRange')) {
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 					if (camelotKey) {
@@ -1221,13 +1221,13 @@ async function searchByDistance({
 		let iso;
 		if (bUseTheme) { iso = (Object.hasOwn(theme.tags[0], 'iso') ? theme.tags[0].iso[0] : '') || ''; }
 		else {
-			const bSep = calcTags.artistRegion.tf.indexOf('$') === -1 && calcTags.artistRegion.tf.indexOf('%') === -1;
+			const bSep = !calcTags.artistRegion.tf.includes('$') && !calcTags.artistRegion.tf.includes('%');
 			const tagName = bSep
-				? '[$meta_sep(' + calcTags.artistRegion.tf + ',|‎ |)'
+				? '[$meta_sep(' + calcTags.artistRegion.tf + ',|‎|)'
 				: _bt(calcTags.artistRegion.tf);
 			// Exotic separators are preferred to ', ' since this tag may contain such char...
 			const localeTag = fb.TitleFormat(tagName).EvalWithMetadb(sel)
-				.split(bSep ? '|‎ |' : ', ').filter(Boolean).pop() || '';
+				.split(bSep ? '|‎|' : ', ').filter(Boolean).pop() || '';
 			if (localeTag.length) { iso = getCountryISO(localeTag); }
 			else {
 				const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
@@ -1313,7 +1313,7 @@ async function searchByDistance({
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 			if (influences.length) {
 				influences = [...new Set(influences)];
-				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				const match = genreStyleTagQuery.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 				let temp = queryCombinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				temp = 'NOT (' + queryJoin(temp, 'OR') + ')'; // flattens the array
 				influencesQuery.push(temp);
@@ -1328,7 +1328,7 @@ async function searchByDistance({
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
 			if (influences.length) {
 				influences = [...new Set(influences)];
-				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				const match = genreStyleTagQuery.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 				let temp = queryCombinations(influences, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				temp = _p(queryJoin(temp, 'OR')); // flattens the array. Here changes the 'not' part
 				influencesQuery.push(temp);
@@ -1344,11 +1344,11 @@ async function searchByDistance({
 		// For standard artist tags, it's safer to use all, otherwise limit it to the user tag
 		// Exotic separators are preferred to ', ' since this tag may contain such char...
 		const tagName = ['ALBUM ARTIST', 'ARTIST'].includes(globTags.artistRaw.toUpperCase())
-			? '[$meta_sep(ALBUM ARTIST,|‎ |)|‎ |$meta_sep(ARTIST,|‎ |)]'
-			: '[$meta_sep(' + globTags.artistRaw + ',|‎ |)]';
+			? '[$meta_sep(ALBUM ARTIST,|‎|)|‎|$meta_sep(ARTIST,|‎|)]'
+			: '[$meta_sep(' + globTags.artistRaw + ',|‎|)]';
 		const tags = [...new Set(
 			fb.TitleFormat(tagName)
-				.EvalWithMetadb(sel).split('|‎ |').filter(Boolean)
+				.EvalWithMetadb(sel).split('|‎|').filter(Boolean)
 		)];
 		let queryArtist = '';
 		if (tags.length) {
@@ -1378,11 +1378,11 @@ async function searchByDistance({
 				]
 				: []
 			)
-		].map((t) => '[$meta_sep(' + t + ',|‎ |)]').join('|‎ |'));
+		].map((t) => '[$meta_sep(' + t + ',|‎|)]').join('|‎|'));
 		if (bSearchDebug) { console.log('Similar artists filter:', tagName); }
 		// Exotic separators are preferred to ', ' since this tag may contain such char...
 		const similTags = [...new Set(
-			fb.TitleFormat(tagName).EvalWithMetadb(sel).split('|‎ |').filter(Boolean)
+			fb.TitleFormat(tagName).EvalWithMetadb(sel).split('|‎|').filter(Boolean)
 		)];
 		let querySimil = '';
 		if (!similTags.length && files.some(_isFile)) {
@@ -1423,7 +1423,7 @@ async function searchByDistance({
 		if (calcTags.genreStyle.referenceNumber) {
 			const styleGenreRegion = getZoneGraphFilter([...calcTags.genreStyle.referenceSet], genreStyleRegionFilter).map((sg) => sanitizeQueryVal(sg));
 			if (styleGenreRegion.length) {
-				const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+				const match = genreStyleTagQuery.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 				let queryRegion = queryCombinations(styleGenreRegion, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 				queryRegion = queryJoin(queryRegion, 'OR'); // flattens the array
 				const len = queryRegion.length;
@@ -1447,7 +1447,7 @@ async function searchByDistance({
 		);
 		const nearestGenres = getNearestGenreStyles([...calcTags.genreStyle.referenceSet], maxDistance, sbd.allMusicGraph);
 		if (nearestGenres.length) {
-			const match = genreStyleTagQuery.some((tag) => { return tag.indexOf('$') !== -1; }) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
+			const match = genreStyleTagQuery.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
 			let queryNearGenres = queryCombinations(nearestGenres, genreStyleTagQuery, 'OR', void (0), match); // min. array with 2 values or more if tags are remapped
 			queryNearGenres = queryJoin(queryNearGenres, 'OR'); // flattens the array
 			if (query[queryLength].length) { query[queryLength] = queryJoin([query[queryLength], queryNearGenres]); }
@@ -1476,7 +1476,7 @@ async function searchByDistance({
 						key = validTags.find((tag) => tag.toLowerCase() === match.toLowerCase());
 						const expanded = getRemap(key).map((tag) => {
 							return dynQuery.replace(regTag, function (match, g1, g2, g3) {
-								return tag.indexOf('$') !== -1
+								return tag.includes('$')
 									? (g1.replace('%', '') + _qCond(tag) + g3.replace('%', ''))
 									: (g1 + tag + g3);
 							}).replace(/(.*\()("\$)(.*)(\)"[),])/g, function (match, g1, g2, g3, g4) { // eslint-disable-line no-useless-escape
@@ -1533,9 +1533,9 @@ async function searchByDistance({
 	// Prefill tag Cache
 	if (bTagsCache) {
 		const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf.filter(Boolean)).concat([['TITLE'], [globTags.title]])
-			.map((tagName) => { return tagName.map((subTagName) => { return (subTagName.indexOf('$') === -1 ? '%' + subTagName + '%' : subTagName); }); })
-			.map((tagName) => { return tagName.join(', '); }).filter(Boolean)
-			.filter((tagName) => { return !tagsCache.cache.has(tagName); });
+			.map((tagName) => tagName.map((subTagName) => (!subTagName.includes('$') ? '%' + subTagName + '%' : subTagName)))
+			.map((tagName) => tagName.join(', ')).filter(Boolean)
+			.filter((tagName) => !tagsCache.cache.has(tagName));
 		if (missingOnCache.length) {
 			console.log('Caching missing tags...');
 			if (parent) { parent.switchAnimation('Tag cache', true); }
@@ -1616,7 +1616,7 @@ async function searchByDistance({
 	if (['related', 'unrelated'].some((key) => calcTags[key].weight !== 0)) {
 		tagsArr.push(['MUSICBRAINZ_TRACKID']);
 	}
-	tagsArr = tagsArr.map((arr) => arr.map((tag) => (tag.indexOf('$') === -1 && tag !== 'skip' ? _t(tag) : tag)).join(', '));
+	tagsArr = tagsArr.map((arr) => arr.map((tag) => (!tag.includes('$') && tag !== 'skip' ? _t(tag) : tag)).join(', '));
 	if (bSearchDebug) { console.log('Tags to retrieve:', tagsArr); }
 	const tagsValByKey = [];
 	let tagsVal = [];
@@ -1696,7 +1696,7 @@ async function searchByDistance({
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 			if (score === -1 || score < minScoreFilter) { i++; continue; }
 		}
-	
+
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
 				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance, bRelated, bUnrelated });
@@ -1890,7 +1890,7 @@ async function searchByDistance({
 						// Find positions where the remainder tracks could be placed as long as they have the same key than other track
 						for (let i = 0; i < poolLength; i++) {
 							const currTrackData = scoreData[i];
-							if (selectedHandlesData.indexOf(currTrackData) === -1) {
+							if (!selectedHandlesData.includes(currTrackData)) {
 								const matchIdx = selectedHandlesData.findIndex((selTrackData, j) => {
 									let idx = -1;
 									if (keyMap.has(j)) { idx = keyMap.get(j); }
@@ -2530,12 +2530,12 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 				fb.ShowPopupMessage('Error parsing graphDistance (length >= 50): ' + output, 'Search by Distance');
 				return null;
 			}
-			if (output.indexOf('music_graph_descriptors') === -1 || output.indexOf('()') !== -1 || output.indexOf(',') !== -1) {
+			if (!output.includes('music_graph_descriptors') || output.includes('()') || output.includes(',')) {
 				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output, 'Search by Distance');
 				return null;
 			}
 			const validVars = Object.keys(descr).map((key) => { return 'music_graph_descriptors.' + key; });
-			if (output.indexOf('+') === -1 && output.indexOf('-') === -1 && output.indexOf('*') === -1 && output.indexOf('/') === -1 && validVars.indexOf(output) === -1) {
+			if (!output.includes('+') && !output.includes('-') && !output.includes('*') && !output.includes('/') && !validVars.includes(output)) {
 				fb.ShowPopupMessage('Error parsing graphDistance (using no arithmetic or variable): ' + output, 'Search by Distance');
 				return null;
 			}

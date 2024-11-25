@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/24
+//25/11/24
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -471,7 +471,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			let node = nodePair[0];
 			bFound = false;
 			for (let i = superGenreNumbers; i--;) {
-				if (descr.style_supergenre[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+				if (descr.style_supergenre[i].flat(Infinity).includes(node)) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) {
@@ -484,7 +484,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (descr.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+				if (descr.style_supergenre[j].flat(Infinity).includes(node)) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) {
@@ -502,19 +502,19 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		bFound = false;
 		for (let i = superGenreNumbers; i--;) {
 			if (bFound) {break;}
-			if (descr.style_supergenre[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_supergenre[i].flat(Infinity).includes(node)) {bFound = true;}
 		}
 		for (let i = styleClusterNumbers; i--;) {
 			if (bFound) {break;}
-			if (descr.style_cluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_cluster[i].flat(Infinity).includes(node)) {bFound = true;}
 		}
 		for (let i = superGenreClusterNumbers; i--;) {
 			if (bFound) {break;}
-			if (descr.style_supergenre_cluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_supergenre_cluster[i].flat(Infinity).includes(node)) {bFound = true;}
 		}
 		for (let i = superGenreSuperClusterNumbers; i--;) {
 			if (bFound) {break;}
-			if (descr.style_supergenre_supercluster[i].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_supergenre_supercluster[i].flat(Infinity).includes(node)) {bFound = true;}
 		}
 		if (!bFound) {
 			console.log('music_graph_descriptors_xxx Warning: \'style_substitutions\' has nodes not found on \'style_supergenre\'. Check \'Graph nodes and links\' section\n' + '	' +  node);
@@ -528,7 +528,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			let node = nodePair[1][i];
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (descr.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+				if (descr.style_supergenre[j].flat(Infinity).includes(node)) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) { // May be a cluster linked to another cluster
@@ -548,7 +548,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		[...nodePair[1], nodePair[0]].forEach((node) => {
 			bFound = false;
 			for (let j = superGenreNumbers; j--;) {
-				if (descr.style_supergenre[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+				if (descr.style_supergenre[j].flat(Infinity).includes(node)) {bFound = true;}
 				if (bFound) {break;}
 			}
 			if (!bFound) { // May be a style cluster
@@ -586,7 +586,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		let node = nodePair[0];
 		bFound = false;
 		for (let j = superGenreClusterNumbers; j--;) {
-			if (descr.style_supergenre_cluster[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_supergenre_cluster[j].flat(Infinity).includes(node)) {bFound = true;}
 			if (bFound) {break;}
 		}
 		if (!bFound) { // May be a superGenre super Cluster
@@ -606,7 +606,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 		if (node === 'SKIP') {return;}
 		bFound = false;
 		for (let j = superGenreSuperClusterNumbers; j--;) {
-			if (descr.style_supergenre_supercluster[j].flat(Infinity).indexOf(node) !== -1) {bFound = true;}
+			if (descr.style_supergenre_supercluster[j].flat(Infinity).includes(node)) {bFound = true;}
 			if (bFound) {break;}
 		}
 		if (!bFound) {
@@ -807,10 +807,10 @@ async function graphStatistics({
 	let styleGenres;
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') // eslint-disable-line no-prototype-builtins
-			? JSON.parse(properties.genreTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|')
+			? JSON.parse(properties.genreTag[1]).map((tag) => !tag.includes('$')? _t(tag): tag).join('|')
 			: _t(globTags.genre);
 		const styleTag = properties && properties.hasOwnProperty('styleTag') // eslint-disable-line no-prototype-builtins
-			? JSON.parse(properties.genreTag[1]).map((tag) => {return tag.indexOf('$') === -1 ? _t(tag): tag;}).join('|')
+			? JSON.parse(properties.genreTag[1]).map((tag) => !tag.includes('$') ? _t(tag): tag).join('|')
 			: _t(globTags.style);
 		const tags = [genreTag, styleTag].filter(Boolean).join('|');
 		const tfo = fb.TitleFormat(tags);
