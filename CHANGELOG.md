@@ -68,6 +68,8 @@
 - Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.
 - Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.
 - Dynamic queries: improved entries file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
+- Dynamic queries: support for '*' wildcard (also for multi-value tags). i.e. 'ARTIST IS #ARTIST*%' -> 'ARTIST IS A*'
+- Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commads) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Info: loved/hated tracks follow global tags settings.
 - Debug: expanded profiling logs and tools.
@@ -78,6 +80,7 @@
 ### Fixed
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total socre. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
+- Dynamic Queries: improved support for tags with '#' values (for ex. KEY tags).
 
 ## [7.6.0] - 2024-10-09
 ### Added
