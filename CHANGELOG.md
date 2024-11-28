@@ -57,7 +57,7 @@
 
 ## [Unreleased][]
 ### Added
-- Descriptors: added Bubblegum Bass and Big Room House style.
+- Descriptors: added Bubblegum Bass, Deconstructed Club and Big Room House style.
 - Descriptors: added Mainstream Electronic cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
