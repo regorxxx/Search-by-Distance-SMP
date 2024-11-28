@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/11/24
+//28/11/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -98,7 +98,7 @@ const music_graph_descriptors = {
 	// considered 'similar' in an 'listening session' sense. For ex. 'Space Rock' and 'Southern Rock' can be considered Rock but pretty
 	// different when looking for Rock tracks. On the other hand, they are similar if you compare them to Jazz.
 	style_supergenre: [
-		['Industrial_supergenre'			,	['Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Folk','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
+		['Industrial_supergenre'			,	['Deconstructed Club','Minimal Wave','Minimal Industrial','Futurepop','Electro-Industrial','Industrial Folk','Industrial Rock','Industrial Punk','Industrial Metal','Darkwave','Coldwave','Dark Ambient','Dark Industrial','Electronic Body Music','Noise Music','Gothic Rock','Death Rock','Ambient Industrial','Avant-Garde Industrial','Krautrock']],
 		['Metal_supergenre'					,	['Kawaii Metal','Groove Metal','Post-Metal','Neo-Classical Metal','Stoner Doom','Stoner Sludge','Deathcore','Metalcore','Nu Metal','Rap Metal','Grunge Metal','Symphonic Metal','Gothic Metal','Black Metal','Ambient Metal','Atmospheric Black Metal','Stoner Metal','Sludge Metal','Death Metal','Grindcore','Doom Metal','Crossover Thrash','Extreme Metal','Speed Metal','Thrash Metal','British Metal','Glam Metal','Hair Metal','Pop Metal','Power Metal','Progressive Metal','Classic Metal','Proto-Metal']],
 		['Rock & Roll_supergenre'			,	['Rockabilly Revival','Garage Rock','Surf Rock','Rock & Roll','Rockabilly','Skiffle']],
 		['Classic Rock_supergenre'			,	['Proto-Metal','Heartland Rock','Arena Rock','Southern Rock','Glam Rock','Proto-Prog','Crossover Prog','Symphonic Rock','Heavy Prog','Eclectic Prog','Flamenco Rock','Krautrock','Math Rock','Neo-Prog','Italian Prog. Rock','Japanese Prog. Rock','Avant-Prog','Hard Rock','Detroit Rock','Blues Rock','Boogie Rock','Acid Rock','Psychedelic Rock','Space Rock','Raga Rock','Anatolian Rock','Psychedelic Pop','Funk Rock','British Psychedelia','Renaissance Rock','Folk-Rock','Canterbury Scene','Chicano Rock','Latin Rock','Candombe Beat','Beat Music','Tulsa Sound']],
@@ -124,7 +124,7 @@ const music_graph_descriptors = {
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
 		['Rap_supergenre'					,	['Neoperreo','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
-		['Breakbeat_supergenre'				,	['EDM Trap','Future Bass','Bubblegum Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
+		['Breakbeat_supergenre'				,	['Deconstructed Club','EDM Trap','Future Bass','Bubblegum Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
 		['Techno_supergenre'				,	['Melodic Techno-House','Ghetto House','Ghettotech','Dark Techno','Juke','Hardtechno','Tech Trance','Tech House','Industrial Techno','Minimal Techno','Ambient Techno','IDM','Hardtek','Freetekno','Hardcore Techno','Hardcore Rave','New Beat','Detroit Techno','Kuduro']],
@@ -413,7 +413,8 @@ const music_graph_descriptors = {
 		['Acid House'						,	['Hip House','Trip Hop']],
 		['Ghettotech'						,	['Ghetto House','Hip House']],
 		['Emo Rap'							,	['Emo Pop','Nu Metal','Jazz-Rap','Horrorcore']],
-		['Bubblegum Bass'					,	['UK Bass']]
+		['Bubblegum Bass'					,	['UK Bass']],
+		['Deconstructed Club'				,	['Neoperreo']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
@@ -456,7 +457,8 @@ const music_graph_descriptors = {
 		['Dream Pop'						,	['Emo Rap','Emo Pop','Emo Rock','Celtic Folk','Pagan Folk','Ska Punk','Rumba Flamenca']],
 		['Emo Rap'							,	['Reggaeton','Nuevo Flamenco','Flamenco']],
 		['Swing'							,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']],
-		['Dixieland'						,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']]
+		['Dixieland'						,	['Bebop','Hard-Bop','Modal Jazz','Cool Jazz']],
+		['Deconstructed Club'				,	['Chill-Out Downtempo','Melodic Techno-House','Big Room House','Ibiza House','Deep House']]
 	],
 	// These are genre/styles which should always apply the 'Anti-influences' filter in a listening session (see customizable button).
 	// i.e. if  a 'Jazz' track is taken as reference, 'Jazz anti-influences' should always be filtered out, because they sound
@@ -596,7 +598,8 @@ const music_graph_descriptors = {
 		['Kawaii Metal'						,	['Yurufuwa','Idol Metal','Cute Metal','Kawaiicore']],
 		['Trancecore'						,	['Electronicore','Synthcore'		]],
 		['Synthwave'						,	['Retrowave'						]],
-		['Nu-Disco'							,	['Disco House'						]]
+		['Nu-Disco'							,	['Disco House'						]],
+		['Deconstructed Club'				,	['Post-Club'						]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
