@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/24
+//29/11/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -55,7 +55,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_crc.js');
 /* global crc32:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global isInt:readable, isJSON:readable, isBoolean:readable, regExBool:readable, isString:readable, isStringWeak:readable, _t:readable, _p:readable, isArrayStrings:readable, round:readable, _q:readable, _b:readable, _bt:readable, _qCond:readable */
+/* global isInt:readable, isJSON:readable, isBoolean:readable, regExBool:readable, isString:readable, isStringWeak:readable, _t:readable, _p:readable, isArrayStrings:readable, round:readable, _q:readable, _b:readable, _bt:readable, _qCond:readable, range:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
@@ -116,8 +116,8 @@ const SearchByDistance_properties = {
 	bFilterWithGraph: ['Filter values not present on the graph', true],
 	forcedQuery: ['Forced query to pre-filter database (added to any other internal query)', globQuery.filter],
 	bSameArtistFilter: ['Exclude tracks by same artist', false],
-	bUseAntiInfluencesFilter: ['Exclude anti-influences by query', false],
-	bConditionAntiInfluences: ['Conditional anti-influences filter', false],
+	bUseAntiInfluencesFilter: ['Exclude anti-influences by query', true],
+	bConditionAntiInfluences: ['Conditional anti-influences filter', true],
 	bUseInfluencesFilter: ['Allow only influences by query', false],
 	bSimilArtistsFilter: ['Allow only similar artists', false],
 	bSimilArtistsExternal: ['External similar artists tags', false],
@@ -146,11 +146,12 @@ const SearchByDistance_properties = {
 	smartShuffleTag: ['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc: ['Smart Shuffle extra conditions', true],
 	smartShuffleSortBias: ['Smart Shuffle sorting bias', 'random', { func: isStringWeak }, 'random'],
-	artistRegionFilter: ['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, { range: [[-1, 5]], func: isInt }, -1],
-	genreStyleRegionFilter: ['Genre region filter: none (-1), continent (0), region (1)', -1, { range: [[-1, 3]], func: isInt }, -1],
+	artistRegionFilter: ['Artist region filter: none (-1), continent (0), region (1), country (2)', -1, { range: [[-1, 2]], func: isInt }, -1],
+	genreStyleRegionFilter: ['Genre region filter: none (-1), continent (0), region (1)', -1, { range: [[-1, 1]], func: isInt }, -1],
 	dynQueries: ['Dynamic query filtering', JSON.stringify([]), { func: isJSON }, JSON.stringify([])],
 	nearGenresFilter: ['Near genres filter: none (-1), auto (0) or any distance value', 0, { range: [[-1, Infinity]], func: isInt }, 0],
-	nearGenresFilterAggressiveness: ['Near genres filter aggressiveness (0-10)', 5, { range: [[0, 10]], func: isInt }, 5]
+	nearGenresFilterAggressiveness: ['Near genres filter aggressiveness (0-10)', 5, { range: [[0, 10]], func: isInt }, 5],
+	bBreakWhenFilled: ['Stop processing on playlist filling', true]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -635,26 +636,134 @@ function testBaseTags(baseTags) {
 // Test default tags
 testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
 
-// 1900 ms 24K tracks GRAPH all default on i7 920 from 2008
-// 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
+/**
+ * Calculates similarity between a reference track and a list of handles (source) and outputs the most similar tracks according to algorithm choosen and multiple filter options.
+ *
+ * Performance notes (after pre-filtering): 1900 ms 24K tracks GRAPH all default on i7 920 from 2008, 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
+ *
+ * @async
+ * @function
+ * @name searchByDistance
+ * @kind function
+ * @param {object} [o] - arguments
+ *
+ * --->Default args (aka properties from the panel and input)
+ *
+ * @param {object?} o.properties - [=getPropertiesPairs(SearchByDistance_properties, sbd_prefix)] Properties, if provided most arguments below are filled from it
+ * @param {object?} o.panelProperties - Panel properties, shared in the same toolbar/panel
+ * @param {FbMetadbHandle?} o.sel - [=fb.GetFocusItem()] Reference track, first item of act. pls. if can't get focus item
+ * @param {FbMetadbHandleList?} o.sourceItems - [=fb.GetLibraryItems()]
+ * @param {{name:string, tags: Object.<string, (string|number)>[]}|string} o.theme - [={}] May be a file path or object with Arr of tags }
+ * @param {object|string} o.recipe - [={}]  // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+ *
+ * --->Args modifiers
+ *
+ * @param {boolean?} o.bAscii - [=o.properties.bAscii[1]|true] Sanitize all tag values with ASCII equivalent chars
+ * @param {boolean?} o.bTagsCache - [=o.properties.bTagsCache[1]|false] Read from cache
+ * @param {boolean?} o.bAdvTitle - [=o.properties.bAdvTitle[1]|true] RegExp duplicate matching,
+ * @param {boolean?} o.bMultiple - [=o.properties.bMultiple[1]|true] Single Multi-value tag matching,
+ * @param {string?} o.checkDuplicatesByTag - [=o.properties.checkDuplicatesByTag[1]|globTags.remDupl] TF to remove duplicates
+ * @param {string?} o.sortBias - [=o.properties.sortBias[1]|globQuery.remDuplBias] TF track selection bias
+ *
+ * --->Weights
+ *
+ * @param {Object.<string, {weight:number, tf:string[], scoringDistribution:'LINEAR'|'LOGARITHMIC'|'LOGISTIC'|'NORMAL', baseScore:number, type:string[], range:number, combs:number}>} o.tags - [=o.properties.tags[1]|true] Tag weights, must follow sbd.schema and sbd.tagTypeSchema
+ * @param {boolean?} o.bNegativeWeighting - [=o.properties.bNegativeWeighting[1]|true] Assigns negative score for num. tags when they fall outside range
+ * @param {boolean?} o.bFilterWithGraph - [=o.properties.bFilterWithGraph[1]|false] Filter graph search with valid values (slow)
+ *
+ * --->Pre-Scoring Filters
+ *
+ * @param {string?} o.forcedQuery - [=o.properties.forcedQuery[1]|''] Query to filter the source (library)
+ * @param {string[]?} o.dynQueries - [=o.properties.dynQueries[1]|[]]
+ * @param {boolean?} o.bSameArtistFilter - [=o.properties.bSameArtistFilter[1]|false] Exclude same artist
+ * @param {boolean?} o.bSimilArtistsFilter - [=o.properties.bSimilArtistsFilter[1]|false] Use only similar artists
+ * @param {boolean?} o.bSimilArtistsExternal - [=o.properties.bSimilArtistsExternal[1]|false] Use ListenBrainz similar artists tags (and file)
+ * @param {boolean?} o.bConditionAntiInfluences - [=o.properties.bConditionAntiInfluences[1]|false] Anti-influences filter only for specific style/genres (for ex. Jazz) (see below)
+ * @param {boolean?} o.bUseAntiInfluencesFilter - [=o.properties.bUseAntiInfluencesFilter[1]|false] Filter anti-influences by query, before any scoring/distance calc
+ * @param {boolean?} o.bUseInfluencesFilter - [=o.properties.bUseInfluencesFilter[1]|false] SAllows only influences by query, before any scoring/distance calc
+ * @param {-1|0|1|2} o.artistRegionFilter - [=o.properties.artistRegionFilter[1]|-1] Artist region filter: none (-1), continent (0), region (1), country (2)
+ * @param {-1|0|1} o.genreStyleRegionFilter - [=o.properties.genreStyleRegionFilter[1]|-1] Genre region filter: none (-1), continent (0), region (1)
+ * @param {-1|0|number?} o.nearGenresFilter - [=o.properties.nearGenresFilter[1]|0] Near genres filter: none (-1), auto (0) or any distance value
+ * @param {0|1|2|3|4|5|6|7|8|9|10} o.nearGenresFilterAggressiveness - [=o.properties.nearGenresFilterAggressiveness[1]|5] Near genres filter aggressiveness (0-10)
+  *
+ * --->Scoring Method
+ *
+ * @param {'SCORE'|'GRAPH'|'DYNGENRE'} o.method - [=o.properties.method[1]|'GRAPH'] scoring method
+ *
+ * --->Scoring filters
+ *
+ * @param {number?} o.scoreFilter - [=o.properties.scoreFilter[1]|75] Minimum similarity score
+ * @param {number?} o.minScoreFilter - [=o.properties.minScoreFilter[1]|o.scoreFilter - 10] In case there are not enough tracks with given scoreFilter, try with this lower value
+ * @param {string|number} o.graphDistance - [=o.properties.graphDistance[1]|Infinity] Max Graph distance allowed, may be a number or string which will be parsed
+ * @param {boolean?} o.bBreakWhenFilled - [=o.properties.bBreakWhenFilled[1]|false] Stop processing as soon as enough tracks are found to fill the playlist
+ *
+ * --->Post-Scoring Filters
+ *
+ * @param {string[]?} o.poolFilteringTag - [=o.properties.poolFilteringTag[1]|[]] Sanitize all tag values with ASCII equivalent chars
+ * @param {number?} o.poolFilteringN - [=o.properties.poolFilteringN[1]|-1] Allow only n+1 tracks on pool by tag
+ * @param {boolean?} o.bPoolFiltering - [=o.properties.bPoolFiltering[1]|o.poolFilteringN > 0] Enable pool filtering by tag
+ *
+ * --->Playlist selection
+ *
+ * @param {boolean?} o.bRandomPick - [=o.properties.bRandomPick[1]|false] Pick from pool randomly
+ * @param {boolean?} o.bInversePick - [=o.properties.bInversePick[1]|false] Pick from pool by inverse similarity score
+ * @param {number?} o.probPick - [=o.properties.probPick[1]|100] Pick from pool by chosen order but with a random probability
+ * @param {number?} o.playlistLength - [=o.properties.playlistLength[1]|50] Playlist size (it's only a max value, it may be smaller)
+ *
+ * --->Playlist sorting
+ *
+ * @param {boolean?} o.bSortRandom - [=o.properties.bSortRandom[1]|false] Random sorting
+ * @param {boolean?} o.bProgressiveListOrder - [=o.properties.bProgressiveListOrder[1]|false] Sorting following progressive changes on tags (score)
+ * @param {boolean?} o.bInverseListOrder - [=o.properties.bInverseListOrder[1]|false] Invert any selected sorting
+ * @param {boolean?} o.bScatterInstrumentals - [=o.properties.bScatterInstrumentals[1]|false] Intercalate instrumental tracks breaking clusters if possible
+ * @param {boolean?} o.bSmartShuffle - [=o.properties.bSmartShuffle[1]|false] Spotify's smart shuffle by artist
+ * @param {boolean?} o.bSmartShuffleAdvc - [=o.properties.bSmartShuffleAdvc[1]|false] Tries to also scatter instrumental, live tracks, ...
+ * @param {'random'|'playcount'|'rating'|'popularity'|'lastplayed'|'key'|'' } o.smartShuffleSortBias - [=o.properties.smartShuffleSortBias[1]|'random'] Spotify's smart shuffle bias, use a preset, a TF string or none ('')
+ *
+ * --->Special Playlists
+ *
+ * @param {boolean?} o.bInKeyMixingPlaylist - [=o.properties.bInKeyMixingPlaylist[1]|false] Key changes following harmonic mixing rules like a DJ
+ * @param {boolean?} o.bHarmonicMixDoublePass - [=o.properties.bHarmonicMixDoublePass[1]|false] Usually outputs more tracks in harmonic mixing
+ * @param {boolean?} o.bProgressiveListCreation - [=o.properties.bProgressiveListCreation[1]|false] Uses output tracks as new references, and so on...
+ * @param {number?} o.progressiveListCreationN - [=o.properties.progressiveListCreationN[1]|1] Must be > 1 and < 100
+ *
+ * --->Console logging
+ *
+ * @param {boolean?} o.bProfile - [=o.properties.bProfile[1]|false] Profiling log
+ * @param {boolean?} o.bShowQuery - [=o.properties.bShowQuery[1]|true] Filter queries log
+ * @param {boolean?} o.bShowFinalSelection - [=o.properties.bShowFinalSelection[1]|true] Final selection log
+ * @param {boolean?} o.bBasicLogging - [=o.properties.bBasicLogging[1]|false] Basic log
+ * @param {boolean?} o.bSearchDebug - [=o.properties.bSearchDebug[1]|false] Debug log
+ *
+ * --->Output
+ *
+ * @param {string?} o.playlistName - [=o.properties.bAscii[1]|'Search...'] Plasylist name
+ * @param {boolean?} o.bCreatePlaylist - [=o.properties.bAscii[1]|true] If false, only outputs handle list. To be used along other scripts and/or recursive calls
+ *
+ * --->Misc
+ *
+ * @param {any?} o.parent - [=null] Parent object
+ * @returns {[FbMetadbHandle[], {name:string, score:number, mapDistance:number, bRelated:boolean, bUnrelated:boolean}[], FbMetadbHandle, FbMetadbHandle|-1]} Output handle list (as array), the score data, current selection (reference track) and more distant track
+ */
 async function searchByDistance({
 	// --->Default args (aka properties from the panel and input)
 	properties = getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 	panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
-	sel = fb.GetFocusItem(), // Reference track, first item of act. pls. if can't get focus item
-	theme = {}, // May be a file path or object with Arr of tags {name, tags: [{genre, style, mood, key, date, bpm, composer, customStr, customNum}]}
-	recipe = {}, // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
+	sel = fb.GetFocusItem(),
+	sourceItems,
+	theme = {},
+	recipe = {},
 	// --->Args modifiers
-	bAscii = Object.hasOwn(properties, 'bAscii') ? properties.bAscii[1] : true, // Sanitize all tag values with ASCII equivalent chars
-	bTagsCache = Object.hasOwn(panelProperties, 'bTagsCache') ? panelProperties.bTagsCache[1] : false, // Read from cache
-	bAdvTitle = Object.hasOwn(properties, 'bAdvTitle') ? properties.bAdvTitle[1] : true, // RegExp duplicate matching,
-	bMultiple = Object.hasOwn(properties, 'bMultiple') ? properties.bMultiple[1] : true, // Single Multi-value tag matching,
+	bAscii = Object.hasOwn(properties, 'bAscii') ? properties.bAscii[1] : true,
+	bTagsCache = Object.hasOwn(panelProperties, 'bTagsCache') ? panelProperties.bTagsCache[1] : false,
+	bAdvTitle = Object.hasOwn(properties, 'bAdvTitle') ? properties.bAdvTitle[1] : true,
+	bMultiple = Object.hasOwn(properties, 'bMultiple') ? properties.bMultiple[1] : true,
 	checkDuplicatesByTag = Object.hasOwn(properties, 'checkDuplicatesByTag') ? JSON.parse(properties.checkDuplicatesByTag[1]) : globTags.remDupl,
-	sortBias = Object.hasOwn(properties, 'sortBias') ? properties.sortBias[1] : globQuery.remDuplBias, // Track selection bias,
+	sortBias = Object.hasOwn(properties, 'sortBias') ? properties.sortBias[1] : globQuery.remDuplBias,
 	// --->Weights
 	tags = Object.hasOwn(properties, 'tags') ? JSON.parse(properties.tags[1]) : null,
-	bNegativeWeighting = Object.hasOwn(properties, 'bNegativeWeighting') ? properties.bNegativeWeighting[1] : true, // Assigns negative score for num. tags when they fall outside range
-	bFilterWithGraph = Object.hasOwn(properties, 'bFilterWithGraph') ? properties.bFilterWithGraph[1] : false, // Filter graph search with valid values (slow)
+	bNegativeWeighting = Object.hasOwn(properties, 'bNegativeWeighting') ? properties.bNegativeWeighting[1] : true,
+	bFilterWithGraph = Object.hasOwn(properties, 'bFilterWithGraph') ? properties.bFilterWithGraph[1] : false,
 	// --->Pre-Scoring Filters
 	// Query to filter library
 	forcedQuery = Object.hasOwn(properties, 'forcedQuery') ? properties.forcedQuery[1] : '',
@@ -664,10 +773,8 @@ async function searchByDistance({
 	// Similar artists
 	bSimilArtistsFilter = Object.hasOwn(properties, 'bSimilArtistsFilter') ? properties.bSimilArtistsFilter[1] : false,
 	bSimilArtistsExternal = Object.hasOwn(properties, 'bSimilArtistsExternal') ? properties.bSimilArtistsExternal[1] : false,
-	// Filter anti-influences by query, before any scoring/distance calc.
-	bConditionAntiInfluences = Object.hasOwn(properties, 'bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false, // Only for specific style/genres (for ex. Jazz)
+	bConditionAntiInfluences = Object.hasOwn(properties, 'bConditionAntiInfluences') ? properties.bConditionAntiInfluences[1] : false,
 	bUseAntiInfluencesFilter = !bConditionAntiInfluences && Object.hasOwn(properties, 'bUseAntiInfluencesFilter') ? properties.bUseAntiInfluencesFilter[1] : false,
-	// Allows only influences by query, before any scoring/distance calc.
 	bUseInfluencesFilter = Object.hasOwn(properties, 'bUseInfluencesFilter') ? properties.bUseInfluencesFilter[1] : false,
 	artistRegionFilter = Object.hasOwn(properties, 'artistRegionFilter') ? Number(properties.artistRegionFilter[1]) : -1,
 	genreStyleRegionFilter = Object.hasOwn(properties, 'genreStyleRegionFilter') ? Number(properties.genreStyleRegionFilter[1]) : -1,
@@ -679,6 +786,7 @@ async function searchByDistance({
 	scoreFilter = Object.hasOwn(properties, 'scoreFilter') ? Number(properties.scoreFilter[1]) : 75,
 	minScoreFilter = Object.hasOwn(properties, 'minScoreFilter') ? Number(properties.minScoreFilter[1]) : scoreFilter - 10,
 	graphDistance = Object.hasOwn(properties, 'graphDistance') ? (isString(properties.graphDistance[1]) ? properties.graphDistance[1] : Number(properties.graphDistance[1])) : Infinity,
+	bBreakWhenFilled = Object.hasOwn(properties, 'bBreakWhenFilled') ? properties.bBreakWhenFilled[1] : false,
 	// --->Post-Scoring Filters
 	// Allows only N +1 tracks per tag set... like only 2 tracks per artist, etc.
 	poolFilteringTag = Object.hasOwn(properties, 'poolFilteringTag') ? JSON.parse(properties.poolFilteringTag[1]).filter(Boolean) : [],
@@ -686,25 +794,24 @@ async function searchByDistance({
 	bPoolFiltering = poolFilteringN >= 0 && poolFilteringN < Infinity,
 	// --->Playlist selection
 	// How tracks are chosen from pool
-	bRandomPick = Object.hasOwn(properties, 'bRandomPick') ? properties.bRandomPick[1] : false, // Get randomly
-	bInversePick = Object.hasOwn(properties, 'bInversePick') ? properties.bInversePick[1] : false, // Get randomly
-	probPick = Object.hasOwn(properties, 'probPick') ? Number(properties.probPick[1]) : 100, // Get by scoring order but with x probability of being chosen
-	playlistLength = Object.hasOwn(properties, 'playlistLength') ? Number(properties.playlistLength[1]) : 50, // Max playlist size
+	bRandomPick = Object.hasOwn(properties, 'bRandomPick') ? properties.bRandomPick[1] : false,
+	bInversePick = Object.hasOwn(properties, 'bInversePick') ? properties.bInversePick[1] : false,
+	probPick = Object.hasOwn(properties, 'probPick') ? Number(properties.probPick[1]) : 100,
+	playlistLength = Object.hasOwn(properties, 'playlistLength') ? Number(properties.playlistLength[1]) : 50,
 	// --->Playlist sorting
-	// How playlist is sorted (independently of playlist selection)
-	bSortRandom = Object.hasOwn(properties, 'bSortRandom') ? properties.bSortRandom[1] : false, // Random sorting
-	bProgressiveListOrder = Object.hasOwn(properties, 'bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false, // Sorting following progressive changes on tags (score)
-	bInverseListOrder = Object.hasOwn(properties, 'bInverseListOrder') ? properties.bInverseListOrder[1] : false, // Invert any selected sorting
-	bScatterInstrumentals = Object.hasOwn(properties, 'bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false, // Intercalate instrumental tracks breaking clusters if possible
-	bSmartShuffle = Object.hasOwn(properties, 'bSmartShuffle') ? properties.bSmartShuffle[1] : false, // Spotify's smart shuffle by artist
-	bSmartShuffleAdvc = Object.hasOwn(properties, 'bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false, // Spotify's smart shuffle by artist
-	smartShuffleSortBias = Object.hasOwn(properties, 'smartShuffleSortBias') ? properties.smartShuffleSortBias[1] : 'random', // Spotify's smart shuffle bias
+	bSortRandom = Object.hasOwn(properties, 'bSortRandom') ? properties.bSortRandom[1] : false,
+	bProgressiveListOrder = Object.hasOwn(properties, 'bProgressiveListOrder') ? properties.bProgressiveListOrder[1] : false,
+	bInverseListOrder = Object.hasOwn(properties, 'bInverseListOrder') ? properties.bInverseListOrder[1] : false,
+	bScatterInstrumentals = Object.hasOwn(properties, 'bScatterInstrumentals') ? properties.bScatterInstrumentals[1] : false,
+	bSmartShuffle = Object.hasOwn(properties, 'bSmartShuffle') ? properties.bSmartShuffle[1] : false,
+	bSmartShuffleAdvc = Object.hasOwn(properties, 'bSmartShuffleAdvc') ? properties.bSmartShuffleAdvc[1] : false,
+	smartShuffleSortBias = Object.hasOwn(properties, 'smartShuffleSortBias') ? properties.smartShuffleSortBias[1] : 'random',
 	// --->Special Playlists
 	// Use previous playlist selection, but override playlist sorting, since they use their own logic
-	bInKeyMixingPlaylist = Object.hasOwn(properties, 'bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false, // Key changes following harmonic mixing rules like a DJ
-	bHarmonicMixDoublePass = Object.hasOwn(properties, 'bHarmonicMixDoublePass') ? properties.bHarmonicMixDoublePass[1] : false, // Usually outputs more tracks in harmonic mixing
-	bProgressiveListCreation = Object.hasOwn(properties, 'bProgressiveListCreation') ? properties.bProgressiveListCreation[1] : false, // Uses output tracks as new references, and so on...
-	progressiveListCreationN = bProgressiveListCreation ? Number(properties.progressiveListCreationN[1]) : 1, // > 1 and < 100
+	bInKeyMixingPlaylist = Object.hasOwn(properties, 'bInKeyMixingPlaylist') ? properties.bInKeyMixingPlaylist[1] : false,
+	bHarmonicMixDoublePass = Object.hasOwn(properties, 'bHarmonicMixDoublePass') ? properties.bHarmonicMixDoublePass[1] : false,
+	bProgressiveListCreation = Object.hasOwn(properties, 'bProgressiveListCreation') ? properties.bProgressiveListCreation[1] : false,
+	progressiveListCreationN = bProgressiveListCreation ? Number(properties.progressiveListCreationN[1]) : 1,
 	// --->Console logging
 	// Uses panelProperties instead of properties, so it always points to the right properties... used along buttons or not.
 	// They are the same for all instances within the same panel
@@ -715,7 +822,7 @@ async function searchByDistance({
 	bSearchDebug = Object.hasOwn(panelProperties, 'bSearchDebug') ? panelProperties.bSearchDebug[1] : false,
 	// --->Output
 	playlistName = Object.hasOwn(properties, 'playlistName') ? properties.playlistName[1] : 'Search...',
-	bCreatePlaylist = true, // false: only outputs handle list. To be used along other scripts and/or recursive calls
+	bCreatePlaylist = true,
 	// --->Misc
 	parent = null
 } = {}) {
@@ -1268,7 +1375,7 @@ async function searchByDistance({
 	['related', 'unrelated'].forEach((key) => {
 		const tag = calcTags[key];
 		if (tag.referenceNumber === 0 && tag.weight !== 0) {
-			if (bBasicLogging) {
+			if (bSearchDebug) {
 				console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(calcTags[key].tf));
 			}
 			tag.weight = 0;
@@ -1528,7 +1635,7 @@ async function searchByDistance({
 	if (!query[queryLength].length) { query[queryLength] = 'ALL'; }
 
 	// Preload lib items
-	const libraryItems = fb.GetLibraryItems();
+	if (!sourceItems) { sourceItems = fb.GetLibraryItems(); }
 
 	// Prefill tag Cache
 	if (bTagsCache) {
@@ -1539,7 +1646,7 @@ async function searchByDistance({
 		if (missingOnCache.length) {
 			console.log('Caching missing tags...');
 			if (parent) { parent.switchAnimation('Tag cache', true); }
-			await tagsCache.cacheTags(missingOnCache, 100, 50, libraryItems.Convert(), true);
+			await tagsCache.cacheTags(missingOnCache, 100, 50, sourceItems.Convert(), true);
 			if (parent) { parent.switchAnimation('Tag cache', false); }
 			tagsCache.save();
 		}
@@ -1547,7 +1654,7 @@ async function searchByDistance({
 
 	// Load query
 	if (bShowQuery) { console.log('Query created: ' + query[queryLength]); }
-	let handleList = fb.GetQueryItemsCheck(libraryItems, query[queryLength]);
+	let handleList = fb.GetQueryItemsCheck(sourceItems, query[queryLength]);
 	const debugQuery = (queryItems, q) => {
 		if (!queryItems) {
 			fb.ShowPopupMessage(
@@ -1654,10 +1761,12 @@ async function searchByDistance({
 		memoryPrint('Search by Distance Tags', calcTags);
 	}
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
-	let i = 0;
-	let mapDistance, score, bRelated, bUnrelated;
+	let mapDistance, score, bRelated, bUnrelated, bIsBreak;
 	let order = 0;
-	while (i < trackTotal) {
+	let poolLength = 0;
+	const randomIdx = bBreakWhenFilled ? range(0, trackTotal - 1, 1).shuffle() : null; // Randomize using this option to not get the same results every time
+	for (let j = 0, i; j < trackTotal; j++) {
+		i = bBreakWhenFilled ? randomIdx[j] : j;
 		if (bProfile) { test.CheckPoint('#5.1 - Score'); }
 		// Get the tags according to weight and filter ''. Also create sets for comparison
 		if (bProfile) { test.CheckPoint('#5.1.1 - Score'); }
@@ -1671,21 +1780,21 @@ async function searchByDistance({
 			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
-			if (score === -1) { i++; continue; }
+			if (score === -1) { continue; }
 
 			if (method === 'GRAPH') {
 				if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
 				if (score >= minScoreFilter) { mapDistance = calcDistance({ calcTags, handleTag }); }
-				else {mapDistance = Infinity; }
+				else { mapDistance = Infinity; }
 				if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
-				if (mapDistance > graphDistance) { i++; continue; }
+				if (mapDistance > graphDistance) { continue; }
 			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 		} else {
 			if (method === 'GRAPH') {
 				if (bProfile) { test.CheckPoint('#5.2 - Graph'); }
 				mapDistance = calcDistance({ calcTags, handleTag });
 				if (bProfile) { test.CheckPointStep('#5.2 - Graph'); }
-				if (mapDistance > graphDistance) { i++; continue; }
+				if (mapDistance > graphDistance) { continue; }
 			} // Distance / style_genre_new_length < graphDistance / style_genre_length ?
 
 			// O(i*j*k) time
@@ -1694,20 +1803,22 @@ async function searchByDistance({
 			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
-			if (score === -1 || score < minScoreFilter) { i++; continue; }
+			if (score === -1 || score < minScoreFilter) { continue; }
 		}
 
 		if (method === 'GRAPH') {
 			if (mapDistance <= graphDistance) {
 				scoreData.push({ index: i, name: titleHandle[i][0], score, mapDistance, bRelated, bUnrelated });
+				poolLength++;
 			}
 		}
 		if (method === 'WEIGHT') {
 			if (score >= minScoreFilter) {
 				scoreData.push({ index: i, name: titleHandle[i][0], score, bRelated, bUnrelated });
+				poolLength++;
 			}
 		}
-		i++;
+		if (bBreakWhenFilled && poolLength === playlistLength) { bIsBreak = true; break; }
 	}
 	if (bProfile) {
 		test.Print('Task #5: Score and Distance', false);
@@ -1716,7 +1827,6 @@ async function searchByDistance({
 		test.CheckPointPrint('#5.1.2 - Score', ' total');
 		test.CheckPointPrint('#5.2 - Graph', ' total');
 	}
-	let poolLength = scoreData.length;
 	if (method === 'WEIGHT') {
 		scoreData.sort(function (a, b) { return b.score - a.score; });
 		let i = 0;
@@ -1764,7 +1874,12 @@ async function searchByDistance({
 		scoreData.sort(function (a, b) { return a.mapDistance - b.mapDistance; }); // First sorted by graph distance, then by weight
 		poolLength = scoreData.length;
 		if (bMin && minScoreFilter !== scoreFilter) { console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.'); }
-		if (bBasicLogging) { console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance + ': ' + poolLength + ' tracks'); }
+		if (bBasicLogging) {
+			console.log(
+				'Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance + ': ' + poolLength + ' tracks',
+				bIsBreak ? '\n\t(Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
+			);
+		}
 	}
 
 	// Post Filter (note there are no real duplicates at this point)
@@ -1977,16 +2092,16 @@ async function searchByDistance({
 					selectedHandlesData.push(scoreData[i]);
 					i++;
 				}
-				if (isFinite(playlistLength)) {
+				if (isFinite(playlistLength) && playlistLength !== poolLength) {
 					if (method === 'GRAPH') {
 						if (bBasicLogging) {
 							let propertyText = Object.hasOwn(properties, 'graphDistance') ? properties['graphDistance'][0] : SearchByDistance_properties['graphDistance'][0];
-							console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
+							console.log('Warning: Final Playlist selection length (= ' + i + ') lower than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + graphDistance + ').');
 						}
 					}
 					if (bBasicLogging) {
 						let propertyText = Object.hasOwn(properties, 'scoreFilter') ? properties['scoreFilter'][0] : SearchByDistance_properties['scoreFilter'][0];
-						console.log('Warning: Final Playlist selection length (= ' + i + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
+						console.log('Warning: Final Playlist selection length (= ' + i + ') lower than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 					}
 				}
 			}

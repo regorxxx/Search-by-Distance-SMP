@@ -57,6 +57,7 @@
 
 ## [Unreleased][]
 ### Added
+- Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
 - Descriptors: added Bubblegum Bass, Deconstructed Club and Big Room House style.
 - Descriptors: added Mainstream Electronic cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
@@ -72,11 +73,13 @@
 - Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commads) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Info: loved/hated tracks follow global tags settings.
+- Configuration: anti-influences filters enabled by default on new installations.
 - Debug: expanded profiling logs and tools.
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
 ### Removed
+- Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total socre. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/24
+//29/11/24
 
 /* exported createConfigMenu */
 
@@ -89,11 +89,11 @@ function createConfigMenu(parent) {
 		});
 	};
 
-	const createBoolMenu = (menuName, options, flag = [], hook = null) => {
+	const createBoolMenu = (menuName, options, flag = [], hook = null, entryNames = []) => {
 		options.forEach((key, i) => {
 			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const props = Object.hasOwn(properties, key) ? properties : sbd.panelProperties;
-			const entryText = props[key][0].substring(props[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
+			const entryText = (entryNames[i] || props[key][0].substring(props[key][0].indexOf('.') + 1)) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					props[key][1] = !props[key][1];
@@ -117,11 +117,10 @@ function createConfigMenu(parent) {
 		{
 			const key = 'graphDistance';
 			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
-			const idxEnd = properties[key][0].indexOf('(');
 			const val = properties[key][1];
 			let displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
 			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
+			const entryText = 'Graph distance lower than...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
@@ -140,12 +139,12 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		{
 			const options = ['scoreFilter', 'minScoreFilter'];
-			options.forEach((key) => {
+			const text = ['Similarity score greater than', 'Minimum if there not enough tracks'];
+			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
-				const idxEnd = properties[key][0].indexOf('(');
 				const val = properties[key][1];
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + val + ']');
+				const entryText = text[i] + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + val + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
 						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance', properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
@@ -157,11 +156,12 @@ function createConfigMenu(parent) {
 			});
 		}
 		menu.newSeparator(menuName);
+		createBoolMenu(menuName, ['bBreakWhenFilled']);
+		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bFilterWithGraph'],
-			[
-				void (0),
-				Object.hasOwn(recipe, 'method') && recipe.method !== 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'GRAPH'
-			]
+			[Object.hasOwn(recipe, 'method') && recipe.method !== 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'GRAPH'],
+			void (0),
+			['Filter non recognized genre/styles']
 		);
 	}
 	{	// Tags and weights
@@ -399,7 +399,6 @@ function createConfigMenu(parent) {
 		{
 			createBoolMenu(menuName, ['bNegativeWeighting'],
 				[
-					void (0),
 					Object.hasOwn(recipe, 'method') && recipe.method !== 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'GRAPH'
 				]
 			);
@@ -1040,12 +1039,10 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
-		menu.newSeparator(menuName);
 		{
 			const options = ['playlistLength'];
 			options.forEach((key) => {
-				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
 						const input = Input.number('int positive', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance', properties[key][3], [(input) => input >= 0]);
