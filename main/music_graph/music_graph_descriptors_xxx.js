@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/11/24
+//29/11/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -513,7 +513,8 @@ const music_graph_descriptors = {
 		['Darksynth'						,	['Darkwave'							]],
 		['Deathcore'						,	['Metalcore'						]],
 		['Neoperreo'						,	['Reggaeton'						]],
-		['Flamenco'							,	['Rumba Flamenca'					]]
+		['Flamenco'							,	['Rumba Flamenca'					]],
+		['Dembow'							,	['Dancehall']]
 	],
 	// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 	// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
