@@ -74,6 +74,7 @@
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Info: loved/hated tracks follow global tags settings.
 - Configuration: anti-influences filters enabled by default on new installations.
+- Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
@@ -831,7 +832,7 @@
 ### Added
 - Helpers: added full script console logging to file at foobar profile folder ('console.log'). File is reset when reaching 5 MB. Logging is also sent to foobar2000's console (along other components logging).
 - Cache: Checks graph links cache size on startup and warns when file size > 40 Mb. This is done to avoid memory leaks, since the file is fully loaded on memory and a corrupted file may increase the map size indefinitely until crashing the panel.
-- Buttons: Customizable button now has all additional menu entries found at Playlist Tools button: debug graph, find genre/styles not on graph, reset cache, etc. i.e. both now should offer the same degree of customization and advanced tools.
+- Buttons: Customizable button now has all additional menu entries found at Playlist Tools button: debug graph, find genre/styles not on Graph, reset cache, etc. i.e. both now should offer the same degree of customization and advanced tools.
 - Buttons: buttons' text color can now be customized via menus on the bar menu (R. Click on the bar).
 - Key tag can now be remapped to another tag (uses 'key' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.
 - BPM tag can now be remapped to another tag (uses 'bpm' by default). It's also directly configurable on the customizable button, via menus. For other buttons, use the properties panel.

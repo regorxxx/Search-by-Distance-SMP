@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/08/24
+//03/12/24
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles */
 
@@ -90,7 +90,8 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 			'too many missing genre/styles, then it\'s recommended to use only\n' +
 			'\'WEIGHT\' or \'DYNGENRE\' methods on the scripts.\n\n'
 			: '') +
-		'List of tags not present on the graph descriptors:\n' +
+		'Tags checked: ' + tagsToCheck.join(', ') +
+		'\n\nList of tags not present on the graph descriptors:\n' +
 		(missing.joinEvery(', ', 6) || 'None found.');
 	if (bPopup) { fb.ShowPopupMessage(report, 'Search by distance'); }
 	return missing;
