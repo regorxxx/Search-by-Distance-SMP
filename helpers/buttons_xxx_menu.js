@@ -1,5 +1,5 @@
 ﻿'use strict';
-//30/12/23
+//10/12/24
 
 /* exported settingsMenu */
 
@@ -19,7 +19,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 		parent:			button context
 		bShowValues:	show value along the menu entry
 		readmeFiles:	list of files to show on readme submenu
-		popups:			{key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
+		popups:			{key: {input, popup}}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
 		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
 		extraEntries:	function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
 	*/
@@ -68,7 +68,7 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 					if (!checkProperty(properties[key], input)) { return; } // Apply properties check which should be personalized for input value
 					properties[key][1] = (type === 'object' ? JSON.stringify(input) : input);
 					overwriteProperties(properties); // Updates panel
-					if (popups && Object.hasOwn(popups, key)) {
+					if (popups && Object.hasOwn(popups, key)&& Object.hasOwn(popups[key], 'popup')) {
 						if (type !== 'boolean' || (type === 'boolean' && input)) {
 							fb.ShowPopupMessage(popups[key].popup, parentName);
 						}
