@@ -805,6 +805,7 @@ async function graphStatistics({
 	influenceMethod, // Must be provided
 } = {}) {
 	let styleGenres;
+	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1, totalRawNodes: 0, totalNodes: 0};
 	if (bFoobar) { // using tags from the current library
 		const genreTag = properties && properties.hasOwnProperty('genreTag') // eslint-disable-line no-prototype-builtins
 			? JSON.parse(properties.genreTag[1]).map((tag) => !tag.includes('$')? _t(tag): tag).join('|')
@@ -815,12 +816,16 @@ async function graphStatistics({
 		const tags = [genreTag, styleTag].filter(Boolean).join('|');
 		const tfo = fb.TitleFormat(tags);
 		styleGenres = new Set(tfo.EvalWithMetadbs(fb.GetLibraryItems()).join('|').split(/\| *|, */g)); // All styles/genres from library without duplicates
+		statistics.totalRawNodes = descriptor.filterSetWithGraph(styleGenres).size;
+		statistics.totalNodes = styleGenres.size;
 	} else { // or the entire graph
-		styleGenres = new Set([...descriptor.style_supergenre, ...descriptor.style_weak_substitutions, ...descriptor.style_substitutions, ...descriptor.style_cluster].flat(Infinity));
+		styleGenres = new Set([...descriptor.style_supergenre, ...descriptor.style_weak_substitutions, ...descriptor.style_cluster].flat(Infinity));
+		statistics.totalRawNodes = styleGenres.size;
+		styleGenres = styleGenres.union(new Set(descriptor.style_substitutions.flat(Infinity)));
+		statistics.totalNodes = styleGenres.size;
 	}
 	const cacheLink = await calcCacheLinkSGV2(graph, styleGenres, void(0), influenceMethod, statusCallback);
 	// Calc basic statistics
-	const statistics = {maxDistance: -1, maxCount: 0, minNonZeroDistance: Infinity, minNonZeroCount: 0, minDistance: Infinity, minCount: 0, mean: -1, median: -1, mode: -1, sigma: -1, totalSize: -1};
 	const distances = [];
 	const total = cacheLink.size;
 	cacheLink.forEach((value) => {
