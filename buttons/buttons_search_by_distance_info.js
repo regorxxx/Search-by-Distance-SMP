@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/11/24
+//09/12/24
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -31,7 +31,7 @@ var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { // NOSONAR [shared on files]
-	bIconMode: ['Icon-only mode?', false, { func: isBoolean }, false],
+	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false],
 	entries: ['Info entries', JSON.stringify([
 		{
 			name: 'By Genre',
@@ -84,7 +84,7 @@ addButton({
 			graphInfoMenu.bind(this)().btn_up(this.currX, this.currY + this.currH);
 		}
 	}, null, void (0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.info, void (0), void (0), void (0), void (0),
-		{ scriptName: 'Search-by-Distance-SMP', version })
+	{ scriptName: 'Search-by-Distance-SMP', version })
 });
 
 // Helper

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/01/24
+//09/12/24
 
 include('..\\helpers\\buttons_xxx.js');
 /* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable */
@@ -24,7 +24,7 @@ var prefix = 'sbd'; // NOSONAR[global]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
 
 var newButtonsProperties = { // NOSONAR[global]
-	bIconMode: ['Icon-only mode?', false, { func: isBoolean }, false]
+	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false]
 };
 newButtonsProperties = { ...SearchByDistance_properties, ...newButtonsProperties }; // Add default properties at the beginning to be sure they work
 delete newButtonsProperties.probPick;

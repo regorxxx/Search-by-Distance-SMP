@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/10/24
+//09/12/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -35,7 +35,7 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	recipe: ['Path to recipe file (instead of using properties)', '', { func: isStringWeak }, ''],
 	data: ['Internal data', JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' }), { func: isJSON }, JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' })],
 	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }, true],
-	bIconMode: ['Icon-only mode?', false, { func: isBoolean }, false]
+	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false]
 };
 newButtonsProperties = { ...SearchByDistance_properties, ...newButtonsProperties }; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
