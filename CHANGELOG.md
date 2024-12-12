@@ -58,7 +58,7 @@
 ## [Unreleased][]
 ### Added
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
-- Descriptors: added Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
+- Descriptors: added Drill, Bubblegum Bass, Deconstructed Club, Big Room House Corrido Tumbado styles.
 - Descriptors: added Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).

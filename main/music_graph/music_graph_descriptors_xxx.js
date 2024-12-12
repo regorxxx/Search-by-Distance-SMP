@@ -123,7 +123,7 @@ const music_graph_descriptors = {
 		['Gospel_supergenre'				,	['Contemporary Christian Music','Christian Rock','Modern Gospel','Ragtime','Stride','Traditional Gospel','Spirituals','Worksongs']],
 		['Jazz_supergenre'					,	['Third Stream','Contemporary Jazz','Electro Swing','Nordic Jazz','Nu Jazz','Future Jazz','Acid Jazz','Smooth Jazz','Jazz-Rock','Fusion','Post-Bop','Free Jazz','Avant-Garde Jazz','Soul-Jazz','Jazz-Blues','Jazz-Funk','Hard-Bop','Cool Jazz','Bebop','New Orleans Jazz Revival','Dixieland Revival','Modal Jazz','Latin-Jazz','Fado','Bossa Nova','Swing','Mainstream Jazz','Gypsy-Jazz','Big Band','Chicago Jazz','New Orleans Jazz','Dixieland']],
 		['Jamaican_supergenre'				,	['Reggaeton','Ragga Hip-Hop','Ska Revival','Reggae Fusion','Ragga','Dancehall','Dembow','UK Reggae','Dub','Roots Reggae','Rocksteady','Ska','Calypso','Mento']],
-		['Rap_supergenre'					,	['Neoperreo','Corrido Tumbado','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
+		['Rap_supergenre'					,	['Neoperreo','Corrido Tumbado','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Drill','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
 		['Breakbeat_supergenre'				,	['Deconstructed Club','EDM Trap','Future Bass','Bubblegum Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
 		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
@@ -174,7 +174,7 @@ const music_graph_descriptors = {
 		['Post-Disco XL'					,	['Dance-Rock','Dance Pop','Italo Disco']],
 		['Soft Pop XL'						,	['Sunshine Pop','Soft Rock','Folk Pop','Chanson']],
 		['Urban R&B XL'						,	['Urban Soul','Urban Breaks']],
-		['Urban Music & Rap XL'				,	['Urban Breaks','Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime','Corrido Tumbado']],
+		['Urban Music & Rap XL'				,	['Urban Breaks','Trap','Reggaeton','Nuevo Flamenco','Neoperreo','Conscious','Grime','Corrido Tumbado','Drill']],
 		['Latin Urban Music & Rap XL'		,	['Trap','Reggaeton','Neoperreo','Corrido Tumbado','Dancehall','Dembow']],
 		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop','Cloud Rap']],
@@ -371,6 +371,7 @@ const music_graph_descriptors = {
 		['Nu-Disco'							,	['French House']],
 		['Urban Breaks'						,	['Trap','Pop Rap']],
 		['Corrido Tumbado'					,	['Trap','Mexican Folk']],
+		['Drill'							,	['Gangsta']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -516,7 +517,8 @@ const music_graph_descriptors = {
 		['Deathcore'						,	['Metalcore'						]],
 		['Neoperreo'						,	['Reggaeton'						]],
 		['Flamenco'							,	['Rumba Flamenca'					]],
-		['Dembow'							,	['Dancehall']]
+		['Dembow'							,	['Dancehall'						]],
+		['Drill'							,	['Trap'								]]
 	],
 	// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 	// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
