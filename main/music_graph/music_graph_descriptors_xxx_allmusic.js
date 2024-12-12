@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/05/24
+//12/12/24
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -304,13 +304,13 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Puerto Rican Traditions'			]],
 			['-'								,	['Trova'							]],
 		/* Mexican Traditions */
-			['0'								,	['Mexican Traditions'				]],
+			['Mexican Folk'						,	['Mexican Traditions'				]],
 			['0'								,	['Alterna Movimiento'				]],
-			['0'								,	['Alternative Corridos'				]],
+			['Mexican Folk'						,	['Alternative Corridos'				]],
 			['0'								,	['Banda'							]],
 			['-'								,	['Bomba'							]],
-			['-'								,	['Conjunto'							]],
-			['-'								,	['Corrido'							]],
+			['Mexican Folk'						,	['Conjunto'							]],
+			['Mexican Folk'						,	['Corrido'							]],
 			['*'								,	['Cumbia'							]],
 			['-'								,	['Duranguense'						]],
 			['Cumbia'							,	['Electro-Cumbia'					]],
@@ -398,14 +398,14 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Italian Rap'						]],
 			['0'								,	['Japanese Rap'						]],
 			['0'								,	['Korean Rap'						]],
-			['0'								,	['UK Drill'							]],
+			['Drill'							,	['UK Drill'							]],
 		/* Pop-Rap */
 			['Pop Rap'							,	['Pop-Rap'							]],
 			['Miami Bass'						,	['Bass Music'						]],
 			['0'								,	['Bay Area Rap'						]],
 			['0'								,	['Contemporary Rap'					]],
 			['South Coast'						,	['Dirty South'						]],
-			['-'								,	['Drill'							]],
+			['*'								,	['Drill'							]],
 			['Psychedelic Rap'					,	['G-Funk'							]],
 			['Gangsta'							,	['Gangsta Rap'						]],
 			['0'								,	['Horror Rap'						]],
