@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/12/24
+//11/12/24
 
 /* exported settingsMenu */
 
@@ -14,15 +14,21 @@ include('helpers_xxx_properties.js');
 include('helpers_xxx_file.js');
 /* global _open:readable, _isFile:readable, utf8:readable, _jsonParseFileCheck:readable */
 
+/**
+ * Returns a settings menu object for a parent button object which allows to set any properties associated.
+ *
+ * @function
+ * @name settingsMenu
+ * @kind function
+ * @param {object} parent - button context
+ * @param {boolean} bShowValues? - show value along the menu entry
+ * @param {any[]} readmeFiles? - list of files to show on readme submenu
+ * @param {object} popups? - {key: {input, popup}}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
+ * @param {object} callbacks? - {key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
+ * @param {any} extraEntries? - function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
+ * @returns {_menu}
+ */
 function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}, extraEntries = null) {
-	/*
-		parent:			button context
-		bShowValues:	show value along the menu entry
-		readmeFiles:	list of files to show on readme submenu
-		popups:			{key: {input, popup}}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
-		callbacks: 		{key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
-		extraEntries:	function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
-	*/
 	if (extraEntries && !isFunction(extraEntries)) { throw new Error('settingsMenu: extraEntries is not a function'); }
 	const menu = new _menu();
 	const properties = parent.buttonsProperties;

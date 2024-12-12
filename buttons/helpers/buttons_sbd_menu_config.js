@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/11/24
+//11/12/24
 
 /* exported createConfigMenu */
 
@@ -288,7 +288,7 @@ function createConfigMenu(parent) {
 				});
 				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => { return options.indexOf(tag.scoringDistribution); });
 			}
-			if (!menu.isLastEntry('sep')) { menu.newSeparator(subMenuName); }
+			if (!menu.isLastEntrySep) { menu.newSeparator(subMenuName); }
 			if (!['related', 'unrelated'].includes(key)) {	// Base score
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'baseScore') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -303,7 +303,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			if (!menu.isLastEntry('sep')) { menu.newSeparator(subMenuName); }
+			if (!menu.isLastEntrySep) { menu.newSeparator(subMenuName); }
 			{	// Edit
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && !Object.hasOwn(tags, key);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;

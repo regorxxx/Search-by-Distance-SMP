@@ -1,27 +1,52 @@
 ﻿'use strict';
-//15/11/24
+//11/12/24
 
 /* exported _createSubMenuEditEntries */
 
 include('menu_xxx.js');
 /* global isFunction:readable, MF_GRAYED:readable, MF_STRING:readable, clone:readable,  */
 
-function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, bClone, onBtnUp}*/) { // NOSONAR
-	/*
-		name:			popup name
+/**
+ * Description
+ *
+ * @function
+ * @name _createSubMenuEditEntries
+ * @kind function
+ * @param {_menu} parent - Menu object
+ * @param {string} menuName - Parent menu name
+ * @param {{name:string, subMenuName:string, list, defaults, input:function, bAdd:Boolean, bNumbered:Boolean, bDuplicate:Boolean, bClone:Boolean, bCopyCurrent:Boolean, onBtnUp:function}} options - Options object
+	{
+
+  		name:			popup name
+
 		subMenuName:	name for the edit entries sub-menu
+
 		list:			current entries. Every entry must have a 'name' key present.
+
 		defaults:		default entries used on 'reset'
+
 		input:			should be a function which returns an object: () => {return {....};}
+
 						there is no need to add logic for 'name' key, it's built-in. Only add whatever you need.
+
 						make sure it returns null or undefined if user cancels or values are not valid!
+
 		bAdd: 			true to show an 'Add entry' option on submenu
+
 		bNumbered:		true to enumerate each entry shown
+
 		bDuplicate:		allow entries with duplicated names
+
 		bClone:			true to show a 'Clone entry' option on submenu
+
 		bCopyCurrent:	true to show a 'Copy current settings' option on submenu
+
 		onBtnUp:		function to run after any menu entry is run (usually to save the modified entries on properties). List is passed as argument. onBtnUp(options.list) => {...}
-	*/
+
+	}
+ * @returns {void}
+ */
+function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, bClone, onBtnUp}*/) { // NOSONAR
 	if (options.onBtnUp && !isFunction(options.onBtnUp)) {
 		throw new Error('_createSubMenuEditEntries: onBtnUp is not a function');
 	}
