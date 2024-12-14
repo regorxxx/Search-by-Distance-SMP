@@ -76,6 +76,7 @@
 - Configuration: anti-influences filters enabled by default on new installations.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
+- UI: improvements of menu entries related to settings.
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
@@ -85,6 +86,8 @@
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total socre. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
 - Dynamic Queries: improved support for tags with '#' values (for ex. KEY tags).
+- Wrong warning about Smart Shuffle Tag not being set if it was empty even when the feature was not used.
+- Wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
 
 ## [7.6.0] - 2024-10-09
 ### Added

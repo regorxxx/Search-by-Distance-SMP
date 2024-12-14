@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/11/24
+//14/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -1037,11 +1037,11 @@ async function searchByDistance({
 		console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, 'Search by distance');
 		return;
 	}
-	if (bSmartShuffle && !smartShuffleTag || !smartShuffleTag.length) {
+	if (bSmartShuffle && (!smartShuffleTag || !smartShuffleTag.length)) {
 		console.popup('Warning: Smart Shuffle Tag is not set or has an invalid value:\n' + smartShuffleTag, 'Search by distance');
 		return;
 	}
-	if (bProgressiveListCreation && !checkDuplicatesByTag || !checkDuplicatesByTag.length) {
+	if (bProgressiveListCreation && (!checkDuplicatesByTag || !checkDuplicatesByTag.length)) {
 		console.popup('Warning: Recursive playlist creation is enabled, but no tags for duplicates removal are provided.', 'Search by distance');
 		return;
 	}
