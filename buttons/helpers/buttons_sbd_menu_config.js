@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/12/24
+//15/12/24
 
 /* exported createConfigMenu */
 
@@ -97,7 +97,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					properties[option][1] = key;
-					if (hook) { hook(key, i); }
+					if (hook) { hook(key, i, properties); }
 					overwriteProperties(properties); // Updates panel
 				}, flags: Object.hasOwn(recipe, option) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
@@ -112,7 +112,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					props[key][1] = !props[key][1];
-					if (hook) { hook(key, i); }
+					if (hook) { hook(key, i, props); }
 					overwriteProperties(props);
 				}, flags: Object.hasOwn(recipe, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
@@ -802,11 +802,11 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : (bGraphCondition ? '\t(Only GRAPH)' : ''));
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						if (key === 'bConditionAntiInfluences' && properties[key][1]) {
-							fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');
-						}
 						properties[key][1] = !properties[key][1];
 						overwriteProperties(properties); // Updates panel
+						if (properties[key][1] && key === 'bConditionAntiInfluences') {
+							fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');
+						}
 					}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
 				});
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
@@ -823,6 +823,8 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1) + (Object.hasOwn(recipe, key) ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName, entryText, func: () => {
+						properties[key][1] = !properties[key][1];
+						overwriteProperties(properties); // Updates panel
 						if (properties[key][1]) {
 							if (key === 'bSimilArtistsFilter') {
 								const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt', utf8);
@@ -833,8 +835,6 @@ function createConfigMenu(parent) {
 								fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance');
 							}
 						}
-						properties[key][1] = !properties[key][1];
-						overwriteProperties(properties); // Updates panel
 					}, flags: (key === 'bSimilArtistsExternal' && !bConditionSimilArtists ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
 				});
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
@@ -861,9 +861,9 @@ function createConfigMenu(parent) {
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						if (opt.val !== -1) { fb.ShowPopupMessage('This filter allows only artists from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
 						properties[key][1] = opt.val;
 						overwriteProperties(properties); // Updates panel
+						if (properties[key][1] !== -1) { fb.ShowPopupMessage('This filter allows only artists from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
@@ -887,9 +887,9 @@ function createConfigMenu(parent) {
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						if (opt.val !== -1) { fb.ShowPopupMessage('This filter allows only genre/styles from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
 						properties[key][1] = opt.val;
 						overwriteProperties(properties); // Updates panel
+						if (properties[key][1] !== -1) { fb.ShowPopupMessage('This filter allows only genre/styles from the same selected cultural region.\n\nNote it\'s pretty performance intensive since it uses native foobar2000 queries with a lot of conditions, so it will probably add some seconds to the search if enabled. The bigger the library, the greater time it will require.'); }
 					}, flags: (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING)
 				});
 			});
@@ -926,11 +926,11 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
 		{
 			createBoolMenu(menuName, ['bRandomPick', 'sep', 'bInversePick'], void (0),
-				(key) => {
+				(key, i, props) => {
 					let toDisable = [];
 					if (key === 'bRandomPick') { toDisable = ['bInversePick']; }
 					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
-					toDisable.forEach((noKey) => { if (properties[noKey][1]) { properties[noKey][1] = !properties[noKey][1]; } });
+					toDisable.forEach((noKey) => { if (properties[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				}
 			);
 		}
@@ -957,12 +957,12 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
 		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bInverseListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
 			[void (0), void (0), void (0), void (0), void (0), properties.bSmartShuffle[1], void (0), void (0), !properties.bSmartShuffle[1]],
-			(key) => {
+			(key, i, props) => {
 				let toDisable = [];
 				if (key === 'bSortRandom') { toDisable = ['bProgressiveListOrder', 'bSmartShuffle']; }
 				else if (key === 'bProgressiveListOrder') { toDisable = ['bSortRandom', 'bSmartShuffle']; }
 				else if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
-				if (key === 'bSmartShuffleAdvc' && properties[key][1]) {
+				if (key === 'bSmartShuffleAdvc' && props[key][1]) {
 					fb.ShowPopupMessage(
 						'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
 						'\n\t-Instrumental tracks.' +
@@ -973,7 +973,7 @@ function createConfigMenu(parent) {
 						, 'Search by distance'
 					);
 				}
-				toDisable.forEach((noKey) => { if (properties[noKey][1]) { properties[noKey][1] = !properties[noKey][1]; } });
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		{
@@ -1101,8 +1101,8 @@ function createConfigMenu(parent) {
 					subMenuName,
 					['bAdvTitle', 'bMultiple'],
 					[!isEnabled, !isEnabled],
-					(key) => {
-						if (properties[key][1]) {
+					(key, i, props) => {
+						if (props[key][1]) {
 							if (key === 'bAdvTitle') {
 								fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');
 							} else if (key === 'bMultiple') {
