@@ -306,11 +306,11 @@ const music_graph_descriptors_allmusic = {
 		/* Mexican Traditions */
 			['Mexican Folk'						,	['Mexican Traditions'				]],
 			['0'								,	['Alterna Movimiento'				]],
-			['Mexican Folk'						,	['Alternative Corridos'				]],
+			['Corrido'							,	['Alternative Corridos'				]],
 			['0'								,	['Banda'							]],
 			['-'								,	['Bomba'							]],
 			['Mexican Folk'						,	['Conjunto'							]],
-			['Mexican Folk'						,	['Corrido'							]],
+			['*'								,	['Corrido'							]],
 			['*'								,	['Cumbia'							]],
 			['-'								,	['Duranguense'						]],
 			['Cumbia'							,	['Electro-Cumbia'					]],

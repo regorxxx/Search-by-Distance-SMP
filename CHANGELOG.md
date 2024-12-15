@@ -58,7 +58,7 @@
 ## [Unreleased][]
 ### Added
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
-- Descriptors: added Drill, Bubblegum Bass, Deconstructed Club, Big Room House Corrido Tumbado styles.
+- Descriptors: added Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
 - Descriptors: added Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
@@ -70,7 +70,7 @@
 - Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.
 - Dynamic queries: improved entries file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
 - Dynamic queries: support for '*' wildcard (also for multi-value tags). i.e. 'ARTIST IS #ARTIST*%' -> 'ARTIST IS A*'
-- Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commads) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
+- Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commands) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Info: loved/hated tracks follow global tags settings.
 - Configuration: anti-influences filters enabled by default on new installations.
@@ -84,7 +84,7 @@
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
 - UI: '&' being displayed as '_' on tooltips.
-- Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total socre. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
+- Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total score. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
 - Dynamic Queries: improved support for tags with '#' values (for ex. KEY tags).
 - Wrong warning about Smart Shuffle Tag not being set if it was empty even when the feature was not used.
 - Wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
@@ -318,7 +318,7 @@
 ### Added
 ### Changed
 - Buttons bar: transparency input popup now has a description for the values.
-- Descriptors: improved debug routines to avoid situations where a susbstitution term doesn't exist in the graph (see below).
+- Descriptors: improved debug routines to avoid situations where a substitution term doesn't exist in the graph (see below).
 - Descriptors: improved pathfinder routines to throw -with a descriptive error- when a path is not found due to some genre not being connected to the graph (see below).
 ### Removed
 ### Fixed
