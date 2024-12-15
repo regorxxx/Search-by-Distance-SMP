@@ -57,8 +57,8 @@ function createConfigMenu(parent) {
 					: ''
 			);
 	};
-	const createTagMenu = (menuName, options) => {
-		options.forEach((key) => {
+	const createTagMenu = (menuName, options, flag = []) => {
+		options.forEach((key, i) => {
 			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const idxEnd = properties[key][0].indexOf('(');
 			const value = bProperties && Object.hasOwn(recipe.properties, key)
@@ -86,7 +86,7 @@ function createConfigMenu(parent) {
 					if (input === null) { return; }
 					properties[key][1] = JSON.stringify(input);
 					overwriteProperties(properties); // Updates panel
-				}, flags: bProperties && Object.hasOwn(recipe.properties, key) ? MF_GRAYED : MF_STRING
+				}, flags: bProperties && Object.hasOwn(recipe.properties, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
 		});
 	};
@@ -408,7 +408,8 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		{
 			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
-			createTagMenu(menuName, options);
+			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')]);
+			menu.newCheckMenuLast(() => JSON.parse(getSetting('genreStyleFilterTag')).length);
 		}
 		menu.newSeparator(menuName);
 		{
@@ -899,7 +900,7 @@ function createConfigMenu(parent) {
 	{	// Post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Tags filter
-			createTagMenu(menuName, ['poolFilteringTag']);
+			createTagMenu(menuName, ['poolFilteringTag'], [!getSetting('poolFilteringN') || getSetting('poolFilteringN') === -1]);
 		}
 		{
 			const options = ['poolFilteringN'];
@@ -917,6 +918,7 @@ function createConfigMenu(parent) {
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING
 				});
+				menu.newCheckMenuLast(() => getSetting(key) && getSetting(key) !== -1);
 			});
 		}
 	}
@@ -1032,7 +1034,7 @@ function createConfigMenu(parent) {
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
-					}, flags: Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING
+					}, flags: Object.hasOwn(recipe, key) || !getSetting('bProgressiveListCreation') ? MF_GRAYED : MF_STRING
 				});
 			});
 		}
