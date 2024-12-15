@@ -409,7 +409,7 @@ function createConfigMenu(parent) {
 		{
 			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
 			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')]);
-			menu.newCheckMenuLast(() => JSON.parse(getSetting('genreStyleFilterTag')).length);
+			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
 		}
 		menu.newSeparator(menuName);
 		{
