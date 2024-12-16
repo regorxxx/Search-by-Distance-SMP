@@ -41,7 +41,13 @@ function createConfigMenu(parent) {
 
 	// Helpers
 	const descriptors = music_graph_descriptors;
-	const getSetting = (key) => Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
+	const getSetting = (key) => {
+		return Object.hasOwn(recipe, key)
+			? recipe[key]
+			: Object.hasOwn(properties, key)
+				? properties[key][1]
+				: sbd.panelProperties[key][1];
+	};
 	const getEntryText = (key, text) => {
 		const value = getSetting(key);
 		return (text || properties[key][0]) +
@@ -71,7 +77,7 @@ function createConfigMenu(parent) {
 				) + '...' + '\t[' +
 				(
 					typeof value === 'string'
-						? value.length ? value.cut(10): '-disabled-'
+						? value.length ? value.cut(10) : '-disabled-'
 						: value
 				) + ']' +
 				(
@@ -101,8 +107,8 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: Object.hasOwn(recipe, option) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenu(menuName, entryText, void (0), () => { return (Object.hasOwn(recipe, option) ? recipe[option] === key : properties[option][1] === key); });
 		});
+		menu.newCheckMenuLast((options) => options.indexOf(getSetting(option)), values);
 	};
 	const createBoolMenu = (menuName, options, flag = [], hook = null, entryNames = []) => {
 		options.forEach((key, i) => {
@@ -116,7 +122,7 @@ function createConfigMenu(parent) {
 					overwriteProperties(props);
 				}, flags: Object.hasOwn(recipe, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : props[key][1]));
+			menu.newCheckMenuLast(() => getSetting(key));
 		});
 	};
 
@@ -932,7 +938,10 @@ function createConfigMenu(parent) {
 					let toDisable = [];
 					if (key === 'bRandomPick') { toDisable = ['bInversePick']; }
 					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
-					toDisable.forEach((noKey) => { if (properties[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					if (!props.bRandomPick[1] && !props.bInversePick[1] && props.bProgressiveListOrder[1]) {
+						props.bProgressiveListOrder[1] = false;
+					}
 				}
 			);
 		}
@@ -957,13 +966,23 @@ function createConfigMenu(parent) {
 		const menuFlags = (Object.hasOwn(recipe, 'bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
-		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder', 'sep', 'bInverseListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
-			[void (0), void (0), void (0), void (0), void (0), properties.bSmartShuffle[1], void (0), void (0), !properties.bSmartShuffle[1]],
+		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder'],
+			[void (0), !getSetting('bRandomPick') && !getSetting('bInversePick')],
 			(key, i, props) => {
 				let toDisable = [];
 				if (key === 'bSortRandom') { toDisable = ['bProgressiveListOrder', 'bSmartShuffle']; }
 				else if (key === 'bProgressiveListOrder') { toDisable = ['bSortRandom', 'bSmartShuffle']; }
-				else if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+			}
+		);
+		if (!getSetting('bRandomPick') && !getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle')) {
+			menu.newCheckMenuLast(() => true);
+		}
+		createBoolMenu(menuName, ['sep', 'bInverseListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
+			[void (0), void (0), void (0), getSetting('bSmartShuffle'), void (0), void (0), !getSetting('bSmartShuffle')],
+			(key, i, props) => {
+				let toDisable = [];
+				if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
 				if (key === 'bSmartShuffleAdvc' && props[key][1]) {
 					fb.ShowPopupMessage(
 						'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
