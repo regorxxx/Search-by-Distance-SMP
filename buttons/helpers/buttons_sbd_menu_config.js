@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/12/24
+//17/12/24
 
 /* exported createConfigMenu */
 
@@ -939,8 +939,18 @@ function createConfigMenu(parent) {
 					if (key === 'bRandomPick') { toDisable = ['bInversePick']; }
 					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
 					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
-					if (!props.bRandomPick[1] && !props.bInversePick[1] && props.bProgressiveListOrder[1]) {
-						props.bProgressiveListOrder[1] = false;
+					if (key === 'bRandomPick') {
+						if (!props.bRandomPick[1] && !getSetting('bInversePick') && getSetting('bProgressiveListOrder')) {
+							props.bProgressiveListOrder[1] = false;
+						}
+					}
+					if (key === 'bInversePick') {
+						if (!props.bInversePick[1] && !getSetting('bRandomPick') && getSetting('bProgressiveListOrder')) {
+							props.bProgressiveListOrder[1] = false;
+						}
+						if (props.bInversePick[1] && getSetting('bInverseListOrder')) {
+							props.bInverseListOrder[1] = false;
+						}
 					}
 				}
 			);
@@ -971,15 +981,26 @@ function createConfigMenu(parent) {
 			(key, i, props) => {
 				let toDisable = [];
 				if (key === 'bSortRandom') { toDisable = ['bProgressiveListOrder', 'bSmartShuffle']; }
-				else if (key === 'bProgressiveListOrder') { toDisable = ['bSortRandom', 'bSmartShuffle']; }
+				else if (key === 'bProgressiveListOrder') {
+					toDisable = ['bSortRandom', 'bSmartShuffle'];
+					if (!getSetting('bRandomPick') && getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle')) {
+						toDisable.push('bInverseListOrder');
+					}
+				}
 				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		if (!getSetting('bRandomPick') && !getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle')) {
 			menu.newCheckMenuLast(() => true);
 		}
-		createBoolMenu(menuName, ['sep', 'bInverseListOrder', 'sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
-			[void (0), void (0), void (0), getSetting('bSmartShuffle'), void (0), void (0), !getSetting('bSmartShuffle')],
+		createBoolMenu(menuName, ['sep', 'bInverseListOrder'],
+			[void (0), getSetting('bInversePick')],
+		);
+		if (!getSetting('bRandomPick') && getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle') && !getSetting('bProgressiveListOrder')) {
+			menu.newCheckMenuLast(() => true);
+		}
+		createBoolMenu(menuName, ['sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
+			[void (0), getSetting('bSmartShuffle'), void (0), void (0), !getSetting('bSmartShuffle')],
 			(key, i, props) => {
 				let toDisable = [];
 				if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
