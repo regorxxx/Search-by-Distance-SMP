@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/12/24
+//17/12/24
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -9,7 +9,7 @@ const music_graph_descriptors_allmusic = {
 	/* 	CODES:
 		*	->	Already included items on the graph (are checked against it and reported if not found)
 		-	->	Items which don't have an alternative term (reported as missing)
-		0	->	Items which are meant to be filtered (added to the exclusions s: [filter)
+		0	->	Items which are meant to be filtered (added to the exclusions): [filter)
 	*/
 	/* Classical */
 			['Avant-Garde Classical'			,	['Avant-Garde Music'				]],
@@ -17,18 +17,18 @@ const music_graph_descriptors_allmusic = {
 			['Orchestral Music XL'				,	['Band Music'						]],
 			['Chamber Music XL'					,	['Chamber Music'					]],
 			['*'								,	['Choral'							]],
-			['0'								,	['Classical Crossover'				]],
+			['*'								,	['Classical Crossover'				]],
 			['*'								,	['Concerto'							]],
-			['0'								,	['Electronic/Computer Music'		]],
-			['0'								,	['Fight Songs'						]],
-			['0'								,	['Film Score'						]],
+			['Electronic Music_supercluster'	,	['Electronic/Computer Music'		]],
+			['March'							,	['Fight Songs'						]],
+			['Ambient Classical'				,	['Film Score'						]],
 			['0'								,	['Keyboard'							]],
 			['March'							,	['Marches'							]],
 			['Orchestral Music XL'				,	['Military'							]],
 			['0'								,	['Miscellaneous (Classical)'		]],
 			['*'								,	['Opera'							]],
 			['Orchestral Music XL'				,	['Orchestral'						]],
-			['0'								,	['Show/Musical'						]],
+			['Musical'							,	['Show/Musical'						]],
 			['*'								,	['Symphony'							]],
 			['Poetry-Secular Music XL'			,	['Vocal Music'						]],
 	/* Country */
@@ -37,10 +37,10 @@ const music_graph_descriptors_allmusic = {
 			['Alt. Country'						,	['Alt-Country'						]],
 			['*'								,	['Americana'						]],
 		/* Contemporary Country */
-			['0'								,	['Bro-Country'						]],
+			['Country Pop'						,	['Bro-Country'						]],
 			['Bluegrass'						,	['Contemporary Bluegrass'			]],
 			['*'								,	['Contemporary Country'				]],
-			['*'								,	['Country Rap'						]], // https://www.allmusic.com/style/country-rap-ma0000013521
+			['*'								,	['Country Rap'						]],
 			['Neo-Traditional Country'			,	['Neo-Traditionalist Country'		]],
 			['Neo-Traditional Country'			,	['New Traditionalist'				]],
 			['Outlaw Country'					,	['Red Dirt'							]], // https://www.allmusic.com/style/red-dirt-ma0000013522
@@ -57,7 +57,7 @@ const music_graph_descriptors_allmusic = {
 			['*'								,	['Outlaw Country'					]],
 			['*'								,	['Progressive Bluegrass'			]],
 			['Outlaw Country'					,	['Progressive Country'				]], // https://www.allmusic.com/style/progressive-country-ma0000002796
-			['*'								,	['Rodeo'							]], // https://www.allmusic.com/style/rodeo-ma0000012323
+			['*'								,	['Rodeo'							]],
 		/* Traditional Country */
 			['*'								,	['Bluegrass'						]],
 			['Bluegrass'						,	['Bluegrass-Gospel'					]],
@@ -67,9 +67,9 @@ const music_graph_descriptors_allmusic = {
 			['0'								,	['Cowboy'							]],
 			['Traditional Country'				,	['Early Country'					]],
 			['Traditional Country'				,	['Instrumental Country'				]],
-			['*'								,	['Jug Band'							]], // https://www.allmusic.com/style/jug-band-ma0000012351
+			['*'								,	['Jug Band'							]],
 			['*'								,	['Old-Timey'						]],
-			['*'								,	['Square Dance'						]], // https://www.allmusic.com/style/square-dance-ma0000011873
+			['*'								,	['Square Dance'						]],
 			['-'								,	['String Bands'						]], // https://www.allmusic.com/style/string-bands-ma0000002880
 			['Bluegrass'						,	['Traditional Bluegrass'			]],
 			['*'								,	['Traditional Country'				]],
@@ -428,8 +428,8 @@ const music_graph_descriptors_allmusic = {
 		/* African Traditions */
 			['0'								,	['African Traditions'				]],
 			['African Folk_supergenre'			,	['African Folk'						]],
-			['0'								,	['Afro-beat'						]],
-			['0'								,	['Afro-Pop'							]],
+			['Afrobeat'							,	['Afro-beat'						]],
+			['Afro-Rock'						,	['Afro-Pop'							]],
 			['*'								,	['Desert Blues'						]],
 		/* Asian Traditions */
 			['0'								,	['Asian Traditions'					]],
