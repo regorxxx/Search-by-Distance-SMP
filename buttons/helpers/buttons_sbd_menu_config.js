@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/12/24
+//18/12/24
 
 /* exported createConfigMenu */
 
@@ -994,7 +994,7 @@ function createConfigMenu(parent) {
 			menu.newCheckMenuLast(() => true);
 		}
 		createBoolMenu(menuName, ['sep', 'bInverseListOrder'],
-			[void (0), getSetting('bInversePick')],
+			[void (0), (getSetting('bInversePick') || getSetting('bSortRandom')) && !getSetting('bProgressiveListCreation')],
 		);
 		if (!getSetting('bRandomPick') && getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle') && !getSetting('bProgressiveListOrder')) {
 			menu.newCheckMenuLast(() => true);
