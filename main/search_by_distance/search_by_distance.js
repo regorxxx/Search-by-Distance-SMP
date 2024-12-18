@@ -1,5 +1,5 @@
 ﻿'use strict';
-//14/12/24
+//18/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -2122,14 +2122,20 @@ async function searchByDistance({
 		}
 		// Forces progressive changes on tracks, independently of the previous sorting/picking methods
 		// Meant to be used along bRandomPick or low probPick, otherwise the playlist is already sorted!
-		if (bProgressiveListOrder && (poolLength < playlistLength || bRandomPick || probPick < 100)) { //
+		if (bProgressiveListOrder && (poolLength < playlistLength || bInversePick || bRandomPick || probPick < 100)) {
 			if (bSortRandom) { console.log('Warning: Sorting by Score is overriding Random Sorting.'); }
-			selectedHandlesData.sort(function (a, b) { return b.score - a.score; });
-			selectedHandlesArray.sort(function (a, b) { return b.score - a.score; });
+			selectedHandlesArray.forEach((handle, i) => {
+				handle.score = selectedHandlesData[i].score;
+				if (method === 'GRAPH') {
+					handle.mapDistance = selectedHandlesData[i].mapDistance;
+				}
+			});
 			if (method === 'GRAPH') { // First sorted by graph distance, then by score
-				selectedHandlesData.sort(function (a, b) { return a.mapDistance - b.mapDistance; });
-				selectedHandlesArray.sort(function (a, b) { return a.mapDistance - b.mapDistance; });
+				selectedHandlesData.sort((a, b) => a.mapDistance - b.mapDistance);
+				selectedHandlesArray.sort((a, b) => a.mapDistance - b.mapDistance);
 			}
+			selectedHandlesData.sort((a, b) => b.score - a.score);
+			selectedHandlesArray.sort((a, b) => b.score - a.score);
 		} else if (bProgressiveListOrder && !bRandomPick && probPick === 100) { console.log('Warning: Sorting by Score has no use if tracks are already chosen by scoring order from pool.'); }
 		// Tries to intercalate vocal & instrumental tracks, breaking clusters of instrumental tracks.
 		// May override previous sorting methods (only for instrumental tracks).

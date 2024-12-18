@@ -85,6 +85,7 @@
 ### Removed
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
+- Sorting: fixed long time bug where 'Sort final playlist by score' was not working properly in some cases, despite the console showing the right order.
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total score. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
 - Dynamic Queries: improved support for tags with '#' values (for ex. KEY tags).
