@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/12/24
+//19/12/24
 
 /* exported createConfigMenu */
 
@@ -47,6 +47,9 @@ function createConfigMenu(parent) {
 			: Object.hasOwn(properties, key)
 				? properties[key][1]
 				: sbd.panelProperties[key][1];
+	};
+	const getAnySetting = (arrKeys) => {
+		return arrKeys.some((k) => getSetting(k));
 	};
 	const getEntryText = (key, text) => {
 		const value = getSetting(key);
@@ -936,9 +939,11 @@ function createConfigMenu(parent) {
 			createBoolMenu(menuName, ['bRandomPick', 'sep', 'bInversePick'], void (0),
 				(key, i, props) => {
 					let toDisable = [];
-					if (key === 'bRandomPick') { toDisable = ['bInversePick']; }
+					if (key === 'bRandomPick') { toDisable = ['bInversePick','bSortRandom']; }
 					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					if (props[key][1]) {
+						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					}
 					if (key === 'bRandomPick') {
 						if (!props.bRandomPick[1] && !getSetting('bInversePick') && getSetting('bProgressiveListOrder')) {
 							props.bProgressiveListOrder[1] = false;
@@ -976,27 +981,40 @@ function createConfigMenu(parent) {
 		const menuFlags = (Object.hasOwn(recipe, 'bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
-		createBoolMenu(menuName, ['bSortRandom', 'bProgressiveListOrder'],
-			[void (0), !getSetting('bRandomPick') && !getSetting('bInversePick')],
+		createBoolMenu(menuName, ['bSortRandom'],
+			[getSetting('bRandomPick')],
 			(key, i, props) => {
-				let toDisable = [];
-				if (key === 'bSortRandom') { toDisable = ['bProgressiveListOrder', 'bSmartShuffle']; }
-				else if (key === 'bProgressiveListOrder') {
-					toDisable = ['bSortRandom', 'bSmartShuffle'];
-					if (!getSetting('bRandomPick') && getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle')) {
-						toDisable.push('bInverseListOrder');
-					}
+				let toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];
+				if (!getSetting('bProgressiveListCreation')) {
+					toDisable.push('bInverseListOrder');
 				}
-				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
 			}
 		);
-		if (!getSetting('bRandomPick') && !getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle')) {
+		if (getSetting('bRandomPick') && !getAnySetting(['bProgressiveListOrder', 'bInversePick', 'bSmartShuffle'])) {
+			menu.newCheckMenuLast(() => true);
+		}
+		createBoolMenu(menuName, ['bProgressiveListOrder'],
+			[!getSetting('bRandomPick') && !getSetting('bInversePick')],
+			(key, i, props) => {
+				let toDisable = ['bSortRandom', 'bSmartShuffle'];
+				if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bSortRandom', 'bSmartShuffle'])) {
+					toDisable.push('bInverseListOrder');
+				}
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
+			}
+		);
+		if (!getAnySetting(['bRandomPick', 'bInversePick', 'bSortRandom', 'bSmartShuffle'])) {
 			menu.newCheckMenuLast(() => true);
 		}
 		createBoolMenu(menuName, ['sep', 'bInverseListOrder'],
-			[void (0), (getSetting('bInversePick') || getSetting('bSortRandom')) && !getSetting('bProgressiveListCreation')],
+			[void (0), (getSetting('bInversePick') || getSetting('bSortRandom') || getSetting('bRandomPick')) && !getSetting('bProgressiveListCreation')],
 		);
-		if (!getSetting('bRandomPick') && getSetting('bInversePick') && !getSetting('bSortRandom') && !getSetting('bSmartShuffle') && !getSetting('bProgressiveListOrder')) {
+		if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bProgressiveListOrder', 'bSortRandom', 'bSmartShuffle'])) {
 			menu.newCheckMenuLast(() => true);
 		}
 		createBoolMenu(menuName, ['sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
@@ -1015,7 +1033,9 @@ function createConfigMenu(parent) {
 						, 'Search by distance'
 					);
 				}
-				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
 			}
 		);
 		{
