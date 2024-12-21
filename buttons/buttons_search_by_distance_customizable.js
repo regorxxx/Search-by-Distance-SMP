@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/24
+//21/12/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -35,7 +35,8 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	recipe: ['Path to recipe file (instead of using properties)', '', { func: isStringWeak }, ''],
 	data: ['Internal data', JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' }), { func: isJSON }, JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' })],
 	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }, true],
-	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false]
+	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false],
+	bLiteMode: ['Lite mode', true, { func: isBoolean }, true],
 };
 newButtonsProperties = { ...SearchByDistance_properties, ...newButtonsProperties }; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
@@ -46,6 +47,11 @@ doOnce('Update SBD cache', debounce(updateCache, 3000))({ properties: newButtons
 // Make the user check their tags before use...
 if (!sbd.panelProperties.firstPopup[1]) {
 	doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(newButtonsProperties);
+}
+
+if (newButtonsProperties.bLiteMode[1] && newButtonsProperties.customName[1] !== newButtonsProperties.customName[3]) {
+	newButtonsProperties.bLiteMode[1] = false;
+	overwriteProperties({bLiteMode: newButtonsProperties.bLiteMode});
 }
 
 // Test tags
@@ -60,10 +66,10 @@ addButton({
 			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else if (mask === MK_CONTROL) {
 			createRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
-		} else if (mask === MK_CONTROL + MK_SHIFT) {
+		} else if (!this.buttonsProperties.bLiteMode[1] && mask === MK_CONTROL + MK_SHIFT) {
 			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 		} else {
-			if (this.buttonsProperties['customName'][1] === 'Customize!') { // NOSONAR
+			if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
 				let input = '';
 				try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
 				catch (e) { return; }
@@ -166,7 +172,7 @@ function buttonTooltipSbdCustom(parent) {
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
 	if (bShift && !bControl || bTooltipInfo) { info += '\n(Shift + L. Click for other config and tools)'; }
 	if (!bShift && bControl || bTooltipInfo) { info += '\n(Ctrl + L. Click to set recipe)'; }
-	if (bShift && bControl || bTooltipInfo) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
+	if (!properties.bLiteMode[1] && (bShift && bControl || bTooltipInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
 	return info;
 }
 

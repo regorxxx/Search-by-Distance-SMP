@@ -58,6 +58,7 @@
 ## [Unreleased][]
 ### Added
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
+- Advanced mode: added advanced mode setting which must be enabled by user (disabled by default). Advanced mode includes all available settings (previous behavior present on [7.6.0](#760---2024-10-09) and below). If not enabled, only a small subset of settings is shown. Themes are only available on advanced mode too. Already existing installation should not be affected by this change, and advanced mode will be enabled by default in such cases.
 - Descriptors: added Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
 - Descriptors: added Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
@@ -74,7 +75,7 @@
 - Dynamic queries: support for '*' wildcard (also for multi-value tags). i.e. 'ARTIST IS #ARTIST*%' -> 'ARTIST IS A*'
 - Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commas) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
-- Info: loved/hated tracks follow global tags settings.
+- Tags: 'Genre/style region' tag weight is set to zero -internally- on any search method different than 'GRAPH' before processing; now available only when using that search method.
 - Configuration: anti-influences filters enabled by default on new installations.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.

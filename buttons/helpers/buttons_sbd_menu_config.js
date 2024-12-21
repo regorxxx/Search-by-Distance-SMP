@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/12/24
+//20/12/24
 
 /* exported createConfigMenu */
 
@@ -7,7 +7,7 @@
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, isPlayCount:readable, globTags:readable, globQuery:readable, clone:readable, isFoobarV2:readable , globRegExp:readable */
+/* global MF_STRING:readable, MF_GRAYED:readable, MF_CHECKED:readable, popup:readable, folders:readable, isPlayCount:readable, globTags:readable, globQuery:readable, clone:readable, isFoobarV2:readable , globRegExp:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
 /* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _deleteFile:readable, _save:readable, _explorer:readable, _run:readable, _copyFile:readable , _jsonParseFileCheck:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
@@ -28,19 +28,14 @@ function createConfigMenu(parent) {
 	if (properties.recipe[1].length) { recipe = processRecipePlaceholder(properties.recipe[1], tags); }
 	// Update tooltip
 	parent.recipe = { recipe: properties.recipe[1].length ? recipe : null, name: properties.recipe[1] || '' };
-	// Recipe forced properties?
-	const bProperties = Object.hasOwn(recipe, 'properties');
-	// Recipe forced tags?
-	const bRecipeTags = Object.hasOwn(recipe, 'tags');
-	// Recipe-only tags?
-	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
-	const graphDistance = Object.hasOwn(recipe, 'graphDistance')
-		? parseGraphVal(recipe.graphDistance)
-		: parseGraphVal(properties.graphDistance[1]);
-	const bIsGraph = Object.hasOwn(recipe, 'method') && recipe.method === 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] === 'GRAPH';
-
 	// Helpers
 	const descriptors = music_graph_descriptors;
+	/**
+	 * @function
+	 * @name getSetting
+	 * @param {string} key
+	 * @returns {string|boolean|number}
+	 */
 	const getSetting = (key) => {
 		return Object.hasOwn(recipe, key)
 			? recipe[key]
@@ -51,6 +46,19 @@ function createConfigMenu(parent) {
 	const getAnySetting = (arrKeys) => {
 		return arrKeys.some((k) => getSetting(k));
 	};
+	// Recipe forced properties?
+	const bProperties = Object.hasOwn(recipe, 'properties');
+	// Recipe forced tags?
+	const bRecipeTags = Object.hasOwn(recipe, 'tags');
+	// Recipe-only tags?
+	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
+	const graphDistance = Object.hasOwn(recipe, 'graphDistance')
+		? parseGraphVal(recipe.graphDistance)
+		: parseGraphVal(properties.graphDistance[1]);
+	const bIsGraph = getSetting('method') === 'GRAPH';
+	const bLiteMode = getSetting('bLiteMode');
+
+	// Helpers
 	const getEntryText = (key, text) => {
 		const value = getSetting(key);
 		return (text || properties[key][0]) +
@@ -66,18 +74,20 @@ function createConfigMenu(parent) {
 					: ''
 			);
 	};
-	const createTagMenu = (menuName, options, flag = []) => {
+	const createTagMenu = (menuName, options, flag = [], hook = null, entryNames = []) => {
 		options.forEach((key, i) => {
 			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const idxEnd = properties[key][0].indexOf('(');
 			const value = bProperties && Object.hasOwn(recipe.properties, key)
 				? recipe.properties[key]
 				: JSON.parse(properties[key][1]).join(',');
-			const entryText = properties[key][0]
-				.substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1
+			const entryText = (
+				entryNames[i] ||
+				properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1
 					? idxEnd - 1
 					: Infinity
-				) + '...' + '\t[' +
+				)
+			) + '...' + '\t[' +
 				(
 					typeof value === 'string'
 						? value.length ? value.cut(10) : '-disabled-'
@@ -94,15 +104,16 @@ function createConfigMenu(parent) {
 					const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] will disable it.\n\nFor example:\n' + example, 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
 					if (input === null) { return; }
 					properties[key][1] = JSON.stringify(input);
+					if (hook) { hook(key, i, properties); }
 					overwriteProperties(properties); // Updates panel
 				}, flags: bProperties && Object.hasOwn(recipe.properties, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
 			});
 		});
 	};
-	const createSwitchMenu = (menuName, option, values, flag = [], hook = null) => {
+	const createSwitchMenu = (menuName, option, values, flag = [], hook = null, entryNames = []) => {
 		values.forEach((key, i) => {
 			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
-			const entryText = key + (Object.hasOwn(recipe, option) && recipe[option] === key ? '\t(forced by recipe)' : '');
+			const entryText = (entryNames[i] || key) + (Object.hasOwn(recipe, option) && recipe[option] === key ? '\t(forced by recipe)' : '');
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					properties[option][1] = key;
@@ -135,12 +146,14 @@ function createConfigMenu(parent) {
 	{	// Search Methods
 		const menuName = menu.newMenu('Set Search method');
 		{
-			createSwitchMenu(menuName, 'method', ['WEIGHT', 'GRAPH', 'DYNGENRE']);
+			createSwitchMenu(menuName, 'method', ['WEIGHT', 'DYNGENRE', 'GRAPH'], void (0), void (0),
+				['Tags similarity (WEIGHT)', 'Tags + Genre analyis (DYNGENRE)', 'Tags + Adv. Genre analysis (GRAPH)']
+			);
 		}
-		menu.newSeparator(menuName);
-		{
+		if (bIsGraph) {
+			menu.newSeparator(menuName);
 			const key = 'graphDistance';
-			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : (bIsGraph ? MF_STRING : MF_GRAYED);
+			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
 			const val = properties[key][1];
 			let displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
 			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
@@ -162,8 +175,14 @@ function createConfigMenu(parent) {
 		}
 		menu.newSeparator(menuName);
 		{
-			const options = ['scoreFilter', 'minScoreFilter'];
-			const text = ['Similarity score greater than', 'Minimum if there not enough tracks'];
+			const options = [
+				'scoreFilter',
+				bLiteMode ? '' : 'minScoreFilter'
+			].filter(Boolean);
+			const text = [
+				'Similarity score greater than',
+				bLiteMode ? '' : 'Minimum if there not enough tracks'
+			].filter(Boolean);
 			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
@@ -174,23 +193,27 @@ function createConfigMenu(parent) {
 						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
 						if (input === null) { return; }
 						properties[key][1] = input;
+						if (bLiteMode) { properties.minScoreFilter[1] = input; }
 						overwriteProperties(properties); // Updates panel
 					}, flags
 				});
 			});
 		}
-		menu.newSeparator(menuName);
-		createBoolMenu(menuName, ['bBreakWhenFilled']);
-		menu.newSeparator(menuName);
-		createBoolMenu(menuName, ['bFilterWithGraph'],
-			[Object.hasOwn(recipe, 'method') && recipe.method !== 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'GRAPH'],
-			void (0),
-			['Filter non recognized genre/styles']
-		);
+		if (!bLiteMode) {
+			menu.newSeparator(menuName);
+			createBoolMenu(menuName, ['bBreakWhenFilled']);
+			if (bIsGraph) {
+				menu.newSeparator(menuName);
+				createBoolMenu(menuName, ['bFilterWithGraph'], void (0), void (0), ['Filter non recognized genre/styles']);
+			}
+		}
 	}
 	{	// Tags and weights
 		const menuName = menu.newMenu('Set Tags and weighting');
-		const options = [...new Set([...Object.keys(tags), ...recipeTags])];
+		const options = [...new Set([...Object.keys(tags), ...recipeTags])]
+			.filter((tag) => !bLiteMode || !['related', 'unrelated'].includes(tag))
+			.filter((tag) => getSetting('method') === 'DYNGENRE' || !['dynGenre'].includes(tag))
+			.filter((tag) => getSetting('method') === 'GRAPH' || !['genreStyleRegion'].includes(tag));
 		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
 		const weights = options.map((key) => {
 			const bIsDyngenreMethodRecipe = Object.hasOwn(recipe, 'method') && recipe.method !== 'DYNGENRE';
@@ -223,7 +246,8 @@ function createConfigMenu(parent) {
 						.replace(/(style) (genre)/gi, '$1/$2')
 					, [' ', '/', '\\']
 				);
-			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName);
+			const menuFlags = weights[i].tag.weight ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName, menuFlags);
 			const baseTag = tags[key];
 			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
@@ -256,7 +280,7 @@ function createConfigMenu(parent) {
 					menu.newEntry({ menuName: subMenuName, entryText: 'Remap...\t[virtual]', flags: MF_GRAYED });
 				}
 			}
-			{	// Ranges
+			if (!bLiteMode) {	// Ranges
 				if (Object.hasOwn(baseTag || recipe.tags[key], 'range')) {
 					const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && Object.hasOwn(recipe.tags[key], 'range');
 					const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -295,7 +319,7 @@ function createConfigMenu(parent) {
 					}, flags: bRecipe || bIsDyngenreProp || bIsDyngenreRecipe ? MF_GRAYED : MF_STRING
 				});
 			}
-			if (!['related', 'unrelated'].includes(key)) {	// Scoring
+			if (!bLiteMode && !['related', 'unrelated'].includes(key)) {	// Scoring
 				const options = ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL'];
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'scoringDistribution') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
@@ -313,7 +337,7 @@ function createConfigMenu(parent) {
 				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => { return options.indexOf(tag.scoringDistribution); });
 			}
 			if (!menu.isLastEntrySep) { menu.newSeparator(subMenuName); }
-			if (!['related', 'unrelated'].includes(key)) {	// Base score
+			if (!bLiteMode && !['related', 'unrelated'].includes(key)) {	// Base score
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'baseScore') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
@@ -420,15 +444,11 @@ function createConfigMenu(parent) {
 			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')]);
 			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
 		}
-		menu.newSeparator(menuName);
-		{
-			createBoolMenu(menuName, ['bNegativeWeighting'],
-				[
-					Object.hasOwn(recipe, 'method') && recipe.method !== 'GRAPH' || !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'GRAPH'
-				]
-			);
+		if (!bLiteMode) {
+			menu.newSeparator(menuName);
+			createBoolMenu(menuName, ['bNegativeWeighting'], [!bIsGraph]);
 		}
-		{	// Cache
+		if (!bLiteMode) {	// Cache
 			const options = ['bAscii', 'bTagsCache', 'bAllMusicDescriptors'];
 			options.forEach((key) => {
 				if (key === 'bTagsCache') { return; }
@@ -556,8 +576,9 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING
 			});
+			menu.newCheckMenuLast(() => getSetting('forcedQuery').length);
 		}
-		{	// Additional filters
+		if (!bLiteMode) {	// Additional filters
 			let options = [];
 			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
 			const bFile = _isFile(file);
@@ -591,7 +612,8 @@ function createConfigMenu(parent) {
 				return !!(prop.match(new RegExp(obj.query.replace('(', '\\(').replace(')', '\\)'))) && !prop.match(new RegExp('NOT \\(' + obj.query + '\\)')));
 			};
 			const filterCount = options.map(hasQuery).filter(Boolean).length;
-			const subMenuName = menu.newMenu('Additional pre-defined filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
+			const menuFlags = filterCount ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu('Additional pre-defined filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName, menuFlags);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Appended to Global Forced Query:', flags: MF_GRAYED });
 			menu.newSeparator(subMenuName);
 			const switchQuery = (input, query) => {
@@ -640,7 +662,7 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
-		menu.newSeparator(menuName);
+		if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 		{	// Dynamic queries
 			let options = [];
 			const currentPropFilters = JSON.parse(properties['dynQueries'][1]) || [];
@@ -683,7 +705,8 @@ function createConfigMenu(parent) {
 			const filterState = currentFilters.map((query) => hasQuery(query));
 			const found = filterState.reduce((acc, state) => acc + (state ? 1 : 0), 0);
 			const notFound = filterCount - found;
-			const subMenuName = menu.newMenu('Dynamic query filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName);
+			const menuFlags = filterCount ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu('Dynamic query filters' + '\t[' + (!filterCount ? 'none' : filterCount + ' filter' + (filterCount > 1 ? 's' : '')) + ']', menuName, menuFlags);
 			menu.newEntry({ menuName: subMenuName, entryText: 'Evaluated with reference: ' + _p(isTheme ? 'theme' : 'selection'), flags: MF_GRAYED });
 			menu.newSeparator(subMenuName);
 			options.forEach((obj) => {
@@ -738,13 +761,13 @@ function createConfigMenu(parent) {
 				}
 			});
 		}
-		menu.newSeparator(menuName);
-		{	// Near genres filter
+		if (!bLiteMode) {	// Near genres filter
+			if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 			const key = 'nearGenresFilter';
-			const scoreFilter = 1 - (Object.hasOwn(recipe, 'scoreFilter') ? recipe.scoreFilter : properties.scoreFilter[1]) / 100;
-			const aggressiveness = Object.hasOwn(recipe, 'nearGenresFilterAggressiveness') ? recipe.nearGenresFilterAggressiveness : properties.nearGenresFilterAggressiveness[1];
+			const scoreFilter = 1 - getSetting('scoreFilter') / 100;
+			const aggressiveness = getSetting('nearGenresFilterAggressiveness');
 			const nearScoreFilter = nearGenresFilterDistribution(0, { scoreFilter, aggressiveness });
-			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
+			const keyVal = getSetting(key);
 			const autoVal = bIsGraph ? nearGenresFilterDistribution(0, { graphDistance, aggressiveness }) : nearScoreFilter;
 			const options = [
 				{
@@ -758,7 +781,8 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 },
 			];
-			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName);
+			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName, menuFlags);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -800,8 +824,8 @@ function createConfigMenu(parent) {
 				});
 			}
 		}
-		menu.newSeparator(menuName);
-		{	// Influences filter
+		if (!bLiteMode) {	// Influences filter
+			if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
 			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences')
 				? recipe['bConditionAntiInfluences']
@@ -822,8 +846,8 @@ function createConfigMenu(parent) {
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
 			});
 		}
-		menu.newSeparator(menuName);
-		{	// Artist filter
+		if (!bLiteMode) {	// Artist filter
+			if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 			const options = ['bSimilArtistsFilter', 'bSimilArtistsExternal', 'sep', 'bSameArtistFilter'];
 			const bConditionSimilArtists = Object.hasOwn(recipe, 'bSimilArtistsFilter')
 				? recipe['bSimilArtistsFilter']
@@ -850,8 +874,8 @@ function createConfigMenu(parent) {
 				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
 			});
 		}
-		menu.newSeparator(menuName);
-		{	// Culture filters
+		if (!bLiteMode) {	// Culture filters
+			if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 			const key = 'artistRegionFilter';
 			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
 			const options = [
@@ -865,7 +889,8 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
-			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
+			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName, menuFlags);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -879,7 +904,7 @@ function createConfigMenu(parent) {
 			});
 			menu.newCheckMenuLast((o) => o.findIndex((opt) => opt.val === keyVal), options);
 		}
-		{	// Culture filters
+		if (!bLiteMode) {	// Culture filters
 			const key = 'genreStyleRegionFilter';
 			const keyVal = Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1];
 			const options = [
@@ -891,7 +916,8 @@ function createConfigMenu(parent) {
 				{ name: 'sep' },
 				{ name: 'Disabled', val: -1 }
 			];
-			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName);
+			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
+			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName, menuFlags);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -906,7 +932,7 @@ function createConfigMenu(parent) {
 			menu.newCheckMenuLast((o) => o.findIndex((opt) => opt.val === keyVal), options);
 		}
 	}
-	{	// Post-scoring filters:
+	if (!bLiteMode) {	// Post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
 		{ // Tags filter
 			createTagMenu(menuName, ['poolFilteringTag'], [!getSetting('poolFilteringN') || getSetting('poolFilteringN') === -1]);
@@ -931,15 +957,15 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	{	// Pool picking:
-		const menuFlags = (Object.hasOwn(recipe, 'bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
-		const menuText = 'Set pool picking' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
+	if (!bLiteMode) {	// Pool picking:
+		const menuFlags = getSetting('bInKeyMixingPlaylist') ? MF_GRAYED : MF_STRING;
+		const menuText = 'Set pool picking' + (getSetting('bInKeyMixingPlaylist') ? '      -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
 		{
 			createBoolMenu(menuName, ['bRandomPick', 'sep', 'bInversePick'], void (0),
 				(key, i, props) => {
 					let toDisable = [];
-					if (key === 'bRandomPick') { toDisable = ['bInversePick','bSortRandom']; }
+					if (key === 'bRandomPick') { toDisable = ['bInversePick', 'bSortRandom']; }
 					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
 					if (props[key][1]) {
 						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
@@ -978,8 +1004,8 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Final sorting
-		const menuFlags = (Object.hasOwn(recipe, 'bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1]) ? MF_GRAYED : MF_STRING;
-		const menuText = 'Set final sorting' + (properties.bInKeyMixingPlaylist[1] || recipe.bInKeyMixingPlaylist ? '       -harmonic mixing-' : '');
+		const menuFlags = getSetting('bInKeyMixingPlaylist') ? MF_GRAYED : MF_STRING;
+		const menuText = 'Set final sorting' + (getSetting('bInKeyMixingPlaylist') ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
 		createBoolMenu(menuName, ['bSortRandom'],
 			[getSetting('bRandomPick')],
@@ -1011,14 +1037,20 @@ function createConfigMenu(parent) {
 		if (!getAnySetting(['bRandomPick', 'bInversePick', 'bSortRandom', 'bSmartShuffle'])) {
 			menu.newCheckMenuLast(() => true);
 		}
-		createBoolMenu(menuName, ['sep', 'bInverseListOrder'],
-			[void (0), (getSetting('bInversePick') || getSetting('bSortRandom') || getSetting('bRandomPick')) && !getSetting('bProgressiveListCreation')],
-		);
-		if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bProgressiveListOrder', 'bSortRandom', 'bSmartShuffle'])) {
+		if (!bLiteMode) {
+			createBoolMenu(menuName, ['sep', 'bInverseListOrder'],
+				[void (0), (getSetting('bInversePick') || getSetting('bSortRandom') || getSetting('bRandomPick')) && !getSetting('bProgressiveListCreation')],
+			);
+			if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bProgressiveListOrder', 'bSortRandom', 'bSmartShuffle'])) {
+				menu.newCheckMenuLast(() => true);
+			}
+		}
+		createBoolMenu(menuName, ['sep', 'bScatterInstrumentals'], [void (0), getSetting('bSmartShuffle')]);
+		if (getSetting('bSmartShuffle') && getSetting('bSmartShuffleAdvc')) {
 			menu.newCheckMenuLast(() => true);
 		}
-		createBoolMenu(menuName, ['sep', 'bScatterInstrumentals', 'sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
-			[void (0), getSetting('bSmartShuffle'), void (0), void (0), !getSetting('bSmartShuffle')],
+		createBoolMenu(menuName, ['sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
+			[void (0), void (0), !getSetting('bSmartShuffle')],
 			(key, i, props) => {
 				let toDisable = [];
 				if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
@@ -1078,10 +1110,17 @@ function createConfigMenu(parent) {
 			}, options.length + 2);
 		}
 	}
-	{	// Special playlists:
-		const menuName = menu.newMenu('Special playlist rules');
+	if (!bLiteMode) {	// Special playlists:
+		const menuFlags = getSetting('bProgressiveListCreation') || getSetting('bInKeyMixingPlaylist') ? MF_CHECKED : void (0);
+		const menuName = menu.newMenu('Special playlist rules', void (0), menuFlags);
 		{
-			createBoolMenu(menuName, ['bProgressiveListCreation']);
+			createBoolMenu(menuName, ['bProgressiveListCreation'], void(0), (key, i, props) => {
+				let toDisable = [];
+				if (key === 'bProgressiveListCreation') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder']; }
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
+			});
 		}
 		{
 			const options = ['progressiveListCreationN'];
@@ -1103,8 +1142,16 @@ function createConfigMenu(parent) {
 			createBoolMenu(
 				menuName,
 				['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'],
-				[void (0), Object.hasOwn(recipe, 'bInKeyMixingPlaylist') && !recipe.bInKeyMixingPlaylist || !Object.hasOwn(recipe, 'bInKeyMixingPlaylist') && !properties.bInKeyMixingPlaylist[1]]
+				[void (0), !getSetting('bInKeyMixingPlaylist')],
+				(key, i, props) => {
+					let toDisable = [];
+					if (key === 'bInKeyMixingPlaylist') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder']; }
+					if (props[key][1]) {
+						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					}
+				}
 			);
+			menu.newCheckMenuLast(() => getSetting('bInKeyMixingPlaylist') && getSetting('bHarmonicMixDoublePass'));
 		}
 	}
 	{	// Menu to configure other playlist attributes:
@@ -1158,7 +1205,7 @@ function createConfigMenu(parent) {
 					}, flags: Object.hasOwn(recipe, 'sortBias') || !isEnabled ? MF_GRAYED : MF_STRING
 				});
 			}
-			{
+			if (!bLiteMode) {
 				createBoolMenu(
 					subMenuName,
 					['bAdvTitle', 'bMultiple'],
@@ -1182,11 +1229,14 @@ function createConfigMenu(parent) {
 				);
 			}
 		}
+		menu.newSeparator(menuName);
+		createBoolMenu(menuName, ['bLiteMode'], void (0), void (0), ['Advanced mode']);
+		menu.newCheckMenuLast(() => !bLiteMode);
 	}
 	menu.newSeparator();
 	{	// Other tools
 		const subMenu = menu.newMenu('Other tools');
-		{
+		{	// Similar Artists
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Calculate similar artists tags', func: () => {
 					calculateSimilarArtistsFromPls({ items: plman.GetPlaylistSelectedItems(plman.ActivePlaylist), properties });
@@ -1198,16 +1248,16 @@ function createConfigMenu(parent) {
 				}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED
 			});
 		}
-		menu.newSeparator(subMenu);
-		{
+		if (!bLiteMode) { // Same zone artists
+			menu.newSeparator(subMenu);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Calculate same zone artists', func: () => {
 					console.log(getArtistsSameZone({ properties }));
 				}
 			});
 		}
-		menu.newSeparator(subMenu);
-		{
+		if (!bLiteMode) { // Relate tracks
+			menu.newSeparator(subMenu);
 			{
 				const flags = plman.ActivePlaylist !== -1 && plman.GetPlaylistSelectedItems(plman.ActivePlaylist).Count > 1 ? MF_STRING : MF_GRAYED;
 				menu.newEntry({
@@ -1271,11 +1321,13 @@ function createConfigMenu(parent) {
 			const submenuTwo = menu.newMenu('Logging', subMenu);
 			createBoolMenu(
 				submenuTwo,
-				['bGraphDebug', 'sep', 'bShowQuery', 'bBasicLogging', 'bShowFinalSelection', 'bSearchDebug', 'bProfile']
+				bLiteMode
+					? ['bShowQuery', 'bBasicLogging', 'bShowFinalSelection']
+					: ['bGraphDebug', 'sep', 'bShowQuery', 'bBasicLogging', 'bShowFinalSelection', 'bSearchDebug', 'bProfile']
 			);
 		}
-		menu.newSeparator(subMenu);
-		{
+		if (!bLiteMode && bIsGraph) {
+			if (!menu.isLastEntrySep) { menu.newSeparator(subMenu); }
 			const submenuTwo = menu.newMenu('Descriptors', subMenu);
 			{
 				menu.newEntry({
@@ -1321,8 +1373,8 @@ function createConfigMenu(parent) {
 				});
 			}
 		}
-		menu.newSeparator(subMenu);
-		{ 	// Find genre/styles not on graph
+		if (bIsGraph) { 	// Find genre/styles not on graph
+			menu.newSeparator(subMenu);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Find genres/styles not on Graph', func: () => {
 					const tags = JSON.parse(properties.tags[1]);
@@ -1334,71 +1386,72 @@ function createConfigMenu(parent) {
 					});
 				}
 			});
-			// Graph debug
-			menu.newEntry({
-				menuName: subMenu, entryText: 'Debug Graph (check console)', func: () => {
-					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
-					graphDebug(sbd.allMusicGraph, true); // Show popup on pass
-					music_graph_descriptors_culture.debug(sbd.allMusicGraph);
-					if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
-				}
-			});
-			// Graph test
-			menu.newEntry({
-				menuName: subMenu, entryText: 'Run distance tests (check console)', func: () => {
-					const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('testGraph') : null;
-					[testGraphNodes, testGraphNodeSets, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
-						console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
-						f(sbd.allMusicGraph);
-					});
-					if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
-				}
-			});
-			if (sbd.panelProperties.bProfile[1]) {
+			if (!bLiteMode) {
+				// Graph debug
 				menu.newEntry({
-					menuName: subMenu, entryText: 'Run speed tests (check console)', func: () => {
-						const sel = fb.GetSelection();
-						const stats = { total: 0, steps: [] };
-						const times = 100;
-						Promise.serial(range(1, times, 1), () => {
-							searchByDistance({ sel, properties: parent.buttonsProperties, theme: parent.buttonsProperties.theme[1], recipe: parent.buttonsProperties.recipe[1], parent });
-							stats.total += sbd.profiler.Time;
-							sbd.profiler.CheckPoints.forEach((sp) => {
-								const found = stats.steps.find((s) => s && s.name === sp.name);
-								if (found) { found.acc += sp.acc; }
-								else { stats.steps.push({ ...sp }); }
-							});
-							return Promise.wait(1000);
-						}).then(() => {
-							console.log('Times executed:\t' + times);
-							console.log('Average runtime:\t' + stats.total / times + ' ms');
-							stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms')); // NOSONAR
-						});
-
+					menuName: subMenu, entryText: 'Debug Graph (check console)', func: () => {
+						const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
+						graphDebug(sbd.allMusicGraph, true); // Show popup on pass
+						music_graph_descriptors_culture.debug(sbd.allMusicGraph);
+						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 					}
 				});
-			}
-		}
-		menu.newSeparator(subMenu);
-		{ 	// Graph cache reset Async
-			menu.newEntry({
-				menuName: subMenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
-					if (sbd.isCalculatingCache) {
-						fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console (or animation).', 'Graph cache');
-						return;
+				// Graph test
+				menu.newEntry({
+					menuName: subMenu, entryText: 'Run distance tests (check console)', func: () => {
+						const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('testGraph') : null;
+						[testGraphNodes, testGraphNodeSets, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
+							console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
+							f(sbd.allMusicGraph);
+						});
+						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 					}
-					_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
-					_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
-					cacheLink = void (0); // NOSONAR [global]
-					cacheLinkSet = void (0); // NOSONAR [global]
-					updateCache({ bForce: true, properties }); // Creates new one and also notifies other panels to discard their cache
-				}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED
-			});
+				});
+				if (sbd.panelProperties.bProfile[1]) {
+					menu.newEntry({
+						menuName: subMenu, entryText: 'Run speed tests (check console)', func: () => {
+							const sel = fb.GetSelection();
+							const stats = { total: 0, steps: [] };
+							const times = 100;
+							Promise.serial(range(1, times, 1), () => {
+								searchByDistance({ sel, properties: parent.buttonsProperties, theme: parent.buttonsProperties.theme[1], recipe: parent.buttonsProperties.recipe[1], parent });
+								stats.total += sbd.profiler.Time;
+								sbd.profiler.CheckPoints.forEach((sp) => {
+									const found = stats.steps.find((s) => s && s.name === sp.name);
+									if (found) { found.acc += sp.acc; }
+									else { stats.steps.push({ ...sp }); }
+								});
+								return Promise.wait(1000);
+							}).then(() => {
+								console.log('Times executed:\t' + times);
+								console.log('Average runtime:\t' + stats.total / times + ' ms');
+								stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms')); // NOSONAR
+							});
+
+						}
+					});
+				}
+				// Graph cache reset Async
+				if (!menu.isLastEntrySep) { menu.newSeparator(subMenu); }
+				menu.newEntry({
+					menuName: subMenu, entryText: 'Reset link cache' + (sbd.isCalculatingCache ? '\t -processing-' : ''), func: () => {
+						if (sbd.isCalculatingCache) {
+							fb.ShowPopupMessage('There is a calculation currently on process.\nTry again after it finishes. Check console (or animation).', 'Graph cache');
+							return;
+						}
+						_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
+						_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
+						cacheLink = void (0); // NOSONAR [global]
+						cacheLinkSet = void (0); // NOSONAR [global]
+						updateCache({ bForce: true, properties }); // Creates new one and also notifies other panels to discard their cache
+					}, flags: !sbd.isCalculatingCache ? MF_STRING : MF_GRAYED
+				});
+			}
 		}
 	}
 	menu.newSeparator();
 	{
-		const subMenuName = menu.newMenu('Button config');
+		const subMenuName = menu.newMenu('Button settings');
 		menu.newEntry({
 			menuName: subMenuName, entryText: 'Rename button...', func: () => {
 				let input = '';
@@ -1419,35 +1472,37 @@ function createConfigMenu(parent) {
 			}
 		});
 		menu.newCheckMenu(subMenuName, 'Show shortcuts on tooltip', void (0), () => { return properties.bTooltipInfo[1]; });
-	}
-	menu.newSeparator();
-	{	// Reset
-		menu.newEntry({
-			entryText: 'Restore defaults...', func: () => {
-				for (let key in SearchByDistance_properties) {
-					if (Object.hasOwn(properties, key)) { properties[key][1] = SearchByDistance_properties[key][1]; }
+		menu.newSeparator(subMenuName);
+		{	// Reset
+			menu.newEntry({
+				menuName: subMenuName,
+				entryText: 'Restore defaults...', func: () => {
+					for (let key in SearchByDistance_properties) {
+						if (Object.hasOwn(properties, key)) { properties[key][1] = SearchByDistance_properties[key][1]; }
+					}
+					properties.theme[1] = '';
+					properties.recipe[1] = '';
+					properties.data[1] = JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' });
+					overwriteProperties(properties); // Force overwriting
 				}
-				properties.theme[1] = '';
-				properties.recipe[1] = '';
-				properties.data[1] = JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' });
-				overwriteProperties(properties); // Force overwriting
-			}
-		});
-	}
-	{	// Reset
-		menu.newEntry({
-			entryText: 'Share configuration...', func: () => {
-				const list = ['tags', 'forced query', 'genre/style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
-				const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n' + capitalizePartial(list.join(', ')), 0, 'Search by distance', popup.question + popup.yes_no);
-				if (answer === popup.yes) {
-					const obj = clone(properties);
-					obj.name = parent.name;
-					window.NotifyOthers('Search by Distance: share configuration', obj);
-					obj.notifyThis = true;
-					window.NotifyThis('Search by Distance: share configuration', obj);
+			});
+		}
+		if (!bLiteMode) {	// Reset
+			menu.newEntry({
+				menuName: subMenuName,
+				entryText: 'Share configuration...', func: () => {
+					const list = ['tags', 'forced query', 'genre/style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
+					const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n' + capitalizePartial(list.join(', ')), 0, 'Search by distance', popup.question + popup.yes_no);
+					if (answer === popup.yes) {
+						const obj = clone(properties);
+						obj.name = parent.name;
+						window.NotifyOthers('Search by Distance: share configuration', obj);
+						obj.notifyThis = true;
+						window.NotifyThis('Search by Distance: share configuration', obj);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 	menu.newSeparator();
 	{	// Readmes
@@ -1456,14 +1511,14 @@ function createConfigMenu(parent) {
 		menu.newSeparator(subMenuName);
 		let iCount = 0;
 		const readmes = [
-			{ name: 'Main', file: folders.xxx + 'helpers\\readme\\search_by_distance.txt' },
-			{ name: 'sep' },
-			{ name: 'Method: DYNGENRE', file: folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt' },
-			{ name: 'Method: GRAPH', file: folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt' },
-			{ name: 'Method: WEIGHT', file: folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt' },
-			{ name: 'sep' },
+			{ name: 'Main', file: folders.xxx + 'helpers\\readme\\search_by_distance.txt', bLiteMode: true },
+			{ name: 'sep', bLiteMode: true },
+			{ name: 'Method: DYNGENRE', file: folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt', bLiteMode: true },
+			{ name: 'Method: GRAPH', file: folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt', bLiteMode: true },
+			{ name: 'Method: WEIGHT', file: folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt', bLiteMode: true },
+			{ name: 'sep', bLiteMode: true },
 			{ name: 'Filter: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural_filter.txt' },
-			{ name: 'Filter: dynamic query', file: folders.xxx + 'helpers\\readme\\search_by_distance_dynamic_query.txt' },
+			{ name: 'Filter: dynamic query', file: folders.xxx + 'helpers\\readme\\search_by_distance_dynamic_query.txt', bLiteMode: true },
 			{ name: 'Filter: influences', file: folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt' },
 			{ name: 'Filter: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt' },
 			{ name: 'sep' },
@@ -1473,7 +1528,7 @@ function createConfigMenu(parent) {
 			{ name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt' },
 			{ name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png' },
 			{ name: 'sep' },
-			{ name: 'Sorting: smart shuffle', file: folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt' },
+			{ name: 'Sorting: smart shuffle', file: folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt', bLiteMode: true },
 			{ name: 'Sorting: harmonic mixing', file: folders.xxx + 'helpers\\readme\\harmonic_mixing.txt' },
 			{ name: 'sep' },
 			{ name: 'Recipes & Themes', file: folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt' },
@@ -1483,7 +1538,7 @@ function createConfigMenu(parent) {
 			{ name: 'Tagging requisites', file: folders.xxx + 'helpers\\readme\\tags_structure.txt' },
 			{ name: 'Tags sources', file: folders.xxx + 'helpers\\readme\\tags_sources.txt' },
 			{ name: 'Other tags notes', file: folders.xxx + 'helpers\\readme\\tags_notes.txt' },
-		].filter(Boolean);
+		].filter(Boolean).filter((e) => e.bLiteMode || !bLiteMode);
 		if (readmes.length) {
 			readmes.forEach((entry) => { // Only show non empty files
 				if (menu.isSeparator(entry)) { menu.newSeparator(subMenuName); }

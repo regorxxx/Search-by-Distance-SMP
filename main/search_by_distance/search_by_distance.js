@@ -1,5 +1,5 @@
 ﻿'use strict';
-//18/12/24
+//20/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -121,7 +121,7 @@ const SearchByDistance_properties = {
 	bUseInfluencesFilter: ['Allow only influences by query', false],
 	bSimilArtistsFilter: ['Allow only similar artists', false],
 	bSimilArtistsExternal: ['External similar artists tags', false],
-	genreStyleFilterTag: ['Filter for genre/style', JSON.stringify(['Children\'s Music', '?'])],
+	genreStyleFilterTag: ['Filter genre/style values', JSON.stringify(['Children\'s Music', '?'])],
 	poolFilteringTag: ['Filter pool by tag', JSON.stringify([globTags.artist])],
 	poolFilteringN: ['Allows only N + 1 tracks on the pool (-1 = disabled)', -1, { greaterEq: -1, func: isInt }, -1],
 	bRandomPick: ['Random picking (not sorted by score)', true],
@@ -830,7 +830,10 @@ async function searchByDistance({
 	const oldCacheLinkSize = cacheLink ? cacheLink.size : 0;
 	const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 	// Tags check
-	if (!tags || Object.keys(tags).length === 0) { console.popup('No tags provided: ' + tags + '\nRestore defaults to fix it.', 'Search by distance'); return; }
+	if (!tags || Object.keys(tags).length === 0) {
+		console.popup('No valid tags provided: ' + tags + '\nRestore defaults to fix it.', 'Search by distance');  // NOSONAR
+		return;
+	}
 	// Test tags
 	if (!testBaseTags(tags)) { return; }
 	// Recipe check
@@ -1069,6 +1072,10 @@ async function searchByDistance({
 			return;
 		} else { method = 'WEIGHT'; } // For calcs they are the same!
 	} else { calcTags.dynGenre.weight = 0; }
+
+	if (method !== 'GRAPH') {
+		calcTags.genreStyleRegion.weight = 0;
+	}
 
 	if (!playlistLength) {
 		if (bBasicLogging) { console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.'); }
