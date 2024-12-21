@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/24
+//21/12/24
 
 /* exported createConfigMenu */
 
@@ -988,18 +988,16 @@ function createConfigMenu(parent) {
 		}
 		menu.newSeparator(menuName);
 		{
-			const options = ['probPick'];
-			options.forEach((key) => {
-				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
-				menu.newEntry({
-					menuName, entryText, func: () => {
-						const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
-						if (input === null) { return; }
-						properties[key][1] = input;
-						overwriteProperties(properties); // Updates panel
-					}, flags: Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING
-				});
+			const key = 'probPick';
+			const idxEnd = properties[key][0].indexOf('(');
+			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+			menu.newEntry({
+				menuName, entryText, func: () => {
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
+					if (input === null) { return; }
+					properties[key][1] = input;
+					overwriteProperties(properties); // Updates panel
+				}, flags: Object.hasOwn(recipe, key) || getSetting('bRandomPick') ? MF_GRAYED : MF_STRING
 			});
 		}
 	}
