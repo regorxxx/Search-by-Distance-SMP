@@ -210,7 +210,7 @@ function createConfigMenu(parent) {
 				if (key === 'bBreakWhenFilled') { props.probPick[1] = 100; }
 				if (key === 'bBreakWhenFilled' && props[key][1]) {
 					fb.ShowPopupMessage(
-						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the playlist size is reached, no more tracks will be analyzed.\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
+						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the playlist size is reached, no more tracks will be analyzed. This greatly improce processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
 						, 'Search by distance'
 					);
 				}
