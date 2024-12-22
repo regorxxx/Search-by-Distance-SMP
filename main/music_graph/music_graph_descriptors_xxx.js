@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/12/24
+//22/12/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -145,7 +145,7 @@ const music_graph_descriptors = {
 	// For ex. instead of adding sub-styles to other places, we can add them here
 	style_cluster: [
 		['Synth & Wave XL'					,	['Minimal Wave','Minimal Industrial','Darkwave','Coldwave','Electroclash','Synth-Pop','Futurepop','Synthwave','Vaporwave','Synth','Darksynth']],
-		['Gothic XL'						,	['Darkwave','Coldwave','Darksynth','Gothic Rock']],
+		['Gothic XL'						,	['Darkwave','Coldwave','Darksynth','Gothic Rock','Post-Punk']],
 		['Lounge XL'						,	['Lounge','Exotica','Latin-Jazz','Bossa Nova','Samba']],
 		['Easy Listening'					,	['Lounge','Muzak','Bossa Nova']],
 		['Progressive Rock XL'				,	['Proto-Prog','Crossover Prog','Symphonic Rock','Heavy Prog','Eclectic Prog','Krautrock','Math Rock','Neo-Prog','Italian Prog. Rock','Japanese Prog. Rock','Space Rock','Avant-Prog','Canterbury Scene','Flamenco Rock','Nuevo Flamenco']],
@@ -178,7 +178,7 @@ const music_graph_descriptors = {
 		['Latin Urban Music & Rap XL'		,	['Trap','Reggaeton','Neoperreo','Corrido Tumbado','Dancehall','Dembow']],
 		['Alt. Rap XL'						,	['British Hip-Hop','Progressive Rap','Jazz-Rap','Alt. Rap','Underground Rap','Psychedelic Rap','Symphonic Rap']],
 		['Downtempo Rap XL'					,	['Jazz-Rap','Trip Hop','Cloud Rap']],
-		['Sad Emo XL'						,	['Emo Rap','Emo Pop','Emo Rock','Sadcore']],
+		['Sad Emo XL'						,	['Emo Rap','Emo Pop','Emo Rock','Sadcore','Shoegaze']],
 		['Funk'								,	['Classic Funk','P-Funk','Deep Funk','Electrofunk','Funk Rock','Contemporary Funk','Funk Blues','Deep Funk Revival','Psychedelic Funk']],
 		['Soul'								,	['Philadelphia Soul','Motown Sound','Southern Soul','Psychedelic Soul']],
 		['Deep Soul XL'						,	['Smooth Soul','Soul Blues','Southern Soul']],
@@ -371,7 +371,8 @@ const music_graph_descriptors = {
 		['Nu-Disco'							,	['French House']],
 		['Urban Breaks'						,	['Trap','Pop Rap']],
 		['Corrido Tumbado'					,	['Trap','Mexican Folk','Corrido']],
-		['Drill'							,	['Gangsta']]
+		['Drill'							,	['Gangsta']],
+		['Sad Emo XL'						,	['Gothic XL']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -699,8 +700,8 @@ const music_graph_descriptors = {
 		Influences:
 	*/
 	anti_influence: 100, //backlash / anti-influence between two nodes (added directly to the total path distance): A -> ? -> B
-	primary_origin_influence: -10, //primary origin-influence between two nodes (added directly to the total path distance): A -> ? -> B
-	secondary_origin_influence: -5, //secondary origin-influence between two nodes (added directly to the total path distance): A -> ? -> B
+	primary_origin_influence: -10, //primary origin-influence between two nodes in same supergenre (added directly to the total path distance): A -> ? -> B
+	secondary_origin_influence: -5, //secondary origin-influence between two nodes in same supergenre (added directly to the total path distance): A -> ? -> B
 	/*
 		Note on intra_supergenre:
 		-------------------------

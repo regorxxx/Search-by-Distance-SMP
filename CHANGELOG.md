@@ -68,6 +68,7 @@
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 ### Changed
 - Descriptors: merged Tishoumaren and Desert Blues styles, used the first and added Desert Blues and Assouf as substitutions.
+- Descriptors: tweaked Sad Emo XL and Gothic XL clusters.
 - Descriptors: multiple improvements to All Music descriptors.
 - Dynamic queries: the submenu on the customizable button showing the filters now shows the current filter count, if any.
 - Dynamic queries: non recognized filters are now shown as individual entries which open a popup with the query if clicked.
