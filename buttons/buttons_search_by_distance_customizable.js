@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/12/24
+//22/12/24
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -36,7 +36,7 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	data: ['Internal data', JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' }), { func: isJSON }, JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' })],
 	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }, true],
 	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false],
-	bLiteMode: ['Lite mode', true, { func: isBoolean }, true],
+	bLiteMode: ['Lite mode', false, { func: isBoolean }, false],
 };
 newButtonsProperties = { ...SearchByDistance_properties, ...newButtonsProperties }; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
@@ -49,8 +49,8 @@ if (!sbd.panelProperties.firstPopup[1]) {
 	doOnce('findStyleGenresMissingGraphCheck', debounce(findStyleGenresMissingGraphCheck, 500))(newButtonsProperties);
 }
 
-if (newButtonsProperties.bLiteMode[1] && newButtonsProperties.customName[1] !== newButtonsProperties.customName[3]) {
-	newButtonsProperties.bLiteMode[1] = false;
+if (newButtonsProperties.customName[1] === newButtonsProperties.customName[3]) {
+	newButtonsProperties.bLiteMode[1] = true;
 	overwriteProperties({bLiteMode: newButtonsProperties.bLiteMode});
 }
 
