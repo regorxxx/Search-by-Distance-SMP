@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/12/24
+//22/12/24
 
 /* exported createConfigMenu */
 
@@ -181,7 +181,7 @@ function createConfigMenu(parent) {
 			].filter(Boolean);
 			const text = [
 				'Similarity score greater than',
-				bLiteMode ? '' : 'Minimum if there not enough tracks'
+				bLiteMode ? '' : 'Minimum if there are not enough tracks'
 			].filter(Boolean);
 			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
@@ -199,9 +199,24 @@ function createConfigMenu(parent) {
 				});
 			});
 		}
+		menu.newSeparator(menuName);
+		createBoolMenu(menuName, ['bBreakWhenFilled'], void (0),
+			(key, i, props) => {
+				let toDisable = [];
+				if (key === 'bBreakWhenFilled') { toDisable = ['bRandomPick', 'bInversePick']; }
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
+				if (key === 'bBreakWhenFilled') { props.probPick[1] = 100; }
+				if (key === 'bBreakWhenFilled' && props[key][1]) {
+					fb.ShowPopupMessage(
+						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the playlist size is reached, no more tracks will be analyzed.\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
+						, 'Search by distance'
+					);
+				}
+			}
+		);
 		if (!bLiteMode) {
-			menu.newSeparator(menuName);
-			createBoolMenu(menuName, ['bBreakWhenFilled']);
 			if (bIsGraph) {
 				menu.newSeparator(menuName);
 				createBoolMenu(menuName, ['bFilterWithGraph'], void (0), void (0), ['Filter non recognized genre/styles']);
@@ -576,7 +591,7 @@ function createConfigMenu(parent) {
 					overwriteProperties(properties); // Updates panel
 				}, flags: bRecipe ? MF_GRAYED : MF_STRING
 			});
-			menu.newCheckMenuLast(() => getSetting('forcedQuery').length);
+			menu.newCheckMenuLast(() => !!getSetting('forcedQuery').length);
 		}
 		if (!bLiteMode) {	// Additional filters
 			let options = [];
@@ -957,23 +972,31 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	if (!bLiteMode) {	// Pool picking:
-		const menuFlags = getSetting('bInKeyMixingPlaylist') ? MF_GRAYED : MF_STRING;
+	if (!getSetting('bBreakWhenFilled') || !getSetting('bLiteMode')) {
+		const menuFlags = getSetting('bInKeyMixingPlaylist') || getSetting('bBreakWhenFilled') ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set pool picking' + (getSetting('bInKeyMixingPlaylist') ? '      -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
-		{
-			createBoolMenu(menuName, ['bRandomPick', 'sep', 'bInversePick'], void (0),
+		createBoolMenu(menuName, ['bRandomPick'], [getSetting('bBreakWhenFilled')],
+			(key, i, props) => {
+				let toDisable = [];
+				if (key === 'bRandomPick') { toDisable = ['bInversePick', 'bSortRandom', 'bInverseListOrder']; }
+				if (props[key][1]) {
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				}
+				if (key === 'bRandomPick') {
+					if (!props.bRandomPick[1] && !getSetting('bInversePick') && getSetting('bProgressiveListOrder')) {
+						props.bProgressiveListOrder[1] = false;
+					}
+				}
+			}
+		);
+		if (!bLiteMode) {	// Pool picking:
+			createBoolMenu(menuName, ['sep', 'bInversePick'], void (0),
 				(key, i, props) => {
 					let toDisable = [];
-					if (key === 'bRandomPick') { toDisable = ['bInversePick', 'bSortRandom']; }
-					else if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
+					if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
 					if (props[key][1]) {
 						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
-					}
-					if (key === 'bRandomPick') {
-						if (!props.bRandomPick[1] && !getSetting('bInversePick') && getSetting('bProgressiveListOrder')) {
-							props.bProgressiveListOrder[1] = false;
-						}
 					}
 					if (key === 'bInversePick') {
 						if (!props.bInversePick[1] && !getSetting('bRandomPick') && getSetting('bProgressiveListOrder')) {
@@ -985,20 +1008,20 @@ function createConfigMenu(parent) {
 					}
 				}
 			);
-		}
-		menu.newSeparator(menuName);
-		{
-			const key = 'probPick';
-			const idxEnd = properties[key][0].indexOf('(');
-			const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
-			menu.newEntry({
-				menuName, entryText, func: () => {
-					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
-					if (input === null) { return; }
-					properties[key][1] = input;
-					overwriteProperties(properties); // Updates panel
-				}, flags: Object.hasOwn(recipe, key) || getSetting('bRandomPick') ? MF_GRAYED : MF_STRING
-			});
+			menu.newSeparator(menuName);
+			{
+				const key = 'probPick';
+				const idxEnd = properties[key][0].indexOf('(');
+				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+				menu.newEntry({
+					menuName, entryText, func: () => {
+						const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
+						if (input === null) { return; }
+						properties[key][1] = input;
+						overwriteProperties(properties); // Updates panel
+					}, flags: Object.hasOwn(recipe, key) || getSetting('bRandomPick') ? MF_GRAYED : MF_STRING
+				});
+			}
 		}
 	}
 	{	// Final sorting
@@ -1112,9 +1135,14 @@ function createConfigMenu(parent) {
 		const menuFlags = getSetting('bProgressiveListCreation') || getSetting('bInKeyMixingPlaylist') ? MF_CHECKED : void (0);
 		const menuName = menu.newMenu('Special playlist rules', void (0), menuFlags);
 		{
-			createBoolMenu(menuName, ['bProgressiveListCreation'], void(0), (key, i, props) => {
+			createBoolMenu(menuName, ['bProgressiveListCreation'], void (0), (key, i, props) => {
 				let toDisable = [];
-				if (key === 'bProgressiveListCreation') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder']; }
+				if (key === 'bProgressiveListCreation') {
+					toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder'];
+					if (getSetting('bRandomPick')) {
+						toDisable.push('bInverseListOrder');
+					}
+				}
 				if (props[key][1]) {
 					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				}
