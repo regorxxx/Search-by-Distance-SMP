@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/24
+//22/12/24
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -79,63 +79,77 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 
 	const style_primary_origin_length = style_primary_origin.length;
 	for (i = 0; i < style_primary_origin_length; i++) {
-		let sub_lenght = style_primary_origin[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], {weight: primary_origin, absoluteWeight: 0});
+		const from = style_primary_origin[i][0];
+		const to = style_primary_origin[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: primary_origin, absoluteWeight: 0});
 		}
 	}
 
 	const style_secondary_origin_length = style_secondary_origin.length;
 	for (i = 0; i < style_secondary_origin_length; i++) {
-		let sub_lenght = style_secondary_origin[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], {weight: secondary_origin, absoluteWeight: 0});
+		const from = style_secondary_origin[i][0];
+		const to = style_secondary_origin[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: secondary_origin, absoluteWeight: 0});
 		}
 	}
 
 	const style_weak_substitutions_length = style_weak_substitutions.length;
 	for (i = 0; i < style_weak_substitutions_length; i++) {
-		let sub_lenght = style_weak_substitutions[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_weak_substitutions[i][0], style_weak_substitutions[i][1][j], {weight: weak_substitutions, absoluteWeight: 0});
+		const from = style_weak_substitutions[i][0];
+		const to = style_weak_substitutions[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: weak_substitutions, absoluteWeight: 0});
 		}
 	}
 
 	const style_cluster_length = style_cluster.length;
 	for (i = 0; i < style_cluster_length; i++) {
-		let sub_lenght = style_cluster[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_cluster[i][0], style_cluster[i][1][j], {weight: cluster, absoluteWeight: 0});
+		const from = style_cluster[i][0];
+		const to = style_cluster[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: cluster, absoluteWeight: 0});
 		}
 	}
 
 	const style_supergenre_length = style_supergenre.length;
 	for (i = 0; i < style_supergenre_length; i++) {
-		superGenreSets[i] = new Set(style_supergenre[i][1]); // For later use
-		let sub_lenght = style_supergenre[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre[i][0], style_supergenre[i][1][j], {weight: intra_supergenre, absoluteWeight: 0});
+		const from = style_supergenre[i][0];
+		const to = style_supergenre[i][1];
+		const subLen = to.length;
+		superGenreSets[i] = new Set(to); // For later use
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: intra_supergenre, absoluteWeight: 0});
 		}
 	}
 
 	const style_supergenre_cluster_length = style_supergenre_cluster.length;
 	let style_supergenre_cluster_break = style_supergenre_cluster_length;
 	for (i = 0; i < style_supergenre_cluster_length; i++) {
-		if(style_supergenre_cluster[i][0] === 'SKIP' ) {
+		const from = style_supergenre_cluster[i][0];
+		if(from === 'SKIP' ) {
 			style_supergenre_cluster_break = i; //Save for later
 			continue;
 		}
-		let sub_lenght = style_supergenre_cluster[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[i][1][j], {weight: supergenre_cluster, absoluteWeight: 0});
+		const to = style_supergenre_cluster[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: supergenre_cluster, absoluteWeight: 0});
 		}
 	}
 
 	const style_supergenre_supercluster_length = style_supergenre_supercluster.length;
 	for (i = 0; i < style_supergenre_supercluster_length; i++) {
-		let sub_lenght = style_supergenre_supercluster[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre_supercluster[i][0], style_supergenre_supercluster[i][1][j], {weight: supergenre_supercluster, absoluteWeight: 0});
+		const from = style_supergenre_supercluster[i][0];
+		const to = style_supergenre_supercluster[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: supergenre_supercluster, absoluteWeight: 0});
 		}
 	}
 
@@ -153,9 +167,11 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 
 	const style_substitutions_length = style_substitutions.length;
 	for (i = 0; i < style_substitutions_length; i++) {
-		let sub_lenght = style_substitutions[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_substitutions[i][0], style_substitutions[i][1][j], {weight: substitutions, absoluteWeight: 0});
+		const from = style_substitutions[i][0];
+		const to = style_substitutions[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from,to[j], {weight: substitutions, absoluteWeight: 0});
 		}
 	}
 
@@ -163,9 +179,11 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	// We put an arbitrary high weight so this path is never taken for considering distance. Only the absoluteWeight will be considered after finding the shortest path!
 	const style_anti_influence_length = style_anti_influence.length;
 	for (i = 0; i < style_anti_influence_length; i++) {
-		let sub_lenght = style_anti_influence[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_anti_influence[i][0], style_anti_influence[i][1][j], {weight: Infinity, absoluteWeight: anti_influence});
+		const from = style_anti_influence[i][0];
+		const to = style_anti_influence[i][1];
+		const subLen = to.length;
+		for (j = 0; j < subLen; j++) {
+			mygraph.addLink(from, to[j], {weight: Infinity, absoluteWeight: anti_influence});
 		}
 	}
 
@@ -173,11 +191,13 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	// Same than Anti-influences but applied only to style_primary_origin links and both nodes must be on the same SuperGenre set...
 	if (primary_origin_influence) {
 		for (i = 0; i < style_primary_origin_length; i++) {
-			let sub_lenght = style_primary_origin[i][1].length;
-			for (j = 0; j < sub_lenght; j++) {
+			const from = style_primary_origin[i][0];
+			const to = style_primary_origin[i][1];
+			const subLen = to.length;
+			for (j = 0; j < subLen; j++) {
 				for (h = 0; h < style_supergenre_length; h++) {
-					if (superGenreSets[h].has(style_primary_origin[i][0]) && superGenreSets[h].has(style_primary_origin[i][1][j])) {
-						mygraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], {weight: Infinity, absoluteWeight: primary_origin_influence});
+					if (superGenreSets[h].has(from) && superGenreSets[h].has(to[j])) {
+						mygraph.addLink(from, to[j], {weight: Infinity, absoluteWeight: primary_origin_influence});
 					}
 				}
 			}
@@ -188,11 +208,13 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	// Same than Primary-Origin influences for style_secondary origin links
 	if (secondary_origin_influence) {
 		for (i = 0; i < style_secondary_origin_length; i++) {
-			let sub_lenght = style_secondary_origin[i][1].length;
-			for (j = 0; j < sub_lenght; j++) {
+			const from = style_secondary_origin[i][0];
+			const to = style_secondary_origin[i][1];
+			const subLen = to.length;
+			for (j = 0; j < subLen; j++) {
 				for (h = 0; h < style_supergenre_length; h++) {
-					if (superGenreSets[h].has(style_secondary_origin[i][0]) && superGenreSets[h].has(style_secondary_origin[i][1][j])) {
-						mygraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], {weight: Infinity, absoluteWeight: secondary_origin_influence});
+					if (superGenreSets[h].has(from) && superGenreSets[h].has(to[j])) {
+						mygraph.addLink(from, to[j], {weight: Infinity, absoluteWeight: secondary_origin_influence});
 					}
 				}
 			}
