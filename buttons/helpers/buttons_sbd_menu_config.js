@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/24
+//23/12/24
 
 /* exported createConfigMenu */
 
@@ -74,7 +74,7 @@ function createConfigMenu(parent) {
 					: ''
 			);
 	};
-	const createTagMenu = (menuName, options, flag = [], hook = null, entryNames = []) => {
+	const createTagMenu = (menuName, options, flag = [], hook = null, entryNames = [], info = []) => {
 		options.forEach((key, i) => {
 			if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 			const idxEnd = properties[key][0].indexOf('(');
@@ -101,9 +101,11 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					const example = '["GENRE","GENRE2"]';
-					const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] will disable it.\n\nFor example:\n' + example, 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
+					const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example + (info[i] ? info[i] : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
 					if (input === null) { return; }
-					properties[key][1] = JSON.stringify(input);
+					properties[key][1] = input.length === 1 && input[0].toUpperCase() === 'DEFAULT'
+						? properties[key][3]
+						: JSON.stringify(input);
 					if (hook) { hook(key, i, properties); }
 					overwriteProperties(properties); // Updates panel
 				}, flags: bProperties && Object.hasOwn(recipe.properties, key) || (flag[i] !== void (0) ? flag[i] : false) ? MF_GRAYED : MF_STRING
@@ -144,7 +146,9 @@ function createConfigMenu(parent) {
 	menu.newEntry({ entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
 	{	// Search Methods
-		const menuName = menu.newMenu('Set Search method');
+		const menuName = menu.newMenu('Set Analysis method');
+		menu.newEntry({ menuName, entryText: 'How similar tracks are searched:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		{
 			createSwitchMenu(menuName, 'method', ['WEIGHT', 'DYNGENRE', 'GRAPH'], void (0), void (0),
 				['Tags similarity (WEIGHT)', 'Tags + Genre analyis (DYNGENRE)', 'Tags + Adv. Genre analysis (GRAPH)']
@@ -157,11 +161,11 @@ function createConfigMenu(parent) {
 			const val = properties[key][1];
 			let displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
 			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
-			const entryText = 'Graph distance lower than...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
+			const entryText = 'Genre/styles variation lower than...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
-					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; }
+					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; }
 					if (!input && input !== '0' || !input.length) { return; }
 					if (parseGraphDistance(input) === null) { return; }
 					if (!Number.isNaN(Number(input))) { input = Number(input); } // Force a number type if possible
@@ -180,8 +184,12 @@ function createConfigMenu(parent) {
 				bLiteMode ? '' : 'minScoreFilter'
 			].filter(Boolean);
 			const text = [
-				'Similarity score greater than',
+				'Tag similarity score greater than',
 				bLiteMode ? '' : 'Minimum if there are not enough tracks'
+			].filter(Boolean);
+			const info = [
+				'\n\nControls how tracks are matched based on tag similarity; any track with a score over this value will be considered a match',
+				'\n\nIn case the there are not enough tracks with the chosen similarity score, it may be lowered to this value as fallback. Otherwise only the standard limit is used.'
 			].filter(Boolean);
 			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
@@ -190,7 +198,7 @@ function createConfigMenu(parent) {
 				const entryText = text[i] + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + val + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
+						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)' + (info[i] || ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						if (bLiteMode) { properties.minScoreFilter[1] = input; }
@@ -210,7 +218,7 @@ function createConfigMenu(parent) {
 				if (key === 'bBreakWhenFilled') { props.probPick[1] = 100; }
 				if (key === 'bBreakWhenFilled' && props[key][1]) {
 					fb.ShowPopupMessage(
-						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the playlist size is reached, no more tracks will be analyzed. This greatly improce processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
+						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the desired playlist size is reached, no more tracks will be analyzed. This greatly improves processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
 						, 'Search by distance'
 					);
 				}
@@ -219,12 +227,21 @@ function createConfigMenu(parent) {
 		if (!bLiteMode) {
 			if (bIsGraph) {
 				menu.newSeparator(menuName);
-				createBoolMenu(menuName, ['bFilterWithGraph'], void (0), void (0), ['Filter non recognized genre/styles']);
+				createBoolMenu(menuName, ['bFilterWithGraph'], void (0), (key, i, props) => {
+					if (key === 'bFilterWithGraph' && props[key][1]) {
+						fb.ShowPopupMessage(
+							'Filters genre/styles not present on the graph descriptors while performing the genre analysis (GRAPH method). The same can be achieved adding all missing values to \'Filter genre/style values\' setting or graph descriptors exclusions, but this setting covers all use-cases (although it requires more processing time).\n\nNote this only applies to the genre analysis part, i.e. non-recognized tags will still be used when checking tag similarity score.\n\nIn general, it\'s recommended to leave it enabled,unless you know what you are doing.'
+							, 'Search by distance'
+						);
+					}
+				}, ['Filter non-recognized genre/styles']);
 			}
 		}
 	}
 	{	// Tags and weights
 		const menuName = menu.newMenu('Set Tags and weighting');
+		menu.newEntry({ menuName, entryText: 'Tags and scoring settings for similarity:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		const options = [...new Set([...Object.keys(tags), ...recipeTags])]
 			.filter((tag) => !bLiteMode || !['related', 'unrelated'].includes(tag))
 			.filter((tag) => getSetting('method') === 'DYNGENRE' || !['dynGenre'].includes(tag))
@@ -260,9 +277,11 @@ function createConfigMenu(parent) {
 						.replace(/(genre) (style)/gi, '$1/$2')
 						.replace(/(style) (genre)/gi, '$1/$2')
 					, [' ', '/', '\\']
-				);
-			const menuFlags = weights[i].tag.weight ? MF_CHECKED : void (0);
+				).replace(/^bpm$/gi, 'BPM');
+			const menuFlags = weights[i].tag.weight && (weights[i].tag.tf.length || weights[i].tag.type.includes('virtual') || weights[i].tag.type.includes('tfRemap')) ? MF_CHECKED : void (0);
 			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName, menuFlags);
+			menu.newEntry({ menuName: subMenuName, entryText: keyFormat + ' tag settings:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			const baseTag = tags[key];
 			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
@@ -278,10 +297,15 @@ function createConfigMenu(parent) {
 					menu.newEntry({
 						menuName: subMenuName, entryText, func: () => {
 							const example = '["GENRE","LASTFM_GENRE","GENRE2"]';
-							const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\n\nFor example:\n' + example, 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
+							const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example, 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
 							if (input === null) { return; }
-							baseTag.tf = input;
-							properties.tags[1] = JSON.stringify(tags);
+							if (input.length === 1 && input[0].toUpperCase() === 'DEFAULT') {
+								baseTag.tf = JSON.parse(properties.tags[3]);
+								properties.tags[1] = properties.tags[3];
+							} else {
+								baseTag.tf = input;
+								properties.tags[1] = JSON.stringify(tags);
+							}
 							overwriteProperties(properties); // Updates panel
 							if (tag.type.includes('graph')) {
 								const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
@@ -339,6 +363,8 @@ function createConfigMenu(parent) {
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'scoringDistribution') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 				const subMenuName2 = menu.newMenu('Scoring...', subMenuName);
+				menu.newEntry({ menuName: subMenuName2, entryText: 'How scoring is distributed:', func: null, flags: MF_GRAYED });
+				menu.newSeparator(subMenuName2);
 				options.forEach((option) => {
 					const entryText = option + (bRecipe && tag.scoringDistribution === option ? '\t(forced by recipe)' : '');
 					menu.newEntry({
@@ -456,7 +482,11 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		{
 			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
-			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')]);
+			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')], void (0), void (0), [
+				'\n\nTag(s) used for smart shuffle sorting. To enable/disable it, directly use the related sorting setting.',
+				null,
+				'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
+			]);
 			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
 		}
 		if (!bLiteMode) {
@@ -567,6 +597,8 @@ function createConfigMenu(parent) {
 	}
 	{	// Pre-scoring filters:
 		const menuName = menu.newMenu('Set pre-scoring filters');
+		menu.newEntry({ menuName, entryText: 'Filters applied before similarity scoring:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		{	// Forced Query
 			const bRecipe = Object.hasOwn(recipe, 'forcedQuery');
 			const prop = bRecipe ? recipe.forcedQuery : properties['forcedQuery'][1];
@@ -749,7 +781,7 @@ function createConfigMenu(parent) {
 						menu.newEntry({
 							menuName: subMenuName, entryText: 'Other filter ' + _p(++i),
 							func: () => {
-								fb.ShowPopupMessage('Non recognized filter:\n\n' + currentFilters[idx] + '\n\nYou may add this filter as an entry by adding it to the entries file with a custom name and copying the query (using the \'Edit Entries...\' option).', 'Dynamic query filter');
+								fb.ShowPopupMessage('Non-recognized filter:\n\n' + currentFilters[idx] + '\n\nYou may add this filter as an entry by adding it to the entries file with a custom name and copying the query (using the \'Edit Entries...\' option).', 'Dynamic query filter');
 							}
 						});
 						menu.newCheckMenuLast(() => true);
@@ -798,6 +830,8 @@ function createConfigMenu(parent) {
 			];
 			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
 			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName, menuFlags);
+			menu.newEntry({ menuName: subMenuName, entryText: 'With guessed nearest genres:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, 'key') && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -805,7 +839,7 @@ function createConfigMenu(parent) {
 					menuName: subMenuName, entryText, func: () => {
 						let input = opt.val;
 						const defVal = keyVal || autoVal;
-						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genres/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', 'Search by distance'); }
+						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genre/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', 'Search by distance'); }
 						if (input > 0) {
 							input = Input.number('int', defVal, 'Enter number: (between -1 and Infinity)\n\nDisabled (-1),  automatic (0) or any Graph distance value (suggested 2 x max Graph distance).', 'Search by distance: ' + entryText.replace(/\t.*/, ''), defVal, [(input) => input >= -1]);
 							if (input === null) {
@@ -906,6 +940,8 @@ function createConfigMenu(parent) {
 			];
 			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
 			const subMenuName = menu.newMenu('Artist cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName, menuFlags);
+			menu.newEntry({ menuName: subMenuName, entryText: 'Based on artist locale:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -933,6 +969,8 @@ function createConfigMenu(parent) {
 			];
 			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
 			const subMenuName = menu.newMenu('Genre cultural filter' + (keyVal === -1 ? '\t[-disabled-]' : '\t[enabled]'), menuName, menuFlags);
+			menu.newEntry({ menuName: subMenuName, entryText: 'Based on genre origin:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			options.forEach((opt) => {
 				if (menu.isSeparator(opt)) { menu.newSeparator(subMenuName); return; }
 				const entryText = opt.name + (Object.hasOwn(recipe, key) && recipe[key] === opt.val ? '\t(forced by recipe)' : '');
@@ -949,8 +987,15 @@ function createConfigMenu(parent) {
 	}
 	if (!bLiteMode) {	// Post-scoring filters:
 		const menuName = menu.newMenu('Set post-scoring filters');
+		menu.newEntry({ menuName, entryText: 'Filters applied after similarity scoring:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		{ // Tags filter
-			createTagMenu(menuName, ['poolFilteringTag'], [!getSetting('poolFilteringN') || getSetting('poolFilteringN') === -1]);
+			createTagMenu(menuName, ['poolFilteringTag'],
+				[!getSetting('poolFilteringN') || getSetting('poolFilteringN') === -1],
+				void (0), ['Filter pool of similar tracks by tag'],
+				[
+					'\n\nTag(s) used to filter the pool of available similar tracks and only allow N + 1 tracks with the same tag value(s). In the case of multi-value tags, it may match any value. For ex. it may be used to only allow 1 track per artist on output playlist.',
+				]);
 		}
 		{
 			const options = ['poolFilteringN'];
@@ -972,10 +1017,12 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
-	if (!getSetting('bBreakWhenFilled') || !getSetting('bLiteMode')) {
+	if (!getSetting('bBreakWhenFilled') || !getSetting('bLiteMode')) {	// Picking modes
 		const menuFlags = getSetting('bInKeyMixingPlaylist') || getSetting('bBreakWhenFilled') ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set pool picking' + (getSetting('bInKeyMixingPlaylist') ? '      -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
+		menu.newEntry({ menuName, entryText: 'How similar available tracks are chosen:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bRandomPick'], [getSetting('bBreakWhenFilled')],
 			(key, i, props) => {
 				let toDisable = [];
@@ -1028,6 +1075,8 @@ function createConfigMenu(parent) {
 		const menuFlags = getSetting('bInKeyMixingPlaylist') ? MF_GRAYED : MF_STRING;
 		const menuText = 'Set final sorting' + (getSetting('bInKeyMixingPlaylist') ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
+		menu.newEntry({ menuName, entryText: 'How chosen tracks are sorted:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bSortRandom'],
 			[getSetting('bRandomPick')],
 			(key, i, props) => {
@@ -1134,6 +1183,8 @@ function createConfigMenu(parent) {
 	if (!bLiteMode) {	// Special playlists:
 		const menuFlags = getSetting('bProgressiveListCreation') || getSetting('bInKeyMixingPlaylist') ? MF_CHECKED : void (0);
 		const menuName = menu.newMenu('Special playlist rules', void (0), menuFlags);
+		menu.newEntry({ menuName, entryText: 'Special playlists creation and handling:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		{
 			createBoolMenu(menuName, ['bProgressiveListCreation'], void (0), (key, i, props) => {
 				let toDisable = [];
@@ -1146,21 +1197,18 @@ function createConfigMenu(parent) {
 				if (props[key][1]) {
 					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				}
-			});
+			}, ['Recursive search using output']);
 		}
 		{
-			const options = ['progressiveListCreationN'];
-			options.forEach((key) => {
-				const idxEnd = properties[key][0].indexOf('(');
-				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
-				menu.newEntry({
-					menuName, entryText, func: () => {
-						const input = Input.number('int positive', properties[key][1], 'Enter number: (between 2 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= 2 && input <= 100]);
-						if (input === null) { return; }
-						properties[key][1] = input;
-						overwriteProperties(properties); // Updates panel
-					}, flags: Object.hasOwn(recipe, key) || !getSetting('bProgressiveListCreation') ? MF_GRAYED : MF_STRING
-				});
+			const key = 'progressiveListCreationN';
+			const entryText = 'Steps on recursive search...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+			menu.newEntry({
+				menuName, entryText, func: () => {
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 2 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= 2 && input <= 100]);
+					if (input === null) { return; }
+					properties[key][1] = input;
+					overwriteProperties(properties); // Updates panel
+				}, flags: Object.hasOwn(recipe, key) || !getSetting('bProgressiveListCreation') ? MF_GRAYED : MF_STRING
 			});
 		}
 		menu.newSeparator(menuName);
@@ -1175,7 +1223,8 @@ function createConfigMenu(parent) {
 					if (props[key][1]) {
 						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 					}
-				}
+				},
+				['Harmonic mixing sorting', 'Double pass to match more tracks']
 			);
 			menu.newCheckMenuLast(() => getSetting('bInKeyMixingPlaylist') && getSetting('bHarmonicMixDoublePass'));
 		}
@@ -1214,10 +1263,14 @@ function createConfigMenu(parent) {
 		}
 		menu.newSeparator(menuName);
 		{
-			const subMenuName = menu.newMenu('Duplicates', menuName);
+			const subMenuName = menu.newMenu('Duplicated tracks', menuName);
+			menu.newEntry({ menuName: subMenuName, entryText: 'How duplicates are handled by TF:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
 			const isEnabled = !!JSON.parse(getSetting('checkDuplicatesByTag')).length;
 			{
-				createTagMenu(subMenuName, ['checkDuplicatesByTag']);
+				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void(0), void(0), void(0), [
+					'\n\nTag(s) used to find and remove duplicates which match the same values. On some libraries there may be multiple versions of the same track (for ex. on compilations or live versions) and therefore appear on output playlist multiple times, which may be undesired.',
+				]);
 				menu.newCheckMenuLast(() => isEnabled);
 			}
 			{
@@ -1251,7 +1304,8 @@ function createConfigMenu(parent) {
 								);
 							}
 						}
-					}
+					},
+					['Use RegExp for title matching', void (0)]
 				);
 			}
 		}
@@ -1262,6 +1316,8 @@ function createConfigMenu(parent) {
 	menu.newSeparator();
 	{	// Other tools
 		const subMenu = menu.newMenu('Other tools');
+		menu.newEntry({ menuName: subMenu, entryText: 'Tagging related tools:', func: null, flags: MF_GRAYED });
+		menu.newSeparator(subMenu);
 		{	// Similar Artists
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Calculate similar artists tags', func: () => {
@@ -1402,7 +1458,7 @@ function createConfigMenu(parent) {
 		if (bIsGraph) { 	// Find genre/styles not on graph
 			menu.newSeparator(subMenu);
 			menu.newEntry({
-				menuName: subMenu, entryText: 'Find genres/styles not on Graph', func: () => {
+				menuName: subMenu, entryText: 'Find genre/styles not on Graph', func: () => {
 					const tags = JSON.parse(properties.tags[1]);
 					findStyleGenresMissingGraph({
 						genreStyleFilter: JSON.parse(properties.genreStyleFilterTag[1]).filter(Boolean),
@@ -1566,7 +1622,7 @@ function createConfigMenu(parent) {
 			{ name: 'Other tags notes', file: folders.xxx + 'helpers\\readme\\tags_notes.txt' },
 		].filter(Boolean).filter((e) => e.bLiteMode || !bLiteMode);
 		if (readmes.length) {
-			readmes.forEach((entry) => { // Only show non empty files
+			readmes.forEach((entry) => { // Only show non-empty files
 				if (menu.isSeparator(entry)) { menu.newSeparator(subMenuName); }
 				else if (_isFile(entry.file)) {
 					const readme = _open(entry.file, utf8); // Executed on script load
