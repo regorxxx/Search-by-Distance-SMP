@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/24
+//23/12/24
 
 /* exported createThemeMenu */
 
@@ -56,7 +56,7 @@ function createThemeMenu(parent) {
 			const themeTagsKeys = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
 			const themeTagsTf = themeTagsKeys.map((k) => tags[k].tf.filter(Boolean));
 			// Retrieve values
-			const selHandleList = new FbMetadbHandleList(fb.GetFocusItem());
+			const selHandleList = new FbMetadbHandleList(fb.GetFocusItem(true));
 			const themeTagsValues = themeTagsTf.map((tf) => getHandleListTags(selHandleList, tf, { bMerged: true }).flat().filter(Boolean));
 			// Force data type
 			themeTagsKeys.forEach((key, i) => {
@@ -74,10 +74,12 @@ function createThemeMenu(parent) {
 				if (localeTag) { themeTags.iso.push(getCountryISO(localeTag)); }
 				else {
 					const artists = getHandleListTags(selHandleList, [globTags.artist], { bMerged: true }).flat(Infinity);
-					const data = getLocaleFromId([...new Set(artists)]);
-					data.forEach((obj) => {
-						if (obj.iso.length) { themeTags.iso.push(obj.iso); }
-					});
+					if (artists && artists.length) {
+						const data = getLocaleFromId([...new Set(artists)]);
+						data.forEach((obj) => {
+							if (obj.iso.length) { themeTags.iso.push(obj.iso); }
+						});
+					}
 				}
 			});
 			// Theme obj

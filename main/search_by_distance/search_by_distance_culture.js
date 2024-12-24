@@ -1,11 +1,11 @@
 ﻿'use strict';
-//09/08/24
+//23/12/24
 
 /* exported getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter */
 
 /* global sbd:readable */
 include('..\\music_graph\\music_graph_xxx.js');
-/* global globTags:readable, _p:readable, queryJoin:readable, folders:readable, _isFile:readable, utf8:readable, music_graph_descriptors:readable, _jsonParseFileCheck:readable, isArray:readable, _bt:readable, isString:readable, _qCond:readable, isInt:readable */
+/* global globTags:readable, _p:readable, queryJoin:readable, folders:readable, _isFile:readable, utf8:readable, music_graph_descriptors:readable, _jsonParseFileCheck:readable, _bt:readable, isString:readable, _qCond:readable, isInt:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 /* global music_graph_descriptors_countries:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
@@ -27,17 +27,22 @@ include('..\\world_map\\world_map_tables.js');
 
 // Similar culture zone
 function getLocaleFromId(id, worldMapData = null) {
-	const output = { locale: [''], country: '', iso: '', worldMapData: null };
 	const dataId = 'artist';
 	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
 	if (!worldMapData && _isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) { worldMapData = data; }
 	}
-	if (!worldMapData) { console.log('getZoneArtistFilter: no world map data available'); return output; }
+	if (!id || !worldMapData) {
+		if (!worldMapData) { console.log('getZoneArtistFilter: no world map data available'); }
+		return Array.isArray(id)
+			? id.map(() => { return { locale: [''], country: '', iso: '', worldMapData: null }; })
+			: { locale: [''], country: '', iso: '', worldMapData: null };
+	}
 	// Retrieve current country
-	if (isArray(id)) { return id.map((_) => { return getLocaleFromId(_, worldMapData); }); }
+	if (Array.isArray(id)) { return id.map((subId) => getLocaleFromId(subId, worldMapData)); }
 	else {
+		const output = { locale: [''], country: '', iso: '', worldMapData: null };
 		output.locale = (worldMapData.find((obj) => { return (obj[dataId] === id); }) || {}).val || [''];
 		output.country = output.locale.length ? (output.locale.slice(-1)[0] || '') : '';
 		output.iso = output.country.length ? (getCountryISO(output.country) || '') : '';
@@ -161,7 +166,9 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTa
 
 // Similar culture zone
 function getZoneGraphFilter(styleGenre, mode = 'region') {
-	if (isArray(styleGenre)) { return [...new Set(styleGenre.filter(Boolean).map((_) => { return getZoneGraphFilter(_, mode); }).flat(Infinity))]; }
+	if (Array.isArray(styleGenre)) {
+		return [...new Set(styleGenre.filter(Boolean).map((_) => getZoneGraphFilter(_, mode)).flat(Infinity))];
+	}
 	mode = isString(mode) ? mode.toLowerCase() : mode;
 	// Retrieve current region
 	const regions = music_graph_descriptors_culture.getStyleRegion(styleGenre); // multiple outputs!
