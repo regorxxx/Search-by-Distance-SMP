@@ -1895,7 +1895,7 @@ async function searchByDistance({
 		let i = poolLength;
 		while (i--) { handlePoolArray.push(handleList[scoreData[i].index]); }
 		let handlePool = new FbMetadbHandleList(handlePoolArray);
-		handlePool = filterDuplicates({ handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN }); // n + 1
+		handlePool = filterDuplicates({ handleList: handlePool, checkKeys: poolFilteringTag, nAllowed: poolFilteringN, bAdvTitle: true, bMultiple: true }); // n + 1
 		/** * @type {[string[][]]} */
 		const [titleHandlePool] = getHandleListTagsV2(handlePool, ['TITLE'], { splitBy: null });
 		let filteredScoreData = [];

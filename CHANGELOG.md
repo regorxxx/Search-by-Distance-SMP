@@ -75,6 +75,7 @@
 - Dynamic queries: improved entries file formatting on windows text editors which parse new lines only with CR+LF instead of LF.
 - Dynamic queries: support for '*' wildcard (also for multi-value tags). i.e. 'ARTIST IS #ARTIST*%' -> 'ARTIST IS A*'
 - Dynamic queries: support for 'ALBUM ARTIST' fallback expansion for multi-value tags. Note in foobar2000 '%ALBUM ARTIST%' works as a virtual tag pointing to ALBUM ARTIST|ARTIST|COMPOSER (but values are joined with commas) and 'ALBUM ARTIST' points to a file tag, thus never working with multiple values as intended. i.e. 'ALBUM ARTIST IS ACDC' only works if the track has a real tag with such value, but '%ALBUM ARTIST% IS ACDC' would not work properly with a track with 2 artists. Dynamic queries will automatically replace queries like 'ALBUM ARTIST IS #ALBUM ARTIST#' -> '(ALBUM ARTIST PRESENT AND ALBUM ARTIST IS #ALBUM ARTIST#) OR (ALBUM ARTIST MISSING AND ARTIST IS #ARTIST#)', thus working as intended in most cases.
+- Post-scoring filters: 'Filter pool of similar tracks by tag' option now also uses RegExp for title (if used) and has multi-value tag support (any single match will do, not only when all values of a multi-value tag match).
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Tags: 'Genre/style region' tag weight is set to zero -internally- on any search method different than 'GRAPH' before processing; now available only when using that search method.
 - Configuration: anti-influences filters enabled by default on new installations.
@@ -87,6 +88,7 @@
 ### Removed
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
+- Themes: fix crash on theme creation with incomplete input or when World-Map-SMP was not used.
 - Sorting: fixed long time bug where 'Sort final playlist by score' was not working properly in some cases, despite the console showing the right order.
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total score. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.
