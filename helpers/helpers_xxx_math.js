@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/12/23
+//23/12/24
 
 /* exported combinations, nk_combinations, getClosestDivisor */
 
@@ -10,35 +10,33 @@
 // Ksized-combinations of a given set of elements (array)
 function k_combinations(aSet, k) {
 	// FROM https://gist.github.com/axelpale/3118596
-	let aSetLength = aSet.length;
+	const aSetLen = aSet.length;
 	// Wrong set
-	let isArray = Object.prototype.toString.call(aSet) === '[object Array]' ? 1 : 0; //set
-	if (!isArray || typeof aSet === 'undefined' || aSet === null || aSetLength === null || aSetLength === 0) {
+	if (!Array.isArray(aSet) || typeof aSet === 'undefined' || aSet === null || aSetLen === null || aSetLen === 0) {
 		console.log('k_combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
 		return null; //Array was null or not an array
 	}
 	// Wrong K-size
-	if (!k || k > aSetLength) {
+	if (!k || k > aSetLen) {
 		console.log('select_pairs: wrong combinatory number (' + k + ').');
 		return null;
 	}
 	// K-sized set has only one K-sized subset.
-	if (k === aSetLength) {
+	if (k === aSetLen) {
 		return [aSet];
 	}
-
 	let i, j, combs;
 	// There is N 1-sized subsets in a N-sized set.
 	if (k === 1) {
 		combs = [];
-		for (i = 0; i < aSetLength; i++) {
+		for (i = 0; i < aSetLen; i++) {
 			combs.push([aSet[i]]);
 		}
 		return combs;
 	}
 	let head, tailcombs;
 	combs = [];
-	for (i = 0; i < aSetLength - k + 1; i++) {
+	for (i = 0; i < aSetLen - k + 1; i++) {
 		// head is a list that includes only our current element.
 		head = aSet.slice(i, i + 1);
 		// We take smaller combinations from the subsequent elements
@@ -55,23 +53,20 @@ function k_combinations(aSet, k) {
 // All possible combinations of a given set of elements (array)
 function combinations(aSet) {
 	// FROM https://gist.github.com/axelpale/3118596
-	let aSetLength = aSet.length;
+	let aSetLen = aSet.length;
 	// Wrong set
-	let isArray = Object.prototype.toString.call(aSet) === '[object Array]' ? 1 : 0; //set
-	if (!isArray || typeof aSet === 'undefined' || aSet === null || aSetLength === null || aSetLength === 0) {
+	if (!Array.isArray(aSet) || typeof aSet === 'undefined' || aSet === null || aSetLen === null || aSetLen === 0) {
 		console.log('combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
 		return null; //Array was null or not an array
 	}
 	// 1-sized set has only one subset.
-	if (aSetLength === 1) {
+	if (aSetLen === 1) {
 		return [aSet];
 	}
-
 	let k, i, combs, k_combs;
 	combs = [];
-
 	// Calculate all non-empty k-combinations
-	for (k = 1; k <= aSetLength; k++) {
+	for (k = 1; k <= aSetLen; k++) {
 		k_combs = k_combinations(aSet, k);
 		for (i = 0; i < k_combs.length; i++) {
 			combs.push(k_combs[i]);
