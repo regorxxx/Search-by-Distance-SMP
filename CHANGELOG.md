@@ -79,9 +79,12 @@
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Tags: 'Genre/style region' tag weight is set to zero -internally- on any search method different than 'GRAPH' before processing; now available only when using that search method.
 - Configuration: anti-influences filters enabled by default on new installations.
+- Configuration: genre variation (aka graph distance) can now be set as the distance key string (for ex. 'intra_supergenre') without the need of using 'music_graph_descriptors.' prefix too. In any case both notations are supported ('music_graph_descriptors.intra_supergenre' or 'intra_supergenre').
+- Recursive Playlist: every iterative search will reuse the sorting/picking settings, so final playlist will be sorted in multiple groups with same pattern instead of randomly.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
 - UI: improvements of menu entries related to settings.
+- Readmes: improved readmes and added missing features.
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
@@ -226,7 +229,7 @@
 ### Removed
 ### Fixed
 - Scoring Method: fix to incorrect handling of (negative) values outside range for some methods ('NORMAL' and 'LOGISTIC').
-- Readmes: minor fix to  'search_by_distance_info.txt' file.
+- Readmes: minor fix to 'search_by_distance_info.txt' file.
 - Info: minor fixes to reports provided by 'search_by_distance_info' button.
 - Tags: incorrect handling of single-value tags in some cases. Issue #22.
 - Tags: incorrect handling of empty tags in some cases.
