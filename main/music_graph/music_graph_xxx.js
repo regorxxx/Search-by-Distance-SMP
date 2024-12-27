@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/24
+//27/12/24
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -17,6 +17,8 @@ if (typeof include !== 'undefined') { // On foobar2000
 	/* global _t:readable */
 	include('..\\..\\helpers\\helpers_xxx_statistics.js');
 	/* global zScoreToProbability:readable */
+	include('..\\..\\helpers\\helpers_xxx_math.js');
+	/* global toFraction:readable */
 	let userDescriptor = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 	if (utils.IsFile(userDescriptor)) {
 		try {
@@ -874,7 +876,7 @@ async function graphStatistics({
 	histogram(distances, binSize).forEach((val, i) => {hist[(i * binSize).toString()] = val;});
 	const masxFreq = Math.max(...Object.values(hist));
 	const histEntries = Object.entries(hist);
-	statistics.mode = histEntries.find((pair) => {return pair[1] === masxFreq;});
+	statistics.mode = Math.round(histEntries.find((pair) => {return pair[1] === masxFreq;})[0]);
 	let i = 0, acumFreq = total / 2;
 	while (true) {
 		acumFreq -= histEntries[i][1];
@@ -888,19 +890,16 @@ async function graphStatistics({
 	const ranges = [1/4, 1/2, 3/4, 1, 3/2, 2, 3].map((val) => {
 		const prob = zScoreToProbability(-3 + val) - offset;
 		const roundProb = zScoreToProbability > 0.01 ? Math.round(prob * 100) : Math.round(prob * 10000) / 100;
-		return 'To retrieve <' + roundProb + '% nodes: ' + val * statistics.sigma + ' (' + val.toString() + ' x Sigma)';
+		return 'To retrieve <' + roundProb * 2 + '% nodes: ' + val * statistics.sigma + ' (' + val.toString() + ' x Sigma)';
 	});
 	// Find sigma in terms of graph variables
 	const sigmaConv = ['cluster', 'intra_supergenre'].map((key) => {
-		let val;
-		let coeff = null;
-		for (let i = 1; i < 10; i++) {
-			val = descriptor[key] * i;
-			if (Math.abs(val - statistics.sigma) <= 10) {coeff = i; break;}
-			val = descriptor[key] / i;
-			if (Math.abs(val - statistics.sigma) <= 10) {coeff = 1 / i; break;}
-		}
-		return coeff ? coeff + ' x ' + key + ': ' + val : null;
+		const coeff = toFraction(statistics.sigma / descriptor[key], 0.05);
+		return coeff[0]
+			? coeff[1] !== 1
+				? coeff.join('/') + ' x ' + key + ': ' + (coeff[0] / coeff[1] * descriptor[key])
+				: coeff[0] + ' x ' + key + ': ' +  + (coeff[0] * descriptor[key])
+			: null;
 	}).filter(Boolean);
 	// Report
 	let text = 'Histogram (distance:frequency):\n' + JSON.stringify(hist);

@@ -1,7 +1,7 @@
 ﻿'use strict';
-//23/12/24
+//27/12/24
 
-/* exported combinations, nk_combinations, getClosestDivisor */
+/* exported combinations, nk_combinations, getClosestDivisor, toFraction */
 
 /*
 	Combinatory
@@ -77,7 +77,7 @@ function combinations(aSet) {
 
 const factLookup = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368000, 20922789888000, 355687428096000, 6402373705728000, 121645100408832000, 2432902008176640000, 51090942171709440000, 1124000727777607680000]; // First 23 results
 function fact(n) {
-	if (!factLookup[n]) {factLookup[n] = fact(n-1) * n;}
+	if (!factLookup[n]) { factLookup[n] = fact(n - 1) * n; }
 	return factLookup[n];
 }
 
@@ -85,7 +85,7 @@ function fact(n) {
 function nk_combinations(n, k) {
 	if (k === n) {
 		return 1;
-	} else if (k > n){
+	} else if (k > n) {
 		return 0;
 	} else {
 		return fact(n) / (fact(k) * fact(n - k));
@@ -96,18 +96,33 @@ function nk_combinations(n, k) {
 	Numbers
 */
 
-function getClosestDivisor(n, toX){
-	if (!n % toX) {return toX;}
+function getClosestDivisor(n, toX) {
+	if (!n % toX) { return toX; }
 	let res = [];
 	let i = 0;
 	while (i <= n) {
-		if (n % i === 0){
+		if (n % i === 0) {
 			res.push(i);
-			if (i >= toX) {break;}
+			if (i >= toX) { break; }
 		}
 		i++;
 	}
 	let b = res.pop();
 	let a = res.pop();
 	return (Math.abs(b - toX) < Math.abs(a - toX) ? b : a);
+}
+
+function toFraction(x, epsilon = 0.0001) {
+	if (x === 0) { return [0, 1]; }
+	const a = Math.abs(x);
+	let n = 0;
+	let d = 1;
+	let r;
+	while (true) {
+		r = n / d;
+		if (Math.abs((r - a) / a) < epsilon) { break; }
+		if (r < a) { n++; }
+		else { d++; }
+	}
+	return [x < 0 ? -n : n, d];
 }
