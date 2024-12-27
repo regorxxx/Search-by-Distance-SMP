@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/12/24
+//27/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -109,8 +109,12 @@ const SearchByDistance_properties = {
 	})],
 	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
 	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
-	graphDistance: ['Exclude any track with graph distance greater than (only GRAPH method):', 'music_graph_descriptors.intra_supergenre',
-		{ func: (x) => { return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || (isInt(x) && x >= 0) || x === Infinity; } }, 'music_graph_descriptors.intra_supergenre'],
+	graphDistance: ['Exclude any track with graph distance greater than (only GRAPH method):', 'intra_supergenre',
+		{
+			func: (x) => {
+				return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || (isInt(x) && x >= 0) || x === Infinity;
+			}
+		}, 'intra_supergenre'],
 	method: ['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', { func: checkMethod }, 'GRAPH'],
 	bNegativeWeighting: ['Negative score for tags out of range', true],
 	bFilterWithGraph: ['Filter values not present on the graph', true],
@@ -141,7 +145,7 @@ const SearchByDistance_properties = {
 	checkDuplicatesByTag: ['Remove duplicates by', JSON.stringify(globTags.remDupl)],
 	sortBias: ['Duplicates track selection bias', globQuery.remDuplBias, { func: isStringWeak }, globQuery.remDuplBias],
 	bAdvTitle: ['Duplicates advanced RegExp title matching', true],
-	bMultiple: ['Partial Multi-value tag matching', true],
+	bMultiple: ['Partial multi-value tag matching', true],
 	bSmartShuffle: ['Smart Shuffle by Artist', true],
 	smartShuffleTag: ['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc: ['Smart Shuffle extra conditions', true],
@@ -1421,7 +1425,9 @@ async function searchByDistance({
 		if (bUseAntiInfluencesFilter || bConditionAntiInfluences) { // Removes anti-influences using queries
 			let influences = [];
 			calcTags.genreStyle.referenceSet.forEach((genreStyle) => {
-				let anti = bConditionAntiInfluences ? descr.getConditionalAntiInfluences(genreStyle) : descr.getAntiInfluences(genreStyle);
+				let anti = bConditionAntiInfluences
+					? descr.getConditionalAntiInfluences(genreStyle)
+					: descr.getAntiInfluences(genreStyle);
 				if (anti.length) { influences.push(...descr.replaceWithSubstitutionsReverse(anti)); }
 			});
 			// Even if the argument is known to be a genre or style, the output values may be both, genre and styles.. so we use both for the query
@@ -2217,7 +2223,7 @@ async function searchByDistance({
 						// Reuse arguments for successive calls and disable debug/logs and playlist creation
 						let newArgs = {};
 						for (const arg of arguments) { newArgs = { ...newArgs, ...arg }; }
-						newArgs = { ...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false, bShowFinalSelection: false, bProgressiveListCreation: false, bRandomPick: true, bSortRandom: true, bProgressiveListOrder: false, sel: newSel, bCreatePlaylist: false };
+						newArgs = { ...newArgs, bSearchDebug: false, bProfile: false, bShowQuery: false, bShowFinalSelection: false, bProgressiveListCreation: false, sel: newSel, bCreatePlaylist: false };
 						// Get #n tracks per call and reuse lower scoring track as new selection
 						let newSelectedHandlesArray;
 						for (let i = 0; i < progressiveListCreationN; i++) {
@@ -2658,13 +2664,21 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 				fb.ShowPopupMessage('Error parsing graphDistance (length >= 50): ' + output, 'Search by Distance');
 				return null;
 			}
-			if (!output.includes('music_graph_descriptors') || output.includes('()') || output.includes(',')) {
+			if (output.includes('()') || output.includes(',')) {
 				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output, 'Search by Distance');
 				return null;
 			}
-			const validVars = Object.keys(descr).map((key) => { return 'music_graph_descriptors.' + key; });
-			if (!output.includes('+') && !output.includes('-') && !output.includes('*') && !output.includes('/') && !validVars.includes(output)) {
-				fb.ShowPopupMessage('Error parsing graphDistance (using no arithmetic or variable): ' + output, 'Search by Distance');
+			const validVars = [
+				...descr.distance_keys,
+				...descr.substitution_keys,
+				...descr.influences_keys
+			];
+			const bHasVars = validVars.some((key) => output.includes(key));
+			if (bHasVars) {
+				output = output.replaceAll('music_graph_descriptors.', '');
+				validVars.forEach((key) => output = output.replaceAll(key, descr[key].toString()));
+			} else {
+				fb.ShowPopupMessage('Error parsing graphDistance (using no descriptor variable): ' + output, 'Search by Distance');
 				return null;
 			}
 			output = eval(output);
