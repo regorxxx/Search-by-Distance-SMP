@@ -1,9 +1,9 @@
 ﻿'use strict';
-//23/12/24
+//27/12/24
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -53,8 +53,8 @@ function createConfigMenu(parent) {
 	// Recipe-only tags?
 	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
 	const graphDistance = Object.hasOwn(recipe, 'graphDistance')
-		? parseGraphVal(recipe.graphDistance)
-		: parseGraphVal(properties.graphDistance[1]);
+		? parseGraphDistance(recipe.graphDistance, void(0), false)
+		: parseGraphDistance(properties.graphDistance[1], void(0), false);
 	const bIsGraph = getSetting('method') === 'GRAPH';
 	const bLiteMode = getSetting('bLiteMode');
 
@@ -162,10 +162,17 @@ function createConfigMenu(parent) {
 			let displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
 			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
 			const entryText = 'Genre/styles variation lower than...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
+			const bUSerDescriptor = typeof music_graph_descriptors_user !== 'undefined';
+			const bShowDefault = !bUSerDescriptor ||
+				[
+					...music_graph_descriptors.distance_keys,
+					...music_graph_descriptors.substitution_keys,
+					...music_graph_descriptors.influences_keys
+				].every((key) => !Object.hasOwn(music_graph_descriptors_user, key));
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
-					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; }
+					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.' + (bShowDefault ? '\nBy default a value of ' + (isString(properties[key][3]) ? '\'' + properties[key][3] + '\' ' + _p(parseGraphDistance(properties[key][3])) : parseGraphDistance(properties[key][3])) + ' is used.' : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; }
 					if (!input && input !== '0' || !input.length) { return; }
 					if (parseGraphDistance(input) === null) { return; }
 					if (!Number.isNaN(Number(input))) { input = Number(input); } // Force a number type if possible
@@ -188,8 +195,8 @@ function createConfigMenu(parent) {
 				bLiteMode ? '' : 'Minimum if there are not enough tracks'
 			].filter(Boolean);
 			const info = [
-				'\n\nControls how tracks are matched based on tag similarity; any track with a score over this value will be considered a match',
-				'\n\nIn case the there are not enough tracks with the chosen similarity score, it may be lowered to this value as fallback. Otherwise only the standard limit is used.'
+				'\n\nControls how tracks are matched based on tag similarity; any track with a score over this value will be considered a match.\nBy default a value of ' + properties.scoreFilter[3] + ' is used.',
+				'\n\nIn case there are not enough tracks with the chosen similarity score, it may be lowered to this value as fallback. Otherwise only the standard limit is used.'
 			].filter(Boolean);
 			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
@@ -210,18 +217,18 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bBreakWhenFilled'], void (0),
 			(key, i, props) => {
-				let toDisable = [];
-				if (key === 'bBreakWhenFilled') { toDisable = ['bRandomPick', 'bInversePick']; }
+				const toDisable = [];
 				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					if (key === 'bBreakWhenFilled') {
+						toDisable.push('bRandomPick', 'bInversePick');
+						fb.ShowPopupMessage(
+							'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the desired playlist size is reached, no more tracks will be analyzed. This greatly improves processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
+							, 'Search by distance'
+						);
+					}
+					props.probPick[1] = 100;
 				}
-				if (key === 'bBreakWhenFilled') { props.probPick[1] = 100; }
-				if (key === 'bBreakWhenFilled' && props[key][1]) {
-					fb.ShowPopupMessage(
-						'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the desired playlist size is reached, no more tracks will be analyzed. This greatly improves processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
-						, 'Search by distance'
-					);
-				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		if (!bLiteMode) {
@@ -230,7 +237,7 @@ function createConfigMenu(parent) {
 				createBoolMenu(menuName, ['bFilterWithGraph'], void (0), (key, i, props) => {
 					if (key === 'bFilterWithGraph' && props[key][1]) {
 						fb.ShowPopupMessage(
-							'Filters genre/styles not present on the graph descriptors while performing the genre analysis (GRAPH method). The same can be achieved adding all missing values to \'Filter genre/style values\' setting or graph descriptors exclusions, but this setting covers all use-cases (although it requires more processing time).\n\nNote this only applies to the genre analysis part, i.e. non-recognized tags will still be used when checking tag similarity score.\n\nIn general, it\'s recommended to leave it enabled,unless you know what you are doing.'
+							'Filters genre/styles not present on the graph descriptors while performing the genre analysis (GRAPH method). The same can be achieved adding all missing values to \'Filter genre/style values\' setting or graph descriptors exclusions, but this setting covers all use-cases (although it requires more processing time).\n\nNote this only applies to the genre analysis part, i.e. non-recognized tags will still be used when checking tag similarity score.\n\nIn general, it\'s recommended to leave it enabled, unless you know what you are doing.'
 							, 'Search by distance'
 						);
 					}
@@ -362,8 +369,8 @@ function createConfigMenu(parent) {
 				const options = ['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL'];
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'scoringDistribution') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
-				const subMenuName2 = menu.newMenu('Scoring...', subMenuName);
-				menu.newEntry({ menuName: subMenuName2, entryText: 'How scoring is distributed:', func: null, flags: MF_GRAYED });
+				const subMenuName2 = menu.newMenu('Scoring distribution...', subMenuName);
+				menu.newEntry({ menuName: subMenuName2, entryText: 'How scoring is applied:', func: null, flags: MF_GRAYED });
 				menu.newSeparator(subMenuName2);
 				options.forEach((option) => {
 					const entryText = option + (bRecipe && tag.scoringDistribution === option ? '\t(forced by recipe)' : '');
@@ -876,9 +883,6 @@ function createConfigMenu(parent) {
 		if (!bLiteMode) {	// Influences filter
 			if (!menu.isLastEntrySep) { menu.newSeparator(menuName); }
 			const options = ['bUseAntiInfluencesFilter', 'bConditionAntiInfluences', 'sep', 'bUseInfluencesFilter'];
-			const bConditionAntiInfluences = Object.hasOwn(recipe, 'bConditionAntiInfluences')
-				? recipe['bConditionAntiInfluences']
-				: properties['bConditionAntiInfluences'][1];
 			options.forEach((key) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
 				const bGraphCondition = !bIsGraph && (key === 'bUseAntiInfluencesFilter' || key === 'bConditionAntiInfluences' || key === 'bUseInfluencesFilter');
@@ -887,12 +891,15 @@ function createConfigMenu(parent) {
 					menuName, entryText, func: () => {
 						properties[key][1] = !properties[key][1];
 						overwriteProperties(properties); // Updates panel
-						if (properties[key][1] && key === 'bConditionAntiInfluences') {
-							fb.ShowPopupMessage('This option overrides the global anti-influences filter option,\nso it will be disabled at the configuration menu.\n\nWill be enabled automatically for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');
+						if (properties[key][1]) {
+							fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt') || '', 'Search by distance');
+							if (key === 'bConditionAntiInfluences') {
+								fb.ShowPopupMessage('This option overrides the global anti-influences filter option.\n\nAnti-influences filter will be automatically enabled for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');
+							}
 						}
-					}, flags: (key === 'bUseAntiInfluencesFilter' && bConditionAntiInfluences || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
+					}, flags: (key === 'bUseAntiInfluencesFilter' && getSetting('bConditionAntiInfluences') || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
 				});
-				menu.newCheckMenuLast(() => (Object.hasOwn(recipe, key) ? recipe[key] : properties[key][1]));
+				menu.newCheckMenuLast(() => !bGraphCondition && (getSetting(key) || (key === 'bUseAntiInfluencesFilter' && getSetting('bConditionAntiInfluences'))));
 			});
 		}
 		if (!bLiteMode) {	// Artist filter
@@ -1025,34 +1032,26 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bRandomPick'], [getSetting('bBreakWhenFilled')],
 			(key, i, props) => {
-				let toDisable = [];
-				if (key === 'bRandomPick') { toDisable = ['bInversePick', 'bSortRandom', 'bInverseListOrder']; }
+				const toDisable = [];
 				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					if (key === 'bRandomPick') { toDisable.push('bInversePick', 'bSortRandom', 'bInverseListOrder'); }
+				} else {
+					if (key === 'bRandomPick' && !getSetting('bInversePick')) { toDisable.push('bProgressiveListOrder'); }
 				}
-				if (key === 'bRandomPick') {
-					if (!props.bRandomPick[1] && !getSetting('bInversePick') && getSetting('bProgressiveListOrder')) {
-						props.bProgressiveListOrder[1] = false;
-					}
-				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		if (!bLiteMode) {	// Pool picking:
 			createBoolMenu(menuName, ['sep', 'bInversePick'], void (0),
 				(key, i, props) => {
-					let toDisable = [];
-					if (key === 'bInversePick') { toDisable = ['bRandomPick']; }
+					const toDisable = [];
 					if (props[key][1]) {
-						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+						if (key === 'bInversePick') { toDisable.push('bRandomPick', 'bInverseListOrder'); }
+					} else {
+						if (key === 'bInversePick' && !getSetting('bRandomPick')) { toDisable.push('bProgressiveListOrder'); }
+
 					}
-					if (key === 'bInversePick') {
-						if (!props.bInversePick[1] && !getSetting('bRandomPick') && getSetting('bProgressiveListOrder')) {
-							props.bProgressiveListOrder[1] = false;
-						}
-						if (props.bInversePick[1] && getSetting('bInverseListOrder')) {
-							props.bInverseListOrder[1] = false;
-						}
-					}
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				}
 			);
 			menu.newSeparator(menuName);
@@ -1080,13 +1079,12 @@ function createConfigMenu(parent) {
 		createBoolMenu(menuName, ['bSortRandom'],
 			[getSetting('bRandomPick')],
 			(key, i, props) => {
-				let toDisable = ['bProgressiveListOrder', 'bSmartShuffle'];
-				if (!getSetting('bProgressiveListCreation')) {
-					toDisable.push('bInverseListOrder');
-				}
+				const toDisable = [];
 				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					toDisable.push('bProgressiveListOrder', 'bSmartShuffle');
+					if (!getSetting('bProgressiveListCreation')) { toDisable.push('bInverseListOrder'); }
 				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		if (getSetting('bRandomPick') && !getAnySetting(['bProgressiveListOrder', 'bInversePick', 'bSmartShuffle'])) {
@@ -1095,13 +1093,14 @@ function createConfigMenu(parent) {
 		createBoolMenu(menuName, ['bProgressiveListOrder'],
 			[!getSetting('bRandomPick') && !getSetting('bInversePick')],
 			(key, i, props) => {
-				let toDisable = ['bSortRandom', 'bSmartShuffle'];
-				if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bSortRandom', 'bSmartShuffle'])) {
-					toDisable.push('bInverseListOrder');
-				}
+				const toDisable = [];
 				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					toDisable.push('bSortRandom', 'bSmartShuffle');
+					if (getSetting('bInversePick') && !getAnySetting(['bRandomPick', 'bSortRandom', 'bSmartShuffle'])) {
+						toDisable.push('bInverseListOrder');
+					}
 				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		if (!getAnySetting(['bRandomPick', 'bInversePick', 'bSortRandom', 'bSmartShuffle'])) {
@@ -1122,22 +1121,22 @@ function createConfigMenu(parent) {
 		createBoolMenu(menuName, ['sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
 			[void (0), void (0), !getSetting('bSmartShuffle')],
 			(key, i, props) => {
-				let toDisable = [];
-				if (key === 'bSmartShuffle') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals']; }
-				if (key === 'bSmartShuffleAdvc' && props[key][1]) {
-					fb.ShowPopupMessage(
-						'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
-						'\n\t-Instrumental tracks.' +
-						'\n\t-Live tracks.' +
-						'\n\t-Female/male vocals tracks.' +
-						'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
-						'\nposition whenever possible without altering the main logic.'
-						, 'Search by distance'
-					);
-				}
+				const toDisable = [];
 				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+					if (key === 'bSmartShuffle') { toDisable.push('bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals'); }
+					if (key === 'bSmartShuffleAdvc') {
+						fb.ShowPopupMessage(
+							'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
+							'\n\t-Instrumental tracks.' +
+							'\n\t-Live tracks.' +
+							'\n\t-Female/male vocals tracks.' +
+							'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
+							'\nposition whenever possible without altering the main logic.'
+							, 'Search by distance'
+						);
+					}
 				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		{
@@ -1187,16 +1186,11 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		{
 			createBoolMenu(menuName, ['bProgressiveListCreation'], void (0), (key, i, props) => {
-				let toDisable = [];
-				if (key === 'bProgressiveListCreation') {
-					toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder'];
-					if (getSetting('bRandomPick')) {
-						toDisable.push('bInverseListOrder');
-					}
+				const toDisable = [];
+				if (key === 'bProgressiveListCreation' && !props[key][1] && getSetting('bRandomPick')) {
+					toDisable.push('bInverseListOrder', 'bSortRandom');
 				}
-				if (props[key][1]) {
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
-				}
+				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}, ['Recursive search using output']);
 		}
 		{
@@ -1218,11 +1212,13 @@ function createConfigMenu(parent) {
 				['bInKeyMixingPlaylist', 'bHarmonicMixDoublePass'],
 				[void (0), !getSetting('bInKeyMixingPlaylist')],
 				(key, i, props) => {
-					let toDisable = [];
-					if (key === 'bInKeyMixingPlaylist') { toDisable = ['bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder']; }
+					const toDisable = [];
 					if (props[key][1]) {
-						toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+						if (key === 'bInKeyMixingPlaylist') {
+							toDisable.push('bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bInverseListOrder');
+						}
 					}
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				},
 				['Harmonic mixing sorting', 'Double pass to match more tracks']
 			);
@@ -1268,7 +1264,7 @@ function createConfigMenu(parent) {
 			menu.newSeparator(subMenuName);
 			const isEnabled = !!JSON.parse(getSetting('checkDuplicatesByTag')).length;
 			{
-				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void(0), void(0), void(0), [
+				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void (0), void (0), void (0), [
 					'\n\nTag(s) used to find and remove duplicates which match the same values. On some libraries there may be multiple versions of the same track (for ex. on compilations or live versions) and therefore appear on output playlist multiple times, which may be undesired.',
 				]);
 				menu.newCheckMenuLast(() => isEnabled);
@@ -1647,24 +1643,4 @@ function createConfigMenu(parent) {
 		if (!iCount) { menu.newEntry({ menuName: subMenuName, entryText: '- no files - ', func: null, flags: MF_GRAYED }); }
 	}
 	return menu;
-}
-
-function parseGraphVal(val) {
-	if (isString(val)) { // Safety check
-		if (val.length >= 50) {
-			console.log('Error parsing graphDistance (length >= 50): ' + val);
-			return;
-		}
-		if (!val.includes('music_graph_descriptors') || val.includes('()') || val.includes(',')) {
-			console.log('Error parsing graphDistance (is not a valid variable or using a func): ' + val);
-			return;
-		}
-		const validVars = Object.keys(music_graph_descriptors).map((key) => { return 'music_graph_descriptors.' + key; });
-		if (!val.includes('+') && !val.includes('-') && !val.includes('*') && !val.includes('/') && !validVars.includes(val)) {
-			console.log('Error parsing graphDistance (using no arithmetics or variable): ' + val);
-			return;
-		}
-		val = Math.floor(eval(val));
-	}
-	return val;
 }
