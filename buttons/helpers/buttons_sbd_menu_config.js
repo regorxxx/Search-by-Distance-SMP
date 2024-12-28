@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/12/24
+//28/12/24
 
 /* exported createConfigMenu */
 
@@ -53,8 +53,8 @@ function createConfigMenu(parent) {
 	// Recipe-only tags?
 	const recipeTags = bRecipeTags ? Object.keys(recipe.tags).filter((t) => t !== '*') : [];
 	const graphDistance = Object.hasOwn(recipe, 'graphDistance')
-		? parseGraphDistance(recipe.graphDistance, void(0), false)
-		: parseGraphDistance(properties.graphDistance[1], void(0), false);
+		? parseGraphDistance(recipe.graphDistance, void (0), false)
+		: parseGraphDistance(properties.graphDistance[1], void (0), false);
 	const bIsGraph = getSetting('method') === 'GRAPH';
 	const bLiteMode = getSetting('bLiteMode');
 
@@ -488,10 +488,7 @@ function createConfigMenu(parent) {
 		}
 		menu.newSeparator(menuName);
 		{
-			const options = ['smartShuffleTag', 'sep', 'genreStyleFilterTag'];
-			createTagMenu(menuName, options, [!getSetting('bSmartShuffle')], void (0), void (0), [
-				'\n\nTag(s) used for smart shuffle sorting. To enable/disable it, directly use the related sorting setting.',
-				null,
+			createTagMenu(menuName, ['genreStyleFilterTag'], void(0), void (0), void (0), [
 				'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
 			]);
 			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
@@ -1118,65 +1115,86 @@ function createConfigMenu(parent) {
 		if (getSetting('bSmartShuffle') && getSetting('bSmartShuffleAdvc')) {
 			menu.newCheckMenuLast(() => true);
 		}
-		createBoolMenu(menuName, ['sep', 'bSmartShuffle', 'bSmartShuffleAdvc'],
-			[void (0), void (0), !getSetting('bSmartShuffle')],
+		createBoolMenu(menuName, ['sep', 'bSmartShuffle'],
+			void (0),
 			(key, i, props) => {
 				const toDisable = [];
 				if (props[key][1]) {
 					if (key === 'bSmartShuffle') { toDisable.push('bSortRandom', 'bProgressiveListOrder', 'bScatterInstrumentals'); }
-					if (key === 'bSmartShuffleAdvc') {
-						fb.ShowPopupMessage(
-							'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
-							'\n\t-Instrumental tracks.' +
-							'\n\t-Live tracks.' +
-							'\n\t-Female/male vocals tracks.' +
-							'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
-							'\nposition whenever possible without altering the main logic.'
-							, 'Search by distance'
-						);
-					}
 				}
 				toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 			}
 		);
 		{
-			const subMenuName = menu.newMenu('Smart Shuffle sorting bias', menuName, properties.bSmartShuffle[1] ? MF_STRING : MF_GRAYED);
-			const options = [
-				{ key: 'Random', flags: MF_STRING },
-				{ key: 'Play count', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount' },
-				{ key: 'Rating', flags: MF_STRING },
-				{ key: 'Popularity', flags: utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}') ? MF_STRING : MF_GRAYED, req: 'Find & Play' },
-				{ key: 'Last played', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount' },
-				{ key: 'Key', flags: MF_STRING },
-				{ key: 'Key 6A centered', flags: MF_STRING },
-			];
-			menu.newEntry({ menuName: subMenuName, entryText: 'Prioritize tracks by:', flags: MF_GRAYED });
-			menu.newSeparator(subMenuName);
-			options.forEach((opt) => {
-				opt.tf = opt.key.replace(/ /g, '').toLowerCase();
-				menu.newEntry({
-					menuName: subMenuName, entryText: opt.key + (opt.flags ? '\t' + opt.req : ''), func: () => {
-						properties.smartShuffleSortBias[1] = opt.tf;
-						overwriteProperties(properties); // Updates panel
-					}, flags: (Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING) | opt.flags
+			const subMenuName = menu.newMenu('Smart Shuffle options', menuName, getSetting('bSmartShuffle') ? MF_STRING : MF_GRAYED);
+			{
+				const subMenuNameTwo = menu.newMenu('Sorting bias', subMenuName, properties.bSmartShuffle[1] ? MF_STRING : MF_GRAYED);
+				const options = [
+					{ key: 'Random', flags: MF_STRING },
+					{ key: 'Play count', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount' },
+					{ key: 'Rating', flags: MF_STRING },
+					{ key: 'Popularity', flags: utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}') ? MF_STRING : MF_GRAYED, req: 'Find & Play' },
+					{ key: 'Last played', flags: isPlayCount ? MF_STRING : MF_GRAYED, req: 'foo_playcount' },
+					{ key: 'Key', flags: MF_STRING },
+					{ key: 'Key 6A centered', flags: MF_STRING },
+				];
+				menu.newEntry({ menuName: subMenuNameTwo, entryText: 'Prioritize tracks by:', flags: MF_GRAYED });
+				menu.newSeparator(subMenuNameTwo);
+				options.forEach((opt) => {
+					opt.tf = opt.key.replace(/ /g, '').toLowerCase();
+					menu.newEntry({
+						menuName: subMenuNameTwo, entryText: opt.key + (opt.flags ? '\t' + opt.req : ''), func: () => {
+							properties.smartShuffleSortBias[1] = opt.tf;
+							overwriteProperties(properties); // Updates panel
+						}, flags: (Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING) | opt.flags
+					});
 				});
-			});
-			menu.newSeparator(subMenuName);
-			menu.newEntry({
-				menuName: subMenuName, entryText: 'Custom TF...', func: () => {
-					const currValue = options.find((opt) => opt.tf === properties.smartShuffleSortBias[1])
-						? shuffleBiasTf(properties.smartShuffleSortBias[1])
-						: properties.smartShuffleSortBias[1];
-					const input = Input.string('string', currValue, 'Enter TF expression:', 'Search by distance: Smart Shuffle sorting bias', shuffleBiasTf('rating'));
-					if (input === null) { return; }
-					properties.smartShuffleSortBias[1] = input;
-					overwriteProperties(properties); // Updates panel
-				}, flags: Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING
-			});
-			menu.newCheckMenuLast(() => {
-				const idx = options.findIndex((opt) => opt.key.replace(/ /g, '').toLowerCase() === properties.smartShuffleSortBias[1]);
-				return idx !== -1 ? idx : options.length;
-			}, options.length + 2);
+				menu.newSeparator(subMenuNameTwo);
+				menu.newEntry({
+					menuName: subMenuNameTwo, entryText: 'Custom TF...', func: () => {
+						const currValue = options.find((opt) => opt.tf === properties.smartShuffleSortBias[1])
+							? shuffleBiasTf(properties.smartShuffleSortBias[1])
+							: properties.smartShuffleSortBias[1];
+						const input = Input.string('string', currValue, 'Enter TF expression:', 'Search by distance: Smart Shuffle sorting bias', shuffleBiasTf('rating'));
+						if (input === null) { return; }
+						properties.smartShuffleSortBias[1] = input;
+						overwriteProperties(properties); // Updates panel
+					}, flags: Object.hasOwn(recipe, 'smartShuffleSortBias') ? MF_GRAYED : MF_STRING
+				});
+				menu.newCheckMenuLast(() => {
+					const idx = options.findIndex((opt) => opt.key.replace(/ /g, '').toLowerCase() === properties.smartShuffleSortBias[1]);
+					return idx !== -1 ? idx : options.length;
+				}, options.length + 2);
+			}
+			createBoolMenu(subMenuName, ['bSmartShuffleAdvc'],
+				[!getSetting('bSmartShuffle')],
+				(key, i, props) => {
+					const toDisable = [];
+					if (props[key][1]) {
+						if (key === 'bSmartShuffleAdvc') {
+							fb.ShowPopupMessage(
+								'Smart shuffle will also try to avoid consecutive tracks with these conditions:' +
+								'\n\t-Instrumental tracks.' +
+								'\n\t-Live tracks.' +
+								'\n\t-Female/male vocals tracks.' +
+								'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
+								'\nposition whenever possible without altering the main logic.'
+								, 'Search by distance'
+							);
+						}
+					}
+					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
+				},
+				['Extra conditions (instrumentals, etc.)']
+			);
+			createTagMenu(subMenuName, ['smartShuffleTag'],
+				[!getSetting('bSmartShuffle')], void (0), ['Shuffle by tag'],
+				[
+					'\n\nTag(s) used for smart shuffle sorting. To enable/disable it, directly use the related sorting setting.',
+					null,
+					'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
+				]
+			);
 		}
 	}
 	if (!bLiteMode) {	// Special playlists:

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/12/24
+//28/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -146,7 +146,7 @@ const SearchByDistance_properties = {
 	sortBias: ['Duplicates track selection bias', globQuery.remDuplBias, { func: isStringWeak }, globQuery.remDuplBias],
 	bAdvTitle: ['Duplicates advanced RegExp title matching', true],
 	bMultiple: ['Partial multi-value tag matching', true],
-	bSmartShuffle: ['Smart Shuffle by Artist', true],
+	bSmartShuffle: ['Smart Shuffle', true],
 	smartShuffleTag: ['Smart Shuffle tag', JSON.stringify([globTags.artist])],
 	bSmartShuffleAdvc: ['Smart Shuffle extra conditions', true],
 	smartShuffleSortBias: ['Smart Shuffle sorting bias', 'random', { func: isStringWeak }, 'random'],
