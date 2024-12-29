@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/24
+//29/12/24
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -346,7 +346,9 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 			}
 			const tags = properties && Object.hasOwn(properties, 'tags') ? JSON.parse(properties.tags[1]) : null;
 			const genreStyleTags = tags
-				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity)
+				? Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual'))
+					.map((t) => t.tf)
+					.flat(Infinity)
 					.map((tag) => !tag.includes('$') ? _t(tag) : tag).join('|')
 				: _t(globTags.genre) + '|' + _t(globTags.style);
 			console.log('Search by Distance: tags used for cache - ' + genreStyleTags);
@@ -1122,6 +1124,7 @@ async function searchByDistance({
 		tag.bKeyRange = tag.type.includes('keyRange');
 		tag.bPercentRange = tag.bNumber && tag.type.includes('percentRange');
 		tag.bAbsRange = tag.bNumber && tag.type.includes('absRange');
+		tag.bCombinations = tag.type.includes('combinations');
 	}
 
 	// Get the tag value. Skip those with weight 0 and get num of values per tag right (they may be arrays, single values, etc.)
@@ -1137,7 +1140,7 @@ async function searchByDistance({
 			tag.reference = (bUseTheme
 				? theme.tags[0][key]
 				: getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()
-			).filter(bTagFilter ? (tag) => !genreStyleFilter.has(tag) : Boolean);
+			).filter(bTagFilter && tag.bGraphDyn ? (val) => !genreStyleFilter.has(val) : Boolean);
 		}
 		if (tag.bSingle) {
 			if (tag.bString) {
@@ -1174,13 +1177,12 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		const type = tag.type;
 		if (tag.weight === 0) { continue; }
-		if (type.includes('virtual')) { continue; }
-		const bHasMultiple = type.includes('multiple') && tag.referenceNumber !== 0;
-		const bHasSingle = type.includes('single');
-		const bHasString = bHasSingle && type.includes('string') && tag.reference.length;
-		const bHasNumber = bHasSingle && type.includes('number') && tag.reference !== null;
+		if (tag.bVirtual) { continue; }
+		const bHasMultiple = tag.bMultiple && tag.referenceNumber !== 0;
+		const bHasSingle = tag.bSingle;
+		const bHasString = bHasSingle && tag.bString && tag.reference.length;
+		const bHasNumber = bHasSingle && tag.bNumber && tag.reference !== null;
 		if (!bHasMultiple && !bHasString && !bHasNumber) {
 			if (bBasicLogging) { console.log('Weight was not zero but selected track had no ' + key + ' tags for: ' + _b(tag.tf)); }
 			tag.weight = 0;
@@ -1196,22 +1198,21 @@ async function searchByDistance({
 	// Queries and ranges
 	const queryDebug = bSearchDebug ? [] : null;
 	const sortedByCombs = Object.keys(calcTags)
-		.sort((a, b) => (calcTags[a].type.includes('combinations') ? 1 : 0) - (calcTags[b].type.includes('combinations') ? 1 : 0));
+		.sort((a, b) => (calcTags[a].bCombinations ? 1 : 0) - (calcTags[b].bCombinations ? 1 : 0));
 	for (let key of sortedByCombs) {
 		const tag = calcTags[key];
-		const type = tag.type;
 		if (bSearchDebug) { queryDebug.push({ tag: key, query: '' }); }
 		if (tag.weight === 0 || tag.tf.length === 0) { continue; }
-		if (type.includes('virtual')) { continue; }
-		if ((type.includes('multiple') && tag.referenceNumber !== 0) || (type.includes('single') && (type.includes('string') && tag.reference.length || type.includes('number') && tag.reference !== null))) {
+		if (tag.bVirtual) { continue; }
+		if ((tag.bMultiple && tag.referenceNumber !== 0) || (tag.bSingle && (tag.bString && tag.reference.length || tag.bNumber && tag.reference !== null))) {
 			if (bSearchDebug) { console.log(key + ': ' + originalWeightValue + ' + ' + tag.weight); }
 			originalWeightValue += tag.weight;
 			if (tag.weight / totalWeight >= totalWeight / countWeights / 100) {
 				preQueryLength = query.length;
-				const tagNameTF = type.includes('multiple') // May be a tag or a function...
+				const tagNameTF = tag.bMultiple // May be a tag or a function...
 					? tag.tf.map((t) => !t.includes('$') ? t : _q(t))
 					: (!tag.tf[0].includes('$') ? tag.tf[0] : _q(tag.tf[0]));
-				if (type.includes('keyRange')) {
+				if (tag.bKeyRange) {
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 					if (camelotKey) {
 						let keyComb = [];
@@ -1226,17 +1227,17 @@ async function searchByDistance({
 						// And combine queries
 						if (keyComb.length !== 0) { query[preQueryLength] = queryJoin(keyComb, 'OR'); }
 					} else { query[preQueryLength] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
-				} else if (type.includes('percentRange')) {
+				} else if (tag.bPercentRange) {
 					const rangeUpper = round(tag.reference * (100 + tag.range) / 100, 0);
 					const rangeLower = round(tag.reference * (100 - tag.range) / 100, 0);
 					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
 					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
-				} else if (type.includes('absRange')) {
+				} else if (tag.bAbsRange) {
 					const rangeUpper = tag.reference + tag.range;
 					const rangeLower = tag.reference - tag.range;
 					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
 					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
-				} else if (type.includes('combinations')) {
+				} else if (tag.bCombinations) {
 					const k = tag.referenceNumber >= tag.combs ? tag.combs : tag.referenceNumber; //on combinations of k
 					const tagComb = k_combinations(tag.reference, k);
 					const match = tagNameTF.some((tag) => tag.includes('$')) ? 'HAS' : 'IS'; // Allow partial matches when using funcs
@@ -1285,10 +1286,10 @@ async function searchByDistance({
 				if (bSearchDebug) { queryDebug[queryDebug.length - 1].query = query[preQueryLength]; }
 			} else if (bNegativeWeighting && tag.weight * 2 / totalWeight >= totalWeight / countWeights / 100) {
 				preQueryLength = query.length;
-				const tagNameTF = type.includes('multiple') // May be a tag or a function...
+				const tagNameTF = tag.bMultiple // May be a tag or a function...
 					? tag.tf.map((t) => !t.includes('$') ? t : _q(t))
 					: (!tag.tf[0].includes('$') ? tag.tf[0] : _q(tag.tf[0]));
-				if (type.includes('keyRange')) {
+				if (tag.bKeyRange) {
 					const camelotKey = camelotWheel.getKeyNotationObjectCamelot(tag.reference);
 					if (camelotKey) {
 						let keyComb = [];
@@ -1303,12 +1304,12 @@ async function searchByDistance({
 						// And combine queries
 						if (keyComb.length !== 0) { query[preQueryLength] = queryJoin(keyComb, 'OR'); }
 					} else { query[preQueryLength] = tagNameTF + ' IS ' + tag.reference; } // For non-standard notations just use simple matching
-				} else if (type.includes('percentRange')) {
+				} else if (tag.bPercentRange) {
 					const rangeUpper = round(tag.reference * (100 + tag.range * 2) / 100, 0);
 					const rangeLower = round(tag.reference * (100 - tag.range * 2) / 100, 0);
 					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
 					else { query[preQueryLength] += tagNameTF + ' EQUAL ' + tag.reference; }
-				} else if (type.includes('absRange')) {
+				} else if (tag.bAbsRange) {
 					const rangeUpper = Math.ceil(tag.reference + tag.range * 2);
 					const rangeLower = Math.floor(tag.reference - tag.range * 2);
 					if (rangeUpper !== rangeLower) { query[preQueryLength] = tagNameTF + ' GREATER ' + rangeLower + ' AND ' + tagNameTF + ' LESS ' + rangeUpper; }
@@ -1581,7 +1582,7 @@ async function searchByDistance({
 			return remap;
 		};
 		const validTags = Object.keys(calcTags)
-			.filter((tag) => !calcTags[tag].type.includes('virtual') || calcTags[tag].type.includes('tfRemap'));
+			.filter((tag) => !calcTags[tag].bVirtual || calcTags[tag].type.includes('tfRemap'));
 		const regTag = new RegExp('([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'gi');
 		const regNot = new RegExp('NOT([(% ]|^)(' + validTags.join('|') + ')([)% ])', 'i');
 		// Process every query on array and join
@@ -1652,7 +1653,7 @@ async function searchByDistance({
 
 	// Prefill tag Cache
 	if (bTagsCache) {
-		const missingOnCache = Object.values(calcTags).filter(t => !t.type.includes('virtual')).map(t => t.tf.filter(Boolean)).concat([['TITLE'], [globTags.title]])
+		const missingOnCache = Object.values(calcTags).filter(t => !t.bVirtual).map(t => t.tf.filter(Boolean)).concat([['TITLE'], [globTags.title]])
 			.map((tagName) => tagName.map((subTagName) => (!subTagName.includes('$') ? '%' + subTagName + '%' : subTagName)))
 			.map((tagName) => tagName.join(', ')).filter(Boolean)
 			.filter((tagName) => !tagsCache.cache.has(tagName));
@@ -1846,22 +1847,24 @@ async function searchByDistance({
 		let bMin = false;
 		while (i < poolLength) {
 			const i_score = scoreData[i].score;
-			if (i_score < scoreFilter) { //If below minimum score
-				if (i >= playlistLength) { //Break when reaching required playlist length
-					scoreData.length = i;
-					break;
-				} else if (i_score < minScoreFilter) { //Or after min score
-					scoreData.length = i;
-					bMin = true;
-					break;
-				}
+			// Break when reaching required playlist length or after min score
+			if (i_score < scoreFilter && (i >= playlistLength || i_score < minScoreFilter)) {
+				scoreData.length = i;
+				bMin = true;
+				break;
 			}
 			i++;
 		}
 		poolLength = scoreData.length;
+		if (poolLength < playlistLength) { bMin = true; }
 		if (bBasicLogging) {
-			if (bMin && minScoreFilter !== scoreFilter) { console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.'); }
-			console.log('Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks');
+			if (bMin && minScoreFilter !== scoreFilter) {
+				console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');
+			}
+			console.log(
+				'Pool of tracks with tags similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks',
+				bIsBreak ? '\n\t(Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
+			);
 		}
 	}
 	else { // GRAPH
@@ -1872,24 +1875,22 @@ async function searchByDistance({
 		let bMin = false;
 		while (i < poolLength) {
 			const i_score = scoreData[i].score;
-			if (i_score < scoreFilter) {	//If below minimum score
-				if (i >= playlistLength) {	//Break when reaching required playlist length
-					scoreData.length = i;
-					break;
-				} else if (i_score < minScoreFilter) { //Or after min score
-					scoreData.length = i;
-					bMin = true;
-					break;
-				}
+			if (i_score < scoreFilter && (i >= playlistLength || i_score < minScoreFilter)) {
+				scoreData.length = i;
+				bMin = true;
+				break;
 			}
 			i++;
 		}
 		scoreData.sort(function (a, b) { return a.mapDistance - b.mapDistance; }); // First sorted by graph distance, then by weight
 		poolLength = scoreData.length;
-		if (bMin && minScoreFilter !== scoreFilter) { console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.'); }
+		if (poolLength < playlistLength) { bMin = true; }
+		if (bMin && minScoreFilter !== scoreFilter) {
+			console.log('Not enough tracks on pool with current score filter ' + scoreFilter + '%, using minimum score instead ' + minScoreFilter + '%.');
+		}
 		if (bBasicLogging) {
 			console.log(
-				'Pool of tracks with similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and graph distance lower than ' + graphDistance + ': ' + poolLength + ' tracks',
+				'Pool of tracks with tags similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and genre variation lower than ' + graphDistance + ': ' + poolLength + ' tracks',
 				bIsBreak ? '\n\t(Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
 			);
 		}
