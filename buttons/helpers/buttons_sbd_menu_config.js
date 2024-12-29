@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/24
+//29/12/24
 
 /* exported createConfigMenu */
 
@@ -151,7 +151,7 @@ function createConfigMenu(parent) {
 		menu.newSeparator(menuName);
 		{
 			createSwitchMenu(menuName, 'method', ['WEIGHT', 'DYNGENRE', 'GRAPH'], void (0), void (0),
-				['Tags similarity (WEIGHT)', 'Tags + Genre analyis (DYNGENRE)', 'Tags + Adv. Genre analysis (GRAPH)']
+				['Tags similarity (WEIGHT)', 'Tags + Genre analysis (DYNGENRE)', 'Tags + Adv. Genre analysis (GRAPH)']
 			);
 		}
 		if (bIsGraph) {
@@ -285,7 +285,9 @@ function createConfigMenu(parent) {
 						.replace(/(style) (genre)/gi, '$1/$2')
 					, [' ', '/', '\\']
 				).replace(/^bpm$/gi, 'BPM');
-			const menuFlags = weights[i].tag.weight && (weights[i].tag.tf.length || weights[i].tag.type.includes('virtual') || weights[i].tag.type.includes('tfRemap')) ? MF_CHECKED : void (0);
+			const menuFlags = weights[i].tag.weight && (weights[i].tag.tf.length || weights[i].tag.type.includes('virtual') || weights[i].tag.type.includes('tfRemap'))
+				? MF_CHECKED
+				: void (0);
 			const subMenuName = menu.newMenu(keyFormat + weights[i].menuSuffix, menuName, menuFlags);
 			menu.newEntry({ menuName: subMenuName, entryText: keyFormat + ' tag settings:', func: null, flags: MF_GRAYED });
 			menu.newSeparator(subMenuName);
@@ -293,7 +295,9 @@ function createConfigMenu(parent) {
 			const defTag = sbd.tagSchema; // Used in case a recipe add new tags but miss some keys...
 			{	// Remap
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'tf') || !baseTag);
-				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
+				const tag = bRecipe
+					? { ...defTag, ...baseTag, ...recipe.tags[key] }
+					: baseTag;
 				if (!tag.type.includes('virtual') || tag.type.includes('tfRemap')) {
 					const value = tag.tf.join(',');
 					const entryText = 'Remap...' + '\t[' + (
