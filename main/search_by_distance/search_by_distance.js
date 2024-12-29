@@ -106,6 +106,7 @@ const SearchByDistance_properties = {
 		genreStyleRegion: { weight: 7, tf: [], baseScore: 0, scoringDistribution: 'LOGISTIC', type: ['string', 'single', 'virtual', 'absRange'], range: 5 },
 		related: { weight: 25, tf: [globTags.related], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'virtual', 'tfRemap', 'bNegative'] },
 		unrelated: { weight: -25, tf: [globTags.unrelated], baseScore: 0, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'virtual', 'tfRemap', 'bNegative'] },
+		folksonomy: { weight: 10, tf: [globTags.folksonomy], baseScore: 50, scoringDistribution: 'LINEAR', type: ['string', 'multiple', 'virtual', 'tfRemap'] },
 	})],
 	scoreFilter: ['Exclude any track with similarity lower than (in %)', 70, { range: [[0, 100]], func: isInt }, 70],
 	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
@@ -155,7 +156,9 @@ const SearchByDistance_properties = {
 	dynQueries: ['Dynamic query filtering', JSON.stringify([]), { func: isJSON }, JSON.stringify([])],
 	nearGenresFilter: ['Near genres filter: none (-1), auto (0) or any distance value', 0, { range: [[-1, Infinity]], func: isInt }, 0],
 	nearGenresFilterAggressiveness: ['Near genres filter aggressiveness (0-10)', 5, { range: [[0, 10]], func: isInt }, 5],
-	bBreakWhenFilled: ['Stop processing on playlist filling', true]
+	bBreakWhenFilled: ['Stop processing on playlist filling', true],
+	folksonomyWhitelistTag: ['Folksonomy white list values', JSON.stringify(['Mexican Folk', 'Spanish Folk', 'Female Vocal', 'Spanish Rock', 'Soundtrack', 'Argentinian Rock', 'Feminist', 'Instrumental', 'Live', 'Hi-Fi', 'Lo-Fi', 'Acoustic', 'Japanese', 'African', 'Indian', 'Nubian', 'Greek', 'Spanish Hip-Hop', 'German Rock', 'Israeli', 'Israeli Rock', 'Uruguayan Rock', 'Mexican Rock', 'Italian Rock', 'Asian Folk', 'Torch Songs', 'Tuareg Music', 'Tex-Mex', 'Música Popular Brasileira', 'Jam Band', 'Spanish Jazz', 'Brazilian Rock', 'Turkish', 'Film Score', 'Anime Music', 'Worldbeat'])],
+	folksonomyBlacklistTag: ['Folksonomy black list values', JSON.stringify([])],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -950,7 +953,7 @@ async function searchByDistance({
 			if (!theme) { return; }
 		}
 		// Array of objects
-		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
+		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || ['folksonomy'].includes(k));
 		// Theme tags must contain at least all the user tags
 		const tagCheck = Object.hasOwn(theme, 'tags')
 			? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); })
@@ -1065,7 +1068,7 @@ async function searchByDistance({
 	// Zero weights if there are no tag names to look for
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.type.includes('virtual') && !['related', 'unrelated'].includes(key)) { continue; }
+		if (tag.type.includes('virtual') && !['related', 'unrelated', 'folksonomy'].includes(key)) { continue; }
 		if (tag.tf.length === 0) {
 			tag.weight = 0;
 			if (tag.type.includes('keyMix')) { bInKeyMixingPlaylist = false; }
@@ -1109,6 +1112,16 @@ async function searchByDistance({
 	// It's faster than applying array.filter(Boolean).filter(genreStyleFilterTag)
 	const genreStyleFilter = new Set(JSON.parse(properties['genreStyleFilterTag'][1]).concat(''));
 	const bTagFilter = !genreStyleFilter.isEqual(new Set([''])); // Only use filter when required
+	const folksonomyWhitelist = (() => {
+		const list = new Set(JSON.parse(properties['folksonomyWhitelistTag'][1]));
+		return list.size ? list : null;
+	})();
+	const folksonomyBlacklist = (() => {
+		const list = folksonomyWhitelist
+			? new Set(JSON.parse(properties['folksonomyBlacklistTag'][1]))
+			: null;
+		return list && list.size ? list : null;
+	})();
 
 	// Simplify access to tag types
 	for (let key in calcTags) {
@@ -1135,12 +1148,19 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		tag.reference = [];
-		if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
+		if (tag.bVirtual && !['related', 'unrelated', 'folksonomy'].includes(key)) { continue; }
 		if (tag.weight !== 0 || (tag.tf.length && (tag.bGraphDyn || tag.bKeyMix))) {
 			tag.reference = (bUseTheme
 				? theme.tags[0][key]
 				: getHandleListTags(selHandleList, tag.tf, { bMerged: true }).flat()
 			).filter(bTagFilter && tag.bGraphDyn ? (val) => !genreStyleFilter.has(val) : Boolean);
+			if (key === 'folksonomy') {
+				if (folksonomyWhitelist) {
+					tag.reference = tag.reference.filter((val) => folksonomyWhitelist.has(val));
+				} else if (folksonomyBlacklist) {
+					tag.reference = tag.reference.filter((val) => !folksonomyBlacklist.has(val));
+				}
+			}
 		}
 		if (tag.bSingle) {
 			if (tag.bString) {
@@ -1178,7 +1198,7 @@ async function searchByDistance({
 	for (let key in calcTags) {
 		const tag = calcTags[key];
 		if (tag.weight === 0) { continue; }
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['folksonomy'].includes(key)) { continue; }
 		const bHasMultiple = tag.bMultiple && tag.referenceNumber !== 0;
 		const bHasSingle = tag.bSingle;
 		const bHasString = bHasSingle && tag.bString && tag.reference.length;
@@ -1203,7 +1223,7 @@ async function searchByDistance({
 		const tag = calcTags[key];
 		if (bSearchDebug) { queryDebug.push({ tag: key, query: '' }); }
 		if (tag.weight === 0 || tag.tf.length === 0) { continue; }
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['folksonomy'].includes(key)) { continue; }
 		if ((tag.bMultiple && tag.referenceNumber !== 0) || (tag.bSingle && (tag.bString && tag.reference.length || tag.bNumber && tag.reference !== null))) {
 			if (bSearchDebug) { console.log(key + ': ' + originalWeightValue + ' + ' + tag.weight); }
 			originalWeightValue += tag.weight;
@@ -1724,7 +1744,7 @@ async function searchByDistance({
 	let z = 0;
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['folksonomy'].includes(key)) { continue; }
 		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
 			tagsArr.push(tag.tf);
 		}
@@ -1750,7 +1770,7 @@ async function searchByDistance({
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['folksonomy'].includes(key)) { continue; }
 		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn || tag.bKeyMix)) {
 			if (bSearchDebug) { console.log('Tag:', key, tag.weight, '- index', z); }
 			tag.handle = tagsValByKey[z++];
@@ -1784,7 +1804,7 @@ async function searchByDistance({
 		if (bProfile) { test.CheckPoint('#5.1 - Score'); }
 		// Get the tags according to weight and filter ''. Also create sets for comparison
 		if (bProfile) { test.CheckPoint('#5.1.1 - Score'); }
-		const handleTag = parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, descr, i });
+		const handleTag = parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i });
 		if (bProfile) { test.CheckPointStep('#5.1.1 - Score'); }
 		if (method === 'GRAPH' && (handleTag.genreStyle.number + calcTags.genreStyle.referenceNumber) <= 6) { order = 1; }
 		if (order === 0) {
@@ -2327,11 +2347,11 @@ async function searchByDistance({
 	Helpers
 */
 
-function parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, descr, i }) {
+function parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i }) {
 	const handleTag = { genreStyle: { set: new Set(), number: 0 } };
 	for (let key in calcTags) {
 		const tag = calcTags[key];
-		if (tag.bVirtual && !['related', 'unrelated'].includes(key)) { continue; }
+		if (tag.bVirtual && !['related', 'unrelated', 'folksonomy'].includes(key)) { continue; }
 		handleTag[key] = {};
 		if (tag.tf.length && (tag.weight !== 0 || tag.bGraphDyn)) { // No need for bKeyMix, since is only used for sorting
 			if (tag.bMultiple) {
@@ -2339,6 +2359,13 @@ function parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graph
 					handleTag[key].val = tag.handle[i].filter((tag) => !genreStyleFilter.has(tag));
 				} else {
 					handleTag[key].val = tag.handle[i].filter(Boolean);
+					if ((folksonomyWhitelist || folksonomyBlacklist) && key === 'folksonomy') {
+						if (folksonomyWhitelist) {
+							handleTag[key].val = handleTag[key].val.filter((val) => folksonomyWhitelist.has(val));
+						} else if (folksonomyBlacklist) {
+							handleTag[key].val = handleTag[key].val.filter((val) => !folksonomyBlacklist.has(val));
+						}
+					}
 				}
 			} else {
 				handleTag[key].val = tag.bString ? tag.handle[i][0] : Number(tag.handle[i][0]);
@@ -2393,7 +2420,7 @@ function calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys
 	for (let key of sortTagKeys) {
 		const tag = calcTags[key];
 		if (tag.weight === 0) { continue; }
-		if (tag.bVirtual) { continue; }
+		if (tag.bVirtual && !['folksonomy'].includes(key)) { continue; }
 		if (currScoreAvailable < minScoreFilter) { break; } // Break asap
 		const scoringDistr = tag.scoringDistribution;
 		if (tag.bMultiple) {

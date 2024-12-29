@@ -253,7 +253,7 @@ function createConfigMenu(parent) {
 			.filter((tag) => !bLiteMode || !['related', 'unrelated'].includes(tag))
 			.filter((tag) => getSetting('method') === 'DYNGENRE' || !['dynGenre'].includes(tag))
 			.filter((tag) => getSetting('method') === 'GRAPH' || !['genreStyleRegion'].includes(tag));
-		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date'];
+		const nonDeletable = ['genre', 'style', 'mood', 'key', 'bpm', 'date', 'folksonomy'];
 		const weights = options.map((key) => {
 			const bIsDyngenreMethodRecipe = Object.hasOwn(recipe, 'method') && recipe.method !== 'DYNGENRE';
 			const bIsDyngenreMethodProp = !Object.hasOwn(recipe, 'method') && properties.method[1] !== 'DYNGENRE';
@@ -496,6 +496,16 @@ function createConfigMenu(parent) {
 				'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
 			]);
 			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
+		}
+		{
+			createTagMenu(menuName, ['folksonomyWhitelistTag'], void(0), void (0), void (0), [
+				'\n\nOnly these values will be used when comparing folksonomy tags. Anything not listed here will be ignored.'
+			]);
+			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('folksonomyWhitelistTag')).length);
+			createTagMenu(menuName, ['folksonomyBlacklistTag'], void(0), void (0), void (0), [
+				'\n\nThese values will be filtered when comparing folksonomy tags. Anything not listed here will used.'
+			]);
+			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('folksonomyBlacklistTag')).length && !JSON.parse(getSetting('folksonomyWhitelistTag')).length );
 		}
 		if (!bLiteMode) {
 			menu.newSeparator(menuName);
