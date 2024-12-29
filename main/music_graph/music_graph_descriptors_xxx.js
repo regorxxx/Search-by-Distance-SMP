@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/24
+//29/12/24
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -112,11 +112,11 @@ const music_graph_descriptors = {
 		['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Rumba','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Corrido','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango','Samba','Nueva Gaita','Mambo','Afro-Latin Ritual-Tribal','Pre-Columbian Ritual-Tribal']],
 		['North American Folk_supergenre'	,	['Folk-Rock','Freak Folk','Traditional Folk','Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk','Old-Timey','Appalachian','Aboriginal Folk']],
 		['Nordic Folk_supergenre'			,	['Polka','Traditional European Folk','Pagan Folk','German Folk','Joik','Nordic Folk']],
-		['Celtic Folk_supergenre'			,	['Circle','Jig','Scottish','Celtic Folk','Traditional European Folk','Bal Folk','Irish','Scottish Folk','Celtic New Age']],
+		['Celtic Folk_supergenre'			,	['Circle','Jig','Muiñeira','Alalá','Scottish','Celtic Folk','Traditional European Folk','Bal Folk','Irish','Scottish Folk','Celtic New Age']],
 		['African Folk_supergenre'			,	['Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi','Semba','Kizomba','African Ritual-Tribal','Mbalax']],
 		['Asian Folk_supergenre'			,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana','Asian Ritual-Tribal']],
 		['European Folk_supergenre'			,	['British Folk-Rock','British Folk-Jazz','Folk Baroque','Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals','Traditional European Folk','Bal Folk','German Folk','Irish','Scottish Folk','Romani','Georgian Folk','Branle']],
-		['South European Folk_supergenre'	,	['Cantautor','Rumba Flamenca','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Spanish Folk','Traditional European Folk','Éntekhno','Sephardic','Branle']],
+		['South European Folk_supergenre'	,	['Cantautor','Rumba Flamenca','Rumba Catalana','Rumba Fusión','Flamenco','Nuevo Flamenco','Fado','Jota','Traditional European Folk','Éntekhno','Sephardic','Branle']],
 		['Country_supergenre'				,	['Country Rap','Alt. Country','Americana','Neo-Traditional Country','Contemporary Country','Outlaw Country','Country Pop','Country Rock','Nashville Sound','Bakersfield Sound','Progressive Bluegrass','Bluegrass','Honky Tonk','Old-Timey','Hillbilly','Country Boogie','Square Dance','Rodeo','Jug Band']],
 		['R&B_supergenre'					,	['Funktronica','Contemporary R&B','Afrobeat','Ambient Funk','Urban Soul','Future Soul','Neo Soul','Electrofunk','Deep Funk','Disco','Soul Blues','Smooth Soul','Classic Funk','P-Funk','Funk Rock','Contemporary Funk','Psychedelic Funk','Psychedelic Soul','New Orleans R&B','Funk Blues','Deep Funk Revival','Philadelphia Soul','Motown Sound','Southern Soul','Doo Wop','R&B']],
 		['Blues_supergenre'					,	['Contemporary Blues','Hill Country Blues','Soul Blues','Modern Electric Blues','Psychedelic Blues','Blues Rock','Funk Blues','British Blues','Zydeco','Chicago Blues','Detroit Blues','Memphis Blues','Jump Blues','Texas Blues','Piano Blues','Vaudeville Blues','Country Blues','Delta Blues']],
@@ -208,13 +208,14 @@ const music_graph_descriptors = {
 		['New Age Folk XL'					,	['Hang Music','Celtic New Age','New Acoustic']],
 		['Afro-Cuban XL'					,	['Son']],
 		['Latin Rock XL'					,	['Candombe Beat','Latin Rock','Chicano Rock']],
-		['Latin Folk XL'					,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Fado','Flamenco','Forró','Jota','Mexican Folk','Peruvian Folk','Spanish Folk','Traditional Folk','Rumba','Rumba Flamenca','Rumba Catalana','Rumba Fusión','Ranchera','Tango','Mariachi','Bolero','Samba','Nueva Gaita','Nuevo Flamenco','Corrido']],
+		['Latin Folk XL'					,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Fado','Flamenco','Forró','Jota','Mexican Folk','Peruvian Folk','Traditional Folk','Rumba','Rumba Flamenca','Rumba Catalana','Rumba Fusión','Ranchera','Tango','Mariachi','Bolero','Samba','Nueva Gaita','Nuevo Flamenco','Corrido']],
 		['Americana XL'						,	['Americana','American Primitive Guitar','Country Folk','Neo-Traditional Folk','Songwriter','Traditional American Folk']],
 		['Traditional American Folk XL'		,	['American Primitive Guitar','Neo-Traditional Folk','Traditional American Folk','Appalachian']],
 		['Asian Folk XL'					,	['Tuvan','Hindustani','Israeli Folk','Afghan Folk','Gaana']],
 		['African Folk XL'					,	['Malian Folk','Griot','Isicathamiya','Mauritanian Folk','Niger Folk','Nubian Folk','Sahrawi Folk','Tishoumaren','Gnawa','Classical Sufi']],
 		['Bal Folk XL'						,	['Andro','Bourree','Bresse','Chapelloise','Circle','Farelquesh','Gavotte','Hanterdro','Kost ar C\'hoad','Laridé','Mazurka','Jig','Plinn','Polka','Rond','Scottish','Tarantella','Tricot','Vals']],
-		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani','Sephardic']],
+		['European Folk XL'					,	['Celtic Folk','Traditional European Folk','Bal Folk','Éntekhno','Pagan Folk','German Folk','Irish','Jig','Scottish Folk','Romani','Sephardic','Muiñeira','Alalá']],
+		['Galician Folk XL'					,	['Muiñeira','Alalá','Jota']],
 		['Celtic-Nordic Folk XL'			,	['Celtic Folk','Folk Metal','Pagan Folk','Joik','Nordic Folk']],
 		['European Pre-Modern Folk XL'		,	['Medieval','Renaissance']],
 		['Modern Folk XL'					,	['Contemporary Folk','Folk Pop','Folk-Rock']],
@@ -372,7 +373,8 @@ const music_graph_descriptors = {
 		['Urban Breaks'						,	['Trap','Pop Rap']],
 		['Corrido Tumbado'					,	['Trap','Mexican Folk','Corrido']],
 		['Drill'							,	['Gangsta']],
-		['Sad Emo XL'						,	['Gothic XL']]
+		['Sad Emo XL'						,	['Gothic XL']],
+		['Muiñeira'							,	['Jig']],
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -610,7 +612,9 @@ const music_graph_descriptors = {
 		['Nu-Disco'							,	['Disco House'						]],
 		['Deconstructed Club'				,	['Post-Club'						]],
 		['Tishoumaren'						,	['Desert Blues','Assouf'			]],
-		['Afrobeat'							,	['Afrofunk'							]]
+		['Afrobeat'							,	['Afrofunk'							]],
+		['Muiñeira'							,	['Muñeira'							]],
+		['Jota'								,	['Xota'								]],
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [
@@ -662,7 +666,7 @@ const music_graph_descriptors = {
 		'Spoken Word','Israeli Rock','Uruguayan Rock','Mexican Rock','Italian Rock',
 		'Asian Folk','Torch Songs','Dummy','Rock Opera','Tuareg Music','Tex-Mex',
 		'Música Popular Brasileira','Jam Band','Spanish Jazz','Brazilian Rock','Turkish',
-		'Film Score', 'Anime Music', 'Worldbeat'
+		'Film Score','Anime Music','Worldbeat','Spanish Folk'
 	]),
 	/*
 		----------------------------------------------------------------------------------------------------

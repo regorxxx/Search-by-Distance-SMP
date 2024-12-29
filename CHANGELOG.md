@@ -59,8 +59,8 @@
 ### Added
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
 - Advanced mode: added advanced mode setting which must be enabled by user (disabled by default). Advanced mode includes all available settings (previous behavior present on [7.6.0](#760---2024-10-09) and below). If not enabled, only a small subset of settings is shown. Themes are only available on advanced mode too. Already existing installation should not be affected by this change, and advanced mode will be enabled by default in such cases.
-- Descriptors: added Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
-- Descriptors: added Mainstream Electronic and Latin Urban Music & Rap XL cluster.
+- Descriptors: added Muiñeira, Alalá, Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
+- Descriptors: added Galician Folk XL, Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
@@ -89,6 +89,7 @@
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
 ### Removed
+- Descriptors: removed Spanish Folk style.
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
 - Themes: fix crash on theme creation with incomplete input or when World-Map-SMP was not used.
