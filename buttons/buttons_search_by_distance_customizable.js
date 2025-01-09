@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/24
+//09/01/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -170,7 +170,7 @@ function buttonTooltipSbdCustom(parent) {
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
-	if (bShift && !bControl || bTooltipInfo) { info += '\n(Shift + L. Click for other config and tools)'; }
+	if (bShift && !bControl || bTooltipInfo) { info += '\n(Shift + L. Click for settings and tools)'; }
 	if (!bShift && bControl || bTooltipInfo) { info += '\n(Ctrl + L. Click to set recipe)'; }
 	if (!properties.bLiteMode[1] && (bShift && bControl || bTooltipInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
 	return info;
