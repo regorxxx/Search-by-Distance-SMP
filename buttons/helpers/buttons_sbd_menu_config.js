@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/12/24
+//09/01/25
 
 /* exported createConfigMenu */
 
@@ -143,10 +143,10 @@ function createConfigMenu(parent) {
 	};
 
 	// Header
-	menu.newEntry({ entryText: 'Set config (may be overwritten by recipe):', func: null, flags: MF_GRAYED });
+	menu.newEntry({ entryText: 'Set settings (overwritten by recipe):', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
-	{	// Search Methods
-		const menuName = menu.newMenu('Set Analysis method');
+	{	// Anaylisis Methods
+		const menuName = menu.newMenu('Analysis method');
 		menu.newEntry({ menuName, entryText: 'How similar tracks are searched:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		{
@@ -246,7 +246,7 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Tags and weights
-		const menuName = menu.newMenu('Set Tags and weighting');
+		const menuName = menu.newMenu('Tags and weighting');
 		menu.newEntry({ menuName, entryText: 'Tags and scoring settings for similarity:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		const options = [...new Set([...Object.keys(tags), ...recipeTags])]
@@ -614,8 +614,8 @@ function createConfigMenu(parent) {
 		}
 	}
 	{	// Pre-scoring filters:
-		const menuName = menu.newMenu('Set pre-scoring filters');
-		menu.newEntry({ menuName, entryText: 'Filters applied before similarity scoring:', func: null, flags: MF_GRAYED });
+		const menuName = menu.newMenu('Pre-analysis filters');
+		menu.newEntry({ menuName, entryText: 'Filters applied to source before analysis:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		{	// Forced Query
 			const bRecipe = Object.hasOwn(recipe, 'forcedQuery');
@@ -1004,8 +1004,8 @@ function createConfigMenu(parent) {
 		}
 	}
 	if (!bLiteMode) {	// Post-scoring filters:
-		const menuName = menu.newMenu('Set post-scoring filters');
-		menu.newEntry({ menuName, entryText: 'Filters applied after similarity scoring:', func: null, flags: MF_GRAYED });
+		const menuName = menu.newMenu('Post-analysis filters');
+		menu.newEntry({ menuName, entryText: 'Filters applied after analysis:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		{ // Tags filter
 			createTagMenu(menuName, ['poolFilteringTag'],
@@ -1037,9 +1037,9 @@ function createConfigMenu(parent) {
 	}
 	if (!getSetting('bBreakWhenFilled') || !getSetting('bLiteMode')) {	// Picking modes
 		const menuFlags = getSetting('bInKeyMixingPlaylist') || getSetting('bBreakWhenFilled') ? MF_GRAYED : MF_STRING;
-		const menuText = 'Set pool picking' + (getSetting('bInKeyMixingPlaylist') ? '      -harmonic mixing-' : '');
+		const menuText = 'Tracks picking (from pool)' + (getSetting('bInKeyMixingPlaylist') ? '      -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
-		menu.newEntry({ menuName, entryText: 'How similar available tracks are chosen:', func: null, flags: MF_GRAYED });
+		menu.newEntry({ menuName, entryText: 'How available similar tracks are chosen:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bRandomPick'], [getSetting('bBreakWhenFilled')],
 			(key, i, props) => {
@@ -1083,7 +1083,7 @@ function createConfigMenu(parent) {
 	}
 	{	// Final sorting
 		const menuFlags = getSetting('bInKeyMixingPlaylist') ? MF_GRAYED : MF_STRING;
-		const menuText = 'Set final sorting' + (getSetting('bInKeyMixingPlaylist') ? '       -harmonic mixing-' : '');
+		const menuText = 'Tracks final sorting' + (getSetting('bInKeyMixingPlaylist') ? '       -harmonic mixing-' : '');
 		const menuName = menu.newMenu(menuText, void (0), menuFlags);
 		menu.newEntry({ menuName, entryText: 'How chosen tracks are sorted:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
@@ -1183,7 +1183,6 @@ function createConfigMenu(parent) {
 			createBoolMenu(subMenuName, ['bSmartShuffleAdvc'],
 				[!getSetting('bSmartShuffle')],
 				(key, i, props) => {
-					const toDisable = [];
 					if (props[key][1]) {
 						if (key === 'bSmartShuffleAdvc') {
 							fb.ShowPopupMessage(
@@ -1197,7 +1196,6 @@ function createConfigMenu(parent) {
 							);
 						}
 					}
-					toDisable.forEach((noKey) => { if (props[noKey][1]) { props[noKey][1] = !props[noKey][1]; } });
 				},
 				['Extra conditions (instrumentals, etc.)']
 			);

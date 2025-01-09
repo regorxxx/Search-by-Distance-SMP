@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/24
+//09/01/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -40,7 +40,7 @@ function createRecipeMenu(parent) {
 	recipeMenu.newEntry({ entryText: 'Set recipe file: (Ctrl + Click to hide)', func: null, flags: MF_GRAYED });
 	recipeMenu.newSeparator();
 	recipeMenu.newEntry({
-		entryText: 'Create recipe file with current config', func: () => {
+		entryText: 'Create recipe file with current settings', func: () => {
 			const recipe = { name: '' };
 			// Retrieve allowed keys
 			const excludedKeys = new Set(['name', 'properties', 'panelProperties', 'theme', 'recipe', 'bPoolFiltering', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bStartLogging', 'bSearchDebug', 'bCreatePlaylist']);
@@ -86,11 +86,11 @@ function createRecipeMenu(parent) {
 		}
 	});
 	{	// Recipe tools
-		const menuName = recipeMenu.newMenu('More options...');
+		const menuName = recipeMenu.newMenu('Additional options');
 		{	// Readme
 			const readmePath = folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt';
 			recipeMenu.newEntry({
-				menuName, entryText: 'Open readme...', func: () => {
+				menuName, entryText: 'Open readme', func: () => {
 					const readme = _open(readmePath, utf8); // Executed on script load
 					if (readme.length) { fb.ShowPopupMessage(readme, window.Name); }
 					else { console.log('Readme not found: ' + readmePath); }
