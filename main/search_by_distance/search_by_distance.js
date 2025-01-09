@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/12/24
+//09/01/25
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -1612,7 +1612,7 @@ async function searchByDistance({
 				// Replace with tags set
 				let key = '';
 				if (new RegExp('\\b(' + validTags.join('|') + ')\\b', 'i').test(dynQuery)) {
-					const match = dynQuery.match(new RegExp(regTag.source, 'i'))[2];
+					const match = RegExp(new RegExp(regTag.source, 'i')).exec(dynQuery)[2];
 					if (match) {
 						key = validTags.find((tag) => tag.toLowerCase() === match.toLowerCase());
 						const expanded = getRemap(key).map((tag) => {
