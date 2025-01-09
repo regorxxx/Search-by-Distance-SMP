@@ -68,6 +68,7 @@
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 - Info: added hated stats.
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
+- Presets: "10 Most similar tracks" recipes, which should return the 10 most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature.
 ### Changed
 - Descriptors: merged Tishoumaren and Desert Blues styles, used the first and added Desert Blues and Assouf as substitutions.
 - Descriptors: tweaked Sad Emo XL and Gothic XL clusters.

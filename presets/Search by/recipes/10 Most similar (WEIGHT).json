@@ -1,0 +1,18 @@
+{
+	"name": "10 most similar tracks (W)",
+	"scoreFilter": 0,
+	"bRandomPick": false,
+	"bInversePick": false,
+	"bSortRandom": false,
+	"bSmartShuffle": false,
+	"bScatterInstrumentals": false,
+	"bProgressiveListOrder": true,
+	"bInKeyMixingPlaylist": false,
+	"method": "WEIGHT",
+	"playlistLength": 10,
+	"bBreakWhenFilled" : false,
+	"trackSource": {
+		"sourceType": "activePlaylist",
+		"sourceArg": null
+	}
+}
