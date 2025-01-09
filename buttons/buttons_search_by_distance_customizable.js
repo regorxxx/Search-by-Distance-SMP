@@ -51,7 +51,7 @@ if (!sbd.panelProperties.firstPopup[1]) {
 
 if (newButtonsProperties.customName[1] === newButtonsProperties.customName[3]) {
 	newButtonsProperties.bLiteMode[1] = true;
-	overwriteProperties({bLiteMode: newButtonsProperties.bLiteMode});
+	overwriteProperties({ bLiteMode: newButtonsProperties.bLiteMode });
 }
 
 // Test tags
@@ -61,68 +61,73 @@ testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
-	'Search by Distance Customizable': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, newButtonsProperties.customName[1], function (mask) {
-		if (mask === MK_SHIFT) {
-			createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
-		} else if (mask === MK_CONTROL) {
-			createRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
-		} else if (!this.buttonsProperties.bLiteMode[1] && mask === MK_CONTROL + MK_SHIFT) {
-			createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
-		} else {
-			if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
-				let input = '';
-				try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
-				catch (e) { return; }
-				if (!input.length) { return; }
-				if (this.buttonsProperties.customName[1] !== input) {
-					this.buttonsProperties.customName[1] = input;
-					overwriteProperties(this.buttonsProperties); // Force overwriting
-					this.adjustNameWidth(input);
-					const data = JSON.parse(this.buttonsProperties.data[1]);
-					if (data.recipe === 'none') {
-						window.ShowProperties();
-					}
-				}
+	'Search by Distance Customizable': new ThemedButton(
+		{ x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, newButtonsProperties.customName[1],
+		function (mask) {
+			if (mask === MK_SHIFT) {
+				createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
+			} else if (mask === MK_CONTROL) {
+				createRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
+			} else if (!this.buttonsProperties.bLiteMode[1] && mask === MK_CONTROL + MK_SHIFT) {
+				createThemeMenu(this).btn_up(this.currX, this.currY + this.currH);
 			} else {
-				searchByDistance({ properties: this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this }); // All set according to properties panel!
-			}
-		}
-	}, null, void (0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void (0), void (0),
-	{
-		'on_notify_data': (parent, name, info) => {
-			if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
-			if (!name.startsWith('Search by Distance')) { return; }
-			switch (name) { // NOSONAR
-				case 'Search by Distance: share configuration': {
-					if (info) {
-						if (info.notifyThis && parent.name === info.name) { return; } // Don't apply to same button
-						parent.switchHighlight(true);
-						const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
-						if (answer === popup.yes) {
-							parent.buttonsProperties.tags[1] = String(info.tags[1]);
-							parent.buttonsProperties.forcedQuery[1] = String(info.forcedQuery[1]);
-							parent.buttonsProperties.genreStyleFilterTag[1] = String(info.genreStyleFilterTag[1]);
-							parent.buttonsProperties.poolFilteringTag[1] = String(info.poolFilteringTag[1]);
-							parent.buttonsProperties.checkDuplicatesByTag[1] = String(info.checkDuplicatesByTag[1]);
-							parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
-							overwriteProperties(parent.buttonsProperties);
+				if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
+					let input = '';
+					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
+					catch (e) { return; }
+					if (!input.length) { return; }
+					if (this.buttonsProperties.customName[1] !== input) {
+						this.buttonsProperties.customName[1] = input;
+						overwriteProperties(this.buttonsProperties); // Force overwriting
+						this.adjustNameWidth(input);
+						const data = JSON.parse(this.buttonsProperties.data[1]);
+						if (data.recipe === 'none') {
+							window.ShowProperties();
 						}
-						parent.switchHighlight(false);
-						window.Repaint();
 					}
-					break;
+				} else {
+					searchByDistance({ properties: this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this }); // All set according to properties panel!
 				}
 			}
-		}
-	},
-	(parent) => { // Update tooltip on init
-		const properties = parent.buttonsProperties;
-		parent.recipe = {
-			recipe: properties.recipe[1].length ? processRecipePlaceholder(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
-			name: properties.recipe[1] || ''
-		};
-	},
-	{ scriptName: 'Search-by-Distance-SMP', version })
+		},
+		null, void (0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void (0),
+		void (0),
+		{
+			'on_notify_data': (parent, name, info) => {
+				if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
+				if (!name.startsWith('Search by Distance')) { return; }
+				switch (name) { // NOSONAR
+					case 'Search by Distance: share configuration': {
+						if (info) {
+							if (info.notifyThis && parent.name === info.name) { return; } // Don't apply to same button
+							parent.switchHighlight(true);
+							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
+							if (answer === popup.yes) {
+								parent.buttonsProperties.tags[1] = String(info.tags[1]);
+								parent.buttonsProperties.forcedQuery[1] = String(info.forcedQuery[1]);
+								parent.buttonsProperties.genreStyleFilterTag[1] = String(info.genreStyleFilterTag[1]);
+								parent.buttonsProperties.poolFilteringTag[1] = String(info.poolFilteringTag[1]);
+								parent.buttonsProperties.checkDuplicatesByTag[1] = String(info.checkDuplicatesByTag[1]);
+								parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
+								overwriteProperties(parent.buttonsProperties);
+							}
+							parent.switchHighlight(false);
+							window.Repaint();
+						}
+						break;
+					}
+				}
+			}
+		},
+		(parent) => { // Update tooltip on init
+			const properties = parent.buttonsProperties;
+			parent.recipe = {
+				recipe: properties.recipe[1].length ? processRecipePlaceholder(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
+				name: properties.recipe[1] || ''
+			};
+		},
+		{ scriptName: 'Search-by-Distance-SMP', version }
+	)
 });
 
 // Helper
@@ -131,48 +136,54 @@ function buttonTooltipSbdCustom(parent) {
 	const data = JSON.parse(properties.data[1]);
 	const bTooltipInfo = properties.bTooltipInfo[1];
 	const recipe = parent.recipe.recipe || {};
+	const getSetting = (key) => {
+		return Object.hasOwn(recipe, key)
+			? recipe[key]
+			: Object.hasOwn(properties, key)
+				? sbd.isJsonProperty(key)
+					? JSON.parse(properties[key][1])
+					: properties[key][1]
+				: sbd.isJsonProperty(key)
+					? JSON.parse(sbd.panelProperties[key][1])
+					: sbd.panelProperties[key][1];
+	};
 	let info = 'Search similar tracks by acoustic-folksonomy models:';
 	info += '\nRecipe:\t' + data.recipe;
 	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
-	info += '\nMethod:\t' + sbd.getMethodDescription((Object.hasOwn(recipe, 'method') ? recipe.method : properties.method[1]));
-	const sort = (
-		((Object.hasOwn(recipe, 'bSmartShuffle') ? recipe.bSmartShuffle : properties.bSmartShuffle[1])
+	info += '\nMethod:\t' + sbd.getMethodDescription(getSetting('method'));
+	const sort = [
+		(getSetting('bSmartShuffle')
 			? 'Smart Shuffle'
 			: ''
-		) || ((Object.hasOwn(recipe, 'bInKeyMixingPlaylist') ? recipe.bInKeyMixingPlaylist : properties.bInKeyMixingPlaylist[1])
+		) || (getSetting('bInKeyMixingPlaylist')
 			? 'Harmonic Mix'
 			: ''
-		) || ((Object.hasOwn(recipe, 'bSortRandom') ? recipe.bSortRandom : properties.bSortRandom[1])
+		) || (getSetting('bSortRandom')
 			? 'Random'
 			: ''
-		) || ((Object.hasOwn(recipe, 'bProgressiveListOrder') ? recipe.bProgressiveListOrder : properties.bProgressiveListOrder[1])
+		) || (getSetting('bProgressiveListOrder')
 			? 'Score'
 			: ''
-		)) +
-		(
-			(Object.hasOwn(recipe, 'bProgressiveListCreation') ? recipe.bProgressiveListCreation : properties.bProgressiveListCreation[1])
-				? ' - Progressive playlist'
-				: ''
-		) +
-		(
-			(Object.hasOwn(recipe, 'artistRegionFilter') ? recipe.artistRegionFilter : properties.artistRegionFilter[1]) !== -1 || (Object.hasOwn(recipe, 'genreStyleRegionFilter') ? recipe.genreStyleRegionFilter : properties.genreStyleRegionFilter[1]) !== -1
-				? ' - Cultural filter'
-				: ''
-		) +
-		(
-			(Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : (JSON.parse(properties.dynQueries[1])) || []).length !== 0
-				? ' - Dynamic query'
-				: ''
-		);
+		),
+		getSetting('bProgressiveListCreation')
+			? 'Progressive playlist'
+			: '',
+		getSetting('artistRegionFilter') !== -1 || getSetting('genreStyleRegionFilter') !== -1
+			? 'Cultural filter'
+			: '',
+		(getSetting('dynQueries') || []).length !== 0
+			? 'Dynamic query'
+			: ''
+	].filter(Boolean).join(' | ');
 	info += sort ? '   ' + _p(sort) : '';
-	info += '\nTracks:\t' + properties.playlistLength[1];
+	info += '\nTracks:\t' + getSetting('playlistLength');
 	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
 	if (bShift && !bControl || bTooltipInfo) { info += '\n(Shift + L. Click for settings and tools)'; }
 	if (!bShift && bControl || bTooltipInfo) { info += '\n(Ctrl + L. Click to set recipe)'; }
-	if (!properties.bLiteMode[1] && (bShift && bControl || bTooltipInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
+	if (!getSetting('bLiteMode') && (bShift && bControl || bTooltipInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
 	return info;
 }
 
