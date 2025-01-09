@@ -40,8 +40,12 @@ function createConfigMenu(parent) {
 		return Object.hasOwn(recipe, key)
 			? recipe[key]
 			: Object.hasOwn(properties, key)
-				? properties[key][1]
-				: sbd.panelProperties[key][1];
+				? sbd.isJsonProperty(key)
+					? JSON.parse(properties[key][1])
+					: properties[key][1]
+				: sbd.isJsonProperty(key)
+					? JSON.parse(sbd.panelProperties[key][1])
+					: sbd.panelProperties[key][1];
 	};
 	const getAnySetting = (arrKeys) => {
 		return arrKeys.some((k) => getSetting(k));
@@ -495,17 +499,17 @@ function createConfigMenu(parent) {
 			createTagMenu(menuName, ['genreStyleFilterTag'], void(0), void (0), void (0), [
 				'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
 			]);
-			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('genreStyleFilterTag')).length);
+			menu.newCheckMenuLast(() => !!getSetting('genreStyleFilterTag').length);
 		}
 		{
 			createTagMenu(menuName, ['folksonomyWhitelistTag'], void(0), void (0), void (0), [
 				'\n\nOnly these values will be used when comparing folksonomy tags. Anything not listed here will be ignored.'
 			]);
-			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('folksonomyWhitelistTag')).length);
+			menu.newCheckMenuLast(() => !!getSetting('folksonomyWhitelistTag').length);
 			createTagMenu(menuName, ['folksonomyBlacklistTag'], void(0), void (0), void (0), [
 				'\n\nThese values will be filtered when comparing folksonomy tags. Anything not listed here will used.'
 			]);
-			menu.newCheckMenuLast(() => !!JSON.parse(getSetting('folksonomyBlacklistTag')).length && !JSON.parse(getSetting('folksonomyWhitelistTag')).length );
+			menu.newCheckMenuLast(() => !!getSetting('folksonomyBlacklistTag').length && !getSetting('folksonomyWhitelistTag').length );
 		}
 		if (!bLiteMode) {
 			menu.newSeparator(menuName);
@@ -617,7 +621,7 @@ function createConfigMenu(parent) {
 		const menuName = menu.newMenu('Tracks source');
 		menu.newEntry({ menuName, entryText: 'Select source for lookup:', flags: MF_GRAYED });
 		menu.newSeparator(menuName);
-		const sourceItems = JSON.parse(getSetting('sourceItems'));
+		const trackSource = getSetting('trackSource');
 		const options = [
 			{ entryText: 'Library', sourceType: 'library' },
 			{ entryText: 'Current playlist', sourceType: 'activePlaylist' },
@@ -629,21 +633,21 @@ function createConfigMenu(parent) {
 				menuName, entryText: option.entryText, func: () => {
 					if (Object.hasOwn(option, 'sourceArg')) {
 						if (option.sourceArg === null) {
-							const input = Input.string('string', sourceItems.sourceArg || '', 'Enter playlist name(s):\n(separated by ;)', 'Playlist sources', 'My Playlist;Other Playlist', void (0), true) || Input.lastInput;
+							const input = Input.string('string', trackSource.sourceArg || '', 'Enter playlist name(s):\n(separated by ;)', 'Playlist sources', 'My Playlist;Other Playlist', void (0), true) || Input.lastInput;
 							if (input === null) { return; }
-							sourceItems.sourceArg = input.split(';');
+							trackSource.sourceArg = input.split(';');
 						} else {
-							sourceItems.sourceArg = option.sourceArg;
+							trackSource.sourceArg = option.sourceArg;
 						}
 					}
-					sourceItems.sourceType = option.sourceType;
-					properties.sourceItems[1] = JSON.stringify(sourceItems);
+					trackSource.sourceType = option.sourceType;
+					properties.trackSource[1] = JSON.stringify(trackSource);
 					overwriteProperties(properties);
 				}
 			});
 		});
 		menu.newCheckMenuLast(() => {
-			const idx = options.findIndex((opt) => opt.sourceType === sourceItems.sourceType);
+			const idx = options.findIndex((opt) => opt.sourceType === trackSource.sourceType);
 			return (idx !== -1 ? idx : 0);
 		}, options);
 		menu.newSeparator(menuName);
@@ -651,7 +655,7 @@ function createConfigMenu(parent) {
 			const subMenuName = menu.newMenu('Duplicated tracks', menuName);
 			menu.newEntry({ menuName: subMenuName, entryText: 'How duplicates are handled by TF:', func: null, flags: MF_GRAYED });
 			menu.newSeparator(subMenuName);
-			const isEnabled = !!JSON.parse(getSetting('checkDuplicatesByTag')).length;
+			const isEnabled = !!getSetting('checkDuplicatesByTag').length;
 			{
 				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void (0), void (0), void (0), [
 					'\n\nTag(s) used to find and remove duplicates which match the same values. On some libraries there may be multiple versions of the same track (for ex. on compilations or live versions) and therefore appear on output playlist multiple times, which may be undesired.',

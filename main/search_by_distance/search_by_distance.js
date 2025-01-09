@@ -161,7 +161,7 @@ const SearchByDistance_properties = {
 	bBreakWhenFilled: ['Stop processing on playlist filling', true],
 	folksonomyWhitelistTag: ['Folksonomy white list values', JSON.stringify(['Mexican Folk', 'Spanish Folk', 'Female Vocal', 'Spanish Rock', 'Soundtrack', 'Argentinian Rock', 'Feminist', 'Instrumental', 'Live', 'Hi-Fi', 'Lo-Fi', 'Acoustic', 'Japanese', 'African', 'Indian', 'Nubian', 'Greek', 'Spanish Hip-Hop', 'German Rock', 'Israeli', 'Israeli Rock', 'Uruguayan Rock', 'Mexican Rock', 'Italian Rock', 'Asian Folk', 'Torch Songs', 'Tuareg Music', 'Tex-Mex', 'Música Popular Brasileira', 'Jam Band', 'Spanish Jazz', 'Brazilian Rock', 'Turkish', 'Film Score', 'Anime Music', 'Worldbeat'])],
 	folksonomyBlacklistTag: ['Folksonomy black list values', JSON.stringify([])],
-	sourceItems: ['Tracks source', JSON.stringify({ sourceType: 'library', sourceArg: null })],
+	trackSource: ['Tracks source', JSON.stringify({ sourceType: 'library', sourceArg: null })],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -170,7 +170,7 @@ Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
 		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
-	} else if (k.endsWith('tag') || k.endsWith('tags') || k.endsWith('source')) {
+	} else if (/(source|tags?)$/gi.test(k)) {
 		SearchByDistance_properties[key].push({ func: isJSON }, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
 		SearchByDistance_properties[key].push({ func: isBoolean }, SearchByDistance_properties[key][1]);
@@ -223,6 +223,7 @@ const sbd = {
 		? getPropertiesPairs(SearchByDistance_properties, sbd_prefix)
 		: getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	version,
+	isJsonProperty: (key) => /(source|tags?)$/gi.test(key),
 	get tagSchema() { return { weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */ }; },
 	get tagTypeSchema() {
 		return [
@@ -504,7 +505,7 @@ if (sbd.panelProperties.bProfile[1]) {
 /*
 	Variables allowed at recipe files and automatic documentation update
 */
-const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'nearGenresFilterAggressiveness', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple', 'bBreakWhenFilled']);
+const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'nearGenresFilterAggressiveness', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple', 'bBreakWhenFilled', 'trackSource']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
 const themePath = folders.xxx + 'presets\\Search by\\themes\\';
 const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
@@ -664,7 +665,7 @@ testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
  * @param {object?} o.properties - [=getPropertiesPairs(SearchByDistance_properties, sbd_prefix)] Properties, if provided most arguments below are filled from it
  * @param {object?} o.panelProperties - Panel properties, shared in the same toolbar/panel
  * @param {FbMetadbHandle?} o.sel - [=fb.GetFocusItem()] Reference track, first item of act. pls. if can't get focus item
- * @param {FbMetadbHandleList?} o.sourceItems - [=fb.GetLibraryItems()]
+ * @param {FbMetadbHandleList?} o.trackSource - [=fb.GetLibraryItems()]
  * @param {{name:string, tags: Object.<string, (string|number)>[]}|string} o.theme - [={}] May be a file path or object with Arr of tags }
  * @param {object|string} o.recipe - [={}]  // May be a file path or object with Arr of arguments {genreWeight, styleWeight, ...}
  *
@@ -762,7 +763,7 @@ async function searchByDistance({
 	properties = getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 	panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	sel = fb.GetFocusItem(),
-	sourceItems = Object.hasOwn(properties, 'sourceItems') ? JSON.parse(properties.sourceItems[1]) : { sourceType: 'library' },
+	trackSource = Object.hasOwn(properties, 'trackSource') ? JSON.parse(properties.trackSource[1]) : { sourceType: 'library' },
 	theme = {},
 	recipe = {},
 	// --->Args modifiers
@@ -1672,8 +1673,8 @@ async function searchByDistance({
 	if (!query[queryLength].length) { query[queryLength] = 'ALL'; }
 
 	// Preload source items
-	if (!sourceItems) { sourceItems = fb.GetLibraryItems(); }
-	else if (Object.hasOwn(sourceItems, 'sourceType')) { sourceItems = getSource(sourceItems.sourceType, sourceItems.sourceArg); }
+	if (!trackSource) { trackSource = fb.GetLibraryItems(); }
+	else if (Object.hasOwn(trackSource, 'sourceType')) { trackSource = getSource(trackSource.sourceType, trackSource.sourceArg); }
 
 	// Prefill tag Cache
 	if (bTagsCache) {
@@ -1684,7 +1685,7 @@ async function searchByDistance({
 		if (missingOnCache.length) {
 			console.log('Caching missing tags...');
 			if (parent) { parent.switchAnimation('Tag cache', true); }
-			await tagsCache.cacheTags(missingOnCache, 100, 50, sourceItems.Convert(), true);
+			await tagsCache.cacheTags(missingOnCache, 100, 50, trackSource.Convert(), true);
 			if (parent) { parent.switchAnimation('Tag cache', false); }
 			tagsCache.save();
 		}
@@ -1692,7 +1693,7 @@ async function searchByDistance({
 
 	// Load query
 	if (bShowQuery) { console.log('Query created: ' + query[queryLength]); }
-	let handleList = fb.GetQueryItemsCheck(sourceItems, query[queryLength]);
+	let handleList = fb.GetQueryItemsCheck(trackSource, query[queryLength]);
 	const debugQuery = (queryItems, q) => {
 		if (!queryItems) {
 			fb.ShowPopupMessage(
