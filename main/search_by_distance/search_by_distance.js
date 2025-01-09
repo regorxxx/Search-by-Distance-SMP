@@ -233,6 +233,15 @@ const sbd = {
 			case 'GRAPH': return 'Tags + Adv. Genre analysis (GRAPH)';
 		}
 	},
+	getSourceDescription: (key) => {
+		switch (key) {
+			case 'library': return 'Library';
+			case 'activePlaylist': return 'Current playlist';
+			case 'playingPlaylist': return 'Playing playlist';
+			case 'playlist': return 'Selected playlist(s)...';
+		}
+	},
+	get availableSources() { return ['library', 'activePlaylist', 'playingPlaylist', 'playlist']; },
 	get availableMethods() { return ['WEIGHT', 'DYNGENRE', 'GRAPH']; },
 	get tagSchema() { return { weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */ }; },
 	get tagTypeSchema() {

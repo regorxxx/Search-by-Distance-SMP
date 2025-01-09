@@ -151,6 +151,17 @@ function buttonTooltipSbdCustom(parent) {
 	info += '\nRecipe:\t' + data.recipe;
 	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
 	info += '\nMethod:\t' + sbd.getMethodDescription(getSetting('method'));
+	const filters = [
+		getSetting('bProgressiveListCreation')
+			? 'Progressive playlist'
+			: '',
+		getSetting('artistRegionFilter') !== -1 || getSetting('genreStyleRegionFilter') !== -1
+			? 'Cultural filter'
+			: '',
+		(getSetting('dynQueries') || []).length !== 0
+			? 'Dynamic query'
+			: ''
+	].filter(Boolean).join(' | ');
 	const sort = [
 		(getSetting('bSmartShuffle')
 			? 'Smart Shuffle'
@@ -164,19 +175,13 @@ function buttonTooltipSbdCustom(parent) {
 		) || (getSetting('bProgressiveListOrder')
 			? 'Score'
 			: ''
-		),
-		getSetting('bProgressiveListCreation')
-			? 'Progressive playlist'
-			: '',
-		getSetting('artistRegionFilter') !== -1 || getSetting('genreStyleRegionFilter') !== -1
-			? 'Cultural filter'
-			: '',
-		(getSetting('dynQueries') || []).length !== 0
-			? 'Dynamic query'
-			: ''
+		)
 	].filter(Boolean).join(' | ');
-	info += sort ? '   ' + _p(sort) : '';
-	info += '\nTracks:\t' + getSetting('playlistLength');
+	info += filters ? '\nFilters:\t' + filters : '';
+	info += sort ? '\nSorting:\t' + sort : '';
+	info += '\nTracks:\t'
+		+ (getSetting('playlistLength') === -1 ? 'By user input' : getSetting('playlistLength'))
+		+ ' '+ _p('from ' + sbd.getSourceDescription(getSetting('trackSource').sourceType));
 	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);

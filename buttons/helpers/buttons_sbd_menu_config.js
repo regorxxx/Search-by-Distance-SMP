@@ -624,12 +624,13 @@ function createConfigMenu(parent) {
 		menu.newEntry({ menuName, entryText: 'Select source for lookup:', flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		const trackSource = getSetting('trackSource');
-		const options = [
-			{ entryText: 'Library', sourceType: 'library' },
-			{ entryText: 'Current playlist', sourceType: 'activePlaylist' },
-			{ entryText: 'Playing playlist', sourceType: 'playingPlaylist' },
-			{ entryText: 'Selected playlist(s)...', sourceType: 'playlist', sourceArg: null },
-		];
+		const options = sbd.availableSources.map((sourceType) => {
+			return {
+				entryText: sbd.getSourceDescription(sourceType),
+				sourceType,
+				...(sourceType === 'playlist' ? {sourceArg: null} : {})
+			};
+		});
 		options.forEach((option) => {
 			menu.newEntry({
 				menuName, entryText: option.entryText, func: () => {
