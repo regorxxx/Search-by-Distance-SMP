@@ -154,8 +154,8 @@ function createConfigMenu(parent) {
 		menu.newEntry({ menuName, entryText: 'How similar tracks are searched:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		{
-			createSwitchMenu(menuName, 'method', ['WEIGHT', 'DYNGENRE', 'GRAPH'], void (0), void (0),
-				['Tags similarity (WEIGHT)', 'Tags + Genre analysis (DYNGENRE)', 'Tags + Adv. Genre analysis (GRAPH)']
+			createSwitchMenu(menuName, 'method', sbd.availableMethods, void (0), void (0),
+				sbd.availableMethods.map(sbd.getMethodDescription)
 			);
 		}
 		if (bIsGraph) {
