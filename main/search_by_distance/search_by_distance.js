@@ -226,6 +226,14 @@ const sbd = {
 		: getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	version,
 	isJsonProperty: (key) => /(source|tags?)$/gi.test(key),
+	getMethodDescription: (key) => {
+		switch (key.toUpperCase()) {
+			case 'WEIGHT': return 'Tags similarity (WEIGHT)';
+			case 'DYNGENRE': return 'Tags + Genre analysis (DYNGENRE)';
+			case 'GRAPH': return 'Tags + Adv. Genre analysis (GRAPH)';
+		}
+	},
+	get availableMethods() { return ['WEIGHT', 'DYNGENRE', 'GRAPH']; },
 	get tagSchema() { return { weight: 0, tf: [], baseScore: 0, scoringDistribution: 'LINEAR', type: [] /*, range, combs */ }; },
 	get tagTypeSchema() {
 		return [
@@ -2778,7 +2786,7 @@ function findStyleGenresMissingGraphCheck(properties) {
 }
 
 function checkMethod(method) {
-	return (new Set(['WEIGHT', 'GRAPH', 'DYNGENRE']).has(method));
+	return (new Set(sbd.availableMethods)).has(method);
 }
 
 function checkScoringDistribution(distr) {

@@ -134,7 +134,7 @@ function buttonTooltipSbdCustom(parent) {
 	let info = 'Search similar tracks by acoustic-folksonomy models:';
 	info += '\nRecipe:\t' + data.recipe;
 	info += '\nTheme:\t' + (data.forcedTheme.length ? data.forcedTheme : data.theme);
-	info += '\nMethod:\t' + (Object.hasOwn(recipe, 'method') ? recipe.method : properties.method[1]);
+	info += '\nMethod:\t' + sbd.getMethodDescription((Object.hasOwn(recipe, 'method') ? recipe.method : properties.method[1]));
 	const sort = (
 		((Object.hasOwn(recipe, 'bSmartShuffle') ? recipe.bSmartShuffle : properties.bSmartShuffle[1])
 			? 'Smart Shuffle'
