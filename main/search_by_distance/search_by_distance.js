@@ -1065,7 +1065,7 @@ async function searchByDistance({
 	// Check input
 	playlistLength = (playlistLength >= 0)
 		? playlistLength
-		: Input.number('int positive', 50, 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance: Playlist size', 50);
+		: Input.number('int positive', 50, 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance: Playlist size', 50) || Input.lastInput;
 	probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 	scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 	minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
