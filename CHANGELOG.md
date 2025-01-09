@@ -68,7 +68,7 @@
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 - Info: added hated stats.
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
-- Presets: "10 Most similar tracks" recipes, which should return the 10 most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature.
+- Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 ### Changed
 - Descriptors: merged Tishoumaren and Desert Blues styles, used the first and added Desert Blues and Assouf as substitutions.
 - Descriptors: tweaked Sad Emo XL and Gothic XL clusters.
@@ -81,6 +81,7 @@
 - Post-scoring filters: 'Filter pool of similar tracks by tag' option now also uses RegExp for title (if used) and has multi-value tag support (any single match will do, not only when all values of a multi-value tag match).
 - Tags: small performance improvements when using the setting 'Asciify string values internally'.
 - Tags: 'Genre/style region' tag weight is set to zero -internally- on any search method different than 'GRAPH' before processing; now available only when using that search method.
+- Configuration: playlist size may now be set to -1, asking via input popups the desired playlist size on every call. (the new recipes use this feature, see above)
 - Configuration: anti-influences filters enabled by default on new installations.
 - Configuration: genre variation (aka graph distance) can now be set as the distance key string (for ex. 'intra_supergenre') without the need of using 'music_graph_descriptors.' prefix too. In any case both notations are supported ('music_graph_descriptors.intra_supergenre' or 'intra_supergenre').
 - Recursive Playlist: every iterative search will reuse the sorting/picking settings, so final playlist will be sorted in multiple groups with same pattern instead of randomly.

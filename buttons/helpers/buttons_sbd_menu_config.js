@@ -204,8 +204,10 @@ function createConfigMenu(parent) {
 			].filter(Boolean);
 			options.forEach((key, i) => {
 				if (menu.isSeparator(key)) { menu.newSeparator(menuName); return; }
-				const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
-				const val = properties[key][1];
+				const flags = Object.hasOwn(recipe, key) || (key === 'minScoreFilter' && getSetting('scoreFilter') === 0) ? MF_GRAYED : MF_STRING;
+				const val = key === 'minScoreFilter'
+					? Math.min(properties[key][1], getSetting('scoreFilter'))
+					: properties[key][1];
 				const entryText = text[i] + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + val + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
@@ -1365,7 +1367,7 @@ function createConfigMenu(parent) {
 				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int positive', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= 0]);
+						const input = Input.number('int positive', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel

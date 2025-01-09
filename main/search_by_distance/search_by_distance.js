@@ -68,6 +68,8 @@ include('..\\..\\helpers\\helpers_xxx_math.js');
 /* global k_combinations:readable */
 include('..\\..\\helpers\\helpers_xxx_playlists.js');
 /* global getSource:readable */
+include('..\\..\\helpers\\helpers_xxx_input.js');
+/* global Input:readable */
 include('..\\..\\helpers\\helpers_xxx_statistics.js');
 /* global zScoreToCDF:readable */
 include('..\\..\\helpers\\camelot_wheel_xxx.js');
@@ -167,7 +169,7 @@ const SearchByDistance_properties = {
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 	const k = key.toLowerCase();
 	if (k.endsWith('length')) {
-		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ greaterEq: -1, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
 		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
 	} else if (/(source|tags?)$/gi.test(k)) {
@@ -1044,11 +1046,17 @@ async function searchByDistance({
 	const genreStyleTagQuery = Array.from(new Set(calcTags.genreStyle.tf), (tag) => (!tag.includes('$') ? tag : _q(tag)));
 
 	// Check input
-	playlistLength = (playlistLength >= 0) ? playlistLength : 0;
+	playlistLength = (playlistLength >= 0)
+		? playlistLength
+		: Input.number('int positive', 50, 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance: Playlist size', 50);
 	probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 	scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 	minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
 	bPoolFiltering = bPoolFiltering && (poolFilteringN >= 0 && poolFilteringN < Infinity);
+	if (!playlistLength) {
+		if (bBasicLogging) { console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.'); }
+		return;
+	}
 	if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {
 		console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, 'Search by distance');
 		return;
@@ -1090,10 +1098,6 @@ async function searchByDistance({
 		calcTags.genreStyleRegion.weight = 0;
 	}
 
-	if (!playlistLength) {
-		if (bBasicLogging) { console.log('Check \'Playlist Mix length\' value (' + playlistLength + '). Must be greater than zero.'); }
-		return;
-	}
 	if (method === 'WEIGHT' && Object.keys(calcTags).every((key) => calcTags[key].weight === 0)) {
 		if (bBasicLogging) {
 			if (calcTags.dynGenre.weight !== 0) { console.log('Check weight values, all are set to zero and \'dynGenre\' weight is not used for WEIGHT method.'); }

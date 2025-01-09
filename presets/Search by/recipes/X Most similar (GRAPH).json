@@ -1,6 +1,7 @@
 {
-	"name": "10 most similar tracks (W)",
+	"name": "X most similar tracks (G)",
 	"scoreFilter": 0,
+	"graphDistance": "Infinity",
 	"bRandomPick": false,
 	"bInversePick": false,
 	"bSortRandom": false,
@@ -8,8 +9,8 @@
 	"bScatterInstrumentals": false,
 	"bProgressiveListOrder": true,
 	"bInKeyMixingPlaylist": false,
-	"method": "WEIGHT",
-	"playlistLength": 10,
+	"method": "GRAPH",
+	"playlistLength": -1,
 	"bBreakWhenFilled" : false,
 	"trackSource": {
 		"sourceType": "activePlaylist",

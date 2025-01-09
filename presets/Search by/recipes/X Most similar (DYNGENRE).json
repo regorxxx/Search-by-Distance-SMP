@@ -1,5 +1,5 @@
 {
-	"name": "10 most similar tracks (D)",
+	"name": "X most similar tracks (D)",
 	"scoreFilter": 0,
 	"bRandomPick": false,
 	"bInversePick": false,
@@ -9,7 +9,7 @@
 	"bProgressiveListOrder": true,
 	"bInKeyMixingPlaylist": false,
 	"method": "DYNGENRE",
-	"playlistLength": 10,
+	"playlistLength": -1,
 	"bBreakWhenFilled" : false,
 	"trackSource": {
 		"sourceType": "activePlaylist",
