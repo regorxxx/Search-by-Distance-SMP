@@ -66,6 +66,8 @@ if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 /* global tagsCache:readable */
 include('..\\..\\helpers\\helpers_xxx_math.js');
 /* global k_combinations:readable */
+include('..\\..\\helpers\\helpers_xxx_playlists.js');
+/* global getSource:readable */
 include('..\\..\\helpers\\helpers_xxx_statistics.js');
 /* global zScoreToCDF:readable */
 include('..\\..\\helpers\\camelot_wheel_xxx.js');
@@ -159,6 +161,7 @@ const SearchByDistance_properties = {
 	bBreakWhenFilled: ['Stop processing on playlist filling', true],
 	folksonomyWhitelistTag: ['Folksonomy white list values', JSON.stringify(['Mexican Folk', 'Spanish Folk', 'Female Vocal', 'Spanish Rock', 'Soundtrack', 'Argentinian Rock', 'Feminist', 'Instrumental', 'Live', 'Hi-Fi', 'Lo-Fi', 'Acoustic', 'Japanese', 'African', 'Indian', 'Nubian', 'Greek', 'Spanish Hip-Hop', 'German Rock', 'Israeli', 'Israeli Rock', 'Uruguayan Rock', 'Mexican Rock', 'Italian Rock', 'Asian Folk', 'Torch Songs', 'Tuareg Music', 'Tex-Mex', 'Música Popular Brasileira', 'Jam Band', 'Spanish Jazz', 'Brazilian Rock', 'Turkish', 'Film Score', 'Anime Music', 'Worldbeat'])],
 	folksonomyBlacklistTag: ['Folksonomy black list values', JSON.stringify([])],
+	sourceItems: ['Tracks source', JSON.stringify({ sourceType: 'library', sourceArg: null })],
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -167,7 +170,7 @@ Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 		SearchByDistance_properties[key].push({ greaterEq: 0, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
 		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
-	} else if (k.endsWith('tag') || k.endsWith('tags')) {
+	} else if (k.endsWith('tag') || k.endsWith('tags') || k.endsWith('source')) {
 		SearchByDistance_properties[key].push({ func: isJSON }, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
 		SearchByDistance_properties[key].push({ func: isBoolean }, SearchByDistance_properties[key][1]);
@@ -759,7 +762,7 @@ async function searchByDistance({
 	properties = getPropertiesPairs(SearchByDistance_properties, sbd_prefix),
 	panelProperties = (typeof buttonsBar === 'undefined') ? properties : getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	sel = fb.GetFocusItem(),
-	sourceItems,
+	sourceItems = Object.hasOwn(properties, 'sourceItems') ? JSON.parse(properties.sourceItems[1]) : { sourceType: 'library' },
 	theme = {},
 	recipe = {},
 	// --->Args modifiers
@@ -1668,8 +1671,9 @@ async function searchByDistance({
 	}
 	if (!query[queryLength].length) { query[queryLength] = 'ALL'; }
 
-	// Preload lib items
+	// Preload source items
 	if (!sourceItems) { sourceItems = fb.GetLibraryItems(); }
+	else if (Object.hasOwn(sourceItems, 'sourceType')) { sourceItems = getSource(sourceItems.sourceType, sourceItems.sourceArg); }
 
 	// Prefill tag Cache
 	if (bTagsCache) {

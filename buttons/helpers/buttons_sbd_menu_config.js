@@ -613,6 +613,88 @@ function createConfigMenu(parent) {
 			});
 		}
 	}
+	{	// Tracks Source
+		const menuName = menu.newMenu('Tracks source');
+		menu.newEntry({ menuName, entryText: 'Select source for lookup:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
+		const sourceItems = JSON.parse(getSetting('sourceItems'));
+		const options = [
+			{ entryText: 'Library', sourceType: 'library' },
+			{ entryText: 'Current playlist', sourceType: 'activePlaylist' },
+			{ entryText: 'Playing playlist', sourceType: 'playingPlaylist' },
+			{ entryText: 'Selected playlist(s)...', sourceType: 'playlist', sourceArg: null },
+		];
+		options.forEach((option) => {
+			menu.newEntry({
+				menuName, entryText: option.entryText, func: () => {
+					if (Object.hasOwn(option, 'sourceArg')) {
+						if (option.sourceArg === null) {
+							const input = Input.string('string', sourceItems.sourceArg || '', 'Enter playlist name(s):\n(separated by ;)', 'Playlist sources', 'My Playlist;Other Playlist', void (0), true) || Input.lastInput;
+							if (input === null) { return; }
+							sourceItems.sourceArg = input.split(';');
+						} else {
+							sourceItems.sourceArg = option.sourceArg;
+						}
+					}
+					sourceItems.sourceType = option.sourceType;
+					properties.sourceItems[1] = JSON.stringify(sourceItems);
+					overwriteProperties(properties);
+				}
+			});
+		});
+		menu.newCheckMenuLast(() => {
+			const idx = options.findIndex((opt) => opt.sourceType === sourceItems.sourceType);
+			return (idx !== -1 ? idx : 0);
+		}, options);
+		menu.newSeparator(menuName);
+		{
+			const subMenuName = menu.newMenu('Duplicated tracks', menuName);
+			menu.newEntry({ menuName: subMenuName, entryText: 'How duplicates are handled by TF:', func: null, flags: MF_GRAYED });
+			menu.newSeparator(subMenuName);
+			const isEnabled = !!JSON.parse(getSetting('checkDuplicatesByTag')).length;
+			{
+				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void (0), void (0), void (0), [
+					'\n\nTag(s) used to find and remove duplicates which match the same values. On some libraries there may be multiple versions of the same track (for ex. on compilations or live versions) and therefore appear on output playlist multiple times, which may be undesired.',
+				]);
+				menu.newCheckMenuLast(() => isEnabled);
+			}
+			{
+
+				menu.newEntry({
+					menuName: subMenuName, entryText: getEntryText('sortBias', 'Duplicates selection bias...'), func: () => {
+						const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\nOutput must be a numbers separated by \'|\'.\nHigher valued tracks will be preferred.', 'Search by distance: Duplicates selection bias', globQuery.remDuplBias, void (0), false);
+						if (input === null) { return; }
+						properties['sortBias'][1] = input;
+						overwriteProperties(properties); // Updates panel
+					}, flags: Object.hasOwn(recipe, 'sortBias') || !isEnabled ? MF_GRAYED : MF_STRING
+				});
+			}
+			if (!bLiteMode) {
+				createBoolMenu(
+					subMenuName,
+					['bAdvTitle', 'bMultiple'],
+					[!isEnabled, !isEnabled],
+					(key, i, props) => {
+						if (props[key][1]) {
+							if (key === 'bAdvTitle') {
+								fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');
+							} else if (key === 'bMultiple') {
+								fb.ShowPopupMessage(
+									'When this option is enabled, multi-value tags are parsed independently and a track may be considered a duplicate if at least one of those values match (instead of requiring all to match in the same order).\n\nSo for \'[ARTIST, DATE, TITLE]\' tags, these are duplicates with this option enabled:\n' +
+									'\nJimi Hendrix - 1969 - Blabla' +
+									'\nJimi Hendrix experience, Jimi Hendrix - 1969 - Blabla' +
+									'\nBand of Gypys, Jimi Hendrix - 1969 - Blabla' +
+									'\n\nWith multi-value parsing disabled, these are considered non-duplicated tracks since not all artists match.',
+									'Search by distance'
+								);
+							}
+						}
+					},
+					['Use RegExp for title matching', void (0)]
+				);
+			}
+		}
+	}
 	{	// Pre-scoring filters:
 		const menuName = menu.newMenu('Pre-analysis filters');
 		menu.newEntry({ menuName, entryText: 'Filters applied to source before analysis:', func: null, flags: MF_GRAYED });
@@ -1286,54 +1368,6 @@ function createConfigMenu(parent) {
 					}, flags: Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING
 				});
 			});
-		}
-		menu.newSeparator(menuName);
-		{
-			const subMenuName = menu.newMenu('Duplicated tracks', menuName);
-			menu.newEntry({ menuName: subMenuName, entryText: 'How duplicates are handled by TF:', func: null, flags: MF_GRAYED });
-			menu.newSeparator(subMenuName);
-			const isEnabled = !!JSON.parse(getSetting('checkDuplicatesByTag')).length;
-			{
-				createTagMenu(subMenuName, ['checkDuplicatesByTag'], void (0), void (0), void (0), [
-					'\n\nTag(s) used to find and remove duplicates which match the same values. On some libraries there may be multiple versions of the same track (for ex. on compilations or live versions) and therefore appear on output playlist multiple times, which may be undesired.',
-				]);
-				menu.newCheckMenuLast(() => isEnabled);
-			}
-			{
-
-				menu.newEntry({
-					menuName: subMenuName, entryText: getEntryText('sortBias', 'Duplicates selection bias...'), func: () => {
-						const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\nOutput must be a numbers separated by \'|\'.\nHigher valued tracks will be preferred.', 'Search by distance: Duplicates selection bias', globQuery.remDuplBias, void (0), false);
-						if (input === null) { return; }
-						properties['sortBias'][1] = input;
-						overwriteProperties(properties); // Updates panel
-					}, flags: Object.hasOwn(recipe, 'sortBias') || !isEnabled ? MF_GRAYED : MF_STRING
-				});
-			}
-			if (!bLiteMode) {
-				createBoolMenu(
-					subMenuName,
-					['bAdvTitle', 'bMultiple'],
-					[!isEnabled, !isEnabled],
-					(key, i, props) => {
-						if (props[key][1]) {
-							if (key === 'bAdvTitle') {
-								fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');
-							} else if (key === 'bMultiple') {
-								fb.ShowPopupMessage(
-									'When this option is enabled, multi-value tags are parsed independently and a track may be considered a duplicate if at least one of those values match (instead of requiring all to match in the same order).\n\nSo for \'[ARTIST, DATE, TITLE]\' tags, these are duplicates with this option enabled:\n' +
-									'\nJimi Hendrix - 1969 - Blabla' +
-									'\nJimi Hendrix experience, Jimi Hendrix - 1969 - Blabla' +
-									'\nBand of Gypys, Jimi Hendrix - 1969 - Blabla' +
-									'\n\nWith multi-value parsing disabled, these are considered non-duplicated tracks since not all artists match.',
-									'Search by distance'
-								);
-							}
-						}
-					},
-					['Use RegExp for title matching', void (0)]
-				);
-			}
 		}
 		menu.newSeparator(menuName);
 		createBoolMenu(menuName, ['bLiteMode'], void (0), void (0), ['Advanced mode']);
