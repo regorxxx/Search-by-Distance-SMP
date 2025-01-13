@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/01/25
+//13/01/25
 
 /* exported createConfigMenu */
 
@@ -1368,7 +1368,7 @@ function createConfigMenu(parent) {
 				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int positive', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
+						const input = Input.number('int', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
