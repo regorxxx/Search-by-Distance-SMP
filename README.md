@@ -3,7 +3,7 @@
 [![CodeFactor][codefactor_badge]](https://www.codefactor.io/repository/github/regorxxx/Search-by-Distance-SMP/overview/main)
 [![Codacy Badge][codacy_badge]](https://www.codacy.com/gh/regorxxx/Search-by-Distance-SMP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=regorxxx/Search-by-Distance-SMP&amp;utm_campaign=Badge_Grade)
 ![GitHub](https://img.shields.io/github/license/regorxxx/Search-by-Distance-SMP)  
-An implementation of [Music-Graph](https://github.com/regorxxx/Music-Graph) for [foobar2000](https://www.foobar2000.org) using [Spider Monkey Panel](https://theqwertiest.github.io/foo_spider_monkey_panel), which creates intelligent "spotify-like" playlist using high-level data from tracks and computing their similarity using genres/styles.
+An implementation of [Music-Graph](https://github.com/regorxxx/Music-Graph) for [foobar2000](https://www.foobar2000.org) using [Spider Monkey Panel](https://theqwertiest.github.io/foo_spider_monkey_panel)/[JSplitter](https://foobar2000.ru/forum/viewtopic.php?t=6378), which creates intelligent "spotify-like" playlist using high-level data from tracks and computing their similarity using genres/styles.
 
 ![Animation11](https://user-images.githubusercontent.com/83307074/116761198-80a8bd80-aa06-11eb-904c-b3d50905f6bd.gif)
 
@@ -68,9 +68,22 @@ Graph behavior, new genres or substitutions may be tweaked by the user. Changes 
 
 ![playlist_tools_menu_05](https://user-images.githubusercontent.com/83307074/116759000-cebac280-aa00-11eb-8a81-9a450e13205a.gif)
 
+## Requirements
+ 1. [Spider Monkey Panel](https://theqwertiest.github.io/foo_spider_monkey_panel): Component required to install this javaScript addon. Only x32.
+ 2. [JSplitter](https://foobar2000.ru/forum/viewtopic.php?t=6378): Component required to install this javaScript addon. Both x32 and x64.
+ 3. FontAwesome: found at ’.\ resources\fontawesome-webfont.ttf’. See installation notes.
+
 ## Installation
-See [_TIPS and INSTALLATION (txt)](https://github.com/regorxxx/Search-by-Distance-SMP/blob/main/_TIPS%20and%20INSTALLATION.txt) and the [Wiki](https://github.com/regorxxx/Search-by-Distance-SMP/wiki/Installation).
+See [_INSTALLATION (txt)](https://github.com/regorxxx/Search-by-Distance-SMP/blob/main/_INSTALLATION.txt) and the [Wiki](https://github.com/regorxxx/Search-by-Distance-SMP/wiki/Installation).
 Not properly following the installation instructions will result in scripts not working as intended. Please don't report errors before checking this.
+
+## Support
+ 1. [Issues tracker](https://github.com/regorxxx/Search-by-Distance-SMP/issues).
+ 2. [Hydrogenaudio forum](https://hydrogenaud.io/index.php/topic,120982.0.html).
+ 3. [Wiki](https://github.com/regorxxx/Search-by-Distance-SMP/wiki).
+
+## Nightly releases
+Zip file [from GitHub](https://github.com/regorxxx/Search-by-Distance-SMP/archive/refs/heads/main.zip) (using the latest commit).
 
 [changelog]: CHANGELOG.md
 [version_badge]: https://img.shields.io/github/release/regorxxx/Search-by-Distance-SMP.svg
