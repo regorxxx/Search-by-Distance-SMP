@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/01/25
+//26/01/25
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -66,7 +66,7 @@ const music_graph_descriptors_culture = new RegionMap({
 		},
 		'Europe': {
 			'_ALL_': [
-				'European Pre-Modern Folk_supergenre', 'European Folk_supergenre', 'Classical Medieval Era_supergenre', 'Classical Renaissance Era_supergenre', 'Classical Baroque Era_supergenre', 'Classical Classical Era_supergenre', 'Classical Romantic Era_supergenre', 'Bal Folk XL', 'European Folk XL', 'European Pre-Modern Folk XL', 'Eurodisco', 'Europop', 'Contemporary Christian Music', 'Christian Rock', 'Deep House', 'Microhouse', 'Minimal House', 'Folk-Metal', 'Ambient Black Metal', 'Third Stream', 'Extreme Metal', 'Speed Metal', 'Power Metal', 'Renaissance Rock', 'Glitch Hop', 'Post-Bop', 'Trancecore', 'Tech Trance', 'Dance', 'Eurodance', 'Eurotrance', 'Hardtek', 'Freetekno', 'Vocal Trance', 'Progressive Trance', 'Acid Trance', 'Modernist', 'Neo-Classical', 'Post-Punk Revival', 'Melodic Techno-House'
+				'European Pre-Modern Folk_supergenre', 'European Folk_supergenre', 'Classical Medieval Era_supergenre', 'Classical Renaissance Era_supergenre', 'Classical Baroque Era_supergenre', 'Classical Classical Era_supergenre', 'Classical Romantic Era_supergenre', 'Bal Folk XL', 'European Folk XL', 'European Pre-Modern Folk XL', 'Eurodisco', 'Europop', 'Contemporary Christian Music', 'Christian Rock', 'Deep House', 'Microhouse', 'Minimal House', 'Folk-Metal', 'Ambient Black Metal', 'Third Stream', 'Extreme Metal', 'Speed Metal', 'Power Metal', 'Renaissance Rock', 'Glitch Hop', 'Post-Bop', 'Trancecore', 'Tech Trance', 'Dance', 'Eurodance', 'Eurotrance', 'Hardtek', 'Freetekno', 'Vocal Trance', 'Progressive Trance', 'Acid Trance', 'Modernist', 'Neo-Classical', 'Post-Punk Revival', 'Melodic Techno-House', 'Acid Techno'
 			],
 			'Eastern Europe': [
 				'Darkwave', 'Coldwave', 'Pagan Folk', 'Speedcore'
