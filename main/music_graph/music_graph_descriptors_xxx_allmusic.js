@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/12/24
+//26/01/25
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -125,7 +125,7 @@ const music_graph_descriptors_allmusic = {
 			['*'								,	['Microhouse'						]],
 			['*'								,	['Progressive House'				]],
 			['Tech House'						,	['Tech-House'						]],
-			['-'								,	['Tribal House'						]],
+			['*'								,	['Tribal House'						]],
 			['*'								,	['UK Garage'						]],
 		/* Jungle / Drum'n'Bass */
 			['Drum & Bass_supergenre'			,	['Jungle / Drum\'n\'Bass'			]],
@@ -138,20 +138,20 @@ const music_graph_descriptors_allmusic = {
 			['-'								,	['Industrial Drum\'n\'Bass'			]],
 		/* Techno */
 			['*'								,	['Techno'							]],
-			['-'								,	['Acid Techno'						]],
+			['*'								,	['Acid Techno'						]],
 			['*'								,	['Ambient Techno'					]],
 			['*'								,	['Detroit Techno'					]],
 			['*'								,	['Electro'							]],
 			['Nu Jazz'							,	['Electro-Jazz'						]],
 			['-'								,	['Electro-Techno'					]],
-			['-'								,	['Experimental Electro'				]],
-			['-'								,	['Experimental Techno'				]],
-			['-'								,	['Gabba'							]],
+			['Electro'							,	['Experimental Electro'				]],
+			['Techno'							,	['Experimental Techno'				]],
+			['Gabber'							,	['Gabba'							]],
 			['*'								,	['Happy Hardcore'					]],
 			['*'								,	['Hardcore Techno'					]],
 			['*'								,	['Minimal Techno'					]],
 			['0'								,	['Neo-Electro'						]],
-			['-'								,	['Rave'								]],
+			['Rave XL'							,	['Rave'								]],
 			['-'								,	['Techno Bass'						]],
 			['-'								,	['Techno-Dub'						]],
 		/* Trance */
