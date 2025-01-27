@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/12/24
+//27/01/25
 
 /* exported createThemeMenu */
 
@@ -38,7 +38,9 @@ function createThemeMenu(parent) {
 			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {
 				forcedThemePath = folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme;
 				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
-			} else { console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
+			} else {
+				console.popup('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme, 'Search by distance');
+			}
 		}
 		if (forcedThemePath !== data.forcedTheme) {
 			data.forcedTheme = recipe.theme;
@@ -104,7 +106,7 @@ function createThemeMenu(parent) {
 				menuName, entryText: 'Open readme...', func: () => {
 					const readme = _open(readmePath, utf8); // Executed on script load
 					if (readme.length) { fb.ShowPopupMessage(readme, window.Name); }
-					else { console.log('Readme not found: ' + readmePath); }
+					else { console.log('Search by Distance: Readme not found\n\t ' + readmePath); }
 				}
 			});
 		}
@@ -120,7 +122,7 @@ function createThemeMenu(parent) {
 				const hiddenFiles = files.filter((file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden; });
 				hiddenFiles.forEach((file) => {
 					if (!testRegex.test(file.split('\\').pop())) {
-						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Unhide: ' + file); }
+						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Search by Distance: Unhidden theme\n\t ' + file); }
 					}
 				});
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
@@ -153,10 +155,10 @@ function createThemeMenu(parent) {
 			: 0;
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
-			console.log('Theme: ' + theme.name + (file ? ' (' + file + ')' : ''));
 			console.log(
-				'Theme is missing some keys: ' +
-				(Object.hasOwn(theme, 'tags') && tagCheck !== -1
+				'Search by Distance: Theme is missing some keys\n\t' +
+				'Theme: ' + theme.name + (file ? ' (' + file + ')' : '') + '\n\t ' +
+				'Keys: ' + (Object.hasOwn(theme, 'tags') && tagCheck !== -1
 					? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))]
 					: 'name')
 			);
