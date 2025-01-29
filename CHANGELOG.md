@@ -70,6 +70,10 @@
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 ### Changed
+- Presets: recipes folder has been moved to '.\profile\js_data\presets\recipes\'. All new recipes will be created there. All existing recipes will be copied here upon installation (and overwritten on future updates following previous behavior); user-created recipes will also be copied to the new path as result. Note you will have to manually delete your user-created recipes from the old path (.\profile\scripts\SMP\xxx-scripts\presets\Search by\recipes\) to avoid future overwrites.
+- Presets: themes folder has been moved to '.\profile\js_data\presets\themes\'. See notes above for recipes (it also applies to themes).
+- Presets: query filter file moved from '.\profile\scripts\SMP\xxx-scripts\presets\Search by\filters\custom_button_filters.json' to '.\profile\js_data\presets\filters\custom_button_filters.json'.If you want to use the old settings, move it manually to the new path. If the file doesn't exist, then you are just using the default filters (and may forget about this change).
+- Presets: dynamic query filter file moved from '.\profile\scripts\SMP\xxx-scripts\presets\Search by\filters\custom_button_dynamic_filters.json' to '.\profile\js_data\presets\filters\custom_button_dynamic_filters.json'. See notes above for query filters.
 - Descriptors: merged Tishoumaren and Desert Blues styles, used the first and added Desert Blues and Assouf as substitutions.
 - Descriptors: tweaked Sad Emo XL and Gothic XL clusters.
 - Descriptors: multiple improvements to All Music descriptors.
@@ -98,6 +102,7 @@
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
 - Themes: fix crash on theme creation with incomplete input or when World-Map-SMP was not used.
+- Recipes: menu crash when there were no recipes at folder.
 - Sorting: fixed long time bug where 'Sort final playlist by score' was not working properly in some cases, despite the console showing the right order.
 - UI: '&' being displayed as '_' on tooltips.
 - Tags: fixed wrong application of LOGARITHMIC distribution for ranges greater than 100%, resulting in NaN values for the total score. It did not affect the final results in any case, but resulted in some errors when refactoring the code. The fix should also add some small performance improvement.

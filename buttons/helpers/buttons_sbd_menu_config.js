@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/01/25
+//29/01/25
 
 /* exported createConfigMenu */
 
@@ -734,7 +734,7 @@ function createConfigMenu(parent) {
 		}
 		if (!bLiteMode) {	// Additional filters
 			let options = [];
-			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_filters.json';
+			const file = folders.userPresets + 'filters\\custom_button_filters.json';
 			const bFile = _isFile(file);
 			if (bFile) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
@@ -823,7 +823,7 @@ function createConfigMenu(parent) {
 			const currentFilters = (Object.hasOwn(recipe, 'dynQueries') ? recipe.dynQueries : currentPropFilters) || [];
 			const data = JSON.parse(properties.data[1]);
 			const isTheme = (data.forcedTheme.length ? data.forcedTheme : data.theme) !== 'None';
-			const file = folders.xxx + 'presets\\Search by\\filters\\custom_button_dynamic_filters.json';
+			const file = folders.userPresets + 'filters\\custom_button_dynamic_filters.json';
 			const bFile = _isFile(file);
 			if (bFile) {
 				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/01/25
+//29/01/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -23,7 +23,7 @@ const recipeMenu = new _menu();
 
 function createRecipeMenu(parent) {
 	recipeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\recipes']);
+	const files = findRecursivefile('*.json', [folders.userPresets + 'recipes']);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	const tags = JSON.parse(properties.tags[1]);
@@ -60,7 +60,7 @@ function createRecipeMenu(parent) {
 			catch (e) { return; }
 			if (!input.length) { return; }
 			recipe.name = input;
-			const filePath = folders.xxx + 'presets\\Search by\\recipes\\' + input + '.json';
+			const filePath = folders.userPresets + 'recipes\\' + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			if (WshShell.Popup('Include tag remapping?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {
 				for (let key in recipe.tags) {
@@ -100,7 +100,7 @@ function createRecipeMenu(parent) {
 		recipeMenu.newEntry({
 			menuName, entryText: 'Open recipes folder', func: () => {
 				if (_isFile(properties.recipe[1])) { _explorer(properties.recipe[1]); } // Open current file
-				else { _explorer(folders.xxx + 'presets\\Search by\\recipes'); } // or folder
+				else { _explorer(folders.userPresets + 'recipes'); } // or folder
 			}
 		});
 		const hiddenFilesNum = files.reduce((total, file) => {
@@ -151,47 +151,52 @@ function createRecipeMenu(parent) {
 	});
 	const menus = [];
 	const names = {};
-	options.forEach((file) => {
-		const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
-		if (!recipe) { return; }
-		const name = Object.hasOwn(recipe, 'name') ? recipe.name : utils.SplitFilePath(file)[1];
-		let theme = null;
-		if (Object.hasOwn(recipe, 'theme')) {
-			if (_isFile(recipe.theme)) { theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); }
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) { theme = _jsonParseFileCheck(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme, 'Recipe json', 'Search by distance', utf8); }
-			else { console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
-		}
-		const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
-		if (Object.hasOwn(names, name)) { names[name]++; }
-		else { names[name] = 1; }
-		const result = testRecipe({ json: recipe, baseTags: tags });
-		const entryText = (names[name] === 1 ? name : name + ' ' + _p(names[name])) + (!result.valid ? '\t(error)' : '');
-		menus.push(entryText);
-		recipeMenu.newEntry({
-			entryText, func: () => {
-				if (utils.IsKeyPressed(VK_CONTROL)) {
-					_runCmd('attrib +H ' + _q(file), false);
-					if (properties.recipe[1] === file) { // Set to none when hiding current recipe
-						properties.recipe[1] = '';
-						data.recipe = 'None';
-						data.forcedTheme = '';
+	if (options.length) {
+		options.forEach((file) => {
+			const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
+			if (!recipe) { return; }
+			const name = Object.hasOwn(recipe, 'name') ? recipe.name : utils.SplitFilePath(file)[1];
+			let theme = null;
+			if (Object.hasOwn(recipe, 'theme')) {
+				if (_isFile(recipe.theme)) { theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); }
+				else if (_isFile(folders.userPresets + 'themes\\' + recipe.theme)) { theme = _jsonParseFileCheck(folders.userPresets + 'themes\\' + recipe.theme, 'Recipe json', 'Search by distance', utf8); }
+				else { console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
+			}
+			const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
+			if (Object.hasOwn(names, name)) { names[name]++; }
+			else { names[name] = 1; }
+			const result = testRecipe({ json: recipe, baseTags: tags });
+			const entryText = (names[name] === 1 ? name : name + ' ' + _p(names[name])) + (!result.valid ? '\t(error)' : '');
+			menus.push(entryText);
+			recipeMenu.newEntry({
+				entryText, func: () => {
+					if (utils.IsKeyPressed(VK_CONTROL)) {
+						_runCmd('attrib +H ' + _q(file), false);
+						if (properties.recipe[1] === file) { // Set to none when hiding current recipe
+							properties.recipe[1] = '';
+							data.recipe = 'None';
+							data.forcedTheme = '';
+							properties.data[1] = JSON.stringify(data);
+							overwriteProperties(properties);
+							parent.recipe = { recipe: null, name: '' }; // Update tooltip
+						}
+					} else if (!result.valid) { // Don't allow to use a recipe with errors, show report instead
+						console.popup(result.report.join('\n\t- '), 'Recipe error');
+					} else {
+						properties.recipe[1] = file;
+						data.recipe = name;
+						data.forcedTheme = themeName;
 						properties.data[1] = JSON.stringify(data);
 						overwriteProperties(properties);
-						parent.recipe = { recipe: null, name: '' }; // Update tooltip
+						parent.recipe = { recipe: processRecipePlaceholder(file, tags), name: file }; // Update tooltip
 					}
-				} else if (!result.valid) { // Don't allow to use a recipe with errors, show report instead
-					console.popup(result.report.join('\n\t- '), 'Recipe error');
-				} else {
-					properties.recipe[1] = file;
-					data.recipe = name;
-					data.forcedTheme = themeName;
-					properties.data[1] = JSON.stringify(data);
-					overwriteProperties(properties);
-					parent.recipe = { recipe: processRecipePlaceholder(file, tags), name: file }; // Update tooltip
 				}
-			}
+			});
 		});
-	});
+	} else {
+		menus.push('- No recipe files found -');
+		recipeMenu.newEntry({ entryText: '- No recipe files found -', func: null, flags: MF_GRAYED });
+	}
 	recipeMenu.newCheckMenuLast(() => {
 		const idx = options.indexOf(currRecipeFile);
 		return idx !== -1 ? idx + 1 : 0;

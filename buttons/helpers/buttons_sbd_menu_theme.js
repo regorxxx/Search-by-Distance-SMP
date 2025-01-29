@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/01/25
+//29/01/25
 
 /* exported createThemeMenu */
 
@@ -21,7 +21,7 @@ const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [folders.xxx + 'presets\\Search by\\themes']);
+	const files = findRecursivefile('*.json', [folders.userPresets + 'themes\\']);
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);
@@ -35,8 +35,8 @@ function createThemeMenu(parent) {
 		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
 			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme; }
-			else if (_isFile(folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme)) {
-				forcedThemePath = folders.xxx + 'presets\\Search by\\themes\\' + recipe.theme;
+			else if (_isFile(folders.userPresets + 'themes\\' + recipe.theme)) {
+				forcedThemePath = folders.userPresets + 'themes\\' + recipe.theme;
 				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
 			} else {
 				console.popup('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme, 'Search by distance');
@@ -91,7 +91,7 @@ function createThemeMenu(parent) {
 			if (!input.length) { return; }
 			const theme = { name: input, tags: [] };
 			theme.tags.push(themeTags);
-			const filePath = folders.xxx + 'presets\\Search by\\themes\\' + input + '.json';
+			const filePath = folders.userPresets + 'themes\\' + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
 			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
@@ -113,7 +113,7 @@ function createThemeMenu(parent) {
 		themeMenu.newEntry({
 			menuName, entryText: 'Open themes folder', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
-				else { _explorer(folders.xxx + 'presets\\Search by\\themes'); } // or folder
+				else { _explorer(folders.userPresets + 'themes\\'); } // or folder
 			}
 		});
 		const hiddenFilesNum = files.reduce((total, file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden ? total + 1 : total; }, 0);
@@ -174,37 +174,42 @@ function createThemeMenu(parent) {
 		);
 	});
 	const menus = [];
-	options.forEach((file) => {
-		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
-		if (!theme) { return; }
-		const bIsForcedTheme = forcedTheme && forcedThemePath === file;
-		const name = theme.name + (bIsForcedTheme ? ' (forced by recipe)' : ''); // Recipe may overwrite theme
-		let i = 1;
-		const duplIdx = menus.indexOf(theme.name);
-		const entryText = name + (duplIdx === -1 ? '' : ' (' + ++i + ')');
-		menus.push(entryText);
-		themeMenu.newEntry({
-			entryText, func: () => {
-				if (utils.IsKeyPressed(VK_SHIFT)) {
-					_runCmd('attrib +H ' + _q(file), false);
-					if (properties.theme[1] === file) { // Set to none when hiding current recipe
-						properties.theme[1] = '';
-						data.theme = 'None';
+	if (options.length) {
+		options.forEach((file) => {
+			const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
+			if (!theme) { return; }
+			const bIsForcedTheme = forcedTheme && forcedThemePath === file;
+			const name = theme.name + (bIsForcedTheme ? ' (forced by recipe)' : ''); // Recipe may overwrite theme
+			let i = 1;
+			const duplIdx = menus.indexOf(theme.name);
+			const entryText = name + (duplIdx === -1 ? '' : ' (' + ++i + ')');
+			menus.push(entryText);
+			themeMenu.newEntry({
+				entryText, func: () => {
+					if (utils.IsKeyPressed(VK_SHIFT)) {
+						_runCmd('attrib +H ' + _q(file), false);
+						if (properties.theme[1] === file) { // Set to none when hiding current recipe
+							properties.theme[1] = '';
+							data.theme = 'None';
+							properties.data[1] = JSON.stringify(data);
+							overwriteProperties(properties);
+						}
+					} else {
+						properties.theme[1] = file;
+						data.theme = theme.name;
 						properties.data[1] = JSON.stringify(data);
 						overwriteProperties(properties);
 					}
-				} else {
-					properties.theme[1] = file;
-					data.theme = theme.name;
-					properties.data[1] = JSON.stringify(data);
-					overwriteProperties(properties);
-				}
-			}, flags: !bHasForcedTheme ? MF_STRING : MF_GRAYED
+				}, flags: !bHasForcedTheme ? MF_STRING : MF_GRAYED
+			});
 		});
-	});
-	themeMenu.newCheckMenu(themeMenu.getMainMenuName(), 'None', menus.length ? menus[menus.length - 1] : 'None', () => {
+	} else {
+		menus.push('- No theme files found -');
+		themeMenu.newEntry({ entryText: '- No theme files found -', func: null, flags: MF_GRAYED });
+	}
+	themeMenu.newCheckMenuLast(() => {
 		const idx = options.indexOf(forcedTheme ? forcedThemePath : properties.theme[1]);
 		return idx !== -1 ? idx + 1 : 0;
-	});
+	}, menus.length + 2);
 	return themeMenu;
 }

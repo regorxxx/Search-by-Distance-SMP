@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/01/25
+//29/01/25
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -50,7 +50,7 @@ var bLoadTags = true; // NOSONAR [shared on files]
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global isFoobarV2:readable, checkCompatible:readable, globTags:readable, folders:readable, globQuery:readable, iDelayLibrary:readable */
 /* global debounce:readable, doOnce:readable, clone:readable , memoize:readable */
-/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable */
+/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable, findRecursivefile:readable, _copyFile:readable */
 /* global memoryPrint:readable */
 include('..\\..\\helpers\\helpers_xxx_crc.js');
 /* global crc32:readable */
@@ -324,7 +324,7 @@ if (sbd.panelProperties.bTagsCache[1]) {
 */
 // Only use file cache related to current descriptors, otherwise delete it
 if (sbd.panelProperties.bProfile[1]) { sbd.profiler = new FbProfiler('descriptorCRC'); }
-const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.1.0');
+const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph.toString() + calcGraphDistance.toString() + calcMeanDistance.toString() + sbd.influenceMethod + 'v1.2.0');
 const bMismatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMismatchCRC) {
 	if (sbd.panelProperties.descriptorCRC[1] !== -1) { // There may be multiple panels, don't nuke it on first init on a new panel
@@ -526,9 +526,9 @@ if (sbd.panelProperties.bProfile[1]) {
 */
 const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'nearGenresFilterAggressiveness', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple', 'bBreakWhenFilled', 'trackSource']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
-const themePath = folders.xxx + 'presets\\Search by\\themes\\';
-const recipePath = folders.xxx + 'presets\\Search by\\recipes\\';
-if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bMismatchCRC) {
+const themePath = folders.userPresets + 'themes\\';
+const recipePath = folders.userPresets + 'recipes\\';
+if (!_isFile(recipePath + 'allowedKeys.txt') || bMismatchCRC) {
 	const data = Array.from(recipeAllowedKeys, (key) => {
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
@@ -550,8 +550,19 @@ if (!_isFile(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt') || bM
 		}
 		return [key, descr];
 	});
-	if (sbd.panelProperties.bStartLogging[1]) { console.log('Updating recipes documentation at: ' + folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt'); }
-	_save(folders.xxx + 'presets\\Search by\\recipes\\allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
+	if (sbd.panelProperties.bStartLogging[1]) {
+		console.log('Updating recipes documentation at:\n\t ' + recipePath + 'allowedKeys.txt');
+		console.log('Copying recipes at:\n\t ' + recipePath);
+		console.log('Copying themes at:\n\t ' + themePath);
+	}
+	// Copy docs
+	_save(recipePath + 'allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
+	_copyFile(folders.xxx + 'presets\\Search by\\readme.txt',folders.userPresets + 'themes_recipes_readme.txt', true);
+	// Copy themes and recipes
+	findRecursivefile(
+		'*.json',
+		[folders.xxx + 'presets\\Search by\\recipes\\', folders.xxx + 'presets\\Search by\\themes\\']
+	).forEach((file) =>	_copyFile(file, file.replace(folders.xxx + 'presets\\Search by\\', folders.userPresets), true));
 }
 
 function testRecipe({ path = null, json = null, baseTags = null } = {}) {
