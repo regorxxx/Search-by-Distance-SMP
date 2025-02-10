@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/01/25
+//10/02/25
 
 /* exported createButtonsMenu */
 
@@ -32,7 +32,7 @@ function createButtonsMenu(name) {
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
 	if (!_isFolder(folders.data)) { _createFolder(folders.data); }
-	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js']);
+	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js', 'buttons_utils_volume.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
 	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => { return path.split('\\').pop(); }));
@@ -540,9 +540,9 @@ function createButtonsMenu(name) {
 			menu.newCheckMenuLast(() => buttonsBar.config.bIconModeExpand);
 			menu.newSeparator(subMenu);
 			buttonsBar.listKeys.forEach((arrKeys, idx) => {
+				const bHeadless = arrKeys.every((key) => buttonsBar.buttons[key].state === buttonStates.hide);
+				const entryText = buttonsPath[idx].split('\\').pop() + '\t' + (bHeadless ? ' [headless] ' : '') + _p(idx + 1);
 				if (arrKeys.some((key) => Object.hasOwn(buttonsBar.buttons[key], 'bIconMode'))) {
-					const bHeadless = arrKeys.every((key) => buttonsBar.buttons[key].state === buttonStates.hide);
-					const entryText = buttonsPath[idx].split('\\').pop() + '\t' + (bHeadless ? ' [headless] ' : '') + _p(idx + 1);
 					menu.newEntry({
 						menuName: subMenu, entryText, func: () => {
 							let cache;
@@ -562,7 +562,10 @@ function createButtonsMenu(name) {
 							window.Repaint();
 						}, flags: buttonsBar.config.bIconMode || bHeadless ? MF_GRAYED : MF_STRING
 					});
-					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].bIconMode));
+					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].isIconMode()));
+				} else {
+					menu.newEntry({	menuName: subMenu, entryText, flags: MF_GRAYED });
+					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].isIconMode()));
 				}
 			});
 			menu.newSeparator(subMenu);
