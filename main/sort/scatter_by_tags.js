@@ -1,5 +1,5 @@
 ﻿'use strict';
-//03/11/24
+//10/02/25
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -25,7 +25,11 @@ include('..\\..\\helpers\\helpers_xxx_tags.js');
  * @function
  * @name scatterByTags
  * @kind function
- * @param {{ tagName?: string tagValue?: string selItems?: FbMetadbHandleList bSendToActivePls?: boolean }} { tagName, tagValue, selItems, bSendToActivePls }?
+ * @param {object} o
+ * @param {string} o.tagName? - [='genre,style'] Tag(s) used to intercalate its values. Multiple tags may be provided separated by ; or ,
+ * @param {string} o.tagValue? - [='instrumental] Tag value to scatter
+ * @param {FbMetadbHandleList|null} o.selItems? - Handle List. Selected items from active playlist if not provided.
+ * @param {Boolean} o.bSendToActivePls - Flag to send output to active playlist.
  * @returns {FbMetadbHandleList|null}
  */
 function scatterByTags({
@@ -117,12 +121,17 @@ function scatterByTags({
  * @function
  * @name intercalateByTags
  * @kind function
- * @param {{ tagName?: string selItems?: FbMetadbHandleList bSendToActivePls?: boolean }} { tagName, selItems, bSendToActivePls }?
+ * @param {object} o
+ * @param {string} o.tagName? - [='ALBUM ARTIST'] Tag(s) used to intercalate its values. Multiple tags may be provided separated by ; or ,
+ * @param {FbMetadbHandleList|null} o.selItems? - Handle List. Selected items from active playlist if not provided.
+ * @param {Boolean} o.bMultiple? - [=false] Parse multi-value tags and match any value.
+ * @param {Boolean} o.bSendToActivePls? - [=true] Flag to send output to active playlist.
  * @returns {FbMetadbHandleList|null}
  */
 function intercalateByTags({
 	tagName = 'ALBUM ARTIST',
 	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
+	bMultiple = false,
 	bSendToActivePls = true,
 } = {}) {
 	// Safety checks
@@ -133,10 +142,37 @@ function intercalateByTags({
 	tagName = tagName.split(/[;,]/g);
 	let selItemsArray = selItems.Convert();
 	let selItemsArrayOut = [];
-	// Get tag values and find tag value
-	// Split elements by equal value, by reverse order
-	const tagValues = getHandleListTags(selItems, tagName, { bMerged: true }).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
-	let valMap = new ReverseIterableMap();
+	let tagValues = getHandleListTags(selItems, tagName, { bMerged: true });
+	const valMap = new ReverseIterableMap();
+	// Get tag values and find the one with higher count or merged into a single one (id)
+	if (bMultiple) {
+		tagValues = tagValues.map((item) => item.filter(Boolean).map((item) => item.toLowerCase()).sort());
+		const countMap = new Map();
+		for (let i = 0; i < totalTracks; i++) {
+			tagValues[i].forEach((val) => {
+				let count = countMap.get(val) || 0;
+				countMap.set(val, ++count);
+			});
+		}
+		tagValues = tagValues.map((valArr) => {
+			return valArr.reduce((acc, curr) => {
+				const count = countMap.get(curr);
+				return count > acc.count
+					? { key: curr, count }
+					: acc;
+			}, { key: '', count: -1 }).key;
+		});
+		// Sort key map by count
+		new Set(countMap.keys()).difference(new Set(tagValues)).forEach((key) => {
+			countMap.delete(key);
+		});
+		[...countMap].sort((a, b) => a[1] - b[1]).forEach((entry) => {
+			valMap.set(entry[0], []);
+		});
+	} else {
+		tagValues = tagValues.map((item) => item.filter(Boolean).map((item) => item.toLowerCase()).sort().join(','));
+	}
+	// Split elements by equal value (id), by reverse order
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
 		if (valMap.has(val)) {
@@ -202,16 +238,26 @@ function intercalateByTags({
  * @function
  * @name shuffleByTags
  * @kind function
- * @param {{ tagName?: string[] selItems?: FbMetadbHandleList bSendToActivePls?: boolean data?: { handleArray: any[] dataArray: any[] tagsArray: any[] } bAdvancedShuffle?: boolean sortBias?: string sortDir?: number bDebug?: boolean }} { tagName, selItems, bSendToActivePls, data, bAdvancedShuffle, sortBias, sortDir, bDebug }?
- * @returns {{handleList:FbMetadbHandleList handleArray:FbMetadbHandle[] dataArray:any[] tagsArray:any[]}}
+ * @param {object} o
+ * @param {string} o.tagName? - [='ALBUM ARTIST'] Tag(s) used to intercalate its values. Multiple tags may be provided separated by ; or ,
+ * @param {FbMetadbHandleList|null} o.selItems? - Handle List. Selected items from active playlist if not provided.
+ * @param {{handleArray: FbMetadbHandle[], dataArray: any[], tagsArray: any[]}} o.data? - A handle list may be passsed as an array with additional data which should be sorted too. Shallow copies are made.
+ * @param {Boolean} o.bMultiple? - [=false] Parse multi-value tags and match any value.
+ * @param {Boolean} o.bSendToActivePls? - [=true] Flag to send output to active playlist.
+ * @param {Boolean} o.bAdvancedShuffle? - [=false] Flag to try scattering instrumental, live tracks, ...
+ * @param {'random'|'playcount'|'rating'|'popularity'|'lastplayed'|'key'|string|''} o.sortBias? - [='random'] Flag to try scattering instrumental, live tracks, ...
+ * @param {1|-1} o.sortDir? - [=1] Sort direction. -1 to reverse it
+ * @param {Boolean} o.bDebug? - [=false] Debug logging
+ * @returns {{handleList:FbMetadbHandleList handleArray:FbMetadbHandle[] dataArray:any[] tagsArray:any[]}} Note data and tags arrays Will be empty if no data was used at input.
  */
 function shuffleByTags({
 	tagName = ['ALBUM ARTIST'],
 	selItems = plman.ActivePlaylist !== -1 ? plman.GetPlaylistSelectedItems(plman.ActivePlaylist) : null,
+	data = { handleArray: [], dataArray: [], tagsArray: [] },
+	bMultiple = false,
 	bSendToActivePls = true,
-	data = { handleArray: [], dataArray: [], tagsArray: [] }, // Shallow copies are made
-	bAdvancedShuffle = false, // Tries to scatter instrumental, live tracks, ...
-	sortBias = 'random', // random | playcount | rating | popularity | lastplayed | key | TitleFormat expression || '' (none)
+	bAdvancedShuffle = false,
+	sortBias = 'random',
 	sortDir = 1,
 	bDebug = false
 } = {}) {
@@ -271,11 +317,39 @@ function shuffleByTags({
 	const selItemsClone = dataTagsLen
 		? null
 		: new FbMetadbHandleList(selItemsArray);
-	const tagValues = (selItemsClone
+	const valMap = new ReverseIterableMap();
+	let tagValues = selItemsClone
 		? getHandleListTags(selItemsClone, tagName, { bMerged: true })
-		: [...tagsArray]
-	).map((item) => { return item.filter(Boolean).sort().map((item) => { return item.toLowerCase(); }).join(','); });
-	let valMap = new ReverseIterableMap();
+		: [...tagsArray];
+	// Get tag values and find the one with higher count or merged into a single one (id)
+	if (bMultiple) {
+		tagValues = tagValues.map((item) => item.filter(Boolean).map((item) => item.toLowerCase()).sort());
+		const countMap = new Map();
+		for (let i = totalTracks - 1; i >= 0; i--) {
+			tagValues[i].forEach((val) => {
+				let count = countMap.get(val) || 0;
+				countMap.set(val, ++count) ;
+			});
+		}
+		tagValues = tagValues.map((valArr) => {
+			return valArr.reduce((acc, curr) => {
+				const count = countMap.get(curr);
+				return count > acc.count
+					? { key: curr, count }
+					: acc;
+			}, { key: '', count: -1 }).key;
+		});
+		// Sort key map by count
+		new Set(countMap.keys()).difference(new Set(tagValues)).forEach((key) => {
+			countMap.delete(key);
+		});
+		[...countMap].sort((a, b) => a[1] - b[1]).forEach((entry) => {
+			valMap.set(entry[0], []);
+		});
+	} else {
+		tagValues = tagValues.map((item) => item.filter(Boolean).map((item) => item.toLowerCase()).sort().join(','));
+	}
+	// Split elements by equal value (id), by reverse order
 	for (let i = totalTracks - 1; i >= 0; i--) {
 		const val = tagValues[i];
 		if (valMap.has(val)) {
@@ -495,7 +569,7 @@ function shuffleByTags({
 
 function shuffleBiasTf(sortBias = 'random') {
 	const bEnhPlayCount = (typeof isEnhPlayCount !== 'undefined' && isEnhPlayCount)
-	|| (typeof isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
+		|| (typeof isEnhPlayCount === 'undefined' && utils.CheckComponent('foo_enhanced_playcount'));
 	sortBias = (sortBias || '').toLowerCase();
 	let sortTF;
 	switch (sortBias) {

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/01/25
+//10/02/25
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -2261,6 +2261,7 @@ async function searchByDistance({
 					bSendToActivePls: false,
 					bAdvancedShuffle: bSmartShuffleAdvc,
 					sortBias: smartShuffleSortBias,
+					bMultiple,
 					bDebug: bSearchDebug
 				});
 				selectedHandlesArray = shuffle.handleArray;
