@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/25
+//13/02/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -115,9 +115,9 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	return newCoordinates;
 }
 
-function ThemedButton(
+function ThemedButton({
 	coordinates,
-	text,
+	text = '',
 	func,
 	state,
 	gFont = _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.textScale),
@@ -130,7 +130,7 @@ function ThemedButton(
 	listener = null,
 	onInit = null,
 	update = { scriptName: '', repository: '' }
-) {
+}) {
 	this.name = '';
 	this.state = state || buttonStates.normal;
 	this.animation = []; /* {bActive, condition, animStep} */ // NOSONAR
@@ -174,9 +174,13 @@ function ThemedButton(
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
 	this.descriptionWithID = isFunction(this.description)
 		? (parent) => this.prefix
-			? this.prefix.replace('_', '') + ': ' + this.description(parent)
+			? this.prefix.replace('_', '') + ': '
+				+ '\n-----------------------------------------------------\n' + this.description(parent)
 			: this.description(parent)
-		: () => { return (this.prefix ? this.prefix.replace('_', '') + ': ' + this.description : this.description); }; // Adds prefix to description, whether it's a func or a string
+		: () => this.prefix
+			? this.prefix.replace('_', '') + ': ' +
+				'\n-----------------------------------------------------\n' + this.description
+			: this.description; // Adds prefix to description, whether it's a func or a string
 	this.buttonsProperties = { ...buttonsProperties }; // Clone properties for later use
 	this.bIconMode = false;
 	this.bIconModeExpand = false;
@@ -238,21 +242,25 @@ function ThemedButton(
 		return (this.isAnyAnimationActive() ? 'Currently processing: ' + this.animation.map((ani) => ani.name).join(', ') + '\n' : '');
 	};
 
-	this.headerText = function () {
-		const name = (isFunction(this.text) ? this.text(this) : this.text) || (this.defText && isFunction(this.defText) ? this.defText(this) : this.defText || '');
+	this.headerText = function (bWithId) {
+		const name = (bWithId ? this.prefix.replace('_', '') + ': ' : '') +
+			(isFunction(this.text) ? this.text(this) : this.text) ||
+			(this.defText && isFunction(this.defText) ? this.defText(this) : this.defText || '');
 		return Object.hasOwn(this, 'bIconMode') && this.isIconMode()
 			? name + '\n-----------------------------------------------------\n'
 			: '';
 	};
 
 	this.tooltipText = function () { // ID or just description, according to string or func.
-		return (this.getAnimationText() + this.headerText() + (buttonsBar.config.bShowID
+		const header = this.headerText(buttonsBar.config.bShowID);
+		return this.getAnimationText() + header + (!header.length && buttonsBar.config.bShowID
 			? this.descriptionWithID(this)
 			: (isFunction(this.description)
 				? this.description(this)
 				: this.description)
-		));
+		);
 	};
+
 
 	this.isIconMode = function () { // Either global or for current button
 		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/12/24
+//13/02/25
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -50,46 +50,53 @@ newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // A
 buttonsBar.list.push(newButtonsProperties);
 
 addButton({
-	'Search by Distance Info': new ThemedButton({ x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, 'Graph Info', function (mask) {
-		if (mask === MK_SHIFT) {
-			const menu = settingsMenu(
-				this, true, ['buttons_search_by_distance_info.js'], void (0), void (0),
-				(menu) => {
-					menu.newSeparator();
-					_createSubMenuEditEntries(menu, void (0), {
-						name: 'Graph Info',
-						list: JSON.parse(this.buttonsProperties.entries[1]),
-						defaults: JSON.parse(this.buttonsProperties.entries[3]),
-						input: () => {
-							const entry = {
-								tf: Input.json('array strings', '',
-									'Enter tag names:\n\n' +
-									'Ex:\n' + JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA'])
-									, 'Graph Info', JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA']), void (0), true
-								),
-							};
-							if (!entry.tf) { return; }
-							return entry;
-						},
-						bNumbered: true,
-						onBtnUp: (entries) => {
-							this.buttonsProperties.entries[1] = JSON.stringify(entries);
-							overwriteProperties(this.buttonsProperties);
-						}
-					});
-				}
-			);
-			menu.btn_up(this.currX, this.currY + this.currH);
-		} else {
-			graphInfoMenu.bind(this)().btn_up(this.currX, this.currY + this.currH);
-		}
-	}, null, void (0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.info, void (0), void (0), void (0), void (0),
-	{ scriptName: 'Search-by-Distance-SMP', version })
+	'Search by Distance Info': new ThemedButton({
+		coordinates: { x: 0, y: 0, w: _gr.CalcTextWidth('Graph Info', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 },
+		text: 'Graph Info',
+		func: function (mask) {
+			if (mask === MK_SHIFT) {
+				const menu = settingsMenu(
+					this, true, ['buttons_search_by_distance_info.js'], void (0), void (0),
+					(menu) => {
+						menu.newSeparator();
+						_createSubMenuEditEntries(menu, void (0), {
+							name: 'Graph Info',
+							list: JSON.parse(this.buttonsProperties.entries[1]),
+							defaults: JSON.parse(this.buttonsProperties.entries[3]),
+							input: () => {
+								const entry = {
+									tf: Input.json('array strings', '',
+										'Enter tag names:\n\n' +
+										'Ex:\n' + JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA'])
+										, 'Graph Info', JSON.stringify([globTags.genre, 'ALBUM GENRE WIKIPEDIA']), void (0), true
+									),
+								};
+								if (!entry.tf) { return; }
+								return entry;
+							},
+							bNumbered: true,
+							onBtnUp: (entries) => {
+								this.buttonsProperties.entries[1] = JSON.stringify(entries);
+								overwriteProperties(this.buttonsProperties);
+							}
+						});
+					}
+				);
+				menu.btn_up(this.currX, this.currY + this.currH);
+			} else {
+				graphInfoMenu.bind(this)().btn_up(this.currX, this.currY + this.currH);
+			}
+		},
+		description: buttonTooltipSbdCustom,
+		prefix, buttonsProperties: newButtonsProperties,
+		icon: chars.info,
+		update: { scriptName: 'Search-by-Distance-SMP', version }
+	})
 });
 
 // Helper
-function buttonTooltipSbdCustom(parent) {
-	const properties = parent.buttonsProperties;
+function buttonTooltipSbdCustom() {
+	const properties = this.buttonsProperties;
 	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
 	let info = 'Genre/style info by acoustic-folksonomy models:\n';
 	const sel = fb.GetFocusItem();

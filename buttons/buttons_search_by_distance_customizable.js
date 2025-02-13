@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/01/25
+//13/02/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -61,9 +61,10 @@ testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
-	'Search by Distance Customizable': new ThemedButton(
-		{ x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 }, newButtonsProperties.customName[1],
-		function (mask) {
+	'Search by Distance Customizable': new ThemedButton({
+		coordinates: { x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 },
+		text: newButtonsProperties.customName[1],
+		func: function (mask) {
 			if (mask === MK_SHIFT) {
 				createConfigMenu(this).btn_up(this.currX, this.currY + this.currH);
 			} else if (mask === MK_CONTROL) {
@@ -90,9 +91,10 @@ addButton({
 				}
 			}
 		},
-		null, void (0), buttonTooltipSbdCustom, prefix, newButtonsProperties, chars.wand, void (0),
-		void (0),
-		{
+		description: buttonTooltipSbdCustom,
+		prefix, buttonsProperties: newButtonsProperties,
+		icon: chars.wand,
+		listener: {
 			'on_notify_data': (parent, name, info) => {
 				if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
 				if (!name.startsWith('Search by Distance')) { return; }
@@ -119,23 +121,23 @@ addButton({
 				}
 			}
 		},
-		(parent) => { // Update tooltip on init
-			const properties = parent.buttonsProperties;
-			parent.recipe = {
+		onInit: function () { // Update tooltip on init
+			const properties = this.buttonsProperties;
+			this.recipe = {
 				recipe: properties.recipe[1].length ? processRecipePlaceholder(properties.recipe[1], JSON.parse(properties.tags[1])) : null,
 				name: properties.recipe[1] || ''
 			};
 		},
-		{ scriptName: 'Search-by-Distance-SMP', version }
-	)
+		update: { scriptName: 'Search-by-Distance-SMP', version }
+	})
 });
 
 // Helper
-function buttonTooltipSbdCustom(parent) {
-	const properties = parent.buttonsProperties;
+function buttonTooltipSbdCustom() {
+	const properties = this.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	const bTooltipInfo = properties.bTooltipInfo[1];
-	const recipe = parent.recipe.recipe || {};
+	const recipe = this.recipe.recipe || {};
 	const getSetting = (key) => {
 		return Object.hasOwn(recipe, key)
 			? recipe[key]
@@ -181,7 +183,7 @@ function buttonTooltipSbdCustom(parent) {
 	info += sort ? '\nSorting:\t' + sort : '';
 	info += '\nTracks:\t'
 		+ (getSetting('playlistLength') === -1 ? 'By user input' : getSetting('playlistLength'))
-		+ ' '+ _p('from ' + sbd.getSourceDescription(getSetting('trackSource').sourceType));
+		+ ' ' + _p('from ' + sbd.getSourceDescription(getSetting('trackSource').sourceType));
 	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
