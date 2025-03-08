@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/25
+//24/02/25
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -274,6 +274,7 @@ function shuffleByTags({
 	if (dataLen && dataLen !== dataHandleLen && dataLen !== itemsCount) { console.log('shuffleByTags: data length ' + _p(dataLen) + ' does not match items count ' + _p(itemsCount) + '.'); return null; }
 	if (/playcount|lastplayed/.test(sortBias) && !bPlayCount) { fb.ShowPopupMessage('shuffleByTags: foo_playcount is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return; }
 	if (/popularity/.test(sortBias) && !utils.GetPackageInfo('{F5E9D9EB-42AD-4A47-B8EE-C9877A8E7851}')) { fb.ShowPopupMessage('shuffleByTags: Find & Play package is not installed.\n\nSorting bias can not be used: ' + sortBias, 'shuffleByTags'); return; }
+	if (bDebug) { console.log('shuffleByTags: debug'); }
 	// Convert input and shuffle
 	const totalTracks = dataHandleLen || itemsCount;
 	let dataArray = dataLen ? [...data.dataArray] : null;

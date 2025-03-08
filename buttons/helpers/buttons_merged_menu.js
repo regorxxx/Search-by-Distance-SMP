@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/25
+//21/02/25
 
 /* exported createButtonsMenu */
 
@@ -161,9 +161,9 @@ function createButtonsMenu(name) {
 	menu.newSeparator();
 	{
 		const menuName = menu.newMenu('Colors');
-		const getColorName = (val) => {
-			return (val !== -1 ? (ntc.name(Chroma(val).hex())[1] || '').toString() || 'unknown' : '-none-');
-		}; // From statistics
+		const getColorName = (val) => val !== -1 && val !== null && typeof val !== 'undefined'
+			? (ntc.name(Chroma(val).hex())[1] || '').toString() || 'unknown'
+			: '-none-';
 		menu.newEntry({ menuName, entryText: 'UI colors: (Ctrl + Click to reset)', flags: MF_GRAYED });
 		menu.newSeparator(menuName);
 		menu.newEntry({
