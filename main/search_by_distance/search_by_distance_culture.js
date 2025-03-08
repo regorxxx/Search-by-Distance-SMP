@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/12/24
+//07/03/25
 
 /* exported getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter */
 
@@ -28,7 +28,7 @@ include('..\\world_map\\world_map_tables.js');
 // Similar culture zone
 function getLocaleFromId(id, worldMapData = null) {
 	const dataId = 'artist';
-	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
+	const path = '.\\profile\\' + folders.dataName + 'worldMap.json'; // TODO Expose paths at properties
 	if (!worldMapData && _isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) { worldMapData = data; }
@@ -133,7 +133,7 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTa
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data
-	const path = (_isFile(fb.FoobarPath + 'portable_mode_enabled') ? '.\\profile\\' + folders.dataName : folders.data) + 'worldMap.json';
+	const path = '.\\profile\\' + folders.dataName + 'worldMap.json'; // TODO Expose paths at properties
 	if (!worldMapData && _isFile(path)) {
 		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
 		if (data) { worldMapData = data; }
