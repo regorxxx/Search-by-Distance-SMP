@@ -10,7 +10,7 @@ include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, globTags:readable , VK_SHIFT:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable */
+/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -166,13 +166,7 @@ function createThemeMenu(parent) {
 			return;
 		}
 		// List files, with full path or relative path (portable)
-		options.push(
-			_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.includes(fb.ProfilePath)
-				? (fb.ProfilePath.includes('profile')
-					? file.replace(fb.ProfilePath, '.\\profile\\')
-					: file.replace(fb.ProfilePath, '.\\'))
-				: file
-		);
+		options.push(file.replace(fb.ProfilePath, '.\\profile\\'));
 	});
 	const menus = [];
 	if (options.length) {
@@ -188,8 +182,8 @@ function createThemeMenu(parent) {
 			themeMenu.newEntry({
 				entryText, func: () => {
 					if (utils.IsKeyPressed(VK_SHIFT)) {
-						_runCmd('attrib +H ' + _q(file), false);
-						if (properties.theme[1] === file) { // Set to none when hiding current recipe
+						_runCmd('attrib +H ' + _q(_resolvePath(file)), false);
+						if (_resolvePath(properties.theme[1]) === _resolvePath(file)) { // Set to none when hiding current recipe
 							properties.theme[1] = '';
 							data.theme = 'None';
 							properties.data[1] = JSON.stringify(data);

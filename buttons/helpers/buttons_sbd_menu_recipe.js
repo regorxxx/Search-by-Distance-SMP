@@ -14,7 +14,7 @@ include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, VK_CONTROL:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable */
+/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -141,14 +141,8 @@ function createRecipeMenu(parent) {
 		// Omit hidden files
 		const attr = _parseAttrFile(file);
 		if (attr && attr.Hidden) { return; }
-		// List files, with full path or relative path (portable)
-		options.push(
-			_isFile(fb.FoobarPath + 'portable_mode_enabled') && file.includes(fb.ProfilePath)
-				? (fb.ProfilePath.includes('profile')
-					? file.replace(fb.ProfilePath, '.\\profile\\')
-					: file.replace(fb.ProfilePath, '.\\'))
-				: file
-		);
+		// List files with relative path
+		options.push(file.replace(fb.ProfilePath, '.\\profile\\'));
 	});
 	const menus = [];
 	const names = {};
@@ -172,8 +166,8 @@ function createRecipeMenu(parent) {
 			recipeMenu.newEntry({
 				entryText, func: () => {
 					if (utils.IsKeyPressed(VK_CONTROL)) {
-						_runCmd('attrib +H ' + _q(file), false);
-						if (properties.recipe[1] === file) { // Set to none when hiding current recipe
+						_runCmd('attrib +H ' + _q(_resolvePath(file)), false);
+						if (_resolvePath(properties.recipe[1]) === _resolvePath(file)) { // Set to none when hiding current recipe
 							properties.recipe[1] = '';
 							data.recipe = 'None';
 							data.forcedTheme = '';
