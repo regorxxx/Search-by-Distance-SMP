@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/02/25
+//11/03/25
 
 /* exported createButtonsMenu */
 
@@ -27,7 +27,9 @@ function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => { return !path.split('\\').pop().startsWith('_'); });
-	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
+	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json')
+		? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8)
+		: null;
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
@@ -297,7 +299,7 @@ function createButtonsMenu(name) {
 				barProperties.bBgButtons[1] = !barProperties.bBgButtons[1];
 				if (buttonsBar.useThemeManager) {
 					let gTheme;
-					try { gTheme = window.CreateThemeManager('Button'); } catch (e) { gTheme = null; }
+					try { gTheme = window.CreateThemeManager('Button'); } catch (e) { gTheme = null; } // eslint-disable-line no-unused-vars
 					if (!gTheme) {
 						buttonsBar.config.bUseThemeManager = false;
 						console.popup('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons', 'Toolbar');

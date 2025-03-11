@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/24
+//11/03/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -18,7 +18,7 @@
 var bLoadTags = true; // NOSONAR
 var version = '1.2.0'; // NOSONAR
 
-try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ }
+try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ } // eslint-disable-line no-unused-vars
 
 {
 	const dependencies = [
@@ -39,7 +39,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		/* global Input:readable */
 	];
 	let bIncludeRel = true;
-	try { include('..\\..\\helpers\\helpers_xxx_dummy.js'); } catch (e) { bIncludeRel = false; }
+	try { include('..\\..\\helpers\\helpers_xxx_dummy.js'); } catch (e) { bIncludeRel = false; } // eslint-disable-line no-unused-vars
 	if (bIncludeRel) { dependencies.forEach((file) => { include('..\\..\\' + file); }); }
 	else { dependencies.forEach((file) => { include(file); }); }
 }
@@ -49,7 +49,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		/* global createButtonsMenu:readable */
 	];
 	let bIncludeRel = true;
-	try { include('..\\helpers\\buttons_dummy.js'); } catch (e) { bIncludeRel = false; }
+	try { include('..\\helpers\\buttons_dummy.js'); } catch (e) { bIncludeRel = false; } // eslint-disable-line no-unused-vars
 	if (bIncludeRel) { dependencies.forEach((file) => { include('..\\' + file); }); }
 	else { dependencies.forEach((file) => { include('buttons\\' + file); }); }
 }
@@ -273,7 +273,7 @@ if (barProperties.bAutoUpdateCheck[1]) {
 			'helpers\\helpers_xxx_web_update.js',
 		];
 		let bIncludeRel = true;
-		try { include('..\\..\\helpers\\helpers_xxx_dummy.js'); } catch (e) { bIncludeRel = false; }
+		try { include('..\\..\\helpers\\helpers_xxx_dummy.js'); } catch (e) { bIncludeRel = false; } // eslint-disable-line no-unused-vars
 		if (bIncludeRel) { dependencies.forEach((file) => { include('..\\..\\' + file); }); }
 		else { dependencies.forEach((file) => { include(file); }); }
 	}

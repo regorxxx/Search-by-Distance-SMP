@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/02/25
+//11/03/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
 
@@ -294,7 +294,7 @@ function ThemedButton({
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 		// Check if OS allows button theme
 		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
-			try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; }
+			try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; } // eslint-disable-line no-unused-vars
 			if (!this.g_theme) {
 				buttonsBar.config.bUseThemeManager = false;
 				console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons');
@@ -1152,7 +1152,7 @@ function getButtonVersion(source = 'Playlist-Tools-SMP') {
 				try {
 					ver = RegExp(/var version = '(.*)'/mi)
 						.exec(utils.ReadTextFile(folders.xxx + '\\buttons\\buttons_playlist_tools.js', 65001))[1];
-				} catch (e) { /* empty */ }
+				} catch (e) { /* empty */ } // eslint-disable-line no-unused-vars
 				break;
 		}
 	}

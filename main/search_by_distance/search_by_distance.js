@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/02/25
+//11/03/25
 var version = '7.6.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -1135,7 +1135,7 @@ async function searchByDistance({
 	}
 
 	try { fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery); } // Sanity check
-	catch (e) { fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return; }
+	catch (e) { fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return; } // eslint-disable-line no-unused-vars
 	// Query
 	let query = [];
 	let preQueryLength = 0;

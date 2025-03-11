@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/12/24
+//11/03/25
 
 /* exported settingsMenu */
 
@@ -50,19 +50,19 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 					switch (type) {
 						case 'object': {
 							try { input = JSON.parse(utils.InputBox(window.ID, desc || 'Enter JSON value:', parentName, JSON.stringify(value), true)); }
-							catch (e) { return; }
+							catch (e) { return; } // eslint-disable-line no-unused-vars
 							if (!input) { fb.ShowPopupMessage('Value must be a JSON object.', parentName); return; }
 							break;
 						}
 						case 'number': {
 							try { input = Number(utils.InputBox(window.ID, desc || 'Enter number:', parentName, value, true)); }
-							catch (e) { return; }
+							catch (e) { return; } // eslint-disable-line no-unused-vars
 							if (isNaN(input)) { fb.ShowPopupMessage('Value must be a number.', parentName); return; }
 							break;
 						}
 						case 'string': {
 							try { input = utils.InputBox(window.ID, desc || 'Enter value:', parentName, value, true); }
-							catch (e) { return; }
+							catch (e) { return; } // eslint-disable-line no-unused-vars
 							break;
 						}
 						case 'boolean': {

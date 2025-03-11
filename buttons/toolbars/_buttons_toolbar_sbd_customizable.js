@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/01/24
+//11/03/25
 
 /*
 	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
@@ -14,7 +14,8 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 /* global RGB:readable */
 
-try {window.DefinePanel('Merged SBD Custom Buttons bar', {author:'xxx'});} catch (e) {console.log('Merged SBD Custom Buttons bar loaded.');}  //May be loaded along other buttons
+//May be loaded along other buttons
+try {window.DefinePanel('Merged SBD Custom Buttons bar', {author:'xxx'});} catch (e) {console.log('Merged SBD Custom Buttons bar loaded.');} // eslint-disable-line no-unused-vars
 
 // Global toolbar color
 buttonsBar.config.bToolbar = true; // Change this on buttons bars files to set the background color
