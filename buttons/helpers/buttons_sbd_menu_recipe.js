@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/01/25
+//11/03/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -7,7 +7,8 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 
 /* exported createRecipeMenu */
 
-/* global recipePath:readable, processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable, recipeAllowedKeys:readable, recipePropertiesAllowedKeys:readable, testRecipe:readable */ // eslint-disable-line no-unused-vars
+/* global recipePath:readable, processRecipePlaceholder:readable, recipeAllowedKeys:readable, recipePropertiesAllowedKeys:readable, testRecipe:readable, themePath:readable */
+
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -114,7 +115,7 @@ function createRecipeMenu(parent) {
 				const hiddenFiles = files.filter((file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden; });
 				hiddenFiles.forEach((file) => {
 					if (!testRegex.test(file.split('\\').pop())) {
-						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Unhide: ' + file); }
+						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Search by Distance: Unhidden recipe\n\t ' + file); }
 					}
 				});
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
@@ -159,8 +160,8 @@ function createRecipeMenu(parent) {
 			let theme = null;
 			if (Object.hasOwn(recipe, 'theme')) {
 				if (_isFile(recipe.theme)) { theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); }
-				else if (_isFile(folders.userPresets + 'themes\\' + recipe.theme)) { theme = _jsonParseFileCheck(folders.userPresets + 'themes\\' + recipe.theme, 'Recipe json', 'Search by distance', utf8); }
-				else { console.log('Forced theme json file (by recipe) not found: ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
+				else if (_isFile(themePath + recipe.theme)) { theme = _jsonParseFileCheck(themePath + recipe.theme, 'Recipe json', 'Search by distance', utf8); }
+				else { console.log('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
 			}
 			const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
 			if (Object.hasOwn(names, name)) { names[name]++; }

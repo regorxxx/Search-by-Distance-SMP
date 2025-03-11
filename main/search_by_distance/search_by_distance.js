@@ -885,7 +885,9 @@ async function searchByDistance({
 	if (bUseRecipe) {
 		let path;
 		if (isString(recipe)) { // File path
-			path = !_isFile(recipe) && _isFile(recipePath + recipe) ? recipePath + recipe : recipe; // NOSONAR [is always a string]
+			path = !_isFile(recipe) && _isFile(recipePath + recipe) // NOSONAR [is always a string]
+				? recipePath + recipe
+				: recipe;
 			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
 			if (!recipe) { console.popup('Recipe not found: ' + path, 'Search by distance'); return; } // NOSONAR [is always a string]
 		}

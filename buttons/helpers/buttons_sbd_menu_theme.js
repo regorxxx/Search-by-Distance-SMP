@@ -1,9 +1,10 @@
 ﻿'use strict';
-//29/01/25
+//11/03/25
 
 /* exported createThemeMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, getCountryISO:readable, getLocaleFromId:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, getCountryISO:readable, getLocaleFromId:readable, themePath:readable */
+
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -21,7 +22,7 @@ const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [folders.userPresets + 'themes\\']);
+	const files = findRecursivefile('*.json', [themePath]);
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);
@@ -35,8 +36,8 @@ function createThemeMenu(parent) {
 		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
 			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme; }
-			else if (_isFile(folders.userPresets + 'themes\\' + recipe.theme)) {
-				forcedThemePath = folders.userPresets + 'themes\\' + recipe.theme;
+			else if (_isFile(themePath + recipe.theme)) {
+				forcedThemePath = themePath + recipe.theme;
 				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
 			} else {
 				console.popup('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme, 'Search by distance');
@@ -91,7 +92,7 @@ function createThemeMenu(parent) {
 			if (!input.length) { return; }
 			const theme = { name: input, tags: [] };
 			theme.tags.push(themeTags);
-			const filePath = folders.userPresets + 'themes\\' + input + '.json';
+			const filePath = themePath + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
 			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
@@ -113,7 +114,7 @@ function createThemeMenu(parent) {
 		themeMenu.newEntry({
 			menuName, entryText: 'Open themes folder', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
-				else { _explorer(folders.userPresets + 'themes\\'); } // or folder
+				else { _explorer(themePath); } // or folder
 			}
 		});
 		const hiddenFilesNum = files.reduce((total, file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden ? total + 1 : total; }, 0);

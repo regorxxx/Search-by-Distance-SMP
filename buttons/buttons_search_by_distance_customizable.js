@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/02/25
+//11/03/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -239,8 +239,8 @@ function processRecipePlaceholder(recipeFile, tags) {
 				}
 			}
 		} else {
-			console.log('Recipe file not found:\n\t', recipeFile); // DEBUG
-			fb.ShowPopupMessage('Recipe  file not found:\n' + recipeFile, 'Search by distance');
+			console.log('Search by Distance: Recipe file not found\n\t ', recipeFile); // DEBUG
+			fb.ShowPopupMessage('Recipe file not found:\n' + recipeFile, 'Search by distance');
 		}
 	}
 	return recipe;
