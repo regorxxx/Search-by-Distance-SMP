@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/03/25
+//14/03/25
 
 /* exported createButtonsMenu */
 
@@ -104,7 +104,8 @@ function createButtonsMenu(name) {
 				buttonsPath.push('separator');
 				const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
 				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
-				addButtonSeparator();
+				const newKeys = Object.keys(addButtonSeparator());
+				buttonsBar.listKeys.push(newKeys);
 			}
 		});
 	}

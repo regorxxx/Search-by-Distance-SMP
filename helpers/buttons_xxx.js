@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/03/25
+//14/03/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator */
 
@@ -898,7 +898,16 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 				const maxX = last.currX + last.currW + _scale(5);
 				const maxY = last.currY + last.currH + _scale(5);
 				const axis = buttonsBar.config.orientation;
-				const bMoved = (buttonsBar.move.mX !== -1 || buttonsBar.move.my !== -1) && (axis === 'x' ? Math.abs(x - buttonsBar.move.mX) : Math.abs(y - buttonsBar.move.mY)) >= _scale(5);
+				const coordDiff = buttonsBar.move.mX !== -1 && buttonsBar.move.my !== -1
+					? axis === 'x'
+						? Math.abs(x - buttonsBar.move.mX)
+						: Math.abs(y - buttonsBar.move.mY)
+					: -1;
+				const bMoved = buttonsBar.move.bIsMoving
+					? true
+					: buttonsBar.curBtn.w < _scale(5)
+						? coordDiff >= buttonsBar.curBtn.w / 5
+						: coordDiff >= _scale(5);
 				if (bMoved && ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY)) {
 					if (buttonsBar.move.bIsMoving) {
 						buttonsBar.move.toKey = curBtnKey;
@@ -1036,7 +1045,7 @@ addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no
 });
 
 addEventListener('on_mouse_rbtn_down', (x, y, mask) => { // eslint-disable-line no-unused-vars
-	if (!buttonsBar.move.bIsMoving) {
+	if (!buttonsBar.move.bIsMoving && buttonsBar.curBtn) {
 		buttonsBar.move.mX = x;
 		buttonsBar.move.mY = y;
 	}
