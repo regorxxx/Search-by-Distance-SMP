@@ -1,9 +1,9 @@
 ﻿'use strict';
-//11/03/25
+//13/03/25
 
 /* exported createButtonsMenu */
 
-/* global buttonsPath:readable, buttonsBar:readable, barProperties:readable, buttonStates:readable, buttonSizeCheck:readable,moveButton:readable, */
+/* global buttonsPath:readable, buttonsBar:readable, barProperties:readable, buttonStates:readable, buttonSizeCheck:readable,moveButton:readable, addButtonSeparator:readable */
 
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
@@ -36,29 +36,42 @@ function createButtonsMenu(name) {
 	if (!_isFolder(folders.data)) { _createFolder(folders.data); }
 	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js', 'buttons_utils_volume.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
-	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
+	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_display_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => { return path.split('\\').pop(); }));
 	function isAllowed(fileName) { return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName); }
 	function isAllowedV2(fileName) { return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js'); }
 	function parseSubMenuFolder(s) {
-		return (s === '_playlist_tools'
-			? 'Playlist Tools'
-			: s === '_search_by_distance'
-				? 'Search by Distance'
-				: s === '_device_'
-					? 'Output Devices'
-					: s === '_lastfm_'
-						? 'Last.fm'
-						: capitalizeAll(s.replace(/_/g, '').trim())
-		);
+		switch (s) {
+			case '_device_': return 'Output devices';
+			case '_display_': return 'Display && TF';
+			case '_fingerprint_': return 'Fingerprint Tools';
+			case '_lastfm_':
+			case '_listenbrainz_': return 'ListenBrainz && Last.fm';
+			case '_playlist_': return 'Playlist handling';
+			case '_playlist_tools': return 'Playlist Tools';
+			case '_others_': return 'Other tools';
+			case '_search_': return '(Quick)Search';
+			case '_search_by_distance': return 'Search by Distance';
+			case '_stats_': return 'Library statistics';
+			case '_tags_': return 'Tagging tools';
+			default: return capitalizeAll(s.replace(/_/g, '').trim());
+		}
 	}
 	{
 		const subMenu = menu.newMenu('Add button');
 		menu.newEntry({ menuName: subMenu, entryText: 'Ctrl + L. Click opens readme:', flags: MF_GRAYED });
 		menu.newSeparator(subMenu);
+		[...new Set(files.map((path) => {
+			const entryText = path.split('\\').pop();
+			return subCategories.find((folder) => entryText.includes(folder)) || 'Others';
+		}))]
+			.filter(Boolean)
+			.map(parseSubMenuFolder)
+			.sort((a, b) => a.localeCompare(b))
+			.forEach((subMenuFolder) => menu.findOrNewMenu(subMenuFolder, subMenu));
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
-			let entryText = path.split('\\').pop() + (isAllowed(fileName)
+			let entryText = fileName + (isAllowed(fileName)
 				? (isAllowedV2(fileName)
 					? '' : '\t(Playlist Tools)'
 				) : '\t(1 allowed)');
@@ -85,12 +98,22 @@ function createButtonsMenu(name) {
 				}, flags: isAllowed(fileName) && isAllowedV2(fileName) ? MF_STRING : MF_GRAYED
 			});
 		});
+		menu.newSeparator(subMenu);
+		menu.newEntry({
+			menuName: subMenu, entryText: 'Toolbar separator', func: () => {
+				buttonsPath.push('separator');
+				const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
+				_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
+				addButtonSeparator();
+			}
+		});
 	}
 	{
 		const subMenu = menu.newMenu('Remove button');
 		buttonsPath.forEach((path, idx) => {
+			const buttonName = path.split('\\').pop();
 			menu.newEntry({
-				menuName: subMenu, entryText: path.split('\\').pop() + '\t(' + (idx + 1) + ')', func: () => {
+				menuName: subMenu, entryText: (buttonName === 'separator' ? '-- separator --' : buttonName) + '\t(' + (idx + 1) + ')', func: () => {
 					// Remove button
 					buttonsPath.splice(idx, 1);
 					// Remove properties
@@ -128,7 +151,7 @@ function createButtonsMenu(name) {
 						});
 					}
 					// Save and reload
-					const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
+					const fileNames = buttonsPath.map((path) => path.split('\\').pop());
 					_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
 					window.Reload();
 				}
@@ -522,7 +545,7 @@ function createButtonsMenu(name) {
 				menuName: subMenu, entryText: 'Force for all buttons', func: () => {
 					buttonsBar.config.bIconMode = barProperties.bIconMode[1] = !barProperties.bIconMode[1];
 					overwriteProperties(barProperties);
-					// When normalizing size, sizers are dynamically calculated on paint... so need to force it
+					// When normalizing size, sizes are dynamically calculated on paint... so need to force it
 					if (buttonsBar.config.bAlignSize) {
 						buttonsBar.config.bAlignSize = false; // buttons_xxx.js
 						window.Repaint(true);
@@ -566,7 +589,7 @@ function createButtonsMenu(name) {
 					});
 					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].isIconMode()));
 				} else {
-					menu.newEntry({	menuName: subMenu, entryText, flags: MF_GRAYED });
+					menu.newEntry({ menuName: subMenu, entryText, flags: MF_GRAYED });
 					menu.newCheckMenuLast(() => arrKeys.some((key) => buttonsBar.buttons[key].isIconMode()));
 				}
 			});

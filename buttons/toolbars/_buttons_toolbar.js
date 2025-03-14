@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/03/25
+//13/03/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -23,7 +23,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 {
 	const dependencies = [
 		'helpers\\buttons_xxx.js',
-		/* global buttonsBar:readable */
+		/* global buttonsBar:readable, addButtonSeparator:readable */
 		'helpers\\helpers_xxx.js',
 		/* global globSettings:readable, folders:readable, globFonts:readable, DT_VCENTER:readable, DT_CENTER:readable, DT_END_ELLIPSIS:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, checkUpdate:readable , globProfiler:readable */
 		'helpers\\helpers_xxx_foobar.js',
@@ -226,8 +226,11 @@ const includeButton = (() => {
 				}
 			});
 			buttonsBar.listKeys.push(newKeys);
-			window.Repaint();
-			globProfiler.Print('button - ' + buttonPath.replace(folders.xxx, ''));
+			globProfiler.Print('button - ' + buttonPath.split('\\').pop());
+		} else if (buttonPath.toLowerCase().endsWith('separator')) {
+			const newKeys = Object.keys(addButtonSeparator());
+			buttonsBar.listKeys.push(newKeys);
+			globProfiler.Print('button - ' + buttonPath.split('\\').pop());
 		} else {
 			console.log(buttonPath + ' not loaded'); // DEBUG
 		}

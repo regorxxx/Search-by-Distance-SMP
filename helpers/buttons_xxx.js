@@ -1,7 +1,7 @@
 ﻿'use strict';
-//11/03/25
+//13/03/25
 
-/* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion */
+/* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator */
 
 /* global buttonsPath:readable, barProperties:readable */
 include('helpers_xxx.js');
@@ -9,7 +9,7 @@ include('helpers_xxx.js');
 include('helpers_xxx_basic_js.js');
 /* global doOnce:readable, throttle:readable */
 include('helpers_xxx_prototypes.js');
-/* global isFunction:readable */
+/* global isFunction:readable, isString, round:readable */
 include('helpers_xxx_prototypes_smp.js');
 /* global extendGR:readable */
 include('helpers_xxx_properties.js');
@@ -65,7 +65,7 @@ buttonsBar.config = {
 };
 buttonsBar.config.default = Object.fromEntries(Object.entries(buttonsBar.config));
 // Drag n drop (internal use)
-buttonsBar.move = { bIsMoving: false, btn: null, moveX: null, moveY: null, fromKey: null, toKey: null, rec: { x: null, y: null, w: null, h: null }, last: -1 };
+buttonsBar.move = { bIsMoving: false, btn: null, mX: -1, mY: -1, moveX: null, moveY: null, fromKey: null, toKey: null, rec: { x: null, y: null, w: null, h: null }, last: -1 };
 buttonsBar.hidden = { bShow: false, id: null };
 // Button objs
 buttonsBar.list = []; // Button properties grouped per script
@@ -146,8 +146,12 @@ function ThemedButton({
 	this.g_theme = buttonsBar.useThemeManager() ? window.CreateThemeManager('Button') : null;
 	this.gFont = gFont;
 	this.gFontIcon = gFontIcon;
-	this.description = description;
-	this.text = text;
+	this.description = description !== null && typeof description !== 'undefined' ? description : null;
+	this.text = text === null || typeof text === 'undefined'
+		? ''
+		: isFunction(text)
+			? text
+			: String(text);
 	this.textWidth = isFunction(this.text)
 		? (parent) => _gr.CalcTextWidth(this.text(parent), gFont)
 		: _gr.CalcTextWidth(this.text, gFont);
@@ -172,17 +176,19 @@ function ThemedButton({
 	}
 	this.func = func;
 	this.prefix = prefix; // This let us identify properties later for different instances of the same button, like an unique ID
-	this.descriptionWithID = isFunction(this.description)
-		? (parent) => this.prefix
-			? this.prefix.replace('_', '') + ': '
+	this.descriptionWithID = this.description !== null ?
+		isFunction(this.description) // Adds prefix to description, whether it's a func or a string
+			? (parent) => this.prefix
+				? this.prefix.replace('_', '') + ': '
 				+ '\n-----------------------------------------------------\n' + this.description(parent)
-			: this.description(parent)
-		: () => this.prefix
-			? this.prefix.replace('_', '') + ': ' +
+				: this.description(parent)
+			: () => this.prefix
+				? this.prefix.replace('_', '') + ': ' +
 				'\n-----------------------------------------------------\n' + this.description
-			: this.description; // Adds prefix to description, whether it's a func or a string
+				: this.description
+		: null;
 	this.buttonsProperties = { ...buttonsProperties }; // Clone properties for later use
-	this.bIconMode = false;
+	this.bIconMode = false; // This property may be deleted by addButton()
 	this.bIconModeExpand = false;
 	this.bHeadlessMode = false;
 	this.update = {
@@ -203,7 +209,7 @@ function ThemedButton({
 
 	this.switchActive = function (bActive = null) {
 		this.active = bActive !== null ? bActive : !this.active;
-		window.RepaintRect(this.currX, this.currY, this.currW, this.currH);
+		this.repaint();
 	};
 
 	this.switchAnimation = function (name, bActive, condition = null, animationColors = buttonsBar.config.animationColors) {
@@ -222,7 +228,7 @@ function ThemedButton({
 
 	this.switchHighlight = function (bActive = null) {
 		this.highlight = bActive !== null ? bActive : !this.highlight;
-		window.RepaintRect(this.currX, this.currY, this.currW, this.currH);
+		this.repaint();
 	};
 
 	this.cleanAnimation = function () {
@@ -251,7 +257,8 @@ function ThemedButton({
 			: '';
 	};
 
-	this.tooltipText = function () { // ID or just description, according to string or func.
+	this.tooltipText = function () { // ID or just description, according to string or func
+		if (this.description === null) { return ''; }
 		const header = this.headerText(buttonsBar.config.bShowID);
 		return this.getAnimationText() + header + (!header.length && buttonsBar.config.bShowID
 			? this.descriptionWithID(this)
@@ -263,7 +270,11 @@ function ThemedButton({
 
 
 	this.isIconMode = function () { // Either global or for current button
-		return (((buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand) || !(isFunction(this.text) ? this.text(this) : this.text).length);
+		return (
+			(Object.hasOwn(this, 'bIconMode') && (buttonsBar.config.bIconMode || this.bIconMode) && !this.bIconModeExpand)
+			||
+			!(isFunction(this.text) ? this.text(this) : this.text).length
+		);
 	};
 
 	this.headlessModeTempShow = false;
@@ -293,33 +304,36 @@ function ThemedButton({
 		}
 		const bDrawBackground = buttonsBar.config.partAndStateID === 1;
 		// Check if OS allows button theme
-		if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
-			try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; } // eslint-disable-line no-unused-vars
-			if (!this.g_theme) {
-				buttonsBar.config.bUseThemeManager = false;
-				console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons');
+		if (!this.isSeparator) {
+			if (buttonsBar.useThemeManager() && !this.g_theme) { // may have been changed before drawing but initially not set
+				try { this.g_theme = window.CreateThemeManager('Button'); } catch (e) { this.g_theme = null; } // eslint-disable-line no-unused-vars
+				if (!this.g_theme) {
+					buttonsBar.config.bUseThemeManager = false;
+					console.log('Buttons: window.CreateThemeManager(\'Button\') failed, using non-themed buttons');
+				}
 			}
-		}
-		if (buttonsBar.useThemeManager()) {
-			// Themed Button states
-			switch (this.state) {
-				case buttonStates.normal: {
-					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 1);
-					break;
-				}
-				case buttonStates.hover: {
-					if (!buttonsBar.move.bIsMoving) {
-						buttonsBar.tooltipButton.SetValue(this.tooltipText(), true);
+			if (buttonsBar.useThemeManager()) {
+				// Themed Button states
+				switch (this.state) {
+					case buttonStates.normal: {
+						this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 1);
+						break;
 					}
-					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
-					break;
-				}
-				case buttonStates.down: {
-					this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 3);
-					break;
-				}
-				case buttonStates.hide: {
-					return;
+					case buttonStates.hover: {
+						if (!buttonsBar.move.bIsMoving) {
+							if (this.description !== null) { buttonsBar.tooltipButton.SetValue(this.tooltipText(), true); }
+							else if (isString(buttonsBar.tooltipButton.text)) { buttonsBar.tooltipButton.SetValue('', false); }
+						}
+						this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 2);
+						break;
+					}
+					case buttonStates.down: {
+						this.g_theme.SetPartAndStateID(buttonsBar.config.partAndStateID, 3);
+						break;
+					}
+					case buttonStates.hide: {
+						return;
+					}
 				}
 			}
 		}
@@ -327,7 +341,7 @@ function ThemedButton({
 		const textCalculated = bIconMode
 			? ''
 			: isFunction(this.text) ? this.text(this) : this.text;
-		if (bIconMode) {
+		if (bIconMode && !this.isSeparator) {
 			w = 30;
 			w *= buttonsBar.config.scale;
 		}
@@ -364,13 +378,21 @@ function ThemedButton({
 			w: 0,
 			h: 0
 		};
+		if (this.isSeparator) {
+			if (round(this.currY, 2) < round(this.currH + buttonsBar.config.offset.button.y, 2)) {
+				gr.DrawLine(this.currX + this.currW / 2, this.currY + _scale(1), this.currX + this.currW / 2, this.currH - 2 * _scale(1), _scale(1), opaqueColor(buttonsBar.config.textColor, 50));
+			} else {
+				gr.DrawLine(this.currX + _scale(1), this.currY + this.currH / 2, (bAlign ? Math.min(this.currW, window.Width) : window.Width) - 2 * _scale(1), this.currY + this.currH / 2, _scale(1), opaqueColor(buttonsBar.config.textColor, 50));
+			}
+			return;
+		}
 		if (buttonsBar.useThemeManager()) { this.g_theme.DrawThemeBackground(gr, this.currX, this.currY, this.currW, this.currH); }
 		else {
+			const arc = 3;
 			const x = this.currX + 1;
 			const y = this.currY + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? -2 : 0);
-			const w = this.currW - 4;
+			const w = Math.max(this.currW - 4, arc * 2 + 2);
 			const h = this.currH + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? +2 : -2);
-			const arc = 3;
 			gr.SetSmoothingMode(2); // Antialias for lines
 			const toolbarAlpha = Math.max(0, Math.min(buttonsBar.config.toolbarTransparency, 100));
 			switch (this.state) {
@@ -387,7 +409,10 @@ function ThemedButton({
 					}
 					break;
 				case buttonStates.hover:
-					buttonsBar.tooltipButton.SetValue(this.tooltipText(), true);
+					if (!buttonsBar.move.bIsMoving) {
+						if (this.description !== null) { buttonsBar.tooltipButton.SetValue(this.tooltipText(), true); }
+						else if (isString(buttonsBar.tooltipButton.text.length)) { buttonsBar.tooltipButton.SetValue('', false); }
+					}
 					if (bDrawBackground) {
 						gr.FillRoundRect(x, y, w, h, arc, arc, RGB(240, 240, 240));
 						gr.FillGradRect(x, y + 2, w, h / 2 - 2, 180, RGB(241, 241, 241), RGB(235, 235, 235));
@@ -517,13 +542,16 @@ function ThemedButton({
 						if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1.5); }
 						else { iconCoords.y += _scale(1); }
 					} else {
-						if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {
+						if (!bAlign) {
 							iconCoords.x += wCalc / 2 - (
 								bIconMode
 									? iconImage.Width * 1 / 2
 									: iconImage.Width * 7 / 10
 							) - textWidthCalculated / 2;
-						} else { iconCoords.x += iconWidthCalculated / 2; }
+						} else {
+							if (textPos === 'right') { iconCoords.x += textWidthCalculated / 2 - iconImage.Width * 7 / 10; }
+							else if (textPos === 'left') { iconCoords.x += textWidthCalculated / 2; }
+						}
 						if (textPos === 'left') { iconCoords.x += textWidthCalculated + iconImage.Width / 2; }
 					}
 				} else {
@@ -557,13 +585,13 @@ function ThemedButton({
 					if (textPos === 'top') { iconCoords.y += iconHeightCalculated - _scale(1); }
 					else { iconCoords.y += _scale(1); }
 				} else {
-					if (buttonsBar.config.orientation.toLowerCase() === 'x' && !bAlign) {
+					if (!bAlign) {
 						iconCoords.x += bIconMode
 							? 0
 							: - iconWidthCalculated / 5;
-					} else { iconCoords.x += wCalc / 2 + iconWidthCalculated * 5 / 4; }
+					} else if (textPos === 'right') { iconCoords.x -= iconWidthCalculated / 2; }
 					if (textPos === 'right') { iconCoords.x -= textWidthCalculated / 2 - _scale(1); }
-					else if (!bIconMode) { iconCoords.x += textWidthCalculated / 2 + iconWidthCalculated - iconWidthCalculated / 5; }
+					else if (textPos === 'left') { iconCoords.x += textWidthCalculated / 2 + iconWidthCalculated / 2; }
 				}
 			}
 			if (textPos === 'top') { textCoords.y -= _scale(1); }
@@ -680,6 +708,10 @@ function ThemedButton({
 		}
 	};
 
+	this.repaint = function (bForce) {
+		window.RepaintRect(this.currX, this.currY, this.currW, this.currH, bForce);
+	};
+
 	if (variables) {
 		if (typeof variables === 'object') {
 			for (let key in variables) {
@@ -786,11 +818,8 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		}
 	} else if (buttonsBar.gDown && buttonsBar.curBtn && buttonsBar.curBtn.state !== buttonStates.down) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
-		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
-		if (old) {
-			old.changeState(buttonStates.normal);
-			window.RepaintRect(old.currX, old.currY, old.currW, old.currH);
-		}
+		buttonsBar.curBtn.repaint();
+		if (old) { old.repaint(); }
 		return;
 	}
 
@@ -847,7 +876,11 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 		}
 	}
 	// Toolbar Tooltip
-	if (!buttonsBar.curBtn && buttonsBar.config.toolbarTooltip.length && !buttonsBar.move.bIsMoving) {
+	if (buttonsBar.curBtn) {
+		if (isString(buttonsBar.tooltipButton.text) && buttonsBar.tooltipButton.text === buttonsBar.config.toolbarTooltip) {
+			buttonsBar.tooltipButton.SetValue('', false);
+		}
+	} else if (buttonsBar.config.toolbarTooltip.length && !buttonsBar.move.bIsMoving) {
 		buttonsBar.tooltipButton.SetValue(buttonsBar.config.toolbarTooltip, true);
 	}
 	// Disable on drag n drop
@@ -865,7 +898,8 @@ addEventListener('on_mouse_move', (x, y, mask) => {
 				const maxX = last.currX + last.currW + _scale(5);
 				const maxY = last.currY + last.currH + _scale(5);
 				const axis = buttonsBar.config.orientation;
-				if ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY) {
+				const bMoved = (buttonsBar.move.mX !== -1 || buttonsBar.move.my !== -1) && (axis === 'x' ? Math.abs(x - buttonsBar.move.mX) : Math.abs(y - buttonsBar.move.mY)) >= _scale(5);
+				if (bMoved && ((axis === 'y' && x < last.currX) || (axis === 'x' && y < last.currY) || x <= maxX && y <= maxY)) {
 					if (buttonsBar.move.bIsMoving) {
 						buttonsBar.move.toKey = curBtnKey;
 						if (buttonsBar.move.btn) {
@@ -946,7 +980,7 @@ addEventListener('on_mouse_leave', () => {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.normal);
-		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
+		buttonsBar.curBtn.repaint();
 		buttonsBar.curBtn = null;
 	}
 	if (buttonsBar.config.bIconModeExpand) {
@@ -970,15 +1004,8 @@ addEventListener('on_mouse_lbtn_down', (x, y, mask) => { // eslint-disable-line 
 	buttonsBar.gDown = true;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.changeState(buttonStates.down);
-		window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
+		buttonsBar.curBtn.repaint();
 	}
-});
-
-addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
-	// Must return true, if you want to suppress the default context menu.
-	// Note: left shift + left windows key will bypass this callback and will open default context menu.
-	buttonsBar.move.bIsMoving && on_mouse_move(x, y); // Force drag n drop redraw
-	return Object.hasOwn(buttonsBar, 'menu') ? buttonsBar.menu().btn_up(x, y) : false;
 });
 
 addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
@@ -988,10 +1015,30 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 		// Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
 		if (buttonsBar.curBtn && window.IsVisible) {
 			buttonsBar.curBtn.changeState(buttonStates.hover);
-			window.RepaintRect(buttonsBar.curBtn.currX, buttonsBar.curBtn.currY, buttonsBar.curBtn.currW, buttonsBar.curBtn.currH);
+			buttonsBar.curBtn.repaint();
 		}
 	} else if (mask === MK_SHIFT) {
 		if (Object.hasOwn(buttonsBar, 'shiftMenu')) { buttonsBar.shiftMenu().btn_up(x, this.y + this.h); }
+	}
+});
+
+addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
+	// Must return true, if you want to suppress the default context menu.
+	// Note: left shift + left windows key will bypass this callback and will open default context menu.
+	if (buttonsBar.move.bIsMoving) {
+		on_mouse_move(x, y); // Force drag n drop redraw
+		buttonsBar.move.mX = -1;
+		buttonsBar.move.mY = -1;
+		return true;
+	} else {
+		return Object.hasOwn(buttonsBar, 'menu') ? buttonsBar.menu().btn_up(x, y) : false;
+	}
+});
+
+addEventListener('on_mouse_rbtn_down', (x, y, mask) => { // eslint-disable-line no-unused-vars
+	if (!buttonsBar.move.bIsMoving) {
+		buttonsBar.move.mX = x;
+		buttonsBar.move.mY = y;
 	}
 });
 
@@ -1020,7 +1067,8 @@ addEventListener('on_key_down', (k) => { // eslint-disable-line no-unused-vars
 		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
 			if (button.state === buttonStates.hover) {
-				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
+				if (button.description !== null) { buttonsBar.tooltipButton.SetValue(button.tooltipText(), true); }
+				else if (isString(buttonsBar.tooltipButton.text)) { buttonsBar.tooltipButton.SetValue('', false); }
 			}
 		}
 	}
@@ -1031,14 +1079,15 @@ addEventListener('on_key_up', (k) => { // eslint-disable-line no-unused-vars
 		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
 			if (button.state === buttonStates.hover) {
-				buttonsBar.tooltipButton.SetValue(button.tooltipText(), true);
+				if (button.description !== null) { buttonsBar.tooltipButton.SetValue(button.tooltipText(), true); }
+				else if (isString(buttonsBar.tooltipButton.text)) { buttonsBar.tooltipButton.SetValue('', false); }
 			}
 		}
 	}
 });
 
 function getUniquePrefix(string, sep = '_') {
-	if (string === null || !string.length) { return ''; }
+	if (!isString(string)) { return ''; }
 	let newPrefix = string.replace(sep, '') + 0;  // First ID
 	let i = 1;
 	while (buttonsBar.propertiesPrefixes.has(newPrefix)) { // The rest
@@ -1112,7 +1161,18 @@ function addButton(newButtons) {
 		}
 	}
 	buttonsBar.buttons = { ...buttonsBar.buttons, ...newButtons };
+	window.Repaint();
 	return newButtons;
+}
+
+function addButtonSeparator() {
+	buttonsBar.list.push({});
+	return addButton({
+		'separator': new ThemedButton({
+			coordinates: { x: 0, y: 0, w: _scale(4), h: 22 },
+			func: null, description: null, variables: { isSeparator: true }
+		}),
+	});
 }
 
 function buttonSizeCheck() {

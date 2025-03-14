@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/03/25
+//12/03/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -24,7 +24,7 @@ include('helpers\\buttons_sbd_menu_config.js'); // Button menu
 
 var version = sbd.version; // NOSONAR [shared on files]
 
-try { window.DefineScript('Search by Distance Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ }
+try { window.DefineScript('Search by Distance Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
 
 var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
@@ -75,7 +75,7 @@ addButton({
 				if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
 					let input = '';
 					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
-					catch (e) { return; }
+					catch (e) { return; } // eslint-disable-line no-unused-vars
 					if (!input.length) { return; }
 					if (this.buttonsProperties.customName[1] !== input) {
 						this.buttonsProperties.customName[1] = input;

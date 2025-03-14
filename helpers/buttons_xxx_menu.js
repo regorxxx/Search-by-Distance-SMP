@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/03/25
+//14/03/25
 
 /* exported settingsMenu */
 
@@ -23,8 +23,8 @@ include('helpers_xxx_file.js');
  * @param {object} parent - button context
  * @param {boolean} bShowValues? - show value along the menu entry
  * @param {any[]} readmeFiles? - list of files to show on readme submenu
- * @param {object} popups? - {key: {input, popup}}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
- * @param {object} callbacks? - {key: text}, where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
+ * @param {{[key:string]:{input:string, popup:string}}} popups? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
+ * @param {{[key:string]:(value) => void}} callbacks? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
  * @param {any} extraEntries? - function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
  * @returns {_menu}
  */
@@ -104,6 +104,16 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			const options = Object.keys(properties);
 			options.forEach((key) => { properties[key][1] = properties[key][3]; });
 			overwriteProperties(properties); // Updates panel
+			// Fire callbacks since value changing may affect other parts of code which need refreshing
+			if (callbacks) {
+				options.forEach((key) => {
+					if (Object.hasOwn(callbacks, key)) {
+						callbacks[key](properties[key][1], key);
+					} else if (Object.hasOwn(callbacks, '*')) {
+						callbacks['*'](properties[key][1], key);
+					}
+				});
+			}
 		}
 	});
 	if (readmeList) {
