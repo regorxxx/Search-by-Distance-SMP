@@ -1,18 +1,18 @@
 ﻿'use strict';
-//14/03/25
+//17/03/25
 
 /* exported settingsMenu */
 
+/* global buttonsBar:readable, showButtonReadme:readable */
+
 include('helpers_xxx.js');
-/* global folders:readable, MF_GRAYED:readable */
-include('menu_xxx.js');
-/* global _menu:readable */
+/* global MF_GRAYED:readable */
 include('helpers_xxx_prototypes.js');
 /* global isFunction:readable */
 include('helpers_xxx_properties.js');
 /* global overwriteProperties:readable, checkProperty:readable, */
-include('helpers_xxx_file.js');
-/* global _open:readable, _isFile:readable, utf8:readable, _jsonParseFileCheck:readable */
+include('menu_xxx.js');
+/* global _menu:readable */
 
 /**
  * Returns a settings menu object for a parent button object which allows to set any properties associated.
@@ -23,27 +23,30 @@ include('helpers_xxx_file.js');
  * @param {object} parent - button context
  * @param {boolean} bShowValues? - show value along the menu entry
  * @param {any[]} readmeFiles? - list of files to show on readme submenu
- * @param {{[key:string]:{input:string, popup:string}}} popups? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
- * @param {{[key:string]:(value) => void}} callbacks? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
- * @param {any} extraEntries? - function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
+ * @param {{[key:string]:{input:string, popup:string, bHide:boolean}}} entrySettings? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, popup will appear.
+ * @param {{[key:string]:(value, key:string) => void}} callbacks? - Where key matches the ones at parent.buttonsProperties. Every time such setting is changed, callback will fire (after changing the setting).
+ * @param {(menu:_menu, parent:parent) => void} extraEntries? - Function which could append additional menu entries between the list of properties and the 'Restore defaults...' entry.
+ * @param {{parentName:string}} options? - Additional settings.
  * @returns {_menu}
  */
-function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}, callbacks = {}, extraEntries = null) {
+function settingsMenu(parent, bShowValues = false, readmeFiles = [], entrySettings = {}, callbacks = {}, extraEntries = null, options = { parentName: '' }) {
 	if (extraEntries && !isFunction(extraEntries)) { throw new Error('settingsMenu: extraEntries is not a function'); }
 	const menu = new _menu();
 	const properties = parent.buttonsProperties;
-	const parentName = isFunction(parent.text) ? parent.text(parent) : parent.text;
-	const readmeList = readmeFiles.length && _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json') ? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8) : null;
+	const parentName = options.parentName || (isFunction(parent.text) ? parent.text(parent) : parent.text);
 	// Menu
 	menu.newEntry({ entryText: 'Configure button:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
 	{
 		const options = Object.keys(properties);
 		options.forEach((key) => {
+			const keySettings = entrySettings && Object.hasOwn(entrySettings, key) ? entrySettings[key] : {};
+			if (keySettings.bHide) { return; }
+			if (keySettings.bSep) { menu.newSeparator(); }
 			const value = properties[key][1];
 			const type = typeof value;
 			const entryText = properties[key][0].replace(/[A-z]*\d*_*\d*\./, '') + (bShowValues && type !== 'boolean' ? '\t[' + (type === 'string' && value.length > 10 ? value.slice(0, 10) + '...' : value) + ']' : '');
-			const desc = popups && Object.hasOwn(popups, key) ? popups[key].input || '' : '';
+			const desc = keySettings.input || '';
 			menu.newEntry({
 				entryText, func: () => {
 					let input;
@@ -74,9 +77,9 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 					if (!checkProperty(properties[key], input)) { return; } // Apply properties check which should be personalized for input value
 					properties[key][1] = (type === 'object' ? JSON.stringify(input) : input);
 					overwriteProperties(properties); // Updates panel
-					if (popups && Object.hasOwn(popups, key)&& Object.hasOwn(popups[key], 'popup')) {
+					if (Object.hasOwn(keySettings, 'popup')) {
 						if (type !== 'boolean' || (type === 'boolean' && input)) {
-							fb.ShowPopupMessage(popups[key].popup, parentName);
+							fb.ShowPopupMessage(keySettings.popup, parentName);
 						}
 					}
 					if (key === 'bIconMode') {
@@ -116,30 +119,17 @@ function settingsMenu(parent, bShowValues = false, readmeFiles = [], popups = {}
 			}
 		}
 	});
-	if (readmeList) {
+	if (buttonsBar.readmeList) {
 		menu.newSeparator();
 		if (readmeFiles.length > 1) {
+			const menuName = menu.newMenu('Readmes');
 			readmeFiles.forEach((name) => {
-				const readmeFile = Object.hasOwn(readmeList, name) ? readmeList[name] : '';
-				if (readmeFile.length) {
-					menu.newEntry({
-						entryText: readmeFile, func: () => {
-							const readme = _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8);
-							if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
-							else { console.log(readmeFile + ' not found.'); }
-						}
-					});
+				if (Object.hasOwn(buttonsBar.readmeList, name)) {
+					menu.newEntry({ menuName, entryText: name.replace('buttons_', ''), func: () => showButtonReadme(name) });
 				}
 			});
 		} else {
-			menu.newEntry({
-				entryText: 'Readme...', func: () => {
-					const readmeFile = Object.hasOwn(readmeList, readmeFiles[0]) ? readmeList[readmeFiles[0]] : '';
-					const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
-					if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
-					else { console.log(readmeFile + ' not found.'); }
-				}
-			});
+			menu.newEntry({ entryText: 'Readme...', func: () => showButtonReadme(readmeFiles[0]) });
 		}
 	}
 	return menu;

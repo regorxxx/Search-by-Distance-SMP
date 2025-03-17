@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/03/25
+//17/03/25
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -56,7 +56,11 @@ addButton({
 		func: function (mask) {
 			if (mask === MK_SHIFT) {
 				const menu = settingsMenu(
-					this, true, ['buttons_search_by_distance_info.js'], void (0), void (0),
+					this, true, ['buttons_search_by_distance_info.js'],
+					{
+						entries: { bHide: true }
+					},
+					void (0),
 					(menu) => {
 						menu.newSeparator();
 						_createSubMenuEditEntries(menu, void (0), {
