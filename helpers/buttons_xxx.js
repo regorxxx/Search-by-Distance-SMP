@@ -1,13 +1,15 @@
 ﻿'use strict';
-//14/03/25
+//17/03/25
 
-/* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator */
+/* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
 /* global buttonsPath:readable, barProperties:readable */
 include('helpers_xxx.js');
-/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable, globSettings:readable */
+/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, DT_LEFT:readable, DT_RIGHT:readable, DT_TOP:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable, globSettings:readable */
 include('helpers_xxx_basic_js.js');
 /* global doOnce:readable, throttle:readable */
+include('helpers_xxx_file.js');
+/* global _isFile:readable, _jsonParseFileCheck:readable, utf8:readable, _open:readable */
 include('helpers_xxx_prototypes.js');
 /* global isFunction:readable, isString, round:readable */
 include('helpers_xxx_prototypes_smp.js');
@@ -17,7 +19,7 @@ include('helpers_xxx_properties.js');
 include('helpers_xxx_UI.js');
 /* global RGB:readable, RGBA:readable, _tt:readable, _scale:readable, _gdiFont:readable, _gr:readable, invert:readable, isDark:readable, opaqueColor:readable, toRGB:readable, blendColors:readable, lightenColor:readable */
 include('helpers_xxx_flags.js');
-/* global buttonStates:readable */
+/* global buttonStates:readable, Flag:readable */
 include('callbacks_xxx.js');
 
 /*
@@ -77,6 +79,18 @@ buttonsBar.oldButtonCoordinates = { x: 0, y: 0, w: 0, h: 0 }; // To store coordi
 buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600); // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
+buttonsBar.readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json')
+	? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8)
+	: null;
+if (buttonsBar.readmeList) {
+	// Add additional readmes
+	buttonsBar.readmeList['Global settings'] = 'global_settings.txt';
+	buttonsBar.readmeList['Tagging requisites'] = 'tags_structure.txt';
+	buttonsBar.readmeList['Tags sources'] = 'tags_sources.txt';
+	buttonsBar.readmeList['Other tags notes'] = 'tags_notes.txt';
+	buttonsBar.readmeList['Global tag remapping'] = 'tags_global_remap.txt';
+	buttonsBar.readmeList['Dynamic queries'] = 'dynamic_query.txt';
+}
 buttonsBar.useThemeManager = function useThemeManager() {
 	return (this.config.bUseThemeManager && this.config.partAndStateID === 1);
 };
@@ -91,9 +105,9 @@ function calcNextButtonCoordinates(coord, buttonOrientation = buttonsBar.config.
 	const old = buttonsBar.oldButtonCoordinates;
 	const bFirstButton = !old[orientation];
 	const keys = ['x', 'y', 'w', 'h'];
-	const bFuncCoord = Object.fromEntries(keys.map((c) => { return [c, isFunction(coord[c])]; }));
-	const iCoord = Object.fromEntries(keys.map((c) => { return [c, bFuncCoord[c] ? coord[c]() : coord[c]]; }));
-	newCoordinates = Object.fromEntries(keys.map((c) => { return [c, bFuncCoord[c] ? () => { return old[c] + coord[c](); } : (c !== 'h' && c !== 'w' ? old[c] : 0) + iCoord[c]]; }));
+	const bFuncCoord = Object.fromEntries(keys.map((c) => [c, isFunction(coord[c])]));
+	const iCoord = Object.fromEntries(keys.map((c) => [c, bFuncCoord[c] ? coord[c]() : coord[c]]));
+	newCoordinates = Object.fromEntries(keys.map((c) => [c, (c !== 'h' && c !== 'w' ? old[c] : 0) + iCoord[c]]));
 	let cache = { w: old.w, h: old.h };
 	if (recalc) {
 		if (orientation === 'x') { old.x += iCoord.x + iCoord.w; old.h = Math.max(old.h, iCoord.h); }
@@ -136,10 +150,10 @@ function ThemedButton({
 	this.animation = []; /* {bActive, condition, animStep} */ // NOSONAR
 	this.highlight = false;
 	this.active = false;
-	this.x = this.currX = coordinates.x * buttonsBar.config.scale;
-	this.y = this.currY = coordinates.y * buttonsBar.config.scale;
-	this.w = this.currW = coordinates.w * buttonsBar.config.scale;
-	this.h = this.currH = coordinates.h * buttonsBar.config.scale;
+	this.x = this.currX = coordinates.x;
+	this.y = this.currY = coordinates.y;
+	this.w = this.currW = coordinates.w;
+	this.h = this.currH = coordinates.h;
 	this.moveX = null;
 	this.moveY = null;
 	this.originalWindowWidth = window.Width;
@@ -158,6 +172,7 @@ function ThemedButton({
 	this.textHeight = isFunction(this.text)
 		? (parent) => _gr.CalcTextHeight(this.text(parent), gFont)
 		: _gr.CalcTextHeight(this.text, gFont);
+	this.textFlags = new Flag(DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
 	this.iconImage = this.gFontIcon === null;
 	if (this.iconImage) {
 		this.icon = icon;
@@ -613,7 +628,13 @@ function ThemedButton({
 		}
 		for (const key in buttonsBar.config.offset.text) { textCoords[key] += buttonsBar.config.offset.text[key]; }
 		// text
-		gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, textCoords.x, textCoords.y, textCoords.w, textCoords.h, DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+
+		if (this.textFlags.has(DT_LEFT, [DT_TOP, DT_LEFT])) {
+			textCoords.x += _scale(4);
+		} else if (this.textFlags.has(DT_RIGHT)) {
+			textCoords.x -= _scale(4);
+		}
+		gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, textCoords.x, textCoords.y, textCoords.w, textCoords.h, this.textFlags.get());
 		// Process all animations but only paint once
 		let bDone = false;
 		this.animation.forEach((animation) => {
@@ -712,34 +733,47 @@ function ThemedButton({
 		window.RepaintRect(this.currX, this.currY, this.currW, this.currH, bForce);
 	};
 
-	if (variables) {
-		if (typeof variables === 'object') {
-			for (let key in variables) {
-				if (isFunction(variables[key])) {
-					this[key] = variables[key].bind(this, this);
-				} else {
-					this[key] = variables[key];
+	this.init = function () {
+		['x', 'y', 'w', 'h'].forEach((c) => {
+			if (isFunction(this[c])) {
+				this[c] = this[c].bind(this);
+				this['curr' + c.toUpperCase()] = this[c]() + (buttonsBar.config.offset.button[c] || 0);
+			} else {
+				this[c] = this[c] * buttonsBar.config.scale;
+				this['curr' + c.toUpperCase()] = this[c] + (buttonsBar.config.offset.button[c] || 0);
+			}
+		});
+		if (variables) {
+			if (typeof variables === 'object') {
+				for (let key in variables) {
+					if (isFunction(variables[key])) {
+						this[key] = variables[key].bind(this, this);
+					} else {
+						this[key] = variables[key];
+					}
 				}
-			}
-		} else { console.log('butttons_xxx: variables is not an object'); }
-		variables = null;
-	}
-	if (listener) {
-		if (typeof listener === 'object') {
-			for (let key in listener) {
-				const func = listener[key].bind(this, this);
-				addEventListener(key, func);
-			}
-		} else { console.log('butttons_xxx: listener is not an object'); }
-		listener = null;
-	}
-	if (onInit) {
-		if (isFunction(onInit)) { onInit.call(this, this); }
-		else { console.log('butttons_xxx: onInit is not a function'); }
-		onInit = null;
-	}
-	if (this.isHeadlessMode()) { this.state = buttonStates.hide; }
-	if (['top', 'bottom'].includes(buttonsBar.config.textPosition.toLowerCase())) { this.changePosSize(true); }
+			} else { console.log('butttons_xxx: variables is not an object'); }
+			variables = null;
+		}
+		if (listener) {
+			if (typeof listener === 'object') {
+				for (let key in listener) {
+					const func = listener[key].bind(this, this);
+					addEventListener(key, func);
+				}
+			} else { console.log('butttons_xxx: listener is not an object'); }
+			listener = null;
+		}
+		if (onInit) {
+			if (isFunction(onInit)) { onInit.call(this, this); }
+			else { console.log('butttons_xxx: onInit is not a function'); }
+			onInit = null;
+		}
+		if (this.isHeadlessMode()) { this.state = buttonStates.hide; }
+		if (['top', 'bottom'].includes(buttonsBar.config.textPosition.toLowerCase())) { this.changePosSize(true); }
+	};
+
+	this.init();
 }
 const throttledRepaint = throttle((parent) => window.RepaintRect(parent.currX, parent.currY, parent.currW, parent.currH), 1000);
 
@@ -1226,4 +1260,15 @@ function getButtonVersion(source = 'Playlist-Tools-SMP') {
 		}
 	}
 	return ver || 'x.x.x';
+}
+
+function showButtonReadme(fileName) {
+	let readme = '';
+	if (buttonsBar.readmeList) {
+		const readmeFile = buttonsBar.readmeList[fileName];
+		const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
+		if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
+		else { console.log(readmeFile + ' not found.'); }
+	}
+	return readme;
 }

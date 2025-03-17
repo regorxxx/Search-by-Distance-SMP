@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/03/25
+//17/03/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -187,12 +187,31 @@ function loadButtonsFile(bStartup = false) {
 				name: 'Full', files:
 					['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']
 			},
+			{
+				name: 'Status bar', files:
+					['buttons_display_tf.js', 'separator', 'buttons_display_tf.js', 'separator', 'buttons_display_tf.js', 'separator', 'buttons_display_tf.js'],
+				properties: folders.xxx + 'presets\\Playlist Tools\\toolbars\\statusbar.json'
+			},
 			{ name: 'Blank', files: [] }
-		].map((preset) => { return (preset.files.every((file) => _isFile(folders.xxx + 'buttons\\' + file)) ? preset : void (0)); }).filter(Boolean);
+		].map((preset) =>
+			preset.files.every((file) => _isFile(folders.xxx + 'buttons\\' + file) || file.toLowerCase() === 'separator') ? preset : void (0)
+		).filter(Boolean);
 		const input = Input.number('int positive', presets.length, 'Choose a preset (by number) from the following list, to load the toolbar with pre-defined buttons (they may be added/removed at any time later):\n' + presets.map((p, i) => '\t' + _b(i + 1) + ' ' + p.name).join('\n') + '\n\nCanceling will load a blank toolbar by default.', 'Toolbar: preset', 1, [(n) => n > 0 && n <= presets.length]);
 		if (input == null) { return false; }
-		names = presets[input - 1].files.map((path) => { return path.split('\\').pop(); });
-		_save(file, JSON.stringify(names, null, '\t').replace(/\n/g, '\r\n'));
+		const preset = presets[input - 1];
+		if (preset) {
+			names = preset.files.map((path) => path.split('\\').pop());
+			_save(file, JSON.stringify(names, null, '\t').replace(/\n/g, '\r\n'));
+			if (Object.hasOwn(preset, 'properties')) {
+				const properties = _jsonParseFileCheck(preset.properties, preset.name, preset.name, utf8);
+				if (properties && properties.values) {
+					Object.entries(properties.values).forEach(([key, value]) => {
+						window.SetProperty(key, value);
+					});
+					window.Reload();
+				}
+			}
+		}
 	};
 	if (!_isFile(file)) {
 		presetPopup();
@@ -208,8 +227,8 @@ function loadButtonsFile(bStartup = false) {
 		['buttons_device_selector.js', 'buttons_device_switcher.js'],
 	]);
 	buttonsPath = names
-		.map((name) => remap.has(name) ? remap.get(name) : name )
-		.map((name) => folders.xxx + 'buttons\\' + name );
+		.map((name) => remap.has(name) ? remap.get(name) : name)
+		.map((name) => folders.xxx + 'buttons\\' + name);
 	return buttonsPath.length;
 }
 

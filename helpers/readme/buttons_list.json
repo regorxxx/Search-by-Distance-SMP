@@ -1,12 +1,11 @@
 {
+	"buttons_device_priority.js": "device_priority.txt",
+	"buttons_device_switcher.js": "device_switcher.txt",
+	"buttons_display_tf.js": "display_tf.txt",
 	"buttons_fingerprint_tools.js": "fingerprint_tools.txt",
 	"buttons_lastfm_tools.js": "lastfm_tools.txt",
 	"buttons_listenbrainz_tools.js": "listenbrainz_tools.txt",
 	"buttons_others_auto_dj.js": "auto_dj.txt",
-	"buttons_utils_autobackup.js": "autobackup.txt",
-	"buttons_device_priority.js": "device_priority.txt",
-	"buttons_device_switcher.js": "device_switcher.txt",
-	"buttons_utils_main_menu.js": "main_menu_shortcut.txt",
 	"buttons_playlist_filter.js": "remove_duplicates.txt",
 	"buttons_playlist_history.js": "playlist_history.txt",
 	"buttons_playlist_remove_duplicates.js": "remove_duplicates.txt",
@@ -31,5 +30,7 @@
 	"buttons_tags_fingerprint_fooid.js": "fingerprint_tag.txt",
 	"buttons_tags_save_tags.js": "save_tags.txt",
 	"buttons_tags_tagger.js": "tagger.txt",
-	"buttons_stats_wrapped.js": "wrapped.txt"
+	"buttons_stats_wrapped.js": "wrapped.txt",
+	"buttons_utils_autobackup.js": "autobackup.txt",
+	"buttons_utils_main_menu.js": "main_menu_shortcut.txt"
 }

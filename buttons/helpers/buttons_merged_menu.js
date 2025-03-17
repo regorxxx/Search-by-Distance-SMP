@@ -1,9 +1,9 @@
 ﻿'use strict';
-//14/03/25
+//17/03/25
 
 /* exported createButtonsMenu */
 
-/* global buttonsPath:readable, buttonsBar:readable, barProperties:readable, buttonStates:readable, buttonSizeCheck:readable,moveButton:readable, addButtonSeparator:readable */
+/* global buttonsPath:readable, buttonsBar:readable, barProperties:readable, buttonStates:readable, buttonSizeCheck:readable,moveButton:readable, addButtonSeparator:readable, showButtonReadme:readable */
 
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
@@ -14,7 +14,7 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _jsonParseFileCheck:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable */
+/* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 /* global RGBA:readable, toRGB:readable */
 include('..\\..\\helpers\\helpers_xxx_input.js');
@@ -27,9 +27,6 @@ function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
 	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => { return !path.split('\\').pop().startsWith('_'); });
-	const readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json')
-		? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8)
-		: null;
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
@@ -54,6 +51,7 @@ function createButtonsMenu(name) {
 			case '_search_by_distance': return 'Search by Distance';
 			case '_stats_': return 'Library statistics';
 			case '_tags_': return 'Tagging tools';
+			case 'Settings, Tags and Queries': return s;
 			default: return capitalizeAll(s.replace(/_/g, '').trim());
 		}
 	}
@@ -89,11 +87,7 @@ function createButtonsMenu(name) {
 						const fileNames = buttonsPath.map((path) => { return path.split('\\').pop(); });
 						_save(folders.data + name + '.json', JSON.stringify(fileNames, null, '\t').replace(/\n/g, '\r\n'));
 					}
-					if (readmeList) {
-						const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
-						const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
-						if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
-					}
+					showButtonReadme(fileName);
 					if (!bOnlyReadme) { window.Reload(); }
 				}, flags: isAllowed(fileName) && isAllowedV2(fileName) ? MF_STRING : MF_GRAYED
 			});
@@ -744,20 +738,15 @@ function createButtonsMenu(name) {
 				if (readme.length) { fb.ShowPopupMessage(readme, 'Toolbar'); }
 			}
 		});
-		if (readmeList) {
-			// Add additional readmes
-			readmeList['Global settings'] = 'global_settings.txt';
-			readmeList['Tagging requisites'] = 'tags_structure.txt';
-			readmeList['Tags sources'] = 'tags_sources.txt';
-			readmeList['Other tags notes'] = 'tags_notes.txt';
-			readmeList['Global tag remapping'] = 'tags_global_remap.txt';
-			if (Object.hasOwn(readmeList, 'buttons_search_quicksearch.js')) { readmeList['Dynamic queries'] = 'dynamic_query.txt'; }
+		if (buttonsBar.readmeList) {
 			// Process
 			menu.newSeparator(subMenu);
-			Object.keys(readmeList).forEach((fileName) => {
-				const readmeFile = Object.hasOwn(readmeList, fileName) ? readmeList[fileName] : '';
+			menu.findOrNewMenu('Settings, Tags and Queries', subMenu);
+			menu.newSeparator(subMenu);
+			Object.keys(buttonsBar.readmeList).forEach((fileName) => {
+				const readmeFile = Object.hasOwn(buttonsBar.readmeList, fileName) ? buttonsBar.readmeList[fileName] : '';
 				if (!readmeFile.length || !_isFile(folders.xxx + 'helpers\\readme\\' + readmeFile)) { return; }
-				let subMenuFolder = subCategories.find((folder) => fileName.includes(folder)) || 'Others';
+				let subMenuFolder = subCategories.find((folder) => fileName.includes(folder)) || (fileName.endsWith('.js') ? 'Others' : 'Settings, Tags and Queries');
 				subMenuFolder = parseSubMenuFolder(subMenuFolder);
 				subMenuFolder = menu.findOrNewMenu(subMenuFolder, subMenu);
 				const entryText = fileName.replace('buttons_', '');
