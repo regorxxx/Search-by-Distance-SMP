@@ -1,5 +1,5 @@
 ﻿'use strict';
-//29/01/25
+//19/03/25
 
 /* exported createConfigMenu */
 
@@ -13,7 +13,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global capitalize:readable, capitalizeAll:readable, capitalizePartial:readable, isString:readable, _p:readable , isArrayEqual:readable, range: readable */
+/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range: readable */
 include('..\\..\\helpers\\helpers_xxx_time.js');
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
@@ -1640,8 +1640,8 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName: subMenuName,
 				entryText: 'Share configuration...', func: () => {
-					const list = ['tags', 'forced query', 'genre/style filter tag', 'pool filtering tag', 'duplicates removal tag', 'smart shuffle tag'];
-					const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n' + capitalizePartial(list.join(', ')), 0, 'Search by distance', popup.question + popup.yes_no);
+					const list = ['Tags and weighting', 'Pre-analysis filters\\Global forced query', 'Post-analysis filters\\Filter pool of similar tracks by tag', 'Tracks source\\Duplicated tracks', 'Tracks final sorting\\Smart shuffle tag'];
+					const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n\n' + list.join(', '), 0, 'Search by distance', popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						const obj = clone(properties);
 						obj.name = parent.name;

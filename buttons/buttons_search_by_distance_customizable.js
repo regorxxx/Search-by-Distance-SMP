@@ -106,10 +106,17 @@ addButton({
 							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								parent.buttonsProperties.tags[1] = String(info.tags[1]);
+								parent.buttonsProperties.folksonomyWhitelistTag[1] = String(info.folksonomyWhitelistTag[1]);
+								parent.buttonsProperties.folksonomyBlacklistTag[1] = String(info.folksonomyBlacklistTag[1]);
+								parent.buttonsProperties.bAscii[1] = !!info.bAscii[1];
+								parent.buttonsProperties.bNegativeWeighting[1] = !!info.bNegativeWeighting[1];
 								parent.buttonsProperties.forcedQuery[1] = String(info.forcedQuery[1]);
 								parent.buttonsProperties.genreStyleFilterTag[1] = String(info.genreStyleFilterTag[1]);
 								parent.buttonsProperties.poolFilteringTag[1] = String(info.poolFilteringTag[1]);
 								parent.buttonsProperties.checkDuplicatesByTag[1] = String(info.checkDuplicatesByTag[1]);
+								parent.buttonsProperties.sortBias[1] = !!info.sortBias[1];
+								parent.buttonsProperties.bAdvTitle[1] = !!info.bAdvTitle[1];
+								parent.buttonsProperties.bMultiple[1] = !!info.bMultiple[1];
 								parent.buttonsProperties.smartShuffleTag[1] = String(info.smartShuffleTag[1]);
 								overwriteProperties(parent.buttonsProperties);
 							}
