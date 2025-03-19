@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/03/25
+//19/03/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -34,7 +34,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		'helpers\\helpers_xxx_UI.js',
 		/* global _scale:readable, _gdiFont:readable */
 		'helpers\\helpers_xxx_file.js',
-		/* global _open:readable, _isFile:readable, utf8:readable, _save:readable, _jsonParseFileCheck:readable */
+		/* global _open:readable, _isFile:readable, utf8:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable , popup:readable */
 		'helpers\\helpers_xxx_input.js'
 		/* global Input:readable */
 	];
@@ -286,6 +286,50 @@ addEventListener('on_paint', (gr) => {
 addEventListener('on_mouse_lbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
 	!buttonsPath.length && loadButtonsFile() && includeButtons();
 	window.Repaint();
+});
+
+addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-unused-vars
+	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
+	if (!name.startsWith('Toolbar')) { return; }
+	switch (name) { // NOSONAR
+		case 'Toolbar: share configuration': {
+			if (info) {
+				for (let key in buttonsBar.buttons) {
+					if (Object.hasOwn(buttonsBar.buttons, key)) {
+						buttonsBar.buttons[key].switchHighlight(true);
+					}
+				}
+				const answer = WshShell.Popup('Apply current configuration to highlighted toolbar?\nCheck UI.', 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+				if (answer === popup.yes) {
+					['toolbarColor', 'buttonColor','textColor', 'hoverColor', 'activeColor', 'transparency', 'scale', 'iconScale', 'textScale'].forEach((key) => {
+						buttonsBar.config[key] = barProperties[key][1] = Number(info[key][1]);
+					});
+					buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1;
+					['bDynHoverColor', 'bHoverGrad','bBorders' ].forEach((key) => {
+						buttonsBar.config[key] = barProperties[key][1] = !!info[key][1];
+					});
+					['animationColors'].forEach((key) => {
+						barProperties[key][1] = String(info[key][1]);
+						buttonsBar.config[key] = JSON.parse(info[key][1]);
+					});
+					barProperties.offset[1] = String(info.offset[1]);
+					const offset = JSON.parse(barProperties.offset[1]);
+					buttonsBar.config.offset.button = offset.button;
+					buttonsBar.config.offset.text = offset.button;
+					barProperties.bBgButtons[1] = !!info.bBgButtons[1];
+					buttonsBar.config.partAndStateID = info.bBgButtons[1] ? 1 : 6;
+					overwriteProperties(barProperties);
+				}
+				for (let key in buttonsBar.buttons) {
+					if (Object.hasOwn(buttonsBar.buttons, key)) {
+						buttonsBar.buttons[key].switchHighlight(false);
+					}
+				}
+				window.Repaint();
+			}
+			break;
+		}
+	}
 });
 
 // Update check

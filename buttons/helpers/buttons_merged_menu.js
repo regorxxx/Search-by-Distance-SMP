@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/03/25
+//19/03/25
 
 /* exported createButtonsMenu */
 
@@ -8,7 +8,7 @@
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global folders:readable, MF_GRAYED:readable, MF_STRING:readable, VK_CONTROL:readable, VK_SHIFT:readable, popup:readable, globSettings:readable, checkUpdate:readable */
+/* global folders:readable, MF_GRAYED:readable, MF_STRING:readable, VK_CONTROL:readable, VK_SHIFT:readable, popup:readable, globSettings:readable, checkUpdate:readable, clone:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable, deleteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -760,6 +760,17 @@ function createButtonsMenu(name) {
 			});
 		}
 	}
+	menu.newSeparator();
+	menu.newEntry({
+		entryText: 'Share UI configuration...', func: () => {
+			const list = ['Colors', 'Size and placement'];
+			const answer = WshShell.Popup('Share current configuration with other panels?\nSettings which will be copied:\n\n' + list.join(', '), 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+			if (answer === popup.yes) {
+				const obj = clone(barProperties);
+				window.NotifyOthers('Toolbar: share configuration', obj);
+			}
+		}
+	});
 	menu.newSeparator();
 	menu.newEntry({
 		entryText: 'Open buttons folder...', func: () => {
