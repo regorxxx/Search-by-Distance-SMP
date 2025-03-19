@@ -57,6 +57,7 @@
 
 ## [Unreleased][]
 ### Added
+- Toolbar: new entry on toolbar menu to share current UI settings across all toolbar panels on foobar2000. See [here](https://hydrogenaud.io/index.php/topic,120978.msg1061005.html#msg1061005).
 - Tracks source: added new settings to select source different than library. i.e. active playlist, now playing playlist or selected playlists by name.
 - Tags: added 'FOLKSONOMY' tag slot with it's own whitelist (only values on the list will be used) and blacklist (any value not on the list will be used). It behaves as a standard multi-value string tag in any other sense. It's a default tag which can not be removed, but it's weight may be set to zero in case you don't want to use it.
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
