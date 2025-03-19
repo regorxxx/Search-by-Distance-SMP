@@ -1,11 +1,11 @@
 ﻿'use strict';
-//17/03/25
+//19/03/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
 /* global buttonsPath:readable, barProperties:readable */
 include('helpers_xxx.js');
-/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, DT_LEFT:readable, DT_RIGHT:readable, DT_TOP:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable, globSettings:readable */
+/* global globFonts:readable, InterpolationMode:readable, DT_CENTER:readable, DT_VCENTER:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, DT_LEFT:readable, DT_RIGHT:readable, DT_TOP:readable, DT_NOCLIP:readable, IDC_SIZEALL:readable, IDC_NO:readable, IDC_HAND:readable, IDC_ARROW:readable, MK_RBUTTON:readable, MK_SHIFT:readable, folders:readable, _save:readable, globSettings:readable */
 include('helpers_xxx_basic_js.js');
 /* global doOnce:readable, throttle:readable */
 include('helpers_xxx_file.js');
@@ -172,7 +172,7 @@ function ThemedButton({
 	this.textHeight = isFunction(this.text)
 		? (parent) => _gr.CalcTextHeight(this.text(parent), gFont)
 		: _gr.CalcTextHeight(this.text, gFont);
-	this.textFlags = new Flag(DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX);
+	this.textFlags = new Flag(DT_CENTER | DT_VCENTER | DT_CALCRECT | DT_NOPREFIX | DT_NOCLIP);
 	this.iconImage = this.gFontIcon === null;
 	if (this.iconImage) {
 		this.icon = icon;
@@ -444,11 +444,13 @@ function ThemedButton({
 						const hoverColor = this.getHoverColor();
 						if (toolbarAlpha) { gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(buttonsBar.config.buttonColor, Math.max(1, toolbarAlpha / 5))); }
 						if (buttonsBar.config.bHoverGrad) {
-							const alpha = buttonsBar.config.bToolbar ? (isDark(...toRGB(hoverColor)) ? 5 : 20) : 20;
+							const alpha = buttonsBar.config.bToolbar
+								? (isDark(...toRGB(hoverColor)) ? 10 : 20)
+								: 20;
 							gr.FillRoundRect(x, y + 1, w, h / 2 - 1, arc, arc, opaqueColor(hoverColor, alpha));
 							gr.FillRoundRect(x, y + h / 2, w, h / 2, arc, arc, opaqueColor(invert(hoverColor), 4));
 						} else {
-							gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(hoverColor, 4));
+							gr.FillRoundRect(x, y, w, h, arc, arc, opaqueColor(hoverColor, buttonsBar.config.bDynHoverColor ? 5 : 75));
 						}
 					}
 					break;
@@ -629,10 +631,10 @@ function ThemedButton({
 		for (const key in buttonsBar.config.offset.text) { textCoords[key] += buttonsBar.config.offset.text[key]; }
 		// text
 
-		if (this.textFlags.has(DT_LEFT, [DT_TOP, DT_LEFT])) {
-			textCoords.x += _scale(4);
-		} else if (this.textFlags.has(DT_RIGHT)) {
-			textCoords.x -= _scale(4);
+		if (this.textFlags.has(DT_RIGHT)) {
+			textCoords.x -= _scale(2);
+		} else if (this.textFlags.has(DT_LEFT, [DT_TOP, DT_LEFT])) {
+			textCoords.x += _scale(1);
 		}
 		gr.GdiDrawText(textCalculated, this.gFont, buttonsBar.config.textColor, textCoords.x, textCoords.y, textCoords.w, textCoords.h, this.textFlags.get());
 		// Process all animations but only paint once
