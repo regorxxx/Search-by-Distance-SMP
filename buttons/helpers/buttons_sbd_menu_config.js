@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/03/25
+//20/03/25
 
 /* exported createConfigMenu */
 
@@ -164,7 +164,9 @@ function createConfigMenu(parent) {
 			const flags = Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING;
 			const val = properties[key][1];
 			let displayedVal = Object.hasOwn(recipe, key) ? recipe[key] : val;
-			displayedVal = isNaN(displayedVal) ? displayedVal.split('.').pop() + ' --> ' + graphDistance : displayedVal;
+			displayedVal = isNaN(displayedVal)
+				? displayedVal.split('.').pop() + ' --> ' + graphDistance
+				: Number.isFinite(displayedVal) ? displayedVal : '\u221E';
 			const entryText = 'Genre/styles variation lower than...' + (Object.hasOwn(recipe, key) ? '\t[' + displayedVal + '] (forced by recipe)' : '\t[' + displayedVal + ']');
 			const bUSerDescriptor = typeof music_graph_descriptors_user !== 'undefined';
 			const bShowDefault = !bUSerDescriptor ||
@@ -176,7 +178,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
-					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.' + (bShowDefault ? '\nBy default a value of ' + (isString(properties[key][3]) ? '\'' + properties[key][3] + '\' ' + _p(parseGraphDistance(properties[key][3])) : parseGraphDistance(properties[key][3])) + ' is used.' : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; }
+					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.' + (bShowDefault ? '\nBy default a value of ' + (isString(properties[key][3]) ? '\'' + properties[key][3] + '\' ' + _p(parseGraphDistance(properties[key][3])) : parseGraphDistance(properties[key][3])) + ' is used.' : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; } // eslint-disable-line no-unused-vars
 					if (!input && input !== '0' || !input.length) { return; }
 					if (parseGraphDistance(input) === null) { return; }
 					if (!Number.isNaN(Number(input))) { input = Number(input); } // Force a number type if possible
@@ -714,7 +716,7 @@ function createConfigMenu(parent) {
 				func: (cache) => {
 					let input = '';
 					try { input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', cache || properties['forcedQuery'][1], true); }
-					catch (e) { return; }
+					catch (e) { return; } // eslint-disable-line no-unused-vars
 					if ((!cache || cache !== input) && properties['forcedQuery'][1] === input) { return; }
 					try { if (input.length && fb.GetQueryItems(fb.GetLibraryItems(), input).Count === 0) { throw new Error('No items'); } } // Sanity check
 					catch (e) {
@@ -801,7 +803,7 @@ function createConfigMenu(parent) {
 					menuName: subMenuName, entryText, func: () => {
 						input = switchQuery(properties['forcedQuery'][1], obj.query);
 						try { fb.GetQueryItems(new FbMetadbHandleList(), input); } // Sanity check
-						catch (e) { fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return; }
+						catch (e) { fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return; } // eslint-disable-line no-unused-vars
 						properties['forcedQuery'][1] = input;
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'forcedQuery') ? MF_GRAYED : MF_STRING
@@ -936,7 +938,7 @@ function createConfigMenu(parent) {
 				{ name: 'Disabled', val: -1 },
 			];
 			const menuFlags = keyVal !== -1 ? MF_CHECKED : void (0);
-			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || 'auto: ' + autoVal)) + ']', menuName, menuFlags);
+			const subMenuName = menu.newMenu('Nearest genres filter' + '\t[' + (keyVal === -1 ? '-disabled-' : (keyVal || ('auto: ' + (Number.isFinite(autoVal) ? autoVal : '\u221E')))) + ']', menuName, menuFlags);
 			menu.newEntry({ menuName: subMenuName, entryText: 'With guessed nearest genres:', func: null, flags: MF_GRAYED });
 			menu.newSeparator(subMenuName);
 			options.forEach((opt) => {
@@ -1365,7 +1367,7 @@ function createConfigMenu(parent) {
 		{
 			const options = ['playlistLength'];
 			options.forEach((key) => {
-				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
+				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + Number.isFinite(recipe[key]) ? recipe[key] : '\u221E' + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
 						const input = Input.number('int', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
@@ -1605,7 +1607,7 @@ function createConfigMenu(parent) {
 			menuName: subMenuName, entryText: 'Rename button...', func: () => {
 				let input = '';
 				try { input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true); }
-				catch (e) { return; }
+				catch (e) { return; } // eslint-disable-line no-unused-vars
 				if (!input.length) { return; }
 				if (properties.customName[1] !== input) {
 					properties.customName[1] = input;
