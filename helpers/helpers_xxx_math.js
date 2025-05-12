@@ -1,5 +1,5 @@
 ﻿'use strict';
-//27/12/24
+//09/05/25
 
 /* exported combinations, nk_combinations, getClosestDivisor, toFraction */
 
@@ -125,4 +125,35 @@ function toFraction(x, epsilon = 0.0001) {
 		else { d++; }
 	}
 	return [x < 0 ? -n : n, d];
+}
+
+// https://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+function robertSequence(n, d = 1) {
+	let g;
+	switch (d) {
+		case 1: g = 1.618033988749894; break;
+		case 2: g = 1.324717957244746; break;
+		default: {
+			g = 2.0;
+			for (let i = 0; i < 10; i++) { g = Math.pow(1 + g, 1 / (d + 1)); }
+		}
+	}
+	const out = [];
+	let prev = out[0] = new Array(d).fill(0.5);
+	const coeff = Array.from({ length: d }, (x, i) => g ** (-i - 1));
+	for (let i = 1; i < n; i++) {
+		prev = out[i] = prev.map((c, j) => (c + coeff[j]) % 1);
+	}
+	return out;
+}
+
+// https://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+function robertDitherIntensity(x, y) {
+	const g1 = 0.7548776662;
+	const g2 = 0.56984029;
+	let int = g1 * x + g2 * y % 1;
+	int = int >= 0 && int < 1/2
+		? 2 * int
+		: 2 - 2* int;
+	return int;
 }
