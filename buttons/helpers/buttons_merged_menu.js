@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/03/25
+//07/05/25
 
 /* exported createButtonsMenu */
 
@@ -762,12 +762,12 @@ function createButtonsMenu(name) {
 	}
 	menu.newSeparator();
 	menu.newEntry({
-		entryText: 'Share UI configuration...', func: () => {
-			const list = ['Colors', 'Size and placement'];
-			const answer = WshShell.Popup('Share current configuration with other panels?\nSettings which will be copied:\n\n' + list.join(', '), 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+		entryText: 'Share UI settings...', func: () => {
+			const keys = ['Colors', 'Size and placement'];
+			const answer = WshShell.Popup('Share current UI settings with other panels?\nSettings which will be copied:\n\n' + keys.join(', '), 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
 			if (answer === popup.yes) {
 				const obj = clone(barProperties);
-				window.NotifyOthers('Toolbar: share configuration', obj);
+				window.NotifyOthers('Toolbar: share settings', obj);
 			}
 		}
 	});

@@ -95,6 +95,7 @@
 - Recursive Playlist: every iterative search will reuse the sorting/picking settings, so final playlist will be sorted in multiple groups with same pattern instead of randomly.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
+- UI: unified script updates settings across all my scripts, look for 'Updates' submenu.
 - UI: settings display improvements on tooltip.
 - UI: improvements of menu entries related to settings.
 - Readmes: improved readmes and added missing features.

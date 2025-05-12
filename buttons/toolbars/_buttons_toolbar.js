@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/03/25
+//07/05/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -292,14 +292,14 @@ addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-u
 	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
 	if (!name.startsWith('Toolbar')) { return; }
 	switch (name) { // NOSONAR
-		case 'Toolbar: share configuration': {
+		case 'Toolbar: share settings': {
 			if (info) {
 				for (let key in buttonsBar.buttons) {
 					if (Object.hasOwn(buttonsBar.buttons, key)) {
 						buttonsBar.buttons[key].switchHighlight(true);
 					}
 				}
-				const answer = WshShell.Popup('Apply current configuration to highlighted toolbar?\nCheck UI.', 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+				const answer = WshShell.Popup('Apply current settings to highlighted toolbar?\nCheck UI.', 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
 				if (answer === popup.yes) {
 					['toolbarColor', 'buttonColor','textColor', 'hoverColor', 'activeColor', 'transparency', 'scale', 'iconScale', 'textScale'].forEach((key) => {
 						buttonsBar.config[key] = barProperties[key][1] = Number(info[key][1]);
