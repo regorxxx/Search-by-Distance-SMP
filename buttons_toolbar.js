@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/05/25
+//13/05/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -16,7 +16,7 @@
 // Note this must be added before loading helpers! See buttons_search_by_tags_combinations.js and search_same_by.js
 // eslint-disable-next-line no-unused-vars
 var bLoadTags = true; // NOSONAR
-var version = '1.2.0'; // NOSONAR
+var version = '1.3.0'; // NOSONAR
 
 try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons*/ } // eslint-disable-line no-unused-vars
 
