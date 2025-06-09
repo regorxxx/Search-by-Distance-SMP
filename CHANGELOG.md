@@ -116,6 +116,7 @@
 - Console: minimum tag similarity score shown was wrong in some cases.
 - Console: wrong warning about Smart Shuffle Tag not being set if it was empty even when the feature was not used.
 - Console: wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
+- UI: multiple workarounds for rounded rectangles not being painted properly or producing crashes (SMP limitation).
 
 ## [7.6.0] - 2024-10-09
 ### Added

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/03/25
+//09/06/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -403,7 +403,7 @@ function ThemedButton({
 		}
 		if (buttonsBar.useThemeManager()) { this.g_theme.DrawThemeBackground(gr, this.currX, this.currY, this.currW, this.currH); }
 		else {
-			const arc = 3;
+			const arc = Math.min(3, (this.currW - 4) / 2, (this.currH - 2) / 4 - 2);
 			const x = this.currX + 1;
 			const y = this.currY + (buttonsBar.config.bFullSize && buttonsBar.config.orientation.toLowerCase() === 'x' ? -2 : 0);
 			const w = Math.max(this.currW - 4, arc * 2 + 2);
@@ -823,6 +823,7 @@ function chooseButton(x, y) {
 
 addEventListener('on_paint', (gr) => {
 	if (globSettings.bDebugPaint) { extendGR(gr, { Repaint: true, ImgBox: true }); }
+	else { extendGR(gr, { DrawRoundRect: true, FillRoundRect: true }); }
 	// Toolbar
 	if (buttonsBar.config.bToolbar) {
 		gr.FillSolidRect(0, 0, window.Width, window.Height, buttonsBar.config.toolbarColor);
