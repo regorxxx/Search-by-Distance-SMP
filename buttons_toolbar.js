@@ -115,7 +115,7 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Align all widths and heights according to orientation
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
-buttonsBar.config.toolbarTooltip = 'R. Click for toolbar menu\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)\n(Shift + Win + R. Click for SMP panel menu)';
+buttonsBar.config.toolbarTooltip = 'R. Click for toolbar menu\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)\n(Shift + Win + R. Click for SMP panel menu)\n(Ctrl + Win + R. Click for scripts panel menu)';
 // Assign size and pos
 buttonsBar.config.scale = barProperties.scale[1];
 buttonsBar.config.textScale = barProperties.textScale[1];
