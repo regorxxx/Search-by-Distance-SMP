@@ -1,24 +1,26 @@
 ﻿'use strict';
-//07/05/25
+//12/06/25
 
-/* exported createButtonsMenu */
+/* exported createButtonsMenu, importSettingsMenu */
 
 /* global buttonsPath:readable, buttonsBar:readable, barProperties:readable, buttonStates:readable, buttonSizeCheck:readable,moveButton:readable, addButtonSeparator:readable, showButtonReadme:readable */
 
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global folders:readable, MF_GRAYED:readable, MF_STRING:readable, VK_CONTROL:readable, VK_SHIFT:readable, popup:readable, globSettings:readable, checkUpdate:readable, clone:readable */
+/* global folders:readable, MF_GRAYED:readable, MF_STRING:readable, VK_CONTROL:readable, VK_SHIFT:readable, globSettings:readable, checkUpdate:readable, clone:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable, deleteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable */
+/* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _renameFile:readable, popup:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 /* global RGBA:readable, toRGB:readable */
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
+include('..\\..\\helpers\\helpers_xxx_export.js');
+/* global exportSettings:readable, importSettings:readable */
 include('..\\..\\helpers-external\\namethatcolor\\ntc.js');
 /* global ntc:readable */
 const Chroma = require('..\\helpers-external\\chroma.js\\chroma-ultra-light.min'); // Relative to helpers folder
@@ -775,6 +777,69 @@ function createButtonsMenu(name) {
 	menu.newEntry({
 		entryText: 'Open buttons folder...', func: () => {
 			_explorer(folders.xxx + 'buttons');
+		}
+	});
+	return menu;
+}
+
+function importSettingsMenu() {
+	const menu = new _menu();
+	menu.newEntry({ entryText: 'Panel menu: ' + window.Name, flags: MF_GRAYED });
+	menu.newSeparator();
+	menu.newEntry({
+		entryText: 'Export panel settings...', func: () => {
+			exportSettings(
+				barProperties,
+				[
+					folders.temp + 'settings.json', barProperties.name[1],
+					Object.hasOwn(buttonsBar.buttons, 'ListenBrainz Tools') ? 'listenbrainz_*.*' : '',
+					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.*', 'check_library_tags_exclusion.json'] : ['']),
+					Object.hasOwn(buttonsBar.buttons, 'Search by Distance Customizable') || Object.hasOwn(buttonsBar.buttons, 'Search by Distance nearest tracks') ? 'searchByDistance_*.*' : '',
+					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.*' : '',
+					Object.hasOwn(buttonsBar.buttons, 'Fingerprint Tools') ? 'fpChromaprintReverseMap*.json' : '',
+				],
+				'Toolbar'
+			);
+		}
+	});
+	menu.newEntry({
+		entryText: 'Import panel settings...', func: () => {
+			const dataPaths = new Set();
+			importSettings(
+				{
+					onUnzipSettings: (settings, bFound, panelName) => { // eslint-disable-line no-unused-vars
+						if (settings) {
+							dataPaths.add(settings.name[1]);
+							console.log(panelName + ': importing data files\n\t ' + [...dataPaths].join('\n\t '));
+							return true;
+						}
+						return false;
+					},
+					onUnzipData: (importPath, panelName) => { // eslint-disable-line no-unused-vars
+						return getFiles(importPath, new Set(['.json']))
+							.map((file) => {
+								const newFile = [...dataPaths].find((path) => path.endsWith(file.replace(importPath, '')));
+								if (newFile) {
+									dataPaths.delete(newFile);
+									if (_isFile(newFile)) { _renameFile(newFile, newFile + '.old'); }
+									const bDone = _renameFile(file, newFile);
+									if (!bDone) { _renameFile(newFile + '.old', newFile); }
+									return bDone;
+								}
+								return false;
+							})
+							.every(Boolean);
+					}
+				},
+				barProperties,
+				'Toolbar'
+			);
+		}
+	});
+	menu.newSeparator();
+	menu.newEntry({
+		entryText: 'Share UI settings...', func: () => {
+			createButtonsMenu().btn_up(0, 0, void (0), 'Share UI settings...');
 		}
 	});
 	return menu;

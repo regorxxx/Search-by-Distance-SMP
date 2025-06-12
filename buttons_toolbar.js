@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/05/25
+//12/06/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -23,7 +23,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 {
 	const dependencies = [
 		'helpers\\buttons_xxx.js',
-		/* global buttonsBar:readable, addButtonSeparator:readable */
+		/* global buttonsBar:readable, addButtonSeparator:readable, VK_CONTROL:readable, VK_LWIN:readable */
 		'helpers\\helpers_xxx.js',
 		/* global globSettings:readable, folders:readable, globFonts:readable, DT_VCENTER:readable, DT_CENTER:readable, DT_END_ELLIPSIS:readable, DT_CALCRECT:readable, DT_NOPREFIX:readable, checkUpdate:readable , globProfiler:readable */
 		'helpers\\helpers_xxx_foobar.js',
@@ -46,7 +46,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 {
 	const dependencies = [
 		'helpers\\buttons_merged_menu.js'
-		/* global createButtonsMenu:readable */
+		/* global createButtonsMenu:readable, importSettingsMenu:readable */
 	];
 	let bIncludeRel = true;
 	try { include('..\\helpers\\buttons_dummy.js'); } catch (e) { bIncludeRel = false; } // eslint-disable-line no-unused-vars
@@ -90,8 +90,6 @@ setProperties(barProperties);
 barProperties = getPropertiesPairs(barProperties);
 
 // Config at buttons_xxx.js
-// Toolbar menu
-buttonsBar.menu = () => { return createButtonsMenu(barProperties.name[1]); };
 // Global toolbar color
 buttonsBar.config.toolbarColor = barProperties.toolbarColor[1];
 buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1; // To set the background color
@@ -286,6 +284,13 @@ addEventListener('on_paint', (gr) => {
 addEventListener('on_mouse_lbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
 	!buttonsPath.length && loadButtonsFile() && includeButtons();
 	window.Repaint();
+});
+
+addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no-unused-vars
+	if (utils.IsKeyPressed(VK_CONTROL) && utils.IsKeyPressed(VK_LWIN)) {
+		return importSettingsMenu().btn_up(x, y);
+	}
+	return createButtonsMenu(barProperties.name[1]).btn_up(x, y);
 });
 
 addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-unused-vars
