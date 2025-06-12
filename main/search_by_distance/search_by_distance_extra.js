@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/11/24
+//11/06/25
 
 /* exported calculateSimilarArtistsFromPls, addTracksRelation */
 
@@ -32,7 +32,7 @@ include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
  *		'weighted' will use every random track (from input artist) independently and aggregate their score based on how many times that genre/style appears in the input artist's tracks. Bias is reduced to a minimum, only depending on the user library (i.e. if a library mostly contains Rock tracks for a New Age artist, it will be in fact match with other Rock artists).
  *
  *		'variable' will use every random track (from input artist) independently and aggregate their score calculating the mean. It may introduce a bias if the random tracks chosen are not representative of the artist's work.
- * @returns {Promise<{ artist: string; val: { artist: string; count: number; score: number; }[]; }>}
+ * @returns {Promise.<{ artist: string; val: { artist: string; count: number; score: number; }[]; }>}
  */
 async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properties = null, theme = null, recipe = 'int_simil_artists_calc_graph.json', dateRange = 10, size = 50, method = 'weighted' } = {}) {
 	const test = sbd.panelProperties.bProfile[1] ? new FbProfiler('calculateSimilarArtists') : null;

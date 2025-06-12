@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/05/25
+//11/06/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -786,7 +786,7 @@ testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
  * --->Misc
  *
  * @param {any?} o.parent - [=null] Parent object
- * @returns {[FbMetadbHandle[], {name:string, score:number, mapDistance:number, bRelated:boolean, bUnrelated:boolean}[], FbMetadbHandle, FbMetadbHandle|-1]} Output handle list (as array), the score data, current selection (reference track) and more distant track
+ * @returns {Promise.<[FbMetadbHandle[], {name:string, score:number, mapDistance:number, bRelated:boolean, bUnrelated:boolean}[], FbMetadbHandle, FbMetadbHandle|-1]>} Output handle list (as array), the score data, current selection (reference track) and more distant track
  */
 async function searchByDistance({
 	// --->Default args (aka properties from the panel and input)
@@ -886,7 +886,7 @@ async function searchByDistance({
 		let path;
 		if (isString(recipe)) { // File path
 			path = !_isFile(recipe) && _isFile(recipePath + recipe) // NOSONAR [is always a string]
-				? recipePath + recipe
+				? recipePath + recipe // NOSONAR [is always a string]
 				: recipe;
 			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
 			if (!recipe) { console.popup('Recipe not found: ' + path, 'Search by distance'); return; } // NOSONAR [is always a string]
