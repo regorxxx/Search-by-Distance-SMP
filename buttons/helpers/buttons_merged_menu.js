@@ -791,7 +791,7 @@ function importSettingsMenu() {
 			exportSettings(
 				barProperties,
 				[
-					folders.temp + 'settings.json', barProperties.name[1],
+					barProperties.name[1],
 					Object.hasOwn(buttonsBar.buttons, 'ListenBrainz Tools') ? 'listenbrainz_*.*' : '',
 					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.*', 'check_library_tags_exclusion.json'] : ['']),
 					Object.hasOwn(buttonsBar.buttons, 'Search by Distance Customizable') || Object.hasOwn(buttonsBar.buttons, 'Search by Distance nearest tracks') ? 'searchByDistance_*.*' : '',
