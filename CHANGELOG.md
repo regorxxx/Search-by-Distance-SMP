@@ -62,7 +62,7 @@
 - Tags: added 'FOLKSONOMY' tag slot with it's own whitelist (only values on the list will be used) and blacklist (any value not on the list will be used). It behaves as a standard multi-value string tag in any other sense. It's a default tag which can not be removed, but it's weight may be set to zero in case you don't want to use it.
 - Configuration: new setting (at 'Search method') to stop processing as soon as the playlist is filled. This will greatly improve processing time on huge libraries, as long as the desired playlist size or desired similarity score is low enough. Note enabling this option can not ensure that tracks with highest similarity are shown, it just outputs the first -similar enough- tracks found. To avoid always showing the same tracks, while using this option the source items (library) are shuffled; i.e. consecutive runs will output different tracks (which may partially override other sorting and picking options). Enabling this option may increase performance up to +50% in some cases. This setting is now enabled by default.
 - Advanced mode: added advanced mode setting which must be enabled by user (disabled by default). Advanced mode includes all available settings (previous behavior present on [7.6.0](#760---2024-10-09) and below). If not enabled, only a small subset of settings is shown. Themes are only available on advanced mode too. Already existing installation should not be affected by this change, and advanced mode will be enabled by default in such cases.
-- Descriptors: added Psychedelic Techno, Barcarola, Tribal House, Acid Techno, Hyperpop, Jersey Club, Muiñeira, Alalá, Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
+- Descriptors: added Digicore, Glitchcore, Psychedelic Techno, Barcarola, Tribal House, Acid Techno, Hyperpop, Jersey Club, Muiñeira, Alalá, Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
 - Descriptors: added Galician Folk XL, Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
@@ -71,6 +71,7 @@
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 - Installation: new panel menu, accessed through 'Ctrl + Win + R. Click' (which works globally on any script and panel, at any position), used to export/import panel settings and any other associated data. These entries may be used to fully backup the panel data, help when moving between different JS components (JSplitter <-> SMP) or even foobar2000 installations,, without needing to manually backup the panel properties or other external files (like .json, etc.).
+- Configuration: external files like world map database references are now exposed as a panel property.
 ### Changed
 - Installation: added popup warnings when scripts are installed outside foobar2000 profile folder. These checks can be tweaked at globSettings.json.
 - Installation: script may now be installed at any path within the foobar profile folder, no longer limited to '[FOOBAR PROFILE FOLDER]\scripts\SMP\xxx-scripts\' folder. Obviously it may still be installed at such place, which may be preferred if updating an older version.
@@ -79,6 +80,7 @@
 - Presets: themes folder has been moved to '.\profile\js_data\presets\themes\'. See notes above for recipes (it also applies to themes).
 - Presets: query filter file moved from '.\profile\scripts\SMP\xxx-scripts\presets\Search by\filters\custom_button_filters.json' to '.\profile\js_data\presets\filters\custom_button_filters.json'.If you want to use the old settings, move it manually to the new path. If the file doesn't exist, then you are just using the default filters (and may forget about this change).
 - Presets: dynamic query filter file moved from '.\profile\scripts\SMP\xxx-scripts\presets\Search by\filters\custom_button_dynamic_filters.json' to '.\profile\js_data\presets\filters\custom_button_dynamic_filters.json'. See notes above for query filters.
+- Presets: unified presets along different query filtering tools.
 - Descriptors: merged Tishoumaren and Desert Blues styles, used the first and added Desert Blues and Assouf as substitutions.
 - Descriptors: tweaked Sad Emo XL and Gothic XL clusters.
 - Descriptors: multiple improvements to All Music descriptors.
@@ -118,6 +120,7 @@
 - Console: wrong warning about Smart Shuffle Tag not being set if it was empty even when the feature was not used.
 - Console: wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
 - UI: multiple workarounds for rounded rectangles not being painted properly or producing crashes (SMP limitation).
+- Fixed some inconsistencies with  [foo_playcount_2003](https://marc2k3.github.io/component/playcount-2003/) support.
 
 ## [7.6.0] - 2024-10-09
 ### Added
