@@ -1,9 +1,9 @@
 ﻿'use strict';
-//20/03/25
+//20/06/25
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable, sendToPlaylist:readable, queryCombinations:readable, removeDuplicatesAsync:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -13,7 +13,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range: readable */
+/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range:readable, _qCond:readable */
 include('..\\..\\helpers\\helpers_xxx_time.js');
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
@@ -23,6 +23,7 @@ function createConfigMenu(parent) {
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const defTags = JSON.parse(properties.tags[3]);
+	const filePaths = JSON.parse(properties.filePaths[1]);
 	// Process recipe
 	let recipe = {};
 	if (properties.recipe[1].length) { recipe = processRecipePlaceholder(properties.recipe[1], tags); }
@@ -500,20 +501,20 @@ function createConfigMenu(parent) {
 		}
 		menu.newSeparator(menuName);
 		{
-			createTagMenu(menuName, ['genreStyleFilterTag'], void(0), void (0), void (0), [
+			createTagMenu(menuName, ['genreStyleFilterTag'], void (0), void (0), void (0), [
 				'\n\nThese genre/style values will be filtered globally and not considered neither for tag similarity scoring nor for genre/style variation analysis.'
 			]);
 			menu.newCheckMenuLast(() => !!getSetting('genreStyleFilterTag').length);
 		}
 		{
-			createTagMenu(menuName, ['folksonomyWhitelistTag'], void(0), void (0), void (0), [
+			createTagMenu(menuName, ['folksonomyWhitelistTag'], void (0), void (0), void (0), [
 				'\n\nOnly these values will be used when comparing folksonomy tags. Anything not listed here will be ignored.'
 			]);
 			menu.newCheckMenuLast(() => !!getSetting('folksonomyWhitelistTag').length);
-			createTagMenu(menuName, ['folksonomyBlacklistTag'], void(0), void (0), void (0), [
+			createTagMenu(menuName, ['folksonomyBlacklistTag'], void (0), void (0), void (0), [
 				'\n\nThese values will be filtered when comparing folksonomy tags. Anything not listed here will used.'
 			]);
-			menu.newCheckMenuLast(() => !!getSetting('folksonomyBlacklistTag').length && !getSetting('folksonomyWhitelistTag').length );
+			menu.newCheckMenuLast(() => !!getSetting('folksonomyBlacklistTag').length && !getSetting('folksonomyWhitelistTag').length);
 		}
 		if (!bLiteMode) {
 			menu.newSeparator(menuName);
@@ -630,7 +631,7 @@ function createConfigMenu(parent) {
 			return {
 				entryText: sbd.getSourceDescription(sourceType),
 				sourceType,
-				...(sourceType === 'playlist' ? {sourceArg: null} : {})
+				...(sourceType === 'playlist' ? { sourceArg: null } : {})
 			};
 		});
 		options.forEach((option) => {
@@ -750,10 +751,18 @@ function createConfigMenu(parent) {
 					{ name: 'Female vocals', query: globQuery.female },
 					{ name: 'Instrumentals', query: globQuery.instrumental },
 					{ name: 'Acoustic tracks', query: globQuery.acoustic },
-					{ name: 'Rating > 2', query: globQuery.ratingGr2 },
-					{ name: 'Rating > 3', query: globQuery.ratingGr3 },
+					{ name: 'Rating ≥3', query: globQuery.ratingGr2 },
+					{ name: 'Rating ≥4', query: globQuery.ratingGr3 },
+					{ name: 'Fav tracks', query: globQuery.fav },
+					{ name: 'Loved tracks', query: globQuery.loved },
 					{ name: 'Length < 6 min', query: globQuery.shortLength },
 					{ name: 'Only Stereo', query: globQuery.stereo },
+					{ name: 'sep' },
+					{ name: 'Not recently listened', query: 'NOT ' + globQuery.recent },
+					{ name: 'Daily listen rate >1', query: 'NOT ' + _qCond(globTags.playCountRateGlobalDay) + ' LESS 1' },
+					{ name: 'Weekly listen rate >1', query: 'NOT ' + _qCond(globTags.playCountRateGlobalWeek) + ' LESS 1' },
+					{ name: 'Monthly listen rate >1', query: 'NOT ' + _qCond(globTags.playCountRateGlobalMonth) + ' LESS 1' },
+					{ name: 'Yearly listen rate >1', query: 'NOT ' + _qCond(globTags.playCountRateGlobalYear) + ' LESS 1' },
 					{ name: 'sep' },
 					{ name: 'No Female vocals', query: globQuery.noFemale },
 					{ name: 'No Instrumentals', query: globQuery.noInstrumental },
@@ -1403,7 +1412,14 @@ function createConfigMenu(parent) {
 			menu.newSeparator(subMenu);
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Calculate same zone artists', func: () => {
-					console.log(getArtistsSameZone({ properties }));
+					const artists = getArtistsSameZone({ worldMapData: filePaths.worldMapArtists });
+					const query = queryCombinations(artists, 'ARTIST', 'OR');
+					const handleList = fb.GetQueryItemsCheck(void (0), query);
+					if (handleList) {
+						removeDuplicatesAsync({ handleList, sortOutput: '', checkKeys: getSetting('checkDuplicatesByTag'), bAdvTitle: getSetting('bAdvTitle'), bMultiple: getSetting('bMultiple') })
+							.then((out) => sendToPlaylist(out, properties.playlistName[1]))
+							.finally(() => console.log('Same zone artists:\n\t' + artists.join(', ')));
+					}
 				}
 			});
 		}
@@ -1576,7 +1592,7 @@ function createConfigMenu(parent) {
 							}).then(() => {
 								console.log('Times executed:\t' + times);
 								console.log('Average runtime:\t' + stats.total / times + ' ms');
-								stats.steps.sort((a, b) => a.name.localeCompare(b.name)).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms')); // NOSONAR
+								stats.steps.sort((a, b) => a.name.localeCompare(b.name, void (0), { sensitivity: 'base' })).forEach((s) => console.log('\t' + s.name + ':\t' + s.acc / times + ' ms')); // NOSONAR
 							});
 
 						}
