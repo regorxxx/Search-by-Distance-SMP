@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/06/25
+//20/06/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -164,6 +164,11 @@ const SearchByDistance_properties = {
 	folksonomyWhitelistTag: ['Folksonomy white list values', JSON.stringify(['Mexican Folk', 'Spanish Folk', 'Female Vocal', 'Spanish Rock', 'Soundtrack', 'Argentinian Rock', 'Feminist', 'Instrumental', 'Live', 'Hi-Fi', 'Lo-Fi', 'Acoustic', 'Japanese', 'African', 'Indian', 'Nubian', 'Greek', 'Spanish Hip-Hop', 'German Rock', 'Israeli', 'Israeli Rock', 'Uruguayan Rock', 'Mexican Rock', 'Italian Rock', 'Asian Folk', 'Torch Songs', 'Tuareg Music', 'Tex-Mex', 'Música Popular Brasileira', 'Jam Band', 'Spanish Jazz', 'Brazilian Rock', 'Turkish', 'Film Score', 'Anime Music', 'Worldbeat'])],
 	folksonomyBlacklistTag: ['Folksonomy black list values', JSON.stringify([])],
 	trackSource: ['Tracks source', JSON.stringify({ sourceType: 'library', sourceArg: null })],
+	filePaths: ['External database paths', JSON.stringify({
+		listenBrainzArtists: '.\\profile\\' + folders.dataName + 'listenbrainz_artists.json',
+		searchByDistanceArtists: '.\\profile\\' + folders.dataName + 'searchByDistance_artists.json',
+		worldMapArtists: '.\\profile\\' + folders.dataName + 'worldMap.json'
+	})]
 };
 // Checks
 Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
@@ -171,11 +176,13 @@ Object.keys(SearchByDistance_properties).forEach((key) => { // Checks
 	if (k.endsWith('length')) {
 		SearchByDistance_properties[key].push({ greaterEq: -1, func: Number.isSafeInteger }, SearchByDistance_properties[key][1]);
 	} else if (k.endsWith('query')) {
-		SearchByDistance_properties[key].push({ func: (query) => { return checkQuery(query, true); } }, SearchByDistance_properties[key][1]);
+		SearchByDistance_properties[key].push({ func: (query) => checkQuery(query, true) }, SearchByDistance_properties[key][1]);
 	} else if (/(source|tags?)$/gi.test(k)) {
 		SearchByDistance_properties[key].push({ func: isJSON }, SearchByDistance_properties[key][1]);
 	} else if (regExBool.test(key)) {
 		SearchByDistance_properties[key].push({ func: isBoolean }, SearchByDistance_properties[key][1]);
+	} else if (['filePaths'].map((s) => s.toLowerCase()).includes(k)) {
+		SearchByDistance_properties[key].push({ func: isJSON }, SearchByDistance_properties[key][1]);
 	}
 });
 
@@ -1407,8 +1414,9 @@ async function searchByDistance({
 				.split(bSep ? '|‎|' : ', ').filter(Boolean).pop() || '';
 			if (localeTag.length) { iso = getCountryISO(localeTag); }
 			else {
+				const filePaths = JSON.parse(properties.filePaths[1]);
 				const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
-				const { iso: artistIso, worldMapData: data } = getLocaleFromId(artist);
+				const { iso: artistIso, worldMapData: data } = getLocaleFromId(artist, filePaths.worldMapArtists);
 				if (artistIso.length) { iso = artistIso; }
 				if (data) { worldMapData = data; }
 			}

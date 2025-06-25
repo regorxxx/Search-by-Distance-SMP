@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/03/25
+//20/06/25
 
 /* exported getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter */
 
@@ -13,25 +13,14 @@ include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
 include('..\\world_map\\world_map_tables.js');
 /* global getCountryISO:readable, isoMapRev:readable , nameReplacersRev:readable */
 
-/* function getIsoFromHandle (handle, worldMapData = null) {
-	let iso = '';
-	const tagName = globTags.locale;
-	const localeTag = fb.TitleFormat(_bt(tagName)).EvalWithMetadb(handle).split(', ').filter(Boolean).pop() || '';
-	if (localeTag.length) {iso = getCountryISO(localeTag) || '';}
-	else {
-		const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(handle);
-		{iso, worldMapData} = getLocaleFromId(artist, worldMapData);
-	}
-	return {iso, worldMapData};
-} */
-
 // Similar culture zone
-function getLocaleFromId(id, worldMapData = null) {
+function getLocaleFromId(id, worldMapData = '.\\profile\\' + folders.dataName + 'worldMap.json') {
 	const dataId = 'artist';
-	const path = '.\\profile\\' + folders.dataName + 'worldMap.json'; // TODO Expose paths at properties
-	if (!worldMapData && _isFile(path)) {
-		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
-		if (data) { worldMapData = data; }
+	if (typeof worldMapData === 'string') {
+		if (_isFile(worldMapData)) {
+			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name, utf8);
+			worldMapData = data || null;
+		} else { worldMapData = null; }
 	}
 	if (!id || !worldMapData) {
 		if (!worldMapData) { console.log('getZoneArtistFilter: no world map data available'); }
@@ -52,7 +41,7 @@ function getLocaleFromId(id, worldMapData = null) {
 }
 
 // Similar culture zone
-function getArtistsSameZone({ selHandle = fb.GetFocusItem() } = {}) {
+function getArtistsSameZone({ selHandle = fb.GetFocusItem(), worldMapData } = {}) {
 	const bProfile = typeof sbd !== 'undefined' && sbd.panelProperties.bProfile[1];
 	const test = bProfile ? new FbProfiler('getArtistsSameZone') : null;
 	// Retrieve artist
@@ -60,7 +49,7 @@ function getArtistsSameZone({ selHandle = fb.GetFocusItem() } = {}) {
 	const selId = fb.TitleFormat(_bt(dataId)).EvalWithMetadb(selHandle);
 	if (bProfile) { test.Print('Task #1: Retrieve artists\' track', false); }
 	// Retrieve world map data
-	const { iso: selIso, worldMapData } = getLocaleFromId(selId);
+	const { iso: selIso, worldMapData: data } = getLocaleFromId(selId, worldMapData);
 	if (bProfile) { test.Print('Task #3: Retrieve current country', false); }
 	const allowCountryName = new Set();
 	if (selIso.length) {
@@ -81,7 +70,7 @@ function getArtistsSameZone({ selHandle = fb.GetFocusItem() } = {}) {
 	// Compare and get list of allowed artists
 	const artists = [];
 	if (allowCountryName.size !== 0) {
-		worldMapData.forEach((item) => {
+		data.forEach((item) => {
 			const country = item.val.length ? item.val.slice(-1)[0].toLowerCase() : null;
 			if (country && allowCountryName.has(country)) { artists.push(item[dataId]); }
 		});
@@ -129,14 +118,15 @@ function getCountriesFromISO(iso, mode) {
 		: [filterNodes, oppositeNodes];
 }
 
-function getZoneArtistFilter(iso, mode = 'region', worldMapData = null, localeTag = globTags.locale) {
+function getZoneArtistFilter(iso, mode = 'region', worldMapData = '.\\profile\\' + folders.dataName + 'worldMap.json', localeTag = globTags.locale) {
 	// Retrieve artist
 	const dataId = 'artist';
 	// Retrieve world map data
-	const path = '.\\profile\\' + folders.dataName + 'worldMap.json'; // TODO Expose paths at properties
-	if (!worldMapData && _isFile(path)) {
-		const data = _jsonParseFileCheck(path, 'Tags json', window.Name, utf8);
-		if (data) { worldMapData = data; }
+	if (typeof worldMapData === 'string') {
+		if (_isFile(worldMapData)) {
+			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name, utf8);
+			worldMapData = data || null;
+		} else { worldMapData = null; }
 	}
 	if (!worldMapData) { console.log('getZoneArtistFilter: no world map data available'); return; }
 	// Set allowed countries from current region
