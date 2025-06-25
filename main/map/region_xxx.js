@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/12/23
+//15/05/25
 
 function RegionMap({nodeName = 'node', intraSubRegionDist = 1, interSubRegionDist = 2, interRegionDist = 4, culturalRegion} = {}) {
 	this.culturalRegion = culturalRegion || {
@@ -164,7 +164,7 @@ RegionMap.prototype.getNodesFromRegion = function getNodesFromRegion(region) {
 // Distance functions
 RegionMap.prototype.getDistance = function getDistance(nodeA, nodeB) {
 	let distance;
-	const id = [nodeA, nodeB].sort((a, b) => a.localeCompare(b)).join('-');
+	const id = [nodeA, nodeB].sort((a, b) => a.localeCompare(b, void(0), { sensitivity: 'base' })).join('-');
 	if (this.cache.getDistance.has(id)) {distance = this.cache.getDistance.get(id);}
 	else {
 		distance = this.capitalize(nodeA) === this.capitalize(nodeB)
