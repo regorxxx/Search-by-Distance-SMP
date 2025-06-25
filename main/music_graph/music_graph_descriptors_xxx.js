@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/05/25
+//24/06/25
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -106,7 +106,7 @@ const music_graph_descriptors = {
 		['Alternative_supergenre'			,	['Electrorock','Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Celtic Rock','Pop Punk','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
 		['Hardcore Punk_supergenre'			,	['Metalcore','Post-Hardcore','Math Rock','Grindcore','Crossover Thrash','Hardcore Punk','Anarcho-Punk','Stoner Rock','Stoner Sludge','Proto-Stoner Rock']],
 		['Contemporary_supergenre'			,	['Indie','Freak Folk','Neo-Prog','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Post-Britpop','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock','Afro-Rock']],
-		['Pop_supergenre'					,	['Hyperpop','Classical Crossover','Urban Breaks','Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','K-Pop','J-Pop','Kayokyoku','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
+		['Pop_supergenre'					,	['Hyperpop','Digicore', 'Glitchcore','Classical Crossover','Urban Breaks','Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','K-Pop','J-Pop','Kayokyoku','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
 		['Modern Folk_supergenre'			,	['Folk-Rock','Folk Pop','Folk Baroque','Folk Metal','Psychedelic Folk','Contemporary Folk','Folk-Jazz','Folktronica','Progressive Folk','Folk Punk','Hang Music','Ambient Folk']],
 		['European Pre-Modern Folk_supergenre',	['Medieval','Renaissance']],
 		['South American Folk_supergenre'	,	['Afro-Cuban','Son','Argentinian Folk','Venezuelan Folk','Rumba','Batucada','Candombe','Cumbia','Chilean Folk','Colombian Folk','Cantautor','Forró','Jota','Corrido','Mexican Folk','Peruvian Folk','Andean','Bolero','Mariachi','Ranchera','Tango','Samba','Nueva Gaita','Mambo','Afro-Latin Ritual-Tribal','Pre-Columbian Ritual-Tribal']],
@@ -204,7 +204,7 @@ const music_graph_descriptors = {
 		['Early Progressive Electronic XL'	,	['Krautrock','New Age','Synth']],
 		['Progressive Electronic XL'		,	['Progressive House','Progressive Trance','Melodic Techno-House','Deep House']],
 		['Electronic Rap XL'				,	['Hip House','Ghettotech','Grime','EDM Trap','Trap','Electro','Glitch Hop']],
-		['Mainstream Electronic'			,	['Melodic Techno-House','Big Room House','Electro House','Progressive House','Bubblegum Bass','Hyperpop']],
+		['Mainstream Electronic'			,	['Melodic Techno-House','Big Room House','Electro House','Progressive House','Bubblegum Bass','Hyperpop','Digicore']],
 		['New Age XL'						,	['Neo-Classical New Age','Healing Music','New Age','New Acoustic']],
 		['New Age Folk XL'					,	['Hang Music','Celtic New Age','New Acoustic']],
 		['Afro-Cuban XL'					,	['Son']],
@@ -378,7 +378,7 @@ const music_graph_descriptors = {
 		['Muiñeira'							,	['Jig']],
 		['Goa Trance'						,	['Psytrance']],
 		['Deconstructed Club'				,	['Jersey Club']],
-		['Hyperpop'							,	['Bubblegum Bass','Electropop']],
+		['Hyperpop'							,	['Bubblegum Bass','Electropop','Digicore', 'Glitchcore']],
 		['Acid Techno'						,	['Acid House']],
 		['Tribal House'						,	['Deep House','Progressive House']]
 	],
@@ -534,7 +534,8 @@ const music_graph_descriptors = {
 		['Flamenco'							,	['Rumba Flamenca'					]],
 		['Dembow'							,	['Dancehall'						]],
 		['Drill'							,	['Trap'								]],
-		['Goa Trance'						,	['Psytrance'						]]
+		['Goa Trance'						,	['Psytrance'						]],
+		['Hyperpop'							,	['Digicore', 'Glitchcore'			]]
 	],
 	// Some big groups or clusters are equal to genres or styles 'in the classic sense', so these are direct connections for them:
 	// ALWAYS PUT FIRST the genre at the graph, then -at the right- the one(s) expected to be found on tags.
