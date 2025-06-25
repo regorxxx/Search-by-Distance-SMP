@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/03/25
+//20/06/25
 
 /* exported createThemeMenu */
 
@@ -26,6 +26,7 @@ function createThemeMenu(parent) {
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);
+	const filePaths = JSON.parse(properties.filePaths[1]);
 	const testRegex = /test_.*|int_.*/i;
 	// Recipe forced theme?
 	let bHasForcedTheme = false;
@@ -73,12 +74,13 @@ function createThemeMenu(parent) {
 			// Iso
 			themeTags.iso = [];
 			const localeTags = getHandleListTags(selHandleList, [globTags.locale]).flat().map((tag) => tag.filter(Boolean).pop());
+			const worldMapData = _jsonParseFileCheck(filePaths.worldMapArtists, 'Tags json', window.Name, utf8);
 			localeTags.forEach((localeTag) => {
 				if (localeTag) { themeTags.iso.push(getCountryISO(localeTag)); }
-				else {
+				else if (worldMapData) {
 					const artists = getHandleListTags(selHandleList, [globTags.artist], { bMerged: true }).flat(Infinity);
 					if (artists && artists.length) {
-						const data = getLocaleFromId([...new Set(artists)]);
+						const data = getLocaleFromId([...new Set(artists)], worldMapData);
 						data.forEach((obj) => {
 							if (obj.iso.length) { themeTags.iso.push(obj.iso); }
 						});
@@ -88,7 +90,7 @@ function createThemeMenu(parent) {
 			// Theme obj
 			let input = '';
 			try { input = utils.InputBox(window.ID, 'Enter theme name', 'Search by distance', 'my theme', true); }
-			catch (e) { return; }
+			catch (e) { return; } // eslint-disable-line no-unused-vars
 			if (!input.length) { return; }
 			const theme = { name: input, tags: [] };
 			theme.tags.push(themeTags);
