@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/06/25
+//23/06/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -115,7 +115,12 @@ buttonsBar.config.bReflow = barProperties.bReflow[1];
 // Align all widths and heights according to orientation
 buttonsBar.config.bAlignSize = barProperties.bAlignSize[1];
 // Tooltip at empty bar
-buttonsBar.config.toolbarTooltip = 'R. Click for toolbar menu\nHold R. Click to move buttons\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)\n(Shift + Win + R. Click for SMP panel menu)\n(Ctrl + Win + R. Click for script panel menu)';
+buttonsBar.config.toolbarTooltip = 'R. Click for toolbar menu' +
+	'\nHold R. Click to move buttons' +
+	'\nM. Click to show headless buttons (for ' + parseFloat(buttonsBar.config.hiddenTimeout / 1000).toFixed(1) + ' s)' +
+	'\n' + '-'.repeat(60) +
+	'\n(Shift + Win + R. Click for SMP panel menu)' +
+	'\n(Ctrl + Win + R.Click for script panel menu)';
 // Assign size and pos
 buttonsBar.config.scale = barProperties.scale[1];
 buttonsBar.config.textScale = barProperties.textScale[1];
@@ -306,11 +311,11 @@ addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-u
 				}
 				const answer = WshShell.Popup('Apply current settings to highlighted toolbar?\nCheck UI.', 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
 				if (answer === popup.yes) {
-					['toolbarColor', 'buttonColor','textColor', 'hoverColor', 'activeColor', 'transparency', 'scale', 'iconScale', 'textScale'].forEach((key) => {
+					['toolbarColor', 'buttonColor', 'textColor', 'hoverColor', 'activeColor', 'transparency', 'scale', 'iconScale', 'textScale'].forEach((key) => {
 						buttonsBar.config[key] = barProperties[key][1] = Number(info[key][1]);
 					});
 					buttonsBar.config.bToolbar = buttonsBar.config.toolbarColor !== -1;
-					['bDynHoverColor', 'bHoverGrad','bBorders' ].forEach((key) => {
+					['bDynHoverColor', 'bHoverGrad', 'bBorders'].forEach((key) => {
 						buttonsBar.config[key] = barProperties[key][1] = !!info[key][1];
 					});
 					['animationColors'].forEach((key) => {
