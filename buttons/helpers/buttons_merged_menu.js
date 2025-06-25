@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/06/25
+//15/06/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -67,7 +67,7 @@ function createButtonsMenu(name) {
 		}))]
 			.filter(Boolean)
 			.map(parseSubMenuFolder)
-			.sort((a, b) => a.localeCompare(b))
+			.sort((a, b) => a.localeCompare(b, void(0), { sensitivity: 'base' }))
 			.forEach((subMenuFolder) => menu.findOrNewMenu(subMenuFolder, subMenu));
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();

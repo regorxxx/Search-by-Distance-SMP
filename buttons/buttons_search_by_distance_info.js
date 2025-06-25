@@ -1,5 +1,5 @@
 ﻿'use strict';
-//17/03/25
+//15/06/25
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -164,7 +164,7 @@ function graphInfoMenu() {
 				const bSingle = entry.valSet.size <= 1;
 				const menuName = bSingle ? menu.getMainMenuName() : menu.newMenu(entry.name);
 				if (entry.valSet.size === 0) { entry.valSet.add(''); }
-				[...entry.valSet].sort((a, b) => a.localeCompare(b, 'en', { 'sensitivity': 'base' })).forEach((tagVal, i) => {
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void(0), { sensitivity: 'base' })).forEach((tagVal, i) => {
 					menu.newEntry({
 						menuName, entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25), func: () => {
 							// report
