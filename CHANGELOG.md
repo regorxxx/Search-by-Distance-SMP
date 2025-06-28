@@ -70,6 +70,14 @@
 - Info: added hated stats.
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
+- Dynamic queries: support for '#NOW#' (or #TODAY#) variable, which resolves to current date (2025-3-8).
+- Dynamic queries: support for '#YESTERDAY#' variable, which resolves to yesterday date (2025-3-8).
+- Dynamic queries: support for '#NOW_TS#' and '#YESTERDAY_TS#' variables, which resolves to Unix timestamps in seconds (1750881508).
+- Dynamic queries: support for '#DECADE#', '#PREVDECADE#', '#PREVYEAR#', '#PREVMONTH#'. See dynamic queries readme for more info.
+- Dynamic queries: support for '#VOLUME#', '#VOLUMEDB#, '#VERSION#', '#SELTYPE#', '#ISPLAYING#', '#ISPAUSED#','#PLAYSTATE#', '#DEVICE#', '#DEVICEID#', '#SAC#', '#RGMODE#', '#PLAYMODE#', '#PLSCOUNT#' variables. See dynamic queries readme for more info.
+- Dynamic queries: support for '#SELTRACKS#', '#SELDURATION#, '#SELSIZE#', '#SELPLAYING#', '#SELINLIBRARY#' variables for selections. See dynamic queries readme for more info.
+- Dynamic queries: support for '#PLSIDX#', '#PLSNAME#', '#PLSTRACKS#, '#PLSISAUTOPLS#, '#PLSISLOCKED#', '#PLSDURATION#', '#PLSSIZE#', '#PLSLOCKS#', '#PLSLOCKNAME#' variables for playlists. See dynamic queries readme for more info.
+- Dynamic queries: support for '#PLSPLAYIDX#', '#PLSPLAYNAME#', '#PLSPLAYTRACKS#, '#PLSPLAYDURATION#, '#PLSPLAYSIZE#' variables for playing playlist. See dynamic queries readme for more info.
 - Installation: new panel menu, accessed through 'Ctrl + Win + R. Click' (which works globally on any script and panel, at any position), used to export/import panel settings and any other associated data. These entries may be used to fully backup the panel data, help when moving between different JS components (JSplitter <-> SMP) or even foobar2000 installations,, without needing to manually backup the panel properties or other external files (like .json, etc.).
 - Configuration: external files like world map database references are now exposed as a panel property.
 ### Changed

@@ -39,14 +39,76 @@ shown as a popup.
 
 Special variables:
 -------------
-Don't require a track to be evaluated (i.e. they always work with
-themes):
-	- #DAY# 	-> 14 (current day)
-	- #MONTH#	-> 11 (current month)
-	- #YEAR#	-> 2023 (current year)
+Don't require a track to be evaluated (i.e. they always work):
+	- #DAY# 	  -> 8 (current day)
+	- #MONTH#	  -> 3 (current month)
+	- #YEAR#	  -> 2025 (current year)
+	- #DECADE#	  -> 2020s (current decade)
+	- #NOW#		  -> 2023-3-8 (current date)
+	- #TODAY#	  -> Alias for #NOW#
+	- #NOW_TS#	  -> 1750881508 (current Unix timestamp in s)
+	- #YESTERDAY#	  -> 2023-3-07 (yesterday date)
+	- #PREVDAY#	  -> Alias for #YESTERDAY#
+	- #YESTERDAY_TS#  -> 1750881508 (yesterday Unix timestamp in s)
+	- #PREVDAY_TS#	  -> Alias for #YESTERDAY_TS#
+	- #PREVMONTH#	  -> 2 (previous month)
+	- #PREVYEAR#	  -> 2024 (previous year)
+	- #PREVDECADE#	  -> 2010s (previous decade)
+	- #VOLUME#	  -> 100 (volume from 0 to 100, rounded)
+	- #VOLUMEDB#	  -> -7.53 dB (volume from -100 to 0 dB)
+	- #VERSION#	  -> 1.4.1 (foobar version)
+	- #ISPLAYING#	  -> 1 (1 if playing, empty otherwise)
+	- #ISPAUSED#	  -> 1 (1 if playing, empty otherwise)
+	- #PLAYSTATE#	  -> Paused (Paused|Playing|Stopped)
+	- #SELTYPE#	  -> active playlist (selection type)
+	- #DEVICE#	  -> Null Output (output device name)
+	- #DEVICEID#	  -> {5243F9AD-C84F-4723-8194-0788FC021BCC}
+	- #SAC#		  -> 1 (1 if stop after current, empty otherwise)
+	- #RGMODE#	  -> disabled (Replay Gain mode)
+	- #PLAYMODE#	  -> default (Playback Order mode)
+	- #PLSCOUNT#	  -> 13 (playlists count)
+
+Special selection variables:
+----------------------------
+Requires a selection to be evaluated:
+	- #SELTRACKS#	  -> 10 (number of selected tracks)
+	- #SELDURATION#	  -> 3:09:37 (duration of selected tracks)
+	- #SELSIZE#	  -> 1.88 GB (size of selected tracks)
+	- #SELPLAYING#	  -> 1 (1 if playing*, empty otherwise)
+	- #SELINLIBRARY#  -> 1 (1 if in library, empty otherwise)
+
+(*) Note this will return nothing while playing unless the focused track
+is also the playing track. Use #ISPLAYING# to globally evaluate if foobar
+is playing, or use %ISPLAYING% but only when following now playing (it will
+not work when evaluated on a selection).
+
+Special active playlist variables:
+----------------------------------
+Requires an active playlist to be evaluated:
+	- #PLSIDX#	  -> 3 (index)
+	- #PLSNAME#	  -> My playlist (name)
+	- #PLSTRACKS#	  -> 27 (number of tracks)
+	- #PLSISAUTOPLS#  -> 1 (1 for AutoPlaylists, empty otherwise)
+	- #PLSISLOCKED#	  -> 1 (1 if locked, empty otherwise)
+	- #PLSDURATION#	  -> 3:09:37 (total duration)
+	- #PLSSIZE#	  -> 1.88 GB (total size)
+	- #PLSLOCKS#	  -> AddItems (blocked actions)
+	- #PLSLOCKNAME#	  -> Quicksearch (lock owner)
+
+Special playing playlist variables:
+----------------------------------
+Requires a playing playlist to be evaluated:
+	- #PLSPLAYIDX#	  -> 3 (index)
+	- #PLSPLAYNAME#	  -> My playlist (name)
+	- #PLSPLAYTRACKS# -> 27 (number of tracks)
+	- #PLSPLAYDURATION# -> 3:09:37 (total duration)
+	- #PLSPLAYSIZE#	  -> 1.88 GB (total size)
 
 Some examples:
 -------------
+For tracks from this decade:
+"$div(%DATE%,10)0s" IS #DECADE# -> "$div(%DATE%,10)0s" IS 2020s
+
 For a rock track:
 GENRE IS #GENRE# -> GENRE IS Rock.
 The entire library would be filtered with tracks from that genre.
