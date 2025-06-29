@@ -41,17 +41,24 @@ Special variables:
 -------------
 Don't require a track to be evaluated (i.e. they always work):
 	- #DAY# 	  -> 8 (current day)
+	- #DDAY# 	  -> 08 (current day DD)
+	- #WEEK# 	  -> 5 (first day of week)
+	- #DWEEK# 	  -> 05 (first day of week DD)
 	- #MONTH#	  -> 3 (current month)
+	- #MMONTH#	  -> 03 (current month MM)
 	- #YEAR#	  -> 2025 (current year)
 	- #DECADE#	  -> 2020s (current decade)
-	- #NOW#		  -> 2023-3-8 (current date)
+	- #NOW#		  -> 2023-03-08 (current date YY-MM-DD)
 	- #TODAY#	  -> Alias for #NOW#
 	- #NOW_TS#	  -> 1750881508 (current Unix timestamp in s)
-	- #YESTERDAY#	  -> 2023-3-07 (yesterday date)
+	- #YESTERDAY#	  -> 2023-03-07 (yesterday date YY-MM-DD)
 	- #PREVDAY#	  -> Alias for #YESTERDAY#
 	- #YESTERDAY_TS#  -> 1750881508 (yesterday Unix timestamp in s)
 	- #PREVDAY_TS#	  -> Alias for #YESTERDAY_TS#
+	- #PREVWEEK#	  -> 5 (first day of previous week)
+	- #PREVDWEEK#	  -> 05 (first day of previous week DD)
 	- #PREVMONTH#	  -> 2 (previous month)
+	- #PREVMMONTH#	  -> 02 (previous month MM)
 	- #PREVYEAR#	  -> 2024 (previous year)
 	- #PREVDECADE#	  -> 2010s (previous decade)
 	- #VOLUME#	  -> 100 (volume from 0 to 100, rounded)

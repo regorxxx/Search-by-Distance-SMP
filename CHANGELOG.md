@@ -72,8 +72,10 @@
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 - Dynamic queries: support for '#NOW#' (or #TODAY#) variable, which resolves to current date (2025-3-8).
 - Dynamic queries: support for '#YESTERDAY#' variable, which resolves to yesterday date (2025-3-8).
+- Dynamic queries: support for '#WEEK#' variable, which resolves to first day of current week (8).
 - Dynamic queries: support for '#NOW_TS#' and '#YESTERDAY_TS#' variables, which resolves to Unix timestamps in seconds (1750881508).
-- Dynamic queries: support for '#DECADE#', '#PREVDECADE#', '#PREVYEAR#', '#PREVMONTH#'. See dynamic queries readme for more info.
+- Dynamic queries: support for '#DDAY#', '#DWEEK#', #MMONTH# variables, which  analog to #DAY#, #WEEK# and #MONTH# but on DD and MM format. See dynamic queries readme for more info.
+- Dynamic queries: support for '#DECADE#', '#PREVDECADE#', '#PREVYEAR#', '#PREVMONTH#', #PREVMMONTH#, '#PREVWEEK#' and '#PREVDWEEK#'. See dynamic queries readme for more info.
 - Dynamic queries: support for '#VOLUME#', '#VOLUMEDB#, '#VERSION#', '#SELTYPE#', '#ISPLAYING#', '#ISPAUSED#','#PLAYSTATE#', '#DEVICE#', '#DEVICEID#', '#SAC#', '#RGMODE#', '#PLAYMODE#', '#PLSCOUNT#' variables. See dynamic queries readme for more info.
 - Dynamic queries: support for '#SELTRACKS#', '#SELDURATION#, '#SELSIZE#', '#SELPLAYING#', '#SELINLIBRARY#' variables for selections. See dynamic queries readme for more info.
 - Dynamic queries: support for '#PLSIDX#', '#PLSNAME#', '#PLSTRACKS#, '#PLSISAUTOPLS#, '#PLSISLOCKED#', '#PLSDURATION#', '#PLSSIZE#', '#PLSLOCKS#', '#PLSLOCKNAME#' variables for playlists. See dynamic queries readme for more info.
