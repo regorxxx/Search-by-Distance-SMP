@@ -1,5 +1,5 @@
 ﻿'use strict';
-//24/06/25
+//01/07/25
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -126,7 +126,7 @@ const music_graph_descriptors = {
 		['Rap_supergenre'					,	['Neoperreo','Corrido Tumbado','Emo Rap','Symphonic Rap','Glitch Hop','Cloud Rap','Grime','Urban Breaks','Trap','Drill','Hip-Hop Soul','Pop Rap','Country Rap','Conscious','British Hip-Hop','South Coast','Midwest','East Coast','Gangsta','Horrorcore','Reggaeton','Progressive Rap','Ragga Hip-Hop','Jazz-Rap','West Coast','Miami Bass','Bounce','Boom Bap','Golden Age','Hardcore Rap','Melodic Hardcore','Electro','Old-School','Alt. Rap','Underground Rap','Psychedelic Rap']],
 		['Breakbeat_supergenre'				,	['Deconstructed Club','Jersey Club','EDM Trap','Future Bass','Bubblegum Bass','Bassline','Glitch Hop','Breakbeat Garage','Broken Beats','Nu Skool Breaks','UK Garage','Chemical Breaks','Big Beat','Trip Hop','Florida Breaks','Breakdance','Electro']],
 		['Drum & Bass_supergenre'			,	['Future Bass','Post-Dubstep','Dubstep','Bassline','Breakbeat Garage','Liquid Funk','Neuro Funk','Intelligent Drum & Bass','Ambient Drum & Bass','Jazzstep','Jump Up','Hardstep','Techstep','Darkcore','Darkstep','Old School Jungle']],
-		['Hardcore_supergenre'				,	['New Beat','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
+		['Hardcore_supergenre'				,	['New Beat','Uptempo Hardcore','Hardcore Techno','Hardcore Rave','Breakbeat Hardcore','Darkcore','Darkstep','Happy Hardcore','Bouncy Techno','Trancecore','Acidcore','Gabber','Speedcore','Frenchcore','Terrorcore','Nu Style Gabber','Mainstream Hardcore','Hardstyle']],
 		['Techno_supergenre'				,	['Melodic Techno-House','Psychedelic Techno','Ghetto House','Ghettotech','Dark Techno','Juke','Hardtechno','Acid Techno','Tech Trance','Tech House','Industrial Techno','Minimal Techno','Ambient Techno','IDM','Hardtek','Freetekno','Hardcore Techno','Hardcore Rave','New Beat','Detroit Techno','Kuduro']],
 		['House_supergenre'					,	['Melodic Techno-House','Big Room House','Fidget House','Electro House','Moombahton','Microhouse','Minimal House','Ghetto House','French House','Funky House','Tech House','NRG','Hard NRG','Hard House','Progressive House','Tribal House','Deep House','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Hip House','Eurodance','Acid House','Nu-Disco','Chicago House','Garage House']],
 		['Trance_supergenre'				,	['Neo Trance','Epic Trance','Hardtrance','NRG','Hard NRG','Hard House','Eurotrance','Vocal Trance','Progressive Trance','Goa Trance','Psytrance','Ibiza House','Ibiza Trance','Dream House','Dream Trance','Classic Trance','Acid Trance']],
@@ -380,7 +380,8 @@ const music_graph_descriptors = {
 		['Deconstructed Club'				,	['Jersey Club']],
 		['Hyperpop'							,	['Bubblegum Bass','Electropop','Digicore', 'Glitchcore']],
 		['Acid Techno'						,	['Acid House']],
-		['Tribal House'						,	['Deep House','Progressive House']]
+		['Tribal House'						,	['Deep House','Progressive House']],
+		['Uptempo Hardcore'					,	['Hardcore Techno', 'Speedcore', 'Gabber']]
 	],
 	// Secondary influence. For example one style being slightly influenced by another.
 	style_secondary_origin: [
@@ -432,7 +433,8 @@ const music_graph_descriptors = {
 		['Afrobeat'							,	['Afro-Cuban','R&B','Classic Funk','Funk Rock']],
 		['Acid Techno'						,	['Freetekno','Hardcore Techno','Hardcore Rave']],
 		['Tribal House'						,	['Minimal Techno']],
-		['Psychedelic Techno'				,	['Psytrance']]
+		['Psychedelic Techno'				,	['Psytrance']],
+		['Uptempo Hardcore'					,	['Frenchcore']]
 	],
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
