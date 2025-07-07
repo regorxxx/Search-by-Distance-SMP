@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/06/25
+//07/07/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -1044,6 +1044,7 @@ addEventListener('on_mouse_leave', () => {
 		}
 	}
 	if (buttonsBar.config.bUseCursors) { window.SetCursor(IDC_ARROW); }
+	buttonsBar.tooltipButton.Deactivate();
 });
 
 addEventListener('on_mouse_lbtn_down', (x, y, mask) => { // eslint-disable-line no-unused-vars
