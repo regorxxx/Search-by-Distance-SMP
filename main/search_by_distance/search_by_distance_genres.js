@@ -1,12 +1,14 @@
 ﻿'use strict';
-//03/12/24
+//28/07/25
 
-/* exported findStyleGenresMissingGraph , getNearestGenreStyles */
+/* exported findStyleGenresMissingGraph , getNearestGenreStyles, getNearestGenreStylesV2 */
 
-/* global getHandleListTagsV2:readable, folders:readable, _isFile:readable, musicGraph:readable, calcMeanDistanceV2:readable, music_graph_descriptors:readable, _asciify:readable */
+/* global getHandleListTagsV2:readable, folders:readable, _isFile:readable, _asciify:readable */
+
 include('..\\music_graph\\music_graph_xxx.js');
-/* global music_graph_descriptors_user:readable */
+/* global music_graph_descriptors_user:readable, musicGraph:readable, music_graph_descriptors:readable */
 include('..\\search_by_distance\\ngraph_helpers_xxx.js');
+/* global calcMeanDistanceV2:readable */
 
 // Similar genre/styles
 function getNearestNodes(fromNode, maxDistance, graph = musicGraph()) {
@@ -38,6 +40,16 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 	let genreStyles = [...fromGenreStyles]; // Include theirselves
 	fromGenreStyles.forEach((node) => {
 		getNearestNodes(node, maxDistance, graph).forEach((obj) => genreStyles.push(obj.toId));
+	});
+	genreStyles = music_graph_descriptors.replaceWithSubstitutionsReverse([...new Set(genreStyles)]);
+	genreStyles = [...(new Set(genreStyles.filter((node) => !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi))))];
+	return genreStyles;
+}
+
+function getNearestGenreStylesV2(fromGenreStyles, maxDistance, maxPerNode = 5, graph = musicGraph()) {
+	let genreStyles = [...fromGenreStyles]; // Include theirselves
+	fromGenreStyles.forEach((node) => {
+		getNearestNodes(node, maxDistance, graph).sort((a, b) => a.distance - b.distance).slice(0, maxPerNode + 1).forEach((obj) => genreStyles.push(obj.toId));
 	});
 	genreStyles = music_graph_descriptors.replaceWithSubstitutionsReverse([...new Set(genreStyles)]);
 	genreStyles = [...(new Set(genreStyles.filter((node) => !node.match(/_supercluster$|_cluster$|_supergenre$| XL$/gi))))];

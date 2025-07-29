@@ -69,6 +69,11 @@
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 - Info: added hated stats.
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
+- Info: added similar genres stats.
+- Info: added similar genres from same region stats.
+- Info: added similar genres search tools.
+- Info: added similar genres from same region search tools.
+- Info: added influences search tools.
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 - Dynamic queries: support for '#NOW#' (or #TODAY#) variable, which resolves to current date (2025-3-8).
 - Dynamic queries: support for '#YESTERDAY#' variable, which resolves to yesterday date (2025-3-8).

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/06/25
+//28/07/25
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -12,8 +12,10 @@ include('..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\helpers\\helpers_xxx_prototypes.js');
 /* global isBoolean:readable, isJSON:readable, _p:readable, capitalizePartial:readable, isStringWeak: readable */
+include('..\\helpers\\helpers_xxx_playlists.js');
+/* global sendToPlaylist: readable */
 include('..\\helpers\\helpers_xxx_tags.js');
-/* global queryJoin:readable, getHandleListTagsTyped:readable, _b:readable, _t:readable */
+/* global queryJoin:readable, getHandleListTagsTyped:readable, _b:readable, _t:readable, queryCombinations:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global _menu:readable, settingsMenu:readable */
 include('..\\helpers\\menu_xxx_extras.js');
@@ -22,7 +24,11 @@ include('..\\helpers\\helpers_xxx_statistics.js');
 /* global calcStatistics:readable */
 include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
 /* global sbd:readable, music_graph_descriptors:readable */
-include('..\\main\\search_by_distance\\search_by_distance_extra.js'); // Load after buttons_xxx.js so properties are only set once
+include('..\\main\\search_by_distance\\search_by_distance_extra.js');
+include('..\\main\\search_by_distance\\search_by_distance_genres.js');
+/* global getNearestGenreStylesV2:readable, calcMeanDistanceV2:readable */
+include('..\\main\\search_by_distance\\search_by_distance_culture.js');
+/* global getZoneGraphFilter:readable */
 var version = sbd.version; // NOSONAR [shared on files]
 
 try { window.DefineScript('Search by Distance Info Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
@@ -150,23 +156,26 @@ function graphInfoMenu() {
 	}
 	// Menu
 	const menu = new _menu();
-	menu.newEntry({ entryText: 'Display statistics:', flags: MF_GRAYED });
-	menu.newSeparator();
-	{	// Same...
+	{ // Stats
+		const menuName = menu.newMenu('Library statistics');
+		menu.newEntry({ menuName, entryText: 'Library and Graph stats:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
 		entries.forEach((entry) => {
 			// Add separators
 			if (menu.isSeparator(entry)) {
-				menu.newSeparator();
+				menu.newSeparator(menuName);
 			} else {
 				// Create names for all entries
 				entry.name = entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name;
 				// Entries
 				const bSingle = entry.valSet.size <= 1;
-				const menuName = bSingle ? menu.getMainMenuName() : menu.newMenu(entry.name);
+				const subMenuName = bSingle ? menuName : menu.newMenu(entry.name, menuName);
 				if (entry.valSet.size === 0) { entry.valSet.add(''); }
-				[...entry.valSet].sort((a, b) => a.localeCompare(b, void(0), { sensitivity: 'base' })).forEach((tagVal, i) => {
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' })).forEach((tagVal, i) => {
 					menu.newEntry({
-						menuName, entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25), func: () => {
+						menuName: subMenuName,
+						entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25),
+						func: () => {
 							// report
 							const report = [];
 							const header = (title) => {
@@ -175,12 +184,13 @@ function graphInfoMenu() {
 								report.push(title);
 								report.push('-'.repeat(len));
 							};
-							header('Genre/style: ' + tagVal);
+							header('-------------------------------- ' + tagVal + ' --------------------------------');
 							report.push('');
 							// Data from library
 							const query = queryJoin(entry.tf.map((tag) => tag + ' IS ' + tagVal), 'OR');
 							const libItems = fb.GetLibraryItems();
 							const handleList = fb.GetQueryItems(libItems, query);
+							const node = music_graph_descriptors.getSubstitution(tagVal);
 							{ // Library stats
 								const trackCount = handleList.Count;
 								const libCount = libItems.Count;
@@ -204,11 +214,11 @@ function graphInfoMenu() {
 								{ // Tracks
 									report.push('Tracks: ' + trackCount + ' ' + _p(round(trackCount / libCount * 100, 2) + '% from ' + libCount + ' total library tracks'));
 									const subQuery = [
-										{ name: 'With rating >= 3: ', query: globQuery.ratingGr2 },
-										{ name: 'With rating >= 4: ', query: globQuery.ratingGr3 },
-										{ name: 'With rating  = 5: ', query: globTags.rating + ' IS 5' },
-										{ name: 'Loved:\t\t  ', query: globQuery.loved },
-										{ name: 'Hated:\t\t  ', query: globQuery.hated }
+										{ name: 'Rated ≥3: ', query: globQuery.ratingGr2 },
+										{ name: 'Rated ≥4: ', query: globQuery.ratingGr3 },
+										{ name: 'Rated =5: ', query: globTags.rating + ' IS 5' },
+										{ name: 'Loved:\t  ', query: globQuery.loved },
+										{ name: 'Hated:\t  ', query: globQuery.hated }
 									];
 									report.push(...subQuery.map((q) => '\t' + q.name + fb.GetQueryItems(handleList, q.query).Count));
 								}
@@ -227,7 +237,7 @@ function graphInfoMenu() {
 							report.push('');
 							{ // Data from descriptors
 								header('Graph info:');
-								const data = clone(music_graph_descriptors.nodeList.get(music_graph_descriptors.getSubstitution(tagVal)));
+								const data = clone(music_graph_descriptors.nodeList.get(node));
 								const nodeSet = music_graph_descriptors.getNodeSet(false);
 								for (let key in data) {
 									switch (key) { // NOSONAR
@@ -250,9 +260,227 @@ function graphInfoMenu() {
 									return capitalizePartial(pair[0]).split(/(?=[A-Z])/).join(' ') + ': ' + (Array.isArray(pair[1]) ? pair[1].join(', ') : pair[1]);
 								}));
 							}
+							report.push('');
+							{ // Near nodes
+								header('Most similar genres:');
+								const similar = new Set(
+									getNearestGenreStylesV2([node], music_graph_descriptors.cluster * 5, 5, sbd.allMusicGraph)
+								).difference(
+									new Set(music_graph_descriptors.replaceWithAlternativeTerms([node], true, true))
+								);
+								report.push([...similar].join(', '));
+							}
+							report.push('');
+							{ // Genres from same regions
+								header('Similar genres from region(s):');
+								const regionGenres = getZoneGraphFilter([node], 'region');
+								const similarRegionGenres = [];
+								regionGenres.forEach((g) => {
+									if (calcMeanDistanceV2(sbd.allMusicGraph, [node], [g]) <= music_graph_descriptors.cluster * 5) {
+										similarRegionGenres.push(g);
+									};
+								});
+								report.push([...similarRegionGenres].join(', '));
+							}
 							// report
-							fb.ShowPopupMessage(report.join('\n'), 'Graph info');
-						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
+							fb.ShowPopupMessage(report.join('\n'), entry.name + ': ' + tagVal);
+						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
+					});
+				});
+			}
+		});
+	}
+	{ // Similar genres
+		const menuName = menu.newMenu('Similar genres/styles');
+		menu.newEntry({ menuName, entryText: 'Similar genres/styles:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
+		entries.forEach((entry) => {
+			// Add separators
+			if (menu.isSeparator(entry)) {
+				menu.newSeparator(menuName);
+			} else {
+				// Create names for all entries
+				entry.name = entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name;
+				// Entries
+				const bSingle = entry.valSet.size <= 1;
+				const subMenuName = bSingle ? menuName : menu.newMenu(entry.name, menuName);
+				if (!bSingle) {
+					menu.newEntry({ menuName: subMenuName, entryText: 'Search (Shift) / AutoPlaylist (Ctrl):', flags: MF_GRAYED });
+					menu.newSeparator(subMenuName);
+				}
+				if (entry.valSet.size === 0) { entry.valSet.add(''); }
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' })).forEach((tagVal, i) => {
+					menu.newEntry({
+						menuName: subMenuName,
+						entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25),
+						func: () => {
+							// Data from library
+							const node = music_graph_descriptors.getSubstitution(tagVal);
+							const playlistName = 'Near genres: ' + tagVal;
+							const similar = new Set(
+								getNearestGenreStylesV2([node], music_graph_descriptors.cluster * 5, 5, sbd.allMusicGraph)
+							).difference(
+								new Set(music_graph_descriptors.replaceWithAlternativeTerms([node], true, true))
+							);
+							if (!similar.size) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style is so specific/narraw that there is nothing similar to it.', playlistName); return; }
+							const query = queryJoin(queryCombinations([...similar], entries.map((e) => e.tf).flat(Infinity), 'OR'), 'OR') || '';
+							const bShift = utils.IsKeyPressed(VK_SHIFT);
+							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+							if (bShift || bCtrl) {
+								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+							} else {
+								console.log('Query: ' + query);
+								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+							}
+						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
+					});
+				});
+			}
+		});
+	}
+	{ // Same region
+		const menuName = menu.newMenu('Similar from region(s)');
+		menu.newEntry({ menuName, entryText: 'Similar regional genre/styles:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
+		entries.forEach((entry) => {
+			// Add separators
+			if (menu.isSeparator(entry)) {
+				menu.newSeparator(menuName);
+			} else {
+				// Create names for all entries
+				entry.name = entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name;
+				// Entries
+				const bSingle = entry.valSet.size <= 1;
+				const subMenuName = bSingle ? menuName : menu.newMenu(entry.name, menuName);
+				if (!bSingle) {
+					menu.newEntry({ menuName: subMenuName, entryText: 'Search (Shift) / AutoPlaylist (Ctrl):', flags: MF_GRAYED });
+					menu.newSeparator(subMenuName);
+				}
+				if (entry.valSet.size === 0) { entry.valSet.add(''); }
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' })).forEach((tagVal, i) => {
+					menu.newEntry({
+						menuName: subMenuName,
+						entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25),
+						func: () => {
+							// Data from library
+							const node = music_graph_descriptors.getSubstitution(tagVal);
+							const playlistName = 'Similar genres from region: ' + tagVal;
+							const regionGenres = getZoneGraphFilter([node], 'region');
+							const similarRegionGenres = [];
+							regionGenres.forEach((g) => {
+								if (calcMeanDistanceV2(sbd.allMusicGraph, [node], [g]) <= music_graph_descriptors.cluster * 5) {
+									similarRegionGenres.push(g);
+								};
+							});
+							if (!similarRegionGenres.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style is not associated to any specific region but has worldwide spread.', playlistName); return; }
+							const query = queryJoin(queryCombinations(similarRegionGenres, entries.map((e) => e.tf).flat(Infinity), 'OR'), 'OR') || '';
+							const bShift = utils.IsKeyPressed(VK_SHIFT);
+							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+							if (bShift || bCtrl) {
+								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+							} else {
+								console.log('Query: ' + query);
+								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+							}
+						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
+					});
+				});
+			}
+		});
+	}
+	{ // Influences
+		const menuName = menu.newMenu('Genre/style influences');
+		menu.newEntry({ menuName, entryText: 'Related genre/styles:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
+		entries.forEach((entry) => {
+			// Add separators
+			if (menu.isSeparator(entry)) {
+				menu.newSeparator(menuName);
+			} else {
+				// Create names for all entries
+				entry.name = entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name;
+				// Entries
+				const bSingle = entry.valSet.size <= 1;
+				const subMenuName = bSingle ? menuName : menu.newMenu(entry.name, menuName);
+				if (!bSingle) {
+					menu.newEntry({ menuName: subMenuName, entryText: 'Search (Shift) / AutoPlaylist (Ctrl):', flags: MF_GRAYED });
+					menu.newSeparator(subMenuName);
+				}
+				if (entry.valSet.size === 0) { entry.valSet.add(''); }
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' })).forEach((tagVal, i) => {
+					menu.newEntry({
+						menuName: subMenuName,
+						entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25),
+						func: () => {
+							// Data from library
+							const node = music_graph_descriptors.getSubstitution(tagVal);
+							const playlistName = 'Related genres: ' + tagVal;
+							const data = music_graph_descriptors.nodeList.get(node);
+							const nodeSet = music_graph_descriptors.getNodeSet(false);
+							const influences = [...(data.primaryOrigin || []), ...(data.secondaryOrigin || []), ...(data.weakSubstitution || [])];
+							influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
+							if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific originary or derivative form.', playlistName); return; }
+							const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf).flat(Infinity), 'OR'), 'OR') || '';
+							const bShift = utils.IsKeyPressed(VK_SHIFT);
+							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+							if (bShift || bCtrl) {
+								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+							} else {
+								console.log('Query: ' + query);
+								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+							}
+						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
+					});
+				});
+			}
+		});
+	}
+	{ // Anti-Influences
+		const menuName = menu.newMenu('Genre/style anti-influences');
+		menu.newEntry({ menuName, entryText: 'Opposed genre/styles:', flags: MF_GRAYED });
+		menu.newSeparator(menuName);
+		entries.forEach((entry) => {
+			// Add separators
+			if (menu.isSeparator(entry)) {
+				menu.newSeparator(menuName);
+			} else {
+				// Create names for all entries
+				entry.name = entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name;
+				// Entries
+				const bSingle = entry.valSet.size <= 1;
+				const subMenuName = bSingle ? menuName : menu.newMenu(entry.name, menuName);
+				if (!bSingle) {
+					menu.newEntry({ menuName: subMenuName, entryText: 'Search (Shift) / AutoPlaylist (Ctrl):', flags: MF_GRAYED });
+					menu.newSeparator(subMenuName);
+				}
+				if (entry.valSet.size === 0) { entry.valSet.add(''); }
+				[...entry.valSet].sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' })).forEach((tagVal, i) => {
+					menu.newEntry({
+						menuName: subMenuName,
+						entryText: bSingle ? entry.name + '\t[' + (tagVal.cut(25) || (sel ? 'no tag' : 'no sel')) + ']' : tagVal.cut(25),
+						func: () => {
+							// Data from library
+							const node = music_graph_descriptors.getSubstitution(tagVal);
+							const playlistName = 'Opposed genres: ' + tagVal;
+							const data = music_graph_descriptors.nodeList.get(node);
+							const nodeSet = music_graph_descriptors.getNodeSet(false);
+							const influences = [...(data.antiInfluence || [])];
+							influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
+							if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific anti-derivative form.', playlistName); return; }
+							const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf).flat(Infinity), 'OR'), 'OR') || '';
+							const bShift = utils.IsKeyPressed(VK_SHIFT);
+							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+							if (bShift || bCtrl) {
+								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+							} else {
+								console.log('Query: ' + query);
+								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+							}
+						}, flags: (tagVal ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
 					});
 				});
 			}
