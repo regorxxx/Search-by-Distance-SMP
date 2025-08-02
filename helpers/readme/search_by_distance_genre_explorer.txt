@@ -1,0 +1,14 @@
+﻿Tool to explore genre/styles within your library; uses the current
+selection as reference, although it also allows to manually input
+arbitrary words if desired.
+
+It can be used to display general statistics for a given genre/style.
+That data may come handy in creating new playlists (for tuning settings
+or filters), or to be used along Timeline-SMP (*) or World-Map-SMP (**)
+
+Additionally, there are multiple entries to directly create playlists
+from your library based on the selected genre/style and/or cultural
+or musical influences.
+
+(*)  https://github.com/regorxxx/Timeline-SMP
+(**) https://github.com/regorxxx/World-Map-SMP
