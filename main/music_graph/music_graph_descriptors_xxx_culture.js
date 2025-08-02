@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/25
+//31/07/25
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -205,7 +205,7 @@ music_graph_descriptors_culture.debug = function debug() {
 	});
 	const notFoundNum = notFound.size;
 	if (notFoundNum) {
-		console.log('music_graph_descriptors_culture: not found ' + notFoundNum + ' items\n\t' + [...notFound]);
+		console.log('music_graph_descriptors_culture: not found ' + notFoundNum + ' items\n\t ' + [...notFound]);
 	} else {
 		console.log('music_graph_descriptors_culture: All tests passed');
 	}

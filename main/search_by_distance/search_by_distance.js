@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/06/25
+//31/07/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -1237,7 +1237,7 @@ async function searchByDistance({
 		}
 		calcTags.genreStyle.referenceNumber = calcTags.genreStyle.referenceSet.size;
 		if (calcTags.genreStyle.referenceNumber === 0 && method === 'GRAPH') {
-			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'\n\tAll tracks will be considered to have a graph distance of zero and only compared by score.');
+			console.log('Warning: method was \'GRAPH\' but selected track had no genre tags. Changed to \'WEIGHT\'\n\t All tracks will be considered to have a graph distance of zero and only compared by score.');
 		}
 	}
 	for (let key in calcTags) {
@@ -1930,7 +1930,7 @@ async function searchByDistance({
 			}
 			console.log(
 				'Pool of tracks with tags similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '%: ' + poolLength + ' tracks',
-				bIsBreak ? '\n\t(Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
+				bIsBreak ? '\n\t (Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
 			);
 		}
 	}
@@ -1958,7 +1958,7 @@ async function searchByDistance({
 		if (bBasicLogging) {
 			console.log(
 				'Pool of tracks with tags similarity greater than ' + (bMin ? minScoreFilter : scoreFilter) + '% and genre variation lower than ' + graphDistance + ': ' + poolLength + ' tracks',
-				bIsBreak ? '\n\t(Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
+				bIsBreak ? '\n\t (Processing was stopped after playlist filling, there may be more similar tracks on library)' : ''
 			);
 		}
 	}

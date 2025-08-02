@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/01/25
+//31/07/25
 
 /* global music_graph_descriptors:readable, SearchByDistance_panelProperties:readable */
 
@@ -1297,20 +1297,20 @@ if (Object.keys(music_graph_descriptors_allmusic).length) {
 			if (subs.size) {
 				const error = subs.difference(parent.filterSetWithGraph(subs));
 				if (error.size) {
-					console.log('Items flagged as substitution but missing on graph: ' + error.size + '\n\t' + [...error].join(', '));
+					console.log('Items flagged as substitution but missing on graph: ' + error.size + '\n\t ' + [...error].join(', '));
 				}
 			}
 			if (noAlt.size) {
 				console.log('No alternative items on graph: ' + noAlt.size + '\n\t' + [...noAlt].join(', '));
 				const noAltPresent = noAlt.intersection(parent.filterSetWithGraph(noAlt));
 				if (noAltPresent.size) {
-					console.log('Items flagged with no alternative but present on graph: ' + noAltPresent.size + '\\n\t' + [...noAltPresent].join(', '));
+					console.log('Items flagged with no alternative but present on graph: ' + noAltPresent.size + '\n\t ' + [...noAltPresent].join(', '));
 				}
 			}
 			if (allm.map_distance_exclusions.size) {
 				const exclusions = allm.map_distance_exclusions.intersection(parent.filterSetWithGraph(allm.map_distance_exclusions));
 				if (exclusions.size) {
-					console.log('Items flagged to filter but present on graph: ' + exclusions.size + '\n\t' + [...exclusions].join(', '));
+					console.log('Items flagged to filter but present on graph: ' + exclusions.size + '\n\t ' + [...exclusions].join(', '));
 				}
 			}
 		}

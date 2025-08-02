@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/07/25
+//01/08/25
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -641,7 +641,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	const _ALL_ = ['style_supergenre_supercluster', 'style_supergenre_cluster', 'style_supergenre', 'style_cluster', 'style_primary_origin', 'style_secondary_origin', 'style_anti_influence', 'style_weak_substitutions', 'style_substitutions'];
 	{ // Check letter case
 		const sep = /([ \-&/()]|'n'|\bD')/g; // Added parentheses so they are also included on the split array
-		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM'], [/\bL\.A\. /gi, 'L.A. ']];
+		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM'], [/\bL\.A\. \b/gi, 'L.A. ']];
 		const ommit = [/_cluster$/i];
 		const allmusic = new Set(['New Wave of British Heavy Alternative Metal']);
 		_ALL_.forEach((key) => {
