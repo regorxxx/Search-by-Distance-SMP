@@ -74,6 +74,10 @@
 - Info: added similar genres search tools.
 - Info: added similar genres from same region search tools.
 - Info: added influences search tools.
+- Info: added entry to input any genre/style value as string, instead of using the selection. It will report if the tag is not present on the graph (independently of being on library).
+- Info: added readme menu entry.
+- Info: added settings menu entry.
+- Info: added percentage of tracks with selected genre for displayed artist.
 - Presets: "X Most similar tracks" recipes, which should return the X most similar tracks to selected track from current playlist, sorted by scoring/genre variation. They use the new "Tracks source" feature. The number of tracks is asked everytime before searching.
 - Dynamic queries: support for '#NOW#' (or #TODAY#) variable, which resolves to current date (2025-3-8).
 - Dynamic queries: support for '#YESTERDAY#' variable, which resolves to yesterday date (2025-3-8).
