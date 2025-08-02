@@ -1,5 +1,5 @@
 ﻿'use strict';
-//02/07/25
+//31/07/25
 
 /* exported createConfigMenu */
 
@@ -1418,7 +1418,7 @@ function createConfigMenu(parent) {
 					if (handleList) {
 						removeDuplicatesAsync({ handleList, sortOutput: '', checkKeys: getSetting('checkDuplicatesByTag'), bAdvTitle: getSetting('bAdvTitle'), bMultiple: getSetting('bMultiple') })
 							.then((out) => sendToPlaylist(out, properties.playlistName[1]))
-							.finally(() => console.log('Same zone artists:\n\t' + artists.join(', ')));
+							.finally(() => console.log('Same zone artists:\n\t ' + artists.join(', ')));
 					}
 				}
 			});

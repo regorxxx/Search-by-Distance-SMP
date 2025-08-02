@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/06/25
+//01/08/25
 
 /* exported createThemeMenu */
 
@@ -9,8 +9,10 @@ include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, globTags:readable , VK_SHIFT:readable */
+include('..\\..\\helpers\\buttons_xxx.js');
+/* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
+/* global WshShell:readable, _isFile:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -103,18 +105,9 @@ function createThemeMenu(parent) {
 	});
 	{	// Theme tools
 		const menuName = themeMenu.newMenu('More options...');
-		{	// Readme
-			const readmePath = folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt';
-			themeMenu.newEntry({
-				menuName, entryText: 'Open readme...', func: () => {
-					const readme = _open(readmePath, utf8); // Executed on script load
-					if (readme.length) { fb.ShowPopupMessage(readme, window.Name); }
-					else { console.log('Search by Distance: Readme not found\n\t ' + readmePath); }
-				}
-			});
-		}
+		themeMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt') });
 		themeMenu.newEntry({
-			menuName, entryText: 'Open themes folder', func: () => {
+			menuName, entryText: 'Themes folder...', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
 				else { _explorer(themePath); } // or folder
 			}

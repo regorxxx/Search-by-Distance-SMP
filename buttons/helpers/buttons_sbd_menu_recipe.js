@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/03/25
+//01/08/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -13,8 +13,10 @@ include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, VK_CONTROL:readable */
+include('..\\..\\helpers\\buttons_xxx.js');
+/* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable, _open:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
+/* global WshShell:readable, _isFile:readable,utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -58,7 +60,7 @@ function createRecipeMenu(parent) {
 			// Recipe obj
 			let input = '';
 			try { input = utils.InputBox(window.ID, 'Enter Recipe name', 'Search by distance', 'my recipe', true).toString(); }
-			catch (e) { return; }
+			catch (e) { return; } // eslint-disable-line no-unused-vars
 			if (!input.length) { return; }
 			recipe.name = input;
 			const filePath = folders.userPresets + 'recipes\\' + input + '.json';
@@ -88,16 +90,7 @@ function createRecipeMenu(parent) {
 	});
 	{	// Recipe tools
 		const menuName = recipeMenu.newMenu('Additional options');
-		{	// Readme
-			const readmePath = folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt';
-			recipeMenu.newEntry({
-				menuName, entryText: 'Open readme', func: () => {
-					const readme = _open(readmePath, utf8); // Executed on script load
-					if (readme.length) { fb.ShowPopupMessage(readme, window.Name); }
-					else { console.log('Readme not found: ' + readmePath); }
-				}
-			});
-		}
+		recipeMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt') });
 		recipeMenu.newEntry({
 			menuName, entryText: 'Open recipes folder', func: () => {
 				if (_isFile(properties.recipe[1])) { _explorer(properties.recipe[1]); } // Open current file
