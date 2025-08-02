@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/07/25
+//01/08/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -1268,11 +1268,15 @@ function getButtonVersion(source = 'Playlist-Tools-SMP') {
 
 function showButtonReadme(fileName) {
 	let readme = '';
-	if (buttonsBar.readmeList) {
-		const readmeFile = buttonsBar.readmeList[fileName];
-		const readme = readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
-		if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
-		else { console.log(readmeFile + ' not found.'); }
+	let readmeFile;
+	if (buttonsBar.readmeList && Object.hasOwn(buttonsBar.readmeList, fileName)) {
+		readmeFile = buttonsBar.readmeList[fileName];
+		readme = readmeFile && readmeFile.length ? _open(folders.xxx + 'helpers\\readme\\' + readmeFile, utf8) : '';
+	} else if (_isFile(fileName)) {
+		readmeFile = fileName;
+		readme = _open(readmeFile, utf8);
 	}
+	if (readme.length) { fb.ShowPopupMessage(readme, readmeFile); }
+	else { console.log(readmeFile + ' not found.'); }
 	return readme;
 }
