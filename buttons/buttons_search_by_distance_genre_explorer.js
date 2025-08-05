@@ -101,7 +101,7 @@ addButton({
 function buttonTooltipSbdCustom() {
 	const properties = this.buttonsProperties;
 	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
-	let info = 'Genre/style info by acoustic-folksonomy models:\n';
+	let info = 'Genre/style exploration within your library:\n';
 	const sel = fb.GetFocusItem();
 	if (sel) {
 		const entries = JSON.parse(properties.entries[1]);
