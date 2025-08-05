@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/07/25
+//05/08/25
 
 /* exported createConfigMenu */
 
@@ -395,10 +395,10 @@ function createConfigMenu(parent) {
 						}, flags: bRecipe ? MF_GRAYED : MF_STRING
 					});
 				});
-				menu.newCheckMenu(subMenuName2, options[0], options[options.length - 1], () => { return options.indexOf(tag.scoringDistribution); });
+				menu.newCheckMenuLast(() => options.indexOf(tag.scoringDistribution),  options);
 			}
 			if (!menu.isLastEntrySep) { menu.newSeparator(subMenuName); }
-			if (!bLiteMode && !['related', 'unrelated'].includes(key)) {	// Base score
+			if (!bLiteMode && !['related', 'unrelated'].includes(key)) { // Base score
 				const bRecipe = bRecipeTags && Object.hasOwn(recipe.tags, key) && (Object.hasOwn(recipe.tags[key], 'baseScore') || !baseTag);
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
@@ -594,7 +594,7 @@ function createConfigMenu(parent) {
 						}
 					}, flags: Object.hasOwn(recipe, key) || (key === 'bTagsCache' && !isFoobarV2) ? MF_GRAYED : MF_STRING
 				});
-				menu.newCheckMenu(menuName, entryText, void (0), () => { return (Object.hasOwn(recipe, key) ? recipe[key] : propObj[key][1]); });
+				menu.newCheckMenuLast(() => Object.hasOwn(recipe, key) ? recipe[key] : propObj[key][1]);
 			});
 		}
 		menu.newSeparator(menuName);
@@ -817,7 +817,7 @@ function createConfigMenu(parent) {
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'forcedQuery') ? MF_GRAYED : MF_STRING
 				});
-				menu.newCheckMenu(subMenuName, entryText, void (0), () => hasQuery(obj));
+				menu.newCheckMenuLast(() => hasQuery(obj));
 			});
 			menu.newSeparator(subMenuName);
 			menu.newEntry({
