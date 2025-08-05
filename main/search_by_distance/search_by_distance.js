@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/07/25
+//05/08/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -232,6 +232,10 @@ const sbd = {
 		? getPropertiesPairs(SearchByDistance_properties, sbd_prefix)
 		: getPropertiesPairs(SearchByDistance_panelProperties, sbd_prefix),
 	version,
+	recipesPath: folders.userPresets + 'recipes\\',
+	themesPath: folders.userPresets + 'themes\\',
+	defaultRecipesPath: folders.xxx + 'presets\\Search by\\recipes\\',
+	defaultThemesPath: folders.xxx + 'presets\\Search by\\themes\\',
 	isJsonProperty: (key) => /(source|tags?)$/gi.test(key),
 	getMethodDescription: (key) => {
 		switch (key.toUpperCase()) {
@@ -533,9 +537,7 @@ if (sbd.panelProperties.bProfile[1]) {
 */
 const recipeAllowedKeys = new Set(['name', 'properties', 'theme', 'recipe', 'tags', 'bNegativeWeighting', 'bFilterWithGraph', 'forcedQuery', 'bSameArtistFilter', 'bConditionAntiInfluences', 'bUseAntiInfluencesFilter', 'bUseInfluencesFilter', 'bSimilArtistsFilter', 'bSimilArtistsExternal', 'artistRegionFilter', 'genreStyleRegionFilter', 'nearGenresFilter', 'nearGenresFilterAggressiveness', 'method', 'scoreFilter', 'minScoreFilter', 'graphDistance', 'poolFilteringN', 'bPoolFiltering', 'bRandomPick', 'bInversePick', 'probPick', 'playlistLength', 'bSortRandom', 'bProgressiveListOrder', 'bInverseListOrder', 'bScatterInstrumentals', 'bSmartShuffle', 'bSmartShuffleAdvc', 'smartShuffleSortBias', 'bInKeyMixingPlaylist', 'bProgressiveListCreation', 'progressiveListCreationN', 'playlistName', 'bProfile', 'bShowQuery', 'bShowFinalSelection', 'bBasicLogging', 'bSearchDebug', 'bCreatePlaylist', 'bAscii', 'sortBias', 'bAdvTitle', 'bMultiple', 'bBreakWhenFilled', 'trackSource']);
 const recipePropertiesAllowedKeys = new Set(['smartShuffleTag', 'poolFilteringTag']);
-const themePath = folders.userPresets + 'themes\\';
-const recipePath = folders.userPresets + 'recipes\\';
-if (!_isFile(recipePath + 'allowedKeys.txt') || bMismatchCRC) {
+if (!_isFile(sbd.recipesPath + 'allowedKeys.txt') || bMismatchCRC) {
 	const data = Array.from(recipeAllowedKeys, (key) => {
 		const propDescr = SearchByDistance_properties[key] || SearchByDistance_panelProperties[key];
 		let descr = propDescr ? propDescr[0] : '';
@@ -558,18 +560,18 @@ if (!_isFile(recipePath + 'allowedKeys.txt') || bMismatchCRC) {
 		return [key, descr];
 	});
 	if (sbd.panelProperties.bStartLogging[1]) {
-		console.log('Updating recipes documentation at:\n\t ' + recipePath + 'allowedKeys.txt');
-		console.log('Copying recipes at:\n\t ' + recipePath);
-		console.log('Copying themes at:\n\t ' + themePath);
+		console.log('Updating recipes documentation at:\n\t ' + sbd.recipesPath + 'allowedKeys.txt');
+		console.log('Copying recipes at:\n\t ' + sbd.recipesPath);
+		console.log('Copying themes at:\n\t ' + sbd.themesPath);
 	}
 	// Copy docs
-	_save(recipePath + 'allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
+	_save(sbd.recipesPath + 'allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
 	_copyFile(folders.xxx + 'presets\\Search by\\readme.txt',folders.userPresets + 'themes_recipes_readme.txt', true);
 	// Copy themes and recipes
 	findRecursivefile(
 		'*.json',
-		[folders.xxx + 'presets\\Search by\\recipes\\', folders.xxx + 'presets\\Search by\\themes\\']
-	).forEach((file) =>	_copyFile(file, file.replace(folders.xxx + 'presets\\Search by\\', folders.userPresets), true));
+		[sbd.defaultRecipesPath, sbd.defaultThemesPath]
+	).forEach((file) =>	_copyFile(file, file.replace(sbd.defaultRecipesPath, sbd.recipesPath).replace(sbd.defaultThemesPath, sbd.themesPath), true));
 }
 
 function testRecipe({ path = null, json = null, baseTags = null } = {}) {
@@ -892,8 +894,8 @@ async function searchByDistance({
 	if (bUseRecipe) {
 		let path;
 		if (isString(recipe)) { // File path
-			path = !_isFile(recipe) && _isFile(recipePath + recipe) // NOSONAR [is always a string]
-				? recipePath + recipe // NOSONAR [is always a string]
+			path = !_isFile(recipe) && _isFile(sbd.recipesPath + recipe) // NOSONAR [is always a string]
+				? sbd.recipesPath + recipe // NOSONAR [is always a string]
 				: recipe;
 			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
 			if (!recipe) { console.popup('Recipe not found: ' + path, 'Search by distance'); return; } // NOSONAR [is always a string]
@@ -991,7 +993,7 @@ async function searchByDistance({
 	if (bUseTheme) {
 		let path;
 		if (isString(theme)) { // File path: try to use plain path or themes folder + filename
-			path = !_isFile(theme) && _isFile(themePath + theme) ? themePath + theme : theme; // NOSONAR [is always a string]
+			path = !_isFile(theme) && _isFile(sbd.themesPath + theme) ? sbd.themesPath + theme : theme; // NOSONAR [is always a string]
 			theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', utf8);
 			if (!theme) { return; }
 		}
@@ -2853,8 +2855,8 @@ function processRecipe(initialRecipe) {
 	const processRecipeFile = (newRecipe) => {
 		const newPath = _isFile(newRecipe)
 			? newRecipe
-			: _isFile(recipePath + newRecipe)
-				? recipePath + newRecipe
+			: _isFile(sbd.recipesPath + newRecipe)
+				? sbd.recipesPath + newRecipe
 				: null;
 		const newRecipeObj = newPath ? _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8) : null;
 		if (!newRecipeObj) { console.log('Recipe not found: ' + newPath); }

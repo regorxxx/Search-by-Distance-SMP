@@ -1,9 +1,9 @@
 ﻿'use strict';
-//01/08/25
+//05/08/25
 
 /* exported createThemeMenu */
 
-/* global processRecipePlaceholder:readable, getCountryISO:readable, getLocaleFromId:readable, themePath:readable */
+/* global processRecipePlaceholder:readable, getCountryISO:readable, getLocaleFromId:readable, sbd:readable */
 
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
@@ -24,7 +24,7 @@ const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [themePath]);
+	const files = findRecursivefile('*.json', [sbd.themesPath]);
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);
@@ -39,8 +39,8 @@ function createThemeMenu(parent) {
 		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
 			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme; }
-			else if (_isFile(themePath + recipe.theme)) {
-				forcedThemePath = themePath + recipe.theme;
+			else if (_isFile(sbd.themesPath + recipe.theme)) {
+				forcedThemePath = sbd.themesPath + recipe.theme;
 				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
 			} else {
 				console.popup('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme, 'Search by distance');
@@ -96,7 +96,7 @@ function createThemeMenu(parent) {
 			if (!input.length) { return; }
 			const theme = { name: input, tags: [] };
 			theme.tags.push(themeTags);
-			const filePath = themePath + input + '.json';
+			const filePath = sbd.themesPath + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
 			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
@@ -109,7 +109,7 @@ function createThemeMenu(parent) {
 		themeMenu.newEntry({
 			menuName, entryText: 'Themes folder...', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
-				else { _explorer(themePath); } // or folder
+				else { _explorer(sbd.themesPath); } // or folder
 			}
 		});
 		const hiddenFilesNum = files.reduce((total, file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden ? total + 1 : total; }, 0);
