@@ -79,7 +79,7 @@ addButton({
 		text: 'Similar Tracks',
 		func: function (mask) {
 			if (mask === MK_SHIFT) {
-				settingsMenu(this, true, ['buttons_search_by_distance.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
+				settingsMenu(this, true, ['buttons_search_by_distance_basic.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 			} else {
 				choosePresetMenu(this).btn_up(this.currX, this.currY + this.currH);
 			}
