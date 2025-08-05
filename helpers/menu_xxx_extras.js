@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/12/24
+//04/08/25
 
 /* exported _createSubMenuEditEntries */
 
@@ -14,10 +14,10 @@ include('menu_xxx.js');
  * @kind function
  * @param {_menu} parent - Menu object
  * @param {string} menuName - Parent menu name
- * @param {{name:string, subMenuName:string, list, defaults, input:function, bAdd:Boolean, bNumbered:Boolean, bDuplicate:Boolean, bClone:Boolean, bCopyCurrent:Boolean, onBtnUp:function}} options - Options object
+ * @param {{name:string, subMenuName:string, list, defaults, input:function, bAdd:Boolean, bNumbered:Boolean, bDuplicate:Boolean, bClone:Boolean, bCopyCurrent:Boolean, bMove:Boolean, onBtnUp:function}} options - Options object
 	{
 
-  		name:			popup name
+			name:			popup name
 
 		subMenuName:	name for the edit entries sub-menu
 
@@ -41,16 +41,19 @@ include('menu_xxx.js');
 
 		bCopyCurrent:	true to show a 'Copy current settings' option on submenu
 
-		onBtnUp:		function to run after any menu entry is run (usually to save the modified entries on properties). List is passed as argument. onBtnUp(options.list) => {...}
+		bMove:			true to show a 'Move ventry' option on submenu
+
+		onBtnUp:		function to run after any menu entry is run (usually to save the modified entries on properties). List is passed as argument. onBtnUp(options.list, modified, event) => {...}
 
 	}
  * @returns {void}
  */
-function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, bClone, onBtnUp}*/) { // NOSONAR
+function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, bClone, bMove, bCopyCurrent, onBtnUp}*/) { // NOSONAR
 	if (options.onBtnUp && !isFunction(options.onBtnUp)) {
 		throw new Error('_createSubMenuEditEntries: onBtnUp is not a function');
 	}
-	if (!options.list || !options.defaults || !Array.isArray(options.list) || !Array.isArray(options.defaults) || !options.input || !isFunction(options.input)) {
+	if (!options.defaults) { options.defaults = []; }
+	if (!options.list || !Array.isArray(options.list) || !Array.isArray(options.defaults) || !options.input || !isFunction(options.input)) {
 		throw new Error('_createSubMenuEditEntries: list, defaults or input options are non valid or not provided');
 	}
 	// options.list always point to the original entry list and original values are edited
@@ -58,16 +61,19 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 	let i = 0;
 	const bAdd = !Object.hasOwn(options, 'bAdd') || options.bAdd;
 	const bClone = bAdd && !Object.hasOwn(options, 'bClone') || options.bClone;
+	const bMove = !Object.hasOwn(options, 'bMove') || options.bMove;
 	options.list.forEach((entry, index) => {
 		if (parent.isNotSeparator(entry)) { i++; }
-		const entryName = (parent.isSeparator(entry) ? '------(separator)------' + parent.getNextId() : (options.bNumbered ? i + '. ' : '') + (entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name));
+		const entryName = parent.isSeparator(entry)
+			? '------(separator)------' + parent.getNextId()
+			: (options.bNumbered ? i + '. ' : '') + (entry.name.length > 40 ? entry.name.substring(0, 40) + ' ...' : entry.name);
 		const subMenuThirdName = parent.newMenu(entryName, subMenuSecondName);
 		parent.newEntry({
 			menuName: subMenuThirdName, entryText: 'Edit entry...', func: () => {
 				const oriEntry = JSON.stringify(entry);
 				let newEntry = oriEntry;
 				try { newEntry = utils.InputBox(window.ID, 'Edit entry as JSON:', options.name, oriEntry, true); }
-				catch (e) { return; }
+				catch (e) { return; } // eslint-disable-line no-unused-vars
 				if (newEntry === oriEntry) { return; }
 				if (!newEntry || !newEntry.length) { fb.ShowPopupMessage('Input: ' + newEntry + '\n\nNon valid entry.', 'JSON error'); return; }
 				try { newEntry = JSON.parse(newEntry); } catch (e) { fb.ShowPopupMessage('Input: ' + newEntry.toString() + '\n\n' + e, 'JSON error'); return; }
@@ -77,24 +83,26 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 					return;
 				}
 				options.list[index] = newEntry;
-				if (options.onBtnUp) { options.onBtnUp(options.list); }
+				if (options.onBtnUp) { options.onBtnUp(options.list, newEntry, 'edit'); }
 				return options.list;
 			}, flags: parent.isSeparator(entry) ? MF_GRAYED : MF_STRING
 		});
-		parent.newEntry({
-			menuName: subMenuThirdName, entryText: 'Move entry...', func: () => {
-				let pos = 1;
-				try { pos = Number(utils.InputBox(window.ID, 'Move up X indexes (negative is down):\n', options.name, pos, true)); }
-				catch (e) { return; }
-				if (pos === 0 || !Number.isSafeInteger(pos)) { return; }
-				if (index - pos < 0) { pos = 0; }
-				else if (index - pos >= options.list.length) { pos = options.list.length; }
-				else { pos = index - pos; }
-				options.list.splice(pos, 0, options.list.splice(index, 1)[0]);
-				if (options.onBtnUp) { options.onBtnUp(options.list); }
-				return options.list;
-			}
-		});
+		if (bMove) {
+			parent.newEntry({
+				menuName: subMenuThirdName, entryText: 'Move entry...', func: () => {
+					let pos = 1;
+					try { pos = Number(utils.InputBox(window.ID, 'Move up X indexes (negative is down):\n', options.name, pos, true)); }
+					catch (e) { return; } // eslint-disable-line no-unused-vars
+					if (pos === 0 || !Number.isSafeInteger(pos)) { return; }
+					if (index - pos < 0) { pos = 0; }
+					else if (index - pos >= options.list.length) { pos = options.list.length; }
+					else { pos = index - pos; }
+					options.list.splice(pos, 0, options.list.splice(index, 1)[0]);
+					if (options.onBtnUp) { options.onBtnUp(options.list, options.list[pos], 'move'); }
+					return options.list;
+				}
+			});
+		}
 		if (bClone) {
 			parent.newSeparator(subMenuThirdName);
 			parent.newEntry({
@@ -104,7 +112,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 					let entryName = '';
 					if (parent.isNotSeparator(entry)) {
 						try { entryName = utils.InputBox(window.ID, 'Enter new name for cloned menu entry:', options.name, '', true); }
-						catch (e) { return; }
+						catch (e) { return; } // eslint-disable-line no-unused-vars
 						if (!entryName.length) { return; }
 						if (parent.isSeparator({ name: entryName })) { return; }
 						else { // or new entry
@@ -120,7 +128,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 					}
 					// Add entry
 					options.list.push(input);
-					if (options.onBtnUp) { options.onBtnUp(options.list); }
+					if (options.onBtnUp) { options.onBtnUp(options.list, input, 'clone'); }
 					return options.list;
 				}
 			});
@@ -132,7 +140,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 					const current = options.input(true);
 					if (!current) { return; }
 					for (let key in current) { entry[key] = current[key]; }
-					if (options.onBtnUp) { options.onBtnUp(options.list); }
+					if (options.onBtnUp) { options.onBtnUp(options.list, entry, 'update'); }
 					return options.list;
 				}
 			});
@@ -143,7 +151,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 			parent.newEntry({
 				menuName: subMenuThirdName, entryText: 'Reset default entry', func: () => {
 					options.list[index] = defTag;
-					if (options.onBtnUp) { options.onBtnUp(options.list); }
+					if (options.onBtnUp) { options.onBtnUp(options.list, defTag, 'reset'); }
 					return options.list;
 				}
 			});
@@ -151,8 +159,8 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 		parent.newSeparator(subMenuThirdName);
 		parent.newEntry({
 			menuName: subMenuThirdName, entryText: 'Remove entry', func: () => {
-				options.list.splice(index, 1);
-				if (options.onBtnUp) { options.onBtnUp(options.list); }
+				const deleted = options.list.splice(index, 1)[0];
+				if (options.onBtnUp) { options.onBtnUp(options.list, deleted, 'delete'); }
 				return options.list;
 			}
 		});
@@ -166,7 +174,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 				let input;
 				let entryName = '';
 				try { entryName = utils.InputBox(window.ID, 'Enter name for menu entry:\nWrite \'sep\' to add a line.', options.name, '', true); }
-				catch (e) { return; }
+				catch (e) { return; } // eslint-disable-line no-unused-vars
 				if (!entryName.length) { return; }
 				if (parent.isSeparator({ name: entryName })) { input = { name: entryName }; } // Add separator
 				else { // or new entry
@@ -174,24 +182,26 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 						fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
 						return;
 					}
-					const entry = options.input();
+					const entry = options.input(entryName);
 					if (!entry) { return; }
 					input = { name: entryName, ...entry };
 				}
 				// Add entry
 				options.list.push(input);
-				if (options.onBtnUp) { options.onBtnUp(options.list); }
+				if (options.onBtnUp) { options.onBtnUp(options.list, input, 'add'); }
 				return options.list;
 			}
 		});
 	}
-	parent.newSeparator(subMenuSecondName);
-	parent.newEntry({
-		menuName: subMenuSecondName, entryText: 'Restore defaults...', func: () => {
-			options.list.length = 0;
-			clone(options.defaults).forEach(e => options.list.push(e));
-			if (options.onBtnUp) { options.onBtnUp(options.list); }
-			return options.list;
-		}
-	});
+	if (options.defaults.length) {
+		parent.newSeparator(subMenuSecondName);
+		parent.newEntry({
+			menuName: subMenuSecondName, entryText: 'Restore defaults...', func: () => {
+				options.list.length = 0;
+				clone(options.defaults).forEach(e => options.list.push(e));
+				if (options.onBtnUp) { options.onBtnUp(options.list, options.list, 'defaults'); }
+				return options.list;
+			}
+		});
+	}
 }
