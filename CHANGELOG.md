@@ -129,6 +129,7 @@
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.
 - Performance improvements using GRAPH (approx. 17%) and WEIGHT (approx. 13%) modes.
+- Hardcoded button with 4 different presets has been reworked into a single one showing the 4 built-in presets plus a list of available recipes.
 ### Removed
 - Descriptors: removed Spanish Folk style.
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
