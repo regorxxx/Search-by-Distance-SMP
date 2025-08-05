@@ -1,5 +1,5 @@
 ﻿'use strict';
-//23/06/25
+//05/08/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -155,7 +155,7 @@ function loadButtonsFile(bStartup = false) {
 			},
 			{
 				name: 'Search by Distance', files:
-					['buttons_search_by_distance.js']
+					['buttons_search_by_distance_basic.js']
 			},
 			{
 				name: 'Search by Distance (customizable)', files:
