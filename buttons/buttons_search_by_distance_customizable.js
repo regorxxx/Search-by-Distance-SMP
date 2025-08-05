@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/07/25
+//05/08/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -14,11 +14,11 @@ include('..\\helpers\\helpers_xxx_UI.js');
 include('..\\helpers\\helpers_xxx_file.js');
 /* global _isFile:readable, utf8:readable, _jsonParseFileCheck:readable, WshShell:readable , popup:readable */
 include('..\\main\\search_by_distance\\search_by_distance.js'); // Load after buttons_xxx.js so properties are only set once
-/* global SearchByDistance_properties:readable, sbd:readable, searchByDistance:readable, updateCache:readable, findStyleGenresMissingGraphCheck:readable, testBaseTags:readable, recipePath:readable, testRecipe:readable */
+/* global SearchByDistance_properties:readable, sbd:readable, searchByDistance:readable, updateCache:readable, findStyleGenresMissingGraphCheck:readable, testBaseTags:readable, testRecipe:readable */
 include('helpers\\buttons_sbd_menu_theme.js'); // Button menu
 /* global createThemeMenu:readable */
 include('helpers\\buttons_sbd_menu_recipe.js'); // Button menu
-/* global createRecipeMenu:readable */
+/* global createRecipeMenu:readable, chooseRecipeMenu:readable */
 include('helpers\\buttons_sbd_menu_config.js'); // Button menu
 /* global createConfigMenu:readable */
 
@@ -37,6 +37,7 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }, true],
 	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false],
 	bLiteMode: ['Lite mode', false, { func: isBoolean }, false],
+	bSearchRecipes: ['Show recipe list on search', true, { func: isBoolean }, true],
 };
 newButtonsProperties = { ...SearchByDistance_properties, ...newButtonsProperties }; // Add default properties at the beginning to be sure they work
 setProperties(newButtonsProperties, prefix, 0); //This sets all the panel properties at once
@@ -86,6 +87,8 @@ addButton({
 							window.ShowProperties();
 						}
 					}
+				} else if (this.buttonsProperties.bSearchRecipes[1]) {
+					chooseRecipeMenu(this).btn_up(this.currX, this.currY + this.currH);
 				} else {
 					searchByDistance({ properties: this.buttonsProperties, theme: this.buttonsProperties.theme[1], recipe: this.buttonsProperties.recipe[1], parent: this }); // All set according to properties panel!
 				}
@@ -206,8 +209,8 @@ function processRecipePlaceholder(recipeFile, tags) {
 	if (recipeFile.length) {
 		recipe = _isFile(recipeFile)
 			? _jsonParseFileCheck(recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
-			: _isFile(recipePath + recipeFile)
-				? _jsonParseFileCheck(recipePath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
+			: _isFile(sbd.recipesPath + recipeFile)
+				? _jsonParseFileCheck(sbd.recipesPath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
 				: {};
 		if (Object.keys(recipe).length !== 0) {
 			const result = testRecipe({ json: recipe, baseTags: tags });

@@ -92,6 +92,8 @@
 - Installation: new panel menu, accessed through 'Ctrl + Win + R. Click' (which works globally on any script and panel, at any position), used to export/import panel settings and any other associated data. These entries may be used to fully backup the panel data, help when moving between different JS components (JSplitter <-> SMP) or even foobar2000 installations,, without needing to manually backup the panel properties or other external files (like .json, etc.).
 - Configuration: external files like world map database references are now exposed as a panel property.
 ### Changed
+- Recipes: improvements to the recipes menu for customizable button, which now allows to directly edit recipes as submenu entries. Added multiple entries to hide/show recipes, clone, remove or even reset default ones.
+- Recipes: customizable button now shows by default a recipe list on L. Click instead of directly searching. This is done to make it easier to run recipes without changing settings first. Previous behavior may be restored at the 'Button settings' submenu.
 - Info: changed 'Graph info' button name to 'Genre explorer'.
 - Cultural Regions: 'Other tools\Calculate same zone artists' creates now a randomly sorted playlists with all artists from the same cultural zone than the selected one. The list of artists is also output to console (previous behavior).
 - Installation: added popup warnings when scripts are installed outside foobar2000 profile folder. These checks can be tweaked at globSettings.json.

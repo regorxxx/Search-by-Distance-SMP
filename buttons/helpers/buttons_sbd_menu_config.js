@@ -1638,7 +1638,15 @@ function createConfigMenu(parent) {
 				overwriteProperties(properties); // Force overwriting
 			}
 		});
-		menu.newCheckMenu(subMenuName, 'Show shortcuts on tooltip', void (0), () => { return properties.bTooltipInfo[1]; });
+		menu.newCheckMenuLast(() => properties.bTooltipInfo[1]);
+		menu.newSeparator(subMenuName);
+		menu.newEntry({
+			menuName: subMenuName, entryText: 'Show recipe list on search', func: () => {
+				properties.bSearchRecipes[1] = !properties.bSearchRecipes[1];
+				overwriteProperties(properties); // Force overwriting
+			}
+		});
+		menu.newCheckMenuLast(() => properties.bSearchRecipes[1]);
 		menu.newSeparator(subMenuName);
 		{	// Reset
 			menu.newEntry({
