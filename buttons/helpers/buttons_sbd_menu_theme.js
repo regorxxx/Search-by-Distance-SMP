@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//06/08/25
 
 /* exported createThemeMenu */
 
@@ -12,7 +12,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable */
+/* global WshShell:readable, _isFile:readable, utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursiveFile:readable, _resolvePath:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -24,7 +24,7 @@ const themeMenu = new _menu();
 
 function createThemeMenu(parent) {
 	themeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [sbd.themesPath]);
+	const files = findRecursiveFile('*.json', [sbd.themesPath]);
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(properties.tags[1]);
 	const data = JSON.parse(properties.data[1]);

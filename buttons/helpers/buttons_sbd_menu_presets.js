@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//06/08/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -16,7 +16,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global utf8:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, findRecursivefile:readable */
+/* global utf8:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, findRecursiveFile:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global _p:readable */
 
@@ -27,7 +27,7 @@ function choosePresetMenu(parent) {
 	const properties = parent.buttonsProperties;
 	const tags = JSON.parse(parent.buttonsProperties.tags[1]);
 	const defArgs = { tags, bRandomPick: true, bHarmonicMixDoublePass: true, properties: parent.buttonsProperties };
-	const recipes = findRecursivefile('*.json', [sbd.recipesPath])
+	const recipes = findRecursiveFile('*.json', [sbd.recipesPath])
 		.map((path) => {
 			// Omit hidden files
 			const attr = _parseAttrFile(path);

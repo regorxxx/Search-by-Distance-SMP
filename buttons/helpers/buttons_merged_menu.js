@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/06/25
+//06/08/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -14,7 +14,7 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global findRecursivefile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _renameFile:readable, popup:readable */
+/* global findRecursiveFile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _renameFile:readable, popup:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 /* global RGBA:readable, toRGB:readable */
 include('..\\..\\helpers\\helpers_xxx_input.js');
@@ -28,7 +28,7 @@ const Chroma = require('..\\helpers-external\\chroma.js\\chroma-ultra-light.min'
 function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.js', [folders.xxx + 'buttons']).filter((path) => { return !path.split('\\').pop().startsWith('_'); });
+	const files = findRecursiveFile('*.js', [folders.xxx + 'buttons']).filter((path) => { return !path.split('\\').pop().startsWith('_'); });
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();

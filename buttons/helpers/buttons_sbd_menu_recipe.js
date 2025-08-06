@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//06/08/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -18,7 +18,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global WshShell:readable, _isFile:readable,utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursivefile:readable, _resolvePath:readable, _recycleFile:readable, sanitizePath:readable, sanitize:readable, _deleteFile:readable, _copyFile:readable */
+/* global WshShell:readable, _isFile:readable,utf8:readable, _save:readable, _explorer:readable, _jsonParseFileCheck:readable, _parseAttrFile:readable, _runCmd:readable, findRecursiveFile:readable, _resolvePath:readable, _recycleFile:readable, sanitizePath:readable, sanitize:readable, _deleteFile:readable, _copyFile:readable */
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
@@ -28,7 +28,7 @@ const recipeMenu = new _menu();
 
 function createRecipeMenu(parent) {
 	recipeMenu.clear(true); // Reset on every call
-	const files = findRecursivefile('*.json', [sbd.recipesPath]);
+	const files = findRecursiveFile('*.json', [sbd.recipesPath]);
 	const properties = parent.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
 	const tags = JSON.parse(properties.tags[1]);
@@ -178,7 +178,7 @@ function createRecipeMenu(parent) {
 			name: 'Recipes',
 			subMenuName: menuName,
 			list: recipes,
-			defaults: findRecursivefile(
+			defaults: findRecursiveFile(
 				'*.json',
 				[sbd.defaultRecipesPath]
 			).map((path) => {
@@ -206,7 +206,7 @@ function createRecipeMenu(parent) {
 					);
 					if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + modified.path, 'Search by distance'); }
 				} else if (event === 'defaults') {
-					const defaultFiles = findRecursivefile(
+					const defaultFiles = findRecursiveFile(
 						'*.json',
 						[sbd.defaultRecipesPath]
 					).map((from) => {
@@ -215,7 +215,7 @@ function createRecipeMenu(parent) {
 					const answer = WshShell.Popup('Delete user created recipes?\n(They will be sent to recycle bin)', 0, 'Search by distance', popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						const defaultFilePaths = new Set(defaultFiles.map((file) => file.to));
-						findRecursivefile(
+						findRecursiveFile(
 							'*.json',
 							[sbd.recipesPath]
 						).forEach((path) => !defaultFilePaths.has(path) && _recycleFile(path));
@@ -296,7 +296,7 @@ function createRecipeMenu(parent) {
 function chooseRecipeMenu(parent) {
 	recipeMenu.clear(true); // Reset on every call
 	const properties = parent.buttonsProperties;
-	const recipes = findRecursivefile('*.json', [sbd.recipesPath])
+	const recipes = findRecursiveFile('*.json', [sbd.recipesPath])
 		.map((path) => {
 			// Omit hidden files
 			const attr = _parseAttrFile(path);
