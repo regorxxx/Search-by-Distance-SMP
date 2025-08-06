@@ -103,7 +103,7 @@ const music_graph_descriptors = {
 		['Rock & Roll_supergenre'			,	['Rockabilly Revival','Garage Rock','Surf Rock','Rock & Roll','Rockabilly','Skiffle']],
 		['Classic Rock_supergenre'			,	['Proto-Metal','Heartland Rock','Arena Rock','Southern Rock','Glam Rock','Proto-Prog','Crossover Prog','Symphonic Rock','Heavy Prog','Eclectic Prog','Flamenco Rock','Krautrock','Math Rock','Neo-Prog','Italian Prog. Rock','Japanese Prog. Rock','Avant-Prog','Hard Rock','Detroit Rock','Blues Rock','Boogie Rock','Acid Rock','Psychedelic Rock','Space Rock','Raga Rock','Anatolian Rock','Psychedelic Pop','Funk Rock','British Psychedelia','Renaissance Rock','Folk-Rock','Canterbury Scene','Chicano Rock','Latin Rock','Candombe Beat','Beat Music','Tulsa Sound']],
 		['Punk Rock_supergenre'				,	['Celtic Punk','Ska Punk','Skacore','Cowpunk','Punk Pop','Grunge Punk','Riot Grrrl','Anarcho-Punk','Psychobilly','Synth-Pop','New Wave','No Wave','Post-Punk','Punk Rock','Pub Rock','Aussie Rock','Proto-Punk']],
-		['Alternative_supergenre'			,	['Electrorock','Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Celtic Rock','Pop Punk','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
+		['Alternative_supergenre'			,	['Electrorock','Post-Rock','Post-Grunge','Britpop','Sadcore','Alt. Rock','Geek Rock','Celtic Rock','Punk Pop','Math Rock','Rap Rock','Funk Metal','Grunge','Grunge Rock','Psychedelic Grunge','Grunge Punk','Classic Grunge','Dream Pop','Shoegaze','Noise Rock','Proto-Stoner Rock']],
 		['Hardcore Punk_supergenre'			,	['Metalcore','Post-Hardcore','Math Rock','Grindcore','Crossover Thrash','Hardcore Punk','Anarcho-Punk','Stoner Rock','Stoner Sludge','Proto-Stoner Rock']],
 		['Contemporary_supergenre'			,	['Indie','Freak Folk','Neo-Prog','Dance-Punk','Chillwave','Garage Punk','Garage Rock Revival','Post-Punk Revival','Emo Rock','Post-Britpop','Neo-Psychedelia','Contemporary Rock','90s Rock','Garage Pop','Retro Rock','Afro-Rock']],
 		['Pop_supergenre'					,	['Hyperpop','Digicore', 'Glitchcore','Classical Crossover','Urban Breaks','Electropop','Ambient Rock','Indie','Freak Folk','Hypersoul','Chillwave','Sophisti-Pop','Electroclash','Post-Britpop','Emo Pop','K-Pop','J-Pop','Kayokyoku','Britpop','Dance-Rock','Italo Disco','Dance Pop','Dream Pop','Shoegaze','Disco Pop','Eurodisco','Europop','Synth-Pop','80s Rock','Soft Rock','Power Pop','Chanson','Sunshine Pop','Psychedelic Pop','Pop Rock','Jazz-Pop','Baroque Pop','Songwriter','Country Pop','Brill Building Sound','Skiffle','Close Harmony']],
@@ -152,7 +152,7 @@ const music_graph_descriptors = {
 		['Progressive Psychedelic Fusion XL',	['Canterbury Scene','Eclectic Prog','Krautrock']],
 		['Classic Rock XL'					,	['Proto-Prog','Arena Rock','Southern Rock','Hard Rock','Aussie Rock','Detroit Rock','90s Rock','Boogie Rock','Blues Rock','Acid Rock','Folk-Rock','Beat Music','Raga Rock']],
 		['Psy XL & Gaze'					,	['Dream Pop','Shoegaze','Dance-Punk','Acid Rock','Space Rock','Psychedelic Rock','Psychedelic Folk','Psychedelic Rap','British Psychedelia','Psychedelic Pop','Neo-Psychedelia','Psychedelic Grunge','Psychedelic Blues','Psychedelic Funk','Psychedelic Soul','Raga Rock']],
-		['Punk XL'							,	['Proto-Punk','Punk Rock','Anarcho-Punk','Psychobilly','Pop Punk','Grunge Punk','Riot Grrrl','Industrial Punk','Celtic Punk','Ska Punk','Cowpunk','Skacore']],
+		['Punk XL'							,	['Proto-Punk','Punk Rock','Anarcho-Punk','Psychobilly','Punk Pop','Grunge Punk','Riot Grrrl','Industrial Punk','Celtic Punk','Ska Punk','Cowpunk','Skacore']],
 		['Classic Metal XL'					,	['Neo-Classical Metal','British Metal','Glam Metal','Hair Metal','Pop Metal','Classic Metal','Proto-Metal']],
 		['Black Metal XL'					,	['Gothic Metal','Black Metal','Atmospheric Black Metal','Death Metal','Doom Metal']],
 		['Thrash Metal XL'					,	['Groove Metal','Crossover Thrash','Thrash Metal']],
@@ -264,7 +264,7 @@ const music_graph_descriptors = {
 		['Post-Britpop'						,	['Britpop','Indie']],
 		['Garage Rock Revival'				,	['Post-Punk Revival','Dance-Punk','Post-Punk','Garage Rock','Garage Punk','Garage Pop']],
 		['Brill Building Sound'				,	['Pop Rock','Power Pop','Rock & Roll']],
-		['Power Pop'						,	['Beat Music','Brill Building Sound','Pop Punk']],
+		['Power Pop'						,	['Beat Music','Brill Building Sound','Punk Pop']],
 		['Hillbilly'						,	['Rock & Roll','Rockabilly','Skiffle','Honky Tonk','Bluegrass','Progressive Bluegrass','Country Boogie']],
 		['Honky Tonk'						,	['Hillbilly','Rockabilly','Skiffle','Outlaw Country','Nashville Sound','Bakersfield Sound','Neo-Traditional Country','Country Boogie']],
 		['Bakersfield Sound'				,	['Outlaw Country','Honky Tonk']],
@@ -300,7 +300,7 @@ const music_graph_descriptors = {
 		['Appalachian'						,	['Old-Timey','Bluegrass','Traditional American Folk XL','Traditional Country']],
 		['Industrial Punk'					,	['Industrial Rock']],
 		['Krautrock'						,	['Post-Rock','Post-Punk']],
-		['Proto-Punk'						,	['Punk Rock','Pop Punk']],
+		['Proto-Punk'						,	['Punk Rock','Punk Pop']],
 		['Celtic Punk'						,	['Punk Rock']],
 		['Ska Punk'							,	['Ska','Skacore']],
 		['Cowpunk'							,	['Alt. Country','Roots Rock','Americana']],
@@ -628,7 +628,8 @@ const music_graph_descriptors = {
 		['Afrobeat'							,	['Afrofunk'							]],
 		['Muiñeira'							,	['Muñeira'							]],
 		['Jota'								,	['Xota'								]],
-		['Hardtechno'						,	['Hard Techno'						]]
+		['Hardtechno'						,	['Hard Techno'						]],
+		['Punk Pop'							,	['Pop Punk'							]]
 	],
 	// Arbitrary classification of style clusters into folksonomy groups
 	style_cluster_groups: [

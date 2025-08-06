@@ -65,6 +65,7 @@
 - Descriptors: added Uptempo Hardcore, Digicore, Glitchcore, Psychedelic Techno, Barcarola, Tribal House, Acid Techno, Hyperpop, Jersey Club, Muiñeira, Alalá, Afro-Rock, Afrobeat, Classical Crossover, Corrido, Drill, Bubblegum Bass, Deconstructed Club, Big Room House and Corrido Tumbado styles.
 - Descriptors: added Galician Folk XL, Mainstream Electronic and Latin Urban Music & Rap XL cluster.
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
+- Descriptors: merged Punk Pop and Pop Punk into a single node (Punk Pop). Pop Punk is now a substitution.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 - Other tools: added new entries at 'other tools' to calculate similarity between tracks and report the score.
