@@ -1,5 +1,5 @@
 ﻿'use strict';
-//19/06/25
+//06/08/25
 
 /* exported scatterByTags, intercalateByTags, shuffleByTags */
 
@@ -99,7 +99,7 @@ function scatterByTags({
 				plsItemsBelow.MakeIntersection(clone);
 				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
-			if (end < 0 || !idx.lenth) {
+			if (end < 0 || !idx.length) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
@@ -214,7 +214,7 @@ function intercalateByTags({
 				plsItemsBelow.MakeIntersection(clone);
 				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
-			if (end < 0 || !idx.lenth) {
+			if (end < 0 || !idx.length) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
@@ -241,7 +241,7 @@ function intercalateByTags({
  * @param {object} o
  * @param {string} o.tagName? - [='ALBUM ARTIST'] Tag(s) used to intercalate its values. Multiple tags may be provided separated by ; or ,
  * @param {FbMetadbHandleList|null} o.selItems? - Handle List. Selected items from active playlist if not provided.
- * @param {{handleArray: FbMetadbHandle[], dataArray: any[], tagsArray: any[]}} o.data? - A handle list may be passsed as an array with additional data which should be sorted too. Shallow copies are made.
+ * @param {{handleArray: FbMetadbHandle[], dataArray: any[], tagsArray: any[]}} o.data? - A handle list may be passed as an array with additional data which should be sorted too. Shallow copies are made.
  * @param {Boolean} o.bMultiple? - [=false] Parse multi-value tags and match any value.
  * @param {Boolean} o.bSendToActivePls? - [=true] Flag to send output to active playlist.
  * @param {Boolean} o.bAdvancedShuffle? - [=false] Flag to try scattering instrumental, live tracks, ...
@@ -550,7 +550,7 @@ function shuffleByTags({
 				plsItemsBelow.MakeIntersection(clone);
 				if (plsItemsBelow.Count === totalTracks) { idx = range(end, focusIdx, 1); }
 			}
-			if (end < 0 || !idx.lenth) {
+			if (end < 0 || !idx.length) {
 				const plsItemsOver = new FbMetadbHandleList(plsItems.slice(focusIdx, focusIdx + totalTracks));
 				plsItemsOver.Sort();
 				plsItemsOver.MakeIntersection(clone);
