@@ -1,9 +1,9 @@
 ﻿'use strict';
-//05/08/25
+//06/08/25
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable, sendToPlaylist:readable, queryCombinations:readable, removeDuplicatesAsync:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, calculateTrackSimilarity:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable, sendToPlaylist:readable, queryCombinations:readable, removeDuplicatesAsync:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -150,7 +150,7 @@ function createConfigMenu(parent) {
 	// Header
 	menu.newEntry({ entryText: 'Set settings (overwritten by recipe):', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
-	{	// Anaylisis Methods
+	{	// Analysis Methods
 		const menuName = menu.newMenu('Analysis method');
 		menu.newEntry({ menuName, entryText: 'How similar tracks are searched:', func: null, flags: MF_GRAYED });
 		menu.newSeparator(menuName);
@@ -395,7 +395,7 @@ function createConfigMenu(parent) {
 						}, flags: bRecipe ? MF_GRAYED : MF_STRING
 					});
 				});
-				menu.newCheckMenuLast(() => options.indexOf(tag.scoringDistribution),  options);
+				menu.newCheckMenuLast(() => options.indexOf(tag.scoringDistribution), options);
 			}
 			if (!menu.isLastEntrySep) { menu.newSeparator(subMenuName); }
 			if (!bLiteMode && !['related', 'unrelated'].includes(key)) { // Base score
@@ -693,7 +693,7 @@ function createConfigMenu(parent) {
 									'When this option is enabled, multi-value tags are parsed independently and a track may be considered a duplicate if at least one of those values match (instead of requiring all to match in the same order).\n\nSo for \'[ARTIST, DATE, TITLE]\' tags, these are duplicates with this option enabled:\n' +
 									'\nJimi Hendrix - 1969 - Blabla' +
 									'\nJimi Hendrix experience, Jimi Hendrix - 1969 - Blabla' +
-									'\nBand of Gypys, Jimi Hendrix - 1969 - Blabla' +
+									'\nBand of Gypsys, Jimi Hendrix - 1969 - Blabla' +
 									'\n\nWith multi-value parsing disabled, these are considered non-duplicated tracks since not all artists match.',
 									'Search by distance'
 								);
@@ -1421,6 +1421,20 @@ function createConfigMenu(parent) {
 							.finally(() => console.log('Same zone artists:\n\t ' + artists.join(', ')));
 					}
 				}
+			});
+		}
+		menu.newSeparator(subMenu);
+		{ // Track similarity
+			const flags = plman.ActivePlaylist !== -1 && plman.GetPlaylistSelectedItems(plman.ActivePlaylist).Count > 1 ? MF_STRING : MF_GRAYED;
+			menu.newEntry({
+				menuName: subMenu, entryText: 'Calculate focused track similarity', func: () => {
+					calculateTrackSimilarity({ sel: fb.GetFocusItem(true), properties });
+				}, flags
+			});
+			menu.newEntry({
+				menuName: subMenu, entryText: 'Calculate selected tracks similarity', func: () => {
+					calculateTrackSimilarity({ properties });
+				}, flags
 			});
 		}
 		if (!bLiteMode) { // Relate tracks

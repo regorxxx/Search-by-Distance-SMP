@@ -1,7 +1,7 @@
 ﻿'use strict';
-//11/06/25
+//06/08/25
 
-/* exported calculateSimilarArtistsFromPls, addTracksRelation */
+/* exported calculateSimilarArtistsFromPls, addTracksRelation, calculateTrackSimilarity */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, getNearestGenreStyles:readable */
@@ -9,7 +9,7 @@ include('search_by_distance.js');
 include('..\\music_graph\\music_graph_descriptors_xxx_node.js');
 // music_graph_descriptors.nodeList
 include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
-/* global updateTrackSimilarTags:readable, updateSimilarDataFile:radable, updateSimilarDataFile:readable */
+/* global updateTrackSimilarTags:readable, updateSimilarDataFile:readable, updateSimilarDataFile:readable */
 
 /**
  * Output similar artists to the one from input FbMetadbHandle using (@see {@link searchByDistance})
@@ -149,7 +149,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties } = {}) {
 	const handleList = removeDuplicates({ handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist] });
 	const time = secondsToTime(Math.round(handleList.Count * 5 * fb.GetLibraryItems().Count / 70000));
-	if (WshShell.Popup('Process [diferent] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) { return; }
+	if (WshShell.Popup('Process [different] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) { return; }
 	let profiler = new FbProfiler('Calculate similar artists');
 	const newData = [];
 	const handleArr = handleList.Convert();
@@ -167,7 +167,7 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 	).join('\n\n');
 	fb.ShowPopupMessage(report, 'Search by distance');
 	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Similar artists', popup.question + popup.yes_no) === popup.yes) {
-		updateTrackSimilarTags({data: newData, iNum, tagName, windowName: 'Search by distance', bPopup: false });
+		updateTrackSimilarTags({ data: newData, iNum, tagName, windowName: 'Search by distance', bPopup: false });
 	}
 	return newData;
 }
@@ -229,4 +229,42 @@ function addTracksRelation({
 		return false;
 	}
 	return true;
+}
+
+async function calculateTrackSimilarity({ sel = null, items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), properties } = {}) {
+	{ // Deduplicate and preserve sorting
+		const temp = items.Clone();
+		items = items.Clone();
+		items.Sort();
+		items = FbMetadbHandleList.partialSort(items, temp);
+	}
+	const titles = getHandleListTags(items, [globTags.titleRaw], { bMerged: true });
+	let profiler = new FbProfiler('Calculate track similarity');
+	const newData = [];
+	const itemCount = items.Count;
+	for (let i = 0, handleList; i < itemCount; i++) {
+		if (!sel) {
+			handleList = items.Clone();
+			handleList.RemoveById(i);
+		} else {
+			handleList = items;
+			items.Remove(sel);
+		}
+		const output = await searchByDistance({
+			sel: sel || items[i],
+			trackSource: { sourceType: 'handleList', sourceArg: handleList },
+			properties, theme: null, recipe: properties.recipe[1], bCreatePlaylist: false, scoreFilter: 0, graphDistance: Infinity, bBasicLogging: false, bSearchDebug: false, bShowFinalSelection: false, bProfile: false, bShowQuery: false, bProgressiveListOrder: true, bSortRandom: false, bInverseListOrder: false, bSmartShuffle: false, bInKeyMixingPlaylist: false
+		});
+		if (output) {
+			newData.push(titles[i] + ':');
+			newData.push('\t' + output[1].map((score) => score.name + ' - ' + score.score).join('\n\t'));
+			newData.push('\n');
+		}
+		if (sel) { break; }
+	};
+	if (!newData.length) { console.log('Nothing found.'); return []; }
+	profiler.Print();
+	const report = newData.join('\n');
+	fb.ShowPopupMessage(report, 'Search by distance');
+	return newData;
 }
