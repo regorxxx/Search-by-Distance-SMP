@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/08/24
+//06/08/25
 
 /* exported findCountryCoords,isNearCountry, findCountry, getCountryName, alpha3toAlpha2, nameReplacersRev, nameShortRev */
 
@@ -16,22 +16,22 @@ function findCountryCoords({ id /* country */, mapWidth, mapHeight, factorX, fac
 	const isoCode = getCountryISO(id);
 	if (isoCode.length) {
 		let [latitude, longitude] = isoCoordinates.get(isoCode);
-		if (latitude != null) { xy = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY); }
+		if (latitude != null) { xy = mercatorProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY); }
 	}
 	return xy;
 }
 
-function mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY) {
+function mercatorProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY) {
 	const x = round((longitude + 180) * (mapWidth * factorX / 100 / 360), 0);
 	const latRad = latitude * Math.PI / 180; // convert from degrees to radians
-	const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
-	const y = round((mapHeight * factorY / 100 / 2) - (mapWidth * factorX / 100 * mercN / (2 * Math.PI)), 0);
+	const mercatorN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
+	const y = round((mapHeight * factorY / 100 / 2) - (mapWidth * factorX / 100 * mercatorN / (2 * Math.PI)), 0);
 	return [x, y];
 }
 
 function calcProximity(coord, x, y, mapWidth, mapHeight, factorX, factorY) {
 	const [latitude, longitude] = coord;
-	const [xCoord, yCoord] = mercProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);
+	const [xCoord, yCoord] = mercatorProj(latitude, longitude, mapWidth, mapHeight, factorX, factorY);
 	const xProx = x < xCoord ? x / xCoord : xCoord / x;
 	const yProx = y < yCoord ? y / yCoord : yCoord / y;
 	return [xProx, yProx];
