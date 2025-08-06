@@ -1,5 +1,5 @@
 ﻿'use strict';
-//22/12/24
+//06/08/25
 
 /* global music_graph_descriptors:readable */
 
@@ -89,8 +89,8 @@ music_graph_descriptors.filterDuplicatedSubstitutions = function filterDuplicate
 };
 
 music_graph_descriptors.getAntiInfluences = function getAntiInfluences(genreStyle) {
-	const dbleIdx = this.style_anti_influence.flat().indexOf(this.getSubstitution(genreStyle));
-	const idx = !(dbleIdx & 1) ? dbleIdx / 2 : -1; // -1 for odd indexes, halved for even values
+	const doubleIdx = this.style_anti_influence.flat().indexOf(this.getSubstitution(genreStyle));
+	const idx = !(doubleIdx & 1) ? doubleIdx / 2 : -1; // -1 for odd indexes, halved for even values
 	return idx !== -1 ? [...this.style_anti_influence[idx][1]] : [];
 };
 
@@ -100,8 +100,8 @@ music_graph_descriptors.getConditionalAntiInfluences = function getConditionalAn
 };
 
 music_graph_descriptors.getInfluences = function getInfluences(genreStyle) {
-	const dbleIdx = this.style_primary_origin.flat().indexOf(this.getSubstitution(genreStyle));
-	const idx = !(dbleIdx & 1) ? dbleIdx / 2 : -1; // -1 for odd indexes, halved for even values
+	const doubleIdx = this.style_primary_origin.flat().indexOf(this.getSubstitution(genreStyle));
+	const idx = !(doubleIdx & 1) ? doubleIdx / 2 : -1; // -1 for odd indexes, halved for even values
 	return idx !== -1 ? [...this.style_primary_origin[idx][1]] : [];
 };
 

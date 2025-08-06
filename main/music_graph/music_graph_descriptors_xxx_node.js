@@ -1,5 +1,5 @@
 ﻿'use strict';
-//13/06/24
+//06/08/25
 
 /*
 	Inverse mapping for the graph
@@ -130,8 +130,8 @@
 			let styleCluster = new Set();
 			switch (true) {
 				case bStyleCluster: {
-					const childs = music_graph_descriptors.style_cluster[i][1];
-					childs.forEach((child) => {
+					const children = music_graph_descriptors.style_cluster[i][1];
+					children.forEach((child) => {
 						const node = nodeList.get(child);
 						if (!node) {return;}
 						node.superGenre.forEach((sg) => {

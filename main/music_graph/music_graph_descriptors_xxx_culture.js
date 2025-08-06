@@ -1,5 +1,5 @@
 ﻿'use strict';
-//31/07/25
+//06/08/25
 
 // Required since this script is loaded on browsers for drawing too!
 if (typeof include !== 'undefined') {
@@ -147,14 +147,14 @@ music_graph_descriptors_culture.getStyleRegion = function (style) {
 	const len = styles.length;
 	let regions = null;
 	for (let i = 0; i < len; i++) {
-		if (this.ommit.has(styles[i])) { break; }
+		if (this.omit.has(styles[i])) { break; }
 		regions = this.nodeList.get(styles[i]) || this.getNodeRegion(styles[i]);
 		if (Object.keys(regions).length) { break; }
 	}
 	return regions;
 };
 
-music_graph_descriptors_culture.ommit = new Set(['Industrial_supergenre', 'Blues_supergenre', 'Metal_supergenre', 'Classic Rock_supergenre', 'Pop_supergenre', 'Contemporary_supergenre', 'Classical Modernist Era_supergenre', 'Modern Folk_supergenre', 'Punk Rock_supergenre', 'Alternative_supergenre', 'Hardcore Punk_supergenre', 'R&B_supergenre', 'Gospel_supergenre', 'Jazz_supergenre', 'Rap_supergenre', 'Breakbeat_supergenre', 'Drum & Bass_supergenre', 'Hardcore_supergenre', 'House_supergenre', 'Techno_supergenre', 'Trance_supergenre', 'Downtempo_supergenre', 'Punk XL', 'Classic Metal XL', 'Black Metal XL', 'Thrash Metal XL', 'Alt. Metal XL', 'Progressive Alt. Metal XL', 'Contemporary Alt. Metal XL', 'Stoner Metal XL', 'Grunge XL', 'Stoner XL', 'Doom XL', 'Extreme Metal XL', 'Mainstream Pop', 'Traditional Pop', 'Vocal Pop', 'Disco XL', 'Post-Disco XL', 'Soft Pop XL', 'Urban', 'Alt. Rap XL', 'Downtempo Rap XL', 'Deep Soul XL', 'Modern Blues XL', 'Synth & Wave XL', 'Lounge XL', 'Psy XL & Gaze', 'Chill Folk XL', 'New Age XL', 'New Age Folk XL', 'Modern Folk XL', 'Neo Folk XL', 'Ambient XL', 'Electro House XL', 'Electro XL', 'Progressive Rock XL', 'Classic Rock XL', 'Progressive Psychedelic Fusion XL', 'Classical Music_supercluster', 'Folk Music_supercluster', 'Electronic Music_supercluster', 'Rock_cluster', 'Progressive Electronic', 'Modern Jazz', 'Loungetronica', 'House']);
+music_graph_descriptors_culture.omit = new Set(['Industrial_supergenre', 'Blues_supergenre', 'Metal_supergenre', 'Classic Rock_supergenre', 'Pop_supergenre', 'Contemporary_supergenre', 'Classical Modernist Era_supergenre', 'Modern Folk_supergenre', 'Punk Rock_supergenre', 'Alternative_supergenre', 'Hardcore Punk_supergenre', 'R&B_supergenre', 'Gospel_supergenre', 'Jazz_supergenre', 'Rap_supergenre', 'Breakbeat_supergenre', 'Drum & Bass_supergenre', 'Hardcore_supergenre', 'House_supergenre', 'Techno_supergenre', 'Trance_supergenre', 'Downtempo_supergenre', 'Punk XL', 'Classic Metal XL', 'Black Metal XL', 'Thrash Metal XL', 'Alt. Metal XL', 'Progressive Alt. Metal XL', 'Contemporary Alt. Metal XL', 'Stoner Metal XL', 'Grunge XL', 'Stoner XL', 'Doom XL', 'Extreme Metal XL', 'Mainstream Pop', 'Traditional Pop', 'Vocal Pop', 'Disco XL', 'Post-Disco XL', 'Soft Pop XL', 'Urban', 'Alt. Rap XL', 'Downtempo Rap XL', 'Deep Soul XL', 'Modern Blues XL', 'Synth & Wave XL', 'Lounge XL', 'Psy XL & Gaze', 'Chill Folk XL', 'New Age XL', 'New Age Folk XL', 'Modern Folk XL', 'Neo Folk XL', 'Ambient XL', 'Electro House XL', 'Electro XL', 'Progressive Rock XL', 'Classic Rock XL', 'Progressive Psychedelic Fusion XL', 'Classical Music_supercluster', 'Folk Music_supercluster', 'Electronic Music_supercluster', 'Rock_cluster', 'Progressive Electronic', 'Modern Jazz', 'Loungetronica', 'House']);
 
 // Populate with substitutions
 (function () {

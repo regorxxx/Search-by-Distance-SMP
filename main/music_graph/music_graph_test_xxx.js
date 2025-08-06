@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/24
+//06/08/25
 
 /* exported testGraphNodes, testGraphNodeSets */
 
@@ -8,10 +8,10 @@
 // FOR TESTING: compares genre/style A to Band computes distance (similar to the main function for individual links)
 // Tip: Use html rendering to find relevant nodes to test. i.e. it's much easier to find distant nodes or possible paths.
 // Uses NBA pathFinder as default.
-function testGraphNodes(mygraph) {
+function testGraphNodes(myGraph) {
 	const test = new FbProfiler('Test nodes');
 	let path = [];
-	let idpath = '';
+	let idPath = '';
 	let distance = Infinity;
 	let influence = 0;
 	[ // here both keys...
@@ -51,9 +51,9 @@ function testGraphNodes(mygraph) {
 	].forEach((o) => {
 		if (Object.hasOwn(o, 'name')) {console.log(o.name);}
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
-			({distance, influence, path} = calcGraphDistance(mygraph, o.from, o.to, true));
-			idpath = getNodesFromPath(path);
-			console.log(idpath + '\t' + distance + ' (' + influence + ')'); // DEBUG
+			({distance, influence, path} = calcGraphDistance(myGraph, o.from, o.to, true));
+			idPath = getNodesFromPath(path);
+			console.log(idPath + '\t' + distance + ' (' + influence + ')'); // DEBUG
 		}
 	});
 	test.Print('', false);
@@ -64,7 +64,7 @@ function testGraphNodes(mygraph) {
 // 		'[' ''$meta_sep(genre,''',' '')'', ''$meta_sep(style,''',' '')''' '']'
 // It will output things like this, ready to use here:
 // 		[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]
-function testGraphNodeSets(mygraph) {
+function testGraphNodeSets(myGraph) {
 	const test = new FbProfiler('Test node sets');
 	// EDIT HERE
 	[
@@ -200,7 +200,7 @@ function testGraphNodeSets(mygraph) {
 	].forEach((o) => {
 		if (Object.hasOwn(o, 'name')) {console.log(o.name);}
 		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
-			console.log(o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(mygraph, o.from, o.to)); // DEBUG
+			console.log(o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(myGraph, o.from, o.to)); // DEBUG
 		}
 	});
 
