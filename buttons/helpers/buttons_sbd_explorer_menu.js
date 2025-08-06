@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/08/25
+//06/08/25
 
 /* exported graphInfoMenu */
 
@@ -169,8 +169,8 @@ function graphInfoMenu() {
 							{ // Data from descriptors
 								header('Genre explorer:');
 								const data = clone(music_graph_descriptors.nodeList.get(node));
-								const nodeSet = music_graph_descriptors.getNodeSet(false);
 								if (data) {
+									const nodeSet = music_graph_descriptors.getNodeSet(false);
 									bFoundGraph = true;
 									for (let key in data) {
 										switch (key) { // NOSONAR
@@ -380,20 +380,22 @@ function graphInfoMenu() {
 							const node = music_graph_descriptors.getSubstitution(tagVal);
 							const playlistName = 'Related genres: ' + tagVal;
 							const data = music_graph_descriptors.nodeList.get(node);
-							const nodeSet = music_graph_descriptors.getNodeSet(false);
-							const influences = [...(data.primaryOrigin || []), ...(data.secondaryOrigin || []), ...(data.weakSubstitution || [])];
-							influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
-							if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific originary or derivative form.', playlistName); return; }
-							const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf || []).flat(Infinity).filter(Boolean), 'OR'), 'OR') || '';
-							const bShift = utils.IsKeyPressed(VK_SHIFT);
-							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
-							if (bShift || bCtrl) {
-								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
-								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
-							} else {
-								console.log('Query: ' + query);
-								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
-							}
+							if (data) {
+								const nodeSet = music_graph_descriptors.getNodeSet(false);
+								const influences = [...(data.primaryOrigin || []), ...(data.secondaryOrigin || []), ...(data.weakSubstitution || [])];
+								influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
+								if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific originary or derivative form.', playlistName); return; }
+								const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf || []).flat(Infinity).filter(Boolean), 'OR'), 'OR') || '';
+								const bShift = utils.IsKeyPressed(VK_SHIFT);
+								const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+								if (bShift || bCtrl) {
+									if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+									else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+								} else {
+									console.log('Query: ' + query);
+									sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+								}
+							} else { fb.ShowPopupMessage('Genre/style not found on graph.', 'Genre explorer'); }
 						}, flags: (tagVal || entry.bInput ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
 					});
 				});
@@ -434,20 +436,22 @@ function graphInfoMenu() {
 							const node = music_graph_descriptors.getSubstitution(tagVal);
 							const playlistName = 'Opposed genres: ' + tagVal;
 							const data = music_graph_descriptors.nodeList.get(node);
-							const nodeSet = music_graph_descriptors.getNodeSet(false);
-							const influences = [...(data.antiInfluence || [])];
-							influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
-							if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific anti-derivative form.', playlistName); return; }
-							const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf || []).flat(Infinity).filter(Boolean), 'OR'), 'OR') || '';
-							const bShift = utils.IsKeyPressed(VK_SHIFT);
-							const bCtrl = utils.IsKeyPressed(VK_CONTROL);
-							if (bShift || bCtrl) {
-								if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
-								else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
-							} else {
-								console.log('Query: ' + query);
-								sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
-							}
+							if (data) {
+								const nodeSet = music_graph_descriptors.getNodeSet(false);
+								const influences = [...(data.antiInfluence || [])];
+								influences.forEach((sg) => nodeSet.has(sg) ? sg : music_graph_descriptors.replaceWithSubstitutionsReverse([sg])[0]);
+								if (!influences.length) { fb.ShowPopupMessage('No results found.\n\nThis may happen if the selected genre/style doesn\'t have any specific anti-derivative form.', playlistName); return; }
+								const query = queryJoin(queryCombinations(influences, entries.map((e) => e.tf || []).flat(Infinity).filter(Boolean), 'OR'), 'OR') || '';
+								const bShift = utils.IsKeyPressed(VK_SHIFT);
+								const bCtrl = utils.IsKeyPressed(VK_CONTROL);
+								if (bShift || bCtrl) {
+									if (bShift && !bCtrl) { fb.ShowLibrarySearchUI(query); }
+									else { plman.ActivePlaylist = plman.CreateAutoPlaylist(plman.PlaylistCount, playlistName, query); }
+								} else {
+									console.log('Query: ' + query);
+									sendToPlaylist(fb.GetQueryItems(fb.GetLibraryItems(), query), playlistName);
+								}
+							} else { fb.ShowPopupMessage('Genre/style not found on graph.', 'Genre explorer');}
 						}, flags: (tagVal || entry.bInput ? MF_STRING : MF_GRAYED) | (!bSingle && i % 8 === 0 && i ? MF_MENUBREAK : MF_STRING), data: { bDynamicMenu: true }
 					});
 				});

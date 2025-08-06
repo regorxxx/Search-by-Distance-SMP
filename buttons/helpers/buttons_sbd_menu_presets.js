@@ -90,7 +90,7 @@ function choosePresetMenu(parent) {
 			const entryText = recipe.name + '\t' + _p(recipe.method);
 			presetMenu.newEntry({
 				menuName, entryText, func: () => {
-					searchByDistance({ properties, theme: properties.theme[1], recipe: recipe.path, parent });
+					searchByDistance({ properties, recipe: recipe.path, parent });
 				}
 			});
 		});
