@@ -67,6 +67,7 @@
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
+- Other tools: added new entries at 'other tools' to calculate similarity between tracks and report the score.
 - Info: added hated stats.
 - Info: added artist stats. Total artists from selected genre and top 5 artists (by # tracks).
 - Info: added similar genres stats.
@@ -145,6 +146,7 @@
 - Console: wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
 - UI: multiple workarounds for rounded rectangles not being painted properly or producing crashes (SMP limitation).
 - Fixed some inconsistencies with  [foo_playcount_2003](https://marc2k3.github.io/component/playcount-2003/) support.
+- Ensure that one track compared to itself reports a 100% score similarity. Previously it could be off by a few decimals due to rounding errors.
 - Fixed some misspelled terms on UI and variables (which also lead to some minor bugs).
 
 ## [7.6.0] - 2024-10-09
