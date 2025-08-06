@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/07/25
+//06/08/25
 
 /*
 	These are the variables of the music graph: nodes (styles and genres), links, link weighting (aka distance) and rendering settings.
@@ -67,7 +67,7 @@ const music_graph_descriptors = {
 	style_supergenre_supercluster: [
 		['Heavy Music_supercluster'				,	['Industrial_cluster','Metal_cluster','Punk Rock_supergenre','Hardcore Punk_supergenre']],
 		['Pop & Rock Music_supercluster'		,	['Rock_cluster','Pop_cluster','Country_cluster']],
-		['Rythm Music_supercluster'				,	['R&B_cluster','Blue_Note_cluster','Jamaican_cluster','Rap_cluster']],
+		['Rhythm Music_supercluster'			,	['R&B_cluster','Blue_Note_cluster','Jamaican_cluster','Rap_cluster']],
 		['Electronic Music_supercluster'		,	['Breakbeat Dance_cluster','Four-to-the-floor Dance_cluster','Downtempo_cluster']],
 		['Folk Music_supercluster'				,	['Folk_cluster'					]],
 		['Classical Music_supercluster'			,	['Classical Music_cluster'		]]
@@ -439,7 +439,7 @@ const music_graph_descriptors = {
 	// Anti-influences. Styles so different that are considered to be heavily distanced, even if the belong to the same genre parent.
 	// For ex. 'Americana' and 'British Folk-Rock' are both 'Folk' styles, but they are considered to be farther away than other 'Folk' styles.
 	style_anti_influence: [
-		['Classical Music_supercluster'		,	['Heavy Music_supercluster','Pop & Rock Music_supercluster','Rythm Music_supercluster','Breakbeat Dance_cluster','Four-to-the-floor Dance_cluster','Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre','Rap_cluster','Hardcore Punk_supergenre','Electronic Music_supercluster','Techno_supergenre','House_supergenre','Trance_supergenre','Folk-Rock','Alt. Rock']],
+		['Classical Music_supercluster'		,	['Heavy Music_supercluster','Pop & Rock Music_supercluster','Rhythm Music_supercluster','Breakbeat Dance_cluster','Four-to-the-floor Dance_cluster','Industrial_supergenre','Metal_supergenre','Classic Rock XL','Rock_cluster','Punk Rock_supergenre','Pop_supergenre','Country_supergenre','Blues_supergenre','Jazz_supergenre','Rap_cluster','Hardcore Punk_supergenre','Electronic Music_supercluster','Techno_supergenre','House_supergenre','Trance_supergenre','Folk-Rock','Alt. Rock']],
 		['British Folk-Rock'				,	['Americana','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
 		['British Folk-Jazz'				,	['Americana','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
 		['Folk Baroque'						,	['Americana','Country_supergenre','Country Rock','Country Folk','Heartland Rock','Sunshine Pop','Beat Music','Roots Rock']],
@@ -818,7 +818,7 @@ const music_graph_descriptors = {
 		// Supergenre SuperClusters
 		['Heavy Music_supercluster'				,'#D88417'],
 		['Pop & Rock Music_supercluster'		,'#F9FF03'],
-		['Rythm Music_supercluster'				,'#006da8'],
+		['Rhythm Music_supercluster'			,'#006da8'],
 		['Electronic Music_supercluster'		,'#950610'],
 		['Folk Music_supercluster'		 		,'#D4F900'],
 		['Classical Music_supercluster'	 		,'#adadad'],
