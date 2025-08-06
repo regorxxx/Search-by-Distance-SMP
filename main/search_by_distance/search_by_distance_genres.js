@@ -1,5 +1,5 @@
 ﻿'use strict';
-//28/07/25
+//06/08/25
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles, getNearestGenreStylesV2 */
 
@@ -37,7 +37,7 @@ function getNearestNodes(fromNode, maxDistance, graph = musicGraph()) {
 }
 
 function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph()) {
-	let genreStyles = [...fromGenreStyles]; // Include theirselves
+	let genreStyles = [...fromGenreStyles]; // Include themselves
 	fromGenreStyles.forEach((node) => {
 		getNearestNodes(node, maxDistance, graph).forEach((obj) => genreStyles.push(obj.toId));
 	});
@@ -47,7 +47,7 @@ function getNearestGenreStyles(fromGenreStyles, maxDistance, graph = musicGraph(
 }
 
 function getNearestGenreStylesV2(fromGenreStyles, maxDistance, maxPerNode = 5, graph = musicGraph()) {
-	let genreStyles = [...fromGenreStyles]; // Include theirselves
+	let genreStyles = [...fromGenreStyles]; // Include themselves
 	fromGenreStyles.forEach((node) => {
 		getNearestNodes(node, maxDistance, graph).sort((a, b) => a.distance - b.distance).slice(0, maxPerNode + 1).forEach((obj) => genreStyles.push(obj.toId));
 	});
@@ -98,7 +98,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 		'[scripts folder]\\main\\music_graph\\music_graph_descriptors_xxx.js\n' +
 		'[profile folder]\\js_data\\helpers\\music_graph_descriptors_xxx_user.js' + (userFileNotFound || userFileEmpty) + '\n\n' +
 		(missing.length > 5
-			? 'If you don\'t plan to retag your files or add substitutions and there are\n' +
+			? 'If you don\'t plan to re-tag your files or add substitutions and there are\n' +
 			'too many missing genre/styles, then it\'s recommended to use only\n' +
 			'\'WEIGHT\' or \'DYNGENRE\' methods on the scripts.\n\n'
 			: '') +
