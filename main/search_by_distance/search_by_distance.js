@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//06/08/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -50,7 +50,7 @@ var bLoadTags = true; // NOSONAR [shared on files]
 include('..\\..\\helpers\\helpers_xxx.js');
 /* global isFoobarV2:readable, checkCompatible:readable, globTags:readable, folders:readable, globQuery:readable, iDelayLibrary:readable */
 /* global debounce:readable, doOnce:readable, clone:readable , memoize:readable */
-/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable, findRecursivefile:readable, _copyFile:readable */
+/* global _isFile:readable, _deleteFile:readable, utf8:readable, _open:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable, popup:readable, findRecursiveFile:readable, _copyFile:readable */
 /* global memoryPrint:readable */
 include('..\\..\\helpers\\helpers_xxx_crc.js');
 /* global crc32:readable */
@@ -566,12 +566,12 @@ if (!_isFile(sbd.recipesPath + 'allowedKeys.txt') || bMismatchCRC) {
 	}
 	// Copy docs
 	_save(sbd.recipesPath + 'allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
-	_copyFile(folders.xxx + 'presets\\Search by\\readme.txt',folders.userPresets + 'themes_recipes_readme.txt', true);
+	_copyFile(folders.xxx + 'presets\\Search by\\readme.txt', folders.userPresets + 'themes_recipes_readme.txt', true);
 	// Copy themes and recipes
-	findRecursivefile(
+	findRecursiveFile(
 		'*.json',
 		[sbd.defaultRecipesPath, sbd.defaultThemesPath]
-	).forEach((file) =>	_copyFile(file, file.replace(sbd.defaultRecipesPath, sbd.recipesPath).replace(sbd.defaultThemesPath, sbd.themesPath), true));
+	).forEach((file) => _copyFile(file, file.replace(sbd.defaultRecipesPath, sbd.recipesPath).replace(sbd.defaultThemesPath, sbd.themesPath), true));
 }
 
 function testRecipe({ path = null, json = null, baseTags = null } = {}) {
@@ -689,7 +689,7 @@ function testBaseTags(baseTags) {
 testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
 
 /**
- * Calculates similarity between a reference track and a list of handles (source) and outputs the most similar tracks according to algorithm choosen and multiple filter options.
+ * Calculates similarity between a reference track and a list of handles (source) and outputs the most similar tracks according to algorithm chosen and multiple filter options.
  *
  * Performance notes (after pre-filtering): 1900 ms 24K tracks GRAPH all default on i7 920 from 2008, 3144 ms 46K tracks DYNGENRE all default on i7 920 from 2008
  *
@@ -789,7 +789,7 @@ testBaseTags(JSON.parse(SearchByDistance_properties.tags[3]));
  *
  * --->Output
  *
- * @param {string?} o.playlistName - [=o.properties.bAscii[1]|'Search...'] Plasylist name
+ * @param {string?} o.playlistName - [=o.properties.bAscii[1]|'Search...'] Playlist name
  * @param {boolean?} o.bCreatePlaylist - [=o.properties.bAscii[1]|true] If false, only outputs handle list. To be used along other scripts and/or recursive calls
  *
  * --->Misc
@@ -1853,14 +1853,16 @@ async function searchByDistance({
 		if (bProfile) { test.CheckPoint('#5.1 - Score'); }
 		// Get the tags according to weight and filter ''. Also create sets for comparison
 		if (bProfile) { test.CheckPoint('#5.1.1 - Score'); }
-		const handleTag = parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i });
+		const handleTag = parseHandleTags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i });
 		if (bProfile) { test.CheckPointStep('#5.1.1 - Score'); }
 		if (method === 'GRAPH' && (handleTag.genreStyle.number + calcTags.genreStyle.referenceNumber) <= 6) { order = 1; }
 		if (order === 0) {
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
 			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
-			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			({ score, bRelated, bUnrelated } = sel.Compare(handleList[i])
+				? { score: 100, bRelated: false, bUnrelated: false }
+				: calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 			if (score === -1) { continue; }
@@ -1883,7 +1885,9 @@ async function searchByDistance({
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
 			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
-			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			({ score, bRelated, bUnrelated } = sel.Compare(handleList[i])
+				? { score: 100, bRelated: false, bUnrelated: false }
+				: calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 			if (score === -1 || score < minScoreFilter) { continue; }
@@ -2397,7 +2401,7 @@ async function searchByDistance({
 	Helpers
 */
 
-function parseHandletags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i }) {
+function parseHandleTags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i }) {
 	const handleTag = { genreStyle: { set: new Set(), number: 0 } };
 	for (let key in calcTags) {
 		const tag = calcTags[key];
@@ -2780,12 +2784,12 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
  * @kind Function
  * @param {number|string} graphDistance - Graph distance to check, may be a string (key from descriptors) or number
  * @param {object} descr - Graph descriptors
- * @returns {{subtitutions:boolean, links:boolean}}
+ * @returns {{substitutions:boolean, links:boolean}}
  */
 function checkMinGraphDistance(graphDistance, descr = music_graph_descriptors) {
 	graphDistance = parseGraphDistance(graphDistance, descr, false);
 	const check = {
-		subtitutions: {
+		substitutions: {
 			pass: true,
 			min: Math.min(...descr.substitution_keys.map((key) => descr[key]).filter(Boolean))
 		},
@@ -2795,12 +2799,12 @@ function checkMinGraphDistance(graphDistance, descr = music_graph_descriptors) {
 		},
 		report: ''
 	};
-	['subtitutions', 'links'].forEach((key) => check[key].pass = graphDistance >= check[key].min);
+	['substitutions', 'links'].forEach((key) => check[key].pass = graphDistance >= check[key].min);
 	const bLinks = !check.links.pass;
-	const bSubs = !check.subtitutions.pass;
+	const bSubs = !check.substitutions.pass;
 	const bBoth = bLinks && bSubs;
 	if (bLinks || bSubs) {
-		check.report = 'Value set (' + parseGraphDistance(graphDistance, descr, false) + ') is lower than the minimum ' + (bLinks ? 'link ' + _p(check.links.min) : '') + (bBoth ? ' and ' : '') + (bSubs ? 'subtitution ' + _p(check.subtitutions.min) : '') + ' distance' + (bBoth ? 's' : '') + '.\n\nOutput results will be mostly limited to tracks with same genre/styles.';
+		check.report = 'Value set (' + parseGraphDistance(graphDistance, descr, false) + ') is lower than the minimum ' + (bLinks ? 'link ' + _p(check.links.min) : '') + (bBoth ? ' and ' : '') + (bSubs ? 'substitution ' + _p(check.substitutions.min) : '') + ' distance' + (bBoth ? 's' : '') + '.\n\nOutput results will be mostly limited to tracks with same genre/styles.';
 	}
 	return check;
 }
@@ -2950,7 +2954,7 @@ const weightDistribution = memoize((/** @type {'LINEAR'|'LOGARITHMIC'|'LOGISTIC'
  * @name nearGenresFilterDistribution
  * @kind Function
  * @param {number} mode - 0 (auto) to Infinity
- * @param {{graphDistance?:number, scoreFilter?:number, aggressiveness:number}} options - [={aggressiveness: 5}] Uses GRAPH method or WEIGHT method acording to the key passed. Aggressiveness is only used on when mode is set to 0 (auto), and defaults to a medium value (5) if not provided.
+ * @param {{graphDistance?:number, scoreFilter?:number, aggressiveness:number}} options - [={aggressiveness: 5}] Uses GRAPH method or WEIGHT method according to the key passed. Aggressiveness is only used on when mode is set to 0 (auto), and defaults to a medium value (5) if not provided.
  * @returns {number}
  */
 function nearGenresFilterDistribution(mode, options = { aggressiveness: 5 }) {
