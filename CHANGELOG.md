@@ -145,6 +145,7 @@
 - Console: wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
 - UI: multiple workarounds for rounded rectangles not being painted properly or producing crashes (SMP limitation).
 - Fixed some inconsistencies with  [foo_playcount_2003](https://marc2k3.github.io/component/playcount-2003/) support.
+- Fixed some misspelled terms on UI and variables (which also lead to some minor bugs).
 
 ## [7.6.0] - 2024-10-09
 ### Added
