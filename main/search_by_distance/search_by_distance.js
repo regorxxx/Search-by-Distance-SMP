@@ -1774,7 +1774,10 @@ async function searchByDistance({
 	}
 	const trackTotal = handleList.Count;
 	if (bBasicLogging) { console.log('Items retrieved by query (minus duplicates): ' + trackTotal + ' tracks'); }
-	if (!trackTotal) { console.log('Query created: ' + query[queryLength]); return; }
+	if (!trackTotal) {
+		if (bBasicLogging) { console.log('Query created: ' + query[queryLength]); }
+		return;
+	}
 	// Compute similarity distance by Weight and/or Graph
 	// Similar Artists, Similar Styles, Dynamic Genre, Date Range & Weighting
 	let scoreData = [];
@@ -1856,13 +1859,16 @@ async function searchByDistance({
 		const handleTag = parseHandleTags({ calcTags, bTagFilter, bAscii, bFilterWithGraph, graphExclusions, genreStyleFilter, folksonomyWhitelist, folksonomyBlacklist, descr, i });
 		if (bProfile) { test.CheckPointStep('#5.1.1 - Score'); }
 		if (method === 'GRAPH' && (handleTag.genreStyle.number + calcTags.genreStyle.referenceNumber) <= 6) { order = 1; }
-		if (order === 0) {
+		if (sel.Compare(handleList[i])) {
+			score = 100;
+			bRelated = false;
+			bUnrelated = false;
+			if (method === 'GRAPH') { mapDistance = 0; }
+		} else if (order === 0) {
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
 			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
-			({ score, bRelated, bUnrelated } = sel.Compare(handleList[i])
-				? { score: 100, bRelated: false, bUnrelated: false }
-				: calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 			if (score === -1) { continue; }
@@ -1885,9 +1891,7 @@ async function searchByDistance({
 			// O(i*j*k) time
 			// i = # tracks retrieved by query, j & K = # number of style/genre tags
 			if (bProfile) { test.CheckPoint('#5.1.2 - Score'); }
-			({ score, bRelated, bUnrelated } = sel.Compare(handleList[i])
-				? { score: 100, bRelated: false, bUnrelated: false }
-				: calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
+			({ score, bRelated, bUnrelated } = calcScore({ calcTags, handleTag, titleHandle, artistHandle, sortTagKeys, totalWeight, originalWeightValue, minScoreFilter, bNegativeWeighting, worldMapData, i }));
 			if (bProfile) { test.CheckPointStep('#5.1.2 - Score'); }
 			if (bProfile) { test.CheckPointStep('#5.1 - Score'); }
 			if (score === -1 || score < minScoreFilter) { continue; }
