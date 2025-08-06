@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/08/25
+//06/08/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -1059,7 +1059,7 @@ addEventListener('on_mouse_lbtn_up', (x, y, mask) => {
 	buttonsBar.gDown = false;
 	if (buttonsBar.curBtn) {
 		buttonsBar.curBtn.onClick(mask);
-		// Solves error if you create a new Whsell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
+		// Solves error if you create a new WshShell Popup (curBtn becomes null) after pressing the button and firing curBtn.onClick()
 		if (buttonsBar.curBtn && window.IsVisible) {
 			buttonsBar.curBtn.changeState(buttonStates.hover);
 			buttonsBar.curBtn.repaint();
