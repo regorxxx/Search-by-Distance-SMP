@@ -232,12 +232,6 @@ function addTracksRelation({
 }
 
 async function calculateTrackSimilarity({ sel = null, items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), properties } = {}) {
-	{ // Deduplicate and preserve sorting
-		const temp = items.Clone();
-		items = items.Clone();
-		items.Sort();
-		items = FbMetadbHandleList.partialSort(items, temp);
-	}
 	const titles = getHandleListTags(items, [globTags.titleRaw], { bMerged: true });
 	let profiler = new FbProfiler('Calculate track similarity');
 	const newData = [];
@@ -247,8 +241,9 @@ async function calculateTrackSimilarity({ sel = null, items = plman.GetPlaylistS
 			handleList = items.Clone();
 			handleList.RemoveById(i);
 		} else {
-			handleList = items;
-			items.Remove(sel);
+			const idx = items.Find(sel);
+			handleList = idx !== -1 ? items.Clone() : items;
+			if (idx !== -1) { items.RemoveById(sel); }
 		}
 		const output = await searchByDistance({
 			sel: sel || items[i],
