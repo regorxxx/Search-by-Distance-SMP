@@ -1,4 +1,4 @@
-<!DOCTYPE html> <!-- 21/11/23 -->
+<!DOCTYPE html> <!-- 06/08/25 -->
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -53,18 +53,18 @@
 				var nodeColor = 'white';
 				var nodeShape = 'rect';
 				var nodeImageLink = '';
-				const lineShape = 'stroke'; 
+				const lineShape = 'stroke';
 				const lineColor = '#c3c3c3';
 				const bPreRender = music_graph_descriptors.bPreRender;
 				const renderMethod = music_graph_descriptors.renderMethod;
 				const map_colors = new Map(music_graph_descriptors.map_colors);
 				const lengthMultiplier = 1;
-				
+
 				// Create the graph from foobar scripts:
 				var graph = musicGraphForDrawing();
 				if (bGraphDebug) {graphDebug(graph, false, true);}
-								
-				/* 
+
+				/*
 					SVG Renderer
 				*/
 				var processingElement = document.getElementById('graphContainer');
@@ -114,8 +114,8 @@
 					callback();
 					}
 				}
-				
-				let oldnode = null;
+
+				let oldNode = null;
 				function renderGraph() {
 					graphics = Viva.Graph.View.svgGraphics();
 					graphics.node(function(node) { //NODES
@@ -137,7 +137,7 @@
 						// Shape
 						let ui;
 						if (nodeShape === 'circle') { // Circles
-							nodeSize = nodeSize / 1.414 //Radious is 1/sqrt(2) of rectangle side
+							nodeSize = nodeSize / 1.414 //Radius is 1/sqrt(2) of rectangle side
 							ui = Viva.Graph.svg('circle')
 								.attr('r', nodeSize)
 								.attr('fill', nodeColor)
@@ -164,10 +164,10 @@
 						}
 						// Highlight links on hover
 						$(ui).hover(function(e) { // mouse over
-							if (oldnode !== null && e.shiftKey) {
-								highlightPath(oldnode, node, true); // Show path
-								showNode(oldnode.id); // Show info from selected node
-								findLink(oldnode, node); // Show info from hovered node
+							if (oldNode !== null && e.shiftKey) {
+								highlightPath(oldNode, node, true); // Show path
+								showNode(oldNode.id); // Show info from selected node
+								findLink(oldNode, node); // Show info from hovered node
 							} else {
 								highlightRelatedNodes(node.id, true);
 								showNode(node.id, true); // Show info from current node
@@ -175,20 +175,20 @@
 							}
 						}, function() { // mouse out
 							highlightRelatedNodes(node.id, false);
-							if (oldnode === null) { // Show info from previously selected node if available
+							if (oldNode === null) { // Show info from previously selected node if available
 								showNode(null, true);
 								showLinks(null, true);
 							} else {
-								showNode(oldnode.id);
-								showLinks(oldnode.id);
-								highlightPath(oldnode, node, false); // Hide path
+								showNode(oldNode.id);
+								showLinks(oldNode.id);
+								highlightPath(oldNode, node, false); // Hide path
 							}
 						});
 						// Show node an link on click
 						$(ui).mousedown(function() {
 							showNode(node.id);
 							showLinks(node.id);
-							oldnode = node;
+							oldNode = node;
 						});
 						return ui;
 					}).placeNode(function(nodeUI, pos) {
@@ -212,28 +212,28 @@
 							}
 						}
 					});
-					
-					
+
+
 					graphics.link(function(link){ //LINKS
 						// adds color data to nodes
 						let newLineShape;
 						let newLineColor;
-						
+
 						if (link.data !== undefined) {
-							if (link.data.linecolor !== undefined && link.data.linecolor !== null) {
-								newLineColor = link.data.linecolor;
-							}						
-							if (link.data.lineshape !== undefined && link.data.lineshape !== null) {
-								newLineShape = link.data.lineshape;
+							if (link.data.lineColor !== undefined && link.data.lineColor !== null) {
+								newLineColor = link.data.lineColor;
+							}
+							if (link.data.lineShape !== undefined && link.data.lineShape !== null) {
+								newLineShape = link.data.lineShape;
 							}
 						}
-					
+
 						let ui = Viva.Graph.svg('path')
 								   .attr(newLineColor ? newLineColor[0] : lineShape, newLineColor ? newLineColor[1] : lineColor)
 								   .attr(newLineShape ? newLineShape[0] : null, newLineShape ? newLineShape[1] : null);
 						return ui;
 					}).placeLink(function(linkUI, fromPos, toPos) {
-						// linkUI - is the object returend from link() callback above.
+						// linkUI - is the object returned from link() callback above.
 						let data = 'M' + fromPos.x + ',' + fromPos.y +
 								   'L' + toPos.x + ',' + toPos.y;
 
@@ -241,7 +241,7 @@
 						// is a common way of rendering paths in SVG:
 						linkUI.attr('d', data);
 					});
-					
+
 					renderer = Viva.Graph.View.renderer(graph, {
 						layout : layout,
 						graphics: graphics,
@@ -250,7 +250,7 @@
 						interactive: 'scroll drag'
 					});
 					renderer.run();
-					
+
 					// Final bit: most likely graph will take more space than available
 					// screen. Let's zoom out to fit it into the view:
 					let graphRect = layout.getGraphRect();
@@ -260,11 +260,11 @@
 					let desiredScale = screenSize / graphSize - screenSize / graphSize * 0.2; // A bit more to be sure
 					zoomOut(desiredScale, 1);
 				}
-				
-				/* 
+
+				/*
 					HELPERS
 				*/
-				
+
 				function zoomOut(desiredScale, currentScale) {
 					// zoom API in vivagraph 0.5.x is silly. There is no way to pass transform
 					// directly. Maybe it will be fixed in future, for now this is the best I could do:
@@ -275,10 +275,10 @@
 						}, 16);
 					}
 				}
-			
+
 				// Reset renderer on space bar
 				document.body.addEventListener('keydown', function (e) {
-					if (typeof renderer === 'undefined') {return;} // ommit while loading page
+					if (typeof renderer === 'undefined') {return;} // omit while loading page
 					if (e.which === 32) { // spacebar
 						renderer.reset();
 						// And zoom out
@@ -290,16 +290,16 @@
 						zoomOut(desiredScale, 1);
 					}
 				});
-				
+
 				// SuperGenre/Node Color label legend
 				let paragraph = document.getElementById('label');
 				let text = '<div id="labelHeader">SuperGenre Labels</div>';
 				function logMapElements(value, key, map) {
 					let aCheck = key.replace('_supergenre','');
 					if (aCheck != key) { // We only wants supergenre strings
-						let bCheck = aCheck.replace('Folk',''); 
-						entry = bCheck.replace('Classical',''); 
-						if (entry == aCheck) { // We treat Colks and Classical supergenres appart
+						let bCheck = aCheck.replace('Folk','');
+						entry = bCheck.replace('Classical','');
+						if (entry == aCheck) { // We treat Folks and Classical supergenres apart
 							text += '<span style="color:' + value + ';">' + entry + '</span>' + '<br>';
 							return;
 						} else if (entry == bCheck && text.replace('Folk','') == text) { //Folk
@@ -314,7 +314,7 @@
 				map_colors.forEach(logMapElements);
 				paragraph.innerHTML = text;
 				dragElement(paragraph);
-				
+
 				// Selected node label at top, and list of links
 				function showNode(nodeId, bHover = false) {
 					let bgcolor = '#fff';
@@ -338,7 +338,7 @@
 					let paragraph = document.getElementById('nodehighlight');
 					paragraph.innerHTML = text;
 				}
-				
+
 				function showLinks(nodeId) {
 					let bgcolor = '#fff';
 					let textColor = '#000';
@@ -350,8 +350,8 @@
 					graph.forEachLinkedNode(nodeId, function(node, link){ //List of links
 						if (count < 16) {
 							if (link.id !== undefined && link.id !== null) {
-								if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
-									bgcolor = link.data.linecolor[1];
+								if (link.data.lineColor !== undefined && link.data.lineColor[1] !== null) {
+									bgcolor = link.data.lineColor[1];
 									textColor = invertToBW(bgcolor,true);
 									borderColor = invertToBW(bgcolor,true);
 								}
@@ -374,7 +374,7 @@
 					let paragraph = document.getElementById('nodehighlight');
 					paragraph.innerHTML += text;
 				}
-				
+
 				function findLink(fromNode, toNode) {
 					let bgcolor = '#fff';
 					let textColor = '#000';
@@ -405,8 +405,8 @@
 								let linkColorOn = 'red'; //Highlighted color
 								let linkColorOff = 'white';
 								if (link.data !== undefined) { //Default color
-									if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
-										linkColorOff = link.data.linecolor[1];
+									if (link.data.lineColor !== undefined && link.data.lineColor[1] !== null) {
+										linkColorOff = link.data.lineColor[1];
 									}
 								}
 								// linkUI is a UI object created by graphics below
@@ -423,8 +423,8 @@
 							let linkColorOn = 'red'; //Highlighted color
 							let linkColorOff = 'white';
 							if (link.data !== undefined) { //Default color
-								if (link.data.linecolor !== undefined && link.data.linecolor[1] !== null) {
-									linkColorOff = link.data.linecolor[1];
+								if (link.data.lineColor !== undefined && link.data.lineColor[1] !== null) {
+									linkColorOff = link.data.lineColor[1];
 								}
 							}
                            // linkUI is a UI object created by graphics below
@@ -432,12 +432,12 @@
                        }
 					});
 				}
-				function dragElement(elmnt) {
+				function dragElement(element) {
 					var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-					if (document.getElementById(elmnt.id + 'Header')) {
-						document.getElementById(elmnt.id + 'Header').onmousedown = dragMouseDown;
+					if (document.getElementById(element.id + 'Header')) {
+						document.getElementById(element.id + 'Header').onmousedown = dragMouseDown;
 					} else {
-						elmnt.onmousedown = dragMouseDown;
+						element.onmousedown = dragMouseDown;
 					}
 
 					function dragMouseDown(e) {
@@ -458,8 +458,8 @@
 						pos3 = e.clientX;
 						pos4 = e.clientY;
 						// set the element's new position:
-						elmnt.style.top = (elmnt.offsetTop - pos2) + 'px';
-						elmnt.style.left = (elmnt.offsetLeft - pos1) + 'px';
+						element.style.top = (element.offsetTop - pos2) + 'px';
+						element.style.left = (element.offsetLeft - pos1) + 'px';
 					}
 
 					function closeDragElement() {
@@ -467,8 +467,8 @@
 						document.onmousemove = null;
 					}
 				}
-				
-				/* 
+
+				/*
 					Selection popup
 				*/
 				const selection = new Selection();
@@ -511,10 +511,10 @@
 									popupBar.value = progress = p;
 									popupBar.textContent = p + '%';
 									popupContent.innerHTML = popupContent.innerHTML.replace(/(: )([0-9]{1,2})(%)/, '$1' + p + '$3');
-									<!-- console.log(popupContent.textContent.replace(/(: )([0-9]{1,2})(%)/, '$1' + p + '$3')); -->
+									// console.log(popupContent.textContent.replace(/(: )([0-9]{1,2})(%)/, '$1' + p + '$3'));
 								}}).then((resolve) => {
-									data = resolve; 
-									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>'); 
+									data = resolve;
+									data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>');
 									popupContent.innerHTML = '<br>' + data.text;
 									popup.style.cursor = overlay.style.cursor = 'auto';
 									bRunning = false;

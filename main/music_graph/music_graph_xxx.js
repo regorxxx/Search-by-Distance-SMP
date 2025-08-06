@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/08/25
+//06/08/25
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -67,11 +67,11 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	const secondary_origin_influence = descriptor.secondary_origin_influence;
 
 	//Create and fill graph with links (and nodes)
-	let mygraph;
+	let myGraph;
 	try { // Safety check
-		mygraph = createGraph();
+		myGraph = createGraph();
 	} catch (e) { // eslint-disable-line no-unused-vars
-		mygraph = Viva.Graph.graph();
+		myGraph = Viva.Graph.graph();
 		if (!bHtml) {
 			console.log('Warning: musicGraph() used within html. You should use musicGraphForDrawing() instead! (Unless this is a call from graphDebug())');
 		}
@@ -85,7 +85,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_primary_origin[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: primary_origin, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: primary_origin, absoluteWeight: 0 });
 		}
 	}
 
@@ -95,7 +95,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_secondary_origin[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: secondary_origin, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: secondary_origin, absoluteWeight: 0 });
 		}
 	}
 
@@ -105,7 +105,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_weak_substitutions[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: weak_substitutions, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: weak_substitutions, absoluteWeight: 0 });
 		}
 	}
 
@@ -115,7 +115,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_cluster[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: cluster, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: cluster, absoluteWeight: 0 });
 		}
 	}
 
@@ -126,7 +126,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const subLen = to.length;
 		superGenreSets[i] = new Set(to); // For later use
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: intra_supergenre, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: intra_supergenre, absoluteWeight: 0 });
 		}
 	}
 
@@ -141,7 +141,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_supergenre_cluster[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: supergenre_cluster, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: supergenre_cluster, absoluteWeight: 0 });
 		}
 	}
 
@@ -151,21 +151,21 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_supergenre_supercluster[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: supergenre_supercluster, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: supergenre_supercluster, absoluteWeight: 0 });
 		}
 	}
 
 	for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
 		//Join supergenres clusters in circle: last one is next to first one
 		if (j === style_supergenre_cluster_break) { j = 0; } // NOSONAR [intended]
-		mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], { weight: inter_supergenre, absoluteWeight: 0 });
+		myGraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], { weight: inter_supergenre, absoluteWeight: 0 });
 	}
 
 	//Join music groups in circle: last one (4th) is next to first one (1th). We omit anything past that point!
-	mygraph.addLink(style_supergenre_supercluster[0][0], style_supergenre_supercluster[1][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
-	mygraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[2][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
-	mygraph.addLink(style_supergenre_supercluster[2][0], style_supergenre_supercluster[3][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
-	mygraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[0][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
+	myGraph.addLink(style_supergenre_supercluster[0][0], style_supergenre_supercluster[1][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
+	myGraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[2][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
+	myGraph.addLink(style_supergenre_supercluster[2][0], style_supergenre_supercluster[3][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
+	myGraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[0][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0 });
 
 	const style_substitutions_length = style_substitutions.length;
 	for (i = 0; i < style_substitutions_length; i++) {
@@ -173,7 +173,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_substitutions[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: substitutions, absoluteWeight: 0 });
+			myGraph.addLink(from, to[j], { weight: substitutions, absoluteWeight: 0 });
 		}
 	}
 
@@ -185,7 +185,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 		const to = style_anti_influence[i][1];
 		const subLen = to.length;
 		for (j = 0; j < subLen; j++) {
-			mygraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: anti_influence });
+			myGraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: anti_influence });
 		}
 	}
 
@@ -199,7 +199,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 			for (j = 0; j < subLen; j++) {
 				for (h = 0; h < style_supergenre_length; h++) {
 					if (superGenreSets[h].has(from) && superGenreSets[h].has(to[j])) {
-						mygraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: primary_origin_influence });
+						myGraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: primary_origin_influence });
 					}
 				}
 			}
@@ -216,14 +216,14 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 			for (j = 0; j < subLen; j++) {
 				for (h = 0; h < style_supergenre_length; h++) {
 					if (superGenreSets[h].has(from) && superGenreSets[h].has(to[j])) {
-						mygraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: secondary_origin_influence });
+						myGraph.addLink(from, to[j], { weight: Infinity, absoluteWeight: secondary_origin_influence });
 					}
 				}
 			}
 		}
 	}
 
-	return mygraph;
+	return myGraph;
 }
 
 /*
@@ -273,12 +273,12 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 
 	const map_colors = new Map(music_graph_descriptors.map_colors);
 
-	let mygraph;
+	let myGraph;
 
 	try { // Safety check
-		mygraph = Viva.Graph.graph();
+		myGraph = Viva.Graph.graph();
 	} catch (e) { // eslint-disable-line no-unused-vars
-		mygraph = createGraph();
+		myGraph = createGraph();
 		console.log('Warning: musicGraphForDrawing() used within foobar2000. You should use musicGraph() instead!');
 	}
 
@@ -287,10 +287,10 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 
 	const style_supergenre_length = style_supergenre.length;
 	for (i = 0; i < style_supergenre_length; i++) { //nodes
-		let sub_lenght = style_supergenre[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre[i][0], style_supergenre[i][1][j], { weight: intra_supergenre, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', map_colors.get(style_supergenre[i][0])] });
-			mygraph.addNode(style_supergenre[i][1][j], { shape: nodeShape, size: nodeSize, imageLink: nodeImageLink, color: map_colors.get(style_supergenre[i][0]) });
+		let sub_length = style_supergenre[i][1].length;
+		for (j = 0; j < sub_length; j++) {
+			myGraph.addLink(style_supergenre[i][0], style_supergenre[i][1][j], { weight: intra_supergenre, absoluteWeight: 0, lineShape: [], lineColor: ['stroke', map_colors.get(style_supergenre[i][0])] });
+			myGraph.addNode(style_supergenre[i][1][j], { shape: nodeShape, size: nodeSize, imageLink: nodeImageLink, color: map_colors.get(style_supergenre[i][0]) });
 		}
 	}
 
@@ -301,83 +301,83 @@ function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 			style_supergenre_cluster_break = i; //Save for later
 			continue;
 		}
-		let sub_lenght = style_supergenre_cluster[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[i][1][j], { weight: supergenre_cluster, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', map_colors.get(style_supergenre_cluster[i][1][j])] });
-			mygraph.addNode(style_supergenre_cluster[i][1][j], { shape: style_supergenreShape, size: style_supergenreSize, imageLink: style_supergenreImageLink, color: map_colors.get(style_supergenre_cluster[i][1][j]) });
+		let sub_length = style_supergenre_cluster[i][1].length;
+		for (j = 0; j < sub_length; j++) {
+			myGraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[i][1][j], { weight: supergenre_cluster, absoluteWeight: 0, lineShape: [], lineColor: ['stroke', map_colors.get(style_supergenre_cluster[i][1][j])] });
+			myGraph.addNode(style_supergenre_cluster[i][1][j], { shape: style_supergenreShape, size: style_supergenreSize, imageLink: style_supergenreImageLink, color: map_colors.get(style_supergenre_cluster[i][1][j]) });
 		}
 		//Adds cluster size and color
-		mygraph.addNode(style_supergenre_cluster[i][0], { shape: style_supergenre_clusterShape, size: style_supergenre_clusterSize, imageLink: style_supergenre_clusterImageLink, color: map_colors.get(style_supergenre_cluster[i][0]) });
+		myGraph.addNode(style_supergenre_cluster[i][0], { shape: style_supergenre_clusterShape, size: style_supergenre_clusterSize, imageLink: style_supergenre_clusterImageLink, color: map_colors.get(style_supergenre_cluster[i][0]) });
 	}
 
 	const style_cluster_length = style_cluster.length;
 	for (i = 0; i < style_cluster_length; i++) { //Style cluster
-		let sub_lenght = style_cluster[i][1].length;
+		let sub_length = style_cluster[i][1].length;
 		let color = 'white';
-		for (j = 0; j < sub_lenght; j++) {
-			if (typeof mygraph.getNode(style_cluster[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_cluster[i][1][j]).data.color !== 'undefined') { color = mygraph.getNode(style_cluster[i][1][j]).data.color; }
-			mygraph.addLink(style_cluster[i][0], style_cluster[i][1][j], { weight: cluster, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', color] });
+		for (j = 0; j < sub_length; j++) {
+			if (typeof myGraph.getNode(style_cluster[i][1][j]) !== 'undefined' && typeof myGraph.getNode(style_cluster[i][1][j]).data !== 'undefined' && typeof myGraph.getNode(style_cluster[i][1][j]).data.color !== 'undefined') { color = myGraph.getNode(style_cluster[i][1][j]).data.color; }
+			myGraph.addLink(style_cluster[i][0], style_cluster[i][1][j], { weight: cluster, absoluteWeight: 0, lineShape: [], lineColor: ['stroke', color] });
 		}
-		mygraph.addNode(style_cluster[i][0], { shape: style_clusterShape, size: style_clusterSize, imageLink: style_clusterImageLink, color });
+		myGraph.addNode(style_cluster[i][0], { shape: style_clusterShape, size: style_clusterSize, imageLink: style_clusterImageLink, color });
 	}
 
 	const style_weak_substitutions_length = style_weak_substitutions.length;
 	for (i = 0; i < style_weak_substitutions_length; i++) { //Weak Substitutions
-		let sub_lenght = style_weak_substitutions[i][1].length;
+		let sub_length = style_weak_substitutions[i][1].length;
 		let color = 'white';
-		for (j = 0; j < sub_lenght; j++) {
-			if (typeof mygraph.getNode(style_weak_substitutions[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_weak_substitutions[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_weak_substitutions[i][1][j]).data.color !== 'undefined') { color = mygraph.getNode(style_weak_substitutions[i][1][j]).data.color; }
-			mygraph.addLink(style_weak_substitutions[i][0], style_weak_substitutions[i][1][j], { weight: weak_substitutions, absoluteWeight: 0, lineshape: [], linecolor: ['stroke', color] });
+		for (j = 0; j < sub_length; j++) {
+			if (typeof myGraph.getNode(style_weak_substitutions[i][1][j]) !== 'undefined' && typeof myGraph.getNode(style_weak_substitutions[i][1][j]).data !== 'undefined' && typeof myGraph.getNode(style_weak_substitutions[i][1][j]).data.color !== 'undefined') { color = myGraph.getNode(style_weak_substitutions[i][1][j]).data.color; }
+			myGraph.addLink(style_weak_substitutions[i][0], style_weak_substitutions[i][1][j], { weight: weak_substitutions, absoluteWeight: 0, lineShape: [], lineColor: ['stroke', color] });
 		}
 	}
 
 	const style_primary_origin_length = style_primary_origin.length;
 	for (i = 0; i < style_primary_origin_length; i++) { //Primary origin
-		let sub_lenght = style_primary_origin[i][1].length;
+		let sub_length = style_primary_origin[i][1].length;
 		let color = 'white';
-		for (j = 0; j < sub_lenght; j++) {
-			if (typeof mygraph.getNode(style_primary_origin[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_primary_origin[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_primary_origin[i][1][j]).data.color !== 'undefined') { color = mygraph.getNode(style_primary_origin[i][1][j]).data.color; }
-			mygraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], { weight: primary_origin, absoluteWeight: 0, lineshape: ['stroke-dasharray', '3, 3'], linecolor: ['stroke', color] });
+		for (j = 0; j < sub_length; j++) {
+			if (typeof myGraph.getNode(style_primary_origin[i][1][j]) !== 'undefined' && typeof myGraph.getNode(style_primary_origin[i][1][j]).data !== 'undefined' && typeof myGraph.getNode(style_primary_origin[i][1][j]).data.color !== 'undefined') { color = myGraph.getNode(style_primary_origin[i][1][j]).data.color; }
+			myGraph.addLink(style_primary_origin[i][0], style_primary_origin[i][1][j], { weight: primary_origin, absoluteWeight: 0, lineShape: ['stroke-dasharray', '3, 3'], lineColor: ['stroke', color] });
 		}
 	}
 
 	const style_secondary_origin_length = style_secondary_origin.length;
 	for (i = 0; i < style_secondary_origin_length; i++) { //Secondary origin
-		let sub_lenght = style_secondary_origin[i][1].length;
+		let sub_length = style_secondary_origin[i][1].length;
 		let color = 'white';
-		for (j = 0; j < sub_lenght; j++) {
-			if (typeof mygraph.getNode(style_secondary_origin[i][1][j]) !== 'undefined' && typeof mygraph.getNode(style_secondary_origin[i][1][j]).data !== 'undefined' && typeof mygraph.getNode(style_secondary_origin[i][1][j]).data.color !== 'undefined') { color = mygraph.getNode(style_secondary_origin[i][1][j]).data.color; }
-			mygraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], { weight: secondary_origin, absoluteWeight: 0, lineshape: ['stroke-dasharray', '4, 4'], linecolor: ['stroke', color] });
+		for (j = 0; j < sub_length; j++) {
+			if (typeof myGraph.getNode(style_secondary_origin[i][1][j]) !== 'undefined' && typeof myGraph.getNode(style_secondary_origin[i][1][j]).data !== 'undefined' && typeof myGraph.getNode(style_secondary_origin[i][1][j]).data.color !== 'undefined') { color = myGraph.getNode(style_secondary_origin[i][1][j]).data.color; }
+			myGraph.addLink(style_secondary_origin[i][0], style_secondary_origin[i][1][j], { weight: secondary_origin, absoluteWeight: 0, lineShape: ['stroke-dasharray', '4, 4'], lineColor: ['stroke', color] });
 		}
 	}
 
 	const style_supergenre_supercluster_length = style_supergenre_supercluster.length;
 	for (i = 0; i < style_supergenre_supercluster_length; i++) { //Music clusters
-		let sub_lenght = style_supergenre_supercluster[i][1].length;
-		for (j = 0; j < sub_lenght; j++) {
-			mygraph.addLink(style_supergenre_supercluster[i][0], style_supergenre_supercluster[i][1][j], { weight: supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '7, 7'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[i][1][j])] });
+		let sub_length = style_supergenre_supercluster[i][1].length;
+		for (j = 0; j < sub_length; j++) {
+			myGraph.addLink(style_supergenre_supercluster[i][0], style_supergenre_supercluster[i][1][j], { weight: supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '7, 7'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[i][1][j])] });
 		}
 		//Adds cluster size and color
-		mygraph.addNode(style_supergenre_supercluster[i][0], { shape: style_supergenre_superclusterShape, size: style_supergenre_superclusterSize, imageLink: style_supergenre_superclusterImageLink, color: map_colors.get(style_supergenre_supercluster[i][0]) });
+		myGraph.addNode(style_supergenre_supercluster[i][0], { shape: style_supergenre_superclusterShape, size: style_supergenre_superclusterSize, imageLink: style_supergenre_superclusterImageLink, color: map_colors.get(style_supergenre_supercluster[i][0]) });
 	}
 
 	for (i = 0, j = 1; i < style_supergenre_cluster_break; i++, j++) { //We skip anything past the break point saved before
 		//Join supergenres clusters in circle: last one is next to first one
 		if (j === style_supergenre_cluster_break) { j = 0; } // NOSONAR [intended]
-		mygraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], { weight: inter_supergenre, absoluteWeight: 0, lineshape: ['stroke-dasharray', '5, 5'], linecolor: ['stroke', map_colors.get(style_supergenre_cluster[0][0])] });
+		myGraph.addLink(style_supergenre_cluster[i][0], style_supergenre_cluster[j][0], { weight: inter_supergenre, absoluteWeight: 0, lineShape: ['stroke-dasharray', '5, 5'], lineColor: ['stroke', map_colors.get(style_supergenre_cluster[0][0])] });
 	}
 
 	// Join music groups in circle: last one (4th) is next to first one (1th). We omit anything past that point!
-	mygraph.addLink(style_supergenre_supercluster[0][0], style_supergenre_supercluster[1][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[0][0])] });
-	mygraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[2][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[1][0])] });
-	mygraph.addLink(style_supergenre_supercluster[2][0], style_supergenre_supercluster[3][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[2][0])] });
-	mygraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[0][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[3][0])] });
+	myGraph.addLink(style_supergenre_supercluster[0][0], style_supergenre_supercluster[1][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[0][0])] });
+	myGraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[2][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[1][0])] });
+	myGraph.addLink(style_supergenre_supercluster[2][0], style_supergenre_supercluster[3][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[2][0])] });
+	myGraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[0][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[3][0])] });
 	// Join Folk with Pop/rock Music
-	mygraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[4][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[4][0])] });
+	myGraph.addLink(style_supergenre_supercluster[1][0], style_supergenre_supercluster[4][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[4][0])] });
 	// Join Classical with Electronic Music
-	mygraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[5][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineshape: ['stroke-dasharray', '10, 10'], linecolor: ['stroke', map_colors.get(style_supergenre_supercluster[5][0])] });
+	myGraph.addLink(style_supergenre_supercluster[3][0], style_supergenre_supercluster[5][0], { weight: inter_supergenre_supercluster, absoluteWeight: 0, lineShape: ['stroke-dasharray', '10, 10'], lineColor: ['stroke', map_colors.get(style_supergenre_supercluster[5][0])] });
 
-	return mygraph;
+	return myGraph;
 }
 
 /*
@@ -445,7 +445,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			console.log('music_graph_descriptors_xxx Warning: ' + key + 'has a value of Infinite. Check \'Weighting, for Foobar2000\' section');
 			bWarning = true;
 		} else if (descr[key] < 0) { // Check for less than zero valued keys
-			console.log('music_graph_descriptors_xxx Warning: ' + key + 'has a value less than zero wich breacks distance calculation. Check \'Weighting, for Foobar2000\' section');
+			console.log('music_graph_descriptors_xxx Warning: ' + key + 'has a value less than zero which breaks distance calculation. Check \'Weighting, for Foobar2000\' section');
 			bWarning = true;
 		}
 		sumDistances += descr[key];
@@ -642,7 +642,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	{ // Check letter case
 		const sep = /([ \-&/()]|'n'|\bD')/g; // Added parentheses so they are also included on the split array
 		const otherRegEx = [[/\bXL\b/gi, 'XL'], [/\bEDM\b/gi, 'EDM'], [/\bNRG\b/gi, 'NRG'], [/\bUK\b/gi, 'UK'], [/\bIDM\b/gi, 'IDM'], [/\bar\b/gi, 'ar'], [/\bAM\b/gi, 'AM'], [/\bL\.A\. \b/gi, 'L.A. ']];
-		const ommit = [/_cluster$/i];
+		const omit = [/_cluster$/i];
 		const allmusic = new Set(['New Wave of British Heavy Alternative Metal']);
 		_ALL_.forEach((key) => {
 			descr[key].forEach((nodePair) => {
@@ -650,9 +650,9 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 				const nodeList = nodePair[1];
 				nodeList.forEach((node) => {
 					let capNode = node.split(sep).map((subS) => { return subS.charAt(0).toUpperCase() + subS.slice(1).toLowerCase(); }).join('');
-					otherRegEx.forEach((rgex) => { capNode = capNode.replace(rgex[0], rgex[1]); });
+					otherRegEx.forEach((regex) => { capNode = capNode.replace(regex[0], regex[1]); });
 					if (capNode !== node) {
-						if (ommit.some((r) => r.test(node)) || allmusic.has(node)) { return; }
+						if (omit.some((r) => r.test(node)) || allmusic.has(node)) { return; }
 						console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has nodes not following standard letter case. Check \'Graph nodes and links\' section\n' + '	' + nodePair[0] + ' -> ' + node);
 						bWarning = true;
 					}
@@ -669,7 +669,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 				const nodeList = nodePair[1];
 				nodeList.forEach((node) => {
 					let asciiNode = node.normalize('NFD');
-					asciiRegEx.forEach((rgex) => { asciiNode = asciiNode.replace(rgex[0], rgex[1]); });
+					asciiRegEx.forEach((regex) => { asciiNode = asciiNode.replace(regex[0], regex[1]); });
 					if (asciiNode !== node) {
 						if (allmusic.has(node)) { return; }
 						console.log('music_graph_descriptors_xxx Warning: \'' + key + '\' has nodes not compatible with ASCII. Check \'Graph nodes and links\' section\n' + '	' + nodePair[0] + ' -> ' + node);
@@ -722,7 +722,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 	}
 	if (bIncludesDeclared) {
 		console.log('music_graph_descriptors_xxx: Advanced debug enabled');
-		const mygraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void (0), bHtml); // foobar2000 graph, or HTML graph or a new one
+		const myGraph = bGraphDeclared ? sbd.allMusicGraph : musicGraph(void (0), bHtml); // foobar2000 graph, or HTML graph or a new one
 		let distance = Infinity;
 		let keyOne = '';
 		let keyTwo = '';
@@ -733,7 +733,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			if (i + 1 === superGenreNumbers) { nextIndex = 0; } // NOSONAR [intended]
 			keyOne = descr.style_supergenre[i][0];
 			keyTwo = descr.style_supergenre[nextIndex][0];
-			({ distance, path } = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+			({ distance, path } = calcGraphDistance(myGraph, keyOne, keyTwo, true));
 			if (!Number.isFinite(distance) || !distance) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
 				console.log('Path: ' + getNodesFromPath(path));
@@ -750,7 +750,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			if (descr.style_supergenre_cluster[i][0] !== 'SKIP' && descr.style_supergenre_cluster[nextIndex][0] !== 'SKIP') {
 				keyOne = descr.style_supergenre_cluster[i][0];
 				keyTwo = descr.style_supergenre_cluster[nextIndex][0];
-				({ distance, path } = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+				({ distance, path } = calcGraphDistance(myGraph, keyOne, keyTwo, true));
 				if (!Number.isFinite(distance) || !distance) {
 					console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
 					console.log('Path: ' + getNodesFromPath(path));
@@ -767,7 +767,7 @@ function graphDebug(graph = musicGraph(), bShowPopupOnPass = false, bHtml = fals
 			if (i + 1 === style_supergenre_superclusterNumbers) { nextIndex = 0; } // NOSONAR [intended]
 			keyOne = descr.style_supergenre_supercluster[i][0];
 			keyTwo = descr.style_supergenre_supercluster[nextIndex][0];
-			({ distance, path } = calcGraphDistance(mygraph, keyOne, keyTwo, true));
+			({ distance, path } = calcGraphDistance(myGraph, keyOne, keyTwo, true));
 			if (!Number.isFinite(distance) || !distance) {
 				console.log('music_graph_descriptors_xxx Warning: Path from ' + keyOne + ' to ' + keyTwo + ' has a zero or infinite distance. Check \'Weighting, for Foobar2000\' section');
 				console.log('Path: ' + getNodesFromPath(path));
@@ -874,9 +874,9 @@ async function graphStatistics({
 	const hist = {};
 	const binSize = statistics.minNonZeroDistance * 2;
 	histogram(distances, binSize).forEach((val, i) => { hist[(i * binSize).toString()] = val; });
-	const masxFreq = Math.max(...Object.values(hist));
+	const maxFreq = Math.max(...Object.values(hist));
 	const histEntries = Object.entries(hist);
-	statistics.mode = Math.round(histEntries.find((pair) => { return pair[1] === masxFreq; })[0]);
+	statistics.mode = Math.round(histEntries.find((pair) => { return pair[1] === maxFreq; })[0]);
 	let i = 0, acumFreq = total / 2;
 	while (true) {
 		acumFreq -= histEntries[i][1];
