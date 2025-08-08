@@ -91,6 +91,7 @@
 - Dynamic queries: support for '#SELTRACKS#', '#SELDURATION#, '#SELSIZE#', '#SELPLAYING#', '#SELINLIBRARY#' variables for selections. See dynamic queries readme for more info.
 - Dynamic queries: support for '#PLSIDX#', '#PLSNAME#', '#PLSTRACKS#, '#PLSISAUTOPLS#, '#PLSISLOCKED#', '#PLSDURATION#', '#PLSSIZE#', '#PLSLOCKS#', '#PLSLOCKNAME#' variables for playlists. See dynamic queries readme for more info.
 - Dynamic queries: support for '#PLSPLAYIDX#', '#PLSPLAYNAME#', '#PLSPLAYTRACKS#, '#PLSPLAYDURATION#, '#PLSPLAYSIZE#' variables for playing playlist. See dynamic queries readme for more info.
+- Themes: preliminary support for themes with multiple references (i.e. multiple tag arrays). Output will join the results of a lookup per reference into a single playlist. Check the theme named 'multi-test.json' for reference. For now the only way to create them is via text editors.
 - Installation: new panel menu, accessed through 'Ctrl + Win + R. Click' (which works globally on any script and panel, at any position), used to export/import panel settings and any other associated data. These entries may be used to fully backup the panel data, help when moving between different JS components (JSplitter <-> SMP) or even foobar2000 installations,, without needing to manually backup the panel properties or other external files (like .json, etc.).
 - Configuration: external files like world map database references are now exposed as a panel property.
 ### Changed

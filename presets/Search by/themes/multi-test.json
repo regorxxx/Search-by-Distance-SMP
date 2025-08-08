@@ -1,5 +1,5 @@
 {
-	"name": "Test",
+	"name": "Multi-test",
 	"tags": [
 		{
 			"genre": [
@@ -30,6 +30,40 @@
 			"composer": [
 				"J.J. Cale"
 			],
+			"customStr": [],
+			"customNum": [],
+			"artistRegion": [],
+			"related": [],
+			"unrelated": [],
+			"folksonomy": []
+		},
+		{
+			"genre": [
+				"Folk"
+			],
+			"style": [
+				"Freak Folk"
+			],
+			"mood": [
+				"Acoustic",
+				"Not aggressive",
+				"Not electronic",
+				"Not happy",
+				"Not party",
+				"Relaxed",
+				"Sad",
+				"Mellow"
+			],
+			"key": [
+				"Am"
+			],
+			"date": [
+				1975
+			],
+			"bpm": [
+				80
+			],
+			"composer": [],
 			"customStr": [],
 			"customNum": [],
 			"artistRegion": [],

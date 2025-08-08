@@ -1151,6 +1151,29 @@ async function searchByDistance({
 
 	try { fb.GetQueryItems(new FbMetadbHandleList(), forcedQuery); } // Sanity check
 	catch (e) { fb.ShowPopupMessage('Query not valid, check forced query:\n' + forcedQuery); return; } // eslint-disable-line no-unused-vars
+
+	// Handle multi-valued themes
+	if (bUseTheme && theme.tags.length > 1) {
+		const arg = arguments[0];
+		return Promise.serial(
+			theme.tags.map((subTags) => { return { ...arg, theme: { ...theme, tags: [subTags] }, bCreatePlaylist: false }; }),
+			searchByDistance,
+			25
+		).then((dataArr) => {
+			if (bCreatePlaylist) {
+				const handleList = removeDuplicates({
+					handleList: new FbMetadbHandleList(dataArr.map((data) => data[0]).flat(Infinity)),
+					checkKeys: checkDuplicatesByTag,
+					bAdvTitle,
+					bMultiple
+				});
+				sendToPlaylist(handleList, parsePlaylistName(playlistName, theme.name), false);
+				if (bBasicLogging) { console.log('Final Playlist selection length: ' + handleList.Count + ' tracks.'); }
+			}
+			return dataArr;
+		});
+	}
+
 	// Query
 	let query = [];
 	let preQueryLength = 0;
