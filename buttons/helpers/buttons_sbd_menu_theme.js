@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//08/08/25
 
 /* exported createThemeMenu */
 
@@ -59,7 +59,7 @@ function createThemeMenu(parent) {
 	themeMenu.newEntry({
 		entryText: 'Create theme file with selected track', func: () => {
 			// Tag names
-			const themeTagsKeys = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
+			const themeTagsKeys = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || tags[k].type.includes('tfRemap'));
 			const themeTagsTf = themeTagsKeys.map((k) => tags[k].tf.filter(Boolean));
 			// Retrieve values
 			const selHandleList = new FbMetadbHandleList(fb.GetFocusItem(true));
@@ -73,18 +73,17 @@ function createThemeMenu(parent) {
 			// Tags obj
 			const themeTags = {};
 			themeTagsKeys.forEach((key, i) => { themeTags[key] = themeTagsValues[i]; });
-			// Iso
-			themeTags.iso = [];
+			// artistRegion Iso
 			const localeTags = getHandleListTags(selHandleList, [globTags.locale]).flat().map((tag) => tag.filter(Boolean).pop());
 			const worldMapData = _jsonParseFileCheck(filePaths.worldMapArtists, 'Tags json', window.Name, utf8);
 			localeTags.forEach((localeTag) => {
-				if (localeTag) { themeTags.iso.push(getCountryISO(localeTag)); }
+				if (localeTag) { themeTags.artistRegion.push(getCountryISO(localeTag)); }
 				else if (worldMapData) {
 					const artists = getHandleListTags(selHandleList, [globTags.artist], { bMerged: true }).flat(Infinity);
 					if (artists && artists.length) {
 						const data = getLocaleFromId([...new Set(artists)], worldMapData);
 						data.forEach((obj) => {
-							if (obj.iso.length) { themeTags.iso.push(obj.iso); }
+							if (obj.iso.length) { themeTags.artistRegion.push(obj.iso); }
 						});
 					}
 				}
@@ -135,7 +134,7 @@ function createThemeMenu(parent) {
 	});
 	themeMenu.newSeparator();
 	// All entries
-	const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual'));
+	const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || tags[k].type.includes('tfRemap'));
 	// List
 	const options = [];
 	files.forEach((file) => {
