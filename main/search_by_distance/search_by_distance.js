@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//08/08/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
@@ -67,7 +67,7 @@ if (isFoobarV2) { include('..\\..\\helpers\\helpers_xxx_tags_cache.js'); }
 include('..\\..\\helpers\\helpers_xxx_math.js');
 /* global k_combinations:readable */
 include('..\\..\\helpers\\helpers_xxx_playlists.js');
-/* global getSource:readable */
+/* global getSource:readable, sendToPlaylist:readable */
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
 include('..\\..\\helpers\\helpers_xxx_statistics.js');
@@ -116,9 +116,7 @@ const SearchByDistance_properties = {
 	minScoreFilter: ['Minimum in case there are not enough tracks (in %)', 65, { range: [[0, 100]], func: isInt }, 65],
 	graphDistance: ['Exclude any track with graph distance greater than (only GRAPH method):', 'intra_supergenre',
 		{
-			func: (x) => {
-				return (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || (isInt(x) && x >= 0) || x === Infinity;
-			}
+			func: (x) => (isString(x) && Object.hasOwn(music_graph_descriptors, x.split('.').pop())) || (isInt(x) && x >= 0) || x === Infinity
 		}, 'intra_supergenre'],
 	method: ['Method to use (\'GRAPH\', \'DYNGENRE\' or \'WEIGHT\')', 'GRAPH', { func: checkMethod }, 'GRAPH'],
 	bNegativeWeighting: ['Negative score for tags out of range', true],
@@ -351,11 +349,17 @@ if (sbd.panelProperties.bProfile[1]) { sbd.profiler.Print(); }
 var cacheLinkSet; // NOSONAR [shared on files]
 if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLink.json');
-	if (data.size) { cacheLink = data; if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from file.'); } } // NOSONAR [shared on files]
+	if (data.size) {
+		cacheLink = data;
+		if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from file.'); }
+	}
 }
 if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
-	if (data.size) { cacheLinkSet = data; if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from file.'); } }
+	if (data.size) {
+		cacheLinkSet = data;
+		if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from file.'); }
+	}
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { debounce(updateCache, 3000)({ properties: sbd.panelProperties }); }
@@ -374,7 +378,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 			sbd.isCalculatingCache = true;
 			const bBar = typeof buttonsBar !== 'undefined';
 			const sbdButtons = bBar
-				? buttonsBar.listKeys.flat(Infinity).filter((key) => { return key.match(/(?:^Search by Distance.*)|(?:^Playlist Tools$)/i); })
+				? buttonsBar.listKeys.flat(Infinity).filter((key) => key.match(/(?:^Search by Distance.*)|(?:^Playlist Tools$)/i))
 				: [];
 			if (bBar) {
 				sbdButtons.forEach((key) => {
@@ -494,7 +498,7 @@ addEventListener('on_notify_data', (name, info) => {
 		}
 		case 'Search by Distance: cacheLink map': {
 			if (info) {
-				console.log('Search by Distance: Used Cache - cacheLink from other panel.');
+				if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from other panel.'); }
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => { if (pair[1].distance === null) { pair[1].distance = Infinity; } }); // stringify converts Infinity to null, this reverts the change
 				updateCache({ newCacheLink: new Map(data) });
@@ -503,7 +507,7 @@ addEventListener('on_notify_data', (name, info) => {
 		}
 		case 'Search by Distance: cacheLinkSet map': {
 			if (info) {
-				console.log('Search by Distance: Used Cache - cacheLinkSet from other panel.');
+				if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from other panel.'); }
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => { if (pair[1] === null) { pair[1] = Infinity; } }); // stringify converts Infinity to null, this reverts the change
 				updateCache({ newCacheLinkSet: new Map(data) });
@@ -989,7 +993,7 @@ async function searchByDistance({
 		if (graphDistance === null) { return; }
 	}
 	// Theme check
-	const bUseTheme = !!(theme && (typeof recipe === 'string' && theme.length || Object.keys(theme).length));
+	const bUseTheme = !!(theme && (typeof theme === 'string' && theme.length || Object.keys(theme).length));
 	if (bUseTheme) {
 		let path;
 		if (isString(theme)) { // File path: try to use plain path or themes folder + filename
@@ -998,10 +1002,10 @@ async function searchByDistance({
 			if (!theme) { return; }
 		}
 		// Array of objects
-		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || ['folksonomy'].includes(k));
+		const tagsToCheck = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || tags[k].type.includes('tfRemap'));
 		// Theme tags must contain at least all the user tags
 		const tagCheck = Object.hasOwn(theme, 'tags')
-			? theme.tags.findIndex((tagArr) => { return !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)); })
+			? theme.tags.findIndex((tagArr) => !new Set(Object.keys(tagArr)).isSuperset(new Set(tagsToCheck)))
 			: 0;
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
@@ -1257,9 +1261,9 @@ async function searchByDistance({
 	}
 	// Related and unrelated tags are not considered here, but just added to the total score before any calculation is done, to break asap. Tracks witch such tags are accounted with extra queries
 	const totalWeight = Object.keys(calcTags).filter((key) => !['related', 'unrelated'].includes(key))
-		.reduce((total, key) => { return total + calcTags[key].weight; }, 0); //100%
+		.reduce((total, key) => total + calcTags[key].weight, 0); //100%
 	const countWeights = Object.keys(calcTags).filter((key) => !['related', 'unrelated'].includes(key))
-		.reduce((total, key) => { return (total + (calcTags[key].weight !== 0 ? 1 : 0)); }, 0);
+		.reduce((total, key) => total + (calcTags[key].weight !== 0 ? 1 : 0), 0);
 	if (bSearchDebug) { console.log('Init Weights:', totalWeight, countWeights); }
 	let originalWeightValue = 0;
 	// Queries and ranges
@@ -1405,7 +1409,7 @@ async function searchByDistance({
 	let worldMapData;
 	if (calcTags.artistRegion.weight !== 0 || artistRegionFilter !== -1) {
 		let iso;
-		if (bUseTheme) { iso = (Object.hasOwn(theme.tags[0], 'iso') ? theme.tags[0].iso[0] : '') || ''; }
+		if (bUseTheme) { iso = (Object.hasOwn(theme.tags[0], 'artistRegion') ? theme.tags[0].artistRegion[0] : '') || ''; }
 		else {
 			const bSep = !calcTags.artistRegion.tf.includes('$') && !calcTags.artistRegion.tf.includes('%');
 			const tagName = bSep
@@ -1541,7 +1545,7 @@ async function searchByDistance({
 		)];
 		let queryArtist = '';
 		if (tags.length) {
-			queryArtist = tags.map((artist) => { return globTags.artist + ' IS ' + artist; });
+			queryArtist = tags.map((artist) => globTags.artist + ' IS ' + artist);
 			queryArtist = 'NOT ' + _p(queryJoin(queryArtist, 'OR'));
 		}
 		if (queryArtist.length) {
@@ -1578,13 +1582,13 @@ async function searchByDistance({
 			const data = mergeSimilarDataFromFiles(files);
 			const artist = fb.TitleFormat(globTags.artist).EvalWithMetadb(sel);
 			if (data) {
-				const dataArtist = data.find((obj) => { return obj.artist === artist; });
+				const dataArtist = data.find((obj) => obj.artist === artist);
 				if (dataArtist) { dataArtist.val.forEach((artistObj) => { similTags.push(artistObj.artist); }); }
 			}
 			if (!bSameArtistFilter) { similTags.push(artist); } // Always add the original artist as a valid value
 		}
 		if (similTags.length) {
-			querySimil = similTags.map((artist) => { return globTags.artistRaw + ' IS ' + artist; });
+			querySimil = similTags.map((artist) => globTags.artistRaw + ' IS ' + artist);
 			querySimil = queryJoin(querySimil, 'OR');
 		}
 		if (querySimil.length) {
@@ -1818,7 +1822,7 @@ async function searchByDistance({
 		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal[tag]; });
 	} else {
 		tagsVal = getHandleListTags(handleList, tagsArr);
-		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal.map((tag) => { return tag[i]; }); });
+		tagsArr.forEach((tag, i) => { tagsValByKey[i] = tagsVal.map((tag) => tag[i]); });
 	}
 	for (let key in calcTags) {
 		const tag = calcTags[key];
@@ -1919,7 +1923,7 @@ async function searchByDistance({
 		test.CheckPointPrint('#5.2 - Graph', ' total');
 	}
 	if (method === 'WEIGHT') {
-		scoreData.sort(function (a, b) { return b.score - a.score; });
+		scoreData.sort((a, b) => b.score - a.score);
 		let i = 0;
 		let bMin = false;
 		while (i < poolLength) {
@@ -1947,7 +1951,7 @@ async function searchByDistance({
 	else { // GRAPH
 		// Done on 3 steps. Weight filtering (done) -> Graph distance filtering (done) -> Graph distance sort
 		// Now we check if all tracks are needed (over 'minScoreFilter') or only those over 'scoreFilter'.
-		scoreData.sort(function (a, b) { return b.score - a.score; });
+		scoreData.sort((a, b) => b.score - a.score);
 		let i = 0;
 		let bMin = false;
 		while (i < poolLength) {
@@ -1959,7 +1963,7 @@ async function searchByDistance({
 			}
 			i++;
 		}
-		scoreData.sort(function (a, b) { return a.mapDistance - b.mapDistance; }); // First sorted by graph distance, then by weight
+		scoreData.sort((a, b) => a.mapDistance - b.mapDistance); // First sorted by graph distance, then by weight
 		poolLength = scoreData.length;
 		if (poolLength < playlistLength) { bMin = true; }
 		if (bMin && minScoreFilter !== scoreFilter) {
@@ -2241,7 +2245,7 @@ async function searchByDistance({
 					const genreStyleTag = Object.values(calcTags)
 						.filter((t) => t.bGraph && !t.bVirtual && (t.weight !== 0 || calcTags.dynGenre.weight !== 0))
 						.map((t) => t.handle[index].filter(Boolean)).flat(Infinity);
-					const tagSet_i = new Set(genreStyleTag.map((item) => { return item.toLowerCase(); }));
+					const tagSet_i = new Set(genreStyleTag.map((item) => item.toLowerCase()));
 					if (tagSet_i.has('instrumental') || language[i][0] === 'zxx' || Number(speechness[i][0]) === 0) { // Any match, then add to reorder list
 						newOrder.push(i);
 					}
@@ -2355,45 +2359,19 @@ async function searchByDistance({
 			console.log('Warning: Final Playlist selection length (= ' + finalPlaylistLength + ') lower/equal than ' + playlistLength + ' tracks. You may want to check \'' + propertyText + '\' parameter (= ' + scoreFilter + '%).');
 		}
 	}
-	// Insert to playlist
-	if (bCreatePlaylist) {
-		// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
-		let playlistNameEval;
-		const bIsTF = /(%.*%)|(\$.*\(.*\))/.test(playlistName);
-		if (bUseTheme) {
-			const themeRegexp = /%SBD_THEME%/gi;
-			if (bIsTF && themeRegexp.test(playlistName)) {
-				playlistNameEval = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + theme.name + ')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
-			} else {
-				playlistNameEval = playlistName;
-			}
-		} else {
-			playlistNameEval = bIsTF ? fb.TitleFormat(playlistName).EvalWithMetadb(sel) : playlistName;
-		}
-		let i = 0;
-		const plc = plman.PlaylistCount;
-		while (i < plc) {
-			if (plman.GetPlaylistName(i) === playlistNameEval) {
-				plman.ActivePlaylist = i;
-				plman.UndoBackup(i);
-				plman.ClearPlaylist(i);
-				break;
-			}
-			i++;
-		}
-		if (i === plc) { //if no playlist was found before
-			plman.CreatePlaylist(plc, playlistNameEval);
-			plman.ActivePlaylist = plc;
-		}
-		const outputHandleList = new FbMetadbHandleList(selectedHandlesArray);
-		plman.InsertPlaylistItems(plman.ActivePlaylist, 0, outputHandleList);
-		if (bBasicLogging) { console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.'); }
-	} else if (bBasicLogging) { console.log('Final selection length: ' + finalPlaylistLength + ' tracks.'); }
 	// Store options
 	sbd.lastSearch.handle = sel;
 	sbd.lastSearch.options = {
 		theme, recipe, bAscii, bTagsCache, bAdvTitle, bMultiple, checkDuplicatesByTag, sortBias, tags, bNegativeWeighting, bFilterWithGraph, forcedQuery, dynQueries, bSameArtistFilter, bSimilArtistsFilter, bConditionAntiInfluences, bUseAntiInfluencesFilter, bUseInfluencesFilter, artistRegionFilter, genreStyleRegionFilter, method, scoreFilter, minScoreFilter, graphDistance, poolFilteringTag, poolFilteringN, bPoolFiltering, bRandomPick, bInversePick, probPick, playlistLength, bSortRandom, bProgressiveListOrder, bInverseListOrder, bScatterInstrumentals, bSmartShuffle, bSmartShuffleAdvc, smartShuffleSortBias, bInKeyMixingPlaylist, bHarmonicMixDoublePass, bProgressiveListCreation, progressiveListCreationN, bProfile, bShowQuery, bShowFinalSelection, bBasicLogging, bSearchDebug, playlistName, bCreatePlaylist
 	};
+	// Insert to playlist
+	if (bCreatePlaylist) {
+		// Look if target playlist already exists and clear it. Preferred to removing it, since then we can undo later...
+		const playlistNameEval = parsePlaylistName(playlistName, bUseTheme ? theme.name : sel);
+		sendToPlaylist(new FbMetadbHandleList(selectedHandlesArray), playlistNameEval, false);
+		sbd.lastSearch.options.playlistNameEval = playlistNameEval;
+		if (bBasicLogging) { console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.'); }
+	} else if (bBasicLogging) { console.log('Final selection length: ' + finalPlaylistLength + ' tracks.'); }
 	// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
 	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); }
 	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); }
@@ -2832,6 +2810,19 @@ function checkMethod(method) {
 
 function checkScoringDistribution(distr) {
 	return (new Set(['LINEAR', 'LOGARITHMIC', 'LOGISTIC', 'NORMAL']).has(distr));
+}
+
+function parsePlaylistName(playlistName, reference) {
+	const bIsTF = /(%.*%)|(\$.*\(.*\))/.test(playlistName);
+	if (typeof reference === 'string') {
+		const themeRegexp = /%SBD_THEME%/gi;
+		if (bIsTF && themeRegexp.test(playlistName)) {
+			playlistName = fb.TitleFormat(playlistName.replace(themeRegexp, '$puts(x,' + reference + ')$get(x)')).Eval(true); // Hack to evaluate strings as true on conditional expressions
+		}
+	} else {
+		playlistName = bIsTF ? fb.TitleFormat(playlistName).EvalWithMetadb(reference) : playlistName;
+	}
+	return playlistName;
 }
 
 // Save and load cache on json

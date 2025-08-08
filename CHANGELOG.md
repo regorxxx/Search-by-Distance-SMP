@@ -124,6 +124,7 @@
 - Recursive Playlist: every iterative search will reuse the sorting/picking settings, so final playlist will be sorted in multiple groups with same pattern instead of randomly.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
+- Console: changed cache link console logs to startup logging setting usage.
 - UI: unified script updates settings across all my scripts, look for 'Updates' submenu.
 - UI: settings display improvements on tooltip.
 - UI: improvements of menu entries related to settings.
@@ -136,6 +137,8 @@
 - Descriptors: removed Spanish Folk style.
 - Console: removed warnings about 'related' and 'unrelated' tags not being found when weight was non zero on basic logging (since that should be the most common use-case).
 ### Fixed
+- Themes: fix support for special tags like folksonomy or artist/genre/style region in some cases.
+- Themes: crash when using a recipe (as path) and a theme (as object). Only triggered during internal testing.
 - Themes: fix crash on theme creation with incomplete input or when World-Map-SMP was not used.
 - Recipes: menu crash when there were no recipes at folder.
 - Sorting: fixed long time bug where 'Sort final playlist by score' was not working properly in some cases, despite the console showing the right order.
