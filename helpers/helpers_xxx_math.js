@@ -1,24 +1,24 @@
 ﻿'use strict';
-//09/05/25
+//07/08/25
 
-/* exported combinations, nk_combinations, getClosestDivisor, toFraction */
+/* exported combinations, nk_combinations, getClosestDivisor, toFraction, robertSequence, robertDitherIntensity */
 
 /*
-	Combinatory
+	Combinatorial
 */
 
-// Ksized-combinations of a given set of elements (array)
+// K-Sized-combinations of a given set of elements (array)
 function k_combinations(aSet, k) {
 	// FROM https://gist.github.com/axelpale/3118596
 	const aSetLen = aSet.length;
 	// Wrong set
 	if (!Array.isArray(aSet) || typeof aSet === 'undefined' || aSet === null || aSetLen === null || aSetLen === 0) {
-		console.log('k_combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
+		console.log('k_combinations(): aSet [' + aSet + '] was null, empty or not an array');
 		return null; //Array was null or not an array
 	}
 	// Wrong K-size
 	if (!k || k > aSetLen) {
-		console.log('select_pairs: wrong combinatory number (' + k + ').');
+		console.log('select_pairs: wrong combinatorial number (' + k + ').');
 		return null;
 	}
 	// K-sized set has only one K-sized subset.
@@ -34,17 +34,17 @@ function k_combinations(aSet, k) {
 		}
 		return combs;
 	}
-	let head, tailcombs;
+	let head, tailCombs;
 	combs = [];
 	for (i = 0; i < aSetLen - k + 1; i++) {
 		// head is a list that includes only our current element.
 		head = aSet.slice(i, i + 1);
 		// We take smaller combinations from the subsequent elements
-		tailcombs = k_combinations(aSet.slice(i + 1), k - 1);
+		tailCombs = k_combinations(aSet.slice(i + 1), k - 1);
 		// For each (k-1)-combination we join it with the current
 		// and store it to the set of k-combinations.
-		for (j = 0; j < tailcombs.length; j++) {
-			combs.push(head.concat(tailcombs[j]));
+		for (j = 0; j < tailCombs.length; j++) {
+			combs.push(head.concat(tailCombs[j]));
 		}
 	}
 	return combs;
@@ -56,7 +56,7 @@ function combinations(aSet) {
 	let aSetLen = aSet.length;
 	// Wrong set
 	if (!Array.isArray(aSet) || typeof aSet === 'undefined' || aSet === null || aSetLen === null || aSetLen === 0) {
-		console.log('combinations(): checkarraykeys [' + aSet + '] was null, empty or not an array');
+		console.log('combinations(): aSet [' + aSet + '] was null, empty or not an array');
 		return null; //Array was null or not an array
 	}
 	// 1-sized set has only one subset.

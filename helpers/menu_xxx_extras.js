@@ -1,5 +1,5 @@
 ﻿'use strict';
-//04/08/25
+//07/08/25
 
 /* exported _createSubMenuEditEntries */
 
@@ -41,7 +41,7 @@ include('menu_xxx.js');
 
 		bCopyCurrent:	true to show a 'Copy current settings' option on submenu
 
-		bMove:			true to show a 'Move ventry' option on submenu
+		bMove:			true to show a 'Move entry' option on submenu
 
 		onBtnUp:		function to run after any menu entry is run (usually to save the modified entries on properties). List is passed as argument. onBtnUp(options.list, modified, event) => {...}
 

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//07/08/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -549,7 +549,7 @@ function ThemedButton({
 								iconImage.ApplyMask(iconMask);
 							}
 						} else {
-							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) { iconImage = iconImage.InvertColours(); }
+							if (buttonsBar.config.bIconInvert || iconCalculatedDarkMode && !iconDarkMode) { iconImage = iconImage.InvertColours(); } /* cspell:disable-line */
 							iconImage = iconImage.Resize(iconWidthCalculated, iconHeightCalculated, InterpolationMode.NearestNeighbor);
 						}
 						iconCache = iconImage;
@@ -754,7 +754,7 @@ function ThemedButton({
 						this[key] = variables[key];
 					}
 				}
-			} else { console.log('butttons_xxx: variables is not an object'); }
+			} else { console.log('buttons_xxx: variables is not an object'); }
 			variables = null;
 		}
 		if (listener) {
@@ -763,12 +763,12 @@ function ThemedButton({
 					const func = listener[key].bind(this, this);
 					addEventListener(key, func);
 				}
-			} else { console.log('butttons_xxx: listener is not an object'); }
+			} else { console.log('buttons_xxx: listener is not an object'); }
 			listener = null;
 		}
 		if (onInit) {
 			if (isFunction(onInit)) { onInit.call(this, this); }
-			else { console.log('butttons_xxx: onInit is not a function'); }
+			else { console.log('buttons_xxx: onInit is not a function'); }
 			onInit = null;
 		}
 		if (this.isHeadlessMode()) { this.state = buttonStates.hide; }

@@ -1,5 +1,5 @@
 ﻿'use strict';
-//09/08/24
+//07/08/25
 
 /* exported camelotWheel */
 
@@ -13,7 +13,7 @@
 			- Energy Boost (nX -> n+1X): adding one 'hour' (+1), equivalent to going up a fifth.
 			- Energy Drop (nX -> n-1X): subtracting one 'hour' (-1), equivalent to going down a fifth.
 			- Energy Switch (nA -> nB): staying in he same 'hour' but changing the letter, equivalent to
-				going from relative minor to major (and viceversa).
+				going from relative minor to major (and vice versa).
 		-Mood Changes:
 			- Mood Boost (nA -> n+3B): adding three 'hours' (+3), equivalent to going from minor to major.
 			- Mood Drop (nX -> n-3B): subtracting three 'hours' (-3), equivalent to going from major to minor.
