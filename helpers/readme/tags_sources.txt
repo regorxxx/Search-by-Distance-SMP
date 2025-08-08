@@ -73,7 +73,7 @@ key), the errors will be the same across the entire library (essential
 for comparison purposes).
 
 	- Mixx: https://mixxx.org
-	Provides KEY tags, but will flatten all multivalue tags with
+	Provides KEY tags, but will flatten all multi-value tags with
 	spaces, making impossible to undone the tagging. Issue has been
 	unresolved for years.
 

@@ -25,14 +25,14 @@ always applied before further processing.
 a track but globally. For ex: #YEAR# -> 2023
 - These placeholders will be replaced with focused item\'s TF result on
 execution.
-- Using tags alone, translates into multivalue tags/queries by default.
+- Using tags alone, translates into multi-value tags/queries by default.
 - When using TF expressions ($...), tags are not converted and the
 expression is executed 'as is'.
 - When using a NOT along a remapped tag, the evaluation will be joined
 with an 'AND' instead of 'OR'.
 - Standard queries may be added -ONLY- to the end of a dynamic query
 expression. In any other case it will probably throw an error.
-- Multiple dynamic multivalued variables are allowed, but they must be
+- Multiple dynamic multi-valued variables are allowed, but they must be
 enclosed on parenthesis to work.
 - In any case queries are tested before using it, so errors will be
 shown as a popup.
@@ -189,7 +189,7 @@ It is not possible to add 2 tags which are going to be remapped at the
 same query slot. For ex:
 'NOT GENRE IS #GENRE# AND STYLE IS #STYLE'
 
-(*) Since '#TAG# IS VALUE' forces tag to be equal to value, muti-value
+(*) Since '#TAG# IS VALUE' forces tag to be equal to value, multi-value
 tags follow the same rationale. If you want to use another logic (OR,
 combinations, etc.) between different values of the same tag
 then the tool to use would be 'Search Same By'.
