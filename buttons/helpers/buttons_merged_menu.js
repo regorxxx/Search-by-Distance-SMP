@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -28,14 +28,15 @@ const Chroma = require('..\\helpers-external\\chroma.js\\chroma-ultra-light.min'
 function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
-	const files = findRecursiveFile('*.js', [folders.xxx + 'buttons']).filter((path) => { return !path.split('\\').pop().startsWith('_'); });
+	const files = findRecursiveFile('*.js', [folders.xxx + 'buttons'])
+		.filter((path) => !path.split('\\').pop().startsWith('_'));
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
 	if (!_isFolder(folders.data)) { _createFolder(folders.data); }
 	const notAllowedDup = new Set(['buttons_playlist_tools.js', 'buttons_playlist_history.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js', 'buttons_device_priority.js', 'buttons_tags_save_tags.js', 'buttons_tags_fingerprint_chromaprint.js', 'buttons_tags_fingerprint_fooid.js', 'buttons_search_fingerprint_chromaprint.js', 'buttons_search_fingerprint_chromaprint_fast.js', 'buttons_search_fingerprint_fooid.js', 'buttons_fingerprint_tools.js', 'buttons_listenbrainz_tools.js', 'buttons_device_switcher.js', 'buttons_playlist_history.js', 'buttons_lastfm_tools.js', 'buttons_utils_autobackup.js', 'buttons_utils_volume.js']);
 	const requirePlaylistTools = new Set(['buttons_playlist_tools_macros.js', 'buttons_playlist_tools_macro_custom.js', 'buttons_playlist_tools_pool.js', 'buttons_playlist_tools_submenu_custom.js']);
-	const subCategories = ['_fingerprint_', '_listenbrainz_', '_search_by_distance', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_display_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
+	const subCategories = ['_fingerprint_', '_listenbrainz_', '_music_map', '_search_', '_tags_', '_playlist_tools', '_playlist_', '_stats_', '_device_', '_display_', '_lastfm_', '_utils_', '_others_']; // By order of priority if it matches multiple strings
 	const buttonsPathNames = new Set(buttonsPath.map((path) => { return path.split('\\').pop(); }));
 	function isAllowed(fileName) { return !notAllowedDup.has(fileName) || !buttonsPathNames.has(fileName); }
 	function isAllowedV2(fileName) { return !requirePlaylistTools.has(fileName) || buttonsPathNames.has('buttons_playlist_tools.js'); }
@@ -50,7 +51,7 @@ function createButtonsMenu(name) {
 			case '_playlist_tools': return 'Playlist Tools';
 			case '_others_': return 'Other tools';
 			case '_search_': return '(Quick)Search';
-			case '_search_by_distance': return 'Search by Distance';
+			case '_music_map': return 'Music Map';
 			case '_stats_': return 'Library statistics';
 			case '_tags_': return 'Tagging tools';
 			case 'Settings, Tags and Queries': return s;
@@ -794,7 +795,10 @@ function importSettingsMenu() {
 					barProperties.name[1],
 					Object.hasOwn(buttonsBar.buttons, 'ListenBrainz Tools') ? 'listenbrainz_*.*' : '',
 					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.*', 'check_library_tags_exclusion.json'] : ['']),
-					Object.hasOwn(buttonsBar.buttons, 'Search by Distance Customizable') || Object.hasOwn(buttonsBar.buttons, 'Search by Distance nearest tracks') ? 'searchByDistance_*.*' : '',
+					/* global sbd:readable */
+					typeof sbd !== 'undefined'
+					 	? Object.keys(buttonsBar.buttons).some((key) => key.startsWith(sbd.name)) ? 'searchByDistance_*.*' : ''
+						: '',
 					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.*' : '',
 					Object.hasOwn(buttonsBar.buttons, 'Fingerprint Tools') ? 'fpChromaprintReverseMap*.json' : '',
 				],

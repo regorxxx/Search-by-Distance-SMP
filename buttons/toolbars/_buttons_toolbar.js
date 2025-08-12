@@ -1,10 +1,10 @@
 ﻿'use strict';
-//05/08/25
+//11/08/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
 	Compatible with:
-		- Search by Distance
+		- Music Map
 		- Playlist Tools
 		- Fingerprint Tools
 		- ListenBrainz Tools
@@ -153,13 +153,14 @@ function loadButtonsFile(bStartup = false) {
 				name: 'Playlist Tools', files:
 					['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_playlist_tools_macros.js', 'buttons_playlist_tools_pool.js']
 			},
+			/* global sbd:readable */
 			{
-				name: 'Search by Distance', files:
-					['buttons_search_by_distance_basic.js']
+				name: typeof sbd !== 'undefined' ? sbd.name + ' (basic)': '', files:
+					['buttons_music_map_basic.js']
 			},
 			{
-				name: 'Search by Distance (customizable)', files:
-					['buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js']
+				name: typeof sbd !== 'undefined' ? sbd.name + ' (customizable)' : '', files:
+					['buttons_music_map_customizable.js', 'buttons_music_map_customizable.js', 'buttons_music_map_customizable.js', 'buttons_music_map_customizable.js']
 			},
 			{
 				name: 'Top Tracks', files:
@@ -183,12 +184,12 @@ function loadButtonsFile(bStartup = false) {
 					['buttons_listenbrainz_tools.js', 'buttons_lastfm_tools.js']
 			},
 			{
-				name: 'Full (no Search by Distance)', files:
+				name: 'Full', files:
 					['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_playlist_tools_macros.js', 'buttons_search_by_tags_combinations.js', 'buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']
 			},
 			{
-				name: 'Full', files:
-					['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_search_by_distance_customizable.js', 'buttons_search_by_distance_customizable.js', 'buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']
+				name: 'Full' + (typeof sbd !== 'undefined' ? '( with ' + sbd.name + ')' : ''), files:
+					['buttons_playlist_tools.js', 'buttons_playlist_tools_submenu_custom.js', 'buttons_music_map_customizable.js', 'buttons_music_map_customizable.js', 'buttons_playlist_remove_duplicates.js', 'buttons_playlist_filter.js', 'buttons_search_quicksearch.js']
 			},
 			{
 				name: 'Status bar', files:
@@ -228,6 +229,11 @@ function loadButtonsFile(bStartup = false) {
 		['buttons_lastfm_list.js', 'buttons_lastfm_tools.js'],
 		['buttons_tags_automation.js', 'buttons_tags_tagger.js'],
 		['buttons_device_selector.js', 'buttons_device_switcher.js'],
+		['buttons_search_by_distance.js', 'buttons_music_map_basic.js.'],
+		['buttons_search_by_distance_basic.js', 'buttons_music_map_basic.js.'],
+		['buttons_search_by_distance_customizable.js', 'buttons_music_map_customizable.js.'],
+		['buttons_search_by_distance_info.js', 'buttons_music_map_genre_explorer.js.'],
+		['buttons_search_by_distance_genre_explorer.js', 'buttons_music_map_genre_explorer.js.'],
 	]);
 	buttonsPath = names
 		.map((name) => remap.has(name) ? remap.get(name) : name)

@@ -1,9 +1,5 @@
 ﻿'use strict';
-//11/03/25
-
-/*
-	Just a bar of the same search by distance buttons customizable! So every instance can have its own name and do its own different thing.
-*/
+//11/08/25
 
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global buttonsBar:readable */
