@@ -190,7 +190,7 @@ const SearchByDistance_panelProperties = {
 	bShowQuery: ['Enable query console logs', false],
 	bBasicLogging: ['Enable basic console logs', true],
 	bShowFinalSelection: ['Enable selection\'s final scoring console logs', true],
-	firstPopup: ['Search by distance: Fired once', false],
+	firstPopup: ['Music Map: Fired once', false],
 	descriptorCRC: ['Graph Descriptors CRC', -1], // Calculated later on first time
 	bAllMusicDescriptors: ['Load AllMusic descriptors', false],
 	bLastfmDescriptors: ['Load Last.fm descriptors', false],
@@ -218,6 +218,7 @@ if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') 
 */
 
 const sbd = {
+	name: 'Music Map',
 	allMusicGraph: musicGraph(),
 	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
 	genreMap: [],
@@ -230,8 +231,8 @@ const sbd = {
 	version,
 	recipesPath: folders.userPresets + 'recipes\\',
 	themesPath: folders.userPresets + 'themes\\',
-	defaultRecipesPath: folders.xxx + 'presets\\Search by\\recipes\\',
-	defaultThemesPath: folders.xxx + 'presets\\Search by\\themes\\',
+	get defaultRecipesPath() { return folders.xxx + 'presets\\' + sbd.name + '\\recipes\\'; },
+	get defaultThemesPath() { return folders.xxx + 'presets\\' + sbd.name + '\\themes\\'; },
 	isJsonProperty: (key) => /(source|tags?)$/gi.test(key),
 	getMethodDescription: (key) => {
 		switch (key.toUpperCase()) {
@@ -271,7 +272,32 @@ const sbd = {
 		options: {},
 	},
 	asciify: (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0142/g, 'l'),
-	profiler: null
+	profiler: null,
+	get readmes() {
+		const name = this.name.replaceAll(' ', '_').toLowerCase();
+		return {
+			main: folders.xxx + 'helpers\\readme\\' + name + '.txt',
+			dynGenre: folders.xxx + 'helpers\\readme\\' + name + '_dyngenre.txt',
+			graph: folders.xxx + 'helpers\\readme\\' + name + '_graph.txt',
+			weight: folders.xxx + 'helpers\\readme\\' + name + '_weight.txt',
+			filterCultural: folders.xxx + 'helpers\\readme\\' + name + '_cultural_filter.txt',
+			filterQuery: folders.xxx + 'helpers\\readme\\' + name + '_dynamic_query.txt',
+			filterInfluence: folders.xxx + 'helpers\\readme\\' + name + '_influences_filter.txt',
+			filterSimilar: folders.xxx + 'helpers\\readme\\' + name + '_similar_artists_filter.txt',
+			tagsCultural: folders.xxx + 'helpers\\readme\\' + name + '_cultural.txt',
+			tagsRelated: folders.xxx + 'helpers\\readme\\' + name + '_related.txt',
+			tagsSimilar: folders.xxx + 'helpers\\readme\\' + name + '_similar_artists.txt',
+			tagsSources: folders.xxx + 'helpers\\readme\\tags_sources.txt',
+			tagsNotes: folders.xxx + 'helpers\\readme\\tags_notes.txt',
+			scoring: folders.xxx + 'helpers\\readme\\' + name + '_scoring.txt',
+			scoringChart: folders.xxx + 'helpers\\readme\\' + name + '_scoring.png',
+			sortingSmartShuffle: folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt',
+			sortingHarmonic: folders.xxx + 'helpers\\readme\\harmonic_mixing.txt',
+			recipes: folders.xxx + 'helpers\\readme\\' + name + '_recipes_themes.txt',
+			descriptors: folders.xxx + 'helpers\\readme\\' + name + '_user_descriptors.txt',
+			tagging: folders.xxx + 'helpers\\readme\\tags_structure.txt',
+		};
+	}
 };
 [sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dynGenreMap();
 
@@ -279,10 +305,12 @@ const sbd = {
 if (!sbd.panelProperties.firstPopup[1]) {
 	// firstPopup is set true on script unloading the first time it successfully closed, so it can be reused somewhere if needed
 	overwriteProperties(sbd.panelProperties); // Updates panel
-	const readmeKeys = [{ name: 'search_by_distance', title: 'Search by Distance' }, { name: 'tags_structure', title: 'Tagging requisites' }]; // Must read files on first execution
-	readmeKeys.forEach((objRead) => {
-		const readmePath = folders.xxx + 'helpers\\readme\\' + objRead.name + '.txt';
-		const readme = _open(readmePath, utf8);
+	// Must read files on first execution
+	[
+		{ file: sbd.readmes.main, title: sbd.name },
+		{ file: sbd.readmes.tagging, title: 'Tagging requisites' }
+	].forEach((objRead) => {
+		const readme = _open(objRead.file, utf8);
 		if (readme.length) { fb.ShowPopupMessage(readme, objRead.title); }
 	});
 	// Make the user check their tags before use...
@@ -335,7 +363,7 @@ const descriptorCRC = crc32(JSON.stringify(music_graph_descriptors) + musicGraph
 const bMismatchCRC = sbd.panelProperties.descriptorCRC[1] !== descriptorCRC;
 if (bMismatchCRC) {
 	if (sbd.panelProperties.descriptorCRC[1] !== -1) { // There may be multiple panels, don't nuke it on first init on a new panel
-		console.log('Search by Distance: CRC mismatch. Deleting old json cache.');
+		console.log(sbd.name + ': CRC mismatch. Deleting old json cache.');
 		_deleteFile(folders.data + 'searchByDistance_cacheLink.json');
 		_deleteFile(folders.data + 'searchByDistance_cacheLinkSet.json');
 	}
@@ -349,24 +377,24 @@ if (_isFile(folders.data + 'searchByDistance_cacheLink.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLink.json');
 	if (data.size) {
 		cacheLink = data;
-		if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from file.'); }
+		if (sbd.panelProperties.bStartLogging[1]) { console.log(sbd.name + ': Used Cache - cacheLink from file.'); }
 	}
 }
 if (_isFile(folders.data + 'searchByDistance_cacheLinkSet.json')) {
 	const data = loadCache(folders.data + 'searchByDistance_cacheLinkSet.json');
 	if (data.size) {
 		cacheLinkSet = data;
-		if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from file.'); }
+		if (sbd.panelProperties.bStartLogging[1]) { console.log(sbd.name + ': Used Cache - cacheLinkSet from file.'); }
 	}
 }
 // Delays cache update after startup (must be called by the button file if it's not done here)
 if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') { debounce(updateCache, 3000)({ properties: sbd.panelProperties }); }
 // Ask others instances to share cache on startup
 if (typeof cacheLink === 'undefined') {
-	setTimeout(() => { window.NotifyOthers('Search by Distance: requires cacheLink map', true); }, 1000);
+	setTimeout(() => { window.NotifyOthers(sbd.name + ': requires cacheLink map', true); }, 1000);
 }
 if (typeof cacheLinkSet === 'undefined') {
-	setTimeout(() => { window.NotifyOthers('Search by Distance: requires cacheLinkSet map', true); }, 1000);
+	setTimeout(() => { window.NotifyOthers(sbd.name + ': requires cacheLinkSet map', true); }, 1000);
 }
 async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, properties = null } = {}) {
 	if (typeof cacheLink === 'undefined' && !newCacheLink) { // only required if on_notify_data did not fire before
@@ -376,7 +404,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 			sbd.isCalculatingCache = true;
 			const bBar = typeof buttonsBar !== 'undefined';
 			const sbdButtons = bBar
-				? buttonsBar.listKeys.flat(Infinity).filter((key) => key.match(/(?:^Search by Distance.*)|(?:^Playlist Tools$)/i))
+				? buttonsBar.listKeys.flat(Infinity).filter((key) => key.match(/(?:^Music Map.*)|(?:^Playlist Tools$)/i))
 				: [];
 			if (bBar) {
 				sbdButtons.forEach((key) => {
@@ -390,7 +418,7 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 					.flat(Infinity)
 					.map((tag) => !tag.includes('$') ? _t(tag) : tag).join('|')
 				: _t(globTags.genre) + '|' + _t(globTags.style);
-			console.log('Search by Distance: tags used for cache - ' + genreStyleTags);
+			console.log(sbd.name + ': tags used for cache - ' + genreStyleTags);
 			const tfo = fb.TitleFormat(genreStyleTags);
 			const styleGenres = await new Promise((resolve) => {
 				const libItems = fb.GetLibraryItems().Convert();
@@ -455,15 +483,15 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 		}
 		saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json');
 		if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
-		console.log('Search by Distance: New Cache - cacheLink');
-		window.NotifyOthers('Search by Distance: cacheLink map', cacheLink);
+		console.log(sbd.name + ': New Cache - cacheLink');
+		window.NotifyOthers(sbd.name + ': cacheLink map', cacheLink);
 	} else if (newCacheLink) {
 		cacheLink = newCacheLink;
 	}
 	if (typeof cacheLinkSet === 'undefined' && !newCacheLinkSet) { // only required if on_notify_data did not fire before
 		cacheLinkSet = new Map();
-		console.log('Search by Distance: New Cache - cacheLinkSet');
-		window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet);
+		console.log(sbd.name + ': New Cache - cacheLinkSet');
+		window.NotifyOthers(sbd.name + ': cacheLinkSet map', cacheLinkSet);
 	} else if (newCacheLinkSet) {
 		cacheLinkSet = newCacheLinkSet;
 	}
@@ -478,34 +506,34 @@ async function updateCache({ newCacheLink, newCacheLinkSet, bForce = false, prop
 
 addEventListener('on_notify_data', (name, info) => {
 	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
-	if (!name.startsWith('Search by Distance')) { return; }
+	if (!name.startsWith(sbd.name)) { return; }
 	switch (name) {
-		case 'Search by Distance: requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
+		case sbd.name + ': requires cacheLink map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLink !== 'undefined' && cacheLink.size) {
-				debounce(() => { if (typeof cacheLink !== 'undefined') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); } }, 1000)();
-				console.log('Search by Distance: Requested Cache - cacheLink.');
+				debounce(() => { if (typeof cacheLink !== 'undefined') { window.NotifyOthers(sbd.name + ': cacheLink map', cacheLink); } }, 1000)();
+				console.log(sbd.name + ': Requested Cache - cacheLink.');
 			}
 			break;
 		}
-		case 'Search by Distance: requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
+		case sbd.name + ': requires cacheLinkSet map': { // When asked to share cache, delay 1 sec. to allow script loading
 			if (typeof cacheLinkSet !== 'undefined' && cacheLinkSet.size) {
-				debounce(() => { if (typeof cacheLinkSet !== 'undefined') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); } }, 1000)();
-				console.log('Search by Distance: Requested Cache - cacheLinkSet.');
+				debounce(() => { if (typeof cacheLinkSet !== 'undefined') { window.NotifyOthers(sbd.name + ': cacheLinkSet map', cacheLinkSet); } }, 1000)();
+				console.log(sbd.name + ': Requested Cache - cacheLinkSet.');
 			}
 			break;
 		}
-		case 'Search by Distance: cacheLink map': {
+		case sbd.name + ': cacheLink map': {
 			if (info) {
-				if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLink from other panel.'); }
+				if (sbd.panelProperties.bStartLogging[1]) { console.log(sbd.name + ': Used Cache - cacheLink from other panel.'); }
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => { if (pair[1].distance === null) { pair[1].distance = Infinity; } }); // stringify converts Infinity to null, this reverts the change
 				updateCache({ newCacheLink: new Map(data) });
 			}
 			break;
 		}
-		case 'Search by Distance: cacheLinkSet map': {
+		case sbd.name + ': cacheLinkSet map': {
 			if (info) {
-				if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Used Cache - cacheLinkSet from other panel.'); }
+				if (sbd.panelProperties.bStartLogging[1]) { console.log(sbd.name + ': Used Cache - cacheLinkSet from other panel.'); }
 				let data = JSON.parse(JSON.stringify([...info])); // Deep copy
 				data.forEach((pair) => { if (pair[1] === null) { pair[1] = Infinity; } }); // stringify converts Infinity to null, this reverts the change
 				updateCache({ newCacheLinkSet: new Map(data) });
@@ -516,7 +544,7 @@ addEventListener('on_notify_data', (name, info) => {
 });
 
 addEventListener('on_script_unload', () => {
-	if (sbd.panelProperties.bStartLogging[1]) { console.log('Search by Distance: Saving Cache.'); }
+	if (sbd.panelProperties.bStartLogging[1]) { console.log(sbd.name + ': Saving Cache.'); }
 	if (cacheLink) { saveCache(cacheLink, folders.data + 'searchByDistance_cacheLink.json'); }
 	if (cacheLinkSet) { saveCache(cacheLinkSet, folders.data + 'searchByDistance_cacheLinkSet.json'); }
 	console.flush();
@@ -531,7 +559,7 @@ if (sbd.panelProperties.bGraphDebug[1]) {
 	if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 }
 if (sbd.panelProperties.bProfile[1]) {
-	memoryPrint('Search by Distance Graph', sbd.allMusicGraph);
+	memoryPrint(sbd.name + ' Graph', sbd.allMusicGraph);
 }
 
 /*
@@ -568,7 +596,7 @@ if (!_isFile(sbd.recipesPath + 'allowedKeys.txt') || bMismatchCRC) {
 	}
 	// Copy docs
 	_save(sbd.recipesPath + 'allowedKeys.txt', JSON.stringify(Object.fromEntries(data), null, '\t').replace(/\n/g, '\r\n'));
-	_copyFile(folders.xxx + 'presets\\Search by\\readme.txt', folders.userPresets + 'themes_recipes_readme.txt', true);
+	_copyFile(sbd.defaultRecipesPath + 'readme.txt', folders.userPresets + 'themes_recipes_readme.txt', true);
 	// Copy themes and recipes
 	findRecursiveFile(
 		'*.json',
@@ -583,7 +611,7 @@ function testRecipe({ path = null, json = null, baseTags = null } = {}) {
 	if (!baseTags) { result.valid = false; result.report.push('No tags provided.'); return result; }
 	else if (path) {
 		if (_isFile(path)) {
-			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
+			recipe = _jsonParseFileCheck(path, 'Recipe json', sbd.name, utf8);
 		} else { result.valid = false; result.report.push('Recipe file not found.'); return result; }
 	} else { recipe = clone(json); }
 	if (Object.keys(recipe).length === 0) { result.valid = false; result.report.push('Recipe is empty.'); return result; }
@@ -682,7 +710,7 @@ function testBaseTags(baseTags) {
 	const result = testRecipe({ json: { tags: { '*': {} } }, baseTags });
 	if (!result.valid) {
 		result.report[0] = 'Error on tags settings.\nTo fix it, restore defaults on affected tags (customizable button) or globally (non-customizable buttons). These options are usually found by Shift + L. Clicking on the button. Then reload the panel.\nIf the error continues, report it as a bug.\n------------------------------------------------------------------------';
-		console.popup(result.report.join('\n'), 'Search by distance');
+		console.popup(result.report.join('\n'), sbd.name);
 	}
 	return result.valid;
 }
@@ -885,7 +913,7 @@ async function searchByDistance({
 	const oldCacheLinkSetSize = cacheLinkSet ? cacheLinkSet.size : 0;
 	// Tags check
 	if (!tags || Object.keys(tags).length === 0) {
-		console.popup('No valid tags provided: ' + tags + '\nRestore defaults to fix it.', 'Search by distance');  // NOSONAR
+		console.popup('No valid tags provided: ' + tags + '\nRestore defaults to fix it.', sbd.name);  // NOSONAR
 		return;
 	}
 	// Test tags
@@ -899,8 +927,8 @@ async function searchByDistance({
 			path = !_isFile(recipe) && _isFile(sbd.recipesPath + recipe) // NOSONAR [is always a string]
 				? sbd.recipesPath + recipe // NOSONAR [is always a string]
 				: recipe;
-			recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by Distance', utf8);
-			if (!recipe) { console.popup('Recipe not found: ' + path, 'Search by distance'); return; } // NOSONAR [is always a string]
+			recipe = _jsonParseFileCheck(path, 'Recipe json', sbd.name, utf8);
+			if (!recipe) { console.popup('Recipe not found: ' + path, sbd.name); return; } // NOSONAR [is always a string]
 		}
 		// Check recipe but don't crash
 		const result = testRecipe({ json: recipe, baseTags: tags });
@@ -996,7 +1024,7 @@ async function searchByDistance({
 		let path;
 		if (isString(theme)) { // File path: try to use plain path or themes folder + filename
 			path = !_isFile(theme) && _isFile(sbd.themesPath + theme) ? sbd.themesPath + theme : theme; // NOSONAR [is always a string]
-			theme = _jsonParseFileCheck(path, 'Theme json', 'Search by Distance', utf8);
+			theme = _jsonParseFileCheck(path, 'Theme json', sbd.name, utf8);
 			if (!theme) { return; }
 		}
 		// Array of objects
@@ -1032,10 +1060,10 @@ async function searchByDistance({
 		}
 	}
 	// Method check
-	if (!checkMethod(method)) { console.popup('Method not recognized: ' + method + '\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', 'Search by distance'); return; }
+	if (!checkMethod(method)) { console.popup('Method not recognized: ' + method + '\nOnly allowed GRAPH, DYNGENRE or WEIGHT.', sbd.name); return; }
 	// Start calcs
 	/** @type {FbProfiler} */
-	const test = sbd.profiler = bProfile ? new FbProfiler('Search by Distance') : null;
+	const test = sbd.profiler = bProfile ? new FbProfiler(sbd.name) : null;
 	// Copy recipe tags
 	if (bUseRecipeTags) {
 		for (let key in recipeProperties.tags) {
@@ -1067,7 +1095,7 @@ async function searchByDistance({
 		calcTags[key] = calcTag;
 		// Safety Check. Warn users if they try wrong settings
 		if (type.includes('single') && calcTag.tf.length > 1) {
-			console.popup('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.', 'Search by distance');
+			console.popup('Check \'tags\' value (' + calcTag.tf + '), for tag ' + key + '. Must be only one tag name!.', sbd.name);
 			return;
 		}
 	}
@@ -1089,7 +1117,7 @@ async function searchByDistance({
 	// Check input
 	playlistLength = (playlistLength >= 0)
 		? playlistLength
-		: Input.number('int positive', 50, 'Enter number: (greater than 0)\n(Infinity is allowed)', 'Search by distance: Playlist size', 50) || Input.lastInput;
+		: Input.number('int positive', 50, 'Enter number: (greater than 0)\n(Infinity is allowed)', sbd.name + ': Playlist size', 50) || Input.lastInput;
 	probPick = (probPick <= 100 && probPick > 0) ? probPick : 100;
 	scoreFilter = (scoreFilter <= 100 && scoreFilter >= 0) ? scoreFilter : 100;
 	minScoreFilter = (minScoreFilter <= scoreFilter && minScoreFilter >= 0) ? minScoreFilter : scoreFilter;
@@ -1099,15 +1127,15 @@ async function searchByDistance({
 		return;
 	}
 	if (bPoolFiltering && (!poolFilteringTag || !poolFilteringTag.length || !isArrayStrings(poolFilteringTag))) {
-		console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, 'Search by distance');
+		console.popup('Warning: Tags for pool filtering are not set or have an invalid value:\n' + poolFilteringTag, sbd.name);
 		return;
 	}
 	if (bSmartShuffle && (!smartShuffleTag || !smartShuffleTag.length)) {
-		console.popup('Warning: Smart Shuffle Tag is not set or has an invalid value:\n' + smartShuffleTag, 'Search by distance');
+		console.popup('Warning: Smart Shuffle Tag is not set or has an invalid value:\n' + smartShuffleTag, sbd.name);
 		return;
 	}
 	if (bProgressiveListCreation && (!checkDuplicatesByTag || !checkDuplicatesByTag.length)) {
-		console.popup('Warning: Recursive playlist creation is enabled, but no tags for duplicates removal are provided.', 'Search by distance');
+		console.popup('Warning: Recursive playlist creation is enabled, but no tags for duplicates removal are provided.', sbd.name);
 		return;
 	}
 	// Can not use those methods without genre/style tags at all
@@ -1718,7 +1746,7 @@ async function searchByDistance({
 						? '\n\n\nCheck the theme has the required tags:\n' + validTags.map((key) => '\t' + (key + ':').padEnd(20, ' ') + calcTags[key].reference).join('\n')
 						: ''
 					)
-					, 'Search by distance'
+					, sbd.name
 				);
 				return null;
 			}
@@ -1869,7 +1897,7 @@ async function searchByDistance({
 	}
 	if (bProfile) {
 		test.Print('Task #4: Library tags', false);
-		memoryPrint('Search by Distance Tags', calcTags);
+		memoryPrint(sbd.name + ' Tags', calcTags);
 	}
 	const sortTagKeys = Object.keys(calcTags).sort((a, b) => calcTags[b].weight - calcTags[a].weight); // Sort it by weight to break asap
 	let mapDistance, score, bRelated, bUnrelated, bIsBreak;
@@ -2345,7 +2373,7 @@ async function searchByDistance({
 						}
 					} else { console.log('Warning: Can not create a Progressive List. First Playlist selection contains less than the required number of tracks.'); }
 				} else { console.log('Warning: Can not create a Progressive List. Current finalPlaylistLength (' + finalPlaylistLength + ') and progressiveListCreationN (' + progressiveListCreationN + ') values would create a playlist with track groups size (' + newPlaylistLength + ') lower than the minimum 3.'); }
-			} else { console.popup('Warning: Can not create a Progressive List. progressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', 'Search by distance'); }
+			} else { console.popup('Warning: Can not create a Progressive List. progressiveListCreationN (' + progressiveListCreationN + ') must be greater than 1 (and less than 100 for safety).', sbd.name); }
 		}
 		// Invert any previous algorithm
 		if (bInverseListOrder) {
@@ -2394,8 +2422,8 @@ async function searchByDistance({
 		if (bBasicLogging) { console.log('Final Playlist selection length: ' + finalPlaylistLength + ' tracks.'); }
 	} else if (bBasicLogging) { console.log('Final selection length: ' + finalPlaylistLength + ' tracks.'); }
 	// Share changes on cache (checks undefined to ensure no crash if it gets run on the first 3 seconds after loading a panel)
-	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLink map', cacheLink); }
-	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') { window.NotifyOthers('Search by Distance: cacheLinkSet map', cacheLinkSet); }
+	if (typeof cacheLink !== 'undefined' && oldCacheLinkSize !== cacheLink.size && method === 'GRAPH') { window.NotifyOthers(sbd.name + ': cacheLink map', cacheLink); }
+	if (typeof cacheLinkSet !== 'undefined' && oldCacheLinkSetSize !== cacheLinkSet.size && method === 'GRAPH') { window.NotifyOthers(sbd.name + ': cacheLinkSet map', cacheLinkSet); }
 	// Output handle list (as array), the score data, current selection (reference track) and more distant track
 	return [selectedHandlesArray, selectedHandlesData, sel, (poolLength ? handleList[scoreData[poolLength - 1].index] : -1)];
 }
@@ -2741,16 +2769,16 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 		if (!Number.isNaN(Number(output))) {
 			output = Number(output);
 			if (output.toString() !== graphDistance) {
-				fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, sbd.name);
 				return null;
 			}
 		} else {
 			if (output.length >= 50) {
-				fb.ShowPopupMessage('Error parsing graphDistance (length >= 50): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (length >= 50): ' + output, sbd.name);
 				return null;
 			}
 			if (output.includes('()') || output.includes(',')) {
-				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (is not a valid variable or using a func): ' + output, sbd.name);
 				return null;
 			}
 			const validVars = [
@@ -2763,17 +2791,17 @@ function parseGraphDistance(graphDistance, descr = music_graph_descriptors, bBas
 				output = output.replaceAll('music_graph_descriptors.', '');
 				validVars.forEach((key) => output = output.replaceAll(key, descr[key].toString()));
 			} else {
-				fb.ShowPopupMessage('Error parsing graphDistance (using no descriptor variable): ' + output, 'Search by Distance');
+				fb.ShowPopupMessage('Error parsing graphDistance (using no descriptor variable): ' + output, sbd.name);
 				return null;
 			}
 			output = eval(output);
-			if (Number.isNaN(output)) { fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, 'Search by Distance'); }
+			if (Number.isNaN(output)) { fb.ShowPopupMessage('Error parsing graphDistance (not a valid number): ' + output, sbd.name); }
 		}
 		if (bBasicLogging) { console.log('Parsed graphDistance to: ' + output); }
 	}
 	if (Number.isFinite(output)) { output = Math.round(output); }
 	if (output < 0) {
-		fb.ShowPopupMessage('Error parsing graphDistance (< 0): ' + output, 'Search by Distance');
+		fb.ShowPopupMessage('Error parsing graphDistance (< 0): ' + output, sbd.name);
 		return null;
 	}
 	return output;
@@ -2813,7 +2841,7 @@ function checkMinGraphDistance(graphDistance, descr = music_graph_descriptors) {
 }
 
 function findStyleGenresMissingGraphCheck(properties) {
-	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, 'Search by distance', popup.question + popup.yes_no);
+	const answer = WshShell.Popup('It\'s recommended to check your current Library tags against the Graph to look for missing genres/styles not on Graph.\nDo you want to do it now? (can be done afterwards at debug menu).', 0, sbd.name + ': library tags checking', popup.question + popup.yes_no);
 	if (answer === popup.yes) {
 		const tags = JSON.parse(properties.tags[1]); // At least tags must be provided, genreStyleFilter and bAscii are optional
 		findStyleGenresMissingGraph({
@@ -2855,8 +2883,8 @@ function saveCache(cacheMap, path) {
 function loadCache(path) {
 	let cacheMap;
 	if (_isFile(path)) {
-		if (utils.GetFileSize(path) > 400000000) { console.log('Search by Distance: cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path); }
-		let obj = _jsonParseFileCheck(path, 'Cache Link json', 'Search by Distance', utf8);
+		if (utils.GetFileSize(path) > 400000000) { console.log(sbd.name + ': cache link file size exceeds 40 Mb, file is probably corrupted (try resetting it): ' + path); }
+		let obj = _jsonParseFileCheck(path, 'Cache Link json', sbd.name, utf8);
 		if (obj) {
 			obj = Object.entries(obj);
 			obj.forEach((pair) => { // There are 2 possible cache structures
@@ -2878,7 +2906,7 @@ function processRecipe(initialRecipe) {
 			: _isFile(sbd.recipesPath + newRecipe)
 				? sbd.recipesPath + newRecipe
 				: null;
-		const newRecipeObj = newPath ? _jsonParseFileCheck(newPath, 'Recipe json', 'Search by Distance', utf8) : null;
+		const newRecipeObj = newPath ? _jsonParseFileCheck(newPath, 'Recipe json', sbd.name, utf8) : null;
 		if (!newRecipeObj) { console.log('Recipe not found: ' + newPath); }
 		else if (Object.hasOwn(newRecipeObj, 'tags') && Object.hasOwn(toAdd, 'tags')) {
 			const tags = deepMergeTags(newRecipeObj.tags, toAdd.tags);
