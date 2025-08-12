@@ -1,7 +1,7 @@
 ﻿'use strict';
 //12/08/25
 
-/* exported testGraphNodes, testGraphNodeSets, testGraphCulture */
+/* exported testGraphNodes, testGraphNodeSets, testGraphNodeSetsWithPath, testGraphCulture */
 
 /* global calcGraphDistance:readable, calcMeanDistanceV2:readable, getNodesFromPath:readable */
 
@@ -202,6 +202,42 @@ function testGraphNodeSets(myGraph, influenceMethod = 'adjacentNodes') {
 		: '')
 	);
 	fb.ShowPopupMessage(report.join('\n'), 'Music Graph: distance tests - Node set'); // DEBUG
+	test.Print('', false);
+	return report;
+}
+
+// FOR TESTING: compares array of styles to other array and computes mean distance (similar to the main function)
+// Tip: Use foobar2000 component Text Tools with this as track pattern:
+// 		'[' ''$meta_sep(genre,''',' '')'', ''$meta_sep(style,''',' '')''' '']'
+// It will output things like this, ready to use here:
+// 		[ 'Electronic', 'Hip-Hop', 'Future Bass', 'Chill-Out Downtempo', 'Alt. Rap' ]
+function testGraphNodeSetsWithPath(myGraph, influenceMethod = 'adjacentNodes') {
+	const test = new FbProfiler('Test node sets + paths');
+	// EDIT HERE
+	const report = [
+		{ name: '<------------------- Arbitrary set distance tests ------------------->' },
+		{
+			from: ['World', 'African', 'Electronic', 'Jazz Vocal', 'Future Jazz'],
+			to: ['Rock', 'Blues', 'Classic Rock', 'Blues Rock', 'Beat Music', 'Electric Blues']
+		},
+	].map((o, i) => {
+		if (Object.hasOwn(o, 'name')) { return (i !== 0 ? '\n' : '') + o.name; }
+		if (Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')) {
+			let text = Object.hasOwn(o, 'from') && Object.hasOwn(o, 'to')
+				? o.from + ' <- ' + o.to + ' = ' + calcMeanDistanceV2(myGraph, o.from, o.to, influenceMethod)
+				: '';
+			text += '\n\t' + o.from.map((nodeFrom) => {
+				let min = { distance: Infinity };
+				o.to.forEach((nodeTo) => {
+					const { distance, influence, path } = calcGraphDistance(myGraph, nodeFrom, nodeTo, influenceMethod);
+					if (distance < min.distance) { min = { distance, text: getNodesFromPath(path) + '\t' + distance + ' (' + influence + ')' }; }
+				});
+				return min.text;
+			}).filter(Boolean).join('\n\t');
+			return text;
+		}
+	});
+	fb.ShowPopupMessage(report.join('\n'), 'Music Graph: distance tests - Node set + paths'); // DEBUG
 	test.Print('', false);
 	return report;
 }
