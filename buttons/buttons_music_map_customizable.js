@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//11/08/25
 
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
@@ -24,7 +24,7 @@ include('helpers\\buttons_sbd_menu_config.js'); // Button menu
 
 var version = sbd.version; // NOSONAR [shared on files]
 
-try { window.DefineScript('Search by Distance Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
+try { window.DefineScript(sbd.name + ' Customizable Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
 
 var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
@@ -62,7 +62,7 @@ testBaseTags(JSON.parse(newButtonsProperties.tags[1]));
 	Some button examples for 'search_by_distance.js'. Look at that file to see what they do.
 */
 addButton({
-	'Search by Distance Customizable': new ThemedButton({
+	[sbd.name + ' Customizable']: new ThemedButton({
 		coordinates: { x: 0, y: 0, w: _gr.CalcTextWidth(newButtonsProperties.customName[1], _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 35 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 },
 		text: newButtonsProperties.customName[1],
 		func: function (mask) {
@@ -75,7 +75,7 @@ addButton({
 			} else {
 				if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
 					let input = '';
-					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': Search by Distance Customizable Button', this.buttonsProperties.customName[1], true); }
+					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': ' + sbd.name + ' Customizable Button', this.buttonsProperties.customName[1], true); }
 					catch (e) { return; } // eslint-disable-line no-unused-vars
 					if (!input.length) { return; }
 					if (this.buttonsProperties.customName[1] !== input) {
@@ -100,13 +100,13 @@ addButton({
 		listener: {
 			'on_notify_data': (parent, name, info) => {
 				if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
-				if (!name.startsWith('Search by Distance')) { return; }
+				if (!name.startsWith(sbd.name)) { return; }
 				switch (name) { // NOSONAR
-					case 'Search by Distance: share configuration': {
+					case sbd.name + ': share configuration': {
 						if (info) {
 							if (info.notifyThis && parent.name === info.name) { return; } // Don't apply to same button
 							parent.switchHighlight(true);
-							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': Search by distance', popup.question + popup.yes_no);
+							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': ' + sbd.name, popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								parent.buttonsProperties.tags[1] = String(info.tags[1]);
 								parent.buttonsProperties.folksonomyWhitelistTag[1] = String(info.folksonomyWhitelistTag[1]);
@@ -208,9 +208,9 @@ function processRecipePlaceholder(recipeFile, tags) {
 	let recipe = {};
 	if (recipeFile.length) {
 		recipe = _isFile(recipeFile)
-			? _jsonParseFileCheck(recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
+			? _jsonParseFileCheck(recipeFile, 'Recipe json', sbd.name, utf8) || {}
 			: _isFile(sbd.recipesPath + recipeFile)
-				? _jsonParseFileCheck(sbd.recipesPath + recipeFile, 'Recipe json', 'Search by distance', utf8) || {}
+				? _jsonParseFileCheck(sbd.recipesPath + recipeFile, 'Recipe json', sbd.name, utf8) || {}
 				: {};
 		if (Object.keys(recipe).length !== 0) {
 			const result = testRecipe({ json: recipe, baseTags: tags });
@@ -249,8 +249,8 @@ function processRecipePlaceholder(recipeFile, tags) {
 				}
 			}
 		} else {
-			console.log('Search by Distance: Recipe file not found\n\t', recipeFile); // DEBUG
-			fb.ShowPopupMessage('Recipe file not found:\n' + recipeFile, 'Search by distance');
+			console.log(sbd.name + ': Recipe file not found\n\t', recipeFile); // DEBUG
+			fb.ShowPopupMessage('Recipe file not found:\n' + recipeFile, sbd.name);
 		}
 	}
 	return recipe;

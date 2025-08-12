@@ -8,8 +8,8 @@ key, etc. For ex, given a reference track:
 - Create an harmonic mix which sounds great no matter the genres mixed
 - Just a random playlist with some coherence in its order and tracks
 
-When their score is over 'scoreFilter', then they are included in the
-final pool.
+When their score is over the desired 'Tag similarity score', then they
+are included in the final pool.
 
 After all tracks have been evaluated and the final pool is complete,
 some of them are chosen to populate the playlist. You can choose whether
@@ -17,85 +17,67 @@ this final selection is done according to score, randomly chosen, etc.
 
 All settings are configurable on the properties panel and/ or menus.
 
-These are the weight/tags pairs checked by default:
+These are the tags remapping checked by default, but new custom tag slots
+can be added by the user too:
 +-----------------+-----------------++----------------+-----------------+
-|      Weight     |       Tag       ||     Weight     |       Tag       |
+|      Name       |       Tag       ||      Name      |       Tag       |
 +-----------------+-----------------++----------------+-----------------+
 +-----------------+-----------------++----------------+-----------------+
-| genreWeight     | genre           || styleWeight    | style           |
+| genre           | %GENRE%         || style          | %STYLE%         |
 +-----------------+-----------------++----------------+-----------------+
-| dyngenreWeight  | virtual tag     || moodWeight     | mood            |
+| folksonomy      | %FOLKSONOMY%    || mood           | %mood%          |
 +-----------------+-----------------++----------------+-----------------+
-| keyWeight       | key             || dateWeight     | $year(%date%)   |
+| key             | %KEY%           || date           | $year(%DATE%)   |
 +-----------------+-----------------++----------------+-----------------+
-| bpmWeight       | bpm             || composerWeight | composer        |
+| bpm             | %BPM%           || composer       | %COMPOSER%      |
 +-----------------+-----------------++----------------+-----------------+
+| dyngenre        | virtual tag     || artist region  | virtual tag     |
++-----------------+-----------------++----------------+-----------------+
+| genre region    | virtual tag     || related        | virtual tag     |
++-----------------+-----------------++----------------+-----------------+
+| unrelated       | virtual tag     ||
++-----------------+-----------------++
 
-There are 2 custom tags which can be set by the user too:
-+-----------------+-----------++-----------------+-----------+
-|      Weight     |    Tag    ||      Weight     |    Tag    |
-+-----------------+-----------++-----------------+-----------+
-+-----------------+-----------++-----------------+-----------+
-|                 | (empty by ||                 | (empty by |
-| customStrWeight |  default) || customNumWeight |  default) |
-+-----------------+-----------++-----------------+-----------+
+Every tag slot has a configurable weight which sets the relevance for
+final similarity scoring.
 
-Any Weight/tags pair can be remapped and/or merged (sep. by comma).
-For example, linking genreWeight to 2 different genre tags on your files:
-+-------+-----------------------------+
-|  Tag  | Remap                       |
-+-------+-----------------------------+
-+-------+-----------------------------+
-| genre | allmusic_genre,my_genre_tag |
-+-------+-----------------------------+
+Any tag slot can be remapped and/or merged into multiple tags (sep. by
+comma). For example, linking genre to 2 different tags on your files:
++-------+----------------------------+
+|  Name | Tag                        |
++-------+----------------------------+
++-------+----------------------------+
+| genre | allmusic_genre,my_genre    |
++-------+----------------------------+
 
-All weight/tags pairs can be linked to TitleFormat Expr. Use tag names
-instead of TF expressions when possible (+ performance).
+All tag slots can be linked to TitleFormat Expressions.Anyway, it's
+recommended to use tag names instead when possible (+ performance).
 For example, see 'date': TF is used to have the same results for
 tracks with YYYY-MM tags or YYYY tags.
-+-----------+--------------------+
-|    Tag    | Remap              |
-+-----------+--------------------+
-+-----------+--------------------+
-| date      | $year(%date%)      |
-+-----------+--------------------+
++---------+--------------------------+
+| name    | Remap                    |
++---------+--------------------------+
++---------+--------------------------+
+| date    | $year(%date%)            |
++---------+--------------------------+
 
-Genre and Style tags (or their remapped values) can be globally
-filtered. See 'genreStyleFilter'. Case sensitive. For example, when
-comparing genre values from track A to track B, 'Soundtrack' and
-'Radio Program' values are omitted:
-+---------------------+--------------------------+
-| Filter              | Values                   |
-+---------------------+--------------------------+
-+---------------------+--------------------------+
-| genreStyleFilterTag | Soundtrack,Radio Program |
-+---------------------+--------------------------+
+Genre and Style tag slots (or their remapped values) can be globally
+filtered. See 'Filter genre/style values'. Case sensitive. For example,
+when comparing genre values from track A to track B, 'Soundtrack' and
+'Radio Program' values can be omitted:
++---------------------------+--------------------------+
+| Filter                    | Values                   |
++---------------------------+--------------------------+
++---------------------------+--------------------------+
+| Filter genre/style values | Soundtrack,Radio Program |
++---------------------------+--------------------------+
 
-There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
-+----------+--------------------------+---------------------------------+
-| Name     | Method                   | Weights                         |
-+----------+--------------------------+---------------------------------+
-+----------+--------------------------+---------------------------------+
-|          |                          | Uses genreWeight, styleWeight,  |
-|          |                          |      moodWeight, keyWeight,     |
-|          |                          |      dateWeight, dateRange,     |
-|          |                          |      bpmWeight, bpmRange,       |
-|          |                          |      composerWeight,            |
-|          |                          |      customStrWeight,           |
-| WEIGHT   | Score filter             |      customNumWeight            |
-+----------+--------------------------+---------------------------------+
-|          |                          | Same than WEIGHT                |
-| GRAPH    | Score + Distance filters |      + max_graph_distance       |
-+----------+--------------------------+---------------------------------+
-|          |                          | Same than WEIGHT                |
-| DYNGENRE | Score filter             |      + dyngenreWeight           |
-+----------+--------------------------+---------------------------------+
-
+There are 3 methods to analyze similarity: WEIGHT, GRAPH and DYNGENRE.
 +----------+-----------------------------------------------------------+
 | Name     | Description                                               |
 +----------+-----------------------------------------------------------+
 +----------+-----------------------------------------------------------+
-|          | Calculates similarity by score via tags comparison.       |
+|          | Calculates tag similarity score via tags comparison.      |
 |          |                                                           |
 |          | Similarity is calculated by simple string matching        |
 |          |      ('Rock' != 'Soul') and ranges for numeric tags.      |
@@ -106,9 +88,10 @@ There are 3 methods to calc similarity: WEIGHT, GRAPH and DYNGENRE.
 |          |      automatic methods (like MusicBrainz Picard,          |
 | WEIGHT   |      see note at bottom).                                 |
 +----------+-----------------------------------------------------------+
-|          | Apart from scoring, it compares the genre/styles tags     |
-|          |      set to the ones of the reference track using a       |
-|          |      graph and calculating their min. mean distance.      |
+|          | Uses tag similarity scoring and genre/style variation     |
+|          |      it compares the genre/styles tags of every track     |
+|          |      to the ones of the reference track using a graph     |
+|          |      and calculating their min. mean distance.            |
 |          |                                                           |
 |          | For ex. for reference track with genre/styles (A,B,D),    |
 |          |      minimum mean distance is done considering (A,B,D)    |

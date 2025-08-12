@@ -1,0 +1,30 @@
+﻿A utility to run multiple main menus with one single click. For ex.
+to completely switch playback statistics/scrobbling at once (which
+may involve up to 3 menu entries with some plugins).
+
+Also allows to call such menus before closing foobar, according 
+to button state (enabled/disabled). Button state may be saved 
+between sessions and will change when clicking on the button.
+
+Entries are added with a name (just cosmetic), and a command
+which should point to the full menu path: "Playback/Play".
+There are some built-in presets which may be used as examples.
+
+Some specific menus (like those related to playback) only work
+if the playback follows the cursor or the focus is set to an specific
+track. Such advanced options may be set with the following modifiers:
+	- PlaybackFollowCursor: true|false
+	- CursorFollowPlayback: true|false
+	- idx: 0 (first) to X (last)
+	- timeout: >= 0 (ms)
+
+For ex. to play the first track, the JSON entry would be:
+	{"name":"Play current pls","command":"Playback/Play",
+	"idx":0,"PlaybackFollowCursor":true}
+	
+For ex. to undo 5 secs after last action:
+	{"name":"Undo (async),"command":"Edit/Undo",
+	"timeout":5000}
+	
+Entry name, command and timeout are set popups when adding new
+entries. Other modifiers require editing the entry (as JSON).

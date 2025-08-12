@@ -1,5 +1,5 @@
 ﻿'use strict';
-//01/08/25
+//11/08/25
 
 /* global menu_panelProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -24,7 +24,7 @@ include('helpers\\buttons_sbd_explorer_menu.js');
 /* global graphInfoMenu:readable */
 var version = sbd.version; // NOSONAR [shared on files]
 
-try { window.DefineScript('Search by Distance Genre explorer Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
+try { window.DefineScript(sbd.name + ' Genre explorer Button', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
 
 var prefix = 'sbd'; // NOSONAR [shared on files]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
@@ -49,7 +49,7 @@ newButtonsProperties = getPropertiesPairs(newButtonsProperties, prefix, 0); // A
 buttonsBar.list.push(newButtonsProperties);
 
 addButton({
-	'Search by Distance Genre explorer': new ThemedButton({
+	[sbd.name + ' Genre explorer']: new ThemedButton({
 		coordinates: { x: 0, y: 0, w: _gr.CalcTextWidth('Genre explorer', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 },
 		text: 'Genre explorer',
 		func: function (mask) {

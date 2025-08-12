@@ -1,0 +1,29 @@
+﻿An utility to easily set main Spider Monkey Panel menu entries
+found at 'File\Spider Monkey Panel\Script Commands\[Panel Name]...'.
+
+Dynamic menus are available with SMP 1.6.1+. They allow to execute 
+panel actions via main menus and even associate them to a keyboard
+shortcut or native toolbar buttons. Most menu entries has been 
+replicated this way. 
+ 
+There is no limit (the old method was limited to 10 entries), 
+so it can be used independently to other panels. 
+
+It also allows to control the tools via CMD, allowing
+further scripting integrated with the SO or other software.
+
+Every panel has its own set of associated actions, 
+so every panel must have different panel names to work 
+(usually not a problem for a toolbar panel). 
+
+This utility is also a way to integrate Playlist Tools
+with online controllers. Since online controllers like
+foo_httpcontrol (https://bitbucket.org/oblikoamorale/foo_httpcontrol/wiki/Home)
+can not interact in any way with custom buttons, UI elements 
+or SMP scripts, the only way to 'use' some of these scripts is associating
+a tool to a main menu entry. 
+
+Having this functionality built-in within Playlist Tools allows not only
+setting your own customized scripts but also using all the tools 
+found within this utility! In other words, it allows to also use any of the
+tools included via remote commands.

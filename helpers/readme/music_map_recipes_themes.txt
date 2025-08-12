@@ -1,5 +1,5 @@
 ﻿Themes are 'tag containers' which emulate track's tags, to be used with
-'Search by Distance' buttons and tools instead of evaluating with the
+'Music Map' buttons and tools instead of evaluating with the
 selected track.
 
 Recipes are 'variables containers' which emulate the args of 'Search by
@@ -19,7 +19,7 @@ Recipe files may be created via files or custom button:
 
 Theme files may be created via files, custom button or Playlist Tools:
 	- On Playlist Tools script there is a menu entry (see
-	Configuration\Search by Distance) to use the selected track's tags
+	Configuration\Music Map) to use the selected track's tags
 	as reference and save them to a json file directly. The tags names
 	set at the properties panel will be used. i.e. genre can be
 	remapped to 'GENRE' and 'ALL MUSIC GENRE', etc.

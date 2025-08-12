@@ -1,0 +1,80 @@
+﻿An utility to easily set main Spider Monkey Panel menu entries
+found at 'File\Spider Monkey Panel\Script Commands\[Panel Name]...'.
+
+Contrary to the automatic functionality which exposes most menus,
+see 'SMP Dynamic menu' readme, the custom menus allow to add an
+indefinite amount of menu entries with customized names and
+functionality:
+	- Custom menu entries.
+	- Custom functions on a script file.
+	- Some predefined tools.
+
+The menus can be easily set at any time without coding at all to 
+arbitrary functions (associated to an script which is 'included'
+automatically), menu entries or predefined examples. They can also
+be removed or restored to defaults values at any time.
+
+Note that if you don't want to use this tool and use your own panel
+with an script to set the menus, you can simply disable the
+associated menu (like any other tool) to skip loading it.
+
+This utility is also a way to integrate Playlist Tools
+with online controllers. Since online controllers like
+foo_httpcontrol (https://bitbucket.org/oblikoamorale/foo_httpcontrol/wiki/Home)
+can not interact in any way with custom buttons, UI elements 
+or SMP scripts, the only way to 'use' some of these scripts is associating
+a tool to a main menu entry. 
+
+Some examples of remote commands (*) (**):
+	
+	- Wanna create automatic playlists via pools using your phone
+	or an internet browser? Set a menu with name 'xxx' to
+	'Pools\Top tracks mix'.
+	Then call it via http control server:
+	http://localhost:8888/default?cmd=CmdLine&param1=/command:"xxx"
+	
+	Playlist will be created and set as active playlist. A refresh
+	may be needed in the online controller to change focus to the
+	currently active playlist (otherwise switch to it manually).
+	
+	- What about removing duplicates from current playlist? Set a
+	menu with name 'xxx' to to 'Duplicates and tag filtering\Remove
+	duplicates by title, artist, date'.
+	Fill any playlist in your online controller and then call it via
+	http control server:
+	http://localhost:8888/default?cmd=CmdLine&param1=/command:"xxx"
+	
+	And it will be applied to current playlist. Same comment apply
+	about refreshing.
+	
+	- What about searching similar tracks to current one? Set a menu
+	with name 'xxx' to 'Search same by tags...\By Styles (=2)
+	and Moods (=6)'.
+	Focus on any song in your online controller and then call it via
+	http control server:
+	http://localhost:8888/default?cmd=CmdLine&param1=/command:"xxx"
+	
+	And it will use that track as input for the playlist creation. 
+	Same comment apply about refreshing.
+
+foo_httpcontrol even allows to create your own templates (for the web UI),
+so instead of using an http url, you can easily create your own buttons
+associated to SMP entries for direct access. Since SMP even allows to set
+output devices with scripts, this piece finally allows to treat foobar as
+a complete music server capable of replacing online servers like Spotify
+with intelligent playlist creation, auto-dj, etc. You can control anything
+via foo_httpcontrol+SMP+Playlist Tools.
+
+Such template already exists and it's named ajquery-xxx:
+https://github.com/regorxxx/ajquery-xxx
+
+A phone App like 'HTTP Request Shortcuts' can also automatize all this
+process if using an App, which obviously can not be user-set to add
+custom buttons. Otherwise, http urls must be sent via browser (*).
+
+(*) Another approach would be sending commands creating playlists with
+specific command names. Specially useful for phone Apps. See 
+'Playlist Names Commands' readme.
+
+(**) Menu names may be easily retrieved by simulating menu execution with
+ Ctrl + L. Click, which copies entry names to clipboard.

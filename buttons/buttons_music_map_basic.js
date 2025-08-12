@@ -1,5 +1,5 @@
 ﻿'use strict';
-//05/08/25
+//11/08/25
 
 include('..\\helpers\\buttons_xxx.js');
 /* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable */
@@ -20,7 +20,7 @@ include('helpers\\buttons_sbd_menu_presets.js'); // Button menu
 /* global choosePresetMenu:readable */
 var version = sbd.version; // NOSONAR[global]
 
-try { window.DefineScript('Search by Distance Buttons', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
+try { window.DefineScript(sbd.name + ' Basic Buttons', { author: 'regorxxx', version, features: { drag_n_drop: false } }); } catch (e) { /* May be loaded along other buttons */ } // eslint-disable-line no-unused-vars
 
 var prefix = 'sbd'; // NOSONAR[global]
 prefix = getUniquePrefix(prefix, ''); // Puts new ID before '_'
@@ -74,12 +74,12 @@ setProperties(newButtonsProperties, prefix, 0); //This sets all the panel proper
 */
 
 addButton({
-	'Search by Distance presets': new ThemedButton({
+	[sbd.name + ' basic']: new ThemedButton({
 		coordinates: { x: 0, y: 0, w: _gr.CalcTextWidth('Similar Tracks', _gdiFont(globFonts.button.name, globFonts.button.size * buttonsBar.config.scale)) + 25 * _scale(1, false) / _scale(buttonsBar.config.scale), h: 22 },
 		text: 'Similar Tracks',
 		func: function (mask) {
 			if (mask === MK_SHIFT) {
-				settingsMenu(this, true, ['buttons_search_by_distance_basic.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
+				settingsMenu(this, true, ['buttons_music_map_basic.js'], { bAdvTitle: { popup: globRegExp.title.desc } }).btn_up(this.currX, this.currY + this.currH);
 			} else {
 				choosePresetMenu(this).btn_up(this.currX, this.currY + this.currH);
 			}
