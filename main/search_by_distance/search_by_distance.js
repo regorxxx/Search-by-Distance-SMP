@@ -220,7 +220,7 @@ if (typeof buttonsBar === 'undefined' && typeof bNotProperties === 'undefined') 
 const sbd = {
 	name: 'Music Map',
 	allMusicGraph: musicGraph(),
-	influenceMethod: 'adjacentNodes', // direct, zeroNodes, adjacentNodes, fullPath
+	influenceMethod: 'adjacentNodes', // none, direct, zeroNodes, adjacentNodes, fullPath
 	genreMap: [],
 	styleMap: [],
 	genreStyleMap: [],
