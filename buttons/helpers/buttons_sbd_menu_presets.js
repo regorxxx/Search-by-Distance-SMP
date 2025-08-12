@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -12,7 +12,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global MF_GRAYED:readable, folders:readable */
+/* global MF_GRAYED:readable */
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
@@ -33,7 +33,7 @@ function choosePresetMenu(parent) {
 			const attr = _parseAttrFile(path);
 			if (attr && attr.Hidden) { return null; }
 			path = path.replace(fb.ProfilePath, '.\\profile\\');
-			const recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by distance', utf8);
+			const recipe = _jsonParseFileCheck(path, 'Recipe json', sbd.name, utf8);
 			if (!recipe) { return null; }
 			if (!testRecipe({ json: recipe, baseTags: JSON.parse(properties.tags[1]) }).valid) { return null; }
 			const name = Object.hasOwn(recipe, 'name')
@@ -99,7 +99,7 @@ function choosePresetMenu(parent) {
 			menuName, entryText: 'Open recipes folder...', func: () => _explorer(sbd.recipesPath)
 		});
 		presetMenu.newSeparator(menuName);
-		presetMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt') });
+		presetMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
 	}
 	return presetMenu;
 }

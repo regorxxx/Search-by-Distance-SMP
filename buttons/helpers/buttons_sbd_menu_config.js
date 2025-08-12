@@ -109,7 +109,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					const example = '["GENRE","GENRE2"]';
-					const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example + (info[i] ? info[i] : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
+					const input = Input.json('array strings', JSON.parse(properties[key][1]), 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example + (info[i] ? info[i] : ''), sbd.name + ': ' + entryText.replace(/\t.*/, ''), example, void (0), true);
 					if (input === null) { return; }
 					properties[key][1] = input.length === 1 && input[0].toUpperCase() === 'DEFAULT'
 						? properties[key][3]
@@ -182,7 +182,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText, func: () => {
 					let input;
-					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.' + (bShowDefault ? '\nBy default a value of ' + (isString(properties[key][3]) ? '\'' + properties[key][3] + '\' ' + _p(parseGraphDistance(properties[key][3])) : parseGraphDistance(properties[key][3])) + ' is used.' : ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; } // eslint-disable-line no-unused-vars
+					try { input = utils.InputBox(window.ID, 'Enter number: (equal or greater than 0)\n(Infinity and descriptor\'s variables are allowed)\n\nIt controls how much genre/styles may differ from reference; higher values allow more variation.' + (bShowDefault ? '\nBy default a value of ' + (isString(properties[key][3]) ? '\'' + properties[key][3] + '\' ' + _p(parseGraphDistance(properties[key][3])) : parseGraphDistance(properties[key][3])) + ' is used.' : ''), sbd.name + ': ' + entryText.replace(/\t.*/, ''), val, true); } catch (e) { return; } // eslint-disable-line no-unused-vars
 					if (!input && input !== '0' || !input.length) { return; }
 					if (parseGraphDistance(input) === null) { return; }
 					if (!Number.isNaN(Number(input))) { input = Number(input); } // Force a number type if possible
@@ -217,7 +217,7 @@ function createConfigMenu(parent) {
 				const entryText = text[i] + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + val + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)' + (info[i] || ''), 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
+						const input = Input.number('int positive', val, 'Enter number: (between 0 and 100)' + (info[i] || ''), sbd.name + ': ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100, (input) => input <= properties.scoreFilter[1]]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						if (bLiteMode) { properties.minScoreFilter[1] = input; }
@@ -235,7 +235,7 @@ function createConfigMenu(parent) {
 						toDisable.push('bRandomPick', 'bInversePick');
 						fb.ShowPopupMessage(
 							'The library will be processed until there are enough tracks on the pool to fill the final playlist. When the desired playlist size is reached, no more tracks will be analyzed. This greatly improves processing time in huge libraries.\n\nNote matched tracks are not guaranteed to be the ones with highest similarity score since the entire library will not be processed (and is also shuffled to have different results).\n\nEnabling this option will disable all related settings to \'Pool picking\', since all matched tracks will be used.'
-							, 'Search by distance'
+							, sbd.name
 						);
 					}
 					props.probPick[1] = 100;
@@ -250,7 +250,7 @@ function createConfigMenu(parent) {
 					if (key === 'bFilterWithGraph' && props[key][1]) {
 						fb.ShowPopupMessage(
 							'Filters genre/styles not present on the graph descriptors while performing the genre analysis (GRAPH method). The same can be achieved adding all missing values to \'Filter genre/style values\' setting or graph descriptors exclusions, but this setting covers all use-cases (although it requires more processing time).\n\nNote this only applies to the genre analysis part, i.e. non-recognized tags will still be used when checking tag similarity score.\n\nIn general, it\'s recommended to leave it enabled, unless you know what you are doing.'
-							, 'Search by distance'
+							, sbd.name
 						);
 					}
 				}, ['Filter non-recognized genre/styles']);
@@ -320,7 +320,7 @@ function createConfigMenu(parent) {
 					menu.newEntry({
 						menuName: subMenuName, entryText, func: () => {
 							const example = '["GENRE","LASTFM_GENRE","GENRE2"]';
-							const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example, 'Search by distance: ' + entryText.replace(/\t.*/, ''), example, void (0), true);
+							const input = Input.json('array strings', tag.tf, 'Enter tag(s) or TF expression(s): (JSON)\nSetting it to [] disables it, ["DEFAULT"] restores default settings.\n\nFor example:\n' + example, sbd.name + ': ' + entryText.replace(/\t.*/, ''), example, void (0), true);
 							if (input === null) { return; }
 							if (input.length === 1 && input[0].toUpperCase() === 'DEFAULT') {
 								baseTag.tf = JSON.parse(properties.tags[3]);
@@ -331,7 +331,7 @@ function createConfigMenu(parent) {
 							}
 							overwriteProperties(properties); // Updates panel
 							if (tag.type.includes('graph')) {
-								const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+								const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, sbd.name + ': Cache', popup.question + popup.yes_no);
 								if (answer === popup.yes) {
 									menu.btn_up(void (0), void (0), void (0), 'Debug and testing\\Reset link cache');
 								}
@@ -348,7 +348,7 @@ function createConfigMenu(parent) {
 					const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 					menu.newEntry({
 						menuName: subMenuName, entryText: 'Range\t[' + tag.range + ']' + (bRecipe ? '(forced by recipe)' : ''), func: () => {
-							const input = Input.number('int positive', tag.range, 'Range sets how numeric tags should be compared.\nA zero value forces an exact match, while greater ranges allow some interval to be compared against.\n\nEnter number: (greater or equal to 0)', 'Search by distance: Range', 10);
+							const input = Input.number('int positive', tag.range, 'Range sets how numeric tags should be compared.\nA zero value forces an exact match, while greater ranges allow some interval to be compared against.\n\nEnter number: (greater or equal to 0)', sbd.name + ': Range', 10);
 							if (input === null) { return; }
 							baseTag.range = input;
 							properties.tags[1] = JSON.stringify(tags);
@@ -371,7 +371,7 @@ function createConfigMenu(parent) {
 							bNegative ? 'int' : 'int positive',
 							tag.weight,
 							'Weight measures the proportion of total scoring associated to this tag.\n\nEnter number: ' + (bNegative ? '(integer)' : '(greater or equal to 0)'),
-							'Search by distance: ' + entryText.replace(/\t.*/, ''),
+							sbd.name + ': ' + entryText.replace(/\t.*/, ''),
 							bNegative ? -15 : 15
 						);
 						if (input === null) { return; }
@@ -407,7 +407,7 @@ function createConfigMenu(parent) {
 				const entryText = 'Base score' + '\t[' + tag.baseScore + ']' + (bRecipe ? ' (forced by recipe)' : '');
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						const input = Input.number('int positive', tag.baseScore, 'Base score sets the minimum score (in %) given to this tag in case the compared track is missing it (when it\'s present on the reference). In most cases this should be set to zero, but it may be changed for some tags in case the library is not fully tagged, and thus missing values for some tracks.\n\nNote this value is further transformed by the scoring distribution method. i.e. 50% equals a final score of 50% for linear method.\n\nEnter number: (from 0 to 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), 15, [(n) => n >= 0 && n <= 100]);
+						const input = Input.number('int positive', tag.baseScore, 'Base score sets the minimum score (in %) given to this tag in case the compared track is missing it (when it\'s present on the reference). In most cases this should be set to zero, but it may be changed for some tags in case the library is not fully tagged, and thus missing values for some tracks.\n\nNote this value is further transformed by the scoring distribution method. i.e. 50% equals a final score of 50% for linear method.\n\nEnter number: (from 0 to 100)', sbd.name + ': ' + entryText.replace(/\t.*/, ''), 15, [(n) => n >= 0 && n <= 100]);
 						if (input === null) { return; }
 						baseTag.baseScore = input;
 						properties.tags[1] = JSON.stringify(tags);
@@ -421,7 +421,7 @@ function createConfigMenu(parent) {
 				const tag = bRecipe ? { ...defTag, ...baseTag, ...recipe.tags[key] } : baseTag;
 				menu.newEntry({
 					menuName: subMenuName, entryText: 'Edit tag...' + (bRecipe ? '\t(forced by recipe)' : ''), func: () => {
-						const input = Input.json('object', tag, 'Edit tag slot: (JSON)', 'Search by distance: Tag remapping ' + _p(key), JSON.stringify(tag));
+						const input = Input.json('object', tag, 'Edit tag slot: (JSON)', sbd.name + ': Tag remapping ' + _p(key), JSON.stringify(tag));
 						if (input === null) { return; }
 						tags[key] = input;
 						properties.tags[1] = JSON.stringify(tags);
@@ -451,7 +451,7 @@ function createConfigMenu(parent) {
 				const bVirtual = tag.type.includes('virtual');
 				menu.newEntry({
 					menuName: subMenuName, entryText: 'Clone tag...' + (bVirtual ? '\t(virtual tag)' : ''), func: () => {
-						const name = Input.string('string', key, 'Enter a new name for the tag:\n(must be different to the original one)\n\nNote cloning also carries over the current recipe settings (which may override any base value set by the tag); if cloning the base tag is desired, set the recipe to \'None\' before cloning.', 'Search by distance: New tag name', 'My Tag');
+						const name = Input.string('string', key, 'Enter a new name for the tag:\n(must be different to the original one)\n\nNote cloning also carries over the current recipe settings (which may override any base value set by the tag); if cloning the base tag is desired, set the recipe to \'None\' before cloning.', sbd.name + ': New tag name', 'My Tag');
 						if (name === null) { return; }
 						tags[name] = clone(tag);
 						properties.tags[1] = JSON.stringify(tags);
@@ -477,7 +477,7 @@ function createConfigMenu(parent) {
 			menu.newEntry({
 				menuName, entryText: 'New tag...', func: () => {
 					const nTag = sbd.tagSchema;
-					const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values have to be filled later (using \'Remap...\').', 'Search by distance: New tag name', 'myTag');
+					const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values have to be filled later (using \'Remap...\').', sbd.name + ': New tag name', 'myTag');
 					if (name === null) { return; }
 					if (WshShell.Popup('Is multi-valued?\n\nTag may make use of multiple or single values. For ex. GENRE usually have more than one value, while DATE is meant to store a single value.\nSingle-valued configured tags will skip any value past the first one.\nMulti-valued tags can only be of \'string\' type.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('multiple', 'string'); }
 					else { nTag.type.push('single'); }
@@ -550,7 +550,7 @@ function createConfigMenu(parent) {
 										'\n\nWarning: it may behave badly on really big libraries (+100K tracks) or if thousands of tracks are tagged/edited at the same time.\nIf you experience crashes or RAM allocation failures, disable it.'
 										, 'Tags cache'
 									);
-									const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+									const answer = WshShell.Popup('Reset tags cache now?\nOtherwise do it manually after all tag changes.', 0, sbd.name + ': Cache', popup.question + popup.yes_no);
 									if (answer === popup.yes) {
 										menu.btn_up(void (0), void (0), void (0), 'Debug and testing\\Reset tags cache');
 									} else {
@@ -585,7 +585,7 @@ function createConfigMenu(parent) {
 							}
 						}
 						if (bLink || bReload) {
-							const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+							const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, sbd.name + ': Cache', popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								if (bLink) {
 									menu.btn_up(void (0), void (0), void (0), 'Debug and testing\\Reset link cache');
@@ -615,7 +615,7 @@ function createConfigMenu(parent) {
 					const newGraphTags = Object.values(newTags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity);
 					const oldGraphTags = Object.values(tags).filter((t) => t.type.includes('graph') && !t.type.includes('virtual')).map((t) => t.tf).flat(Infinity);
 					if (!isArrayEqual(newGraphTags, oldGraphTags)) {
-						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, 'Search by distance', popup.question + popup.yes_no);
+						const answer = WshShell.Popup('Reset link cache now?\nOtherwise do it manually after all tag changes.', 0, sbd.name + ': Cache', popup.question + popup.yes_no);
 						if (answer === popup.yes) {
 							menu.btn_up(void (0), void (0), void (0), 'Debug and testing\\Reset link cache');
 						}
@@ -675,7 +675,7 @@ function createConfigMenu(parent) {
 
 				menu.newEntry({
 					menuName: subMenuName, entryText: getEntryText('sortBias', 'Duplicates selection bias...'), func: () => {
-						const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\nOutput must be a numbers separated by \'|\'.\nHigher valued tracks will be preferred.', 'Search by distance: Duplicates selection bias', globQuery.remDuplBias, void (0), false);
+						const input = Input.string('string', properties['sortBias'][1], 'Enter TF expression for track selection when finding duplicates:\nOutput must be a numbers separated by \'|\'.\nHigher valued tracks will be preferred.', sbd.name + ': Duplicates selection bias', globQuery.remDuplBias, void (0), false);
 						if (input === null) { return; }
 						properties['sortBias'][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -690,7 +690,7 @@ function createConfigMenu(parent) {
 					(key, i, props) => {
 						if (props[key][1]) {
 							if (key === 'bAdvTitle') {
-								fb.ShowPopupMessage(globRegExp.title.desc, 'Search by distance');
+								fb.ShowPopupMessage(globRegExp.title.desc, sbd.name);
 							} else if (key === 'bMultiple') {
 								fb.ShowPopupMessage(
 									'When this option is enabled, multi-value tags are parsed independently and a track may be considered a duplicate if at least one of those values match (instead of requiring all to match in the same order).\n\nSo for \'[ARTIST, DATE, TITLE]\' tags, these are duplicates with this option enabled:\n' +
@@ -698,7 +698,7 @@ function createConfigMenu(parent) {
 									'\nJimi Hendrix experience, Jimi Hendrix - 1969 - Blabla' +
 									'\nBand of Gypsys, Jimi Hendrix - 1969 - Blabla' +
 									'\n\nWith multi-value parsing disabled, these are considered non-duplicated tracks since not all artists match.',
-									'Search by distance'
+									sbd.name
 								);
 							}
 						}
@@ -719,15 +719,15 @@ function createConfigMenu(parent) {
 				menuName, entryText: 'Set Global Forced Query...' + menu.tip(prop.length ? '[enabled]' : '[none]', bRecipe ? '(forced by recipe)' : ''),
 				func: (cache) => {
 					let input = '';
-					try { input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', 'Search by distance', cache || properties['forcedQuery'][1], true); }
+					try { input = utils.InputBox(window.ID, 'Enter global query used to pre-filter library:', sbd.name, cache || properties['forcedQuery'][1], true); }
 					catch (e) { return; } // eslint-disable-line no-unused-vars
 					if ((!cache || cache !== input) && properties['forcedQuery'][1] === input) { return; }
 					try { if (input.length && fb.GetQueryItems(fb.GetLibraryItems(), input).Count === 0) { throw new Error('No items'); } } // Sanity check
 					catch (e) {
 						if (e.message === 'No items') {
-							fb.ShowPopupMessage('Query returns zero items on current library. Check it and add it again:\n' + input, 'Search by distance');
+							fb.ShowPopupMessage('Query returns zero items on current library. Check it and add it again:\n' + input, sbd.name);
 						} else {
-							fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance');
+							fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, sbd.name);
 						}
 						menu.retry({ pos: -1, args: input || properties['forcedQuery'][1] });
 						return;
@@ -743,7 +743,7 @@ function createConfigMenu(parent) {
 			const file = folders.userPresets + 'filters\\custom_button_filters.json';
 			const bFile = _isFile(file);
 			if (bFile) {
-				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
+				options = _jsonParseFileCheck(file, 'Query filters json', sbd.name, utf8) || [];
 				let bSave;
 				options.forEach((o) => {
 					if (!Object.hasOwn(o, 'name')) { o.name = o.title; bSave = true; }
@@ -815,7 +815,7 @@ function createConfigMenu(parent) {
 					menuName: subMenuName, entryText, func: () => {
 						input = switchQuery(properties['forcedQuery'][1], obj.query);
 						try { fb.GetQueryItems(new FbMetadbHandleList(), input); } // Sanity check
-						catch (e) { fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, 'Search by distance'); return; } // eslint-disable-line no-unused-vars
+						catch (e) { fb.ShowPopupMessage('Query not valid. Check it and add it again:\n' + input, sbd.name); return; } // eslint-disable-line no-unused-vars
 						properties['forcedQuery'][1] = input;
 						overwriteProperties(properties); // Updates panel
 					}, flags: Object.hasOwn(recipe, 'forcedQuery') ? MF_GRAYED : MF_STRING
@@ -840,7 +840,7 @@ function createConfigMenu(parent) {
 			const file = folders.userPresets + 'filters\\custom_button_dynamic_filters.json';
 			const bFile = _isFile(file);
 			if (bFile) {
-				options = _jsonParseFileCheck(file, 'Query filters json', 'Search by distance', utf8) || [];
+				options = _jsonParseFileCheck(file, 'Query filters json', sbd.name, utf8) || [];
 				let bSave;
 				options.forEach((o) => {
 					if (!Object.hasOwn(o, 'name')) { o.name = o.title; delete o.title; bSave = true; }
@@ -960,9 +960,9 @@ function createConfigMenu(parent) {
 					menuName: subMenuName, entryText, func: () => {
 						let input = opt.val;
 						const defVal = keyVal || autoVal;
-						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genre/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', 'Search by distance'); }
+						if (input !== -1) { fb.ShowPopupMessage('This option will filter the library using only genre/styles which are near the selected reference, greatly reducing processing time (although some corner cases which would be considered similar after calculating the mean distance may be excluded).\n\nAutomatic mode will set the threshold to 2 x max. Graph distance (' + defVal + ') in GRAPH mode, or scaled with min. similarity (' + nearScoreFilter + ') in any other mode.', sbd.name); }
 						if (input > 0) {
-							input = Input.number('int', defVal, 'Enter number: (between -1 and Infinity)\n\nDisabled (-1),  automatic (0) or any Graph distance value (suggested 2 x max Graph distance).', 'Search by distance: ' + entryText.replace(/\t.*/, ''), defVal, [(input) => input >= -1]);
+							input = Input.number('int', defVal, 'Enter number: (between -1 and Infinity)\n\nDisabled (-1),  automatic (0) or any Graph distance value (suggested 2 x max Graph distance).', sbd.name + ': ' + entryText.replace(/\t.*/, ''), defVal, [(input) => input >= -1]);
 							if (input === null) {
 								if (Input.isLastEqual) { input = Input.previousInput; }
 								else { return; }
@@ -986,7 +986,7 @@ function createConfigMenu(parent) {
 				menu.newSeparator(subMenuName);
 				menu.newEntry({
 					menuName: subMenuName, entryText, func: () => {
-						const input = Input.number('int', val, 'Enter number: (between 0 and 10)\n\nBy default is set to 5; higher values filter in a more aggressive way, and lower values, the opposite.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), 5, [(input) => input >= 0 && input <= 10]);
+						const input = Input.number('int', val, 'Enter number: (between 0 and 10)\n\nBy default is set to 5; higher values filter in a more aggressive way, and lower values, the opposite.', sbd.name + ': ' + entryText.replace(/\t.*/, ''), 5, [(input) => input >= 0 && input <= 10]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1006,9 +1006,9 @@ function createConfigMenu(parent) {
 						properties[key][1] = !properties[key][1];
 						overwriteProperties(properties); // Updates panel
 						if (properties[key][1]) {
-							fb.ShowPopupMessage(_open(folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt') || '', 'Search by distance');
+							fb.ShowPopupMessage(_open(sbd.readmes.filterInfluence) || '', sbd.name);
 							if (key === 'bConditionAntiInfluences') {
-								fb.ShowPopupMessage('This option overrides the global anti-influences filter option.\n\nAnti-influences filter will be automatically enabled for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), 'Search by distance');
+								fb.ShowPopupMessage('This option overrides the global anti-influences filter option.\n\nAnti-influences filter will be automatically enabled for tracks having any of these genre/styles:\n' + descriptors.replaceWithSubstitutionsReverse(descriptors.style_anti_influences_conditional).joinEvery(', ', 6), sbd.name);
 							}
 						}
 					}, flags: (key === 'bUseAntiInfluencesFilter' && getSetting('bConditionAntiInfluences') || bGraphCondition ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
@@ -1031,12 +1031,12 @@ function createConfigMenu(parent) {
 						overwriteProperties(properties); // Updates panel
 						if (properties[key][1]) {
 							if (key === 'bSimilArtistsFilter') {
-								const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt', utf8);
+								const readme = _open(sbd.readmes.filterSimilar, utf8);
 								if (readme.length) { fb.ShowPopupMessage(readme, 'Similar Artists'); }
 							} else if (key === 'bSimilArtistsExternal') {
-								fb.ShowPopupMessage('This option expands the similar artists filter with tags retrieved by ListenBrainz (https://github.com/regorxxx/ListenBrainz-SMP) or other scripts. If there is a JSON database associated, it will also be used. In any case, note the tags from JSON and files are never merged, always preferring file tags.\n\nList of tags used:\n\n' + [globTags.sbdSimilarArtist, globTags.lbSimilarArtist].join('\n'), 'Search by distance');
+								fb.ShowPopupMessage('This option expands the similar artists filter with tags retrieved by ListenBrainz (https://github.com/regorxxx/ListenBrainz-SMP) or other scripts. If there is a JSON database associated, it will also be used. In any case, note the tags from JSON and files are never merged, always preferring file tags.\n\nList of tags used:\n\n' + [globTags.sbdSimilarArtist, globTags.lbSimilarArtist].join('\n'), sbd.name);
 							} else if (key === 'bSameArtistFilter') {
-								fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', 'Search by distance');
+								fb.ShowPopupMessage('This option may override some aspects of the similar artist filter option.\n\nWhen no similar artists data is found, by default only the selected artist would be considered. Thus allowing only tracks by the same artist to be considered.\n\nFiltering the selected artist forces the similar artist filter to fallback to checking all the library tracks in that case, otherwise there would be zero artists to check. It\'s equivalent to have the filter disabled when no similar artist data is present for the selected track\'s artist.\n\nWhen similar artists data is available, it works as expected, skipping the selected artist and only using the others. Thus strictly showing tracks by [others] similar artists.', sbd.name);
 							}
 						}
 					}, flags: (key === 'bSimilArtistsExternal' && !bConditionSimilArtists ? MF_GRAYED : (Object.hasOwn(recipe, key) ? MF_GRAYED : MF_STRING))
@@ -1128,7 +1128,7 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + val;
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int', properties[key][1], 'Enter number: (greater or equal to 0)\n(-1 to disable)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
+						const input = Input.number('int', properties[key][1], 'Enter number: (greater or equal to 0)\n(-1 to disable)', sbd.name + ': ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1175,7 +1175,7 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
+						const input = Input.number('int positive', properties[key][1], 'Enter number: (between 0 and 100)', sbd.name + ': ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input <= 100]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1272,7 +1272,7 @@ function createConfigMenu(parent) {
 						const currValue = options.find((opt) => opt.tf === properties.smartShuffleSortBias[1])
 							? shuffleBiasTf(properties.smartShuffleSortBias[1])
 							: properties.smartShuffleSortBias[1];
-						const input = Input.string('string', currValue, 'Enter TF expression:', 'Search by distance: Smart Shuffle sorting bias', shuffleBiasTf('rating'));
+						const input = Input.string('string', currValue, 'Enter TF expression:', sbd.name + ': Smart Shuffle sorting bias', shuffleBiasTf('rating'));
 						if (input === null) { return; }
 						properties.smartShuffleSortBias[1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1295,7 +1295,7 @@ function createConfigMenu(parent) {
 								'\n\t-Female/male vocals tracks.' +
 								'\n\nThese rules apply in addition to the main smart shuffle, swapping tracks' +
 								'\nposition whenever possible without altering the main logic.'
-								, 'Search by distance'
+								, sbd.name
 							);
 						}
 					}
@@ -1331,7 +1331,7 @@ function createConfigMenu(parent) {
 			const entryText = 'Steps on recursive search...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 			menu.newEntry({
 				menuName, entryText, func: () => {
-					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 2 and 100)', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= 2 && input <= 100]);
+					const input = Input.number('int positive', properties[key][1], 'Enter number: (between 2 and 100)', sbd.name + ': ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= 2 && input <= 100]);
 					if (input === null) { return; }
 					properties[key][1] = input;
 					overwriteProperties(properties); // Updates panel
@@ -1368,7 +1368,7 @@ function createConfigMenu(parent) {
 				const entryText = properties[key][0].substring(properties[key][0].indexOf('.') + 1, idxEnd !== -1 ? idxEnd - 1 : Infinity) + '...' + (Object.hasOwn(recipe, key) ? '\t[' + recipe[key] + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.string('string', properties[key][1], 'Enter TF expression for playlist name:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: ' + globTags.artist + '\'\'s Mix   ->   ACDC\'s Mix\n\nAs special tag, %SBD_THEME% is also available when using themes. When a theme is not being used, it\'s evaluated as usual.\nFor ex: $if2(%SBD_THEME%,' + globTags.artist + ')\'\'s Mix   ->   Test\'s Mix', 'Search by distance: ' + entryText.replace(/\t.*/, ''), globTags.artist + '\'\'s Mix', void (0), true);
+						const input = Input.string('string', properties[key][1], 'Enter TF expression for playlist name:\n\n%, $, [ and ] must be enclosed in \' chars. \'\' results in single quote.\nFor ex: ' + globTags.artist + '\'\'s Mix   ->   ACDC\'s Mix\n\nAs special tag, %SBD_THEME% is also available when using themes. When a theme is not being used, it\'s evaluated as usual.\nFor ex: $if2(%SBD_THEME%,' + globTags.artist + ')\'\'s Mix   ->   Test\'s Mix', sbd.name + ': ' + entryText.replace(/\t.*/, ''), globTags.artist + '\'\'s Mix', void (0), true);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1382,7 +1382,7 @@ function createConfigMenu(parent) {
 				const entryText = 'Playlist size...' + (Object.hasOwn(recipe, key) ? '\t[' + Number.isFinite(recipe[key]) ? recipe[key] : '\u221E' + '] (forced by recipe)' : '\t[' + properties[key][1] + ']');
 				menu.newEntry({
 					menuName, entryText, func: () => {
-						const input = Input.number('int', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', 'Search by distance: ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
+						const input = Input.number('int', properties[key][1], 'Enter number: (greater than 0)\n(Infinity is allowed)\n\nUse -1 to input the desired size on every call.', sbd.name + ': ' + entryText.replace(/\t.*/, ''), properties[key][3], [(input) => input >= -1]);
 						if (input === null) { return; }
 						properties[key][1] = input;
 						overwriteProperties(properties); // Updates panel
@@ -1407,7 +1407,7 @@ function createConfigMenu(parent) {
 			});
 			menu.newEntry({
 				menuName: subMenu, entryText: 'Write similar artists tags', func: () => {
-					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: globTags.sbdSimilarArtist, windowName: 'Search by Distance' });
+					writeSimilarArtistsTags({ file: folders.data + 'searchByDistance_artists.json', tagName: globTags.sbdSimilarArtist, windowName: sbd.name });
 				}, flags: _isFile(folders.data + 'searchByDistance_artists.json') ? MF_STRING : MF_GRAYED
 			});
 		}
@@ -1549,7 +1549,7 @@ function createConfigMenu(parent) {
 						const file = folders.userHelpers + 'music_graph_descriptors_xxx_user.js';
 						if (!_isFile(file)) {
 							_copyFile(folders.xxx + 'main\\music_graph\\music_graph_descriptors_xxx_user.js', file);
-							const readme = _open(folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt', utf8);
+							const readme = _open(sbd.readmes.descriptors, utf8);
 							if (readme.length) { fb.ShowPopupMessage(readme, 'User descriptors'); }
 						}
 						if (_isFile(file)) { _explorer(file); _run('notepad.exe', file); }
@@ -1639,7 +1639,7 @@ function createConfigMenu(parent) {
 		menu.newEntry({
 			menuName: subMenuName, entryText: 'Rename button...', func: () => {
 				let input = '';
-				try { input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': Search by Distance Customizable Button', properties.customName[1], true); }
+				try { input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': ' + sbd.name + ' Customizable Button', properties.customName[1], true); }
 				catch (e) { return; } // eslint-disable-line no-unused-vars
 				if (!input.length) { return; }
 				if (properties.customName[1] !== input) {
@@ -1684,13 +1684,13 @@ function createConfigMenu(parent) {
 				menuName: subMenuName,
 				entryText: 'Share configuration...', func: () => {
 					const list = ['Tags and weighting', 'Pre-analysis filters\\Global forced query', 'Post-analysis filters\\Filter pool of similar tracks by tag', 'Tracks source\\Duplicated tracks', 'Tracks final sorting\\Smart shuffle tag'];
-					const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n\n' + list.join(', '), 0, 'Search by distance', popup.question + popup.yes_no);
+					const answer = WshShell.Popup('Share current configuration with other buttons and panels?\nSettings which will be copied:\n\n' + list.join(', '), 0, sbd.name, popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						const obj = clone(properties);
 						obj.name = parent.name;
-						window.NotifyOthers('Search by Distance: share configuration', obj);
+						window.NotifyOthers(sbd.name + ': share configuration', obj);
 						obj.notifyThis = true;
-						window.NotifyThis('Search by Distance: share configuration', obj);
+						window.NotifyThis(sbd.name + ': share configuration', obj);
 					}
 				}
 			});
@@ -1703,33 +1703,34 @@ function createConfigMenu(parent) {
 		menu.newSeparator(subMenuName);
 		let iCount = 0;
 		const readmes = [
-			{ name: 'Main', file: folders.xxx + 'helpers\\readme\\search_by_distance.txt', bLiteMode: true },
+			{ name: 'Main', file: sbd.readmes.main, bLiteMode: true },
 			{ name: 'sep', bLiteMode: true },
-			{ name: 'Method: DYNGENRE', file: folders.xxx + 'helpers\\readme\\search_by_distance_dyngenre.txt', bLiteMode: true },
-			{ name: 'Method: GRAPH', file: folders.xxx + 'helpers\\readme\\search_by_distance_graph.txt', bLiteMode: true },
-			{ name: 'Method: WEIGHT', file: folders.xxx + 'helpers\\readme\\search_by_distance_weight.txt', bLiteMode: true },
+			{ name: 'Method: DYNGENRE', file: sbd.readmes.dynGenre, bLiteMode: true },
+			{ name: 'Method: GRAPH', file: sbd.readmes.graph, bLiteMode: true },
+			{ name: 'Method: WEIGHT', file: sbd.readmes.weight, bLiteMode: true },
 			{ name: 'sep', bLiteMode: true },
-			{ name: 'Filter: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural_filter.txt' },
-			{ name: 'Filter: dynamic query', file: folders.xxx + 'helpers\\readme\\search_by_distance_dynamic_query.txt', bLiteMode: true },
-			{ name: 'Filter: influences', file: folders.xxx + 'helpers\\readme\\search_by_distance_influences_filter.txt' },
-			{ name: 'Filter: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists_filter.txt' },
+			{ name: 'Filter: cultural', file: sbd.readmes.filterCultural },
+			{ name: 'Filter: dynamic query', file: sbd.readmes.filterQuery, bLiteMode: true },
+			{ name: 'Filter: influences', file: sbd.readmes.filterInfluence },
+			{ name: 'Filter: similar artists', file: sbd.readmes.filterSimilar },
 			{ name: 'sep' },
-			{ name: 'Tags & Weights: cultural', file: folders.xxx + 'helpers\\readme\\search_by_distance_cultural.txt' },
-			{ name: 'Tags & Weights: related tracks', file: folders.xxx + 'helpers\\readme\\search_by_distance_related.txt' },
-			{ name: 'Tags & Weights: similar artists', file: folders.xxx + 'helpers\\readme\\search_by_distance_similar_artists.txt' }, { name: 'sep' },
-			{ name: 'Scoring methods', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.txt' },
-			{ name: 'Scoring methods: chart', file: folders.xxx + 'helpers\\readme\\search_by_distance_scoring.png' },
+			{ name: 'Tags & Weights: cultural', file: sbd.readmes.tagsCultural },
+			{ name: 'Tags & Weights: related tracks', file: sbd.readmes.tagsRelated },
+			{ name: 'Tags & Weights: similar artists', file: sbd.readmes.tagsSimilar },
 			{ name: 'sep' },
-			{ name: 'Sorting: smart shuffle', file: folders.xxx + 'helpers\\readme\\shuffle_by_tags.txt', bLiteMode: true },
-			{ name: 'Sorting: harmonic mixing', file: folders.xxx + 'helpers\\readme\\harmonic_mixing.txt' },
+			{ name: 'Scoring methods', file: sbd.readmes.scoring },
+			{ name: 'Scoring methods: chart', file: sbd.readmes.scoringChart },
 			{ name: 'sep' },
-			{ name: 'Recipes & Themes', file: folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt' },
-
-			{ name: 'User descriptors', file: folders.xxx + 'helpers\\readme\\search_by_distance_user_descriptors.txt' },
+			{ name: 'Sorting: smart shuffle', file: sbd.readmes.sortingSmartShuffle, bLiteMode: true },
+			{ name: 'Sorting: harmonic mixing', file: sbd.readmes.sortingHarmonic },
 			{ name: 'sep' },
-			{ name: 'Tagging requisites', file: folders.xxx + 'helpers\\readme\\tags_structure.txt' },
-			{ name: 'Tags sources', file: folders.xxx + 'helpers\\readme\\tags_sources.txt' },
-			{ name: 'Other tags notes', file: folders.xxx + 'helpers\\readme\\tags_notes.txt' },
+			{ name: 'Recipes & Themes', file: sbd.readmes.recipes },
+			{ name: 'sep' },
+			{ name: 'User descriptors', file: sbd.readmes.descriptors },
+			{ name: 'sep' },
+			{ name: 'Tagging requisites', file: sbd.readmes.tagging },
+			{ name: 'Tags sources', file: sbd.readmes.tagsSources },
+			{ name: 'Other tags notes', file: sbd.readmes.tagsNotes },
 		].filter(Boolean).filter((e) => e.bLiteMode || !bLiteMode);
 		if (readmes.length) {
 			readmes.forEach((entry) => { // Only show non-empty files
@@ -1744,7 +1745,7 @@ function createConfigMenu(parent) {
 										_run(entry.file);
 									} else {
 										const readme = _open(entry.file, utf8);
-										if (readme.length) { fb.ShowPopupMessage(readme, entry.name); }
+										if (readme.length) { fb.ShowPopupMessage(readme, sbd.name + ': ' + entry.name); }
 									}
 								} else { console.log('Readme not found: ' + entry.file); }
 							}

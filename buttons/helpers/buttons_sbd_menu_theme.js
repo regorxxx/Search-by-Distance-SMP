@@ -1,5 +1,5 @@
 ﻿'use strict';
-//08/08/25
+//11/08/25
 
 /* exported createThemeMenu */
 
@@ -8,7 +8,7 @@
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, globTags:readable , VK_SHIFT:readable */
+/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, globTags:readable , VK_SHIFT:readable */
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
@@ -38,12 +38,12 @@ function createThemeMenu(parent) {
 		const recipe = processRecipePlaceholder(properties.recipe[1], tags);
 		bHasForcedTheme = recipe && Object.hasOwn(recipe, 'theme');
 		if (bHasForcedTheme) {
-			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); forcedThemePath = recipe.theme; }
+			if (_isFile(recipe.theme)) { forcedTheme = _jsonParseFileCheck(recipe.theme, 'Theme json', sbd.name, utf8); forcedThemePath = recipe.theme; }
 			else if (_isFile(sbd.themesPath + recipe.theme)) {
 				forcedThemePath = sbd.themesPath + recipe.theme;
-				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', 'Search by distance', utf8);
+				forcedTheme = _jsonParseFileCheck(forcedThemePath, 'Theme json', sbd.name, utf8);
 			} else {
-				console.popup('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme, 'Search by distance');
+				console.popup(sbd.name + ': Forced theme json file (by recipe) not found\n\t ' + recipe.theme, sbd.name);
 			}
 		}
 		if (forcedThemePath !== data.forcedTheme) {
@@ -90,7 +90,7 @@ function createThemeMenu(parent) {
 			});
 			// Theme obj
 			let input = '';
-			try { input = utils.InputBox(window.ID, 'Enter theme name', 'Search by distance', 'my theme', true); }
+			try { input = utils.InputBox(window.ID, 'Enter theme name', sbd.name, 'my theme', true); }
 			catch (e) { return; } // eslint-disable-line no-unused-vars
 			if (!input.length) { return; }
 			const theme = { name: input, tags: [] };
@@ -98,13 +98,13 @@ function createThemeMenu(parent) {
 			const filePath = sbd.themesPath + input + '.json';
 			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
-			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, 'Search by distance'); }
+			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, sbd.name); }
 			else { _explorer(filePath); }
 		}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED
 	});
 	{	// Theme tools
 		const menuName = themeMenu.newMenu('More options...');
-		themeMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt') });
+		themeMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
 		themeMenu.newEntry({
 			menuName, entryText: 'Themes folder...', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
@@ -117,7 +117,7 @@ function createThemeMenu(parent) {
 				const hiddenFiles = files.filter((file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden; });
 				hiddenFiles.forEach((file) => {
 					if (!testRegex.test(file.split('\\').pop())) {
-						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Search by Distance: Unhidden theme\n\t ' + file); }
+						if (_runCmd('attrib -H ' + _q(file), false)) { console.log(sbd.name + ': Unhidden theme\n\t ' + file); }
 					}
 				});
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
@@ -141,7 +141,7 @@ function createThemeMenu(parent) {
 		// Omit hidden files
 		const attr = _parseAttrFile(file);
 		if (attr && attr.Hidden) { return; }
-		const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
+		const theme = _jsonParseFileCheck(file, 'Theme json', sbd.name, utf8);
 		if (!theme) { return; }
 		// Check
 		// Theme tags must contain at least all the user tags
@@ -151,7 +151,7 @@ function createThemeMenu(parent) {
 		const bCheck = Object.hasOwn(theme, 'name') && tagCheck === -1;
 		if (!bCheck) {
 			console.log(
-				'Search by Distance: Theme is missing some keys\n\t' +
+				sbd.name + ': Theme is missing some keys\n\t' +
 				'Theme: ' + theme.name + (file ? ' (' + file + ')' : '') + '\n\t ' +
 				'Keys: ' + (Object.hasOwn(theme, 'tags') && tagCheck !== -1
 					? [...new Set(tagsToCheck).difference(new Set(Object.keys(theme.tags[tagCheck])))]
@@ -165,7 +165,7 @@ function createThemeMenu(parent) {
 	const menus = [];
 	if (options.length) {
 		options.forEach((file) => {
-			const theme = _jsonParseFileCheck(file, 'Theme json', 'Search by distance', utf8);
+			const theme = _jsonParseFileCheck(file, 'Theme json', sbd.name, utf8);
 			if (!theme) { return; }
 			const bIsForcedTheme = forcedTheme && forcedThemePath === file;
 			const name = theme.name + (bIsForcedTheme ? ' (forced by recipe)' : ''); // Recipe may overwrite theme

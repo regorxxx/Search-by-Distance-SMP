@@ -14,7 +14,7 @@ include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\menu_xxx_extras.js');
 /* global _createSubMenuEditEntries:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
-/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, folders:readable, VK_CONTROL:readable */
+/* global MF_STRING:readable, MF_GRAYED:readable, popup:readable, VK_CONTROL:readable */
 include('..\\..\\helpers\\buttons_xxx.js');
 /* global showButtonReadme:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
@@ -58,7 +58,7 @@ function createRecipeMenu(parent) {
 		});
 		// Recipe obj
 		if (!recipe.name.length) {
-			try { recipe.name = utils.InputBox(window.ID, 'Enter Recipe name:', 'Search by distance', 'my recipe', true).toString(); }
+			try { recipe.name = utils.InputBox(window.ID, 'Enter Recipe name:', sbd.name, 'my recipe', true).toString(); }
 			catch (e) { return; } // eslint-disable-line no-unused-vars
 			if (!recipe.name.length) { return; }
 		}
@@ -83,7 +83,7 @@ function createRecipeMenu(parent) {
 			});
 		}
 		const bDone = _save(filePath, JSON.stringify(recipe, null, '\t').replace(/\n/g, '\r\n'));
-		if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + filePath, 'Search by distance'); }
+		if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + filePath, sbd.name); }
 		else { _explorer(filePath); }
 	};
 	const unsetRecipe = (file) => {
@@ -128,16 +128,16 @@ function createRecipeMenu(parent) {
 	const names = {};
 	if (options.length) {
 		options.forEach((file) => {
-			const recipe = _jsonParseFileCheck(file, 'Recipe json', 'Search by distance', utf8);
+			const recipe = _jsonParseFileCheck(file, 'Recipe json', sbd.name, utf8);
 			if (!recipe) { return; }
 			const name = Object.hasOwn(recipe, 'name') ? recipe.name : utils.SplitFilePath(file)[1];
 			const key = name + '\t' + _p(recipe.method);
 			recipes.push({ name, path: file, ...recipe });
 			let theme = null;
 			if (Object.hasOwn(recipe, 'theme')) {
-				if (_isFile(recipe.theme)) { theme = _jsonParseFileCheck(recipe.theme, 'Theme json', 'Search by distance', utf8); }
-				else if (_isFile(sbd.themesPath + recipe.theme)) { theme = _jsonParseFileCheck(sbd.themesPath + recipe.theme, 'Recipe json', 'Search by distance', utf8); }
-				else { console.log('Search by Distance: Forced theme json file (by recipe) not found\n\t ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, 'Search by distance'); }
+				if (_isFile(recipe.theme)) { theme = _jsonParseFileCheck(recipe.theme, 'Theme json', sbd.name, utf8); }
+				else if (_isFile(sbd.themesPath + recipe.theme)) { theme = _jsonParseFileCheck(sbd.themesPath + recipe.theme, 'Recipe json', sbd.name, utf8); }
+				else { console.log(sbd.name + ': Forced theme json file (by recipe) not found\n\t ' + recipe.theme); fb.ShowPopupMessage('Forced theme json file (by recipe) not found:\n' + recipe.theme, sbd.name); }
 			}
 			const themeName = theme ? theme.name + ' (forced by recipe)' : ''; // Recipe may overwrite theme
 			if (Object.hasOwn(names, key)) { names[key]++; }
@@ -200,14 +200,14 @@ function createRecipeMenu(parent) {
 						sanitizePath(modified.path),
 						JSON.stringify(modified, (key, value) => key === 'path' ? void (0) : value, '\t').replace(/\n/g, '\r\n')
 					);
-					if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + modified.path, 'Search by distance'); }
+					if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + modified.path, sbd.name); }
 				} else if (event === 'clone') {
 					modified.path = utils.SplitFilePath(modified.path)[0] + sanitize(modified.name) + '.json';
 					const bDone = _save(
 						modified.path,
 						JSON.stringify(modified, (key, value) => key === 'path' ? void (0) : value, '\t').replace(/\n/g, '\r\n')
 					);
-					if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + modified.path, 'Search by distance'); }
+					if (!bDone) { fb.ShowPopupMessage('Error saving recipe file:' + modified.path, sbd.name); }
 				} else if (event === 'defaults') {
 					const defaultFiles = findRecursiveFile(
 						'*.json',
@@ -215,7 +215,7 @@ function createRecipeMenu(parent) {
 					).map((from) => {
 						return { from, to: from.replace(sbd.defaultRecipesPath, sbd.recipesPath) };
 					});
-					const answer = WshShell.Popup('Delete user created recipes?\n(They will be sent to recycle bin)', 0, 'Search by distance', popup.question + popup.yes_no);
+					const answer = WshShell.Popup('Delete user created recipes?\n(They will be sent to recycle bin)', 0, sbd.name, popup.question + popup.yes_no);
 					if (answer === popup.yes) {
 						const defaultFilePaths = new Set(defaultFiles.map((file) => file.to));
 						findRecursiveFile(
@@ -278,7 +278,7 @@ function createRecipeMenu(parent) {
 				const hiddenFiles = files.filter((file) => { const attr = _parseAttrFile(file); return attr && attr.Hidden; });
 				hiddenFiles.forEach((file) => {
 					if (!testRegex.test(file.split('\\').pop())) {
-						if (_runCmd('attrib -H ' + _q(file), false)) { console.log('Search by Distance: Show recipe\n\t ' + file); }
+						if (_runCmd('attrib -H ' + _q(file), false)) { console.log(sbd.name + ': Show recipe\n\t ' + file); }
 					}
 				});
 			}, flags: hiddenFilesNum ? MF_STRING : MF_GRAYED
@@ -292,7 +292,7 @@ function createRecipeMenu(parent) {
 		});
 	}
 	recipeMenu.newSeparator();
-	recipeMenu.newEntry({ entryText: 'Readme...', func: () => showButtonReadme(folders.xxx + 'helpers\\readme\\search_by_distance_recipes_themes.txt') });
+	recipeMenu.newEntry({ entryText: 'Readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
 	return recipeMenu;
 }
 
@@ -305,7 +305,7 @@ function chooseRecipeMenu(parent) {
 			const attr = _parseAttrFile(path);
 			if (attr && attr.Hidden) { return null; }
 			path = path.replace(fb.ProfilePath, '.\\profile\\');
-			const recipe = _jsonParseFileCheck(path, 'Recipe json', 'Search by distance', utf8);
+			const recipe = _jsonParseFileCheck(path, 'Recipe json', sbd.name, utf8);
 			if (!recipe) { return null; }
 			if (!testRecipe({ json: recipe, baseTags: JSON.parse(properties.tags[1]) }).valid) { return null; }
 			const name = Object.hasOwn(recipe, 'name')
