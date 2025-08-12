@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 /* exported musicGraphForDrawing, graphDebug, graphStatistics */
 
@@ -38,7 +38,7 @@ if (typeof include !== 'undefined') { // On foobar2000
 
 
 /*
-	Creates Music Map links for foobar2000
+	Creates Music Graph links for foobar2000
 */
 function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 	// Maps
@@ -227,7 +227,7 @@ function musicGraph(descriptor = music_graph_descriptors, bHtml = false) {
 }
 
 /*
-	Creates Music Map. This one skips absoluteWeight related links and substitutions! Used along VivaGraph on browsers
+	Creates Music Graph. This one skips absoluteWeight related links and substitutions! Used along VivaGraph on browsers
 */
 function musicGraphForDrawing(descriptor = music_graph_descriptors) {
 	// Maps
