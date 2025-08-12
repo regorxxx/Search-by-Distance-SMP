@@ -99,6 +99,7 @@
 - Recipes: customizable button now shows by default a recipe list on L. Click instead of directly searching. This is done to make it easier to run recipes without changing settings first. Previous behavior may be restored at the 'Button settings' submenu.
 - Info: changed 'Graph info' button name to 'Genre explorer'.
 - Cultural Regions: 'Other tools\Calculate same zone artists' creates now a randomly sorted playlists with all artists from the same cultural zone than the selected one. The list of artists is also output to console (previous behavior).
+- Installation: script has been renamed 'Music Map' and all documentation and files adjusted to the new name.
 - Installation: added popup warnings when scripts are installed outside foobar2000 profile folder. These checks can be tweaked at globSettings.json.
 - Installation: script may now be installed at any path within the foobar profile folder, no longer limited to '[FOOBAR PROFILE FOLDER]\scripts\SMP\xxx-scripts\' folder. Obviously it may still be installed at such place, which may be preferred if updating an older version.
 - Installation: multiple improvements to path handling for portable and non-portable installations. By default scripts will always try to use only relative paths to the profile folder, so scripts will work without any change when exporting the profile to any other installation. This change obviously doesn't apply to already existing installations unless restoring defaults.
@@ -125,6 +126,7 @@
 - Recursive Playlist: every iterative search will reuse the sorting/picking settings, so final playlist will be sorted in multiple groups with same pattern instead of randomly.
 - Debug: checked tags are now shown at 'Find genre/styles not on Graph' tool.
 - Debug: expanded profiling logs and tools.
+- Debug: 'Debug graph' and 'Distance tests' menu entries now show a popup instead of logging to console.
 - Console: changed cache link console logs to startup logging setting usage.
 - UI: unified script updates settings across all my scripts, look for 'Updates' submenu.
 - UI: settings display improvements on tooltip.

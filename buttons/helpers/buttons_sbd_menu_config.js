@@ -1,9 +1,9 @@
 ﻿'use strict';
-//11/08/25
+//12/08/25
 
 /* exported createConfigMenu */
 
-/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, calculateTrackSimilarity:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable, sendToPlaylist:readable, queryCombinations:readable, removeDuplicatesAsync:readable */ // eslint-disable-line no-unused-vars
+/* global processRecipePlaceholder:readable, parseGraphDistance:readable, sbd:readable, testBaseTags:readable, SearchByDistance_properties:readable, music_graph_descriptors:readable, updateCache:readable, graphStatistics:readable, cacheLink:writable, cacheLinkSet:writable, tagsCache:readable, calculateSimilarArtistsFromPls:readable, calculateTrackSimilarity:readable, writeSimilarArtistsTags:readable, getArtistsSameZone:readable, findStyleGenresMissingGraph:readable, graphDebug:readable, music_graph_descriptors_culture:readable, testGraphNodes:readable, testGraphNodeSets:readable, testGraphCulture:readable, addTracksRelation:readable, shuffleBiasTf:readable , nearGenresFilterDistribution:readable, checkMinGraphDistance:readable, searchByDistance:readable, music_graph_descriptors_user:readable, sendToPlaylist:readable, queryCombinations:readable, removeDuplicatesAsync:readable */ // eslint-disable-line no-unused-vars
 include('..\\..\\helpers\\menu_xxx.js');
 /* global _menu:readable */
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -1573,21 +1573,20 @@ function createConfigMenu(parent) {
 			if (!bLiteMode) {
 				// Graph debug
 				menu.newEntry({
-					menuName: subMenu, entryText: 'Debug Graph (check console)', func: () => {
+					menuName: subMenu, entryText: 'Debug Graph', func: () => {
 						const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
-						graphDebug(sbd.allMusicGraph, true); // Show popup on pass
-						music_graph_descriptors_culture.debug(sbd.allMusicGraph);
+						// Show popup on pass
+						graphDebug(sbd.allMusicGraph, true);
+						music_graph_descriptors_culture.debug(true);
 						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 					}
 				});
 				// Graph test
 				menu.newEntry({
-					menuName: subMenu, entryText: 'Run distance tests (check console)', func: () => {
+					menuName: subMenu, entryText: 'Run distance tests', func: () => {
 						const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('testGraph') : null;
-						[testGraphNodes, testGraphNodeSets, music_graph_descriptors_culture.distanceDebug].forEach((f, i) => {
-							console.log('-'.repeat(60) + '-> Test ' + _p(i + 1));
-							f(sbd.allMusicGraph);
-						});
+						[testGraphNodes, testGraphNodeSets].forEach((f) => f(sbd.allMusicGraph, sbd.influenceMethod));
+						[testGraphCulture].forEach((f) => f(music_graph_descriptors_culture));
 						if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 					}
 				});
@@ -1745,7 +1744,7 @@ function createConfigMenu(parent) {
 										_run(entry.file);
 									} else {
 										const readme = _open(entry.file, utf8);
-										if (readme.length) { fb.ShowPopupMessage(readme, sbd.name + ': ' + entry.name); }
+										if (readme.length) { fb.ShowPopupMessage(readme, entry.name); }
 									}
 								} else { console.log('Readme not found: ' + entry.file); }
 							}

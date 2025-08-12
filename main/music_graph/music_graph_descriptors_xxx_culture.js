@@ -198,28 +198,26 @@ music_graph_descriptors_culture.omit = new Set(['Industrial_supergenre', 'Blues_
 })();
 
 // Debug
-music_graph_descriptors_culture.debug = function debug() {
+music_graph_descriptors_culture.debug = function debug(bShowPopupOnPass = false) {
 	const notFound = new Set();
 	music_graph_descriptors.getNodeSet(false).forEach((node) => {
 		if (!this.getFirstNodeRegion(node)) { notFound.add(node); }
 	});
 	const notFoundNum = notFound.size;
+	const files = [
+		'music_graph_descriptors_xxx_culture.js',
+	].filter(Boolean);
 	if (notFoundNum) {
+		const message = 'There are some errors on:\n\n' + files.map((s) => '\'' + s + '\'').join('\n');
+		try { fb.ShowPopupMessage('Check console. ' + message, 'music_graph_descriptors_culture'); } // On foobar2000
+		catch (e) { alert('Check console \'Ctrl + Shift + K\'. ' + message); } // eslint-disable-line no-unused-vars
 		console.log('music_graph_descriptors_culture: not found ' + notFoundNum + ' items\n\t ' + [...notFound]);
 	} else {
+		if (bShowPopupOnPass) {
+			const message = 'All tests passed.\nChecked:\n\n' + files.map((s) => '\'' + s + '\'').join('\n');
+			try { fb.ShowPopupMessage(message, 'music_graph_descriptors_culture'); } // On foobar2000
+			catch (e) { alert(message); } // eslint-disable-line no-unused-vars
+		}
 		console.log('music_graph_descriptors_culture: All tests passed');
 	}
-};
-
-music_graph_descriptors_culture.distanceDebug = function distanceDebug() {
-	console.log('<------------------- Culture node distance tests ------------------->');
-	[
-		['Deep House', 'Crossover Thrash'],	// 1
-		['Deep House', 'Deep House'],		// 0
-		['Tex-Mex', 'Deep House'],			// 2
-		['Aussie Rock', 'New Wave'],		// 4
-		['Disco', 'New Wave'],				// 1
-	].forEach((pair) => {
-		console.log(pair.join(' <-> ') + ' = ', music_graph_descriptors_culture.getDistance(...pair)); // DEBUG
-	});
 };
