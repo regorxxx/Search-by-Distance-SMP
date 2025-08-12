@@ -224,6 +224,7 @@ function calcMeanDistance(myGraph, style_genre_reference, style_genre_new, influ
 			let influenceDistance = 0;
 			for (let style_genre of difference) { // No need to check for those already matched. We are making an assumption here... i.e. that A genre has zero distance to only one value: A. But not to multiple ones: A, B, etc. That possibility is given by zero weight substitutions, but in that case 'calcGraphDistance' will output a zero distance too.
 				let setMin = Infinity;
+				let setInfluenceMin = 0;
 				for (let style_genreNew of toStyleGenre) { // But we need the entire set of new genre/styles to check lowest distance
 					let jh_distance = Infinity; // We consider points are not linked by default
 					let jh_influenceDistance = 0;
@@ -237,10 +238,13 @@ function calcMeanDistance(myGraph, style_genre_reference, style_genre_new, influ
 						//Graph is initialized at startup
 						cacheLink.set(id, [jh_distance, jh_influenceDistance]);
 					}
-					if (jh_distance < setMin) { setMin = jh_distance; }
-					if (jh_influenceDistance !== 0) { influenceDistance += jh_influenceDistance; }
+					if (jh_distance < setMin) {
+						setMin = jh_distance;
+						if (jh_influenceDistance !== 0) { setInfluenceMin = jh_influenceDistance; }
+					}
 				}
 				if (setMin < Infinity) { //Get the minimum distance of the entire set
+					influenceDistance += setInfluenceMin;
 					if (mapDistance === Infinity) { // If points were not linked before
 						mapDistance = setMin;
 					} else { // else sum the next minimum
