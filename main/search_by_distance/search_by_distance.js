@@ -554,6 +554,7 @@ addEventListener('on_script_unload', () => {
 if (sbd.panelProperties.bGraphDebug[1]) {
 	const profiler = sbd.panelProperties.bProfile[1] ? new FbProfiler('graphDebug') : null;
 	graphDebug(sbd.allMusicGraph);
+	music_graph_descriptors_culture.debug();
 	if (sbd.panelProperties.bProfile[1]) { profiler.Print(); }
 }
 if (sbd.panelProperties.bProfile[1]) {
