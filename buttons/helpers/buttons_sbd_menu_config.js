@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 /* exported createConfigMenu */
 
@@ -13,7 +13,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range:readable, _qCond:readable */
+/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range:readable, _qCond:readable, forEachNested:readable */
 include('..\\..\\helpers\\helpers_xxx_time.js');
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
@@ -27,6 +27,9 @@ function createConfigMenu(parent) {
 	// Process recipe
 	let recipe = {};
 	if (properties.recipe[1].length) { recipe = processRecipePlaceholder(properties.recipe[1], tags); }
+	forEachNested(recipe, (value, key, obj) => {
+		if (value === null) { obj[key] = Infinity; }
+	});
 	// Update tooltip
 	parent.recipe = { recipe: properties.recipe[1].length ? recipe : null, name: properties.recipe[1] || '' };
 	// Helpers

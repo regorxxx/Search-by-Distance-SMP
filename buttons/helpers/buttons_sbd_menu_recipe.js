@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -22,7 +22,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global _b:readable, _q:readable, _p:readable, isJSON:readable */
+/* global _b:readable, _q:readable, _p:readable, isJSON:readable, forEachNested:readable */
 
 const recipeMenu = new _menu();
 
@@ -159,6 +159,9 @@ function createRecipeMenu(parent) {
 						properties.data[1] = JSON.stringify(data);
 						overwriteProperties(properties);
 						parent.recipe = { recipe: processRecipePlaceholder(file, tags), name: file }; // Update tooltip
+						forEachNested(recipe, (value, key, obj) => {
+							if (value === null) { obj[key] = Infinity; }
+						});
 					}
 				}
 			});
