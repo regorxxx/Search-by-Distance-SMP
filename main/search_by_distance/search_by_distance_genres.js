@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 /* exported findStyleGenresMissingGraph , getNearestGenreStyles, getNearestGenreStylesV2 */
 
@@ -63,7 +63,7 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 	// Get all tags and their frequency
 	const tagsToCheck = [...new Set(genreStyleTag.filter(Boolean))]; // Merge and filter
 	if (!tagsToCheck.length && bPopup) {
-		fb.ShowPopupMessage('There are no tags to check set.', 'Search by distance');
+		fb.ShowPopupMessage('There are no tags to check set.', 'Music Map');
 		return null;
 	}
 	// Get tags
@@ -105,6 +105,6 @@ function findStyleGenresMissingGraph({ genreStyleFilter = [], genreStyleTag = ['
 		'Tags checked: ' + tagsToCheck.join(', ') +
 		'\n\nList of tags not present on the graph descriptors:\n' +
 		(missing.joinEvery(', ', 6) || 'None found.');
-	if (bPopup) { fb.ShowPopupMessage(report, 'Search by distance'); }
+	if (bPopup) { fb.ShowPopupMessage(report, 'Music Map'); }
 	return missing;
 }

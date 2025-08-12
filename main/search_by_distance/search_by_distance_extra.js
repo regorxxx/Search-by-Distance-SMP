@@ -1,5 +1,5 @@
 ﻿'use strict';
-//06/08/25
+//11/08/25
 
 /* exported calculateSimilarArtistsFromPls, addTracksRelation, calculateTrackSimilarity */
 
@@ -149,7 +149,7 @@ async function calculateSimilarArtists({ selHandle = fb.GetFocusItem(), properti
 async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelectedItems(plman.ActivePlaylist), file = folders.data + 'searchByDistance_artists.json', iNum = 10, tagName = 'SIMILAR ARTISTS SEARCHBYDISTANCE', properties } = {}) {
 	const handleList = removeDuplicates({ handleList: items, sortOutput: globTags.artist, checkKeys: [globTags.artist] });
 	const time = secondsToTime(Math.round(handleList.Count * 5 * fb.GetLibraryItems().Count / 70000));
-	if (WshShell.Popup('Process [different] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, 'Search by Distance', popup.question + popup.yes_no) === popup.no) { return; }
+	if (WshShell.Popup('Process [different] artists from currently selected items and calculate their most similar artists?\nResults are output to console and saved to JSON:\n' + file + '\n\nEstimated time: <= ' + time, 0, sbd.name, popup.question + popup.yes_no) === popup.no) { return; }
 	let profiler = new FbProfiler('Calculate similar artists');
 	const newData = [];
 	const handleArr = handleList.Convert();
@@ -165,9 +165,9 @@ async function calculateSimilarArtistsFromPls({ items = plman.GetPlaylistSelecte
 			_b(sim.score + '%') + '\t' + sim.artist
 		).join('\n\t') || '-NONE-')
 	).join('\n\n');
-	fb.ShowPopupMessage(report, 'Search by distance');
+	fb.ShowPopupMessage(report, sbd.name);
 	if (WshShell.Popup('Write similar artist tags to all tracks by selected artists?\n(It will also rewrite previously added similar artist tags)\nOnly first ' + iNum + ' artists with highest score will be used.', 0, 'Similar artists', popup.question + popup.yes_no) === popup.yes) {
-		updateTrackSimilarTags({ data: newData, iNum, tagName, windowName: 'Search by distance', bPopup: false });
+		updateTrackSimilarTags({ data: newData, iNum, tagName, windowName: sbd.name, bPopup: false });
 	}
 	return newData;
 }
@@ -222,7 +222,7 @@ function addTracksRelation({
 	tags.forEach((handleTags) => {
 		tagsKeys[mode].forEach((tf) => handleTags[tf] = [...handleTags[tf]]);
 	});
-	console.log('Search by distance: relating ' + handleList.Count + ' tracks...');
+	console.log(sbd.name + ': relating ' + handleList.Count + ' tracks...');
 	try { handleList.UpdateFileInfoFromJSON(JSON.stringify(tags)); }
 	catch (e) {
 		console.popup(e, window.Name);
@@ -260,6 +260,6 @@ async function calculateTrackSimilarity({ sel = null, items = plman.GetPlaylistS
 	if (!newData.length) { console.log('Nothing found.'); return []; }
 	profiler.Print();
 	const report = newData.join('\n');
-	fb.ShowPopupMessage(report, 'Search by distance');
+	fb.ShowPopupMessage(report, sbd.name);
 	return newData;
 }
