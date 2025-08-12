@@ -9,7 +9,7 @@ There are many more! For a comprehensive list check:
 
 By default all tools will tend to use such associations whenever they are
 not configured to use other tags or remapping. Many tools have specific
-customizable remapping options (for ex. 'Search by Distance' tools), while
+customizable remapping options (for ex. 'Music Map' tools), while
 others -which use queries- are simply easily editable manually.
 
 In case you want to globally remap a tag, without having to manually edit

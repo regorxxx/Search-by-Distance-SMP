@@ -46,7 +46,7 @@ If you use other tag names then you have these options:
 3. Configure scripts to remap standard tags to your own tags.
 4. Configure your tagging tools to output proper tag names.
 
-WARNING: All tags will be split by comma into multiple values. This is 
+WARNING: All tags will be split by comma into multiple values. This is
 specially important for 'genre' or 'style' tags, since values like:
 'Folk, World, & Country' will be split into 'Folk', 'World', '& Country'.
 Tag properly your files to avoid this situation.
@@ -56,8 +56,8 @@ NOTE: See 'Global tag Remap' readme for permanent remapping in all tools.
 --------------------------------------------------------------------------
 Example:
 --------------------------------------------------------------------------
-I have used the BIO panel to tag my files, and they are all tagged with 
-things like: "ALBUM GENRE ALLMUSIC", "ALBUM GENRE LAST.FM", 
+I have used the BIO panel to tag my files, and they are all tagged with
+things like: "ALBUM GENRE ALLMUSIC", "ALBUM GENRE LAST.FM",
 "ALBUM THEME ALLMUSIC", ...
 
 I also have my own genre tag named as "MY GENRE".
@@ -72,7 +72,7 @@ written as "INITIAL KEY".
 into one new field. I could simply retag all my tracks this way with a new
 tag name "GENRE" which contains the values of the other 3.
 
-(3) Probably the best option. For ex. Playlist Tools or Search by Distance
+(3) Probably the best option. For ex. Playlist Tools or Music Map
 already allow to remap any group of tags to GENRE, merging their values
 and removing duplicates, without touching the files. I will have to look
 for "Tag remapping" at the associated buttons in their config.

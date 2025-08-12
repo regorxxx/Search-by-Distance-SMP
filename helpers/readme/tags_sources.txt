@@ -62,8 +62,8 @@ will be split into 'Folk', 'World' and '& Country'. In such case, tag
 may be remapped to something like "$replace(%GENRE%,', &',',')".
 Otherwise, properly tag your files, splitting the values into real
 genre/styles instead of conglomerates to avoid this situation or just
-don't use those values on tools like 'Search by distance', which would
-made no sense.
+don't use those values on tools like 'Music Map', which would made
+no sense.
 
 - Getting KEY tag from different sources:
 Different software use different algorithms to compute KEY, therefore it
