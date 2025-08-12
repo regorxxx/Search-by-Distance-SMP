@@ -1,9 +1,9 @@
 ﻿'use strict';
-//25/12/23
+//11/08/25
 
-/* exported dyngenreMap, dynGenreRange */
+/* exported dynGenreMap, dynGenreRange */
 
-function dyngenreMap() {
+function dynGenreMap() {
 	// DYNGENRE Maps
 	const genreArray = [
 	//break
@@ -78,7 +78,7 @@ function dyngenreMap() {
 	Helpers
 */
 function dynGenreRange(reference, offset, bReturnLimits = false) {
-	const breaksArray = [0,18,30,31,59,61]; // Cycles on pairs of two. Hardcoded see dyngenreMap()
+	const breaksArray = [0,18,30,31,59,61]; // Cycles on pairs of two. Hardcoded see dynGenreMap()
 	const breaksArrayLen = breaksArray.length;
 	let bFound = false;
 	let lowRange = reference;

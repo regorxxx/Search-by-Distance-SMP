@@ -1,12 +1,10 @@
 ﻿'use strict';
-//08/08/25
+//11/08/25
 var version = '7.7.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
 
 /*
-	Search by Distance
-	-----------------------------------
 	Creates a playlist with similar tracks to the currently selected one according
 	to genre, style, key, etc. Every library track is given a score using its tags
 	and/or a graph distance with their genre/style.
@@ -23,15 +21,15 @@ var version = '7.7.0'; // NOSONAR [shared on files]
 	Any weight equal to zero or tag not set will be skipped for calcs. Therefore it's
 	recommended to only use those really relevant, for speed improvements. There are 3
 	exceptions to this rule:
-		- dyngenreWeight > 0 & method = DYNGENRE:
+		- dyngenre weight > 0 & method == DYNGENRE:
 			genre and style tags will always be retrieved, even if their weight is set
 			to 0. They will not be considered for scoring... but are needed to calculate
 			dynGenre virtual tags.
-		- method = GRAPH:
+		- method == GRAPH:
 			genre and style tags will always be retrieved, even if their weight is set
 			to 0. They will not be considered for scoring... but are needed to calculate
 			the distance in the graph between different tracks.
-		- bInKeyMixingPlaylist = true:
+		- bInKeyMixingPlaylist == true:
 			key tags will always be retrieved, even if keyWeight is set to 0. This is
 			done to create the special playlist even if keys are totally ignored for
 			similarity scoring.
@@ -75,7 +73,7 @@ include('..\\..\\helpers\\helpers_xxx_statistics.js');
 include('..\\..\\helpers\\camelot_wheel_xxx.js');
 /* global camelotWheel:readable */
 include('..\\..\\helpers\\dyngenre_map_xxx.js');
-/* global dyngenreMap:readable, cyclicTagsDescriptor:readable */
+/* global dynGenreMap:readable, cyclicTagsDescriptor:readable */
 include('..\\music_graph\\music_graph_xxx.js');
 /* global musicGraph:readable, music_graph_descriptors:readable, graphDebug:readable */
 include('..\\music_graph\\music_graph_test_xxx.js');
@@ -275,7 +273,7 @@ const sbd = {
 	asciify: (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0142/g, 'l'),
 	profiler: null
 };
-[sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dyngenreMap();
+[sbd.genreMap, sbd.styleMap, sbd.genreStyleMap] = dynGenreMap();
 
 // Info Popup
 if (!sbd.panelProperties.firstPopup[1]) {
