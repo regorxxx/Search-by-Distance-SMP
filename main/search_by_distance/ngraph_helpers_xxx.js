@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/24
+//13/08/24
 
 /* exported calcMeanDistanceV2, calcCacheLinkSG, calcCacheLinkSGV2 , getAntiInfluences, getInfluences, getNodesFromPath */
 
@@ -99,7 +99,6 @@ function calcGraphDistance(myGraph, keyOne, keyTwo, influenceMethod = 'adjacentN
 		}
 		distance = Infinity;
 	} else {
-		// TODO: move this into pathfinder. Zeronodes and Direct can be calculated afterwards since it is irrelevant for path finding. fullpath case is trivial since it requires checking every link. adjacentNodes may be calculated on the first and last step of pathfinder. In any case all links between nodes must be checked.
 		distance = getWeightFromPath(myGraph, path, bJointGraph);
 		// Checks links between pairs of nodes to find if they are (anti)influences
 		// For ex: Hip-Hop <- Rap_supergenre <- Rap_cluster <- Rhythm Music_supercluster <- Blue_Note_cluster <- Blues_supergenre <- Blues
@@ -240,7 +239,7 @@ function calcMeanDistance(myGraph, style_genre_reference, style_genre_new, influ
 					}
 					if (jh_distance < setMin) {
 						setMin = jh_distance;
-						if (jh_influenceDistance !== 0) { setInfluenceMin = jh_influenceDistance; }
+						setInfluenceMin = jh_influenceDistance;
 					}
 				}
 				if (setMin < Infinity) { //Get the minimum distance of the entire set
