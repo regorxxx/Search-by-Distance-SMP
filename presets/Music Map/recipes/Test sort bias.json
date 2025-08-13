@@ -1,0 +1,149 @@
+{
+	"name": "Test sort bias",
+	"tags": {
+		"genre": {
+			"weight": 1,
+			"tf": [
+				"GENRE"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LOGARITHMIC",
+			"type": [
+				"string",
+				"multiple",
+				"graph"
+			]
+		},
+		"style": {
+			"weight": 15,
+			"tf": [
+				"STYLE"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"string",
+				"multiple",
+				"graph"
+			]
+		},
+		"dynGenre": {
+			"weight": 40,
+			"tf": [],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"number",
+				"virtual",
+				"multiple",
+				"absRange"
+			],
+			"range": 1
+		},
+		"mood": {
+			"weight": 10,
+			"tf": [
+				"MOOD"
+			],
+			"baseScore": 50,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"string",
+				"multiple",
+				"combinations"
+			],
+			"combs": 6
+		},
+		"key": {
+			"weight": 5,
+			"tf": [
+				"KEY"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"string",
+				"single",
+				"keyMix",
+				"keyRange"
+			],
+			"range": 3
+		},
+		"bpm": {
+			"weight": 5,
+			"tf": [
+				"BPM"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"number",
+				"single",
+				"percentRange"
+			],
+			"range": 25
+		},
+		"date": {
+			"weight": 10,
+			"tf": [
+				"$year(%DATE%)"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"number",
+				"single",
+				"absRange"
+			],
+			"range": 15
+		},
+		"composer": {
+			"weight": 0,
+			"tf": [
+				"COMPOSER"
+			],
+			"baseScore": 0,
+			"scoringDistribution": "LINEAR",
+			"type": [
+				"string",
+				"multiple"
+			]
+		}
+	},
+	"bNegativeWeighting": true,
+	"bFilterWithGraph": true,
+	"forcedQuery": "",
+	"bSameArtistFilter": false,
+	"bConditionAntiInfluences": false,
+	"bUseAntiInfluencesFilter": false,
+	"bUseInfluencesFilter": false,
+	"bSimilArtistsFilter": false,
+	"method": "GRAPH",
+	"scoreFilter": 70,
+	"minScoreFilter": 50,
+	"graphDistance": "music_graph_descriptors.intra_supergenre",
+	"poolFilteringN": -1,
+	"bRandomPick": false,
+	"probPick": 100,
+	"playlistLength": 50,
+	"bSortRandom": false,
+	"bProgressiveListOrder": true,
+	"bScatterInstrumentals": false,
+	"bSmartShuffle": false,
+	"bSmartShuffleAdvc": true,
+	"smartShuffleSortBias": "random",
+	"bInKeyMixingPlaylist": false,
+	"bProgressiveListCreation": false,
+	"progressiveListCreationN": 4,
+	"playlistName": "Search...",
+	"bAscii": true,
+	"bAdvTitle": true,
+	"properties": {
+		"smartShuffleTag": [
+			"ARTIST"
+		],
+		"poolFilteringTag": [
+			"ARTIST"
+		]
+	}
+}
