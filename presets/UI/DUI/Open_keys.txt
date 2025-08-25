@@ -1,5 +1,5 @@
 Automatically translates standard notation (C#m) or Camelot keys (12A) to Open Keys (5A) for DUI.
-Note DUI doesn't allow multiple lines... so that's why all is joined into one.
+Key is associated to %KEY% tag; adjust as needed if using other tags.
 
 ---------------------- At Playlist View\Custom Columns (DUI) ----------------------
 

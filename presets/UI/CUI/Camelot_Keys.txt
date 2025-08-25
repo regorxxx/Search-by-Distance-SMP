@@ -1,5 +1,5 @@
-Automatically translates standard notation (C#m) or Open Keys (5m) to Camelot Keys (12A) for CUI.
-CUI also allows adding a style to the columns according to the key.
+Automatically translates standard notation (C#m) or Open Keys (5m) to Camelot Keys (12A)
+with color codes (CUI). Key is associated to %KEY% tag; adjust as needed if using other tags.
 
 ---------------------- At Playlist View\Columns\Display Script (CUI) ----------------------
 

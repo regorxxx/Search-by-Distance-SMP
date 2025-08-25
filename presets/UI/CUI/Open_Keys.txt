@@ -1,5 +1,5 @@
-Automatically translates standard notation (C#m) or Camelot keys (12A) to Open Keys (5A) for CUI.
-CUI also allows adding a style to the columns according to the key.
+Automatically translates standard notation (C#m) or Camelot keys (12A) to Open Keys (5A)
+with color codes (CUI). Key is associated to %KEY% tag; adjust as needed if using other tags.
 
 ---------------------- At Playlist View\Columns\Display Script (CUI) ----------------------
 
@@ -64,7 +64,7 @@ $if($stricmp($get(kTrans),11B),$puts(kTrans,4d))
 $if($stricmp($get(kTrans),12B),$puts(kTrans,5d))
 $get(kTrans)
 
----------------------- At Playlist View\Columns\Style Script (CUI) ----------------------	
+---------------------- At Playlist View\Columns\Style Script (CUI) ----------------------
 
 $if($stricmp(%KEY%,G#m),$puts(kTrans,1A))
 $if($stricmp(%KEY%,Abm),$puts(kTrans,1A))
