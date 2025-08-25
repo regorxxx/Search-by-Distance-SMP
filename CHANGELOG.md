@@ -153,6 +153,7 @@
 - Console: wrong warning about Smart Shuffle Tag not being set if it was empty even when the feature was not used.
 - Console: wrong warning about Recursive playlist creation and no tags for duplicates removal even when the former feature was not used.
 - UI: multiple workarounds for rounded rectangles not being painted properly or producing crashes (SMP limitation).
+- UI: workaround for DPI checking under multiple OSes, specially for Wine (Unix).
 - Influences: in some cases (anti)influences weight was not considered properly to calculate the total graph distance between nodes which had multiple links.
 - Fixed some inconsistencies with  [foo_playcount_2003](https://marc2k3.github.io/component/playcount-2003/) support.
 - Ensure that one track compared to itself reports a 100% score similarity. Previously it could be off by a few decimals due to rounding errors.
