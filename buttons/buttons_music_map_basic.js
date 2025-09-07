@@ -1,9 +1,9 @@
 ﻿'use strict';
-//11/08/25
+//07/09/25
 
 include('..\\helpers\\buttons_xxx.js');
 /* global getUniquePrefix:readable, buttonsBar:readable, addButton:readable, ThemedButton:readable */
-/* global menu_panelProperties:readable */
+/* global barProperties:readable */
 include('..\\helpers\\buttons_xxx_menu.js');
 /* global settingsMenu:readable  */
 include('..\\helpers\\helpers_xxx.js');
@@ -103,7 +103,7 @@ function buttonTooltipSbd() {
 	info += '\nTracks:\t' + this.buttonsProperties.playlistLength[1];
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
-	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
+	const bInfo = typeof barProperties === 'undefined' || barProperties.bTooltipInfo[1];
 	if (bShift || bInfo) {
 		info += '\n-----------------------------------------------------';
 		info += '\n(Shift + L. Click to open config menu)';

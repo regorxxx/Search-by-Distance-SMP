@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/08/25
+//07/09/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -521,6 +521,13 @@ function createButtonsMenu(name) {
 	}
 	{
 		const menuName = menu.newMenu('Other UI settings');
+		menu.newEntry({
+			menuName, entryText: 'Show mouse shortcuts on tooltip', func: () => {
+				barProperties.bTooltipInfo[1] = !barProperties.bTooltipInfo[1];
+				overwriteProperties(barProperties);
+			}
+		});
+		menu.newCheckMenuLast(() => barProperties.bTooltipInfo[1]);
 		menu.newEntry({
 			menuName, entryText: 'Show properties IDs on tooltip', func: () => {
 				buttonsBar.config.bShowID = barProperties.bShowId[1] = !barProperties.bShowId[1];

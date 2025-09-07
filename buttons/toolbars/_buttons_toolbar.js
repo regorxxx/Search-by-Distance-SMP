@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/08/25
+//07/09/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -79,11 +79,12 @@ let barProperties = {
 	bDynHoverColor: ['Buttons\' hover dynamic color', true, { func: isBoolean }],
 	bHoverGrad: ['Buttons\' hover gradient', true, { func: isBoolean }],
 	bBorders: ['Buttons\' borders', true, { func: isBoolean }],
-	bAutoUpdateCheck: ['Automatically check updates?', globSettings.bAutoUpdateCheck, { func: isBoolean }, globSettings.bAutoUpdateCheck],
-	bLoadAsync: ['Asynchronous loading?', true, { func: isBoolean }],
+	bAutoUpdateCheck: ['Automatically check updates', globSettings.bAutoUpdateCheck, { func: isBoolean }, globSettings.bAutoUpdateCheck],
+	bLoadAsync: ['Asynchronous loading', true, { func: isBoolean }],
 	iconScale: ['UI icon scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
 	textScale: ['UI text scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
 	textPosition: ['UI text position', 'right', { func: isString }],
+	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }]
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);

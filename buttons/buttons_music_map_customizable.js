@@ -1,6 +1,7 @@
 ﻿'use strict';
-//11/08/25
+//07/09/25
 
+/* global barProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, MK_CONTROL:readable, VK_CONTROL:readable, doOnce:readable, debounce:readable */
 include('..\\helpers\\buttons_xxx.js');
@@ -34,7 +35,6 @@ var newButtonsProperties = { // NOSONAR [shared on files]
 	theme: ['Path to theme file (instead of using selection)', '', { func: isStringWeak }, ''],
 	recipe: ['Path to recipe file (instead of using properties)', '', { func: isStringWeak }, ''],
 	data: ['Internal data', JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' }), { func: isJSON }, JSON.stringify({ forcedTheme: '', theme: 'None', recipe: 'None' })],
-	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }, true],
 	bIconMode: ['Icon-only mode', false, { func: isBoolean }, false],
 	bLiteMode: ['Lite mode', false, { func: isBoolean }, false],
 	bSearchRecipes: ['Show recipe list on search', true, { func: isBoolean }, true],
@@ -146,7 +146,7 @@ addButton({
 function buttonTooltipSbdCustom() {
 	const properties = this.buttonsProperties;
 	const data = JSON.parse(properties.data[1]);
-	const bTooltipInfo = properties.bTooltipInfo[1];
+	const bInfo = typeof barProperties === 'undefined' || barProperties.bTooltipInfo[1];
 	const recipe = this.recipe.recipe || {};
 	const getSetting = (key) => {
 		return Object.hasOwn(recipe, key)
@@ -194,13 +194,13 @@ function buttonTooltipSbdCustom() {
 	info += '\nTracks:\t'
 		+ (getSetting('playlistLength') === -1 ? 'By user input' : getSetting('playlistLength'))
 		+ ' ' + _p('from ' + sbd.getSourceDescription(getSetting('trackSource').sourceType));
-	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
-	if (bShift && !bControl || bTooltipInfo) { info += '\n(Shift + L. Click for settings and tools)'; }
-	if (!bShift && bControl || bTooltipInfo) { info += '\n(Ctrl + L. Click to set recipe)'; }
-	if (!getSetting('bLiteMode') && (bShift && bControl || bTooltipInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
+	if (bInfo || bShift || bControl) { info += '\n-----------------------------------------------------'; }
+	if (bShift && !bControl || bInfo) { info += '\n(Shift + L. Click for settings and tools)'; }
+	if (!bShift && bControl || bInfo) { info += '\n(Ctrl + L. Click to set recipe)'; }
+	if (!getSetting('bLiteMode') && (bShift && bControl || bInfo)) { info += '\n(Shift + Ctrl + L. Click to set theme)'; }
 	return info;
 }
 

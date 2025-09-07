@@ -1,7 +1,7 @@
 ﻿'use strict';
-//11/08/25
+//07/09/25
 
-/* global menu_panelProperties:readable */
+/* global barProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
 /* global globFonts:readable, MK_SHIFT:readable, VK_SHIFT:readable, VK_CONTROL:readable, globTags:readable */
 include('..\\helpers\\buttons_xxx.js');
@@ -100,7 +100,7 @@ addButton({
 // Helper
 function buttonTooltipSbdCustom() {
 	const properties = this.buttonsProperties;
-	const bInfo = typeof menu_panelProperties === 'undefined' || menu_panelProperties.bTooltipInfo[1];
+	const bInfo = typeof barProperties === 'undefined' || barProperties.bTooltipInfo[1];
 	let info = 'Genre/style exploration within your library:\n';
 	const sel = fb.GetFocusItem();
 	if (sel) {
@@ -113,10 +113,10 @@ function buttonTooltipSbdCustom() {
 		);
 		info += tfo.EvalWithMetadb(sel);
 	} else { info += 'No track selected'; }
-	info += '\n-----------------------------------------------------';
 	// Modifiers
 	const bShift = utils.IsKeyPressed(VK_SHIFT);
 	const bControl = utils.IsKeyPressed(VK_CONTROL);
+	if (bInfo || bShift || bControl) { info += '\n-----------------------------------------------------'; }
 	if (bShift && !bControl || bInfo) { info += '\n(Shift + L. Click for config)'; }
 	return info;
 }

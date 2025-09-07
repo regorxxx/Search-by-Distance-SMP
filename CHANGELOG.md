@@ -132,6 +132,7 @@
 - UI: unified script updates settings across all my scripts, look for 'Updates' submenu.
 - UI: settings display improvements on tooltip.
 - UI: improvements of menu entries related to settings.
+- UI: show shortcuts on tooltip setting moved to global setting for the toolbar.
 - Readmes: improved readmes and added missing features.
 - Helpers: updated helpers.
 - Helpers: general code cleanup on menus internal code. Please report any bug on extra separators or menu entries not working as expected.

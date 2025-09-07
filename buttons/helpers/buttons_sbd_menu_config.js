@@ -1,5 +1,5 @@
 ﻿'use strict';
-//12/08/25
+//07/09/25
 
 /* exported createConfigMenu */
 
@@ -1648,13 +1648,6 @@ function createConfigMenu(parent) {
 				}
 			}
 		});
-		menu.newEntry({
-			menuName: subMenuName, entryText: 'Show shortcuts on tooltip', func: () => {
-				properties.bTooltipInfo[1] = !properties.bTooltipInfo[1];
-				overwriteProperties(properties); // Force overwriting
-			}
-		});
-		menu.newCheckMenuLast(() => properties.bTooltipInfo[1]);
 		menu.newSeparator(subMenuName);
 		menu.newEntry({
 			menuName: subMenuName, entryText: 'Show recipe list on search', func: () => {
