@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/08/25
+//10/09/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -79,6 +79,7 @@ buttonsBar.oldButtonCoordinates = { x: 0, y: 0, w: 0, h: 0 }; // To store coordi
 buttonsBar.tooltipButton = new _tt(null, globFonts.tooltip.name, _scale(globFonts.tooltip.size), 600); // Global tooltip
 buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
+buttonsBar.keyDown = new Set();
 buttonsBar.readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json')
 	? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8)
 	: null;
@@ -1109,7 +1110,21 @@ addEventListener('on_mouse_mbtn_up', (x, y, mask) => { // eslint-disable-line no
 });
 
 // Update tooltip with key mask if required
-addEventListener('on_key_down', (k) => { // eslint-disable-line no-unused-vars
+addEventListener('on_key_down', (k) => {
+	for (let key in buttonsBar.buttons) {
+		if (Object.hasOwn(buttonsBar.buttons, key)) {
+			const button = buttonsBar.buttons[key];
+			if (button.state === buttonStates.hover && !buttonsBar.keyDown.has(k)) {
+				buttonsBar.keyDown.add(k);
+				if (button.description !== null) { buttonsBar.tooltipButton.SetValue(button.tooltipText(), true); }
+				else if (isString(buttonsBar.tooltipButton.text)) { buttonsBar.tooltipButton.SetValue('', false); }
+			}
+		}
+	}
+});
+
+addEventListener('on_key_up', (k) => {
+	buttonsBar.keyDown.delete(k);
 	for (let key in buttonsBar.buttons) {
 		if (Object.hasOwn(buttonsBar.buttons, key)) {
 			const button = buttonsBar.buttons[key];
@@ -1121,16 +1136,8 @@ addEventListener('on_key_down', (k) => { // eslint-disable-line no-unused-vars
 	}
 });
 
-addEventListener('on_key_up', (k) => { // eslint-disable-line no-unused-vars
-	for (let key in buttonsBar.buttons) {
-		if (Object.hasOwn(buttonsBar.buttons, key)) {
-			const button = buttonsBar.buttons[key];
-			if (button.state === buttonStates.hover) {
-				if (button.description !== null) { buttonsBar.tooltipButton.SetValue(button.tooltipText(), true); }
-				else if (isString(buttonsBar.tooltipButton.text)) { buttonsBar.tooltipButton.SetValue('', false); }
-			}
-		}
-	}
+addEventListener('on_focus', (is_focused) => {
+	if (!is_focused) { buttonsBar.keyDown.clear(); }
 });
 
 function getUniquePrefix(string, sep = '_') {
