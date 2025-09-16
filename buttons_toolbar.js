@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/09/25
+//15/09/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -228,7 +228,8 @@ function loadButtonsFile(bStartup = false) {
 	}
 	const remap = new Map([
 		['buttons_lastfm_list.js', 'buttons_lastfm_tools.js'],
-		['buttons_tags_automation.js', 'buttons_tags_tagger.js'],
+		['buttons_tags_automation.js', 'buttons_tags_batch_tagger.js'],
+		['buttons_tags_tagger.js', 'buttons_tags_batch_tagger.js'],
 		['buttons_device_selector.js', 'buttons_device_switcher.js'],
 		['buttons_search_by_distance.js', 'buttons_music_map_basic.js.'],
 		['buttons_search_by_distance_basic.js', 'buttons_music_map_basic.js.'],

@@ -29,7 +29,7 @@
 	"buttons_tags_fingerprint_chromaprint.js": "fingerprint_tag.txt",
 	"buttons_tags_fingerprint_fooid.js": "fingerprint_tag.txt",
 	"buttons_tags_save_tags.js": "save_tags.txt",
-	"buttons_tags_tagger.js": "tagger.txt",
+	"buttons_tags_batch_tagger.js": "tagger.txt",
 	"buttons_stats_wrapped.js": "wrapped.txt",
 	"buttons_utils_autobackup.js": "autobackup.txt",
 	"buttons_utils_main_menu.js": "main_menu_shortcut.txt"
