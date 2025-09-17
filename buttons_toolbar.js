@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/09/25
+//17/09/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -30,13 +30,15 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		'helpers\\helpers_xxx_properties.js',
 		/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable */
 		'helpers\\helpers_xxx_prototypes.js',
-		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isJSON:readable */
+		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isJSON:readable, clone:readable */
 		'helpers\\helpers_xxx_UI.js',
 		/* global _scale:readable, _gdiFont:readable */
 		'helpers\\helpers_xxx_file.js',
 		/* global _open:readable, _isFile:readable, utf8:readable, _save:readable, _jsonParseFileCheck:readable, WshShell:readable , popup:readable */
-		'helpers\\helpers_xxx_input.js'
+		'helpers\\helpers_xxx_input.js',
 		/* global Input:readable */
+		'main\\window\\window_xxx_dynamic_colors.js' // Requires Chroma
+		/* global dynamicColors:readable, mostContrastColor:readable */
 	];
 	let bIncludeRel = true;
 	try { include('..\\..\\helpers\\helpers_xxx_dummy.js'); } catch (e) { bIncludeRel = false; } // eslint-disable-line no-unused-vars
@@ -45,7 +47,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 }
 {
 	const dependencies = [
-		'helpers\\buttons_merged_menu.js'
+		'helpers\\buttons_merged_menu.js' // Loads Chroma
 		/* global createButtonsMenu:readable, importSettingsMenu:readable */
 	];
 	let bIncludeRel = true;
@@ -84,7 +86,8 @@ let barProperties = {
 	iconScale: ['UI icon scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
 	textScale: ['UI text scale', _scale(0.7, false), { func: (v) => isFloat(v) || isInt(v) }],
 	textPosition: ['UI text position', 'right', { func: isString }],
-	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }]
+	bTooltipInfo: ['Show shortcuts on tooltip', true, { func: isBoolean }],
+	bOnNotifyColors: ['Adjust colors on panel notify', true, { func: isBoolean }]
 };
 Object.keys(barProperties).forEach(p => barProperties[p].push(barProperties[p][1]));
 setProperties(barProperties);
@@ -156,7 +159,7 @@ function loadButtonsFile(bStartup = false) {
 			},
 			/* global sbd:readable */
 			{
-				name: typeof sbd !== 'undefined' ? sbd.name + ' (basic)': '', files:
+				name: typeof sbd !== 'undefined' ? sbd.name + ' (basic)' : '', files:
 					['buttons_music_map_basic.js']
 			},
 			{
@@ -308,7 +311,6 @@ addEventListener('on_mouse_rbtn_up', (x, y, mask) => { // eslint-disable-line no
 
 addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-unused-vars
 	if (name === 'bio_imgChange' || name === 'biographyTags' || name === 'bio_chkTrackRev' || name === 'xxx-scripts: panel name reply') { return; }
-	if (!name.startsWith('Toolbar')) { return; }
 	switch (name) { // NOSONAR
 		case 'Toolbar: share settings': {
 			if (info) {
@@ -347,6 +349,41 @@ addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-u
 			}
 			break;
 		}
+		case 'Toolbar: set colors': { // Needs an array of 5 colors or an object {toolbar, text, button, hover, active}
+			if (info && barProperties.bOnNotifyColors[1]) {
+				const colors = clone(info);
+				const getColor = (key) => Object.hasOwn(colors, key) ? colors.background : colors[['toolbar', 'text', 'button', 'hover', 'active'].indexOf(key)];
+				const hasColor = (key) => typeof getColor(key) !== 'undefined';
+				const bar = buttonsBar.config;
+				if (bar.bToolbar && hasColor('toolbar')) { bar.toolbarColor = getColor('toolbar'); }
+				if (bar.textColor !== -1 && hasColor('text')) { bar.textColor = getColor('text'); }
+				if (bar.buttonColor !== -1 && hasColor('button')) { bar.buttonColor = getColor('button'); }
+				if (bar.hoverColor !== -1 && hasColor('hover')) { bar.hoverColor = getColor('hover'); }
+				if (bar.activeColor !== -1 && hasColor('active')) { bar.activeColor = getColor('active'); }
+				window.Repaint();
+			}
+			break;
+		}
+		case 'Colors: set color scheme':
+		case 'Toolbar: set color scheme': { // Needs an array of at least 6 colors to automatically adjust dynamic colors
+			if (info && barProperties.bOnNotifyColors[1]) {
+				const bar = buttonsBar.config;
+				const { main, sec, note, mainAlt, secAlt } = dynamicColors( // eslint-disable-line no-unused-vars
+					clone(info),
+					bar.bToolbar
+						? bar.toolbarColor
+						: (window.InstanceType === 0 ? window.GetColourCUI(1) : window.GetColourDUI(1)),
+					true
+				);
+				if (bar.bToolbar) { bar.toolbarColor = main; }
+				if (bar.textColor !== -1 && bar.bToolbar) { bar.textColor = mostContrastColor(bar.toolbarColor).color; }
+				if (bar.buttonColor !== -1) { bar.buttonColor = note; }
+				if (bar.hoverColor !== -1) { bar.hoverColor = mainAlt; }
+				if (bar.activeColor !== -1) { bar.activeColor = sec; }
+				window.Repaint();
+			}
+			break;
+		}
 	}
 });
 
@@ -369,6 +406,13 @@ if (barProperties.bAutoUpdateCheck[1]) {
 			bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb
 		});
 	});
+}
+
+if (barProperties.bOnNotifyColors[1]) { // Ask color-servers at init
+	setTimeout(() => {
+		window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
+		window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
+	}, 1000);
 }
 
 globProfiler.Print('callbacks');

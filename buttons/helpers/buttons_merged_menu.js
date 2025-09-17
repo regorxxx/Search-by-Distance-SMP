@@ -23,7 +23,7 @@ include('..\\..\\helpers\\helpers_xxx_export.js');
 /* global exportSettings:readable, importSettings:readable */
 include('..\\..\\helpers-external\\namethatcolor\\ntc.js');
 /* global ntc:readable */
-const Chroma = require('..\\helpers-external\\chroma.js\\chroma-ultra-light.min'); // Relative to helpers folder
+const Chroma = require('..\\helpers-external\\chroma.js\\chroma.min'); // Relative to helpers folder
 
 function createButtonsMenu(name) {
 	const menu = new _menu();

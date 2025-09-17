@@ -67,6 +67,7 @@
 - Descriptors: added influences and anti-influences for Freak Folk and Dream Pop.
 - Descriptors: merged Punk Pop and Pop Punk into a single node (Punk Pop). Pop Punk is now a substitution.
 - UI: toolbar tooltip now shows 'Shift + Win + R. Click' shortcut to open SMP/JSpliter panel menu (which works globally on any script and panel, at any position).
+- UI: exposed color settings via window.NotifyOthers() method for themes/multi-panel support. You may pass a color scheme -size 6 recommended- (output from GetColourScheme()) at 'Colors: set color scheme' (applies to all compatible panels) or 'Toolbar: set color scheme' (applies only to this script), which will set appropriate colors following panel's color logic; alternatively you may set direct color settings at 'Toolbar: set colors' which needs an array of 5 colors or an object {toolbar, text, button, hover, active}. Panel has also independent settings to listen to colors from other panels (but not for sending colors as a color-server to others). See [this](https://github.com/regorxxx/Not-A-Waveform-Seekbar-SMP/issues/4) and [this](https://hydrogenaudio.org/index.php/topic,120980.msg1069107.html#msg1069107).
 - Readmes: Ctrl + L. Click on any entry within 'Add button' submenu on toolbar now opens directly their associated readme (without actually adding the button).
 - Other tools: added new entries at 'other tools' to calculate similarity between tracks and report the score.
 - Info: added hated stats.
