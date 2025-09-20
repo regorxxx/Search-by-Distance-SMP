@@ -288,8 +288,24 @@ function includeButtonsAsync(timeout = 100) {
 }
 
 let buttonsPath = [];
-if (barProperties.bLoadAsync[1]) { loadButtonsFile(true) && includeButtonsAsync(); }
-else { loadButtonsFile(true) && includeButtons(); }
+if (barProperties.bLoadAsync[1]) {
+	loadButtonsFile(true) && includeButtonsAsync().finally(() => {
+		if (barProperties.bOnNotifyColors[1]) { // Ask color-servers at init
+			setTimeout(() => {
+				window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
+				window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
+			}, 1000);
+		}
+	});
+} else {
+	loadButtonsFile(true) && includeButtons();
+	if (barProperties.bOnNotifyColors[1]) { // Ask color-servers at init
+		setTimeout(() => {
+			window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
+			window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
+		}, 1000);
+	}
+}
 
 addEventListener('on_paint', (gr) => {
 	if (!buttonsPath.length) {
@@ -406,13 +422,6 @@ if (barProperties.bAutoUpdateCheck[1]) {
 			bDownload: globSettings.bAutoUpdateDownload, bOpenWeb: globSettings.bAutoUpdateOpenWeb
 		});
 	});
-}
-
-if (barProperties.bOnNotifyColors[1]) { // Ask color-servers at init
-	setTimeout(() => {
-		window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
-		window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
-	}, 1000);
 }
 
 globProfiler.Print('callbacks');

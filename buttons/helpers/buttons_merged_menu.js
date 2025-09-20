@@ -1,5 +1,5 @@
 ﻿'use strict';
-//15/09/25
+//20/09/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -68,7 +68,7 @@ function createButtonsMenu(name) {
 		}))]
 			.filter(Boolean)
 			.map(parseSubMenuFolder)
-			.sort((a, b) => a.localeCompare(b, void(0), { sensitivity: 'base' }))
+			.sort((a, b) => a.localeCompare(b, void (0), { sensitivity: 'base' }))
 			.forEach((subMenuFolder) => menu.findOrNewMenu(subMenuFolder, subMenu));
 		files.forEach((path) => {
 			const fileName = path.split('\\').pop();
@@ -332,6 +332,21 @@ function createButtonsMenu(name) {
 			}
 		});
 		menu.newCheckMenuLast(() => barProperties.bBgButtons[1]);
+		menu.newSeparator(menuName);
+		{
+			const subMenu = menu.newMenu('Dynamic colors', menuName);
+			menu.newEntry({
+				menuName: subMenu, entryText: 'Listen to color-servers', func: () => {
+					barProperties.bOnNotifyColors[1] = !barProperties.bOnNotifyColors[1];
+					overwriteProperties(barProperties);
+					if (barProperties.bOnNotifyColors[1]) {
+						window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
+						window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
+					}
+				}
+			});
+			menu.newCheckMenuLast(() => barProperties.bOnNotifyColors[1]);
+		}
 		menu.newSeparator(menuName);
 		menu.newEntry({
 			menuName, entryText: 'Reset all configuration...', func: () => {
@@ -804,7 +819,7 @@ function importSettingsMenu() {
 					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.*', 'check_library_tags_exclusion.json'] : ['']),
 					/* global sbd:readable */
 					typeof sbd !== 'undefined'
-					 	? Object.keys(buttonsBar.buttons).some((key) => key.startsWith(sbd.name)) ? 'searchByDistance_*.*' : ''
+						? Object.keys(buttonsBar.buttons).some((key) => key.startsWith(sbd.name)) ? 'searchByDistance_*.*' : ''
 						: '',
 					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.*' : '',
 					Object.hasOwn(buttonsBar.buttons, 'Fingerprint Tools') ? 'fpChromaprintReverseMap*.json' : '',
