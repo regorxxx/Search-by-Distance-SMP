@@ -1,6 +1,6 @@
 ﻿'use strict';
-//12/08/25
-var version = '7.7.0'; // NOSONAR [shared on files]
+//20/09/25
+var version = '8.0.0'; // NOSONAR [shared on files]
 
 /* exported  searchByDistance, checkScoringDistribution, checkMinGraphDistance */
 
