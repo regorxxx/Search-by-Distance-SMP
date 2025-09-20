@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [8.0.0](#800---2025-09-20)
 - [7.6.0](#760---2024-10-09)
 - [7.5.0](#750---2024-08-13)
 - [7.4.0](#740---2024-07-30)
@@ -56,6 +57,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [8.0.0] - 2025-09-20
 ### Added
 - Toolbar: new entry on toolbar menu to share current UI settings across all toolbar panels on foobar2000. See [here](https://hydrogenaud.io/index.php/topic,120978.msg1061005.html#msg1061005).
 - Tracks source: added new settings to select source different than library. i.e. active playlist, now playing playlist or selected playlists by name.
@@ -1021,7 +1028,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.6.0...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v8.0.0...HEAD
+[8.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.6.0...v8.0.0
 [7.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.5.0...v7.6.0
 [7.5.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.3.0...v7.4.0
