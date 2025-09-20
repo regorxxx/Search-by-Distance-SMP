@@ -159,11 +159,11 @@ function loadButtonsFile(bStartup = false) {
 			},
 			/* global sbd:readable */
 			{
-				name: typeof sbd !== 'undefined' ? sbd.name + ' (basic)' : '', files:
+				name: (typeof sbd !== 'undefined' ? sbd.name : 'Music Map') + ' (basic)', files:
 					['buttons_music_map_basic.js']
 			},
 			{
-				name: typeof sbd !== 'undefined' ? sbd.name + ' (customizable)' : '', files:
+				name: (typeof sbd !== 'undefined' ? sbd.name  : 'Music Map') + ' (customizable)', files:
 					['buttons_music_map_customizable.js', 'buttons_music_map_customizable.js', 'buttons_music_map_customizable.js', 'buttons_music_map_customizable.js']
 			},
 			{
