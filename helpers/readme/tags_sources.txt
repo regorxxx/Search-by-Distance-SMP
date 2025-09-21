@@ -45,6 +45,18 @@
 |          | Foobar -   Biography script (*)                         |
 |          |      https://github.com/Wil-B/Biography                 |
 +----------+---------------------------------------------------------+
+|          | Foobar - Search by Distance script - Music Map          |
+| SIMILAR  |      https://github.com/regorxxx/Search-by-Distance-SMP |
+| ARTISTS  +---------------------------------------------------------+
+|          | Foobar - ListenBrainz script                            |
+|          |      https://github.com/regorxxx/ListenBrainz-SMP       |
++----------+---------------------------------------------------------+
+|          |                                                         |
+| FEEDBACK | Foobar - ListenBrainz script                            |
+|  loved   |      https://github.com/regorxxx/ListenBrainz-SMP       |
+|    &     |                                                         |
+|  hated   |                                                         |
++----------+---------------------------------------------------------+
 
 (*) May require additional configuration or steps to either set a
 compatible tag name or merge values. See 'Tagging requisites' readme.
