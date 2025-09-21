@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/25
+//21/09/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -721,7 +721,7 @@ function createButtonsMenu(name) {
 				barProperties.bAutoUpdateCheck[1] = !barProperties.bAutoUpdateCheck[1];
 				overwriteProperties(barProperties);
 				if (barProperties.bAutoUpdateCheck[1]) {
-					if (typeof checkUpdate === 'undefined') { include('helpers\\helpers_xxx_web_update.js'); }
+					if (typeof checkUpdate === 'undefined') { include('..\\..\\helpers\\helpers_xxx_web_update.js'); }
 					const args = buttonsBar.getUpdateList().map((btn) => {
 						return {
 							...(btn.scriptName ? { scriptName: btn.scriptName } : {}),
@@ -738,7 +738,7 @@ function createButtonsMenu(name) {
 		menu.newSeparator(subMenu);
 		menu.newEntry({
 			menuName: subMenu, entryText: 'Check for updates...', func: () => {
-				if (typeof checkUpdate === 'undefined') { include('helpers\\helpers_xxx_web_update.js'); }
+				if (typeof checkUpdate === 'undefined') { include('..\\..\\helpers\\helpers_xxx_web_update.js'); }
 				const args = buttonsBar.getUpdateList().map((btn) => {
 					return {
 						...(btn.scriptName ? { scriptName: btn.scriptName } : {}),

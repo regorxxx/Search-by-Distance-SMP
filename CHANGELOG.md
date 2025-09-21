@@ -62,6 +62,7 @@
 ### Removed
 ### Fixed
 - Toolbar: fix missing preset names for Music Map scripts on new installs.
+- Auto-update: fix error including a file when enabling auto-updates if it was previously disabled.
 
 ## [8.0.0] - 2025-09-20
 ### Added
