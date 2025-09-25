@@ -1,12 +1,14 @@
 'use strict';
-//25/11/24
+//25/09/25
 
 /* exported writeSimilarArtistsTags, updateSimilarDataFile, mergeSimilarDataFromFiles */
 
 include('helpers_xxx_tags.js');
 /* global globTags:readable, folders:readable, WshShell:readable, popup:readable, _jsonParseFile:readable,_jsonParseFileCheck:readable, _isFile:readable, _p:readable, utf8:readable, queryJoin:readable, _save:readable, _deleteFile:readable */
+include('helpers_xxx_prototypes.js');
+/* global _ps:readable */
 
-function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.json', iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name } = {}) {
+function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.json', iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name + _ps(window.ScriptInfo.Name) } = {}) {
 	if (WshShell.Popup('Write similar artist tags from JSON database to files?\nOnly first ' + iNum + ' artists with highest score will be used.', 0, windowName, popup.question + popup.yes_no) === popup.no) { return false; }
 	if (!_isFile(file)) { return false; }
 	else {
@@ -16,7 +18,7 @@ function writeSimilarArtistsTags({ file = folders.data + 'listenbrainz_artists.j
 	return false;
 }
 
-function updateTrackSimilarTags({ data, iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name, bPopup = true } = {}) {
+function updateTrackSimilarTags({ data, iNum = 10, tagName = globTags.lbSimilarArtist, windowName = window.name + _ps(window.ScriptInfo.Name), bPopup = true } = {}) {
 	if (!data || !data.length) { return false; }
 	const bRewrite = bPopup
 		? WshShell.Popup('Rewrite previously added similar artist tags?', 0, windowName, popup.question + popup.yes_no) === popup.yes
@@ -63,7 +65,7 @@ function updateSimilarDataFile(file, newData, iNum = Infinity) {
 }
 
 function getSimilarDataFromFile(file, newData = null, iNum = Infinity) {
-	const data = _jsonParseFileCheck(file, 'Tags json', window.Name, utf8);
+	const data = _jsonParseFileCheck(file, 'Tags json', window.Name + _ps(window.ScriptInfo.Name), utf8);
 	if (data) {
 		if (newData) {
 			const idxMap = new Map();

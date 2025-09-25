@@ -1,10 +1,10 @@
 ﻿'use strict';
-//07/08/25
+//25/09/25
 
 /* exported _createSubMenuEditEntries */
 
 include('menu_xxx.js');
-/* global isFunction:readable, MF_GRAYED:readable, MF_STRING:readable, clone:readable,  */
+/* global _menu:readable, MF_GRAYED:readable, MF_STRING:readable, clone:readable, _ps:readable */
 
 /**
  * Description
@@ -49,11 +49,11 @@ include('menu_xxx.js');
  * @returns {void}
  */
 function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuName, list, defaults, input, bAdd, bNumbered, bDuplicate, bClone, bMove, bCopyCurrent, onBtnUp}*/) { // NOSONAR
-	if (options.onBtnUp && !isFunction(options.onBtnUp)) {
+	if (options.onBtnUp && !_menu.isFunction(options.onBtnUp)) {
 		throw new Error('_createSubMenuEditEntries: onBtnUp is not a function');
 	}
 	if (!options.defaults) { options.defaults = []; }
-	if (!options.list || !Array.isArray(options.list) || !Array.isArray(options.defaults) || !options.input || !isFunction(options.input)) {
+	if (!options.list || !Array.isArray(options.list) || !Array.isArray(options.defaults) || !options.input || !_menu.isFunction(options.input)) {
 		throw new Error('_createSubMenuEditEntries: list, defaults or input options are non valid or not provided');
 	}
 	// options.list always point to the original entry list and original values are edited
@@ -79,7 +79,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 				try { newEntry = JSON.parse(newEntry); } catch (e) { fb.ShowPopupMessage('Input: ' + newEntry.toString() + '\n\n' + e, 'JSON error'); return; }
 				if (!newEntry) { return; }
 				if (!options.bDuplicate && options.list.filter((otherEntry) => otherEntry !== entry).findIndex((otherEntry) => otherEntry.name === newEntry.name) !== -1) {
-					fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
+					fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name + _ps(window.ScriptInfo.Name));
 					return;
 				}
 				options.list[index] = newEntry;
@@ -117,7 +117,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 						if (parent.isSeparator({ name: entryName })) { return; }
 						else { // or new entry
 							if (!options.bDuplicate && options.list.findIndex((entry) => entry.name === entryName) !== -1) {
-								fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
+								fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name + ' (' + window.ScriptInfo.Name + ')');
 								return;
 							}
 							input = { ...entry };
@@ -179,7 +179,7 @@ function _createSubMenuEditEntries(parent, menuName, options /*{name, subMenuNam
 				if (parent.isSeparator({ name: entryName })) { input = { name: entryName }; } // Add separator
 				else { // or new entry
 					if (!options.bDuplicate && options.list.findIndex((entry) => entry.name === entryName) !== -1) {
-						fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name);
+						fb.ShowPopupMessage('There is another entry with same name.\nRetry with another name.', window.Name + ' (' + window.ScriptInfo.Name + ')');
 						return;
 					}
 					const entry = options.input(entryName);

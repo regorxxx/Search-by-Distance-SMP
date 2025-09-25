@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/08/25
+//25/09/25
 
 /* exported createThemeMenu */
 
@@ -16,7 +16,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global _b:readable, _q:readable */
+/* global _b:readable, _q:readable, _ps:readable */
 include('..\\..\\helpers\\helpers_xxx_tags.js');
 /* global getHandleListTags:readable */
 
@@ -75,7 +75,7 @@ function createThemeMenu(parent) {
 			themeTagsKeys.forEach((key, i) => { themeTags[key] = themeTagsValues[i]; });
 			// artistRegion Iso
 			const localeTags = getHandleListTags(selHandleList, [globTags.locale]).flat().map((tag) => tag.filter(Boolean).pop());
-			const worldMapData = _jsonParseFileCheck(filePaths.worldMapArtists, 'Tags json', window.Name, utf8);
+			const worldMapData = _jsonParseFileCheck(filePaths.worldMapArtists, 'Tags json', window.Name + _ps(window.ScriptInfo.Name), utf8);
 			localeTags.forEach((localeTag) => {
 				if (localeTag) { themeTags.artistRegion.push(getCountryISO(localeTag)); }
 				else if (worldMapData) {
@@ -96,7 +96,7 @@ function createThemeMenu(parent) {
 			const theme = { name: input, tags: [] };
 			theme.tags.push(themeTags);
 			const filePath = sbd.themesPath + input + '.json';
-			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
+			if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.no) { return; }
 			const bDone = _save(filePath, JSON.stringify(theme, null, '\t').replace(/\n/g, '\r\n'));
 			if (!bDone) { fb.ShowPopupMessage('Error saving theme file:' + filePath, sbd.name); }
 			else { _explorer(filePath); }

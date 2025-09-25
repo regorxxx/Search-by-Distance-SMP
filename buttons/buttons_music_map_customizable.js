@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/09/25
+//25/09/25
 
 /* global barProperties:readable */
 include('..\\helpers\\helpers_xxx.js');
@@ -9,7 +9,7 @@ include('..\\helpers\\buttons_xxx.js');
 include('..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable */
 include('..\\helpers\\helpers_xxx_prototypes.js');
-/* global isBoolean:readable, isJSON:readable, _p:readable , isStringWeak:readable */
+/* global isBoolean:readable, isJSON:readable, _p:readable , isStringWeak:readable, _ps:readable */
 include('..\\helpers\\helpers_xxx_UI.js');
 /* global _gdiFont:readable, _gr:readable, _scale:readable, chars:readable */
 include('..\\helpers\\helpers_xxx_file.js');
@@ -75,7 +75,7 @@ addButton({
 			} else {
 				if (this.buttonsProperties.customName[1] === 'Customize!') { // NOSONAR
 					let input = '';
-					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + ': ' + sbd.name + ' Customizable Button', this.buttonsProperties.customName[1], true); }
+					try { input = utils.InputBox(window.ID, 'Button may be configured according to your liking using the menus or the properties panel (look for \'' + this.prefix + '...\').\nCheck tooltip to see how to set presets (recipes and themes).\nPredefined presets have been included but new ones may be easily created on .json using the existing ones as examples.\n\nEnter button name:', window.Name + _ps(window.ScriptInfo.Name) + ': ' + sbd.name + ' Customizable Button', this.buttonsProperties.customName[1], true); }
 					catch (e) { return; } // eslint-disable-line no-unused-vars
 					if (!input.length) { return; }
 					if (this.buttonsProperties.customName[1] !== input) {
@@ -106,7 +106,7 @@ addButton({
 						if (info) {
 							if (info.notifyThis && parent.name === info.name) { return; } // Don't apply to same button
 							parent.switchHighlight(true);
-							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + ': ' + sbd.name, popup.question + popup.yes_no);
+							const answer = WshShell.Popup('Apply current configuration to highlighted button?\nCheck buttons bar.', 0, window.Name + _ps(window.ScriptInfo.Name) + ': ' + sbd.name, popup.question + popup.yes_no);
 							if (answer === popup.yes) {
 								parent.buttonsProperties.tags[1] = String(info.tags[1]);
 								parent.buttonsProperties.folksonomyWhitelistTag[1] = String(info.folksonomyWhitelistTag[1]);

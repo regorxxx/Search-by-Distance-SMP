@@ -1,5 +1,5 @@
 ﻿'use strict';
-//07/09/25
+//25/09/25
 
 /* exported createConfigMenu */
 
@@ -13,7 +13,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range:readable, _qCond:readable, forEachNested:readable */
+/* global capitalize:readable, capitalizeAll:readable, isString:readable, _p:readable , isArrayEqual:readable, range:readable, _qCond:readable, forEachNested:readable, _ps:readable */
 include('..\\..\\helpers\\helpers_xxx_time.js');
 include('..\\..\\helpers\\helpers_xxx_input.js');
 /* global Input:readable */
@@ -435,7 +435,7 @@ function createConfigMenu(parent) {
 				const bDefTag = !bRecipe && (nonDeletable.includes(key) || tags[key].type.includes('virtual'));
 				menu.newEntry({
 					menuName: subMenuName, entryText: 'Restore defaults...' + (bRecipe ? '\t(forced by recipe)' : bDefTag ? '\t(default tag)' : ''), func: () => {
-						if (WshShell.Popup('Restore tag\'s settings to default?', 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+						if (WshShell.Popup('Restore tag\'s settings to default?', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) {
 							tags[key] = defTags[key];
 							properties.tags[1] = JSON.stringify(tags);
 							overwriteProperties(properties); // Updates panel
@@ -479,20 +479,20 @@ function createConfigMenu(parent) {
 					const nTag = sbd.tagSchema;
 					const name = Input.string('string', '', 'Enter a name for the tag:\n\nThis is just for identification purposes, the actual tag values have to be filled later (using \'Remap...\').', sbd.name + ': New tag name', 'myTag');
 					if (name === null) { return; }
-					if (WshShell.Popup('Is multi-valued?\n\nTag may make use of multiple or single values. For ex. GENRE usually have more than one value, while DATE is meant to store a single value.\nSingle-valued configured tags will skip any value past the first one.\nMulti-valued tags can only be of \'string\' type.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('multiple', 'string'); }
+					if (WshShell.Popup('Is multi-valued?\n\nTag may make use of multiple or single values. For ex. GENRE usually have more than one value, while DATE is meant to store a single value.\nSingle-valued configured tags will skip any value past the first one.\nMulti-valued tags can only be of \'string\' type.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('multiple', 'string'); }
 					else { nTag.type.push('single'); }
 					if (nTag.type.includes('single')) {
-						if (WshShell.Popup('Are tag values strings?\n\nTag values may be considered as strings or numbers. For ex. GENRE, TITLE, etc. are strings, while DATE or BPM are numbers.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('string'); }
+						if (WshShell.Popup('Are tag values strings?\n\nTag values may be considered as strings or numbers. For ex. GENRE, TITLE, etc. are strings, while DATE or BPM are numbers.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('string'); }
 						else { nTag.type.push('number'); }
 						if (nTag.type.includes('string')) {
-							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
+							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
 						} else if (nTag.type.includes('number')) {
-							if (WshShell.Popup('Uses absolute range?\n\nSince tag values are numbers, comparison is done within a range. Absolute range will make the configurable range to be used as an absolute value, i.e. 30 equals to +-30. For ex. for dates.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('absRange'); nTag.range = 0; }
-							else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percent value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('percentRange'); nTag.range = 0; }
+							if (WshShell.Popup('Uses absolute range?\n\nSince tag values are numbers, comparison is done within a range. Absolute range will make the configurable range to be used as an absolute value, i.e. 30 equals to +-30. For ex. for dates.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('absRange'); nTag.range = 0; }
+							else if (WshShell.Popup('Uses percent range?\n\nSince tag values are numbers, comparison is done within a range. Percent range will make the configurable range to be used as a percent value, i.e. 30 equals to +-30% of the original value. For ex. for BPM.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('percentRange'); nTag.range = 0; }
 						}
 					} else {
 						if (nTag.type.includes('string')) { // NOSONAR
-							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name, popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
+							if (WshShell.Popup('Is a genre/style-like tag?\n\nClicking yes will use the tag for GRAPH purposes, along the default GENRE and STYLE tags.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) { nTag.type.push('graph'); }
 						}
 					}
 					tags[name] = nTag;
@@ -1638,7 +1638,7 @@ function createConfigMenu(parent) {
 		menu.newEntry({
 			menuName: subMenuName, entryText: 'Rename button...', func: () => {
 				let input = '';
-				try { input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + ': ' + sbd.name + ' Customizable Button', properties.customName[1], true); }
+				try { input = utils.InputBox(window.ID, 'Enter button name. Then configure according to your liking using the menus or the properties panel (look for \'' + parent.prefix + '...\').', window.Name + _ps(window.ScriptInfo.Name) + ': ' + sbd.name + ' Customizable Button', properties.customName[1], true); }
 				catch (e) { return; } // eslint-disable-line no-unused-vars
 				if (!input.length) { return; }
 				if (properties.customName[1] !== input) {

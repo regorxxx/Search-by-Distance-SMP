@@ -1,5 +1,5 @@
 ﻿'use strict';
-//11/08/25
+//25/09/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -22,7 +22,7 @@ include('..\\..\\helpers\\helpers_xxx_file.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global overwriteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global _b:readable, _q:readable, _p:readable, isJSON:readable, forEachNested:readable */
+/* global _b:readable, _q:readable, _p:readable, isJSON:readable, forEachNested:readable, _ps:readable */
 
 const recipeMenu = new _menu();
 
@@ -63,14 +63,14 @@ function createRecipeMenu(parent) {
 			if (!recipe.name.length) { return; }
 		}
 		const filePath = sbd.recipesPath + recipe.name + '.json';
-		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name, popup.question + popup.yes_no) === popup.no) { return; }
-		if (WshShell.Popup('Include tag remapping?', 0, window.Name, popup.question + popup.yes_no) === popup.no) {
+		if (_isFile(filePath) && WshShell.Popup('Already exists a file with such name, overwrite?', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.no) { return; }
+		if (WshShell.Popup('Include tag remapping?', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.no) {
 			for (let key in recipe.tags) {
 				delete recipe.tags[key].tf;
 				delete recipe.tags[key].type;
 			}
 		}
-		if (WshShell.Popup('Also add additional variables?\n' + [...recipePropertiesAllowedKeys].joinEvery(', ', 4), 0, window.Name, popup.question + popup.yes_no) === popup.yes) {
+		if (WshShell.Popup('Also add additional variables?\n' + [...recipePropertiesAllowedKeys].joinEvery(', ', 4), 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no) === popup.yes) {
 			recipe.properties = {};
 			Object.keys(properties).forEach((rKey) => {
 				if (!recipePropertiesAllowedKeys.has(rKey)) { return; }

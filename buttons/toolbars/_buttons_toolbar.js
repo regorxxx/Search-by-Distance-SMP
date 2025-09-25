@@ -1,5 +1,5 @@
 ﻿'use strict';
-//20/09/25
+//25/09/25
 
 /* Playlist Tools: Buttons Toolbar
 	Loads any button found on the buttons folder. Just load this file and add your desired buttons via R. Click.
@@ -30,7 +30,7 @@ try { window.DefineScript('Playlist Tools: Buttons Bar', { author: 'regorxxx', v
 		'helpers\\helpers_xxx_properties.js',
 		/* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable */
 		'helpers\\helpers_xxx_prototypes.js',
-		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isJSON:readable, clone:readable */
+		/* global randomString:readable, isString:readable, isInt:readable, isBoolean:readable, isFloat:readable, isJSON:readable, _b:readable, isJSON:readable, clone:readable, _ps:readable */
 		'helpers\\helpers_xxx_UI.js',
 		/* global _scale:readable, _gdiFont:readable */
 		'helpers\\helpers_xxx_file.js',
@@ -204,7 +204,7 @@ function loadButtonsFile(bStartup = false) {
 		].map((preset) =>
 			preset.files.every((file) => _isFile(folders.xxx + 'buttons\\' + file) || file.toLowerCase() === 'separator') ? preset : void (0)
 		).filter(Boolean);
-		const input = Input.number('int positive', presets.length, 'Choose a preset (by number) from the following list, to load the toolbar with pre-defined buttons (they may be added/removed at any time later):\n' + presets.map((p, i) => '\t' + _b(i + 1) + ' ' + p.name).join('\n') + '\n\nCanceling will load a blank toolbar by default.', 'Toolbar: preset', 1, [(n) => n > 0 && n <= presets.length]);
+		const input = Input.number('int positive', presets.length, 'Choose a preset (by number) from the following list, to load the toolbar with pre-defined buttons:\n' + presets.map((p, i) => '\t' + _b((i + 1).toString().padStart(2, '0')) + ' ' + p.name).join('\n') + '\n\nCanceling will load a blank toolbar by default.\n\nNote buttons may be added orremoved at any time later by R. Clicking on the toolbar.', 'Toolbar: preset', 1, [(n) => n > 0 && n <= presets.length]);
 		if (input == null) { return false; }
 		const preset = presets[input - 1];
 		if (preset) {
@@ -335,7 +335,7 @@ addEventListener('on_notify_data', (name, info) => { // eslint-disable-line no-u
 						buttonsBar.buttons[key].switchHighlight(true);
 					}
 				}
-				const answer = WshShell.Popup('Apply current settings to highlighted toolbar?\nCheck UI.', 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+				const answer = WshShell.Popup('Apply current settings to highlighted toolbar?\nCheck UI.', 0, window.Name + _ps(window.ScriptInfo.Name), popup.question + popup.yes_no);
 				if (answer === popup.yes) {
 					['toolbarColor', 'buttonColor', 'textColor', 'hoverColor', 'activeColor', 'transparency', 'scale', 'iconScale', 'textScale'].forEach((key) => {
 						buttonsBar.config[key] = barProperties[key][1] = Number(info[key][1]);

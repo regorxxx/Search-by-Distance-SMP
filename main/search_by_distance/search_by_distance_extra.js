@@ -1,11 +1,11 @@
 ﻿'use strict';
-//11/08/25
+//25/09/25
 
 /* exported calculateSimilarArtistsFromPls, addTracksRelation, calculateTrackSimilarity */
 
 include('search_by_distance.js');
 /* global sbd:readable, searchByDistance:readable, getNearestGenreStyles:readable */
-/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicates:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _b:readable, secondsToTime:readable, getHandleTags:readable */
+/* global getHandleListTags:readable, getHandleListTagsV2:readable, globTags:readable, _p:readable, removeDuplicates:readable, globQuery:readable, clone:readable, _q:readable, queryCombinations:readable, queryJoin:readable, round:readable, folders:readable, WshShell:readable, popup:readable, _b:readable, secondsToTime:readable, getHandleTags:readable, _ps:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_node.js');
 // music_graph_descriptors.nodeList
 include('..\\..\\helpers\\helpers_xxx_tags_extra.js');
@@ -225,7 +225,7 @@ function addTracksRelation({
 	console.log(sbd.name + ': relating ' + handleList.Count + ' tracks...');
 	try { handleList.UpdateFileInfoFromJSON(JSON.stringify(tags)); }
 	catch (e) {
-		console.popup(e, window.Name);
+		console.popup(e, window.Name + _ps(window.ScriptInfo.Name));
 		return false;
 	}
 	return true;
