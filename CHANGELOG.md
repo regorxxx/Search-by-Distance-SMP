@@ -60,6 +60,7 @@
 ### Added
 ### Changed
 ### Removed
+- Installation: fonts are no longer bundled at '_resources' folder, but found at: https://github.com/regorxxx/foobar2000-assets/tree/main/Fonts
 ### Fixed
 - Toolbar: fix missing preset names for Music Map scripts on new installs.
 - Auto-update: fix error including a file when enabling auto-updates if it was previously disabled.
