@@ -1,5 +1,5 @@
 ﻿'use strict';
-//10/09/25
+//25/09/25
 
 /* exported ThemedButton, getUniquePrefix, addButton, getButtonVersion, addButtonSeparator, showButtonReadme */
 
@@ -11,7 +11,7 @@ include('helpers_xxx_basic_js.js');
 include('helpers_xxx_file.js');
 /* global _isFile:readable, _jsonParseFileCheck:readable, utf8:readable, _open:readable */
 include('helpers_xxx_prototypes.js');
-/* global isFunction:readable, isString, round:readable */
+/* global isFunction:readable, isString, round:readable, _ps:readable */
 include('helpers_xxx_prototypes_smp.js');
 /* global extendGR:readable */
 include('helpers_xxx_properties.js');
@@ -81,7 +81,7 @@ buttonsBar.gDown = false;
 buttonsBar.curBtn = null;
 buttonsBar.keyDown = new Set();
 buttonsBar.readmeList = _isFile(folders.xxx + 'helpers\\readme\\buttons_list.json')
-	? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name, utf8)
+	? _jsonParseFileCheck(folders.xxx + 'helpers\\readme\\buttons_list.json', 'Readme list', window.Name + _ps(window.ScriptInfo.Name), utf8)
 	: null;
 if (buttonsBar.readmeList) {
 	// Add additional readmes

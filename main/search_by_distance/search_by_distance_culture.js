@@ -1,11 +1,11 @@
 ﻿'use strict';
-//20/06/25
+//25/09/25
 
 /* exported getArtistsSameZone, getZoneArtistFilter, getZoneGraphFilter */
 
 /* global sbd:readable */
 include('..\\music_graph\\music_graph_xxx.js');
-/* global globTags:readable, _p:readable, queryJoin:readable, folders:readable, _isFile:readable, utf8:readable, music_graph_descriptors:readable, _jsonParseFileCheck:readable, _bt:readable, isString:readable, _qCond:readable, isInt:readable */
+/* global globTags:readable, _p:readable, queryJoin:readable, folders:readable, _isFile:readable, utf8:readable, music_graph_descriptors:readable, _jsonParseFileCheck:readable, _bt:readable, isString:readable, _qCond:readable, isInt:readable, _ps:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_countries.js');
 /* global music_graph_descriptors_countries:readable */
 include('..\\music_graph\\music_graph_descriptors_xxx_culture.js');
@@ -18,7 +18,7 @@ function getLocaleFromId(id, worldMapData = '.\\profile\\' + folders.dataName + 
 	const dataId = 'artist';
 	if (typeof worldMapData === 'string') {
 		if (_isFile(worldMapData)) {
-			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name, utf8);
+			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name + _ps(window.ScriptInfo.Name), utf8);
 			worldMapData = data || null;
 		} else { worldMapData = null; }
 	}
@@ -124,7 +124,7 @@ function getZoneArtistFilter(iso, mode = 'region', worldMapData = '.\\profile\\'
 	// Retrieve world map data
 	if (typeof worldMapData === 'string') {
 		if (_isFile(worldMapData)) {
-			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name, utf8);
+			const data = _jsonParseFileCheck(worldMapData, 'Tags json', window.Name + _ps(window.ScriptInfo.Name), utf8);
 			worldMapData = data || null;
 		} else { worldMapData = null; }
 	}

@@ -12,7 +12,7 @@ include('..\\..\\helpers\\helpers_xxx.js');
 include('..\\..\\helpers\\helpers_xxx_properties.js');
 /* global setProperties:readable, getPropertiesPairs:readable, overwriteProperties:readable, getPropertiesPairs:readable, deleteProperties:readable */
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
-/* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable */
+/* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable, _ps:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
 /* global findRecursiveFile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _renameFile:readable, popup:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
@@ -196,7 +196,7 @@ function createButtonsMenu(name) {
 					barProperties.toolbarColor[1] = buttonsBar.config.toolbarColor = barProperties.toolbarColor[3];
 				} else {
 					barProperties.toolbarColor[1] = utils.ColourPicker(window.ID, barProperties.toolbarColor[1]);
-					console.log('Toolbar (' + window.Name + '): Selected color ->\n\t Android: ' + barProperties.toolbarColor[1] + ' - RGB: ' + Chroma(barProperties.toolbarColor[1]).rgb());
+					console.log('Toolbar (' + window.Name + _ps(window.ScriptInfo.Name) + '): Selected color ->\n\t Android: ' + barProperties.toolbarColor[1] + ' - RGB: ' + Chroma(barProperties.toolbarColor[1]).rgb());
 					buttonsBar.config.bToolbar = true; // buttons_xxx.js
 					buttonsBar.config.toolbarColor = barProperties.toolbarColor[1]; // buttons_xxx.js
 				}
@@ -210,7 +210,7 @@ function createButtonsMenu(name) {
 					barProperties.buttonColor[1] = buttonsBar.config.buttonColor = buttonsBar.config.default.buttonColor;
 				} else {
 					barProperties.buttonColor[1] = utils.ColourPicker(window.ID, barProperties.buttonColor[1]);
-					console.log('Toolbar (' + window.Name + '): Selected color ->\n\t Android: ' + barProperties.buttonColor[1] + ' - RGB: ' + Chroma(barProperties.buttonColor[1]).rgb());
+					console.log('Toolbar (' + window.Name + _ps(window.ScriptInfo.Name) + '): Selected color ->\n\t Android: ' + barProperties.buttonColor[1] + ' - RGB: ' + Chroma(barProperties.buttonColor[1]).rgb());
 					buttonsBar.config.buttonColor = barProperties.buttonColor[1]; // buttons_xxx.js
 				}
 				overwriteProperties(barProperties);
@@ -239,7 +239,7 @@ function createButtonsMenu(name) {
 					barProperties.hoverColor[1] = buttonsBar.config.hoverColor = -1;
 				} else {
 					barProperties.hoverColor[1] = utils.ColourPicker(window.ID, barProperties.hoverColor[1]);
-					console.log('Toolbar (' + window.Name + '): Selected color ->\n\t Android: ' + barProperties.hoverColor[1] + ' - RGB: ' + Chroma(barProperties.hoverColor[1]).rgb());
+					console.log('Toolbar (' + window.Name + _ps(window.ScriptInfo.Name) + '): Selected color ->\n\t Android: ' + barProperties.hoverColor[1] + ' - RGB: ' + Chroma(barProperties.hoverColor[1]).rgb());
 					buttonsBar.config.hoverColor = barProperties.hoverColor[1]; // buttons_xxx.js
 				}
 				overwriteProperties(barProperties);
@@ -277,7 +277,7 @@ function createButtonsMenu(name) {
 					barProperties.activeColor[1] = buttonsBar.config.activeColor = buttonsBar.config.default.activeColor;
 				} else {
 					barProperties.activeColor[1] = utils.ColourPicker(window.ID, barProperties.activeColor[1]);
-					console.log('Toolbar (' + window.Name + '): Selected color ->\n\t Android: ' + barProperties.activeColor[1] + ' - RGB: ' + Chroma(barProperties.activeColor[1]).rgb());
+					console.log('Toolbar (' + window.Name + _ps(window.ScriptInfo.Name) + '): Selected color ->\n\t Android: ' + barProperties.activeColor[1] + ' - RGB: ' + Chroma(barProperties.activeColor[1]).rgb());
 					buttonsBar.config.activeColor = barProperties.activeColor[1]; // buttons_xxx.js
 				}
 				overwriteProperties(barProperties);
@@ -292,7 +292,7 @@ function createButtonsMenu(name) {
 				} else {
 					let colors = JSON.parse(barProperties.animationColors[1]);
 					colors = [RGBA(...toRGB(utils.ColourPicker(window.ID, colors[0])), 50), RGBA(...toRGB(utils.ColourPicker(window.ID, colors[1])), 30)];
-					console.log('Toolbar (' + window.Name + '): Selected color ->' + colors.map((col) => '\n\t Android: ' + col + ' - RGB: ' + Chroma(col).rgb()).join(''));
+					console.log('Toolbar (' + window.Name + _ps(window.ScriptInfo.Name) + '): Selected color ->' + colors.map((col) => '\n\t Android: ' + col + ' - RGB: ' + Chroma(col).rgb()).join(''));
 					barProperties.animationColors[1] = JSON.stringify(colors);
 					buttonsBar.config.animationColors = colors; // buttons_xxx.js
 				}
@@ -789,7 +789,7 @@ function createButtonsMenu(name) {
 	menu.newEntry({
 		entryText: 'Share UI settings...', func: () => {
 			const keys = ['Colors', 'Size and placement'];
-			const answer = WshShell.Popup('Share current UI settings with other panels?\nSettings which will be copied:\n\n' + keys.join(', '), 0, window.Name + ': Toolbar', popup.question + popup.yes_no);
+			const answer = WshShell.Popup('Share current UI settings with other panels?\nSettings which will be copied:\n\n' + keys.join(', '), 0, window.Name + _ps(window.ScriptInfo.Name) + ': Toolbar', popup.question + popup.yes_no);
 			if (answer === popup.yes) {
 				const obj = clone(barProperties);
 				window.NotifyOthers('Toolbar: share settings', obj);
