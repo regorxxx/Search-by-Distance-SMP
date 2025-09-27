@@ -1,5 +1,5 @@
 ﻿'use strict';
-//21/09/25
+//26/09/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -340,8 +340,8 @@ function createButtonsMenu(name) {
 					barProperties.bOnNotifyColors[1] = !barProperties.bOnNotifyColors[1];
 					overwriteProperties(barProperties);
 					if (barProperties.bOnNotifyColors[1]) {
-						window.NotifyOthers('Colors: ask color scheme', 'Toolbar: set color scheme');
-						window.NotifyOthers('Colors: ask color', 'Toolbar: set colors');
+						window.NotifyOthers('Colors: ask color scheme', window.ScriptInfo.Name + ': set color scheme');
+						window.NotifyOthers('Colors: ask color', window.ScriptInfo.Name + ': set colors');
 					}
 				}
 			});
@@ -792,7 +792,7 @@ function createButtonsMenu(name) {
 			const answer = WshShell.Popup('Share current UI settings with other panels?\nSettings which will be copied:\n\n' + keys.join(', '), 0, window.Name + _ps(window.ScriptInfo.Name) + ': Toolbar', popup.question + popup.yes_no);
 			if (answer === popup.yes) {
 				const obj = clone(barProperties);
-				window.NotifyOthers('Toolbar: share settings', obj);
+				window.NotifyOthers(window.ScriptInfo.Name + ': share settings', obj);
 			}
 		}
 	});
@@ -824,7 +824,7 @@ function importSettingsMenu() {
 					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.*' : '',
 					Object.hasOwn(buttonsBar.buttons, 'Fingerprint Tools') ? 'fpChromaprintReverseMap*.json' : '',
 				],
-				'Toolbar'
+				window.ScriptInfo.Name
 			);
 		}
 	});
@@ -858,7 +858,7 @@ function importSettingsMenu() {
 					}
 				},
 				barProperties,
-				'Toolbar'
+				window.ScriptInfo.Name
 			);
 		}
 	});
