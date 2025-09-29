@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/25
+//29/09/25
 
 include('..\\..\\helpers\\menu_xxx.js');
 include('..\\..\\helpers\\helpers_xxx.js');
@@ -292,7 +292,7 @@ function createRecipeMenu(parent) {
 		});
 	}
 	recipeMenu.newSeparator();
-	recipeMenu.newEntry({ entryText: 'Readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
+	recipeMenu.newEntry({ entryText: 'Open readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
 	return recipeMenu;
 }
 

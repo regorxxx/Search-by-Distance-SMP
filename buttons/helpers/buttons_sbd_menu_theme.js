@@ -1,5 +1,5 @@
 ﻿'use strict';
-//25/09/25
+//29/09/25
 
 /* exported createThemeMenu */
 
@@ -57,7 +57,7 @@ function createThemeMenu(parent) {
 	themeMenu.newSeparator();
 	// Create theme
 	themeMenu.newEntry({
-		entryText: 'Create theme file with selected track', func: () => {
+		entryText: 'Create theme (selected track)', func: () => {
 			// Tag names
 			const themeTagsKeys = Object.keys(tags).filter((k) => !tags[k].type.includes('virtual') || tags[k].type.includes('tfRemap'));
 			const themeTagsTf = themeTagsKeys.map((k) => tags[k].tf.filter(Boolean));
@@ -102,9 +102,10 @@ function createThemeMenu(parent) {
 			else { _explorer(filePath); }
 		}, flags: fb.GetFocusItem(true) ? MF_STRING : MF_GRAYED
 	});
+	themeMenu.newSeparator();
 	{	// Theme tools
-		const menuName = themeMenu.newMenu('More options...');
-		themeMenu.newEntry({ menuName, entryText: 'Readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
+		const menuName = themeMenu.newMenu('Additional options');
+		themeMenu.newEntry({ menuName, entryText: 'Open readme...', func: () => showButtonReadme(sbd.readmes.recipes) });
 		themeMenu.newEntry({
 			menuName, entryText: 'Themes folder...', func: () => {
 				if (_isFile(properties.theme[1])) { _explorer(properties.theme[1]); } // Open current file
