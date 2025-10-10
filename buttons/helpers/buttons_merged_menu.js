@@ -1,5 +1,5 @@
 ﻿'use strict';
-//26/09/25
+//08/10/25
 
 /* exported createButtonsMenu, importSettingsMenu */
 
@@ -14,7 +14,7 @@ include('..\\..\\helpers\\helpers_xxx_properties.js');
 include('..\\..\\helpers\\helpers_xxx_prototypes.js');
 /* global require:readable, capitalizeAll:readable, round:readable, _p:readable, capitalize:readable, _b:readable, _ps:readable */
 include('..\\..\\helpers\\helpers_xxx_file.js');
-/* global findRecursiveFile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _renameFile:readable, popup:readable */
+/* global findRecursiveFile:readable, _open:readable, _isFile:readable, utf8:readable, _save:readable, _isFolder:readable, _createFolder:readable, WshShell:readable, _explorer:readable, getFiles:readable, _moveFile:readable, popup:readable */
 include('..\\..\\helpers\\helpers_xxx_UI.js');
 /* global RGBA:readable, toRGB:readable */
 include('..\\..\\helpers\\helpers_xxx_input.js');
@@ -28,8 +28,7 @@ const Chroma = require('..\\helpers-external\\chroma.js\\chroma.min'); // Relati
 function createButtonsMenu(name) {
 	const menu = new _menu();
 	menu.clear(true); // Reset on every call
-	const files = findRecursiveFile('*.js', [folders.xxx + 'buttons'])
-		.filter((path) => !path.split('\\').pop().startsWith('_'));
+	const files = findRecursiveFile('*.js', [folders.xxx + 'buttons']); // without \\ at end looks only on parent folder
 	// Header
 	menu.newEntry({ entryText: 'Toolbar configuration:', func: null, flags: MF_GRAYED });
 	menu.newSeparator();
@@ -51,7 +50,7 @@ function createButtonsMenu(name) {
 			case '_playlist_tools': return 'Playlist Tools';
 			case '_others_': return 'Other tools';
 			case '_search_': return '(Quick)Search';
-			case '_music_map': return 'Music Map';
+			case '_music_map': return typeof sbd !== 'undefined' ? sbd.name : 'Music Map';
 			case '_stats_': return 'Library statistics';
 			case '_tags_': return 'Tagging tools';
 			case 'Settings, Tags and Queries': return s;
@@ -814,14 +813,14 @@ function importSettingsMenu() {
 			exportSettings(
 				barProperties,
 				[
-					barProperties.name[1],
-					Object.hasOwn(buttonsBar.buttons, 'ListenBrainz Tools') ? 'listenbrainz_*.*' : '',
-					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.*', 'check_library_tags_exclusion.json'] : ['']),
+					barProperties.name[1] + '.json',
+					Object.hasOwn(buttonsBar.buttons, 'ListenBrainz Tools') ? 'listenbrainz_*.json' : '',
+					...(Object.hasOwn(buttonsBar.buttons, 'Playlist Tools') ? ['playlistTools_*.json', 'check_library_tags_exclusion.json'] : ['']),
 					/* global sbd:readable */
 					typeof sbd !== 'undefined'
-						? Object.keys(buttonsBar.buttons).some((key) => key.startsWith(sbd.name)) ? 'searchByDistance_*.*' : ''
+						? Object.keys(buttonsBar.buttons).some((key) => key.startsWith(sbd.name)) ? 'searchByDistance_*.json' : ''
 						: '',
-					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.*' : '',
+					Object.hasOwn(buttonsBar.buttons, 'Output device priority') ? 'devices*.json' : '',
 					Object.hasOwn(buttonsBar.buttons, 'Fingerprint Tools') ? 'fpChromaprintReverseMap*.json' : '',
 				],
 				window.ScriptInfo.Name
@@ -833,9 +832,18 @@ function importSettingsMenu() {
 			const dataPaths = new Set();
 			importSettings(
 				{
-					onUnzipSettings: (settings, bFound, panelName) => { // eslint-disable-line no-unused-vars
+					onLoadSettings: (settings, bFound, panelName) => { // eslint-disable-line no-unused-vars
 						if (settings) {
-							dataPaths.add(settings.name[1]);
+							[
+								settings.name[1] + '.json',
+								'listenbrainz_*.json',
+								'playlistTools_*.json',
+								'listenbrainz_*.json',
+								'check_library_tags_exclusion*.json',
+								'searchByDistance_*.json',
+								'devices*.json',
+								'fpChromaprintReverseMap*.json'
+							].forEach((mask) => dataPaths.add(mask));
 							console.log(panelName + ': importing data files\n\t ' + [...dataPaths].join('\n\t '));
 							return true;
 						}
@@ -844,13 +852,13 @@ function importSettingsMenu() {
 					onUnzipData: (importPath, panelName) => { // eslint-disable-line no-unused-vars
 						return getFiles(importPath, new Set(['.json']))
 							.map((file) => {
-								const newFile = [...dataPaths].find((path) => path.endsWith(file.replace(importPath, '')));
+								const newFile = [...dataPaths]
+									.some((mask) => utils.PathWildcardMatch(mask, file.replace(importPath, '')))
+									? file.replace(importPath, folders.data)
+									: '';
 								if (newFile) {
 									dataPaths.delete(newFile);
-									if (_isFile(newFile)) { _renameFile(newFile, newFile + '.old'); }
-									const bDone = _renameFile(file, newFile);
-									if (!bDone) { _renameFile(newFile + '.old', newFile); }
-									return bDone;
+									return _moveFile(file, newFile);
 								}
 								return false;
 							})

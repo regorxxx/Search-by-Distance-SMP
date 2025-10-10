@@ -1,7 +1,7 @@
 ﻿'use strict';
-//25/09/25
+//07/10/25
 
-/* exported _getNameSpacePath, _deleteFolder, _copyFile, _recycleFile, _restoreFile, _saveFSO, _saveSplitJson, _jsonParseFileSplit, _jsonParseFileCheck, _parseAttrFile, _explorer, getFiles, _run, _runHidden, _exec, editTextFile, findRecursiveFile, findRelPathInAbsPath, sanitizePath, sanitize, UUID, created, getFileMeta, popup, getPathMeta, testPath, youTubeRegExp, _isNetwork, findRecursiveDirs, _copyFolder, _renameFolder */
+/* exported _getNameSpacePath, _deleteFolder, _copyFile, _recycleFile, _restoreFile, _saveFSO, _saveSplitJson, _jsonParseFileSplit, _jsonParseFileCheck, _parseAttrFile, _explorer, getFiles, _run, _runHidden, _exec, editTextFile, findRecursiveFile, findRelPathInAbsPath, sanitizePath, sanitize, UUID, created, getFileMeta, popup, getPathMeta, testPath, youTubeRegExp, _isNetwork, findRecursiveDirs, _copyFolder, _renameFolder, _moveFile */
 
 include(fb.ComponentPath + 'docs\\Codepages.js');
 /* global convertCharsetToCodepage:readable */
@@ -346,6 +346,17 @@ function _renameFile(oldFilePath, newFilePath) {
 		return false;
 	}
 	return false;
+}
+
+function _moveFile(oldFilePath, newFilePath) {
+	if (_isFile(newFilePath)) {
+		_deleteFile(newFilePath + '.old');
+		_renameFile(newFilePath, newFilePath + '.old');
+	}
+	const bDone = _renameFile(oldFilePath, newFilePath);
+	if (!bDone) { _renameFile(newFilePath + '.old', newFilePath); }
+	else { _deleteFile(newFilePath + '.old'); }
+	return bDone;
 }
 
 // https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/movefolder-method

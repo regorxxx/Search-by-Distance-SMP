@@ -62,6 +62,8 @@
 ### Changed
 ### Removed
 ### Fixed
+- Export settings: added missing buttons file on zip.
+- Import settings: multiple fixes to extra data files importing.
 
 ## [8.0.1] - 2025-09-29
 ### Added
