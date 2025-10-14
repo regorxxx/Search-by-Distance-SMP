@@ -2,6 +2,7 @@
 
 ## [Table of Contents]
 - [Unreleased](#unreleased)
+- [8.0.2](#802---2025-10-14)
 - [8.0.1](#801---2025-09-29)
 - [8.0.0](#800---2025-09-20)
 - [7.6.0](#760---2024-10-09)
@@ -58,6 +59,12 @@
 - [1.0.0](#100---2021-05-02)
 
 ## [Unreleased][]
+### Added
+### Changed
+### Removed
+### Fixed
+
+## [8.0.2] - 2025-10-14
 ### Added
 ### Changed
 ### Removed
@@ -1040,7 +1047,8 @@
 ### Removed
 ### Fixed
 
-[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v8.0.1...HEAD
+[Unreleased]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v8.0.2...HEAD
+[8.0.2]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v8.0.1...v8.0.2
 [8.0.1]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v8.0.0...v8.0.1
 [8.0.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.6.0...v8.0.0
 [7.6.0]: https://github.com/regorxxx/Search-by-Distance-SMP/compare/v7.5.0...v7.6.0
